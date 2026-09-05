@@ -29,7 +29,7 @@ React 与 Vue 只是两层薄薄的“绑定层”。
 ## 相比现有组件库新增的特性
 
 1. **跨框架 DOM 一致性测试**：`tests/parity.test.tsx` 用同一组 props 分别渲染 React 与 Vue 组件，
-   逐字节比较归一化后的 HTML（Button 覆盖 4 变体 × 5 状态 × 3 尺寸共 60 种组合）。
+   逐字节比较归一化后的 HTML，覆盖全部 30 个组件（仅 Button 就有 4 变体 × 5 状态 × 3 尺寸共 60 种组合）。
    只在一个框架里改了行为，CI 会直接红。
 2. **密度（density）是一等公民**：`compact / default / loose` 一次性改变**所有**控件的高度与内边距，
    不是每个组件各自的 `size`。控制台和营销页可以共用同一套库。
@@ -42,14 +42,16 @@ React 与 Vue 只是两层薄薄的“绑定层”。
 6. **命令式 API 与框架无关**：`message.success()` 就是一个普通函数，React、Vue、甚至原生脚本里都能用。
 7. **无障碍是默认行为**：焦点环统一、Dialog 有焦点锁 + Esc + `aria-modal`，
    FormItem 自动把 `label / 控件 / 错误信息` 用 `for` 和 `aria-describedby` 串起来。
-8. **零运行时依赖**：`cx`、定位引擎、焦点锁都是自带的几十行实现，不引入 clsx / floating-ui。
+8. **零运行时依赖**：`cx`、定位引擎、焦点锁、roving tabindex 都是自带的几十行实现，不引入 clsx / floating-ui。
+9. **一份键盘导航引擎**：RadioGroup、Tabs、Select 共用 core 的 `useRoving`，
+   不会出现「Tabs 支持方向键、Radio 不支持」这种常见的不一致。
 
 ## 快速开始
 
 ```bash
 pnpm install
 pnpm build          # 构建 4 个包
-pnpm test           # 29 个测试：核心逻辑 / 跨框架一致性 / 交互与无障碍
+pnpm test           # 56 个测试：核心逻辑 / 行为与键盘 / 跨框架一致性 / 交互与无障碍
 pnpm --filter @i-design/playground dev   # 打开 React 与 Vue 并排的演示页
 ```
 
@@ -81,20 +83,27 @@ app.use(IDesign);
 </IConfigProvider>
 ```
 
-## 当前组件
+## 当前组件（30 个，React / Vue 双端一致）
 
-| 组件 | React | Vue | 说明 |
-| --- | --- | --- | --- |
-| ConfigProvider | ✅ | ✅ | 主题 / 密度 / 方向 / 语言，可嵌套 |
-| Button | ✅ | ✅ | 4 变体 × 5 状态 × 3 尺寸 × 4 形状，loading 期间吞掉点击 |
-| Input | ✅ | ✅ | 受控/非受控、清除、字数统计、状态色 |
-| Checkbox / Switch | ✅ | ✅ | 共用一份 toggle 行为，支持 indeterminate |
-| Tag | ✅ | ✅ | 可关闭 |
-| Space | ✅ | ✅ | 间距布局 |
-| FormItem | ✅ | ✅ | 自动串联 label / 控件 / 错误信息 |
-| Dialog | ✅ | ✅ | 焦点锁、滚动锁、Esc、遮罩点击 |
-| Tooltip / Popover | ✅ | ✅ | 自带定位引擎，自动翻转与边界收敛 |
-| message | ✅ | ✅ | 命令式，框架无关 |
+**基础**：ConfigProvider（主题/密度/方向/语言，可嵌套）、Button（4 变体 × 5 状态 × 3 尺寸 × 4 形状）、
+Divider、Space、Row / Col（24 栅格 + 响应式断点）
+
+**表单**：Input、Textarea（自动增高）、Checkbox、Switch、RadioGroup（含分段按钮样式）、
+Select（WAI-ARIA combobox：方向键、Home/End、首字母跳转、`aria-activedescendant`）、FormItem
+
+**数据展示**：Card、Tag、Avatar（含 CJK 首字缩写）、Badge、Progress（线形/环形）、
+Skeleton、Spinner、Empty
+
+**导航**：Tabs（line / card / segment 三种，方向键切换）、Collapse（支持手风琴）、
+Pagination（省略号算法）、Steps、Breadcrumb
+
+**反馈**：Alert、Dialog、Drawer（四个方向，RTL 自动镜像）、Tooltip / Popover、message（命令式）
+
+| 能力 | 说明 |
+| --- | --- |
+| 键盘导航 | RadioGroup / Tabs / Select 共用 core 里同一个 roving tabindex 引擎，一组控件只占一个 Tab 停靠点 |
+| 无障碍 | 每个组件的 role 与 aria 由 core 计算，两端完全一致；Dialog/Drawer 带焦点锁与 Esc |
+| 受控/非受控 | React 用 `value` / `defaultValue`，Vue 用 `v-model` / `defaultValue`，语义一致 |
 
 更多设计取舍见 [docs/architecture.md](docs/architecture.md)，后续规划见 [docs/roadmap.md](docs/roadmap.md)，
 新增组件的步骤见 [docs/adding-a-component.md](docs/adding-a-component.md)。

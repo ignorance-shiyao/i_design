@@ -11,5 +11,11 @@ export * from './behaviors/button.js';
 export * from './behaviors/toggle.js';
 export * from './behaviors/input.js';
 export * from './behaviors/overlay.js';
+export * from './behaviors/roving.js';
+export * from './behaviors/display.js';
+export * from './behaviors/navigation.js';
+export * from './behaviors/radio.js';
+export * from './behaviors/select.js';
+export * from './behaviors/grid.js';
 
 export const version = '0.1.0';

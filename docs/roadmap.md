@@ -1,18 +1,28 @@
 # 后续规划
 
-当前版本（0.1.0）已经把地基和验证机制做完：令牌体系、无头核心、两个适配器、
-跨框架一致性测试、并排演示。下面是按价值排序的推进顺序。
+当前版本已经覆盖 30 个组件：令牌体系、无头核心、两个适配器、跨框架一致性测试、
+键盘导航引擎、并排演示都已就位。下面是按价值排序的推进顺序。
 
-## 近期：补齐表单与数据展示
+## 已完成（0.2.0）
+
+基础（ConfigProvider / Button / Divider / Space / Row / Col）、
+表单（Input / Textarea / Checkbox / Switch / RadioGroup / Select / FormItem）、
+数据展示（Card / Tag / Avatar / Badge / Progress / Skeleton / Spinner / Empty）、
+导航（Tabs / Collapse / Pagination / Steps / Breadcrumb）、
+反馈（Alert / Dialog / Drawer / Tooltip / message）。
+
+## 下一批组件
 
 | 组件 | 关键点 |
 | --- | --- |
-| Select / Cascader | 复用 `computePosition`；键盘导航（↑↓ Home End 输入过滤）放进 core 的 listbox 行为 |
-| Radio / RadioGroup | 复用 toggle 行为，加 roving tabindex |
-| DatePicker | 日期计算放 core，两个适配器只渲染 |
-| Table | 虚拟滚动、固定列、排序；状态机放 core |
-| Pagination / Tabs / Menu | 都属于“选中态 + 键盘导航”这一类，共用一个 core 行为 |
+| Table | 排序、固定列、虚拟滚动；列模型与选择状态机放 core |
 | Form | 校验引擎放 core，React 用 hook、Vue 用 composable 各包一层 |
+| Menu / Dropdown | 复用 `useRoving` + `computePosition`，加子菜单的 typeahead |
+| DatePicker | 日期计算与键盘网格导航放 core，两个适配器只负责渲染 |
+| Cascader / TreeSelect / Tree | 复用 Select 的 listbox 行为，加层级展开状态 |
+| Upload | 文件列表状态机放 core，拖拽与预览在适配器 |
+| Popconfirm / Notification | Tooltip 与 message 之上的组合层 |
+| Slider / InputNumber | 数值步进与键盘增减放 core |
 
 ## 工程化
 

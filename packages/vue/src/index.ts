@@ -8,15 +8,28 @@ import { Space } from './components/Space.js';
 import { FormItem } from './components/FormItem.js';
 import { Dialog } from './components/Dialog.js';
 import { Tooltip } from './components/Tooltip.js';
+import { Drawer } from './components/Drawer.js';
+import { Textarea } from './components/Textarea.js';
+import { RadioGroup } from './components/Radio.js';
+import { Select } from './components/Select.js';
+import { Row, Col } from './components/Grid.js';
+import { Alert, Avatar, Badge, Card, Divider, Empty, Progress, Skeleton, Spinner } from './components/Display.js';
+import { Breadcrumb, Collapse, Pagination, Steps, Tabs } from './components/Navigation.js';
 
 export { ConfigProvider, useConfig, type IConfig } from './components/ConfigProvider.js';
 export { Button, Input, Checkbox, Switch, Tag, Space, FormItem, Dialog, Tooltip };
+export { Drawer, Textarea, RadioGroup, Select, Row, Col };
+export { Alert, Avatar, Badge, Card, Divider, Empty, Progress, Skeleton, Spinner };
+export { Breadcrumb, Collapse, Pagination, Steps, Tabs };
 export { toProps, useControlled } from './utils.js';
 
 /** The imperative toast API is framework-free, so Vue simply re-exports it. */
 export { message, showMessage, type MessageOptions } from '@i-design/core';
 
-export type { Density, Direction, Locale, LocaleName, Placement, Size, Status, ThemeMode, Variant } from '@i-design/core';
+export type {
+  BreadcrumbItem, CollapseItem, Density, Direction, DrawerPlacement, Locale, LocaleName,
+  Orientation, Placement, RadioOption, SelectOption, Size, StepItem, Status, TabItem, ThemeMode, Variant,
+} from '@i-design/core';
 export { applyTheme, computedTokens, locales } from '@i-design/core';
 
 const components: Record<string, Component> = {
@@ -30,6 +43,26 @@ const components: Record<string, Component> = {
   IFormItem: FormItem,
   IDialog: Dialog,
   ITooltip: Tooltip,
+  IDrawer: Drawer,
+  ITextarea: Textarea,
+  IRadioGroup: RadioGroup,
+  ISelect: Select,
+  IRow: Row,
+  ICol: Col,
+  IAlert: Alert,
+  IAvatar: Avatar,
+  IBadge: Badge,
+  ICard: Card,
+  IDivider: Divider,
+  IEmpty: Empty,
+  IProgress: Progress,
+  ISkeleton: Skeleton,
+  ISpinner: Spinner,
+  IBreadcrumb: Breadcrumb,
+  ICollapse: Collapse,
+  IPagination: Pagination,
+  ISteps: Steps,
+  ITabs: Tabs,
 };
 
 /** `app.use(IDesign)` for the global-registration style Vue users expect. */

@@ -87,3 +87,53 @@ export function useInputBehavior(options: InputBehaviorOptions = {}): InputBehav
     count: maxlength ? { current: value.length, max: maxlength } : null,
   };
 }
+
+/* --- Textarea ----------------------------------------------------------- */
+const textareaBem = createBem('textarea');
+
+export interface TextareaBehaviorOptions
+  extends Omit<InputBehaviorOptions, 'type' | 'clearable' | 'onClear' | 'size'> {
+  rows?: number;
+  /** Grow with the content, between `minRows` and `maxRows`. */
+  autosize?: boolean;
+  minRows?: number;
+  maxRows?: number;
+  resize?: 'none' | 'vertical' | 'both';
+}
+
+export interface TextareaBehavior {
+  root: ElementSpec;
+  textarea: ElementSpec;
+  count: { current: number; max: number } | null;
+  /** Height in px for the autosize case, given the scrollHeight the adapter measured. */
+  autosizeHeight: (scrollHeight: number, lineHeight: number) => number;
+}
+
+export function useTextareaBehavior(options: TextareaBehaviorOptions = {}): TextareaBehavior {
+  const {
+    value = '', status = 'default', disabled = false, readonly = false, placeholder,
+    maxlength, id, name, describedBy, onInput, rows = 3, autosize, minRows = 2, maxRows = 8,
+    resize = 'vertical', extraClass,
+  } = options;
+
+  return {
+    root: spec(
+      cx(textareaBem(), textareaBem(null, `status-${status}`), textareaBem(null, `resize-${autosize ? 'none' : resize}`), {
+        [textareaBem(null, 'disabled')]: disabled,
+      }, extraClass),
+    ),
+    textarea: spec(
+      textareaBem('inner'),
+      {
+        id, name, value, placeholder, disabled, readonly, maxlength,
+        rows: autosize ? minRows : rows,
+        'aria-invalid': status === 'danger' || undefined,
+        'aria-describedby': describedBy,
+      },
+      { input: (event: any) => onInput?.(String(event?.target?.value ?? ''), event) },
+    ),
+    count: maxlength ? { current: value.length, max: maxlength } : null,
+    autosizeHeight: (scrollHeight, lineHeight) =>
+      Math.min(Math.max(scrollHeight, minRows * lineHeight), maxRows * lineHeight),
+  };
+}

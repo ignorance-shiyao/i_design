@@ -115,3 +115,37 @@ export function usePopupBehavior(options: PopupBehaviorOptions): PopupBehavior {
     }),
   };
 }
+
+/* --- Drawer ------------------------------------------------------------- */
+const drawerBem = createBem('drawer');
+
+export type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom';
+
+export interface DrawerBehaviorOptions extends Omit<DialogBehaviorOptions, 'size'> {
+  placement?: DrawerPlacement;
+  /** CSS length for the sliding dimension (width for left/right, height otherwise). */
+  size?: string;
+}
+
+export interface DrawerBehavior extends Omit<DialogBehavior, 'panel'> {
+  panel: ElementSpec;
+  panelStyle: Record<string, string>;
+}
+
+/**
+ * A drawer is a dialog that enters from an edge: it reuses the dialog behaviour
+ * wholesale (focus trap, Escape, mask) and only changes how it is painted.
+ */
+export function useDrawerBehavior(options: DrawerBehaviorOptions): DrawerBehavior {
+  const { placement = 'right', size = '320px', extraClass, ...rest } = options;
+  const dialog = useDialogBehavior({ ...rest, extraClass });
+  const horizontal = placement === 'left' || placement === 'right';
+
+  return {
+    ...dialog,
+    mask: spec(cx(drawerBem('mask'), { [drawerBem('mask', 'open')]: options.open }), dialog.mask.attrs, dialog.mask.on),
+    panel: spec(cx(drawerBem(), drawerBem(null, placement), extraClass), dialog.panel.attrs, dialog.panel.on),
+    closeButton: spec(drawerBem('close'), dialog.closeButton.attrs, dialog.closeButton.on),
+    panelStyle: horizontal ? { width: size } : { height: size },
+  };
+}
