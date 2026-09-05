@@ -1,0 +1,19 @@
+{
+  "name": "@i-design/tokens",
+  "version": "0.1.0",
+  "description": "Design tokens for i-design: one source of truth compiled to TypeScript and CSS custom properties.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./css": "./dist/tokens.css",
+    "./tokens.css": "./dist/tokens.css"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/build-css.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

@@ -1,0 +1,27 @@
+@import '@i-design/tokens/tokens.css';
+
+.i-reset,
+[class^='i-'],
+[class*=' i-'] {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--i-font-family);
+}
+
+/* One focus treatment for the whole library, keyboard-only. */
+[class^='i-']:focus-visible,
+[class*=' i-']:focus-visible {
+  outline: var(--i-focus-ring-width) solid var(--i-color-brand);
+  outline-offset: var(--i-focus-ring-offset);
+  border-radius: var(--i-radius-m);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class^='i-'],
+  [class*=' i-'] {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}

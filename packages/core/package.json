@@ -1,0 +1,20 @@
+{
+  "name": "@i-design/core",
+  "version": "0.1.0",
+  "description": "Framework-agnostic core of i-design: headless behaviours, accessibility, theming, i18n and the shared stylesheet.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./styles": "./dist/styles/index.css",
+    "./styles/*": "./dist/styles/*"
+  },
+  "files": ["dist"],
+  "dependencies": { "@i-design/tokens": "workspace:*" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node ../../scripts/copy-styles.mjs core",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

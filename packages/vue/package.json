@@ -1,0 +1,23 @@
+{
+  "name": "@i-design/vue",
+  "version": "0.1.0",
+  "description": "Vue 3 adapter for i-design.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./styles": "@i-design/core/styles"
+  },
+  "files": ["dist"],
+  "dependencies": {
+    "@i-design/core": "workspace:*",
+    "@i-design/tokens": "workspace:*"
+  },
+  "peerDependencies": { "vue": ">=3.3" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}
