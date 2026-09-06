@@ -68,3 +68,19 @@ export {
   highlight, formatBytes, formatStatistic, createWatermark, readComputedTokens,
   ICONS, formatDate, parseDate, addDays, addMonths, isSameDay, startOfDay,
 } from '@i-design/core';
+
+export {
+  AutoComplete, Cascader, ColorPicker, Countdown, InputOtp, InputTag, TimePicker, Transfer,
+  type AutoCompleteProps, type CascaderProps, type ColorPickerProps, type CountdownProps,
+  type InputOtpProps, type InputTagProps, type TimePickerProps, type TransferProps,
+} from './components/Advanced.js';
+export {
+  Affix, ButtonGroup, FloatButton, Image, Link, PageHeader, Splitter, Tour,
+  type FloatButtonProps, type ImageProps, type LinkProps, type PageHeaderProps,
+  type SplitterProps, type TourProps,
+} from './components/Utility.js';
+export type { CascaderNode, TimeValue, TourStep, TransferItem } from '@i-design/core';
+export {
+  generateRamp, hexToRgb, rgbToHex, hexToTriplet, rgbToHsl, hslToRgb,
+  formatTime, parseTime, formatCountdown, countdownParts, resolvePath,
+} from '@i-design/core';

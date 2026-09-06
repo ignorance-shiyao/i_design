@@ -33,5 +33,10 @@ export * from './behaviors/tree.js';
 export * from './behaviors/anchor.js';
 export * from './behaviors/data-display.js';
 export * from './behaviors/date.js';
+export * from './behaviors/transfer.js';
+export * from './behaviors/cascader.js';
+export * from './behaviors/color.js';
+export * from './behaviors/time.js';
+export * from './behaviors/misc.js';
 
 export const version = '0.1.0';

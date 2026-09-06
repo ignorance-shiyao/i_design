@@ -145,7 +145,7 @@ export function Landing({ onNavigate }: { onNavigate: (page: string) => void }) 
           </p>
           <div className="install__links">
             <Button variant="text" onClick={() => onNavigate('tokens')}>设计令牌 <Icon name="chevron-right" size={14} /></Button>
-            <Button variant="text" onClick={() => onNavigate('credits')}>各家所长 <Icon name="chevron-right" size={14} /></Button>
+            <Button variant="text" onClick={() => onNavigate('console')}>控制台示例 <Icon name="chevron-right" size={14} /></Button>
           </div>
         </div>
         <CodeBlock

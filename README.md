@@ -96,7 +96,7 @@ React 与 Vue 只是两层薄薄的“绑定层”。
 ```bash
 pnpm install
 pnpm build          # 构建 4 个包
-pnpm test           # 152 个测试：核心逻辑 / 键盘与动效 / 表格与校验 / AI 会话 / 跨框架一致性
+pnpm test           # 196 个测试：核心逻辑 / 键盘与动效 / 表格与校验 / AI 会话 / 跨框架一致性
 pnpm --filter @i-design/playground dev   # 打开 React 与 Vue 并排的演示页
 ```
 
@@ -141,7 +141,7 @@ https://claude.ai/code/artifact/1b6e11f5-e3eb-44e3-9db3-b8d558666354
 > 演示只做一套。React 与 Vue 的差异只出现在「用法」的代码切换里——
 > 两端产出的 DOM 本就相同（由一致性测试强制保证），演示两遍没有意义。
 
-## 当前组件（62 个，React / Vue 双端一致）
+## 当前组件（78 个，React / Vue 双端一致）
 
 **基础**：Icon（36 个自绘 24×24 图标）、ConfigProvider（主题/密度/方向/语言，可嵌套）、Button（4 变体 × 5 状态 × 3 尺寸 × 4 形状）、
 Divider、Space、Row / Col（24 栅格 + 响应式断点）、Layout（Header / Sider / Content / Footer）
@@ -150,18 +150,24 @@ Divider、Space、Row / Col（24 栅格 + 响应式断点）、Layout（Header /
 Select（WAI-ARIA combobox：方向键、Home/End、首字母跳转、`aria-activedescendant`）、
 FormItem、**Form + FormField**（校验引擎在 core，支持同步/异步规则、trigger、脏值追踪）、
 InputNumber（两种步进样式）、Slider（刻度 / 键盘 / 拖拽）、Rate（半星）、Upload（拖拽 + 三道限制）、
-DatePicker（自带日期运算，不依赖 date 库）
+DatePicker（自带日期运算，不依赖 date 库）、
+TimePicker（三列滚轮，按 step 抽稀）、ColorPicker（由主色推导 10 级色阶）、
+Cascader（列由「正在浏览的路径」推导，支持 changeOnSelect）、Transfer（勾选是暂存、方向键才提交）、
+AutoComplete（建议但不限制）、InputTag（退格删标签，输入法安全）、InputOtp（背后仍是一个真实 input，粘贴与自动填充照常工作）
 
 **数据展示**：**Table**（排序 / 多选 / 固定列 / 粘性表头 / 加载与空状态）、Card、Tag、
 Avatar（含 CJK 首字缩写）、Badge、Progress（线形/环形）、Skeleton、Spinner、Empty、
-List、Descriptions、Statistic、Timeline、Segmented、Typography（省略 / 复制）、Tree（父子联动勾选）
+List、Descriptions、Statistic、Timeline、Segmented、Typography（省略 / 复制）、Tree（父子联动勾选）、
+Image（占位 / 失败态 / 可缩放旋转的预览层）、Splitter（可拖拽也可键盘操作的分栏）、Countdown、
+PageHeader、ButtonGroup、Link
 
 **导航**：Tabs（line / card / segment 三种，方向键切换）、Collapse（支持手风琴）、
 Pagination（省略号算法）、Steps、Breadcrumb、Menu（inline / popup 同一模型）、
-Dropdown（Menu 的浮层形态）、Anchor、BackTop
+Dropdown（Menu 的浮层形态）、Anchor、BackTop、Affix（钉住时留等高占位，页面不跳动）、FloatButton
 
 **反馈**：Alert、Dialog、Drawer（四个方向，RTL 自动镜像）、Tooltip / Popover、
-message 与 notification（均为命令式函数）、Popconfirm、Result、Watermark（canvas 平铺）
+message 与 notification（均为命令式函数）、Popconfirm、Result、Watermark（canvas 平铺）、
+Tour（聚光灯由一个超大 box-shadow 挖洞得到，目标元素本身不被遮挡）
 
 **动效**：Transition（7 种预设，相位状态机在 core）、Stagger、Carousel（拖拽 / 键盘 / 自动播放）
 

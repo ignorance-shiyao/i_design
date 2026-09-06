@@ -419,4 +419,74 @@ describe('React / Vue DOM parity', () => {
       vueHtml(V.ConfigProvider, { mode: 'dark', density: 'compact' }),
     );
   });
+
+  it('Transfer — both panels, ticks and the move buttons', () => {
+    const items = [
+      { key: 'a', label: 'Alpha' },
+      { key: 'b', label: 'Bravo' },
+      { key: 'c', label: 'Charlie', disabled: true },
+    ];
+    expect(reactHtml(<R.Transfer items={items} value={['b']} />)).toBe(
+      vueHtml(V.Transfer, { items, modelValue: ['b'] }),
+    );
+    expect(reactHtml(<R.Transfer items={items} value={[]} searchable />)).toBe(
+      vueHtml(V.Transfer, { items, modelValue: [], searchable: true }),
+    );
+  });
+
+  it('Cascader — closed trigger and a browsed path', () => {
+    const options = [
+      { value: 'zj', label: '浙江', children: [{ value: 'hz', label: '杭州' }] },
+      { value: 'js', label: '江苏', disabled: true },
+    ];
+    expect(reactHtml(<R.Cascader options={options} value={[]} placeholder="请选择地区" />)).toBe(
+      vueHtml(V.Cascader, { options, modelValue: [], placeholder: '请选择地区' }),
+    );
+    expect(reactHtml(<R.Cascader options={options} value={['zj', 'hz']} clearable />)).toBe(
+      vueHtml(V.Cascader, { options, modelValue: ['zj', 'hz'], clearable: true }),
+    );
+  });
+
+  it('ColorPicker, TimePicker and AutoComplete triggers', () => {
+    expect(reactHtml(<R.ColorPicker value="#4169ef" />)).toBe(
+      vueHtml(V.ColorPicker, { modelValue: '#4169ef' }),
+    );
+    expect(reactHtml(<R.TimePicker value={{ hour: 9, minute: 30 }} clearable />)).toBe(
+      vueHtml(V.TimePicker, { modelValue: { hour: 9, minute: 30 }, clearable: true }),
+    );
+    expect(reactHtml(<R.AutoComplete value="al" suggestions={['alpha', 'algo']} />)).toBe(
+      vueHtml(V.AutoComplete, { modelValue: 'al', suggestions: ['alpha', 'algo'] }),
+    );
+  });
+
+  it('InputTag and InputOtp — cells and chips line up', () => {
+    expect(reactHtml(<R.InputTag tags={['vue', 'react']} placeholder="回车添加" />)).toBe(
+      vueHtml(V.InputTag, { modelValue: ['vue', 'react'], placeholder: '回车添加' }),
+    );
+    expect(reactHtml(<R.InputOtp value="123" length={6} />)).toBe(
+      vueHtml(V.InputOtp, { modelValue: '123', length: 6 }),
+    );
+  });
+
+  it('Image, Splitter and the small parts', () => {
+    expect(reactHtml(<R.Image src="/a.png" alt="示例" ratio="16 / 9" preview />)).toBe(
+      vueHtml(V.Image, { src: '/a.png', alt: '示例', ratio: '16 / 9', preview: true }),
+    );
+    expect(reactHtml(<R.Splitter value={30}>{[<div key="a">左</div>, <div key="b">右</div>]}</R.Splitter>)).toBe(
+      vueHtml(V.Splitter, { modelValue: 30 }, { start: () => h('div', '左'), end: () => h('div', '右') }),
+    );
+    expect(reactHtml(<R.Link href="/docs">文档</R.Link>)).toBe(
+      vueHtml(V.Link, { href: '/docs' }, { default: () => '文档' }),
+    );
+    expect(reactHtml(<R.Link href="/docs" disabled underline="always">文档</R.Link>)).toBe(
+      vueHtml(V.Link, { href: '/docs', disabled: true, underline: 'always' }, { default: () => '文档' }),
+    );
+    expect(reactHtml(<R.ButtonGroup><R.Button>一</R.Button></R.ButtonGroup>)).toBe(
+      vueHtml(V.ButtonGroup, {}, { default: () => h(V.Button, null, { default: () => '一' }) }),
+    );
+    expect(reactHtml(<R.PageHeader title="订单详情" subtitle="#10241" />)).toBe(
+      vueHtml(V.PageHeader, { title: '订单详情', subtitle: '#10241' }),
+    );
+    expect(reactHtml(<R.FloatButton icon="plus" />)).toBe(vueHtml(V.FloatButton, { icon: 'plus' }));
+  });
 });

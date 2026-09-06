@@ -28,6 +28,12 @@ import { Select } from './components/Select.js';
 import { Row, Col } from './components/Grid.js';
 import { Alert, Avatar, Badge, Card, Divider, Empty, Progress, Skeleton, Spinner } from './components/Display.js';
 import { Breadcrumb, Collapse, Pagination, Steps, Tabs } from './components/Navigation.js';
+import {
+  AutoComplete, Cascader, ColorPicker, Countdown, InputOtp, InputTag, TimePicker, Transfer,
+} from './components/Advanced.js';
+import {
+  Affix, ButtonGroup, FloatButton, Image, Link, PageHeader, Splitter, Tour,
+} from './components/Utility.js';
 
 export { ConfigProvider, useConfig, type IConfig } from './components/ConfigProvider.js';
 export { Button, Input, Checkbox, Switch, Tag, Space, FormItem, Dialog, Tooltip };
@@ -41,6 +47,13 @@ export { Chat, ChatMessage, ChatAction, TypingIndicator, ThinkingBlock, CodeBloc
 export { useForm, type UseFormResult } from './components/Form.js';
 export { Alert, Avatar, Badge, Card, Divider, Empty, Progress, Skeleton, Spinner };
 export { Breadcrumb, Collapse, Pagination, Steps, Tabs };
+export { AutoComplete, Cascader, ColorPicker, Countdown, InputOtp, InputTag, TimePicker, Transfer };
+export { Affix, ButtonGroup, FloatButton, Image, Link, PageHeader, Splitter, Tour };
+export type { CascaderNode, TimeValue, TourStep, TransferItem } from '@i-design/core';
+export {
+  generateRamp, hexToRgb, rgbToHex, hexToTriplet, rgbToHsl, hslToRgb,
+  formatTime, parseTime, formatCountdown, countdownParts, resolvePath,
+} from '@i-design/core';
 export { toProps, useControlled } from './utils.js';
 
 /** The imperative toast API is framework-free, so Vue simply re-exports it. */
@@ -133,6 +146,22 @@ const components: Record<string, Component> = {
   IDatePicker: DatePicker,
   IDropdown: Dropdown,
   IPopconfirm: Popconfirm,
+  ITransfer: Transfer,
+  ICascader: Cascader,
+  IColorPicker: ColorPicker,
+  ITimePicker: TimePicker,
+  IAutoComplete: AutoComplete,
+  IInputTag: InputTag,
+  IInputOtp: InputOtp,
+  ICountdown: Countdown,
+  IImage: Image,
+  IAffix: Affix,
+  ISplitter: Splitter,
+  ITour: Tour,
+  ILink: Link,
+  IButtonGroup: ButtonGroup,
+  IPageHeader: PageHeader,
+  IFloatButton: FloatButton,
 };
 
 /** `app.use(IDesign)` for the global-registration style Vue users expect. */

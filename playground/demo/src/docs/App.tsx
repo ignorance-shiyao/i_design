@@ -8,17 +8,17 @@ import { formEntries } from './registry-form.js';
 import { navEntries } from './registry-nav.js';
 import { aiEntries } from './registry-ai.js';
 import { moreEntries } from './registry-more.js';
+import { advancedEntries } from './registry-advanced.js';
 import { TokensPage, TOKEN_ANCHORS } from './TokensPage.js';
-import { CreditsPage, CREDITS_ANCHORS } from './CreditsPage.js';
 import { Landing } from './Landing.js';
 import { Dashboard } from './Dashboard.js';
 import { SettingsPanel, DEFAULT_SETTINGS, BRANDS, type SiteSettings } from './SettingsPanel.js';
 import type { DocEntry, Demo } from './types.js';
 
-const ENTRIES: DocEntry[] = [...basicEntries, ...formEntries, ...navEntries, ...moreEntries, ...aiEntries];
+const ENTRIES: DocEntry[] = [...basicEntries, ...formEntries, ...navEntries, ...moreEntries, ...advancedEntries, ...aiEntries];
 const CATEGORIES = ['通用', '数据录入', '导航', '数据展示', '反馈', 'AI 会话'];
 
-type Page = 'overview' | 'console' | 'tokens' | 'credits' | string;
+type Page = 'overview' | 'console' | 'tokens' | string;
 
 /** A demo card: stage on top, collapsible source underneath. */
 function DemoCard({ demo, index }: { demo: Demo; index: number }) {
@@ -186,9 +186,7 @@ export function App() {
     ? []
     : page === 'tokens'
     ? TOKEN_ANCHORS
-    : page === 'credits'
-      ? CREDITS_ANCHORS
-      : entry
+    : entry
       ? [
           ...(entry.whenToUse ? [{ id: 'when', label: '何时使用' }] : []),
           { id: 'demos', label: '代码演示' },
@@ -215,7 +213,6 @@ export function App() {
             ['console', '示例'],
             ['tokens', '设计'],
             ['button', '组件'],
-            ['credits', '各家所长'],
           ] as const).map(([target, label]) => {
             const active = target === 'button' ? Boolean(entry) : page === target;
             return (
@@ -256,13 +253,6 @@ export function App() {
             <span>设计令牌</span>
             <span className="sidebar__en">Tokens</span>
           </button>
-          <button
-            className={`sidebar__link${page === 'credits' ? ' sidebar__link--active' : ''}`}
-            onClick={() => setPage('credits')}
-          >
-            <span>各家所长</span>
-            <span className="sidebar__en">Credits</span>
-          </button>
           {groups.map((group) => (
             <div className="sidebar__group" key={group.category}>
               <div className="sidebar__title">{group.category}</div>
@@ -289,8 +279,6 @@ export function App() {
               <Dashboard />
             ) : page === 'tokens' ? (
               <TokensPage />
-            ) : page === 'credits' ? (
-              <CreditsPage />
             ) : entry ? (
               <ComponentPage entry={entry} />
             ) : null}
