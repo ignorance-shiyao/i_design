@@ -1,0 +1,100 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--i-font-family);
+  font-size: var(--i-font-size-md);
+  line-height: var(--i-line-height-base);
+  color: var(--i-color-text);
+  background: var(--i-color-bg);
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--i-motion-base) var(--i-motion-easing),
+    color var(--i-motion-base) var(--i-motion-easing);
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  line-height: var(--i-line-height-tight);
+  font-weight: 600;
+}
+
+p { margin: 0; }
+
+a {
+  color: var(--i-color-text-link);
+  text-decoration: none;
+  transition: color var(--i-motion-fast) var(--i-motion-easing);
+}
+a:hover { color: var(--i-color-brand-hover); }
+
+code {
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-sm);
+  background: var(--i-color-bg-muted);
+  padding: 1px var(--i-spacing-1);
+  border-radius: var(--i-radius-sm);
+}
+
+:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+}
+
+/* 文档站通用排版 */
+.i-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--i-spacing-6);
+}
+
+.i-doc h1 { font-size: var(--i-font-size-3xl); margin-bottom: var(--i-spacing-3); }
+.i-doc h2 {
+  font-size: var(--i-font-size-xl);
+  margin: var(--i-spacing-10) 0 var(--i-spacing-4);
+  padding-bottom: var(--i-spacing-2);
+  border-bottom: 1px solid var(--i-color-border);
+}
+.i-doc h3 { font-size: var(--i-font-size-lg); margin: var(--i-spacing-6) 0 var(--i-spacing-3); }
+.i-doc p { color: var(--i-color-text-secondary); margin-bottom: var(--i-spacing-4); }
+
+.i-lead {
+  font-size: var(--i-font-size-lg);
+  color: var(--i-color-text-secondary);
+  max-width: 68ch;
+}
+
+.i-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--i-font-size-md);
+  margin: var(--i-spacing-4) 0;
+}
+.i-table th,
+.i-table td {
+  text-align: left;
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-border);
+}
+.i-table th {
+  background: var(--i-color-bg-subtle);
+  font-weight: 600;
+  color: var(--i-color-text);
+}
+.i-table td { color: var(--i-color-text-secondary); }
+
+@media (max-width: 720px) {
+  .i-doc h1 { font-size: var(--i-font-size-2xl); }
+}
