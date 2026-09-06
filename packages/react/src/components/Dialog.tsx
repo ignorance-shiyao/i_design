@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { toProps } from '../utils.js';
 import { useConfig } from './ConfigProvider.js';
 import { Button } from './Button.js';
+import { Icon } from './Icon.js';
 
 const bem = createBem('dialog');
 
@@ -64,7 +65,7 @@ export function Dialog(props: DialogProps) {
       <div ref={panelRef} {...toProps(behavior.panel)}>
         <div className={bem('header')}>
           <span id={ids.title}>{title}</span>
-          <button {...toProps(behavior.closeButton)}>×</button>
+          <button {...toProps(behavior.closeButton)}><Icon name="close" size={16} /></button>
         </div>
         <div className={bem('body')} id={ids.body}>
           {children}

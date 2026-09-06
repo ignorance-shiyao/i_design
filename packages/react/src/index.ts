@@ -11,6 +11,9 @@ export { Tooltip, type TooltipProps } from './components/Tooltip.js';
 export { Drawer, type DrawerProps } from './components/Drawer.js';
 export { Table, type TableProps } from './components/Table.js';
 export { Carousel, type CarouselProps } from './components/Carousel.js';
+export { Icon, type IconProps } from './components/Icon.js';
+export { DatePicker, type DatePickerProps } from './components/DatePicker.js';
+export { Dropdown, Popconfirm, type DropdownProps, type PopconfirmProps } from './components/Dropdown.js';
 export {
   InputNumber, Slider, Rate, Upload,
   type InputNumberProps, type SliderProps, type RateProps, type UploadProps,
@@ -57,9 +60,11 @@ export type {
   Status, TabItem, TableColumn, TableSort, ThemeMode, Variant,
   ChatRole, ChatStatus, MotionPreset, TransitionPhase, StreamController,
   AnchorItem, MenuItem, TreeNode, TimelineItem, SegmentedOption, UploadFile, UploadStatus, SliderMark,
+  IconName, CalendarCell,
 } from '@i-design/core';
 export {
   applyTheme, computedTokens, locales, FormStore, validateValue, enMessages, defaultMessages,
   createStreamController, isAtBottom, motionClass, stagger,
   highlight, formatBytes, formatStatistic, createWatermark, readComputedTokens,
+  ICONS, formatDate, parseDate, addDays, addMonths, isSameDay, startOfDay,
 } from '@i-design/core';

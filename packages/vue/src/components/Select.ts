@@ -2,6 +2,7 @@ import { createId, useSelect, type SelectOption, type Size } from '@i-design/cor
 import { defineComponent, h, ref, type PropType } from 'vue';
 import { toProps, useControlled } from '../utils.js';
 import { useConfig } from './ConfigProvider.js';
+import { Icon } from './Icon.js';
 
 export const Select = defineComponent({
   name: 'ISelect',
@@ -51,8 +52,10 @@ export const Select = defineComponent({
             { class: `i-select__value${behavior.selectedLabel ? '' : ' i-select__value--placeholder'}` },
             behavior.selectedLabel ?? behavior.placeholder,
           ),
-          behavior.clear ? h('span', { ...toProps(behavior.clear), role: 'button' }, '×') : null,
-          h('span', { class: 'i-select__arrow' }, '▾'),
+          behavior.clear
+            ? h('span', { ...toProps(behavior.clear), role: 'button' }, [h(Icon, { name: 'close', size: 11 })])
+            : null,
+          h('span', { class: 'i-select__arrow' }, [h(Icon, { name: 'chevron-down', size: 14 })]),
         ]),
         open.value
           ? h('ul', toProps(behavior.listbox), [

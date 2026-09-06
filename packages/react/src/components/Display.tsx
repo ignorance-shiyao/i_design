@@ -5,9 +5,12 @@ import {
 import type { CSSProperties, ReactNode } from 'react';
 import { toProps } from '../utils.js';
 import { useConfig } from './ConfigProvider.js';
+import { Icon } from './Icon.js';
+import type { IconName } from '@i-design/core';
 
-const STATUS_ICON: Record<string, string> = {
-  info: 'ⓘ', brand: 'ⓘ', success: '✓', warning: '!', danger: '✕',
+const STATUS_ICON: Record<string, IconName> = {
+  info: 'info-circle', brand: 'info-circle', success: 'check-circle',
+  warning: 'warning-triangle', danger: 'close-circle',
 };
 
 export interface AlertProps extends Omit<AlertOptions, 'onClose' | 'extraClass'> {
@@ -22,12 +25,16 @@ export function Alert({ title, icon, className, children, onClose, ...rest }: Al
   const behavior = useAlert({ ...rest, onClose, extraClass: className });
   return (
     <div {...toProps(behavior.root)}>
-      {icon !== false && <span className="i-alert__icon">{icon ?? STATUS_ICON[rest.status ?? 'info']}</span>}
+      {icon !== false && (
+        <span className="i-alert__icon">
+          {icon ?? <Icon name={STATUS_ICON[rest.status ?? 'info']!} size={16} />}
+        </span>
+      )}
       <div className="i-alert__content">
         {title != null && <div className="i-alert__title">{title}</div>}
         {children}
       </div>
-      {behavior.close && <button {...toProps(behavior.close)}>×</button>}
+      {behavior.close && <button {...toProps(behavior.close)}><Icon name="close" size={14} /></button>}
     </div>
   );
 }
@@ -167,7 +174,7 @@ export function Empty({ description, icon, className, children }: EmptyProps) {
   const behavior = useEmpty({ extraClass: className });
   return (
     <div {...toProps(behavior.root)}>
-      <span {...toProps(behavior.icon)}>{icon ?? '☱'}</span>
+      <span {...toProps(behavior.icon)}>{icon ?? <Icon name="folder" size={28} />}</span>
       <div {...toProps(behavior.description)}>{description ?? locale.select.empty}</div>
       {children}
     </div>

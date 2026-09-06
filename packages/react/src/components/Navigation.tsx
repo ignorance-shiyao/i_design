@@ -4,6 +4,7 @@ import {
 } from '@i-design/core';
 import { useMemo, type ReactNode } from 'react';
 import { toProps, useControlled } from '../utils.js';
+import { Icon } from './Icon.js';
 
 export interface TabsProps extends Omit<TabsOptions, 'value' | 'id' | 'onChange' | 'onFocusChange' | 'extraClass'> {
   value?: string;
@@ -72,7 +73,7 @@ export function Collapse({ items, value: controlled, defaultValue = [], accordio
         <div key={item.value} {...toProps(behavior.item(item))}>
           <button {...toProps(behavior.trigger(item))}>
             <span>{item.header ?? item.value}</span>
-            <span {...toProps(behavior.arrow)}>▶</span>
+            <span {...toProps(behavior.arrow)}><Icon name="chevron-right" size={13} /></span>
           </button>
           <div {...toProps(behavior.panel(item))}>{children?.(item)}</div>
         </div>
@@ -101,7 +102,7 @@ export function Pagination({ current: controlled, defaultCurrent = 1, className,
 
   return (
     <nav {...toProps(behavior.root)}>
-      <button {...toProps(behavior.prev)}>‹</button>
+      <button {...toProps(behavior.prev)}><Icon name="chevron-left" size={15} /></button>
       {behavior.pages.map((page, index) =>
         page === 'ellipsis' ? (
           <span key={`gap-${index}`} {...toProps(behavior.ellipsis)}>···</span>
@@ -109,7 +110,7 @@ export function Pagination({ current: controlled, defaultCurrent = 1, className,
           <button key={page} {...toProps(behavior.page(page))}>{page}</button>
         ),
       )}
-      <button {...toProps(behavior.next)}>›</button>
+      <button {...toProps(behavior.next)}><Icon name="chevron-right" size={15} /></button>
     </nav>
   );
 }
@@ -130,7 +131,7 @@ export function Steps({ items, current, direction, className }: StepsProps) {
         return (
           <div key={item.title} {...toProps(behavior.item(item, index))}>
             <span {...toProps(behavior.indicator)}>
-              {status === 'finish' ? '✓' : status === 'error' ? '!' : index + 1}
+              {status === 'finish' ? <Icon name="check" size={14} /> : status === 'error' ? '!' : index + 1}
             </span>
             <div className="i-steps__content">
               <div {...toProps(behavior.title)}>{item.title}</div>
@@ -150,7 +151,7 @@ export interface BreadcrumbProps {
   className?: string;
 }
 
-export function Breadcrumb({ items, separator = '/', className }: BreadcrumbProps) {
+export function Breadcrumb({ items, separator, className }: BreadcrumbProps) {
   const behavior = useBreadcrumb({ items, extraClass: className });
   return (
     <nav {...toProps(behavior.root)}>
@@ -158,7 +159,11 @@ export function Breadcrumb({ items, separator = '/', className }: BreadcrumbProp
         {items.map((item, index) => (
           <li key={item.label} {...toProps(behavior.item(item, index))}>
             <a {...toProps(behavior.link(item, index))}>{item.label}</a>
-            {index < items.length - 1 && <span {...toProps(behavior.separator)}>{separator}</span>}
+            {index < items.length - 1 && (
+              <span {...toProps(behavior.separator)}>
+                {separator ?? <Icon name="chevron-right" size={13} />}
+              </span>
+            )}
           </li>
         ))}
       </ol>

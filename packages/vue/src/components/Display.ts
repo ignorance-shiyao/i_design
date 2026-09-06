@@ -3,11 +3,14 @@ import {
   type Size, type Status,
 } from '@i-design/core';
 import { defineComponent, h, type PropType } from 'vue';
+import { Icon } from './Icon.js';
+import type { IconName } from '@i-design/core';
 import { toProps } from '../utils.js';
 import { useConfig } from './ConfigProvider.js';
 
-const STATUS_ICON: Record<string, string> = {
-  info: 'ⓘ', brand: 'ⓘ', success: '✓', warning: '!', danger: '✕',
+const STATUS_ICON: Record<string, IconName> = {
+  info: 'info-circle', brand: 'info-circle', success: 'check-circle',
+  warning: 'warning-triangle', danger: 'close-circle',
 };
 
 export const Alert = defineComponent({
@@ -24,12 +27,14 @@ export const Alert = defineComponent({
     return () => {
       const behavior = useAlert({ ...props, onClose: (e: Event) => emit('close', e) });
       return h('div', toProps(behavior.root), [
-        props.showIcon ? h('span', { class: 'i-alert__icon' }, slots.icon?.() ?? STATUS_ICON[props.status]) : null,
+        props.showIcon
+          ? h('span', { class: 'i-alert__icon' }, slots.icon?.() ?? [h(Icon, { name: STATUS_ICON[props.status]!, size: 16 })])
+          : null,
         h('div', { class: 'i-alert__content' }, [
           props.title || slots.title ? h('div', { class: 'i-alert__title' }, slots.title?.() ?? props.title) : null,
           slots.default?.(),
         ]),
-        behavior.close ? h('button', toProps(behavior.close), '×') : null,
+        behavior.close ? h('button', toProps(behavior.close), [h(Icon, { name: 'close', size: 14 })]) : null,
       ]);
     };
   },
@@ -176,7 +181,7 @@ export const Empty = defineComponent({
     return () => {
       const behavior = useEmpty();
       return h('div', toProps(behavior.root), [
-        h('span', toProps(behavior.icon), slots.icon?.() ?? '☱'),
+        h('span', toProps(behavior.icon), slots.icon?.() ?? [h(Icon, { name: 'folder', size: 28 })]),
         h('div', toProps(behavior.description), props.description ?? config.value.locale.select.empty),
         slots.default?.(),
       ]);

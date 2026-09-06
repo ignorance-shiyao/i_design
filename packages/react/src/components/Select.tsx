@@ -2,6 +2,7 @@ import { createId, useSelect, type SelectOption, type SelectOptions } from '@i-d
 import { useMemo, useState } from 'react';
 import { toProps, useControlled } from '../utils.js';
 import { useConfig } from './ConfigProvider.js';
+import { Icon } from './Icon.js';
 
 export interface SelectProps<T extends string | number = string>
   extends Omit<SelectOptions<T>, 'value' | 'open' | 'activeIndex' | 'id' | 'onChange' | 'onOpenChange' | 'onActiveIndexChange' | 'extraClass'> {
@@ -37,8 +38,12 @@ export function Select<T extends string | number = string>(props: SelectProps<T>
         <span className={`i-select__value${behavior.selectedLabel ? '' : ' i-select__value--placeholder'}`}>
           {behavior.selectedLabel ?? behavior.placeholder}
         </span>
-        {behavior.clear && <span {...toProps(behavior.clear)} role="button">×</span>}
-        <span className="i-select__arrow">▾</span>
+        {behavior.clear && (
+          <span {...toProps(behavior.clear)} role="button">
+            <Icon name="close" size={11} />
+          </span>
+        )}
+        <span className="i-select__arrow"><Icon name="chevron-down" size={14} /></span>
       </button>
       {open && (
         <ul {...toProps(behavior.listbox)}>

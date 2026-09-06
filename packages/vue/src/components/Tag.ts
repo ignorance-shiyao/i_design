@@ -1,5 +1,6 @@
 import { createBem, cx, type Status } from '@i-design/core';
 import { defineComponent, h, type PropType } from 'vue';
+import { Icon } from './Icon.js';
 
 const bem = createBem('tag');
 
@@ -28,7 +29,7 @@ export const Tag = defineComponent({
             ? h(
                 'button',
                 { class: bem('close'), type: 'button', 'aria-label': 'close', onClick: (e: Event) => emit('close', e) },
-                '×',
+                [h(Icon, { name: 'close', size: 12 })],
               )
             : null,
         ],

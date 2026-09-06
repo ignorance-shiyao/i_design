@@ -8,6 +8,7 @@ export * from './notification.js';
 export * from './validation.js';
 export * from './motion.js';
 export * from './highlight.js';
+export * from './icons.js';
 export * from './dom/focus.js';
 export * from './dom/position.js';
 export * from './behaviors/types.js';
@@ -31,5 +32,6 @@ export * from './behaviors/menu.js';
 export * from './behaviors/tree.js';
 export * from './behaviors/anchor.js';
 export * from './behaviors/data-display.js';
+export * from './behaviors/date.js';
 
 export const version = '0.1.0';

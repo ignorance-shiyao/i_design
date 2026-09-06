@@ -149,3 +149,39 @@ export function useDrawerBehavior(options: DrawerBehaviorOptions): DrawerBehavio
     panelStyle: horizontal ? { width: size } : { height: size },
   };
 }
+
+/* --- Popconfirm --------------------------------------------------------- */
+const confirmBem = createBem('popconfirm');
+
+export interface PopconfirmOptions {
+  open: boolean;
+  id: string;
+  status?: 'warning' | 'danger' | 'info';
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  extraClass?: string;
+}
+
+/**
+ * A confirmation anchored to the thing being acted on, rather than a modal that
+ * hides it. Reuses the popup surface; only the body and the two buttons differ.
+ */
+export function usePopconfirm(options: PopconfirmOptions) {
+  const { open, id, status = 'warning', onConfirm, onCancel, extraClass } = options;
+  return {
+    panel: spec(
+      cx(confirmBem(), confirmBem(null, status), extraClass),
+      { id, role: 'alertdialog', 'aria-modal': false, 'data-open': open },
+      {
+        keydown: (event: any) => {
+          if (event?.key === 'Escape') onCancel?.();
+        },
+      },
+    ),
+    icon: spec(confirmBem('icon'), { 'aria-hidden': true }),
+    body: spec(confirmBem('body')),
+    actions: spec(confirmBem('actions')),
+    confirm: spec(confirmBem('confirm'), { type: 'button' }, { click: () => onConfirm?.() }),
+    cancel: spec(confirmBem('cancel'), { type: 'button' }, { click: () => onCancel?.() }),
+  };
+}

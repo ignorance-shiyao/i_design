@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Button, CodeBlock, ConfigProvider, Empty, Input, Table, Tabs, Tag,
-  applyTheme, type Density, type LocaleName, type ThemeMode,
+  Button, CodeBlock, ConfigProvider, Empty, Icon, Input, Table, Tabs, Tag,
+  applyTheme,
 } from '@i-design/react';
 import { basicEntries } from './registry-basic.js';
 import { formEntries } from './registry-form.js';
@@ -10,19 +10,15 @@ import { aiEntries } from './registry-ai.js';
 import { moreEntries } from './registry-more.js';
 import { TokensPage, TOKEN_ANCHORS } from './TokensPage.js';
 import { CreditsPage, CREDITS_ANCHORS } from './CreditsPage.js';
+import { Landing } from './Landing.js';
+import { Dashboard } from './Dashboard.js';
+import { SettingsPanel, DEFAULT_SETTINGS, BRANDS, type SiteSettings } from './SettingsPanel.js';
 import type { DocEntry, Demo } from './types.js';
 
 const ENTRIES: DocEntry[] = [...basicEntries, ...formEntries, ...navEntries, ...moreEntries, ...aiEntries];
 const CATEGORIES = ['通用', '数据录入', '导航', '数据展示', '反馈', 'AI 会话'];
 
-const BRANDS = [
-  { name: '钴蓝', triplet: '65, 105, 239', hover: '107, 144, 251', active: '47, 79, 208' },
-  { name: '墨绿', triplet: '18, 183, 106', hover: '50, 213, 131', active: '3, 152, 85' },
-  { name: '紫罗兰', triplet: '124, 92, 245', hover: '155, 131, 248', active: '101, 65, 224' },
-  { name: '赤陶', triplet: '220, 104, 3', hover: '247, 144, 9', active: '181, 71, 8' },
-];
-
-type Page = 'overview' | 'tokens' | string;
+type Page = 'overview' | 'console' | 'tokens' | 'credits' | string;
 
 /** A demo card: stage on top, collapsible source underneath. */
 function DemoCard({ demo, index }: { demo: Demo; index: number }) {
@@ -119,106 +115,59 @@ function ComponentPage({ entry }: { entry: DocEntry }) {
   );
 }
 
-function Overview({ onNavigate }: { onNavigate: (page: Page) => void }) {
-  return (
-    <>
-      <div className="page__head">
-        <div className="page__eyebrow">跨框架组件库</div>
-        <h1 className="page__title page__title--hero">一套设计令牌与行为逻辑，同时驱动 React 与 Vue</h1>
-        <p className="page__lede">
-          设计令牌、样式、交互行为、无障碍语义只写一份，放在 <code>@i-design/core</code>；
-          React 与 Vue 各自只有一层约 15 行的属性翻译。同样的 props 必然产出同样的 DOM——
-          这条约束由跨框架一致性测试强制保证。
-        </p>
-        <div className="stats">
-          {[
-            { value: '52', label: '组件（双端一致）' },
-            { value: '132', label: '测试全绿' },
-            { value: '0', label: '运行时依赖' },
-            { value: '2', label: '层令牌：基元 + 语义' },
-          ].map((stat) => (
-            <div key={stat.label}>
-              <div className="stats__value">{stat.value}</div>
-              <div className="stats__label">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <section className="section">
-        <h2 className="section__title">架构</h2>
-        <div className="arch">
-          <div className="arch__row">
-            <code className="arch__name">@i-design/tokens</code>
-            <span className="arch__desc">RGB 三元组基元 + 语义令牌，编译为 CSS 变量</span>
-          </div>
-          <div className="arch__link" aria-hidden="true" />
-          <div className="arch__row">
-            <code className="arch__name">@i-design/core</code>
-            <span className="arch__desc">无头行为、类名、无障碍语义、定位、动效状态机、语法高亮、样式表</span>
-          </div>
-          <div className="arch__link arch__link--split" aria-hidden="true" />
-          <div className="arch__pair">
-            <div className="arch__row">
-              <code className="arch__name">@i-design/react</code>
-              <span className="arch__desc">约 15 行 toProps()：class → className，click → onClick</span>
-            </div>
-            <div className="arch__row">
-              <code className="arch__name">@i-design/vue</code>
-              <span className="arch__desc">约 15 行 toProps()：同一份 ElementSpec，换一种写法</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <h2 className="section__title">安装</h2>
-        <CodeBlock language="bash" code={`pnpm add @i-design/react   # 或 @i-design/vue\n# 样式与令牌一并引入\n# import '@i-design/core/styles';`} />
-      </section>
-
-      <section className="section">
-        <h2 className="section__title">从这里开始</h2>
-        <div className="cards">
-          <button className="cards__item" onClick={() => onNavigate('tokens')}>
-            <div className="cards__title">设计令牌</div>
-            <div className="cards__desc">两层令牌结构、色板、圆角、阴影、密度</div>
-          </button>
-          <button className="cards__item" onClick={() => onNavigate('button')}>
-            <div className="cards__title">组件</div>
-            <div className="cards__desc">32 个组件的演示、双端用法与 API</div>
-          </button>
-          <button className="cards__item" onClick={() => onNavigate('chat')}>
-            <div className="cards__title">AI 会话</div>
-            <div className="cards__desc">流式、输入法安全发送、滚动跟随</div>
-          </button>
-        </div>
-      </section>
-    </>
-  );
-}
+const RADIUS_TOKENS: Array<[string, number]> = [
+  ['--i-radius-xs', 2], ['--i-radius-s', 3], ['--i-radius-m', 6], ['--i-radius-l', 12], ['--i-radius-xl', 12],
+];
+const FONT_TOKENS: Array<[string, number]> = [
+  ['--i-font-size-xs', 12], ['--i-font-size-s', 12], ['--i-font-size-m', 14],
+  ['--i-font-size-l', 16], ['--i-font-size-xl', 20], ['--i-font-size-2xl', 24], ['--i-font-size-3xl', 32],
+];
 
 export function App() {
-  const [mode, setMode] = useState<ThemeMode>(() => {
+  const [settings, setSettings] = useState<SiteSettings>(() => {
     const stamped = document.documentElement.getAttribute('data-theme');
-    return stamped === 'dark' ? 'dark' : stamped === 'light' ? 'light' : 'auto';
+    return {
+      ...DEFAULT_SETTINGS,
+      mode: stamped === 'dark' ? 'dark' : stamped === 'light' ? 'light' : 'auto',
+    };
   });
-  const [density, setDensity] = useState<Density>('default');
-  const [locale, setLocale] = useState<LocaleName>('zh-CN');
-  const [brand, setBrand] = useState(BRANDS[0]!);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [page, setPage] = useState<Page>('overview');
   const [filter, setFilter] = useState('');
+  const [navOpen, setNavOpen] = useState(false);
 
-  useEffect(() => { applyTheme({ mode, density }); }, [mode, density]);
+  const patch = (next: Partial<SiteSettings>): void => setSettings((prev) => ({ ...prev, ...next }));
 
-  // Rebranding is three triplets — the whole point of the primitive layer.
+  useEffect(() => {
+    applyTheme({
+      mode: settings.mode,
+      density: settings.density,
+      dir: settings.dir,
+      motion: settings.motion ? 'auto' : 'off',
+    });
+  }, [settings.mode, settings.density, settings.dir, settings.motion]);
+
+  // Every knob below writes CSS variables — no rebuild, no second stylesheet.
   useEffect(() => {
     const root = document.documentElement.style;
+    const brand = BRANDS.find((item) => item.triplet === settings.brand) ?? BRANDS[0]!;
     root.setProperty('--i-brand-5', brand.triplet);
     root.setProperty('--i-brand-4', brand.hover);
     root.setProperty('--i-brand-6', brand.active);
-  }, [brand]);
+    for (const [token, base] of RADIUS_TOKENS) {
+      root.setProperty(token, `${Math.round(base * settings.radius)}px`);
+    }
+    for (const [token, base] of FONT_TOKENS) {
+      root.setProperty(token, `${Math.round(base * settings.fontScale * 100) / 100}px`);
+    }
+  }, [settings.brand, settings.radius, settings.fontScale]);
 
-  useEffect(() => { window.scrollTo({ top: 0 }); }, [page]);
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+    setNavOpen(false);
+  }, [page]);
+
+  const { mode, density, locale } = settings;
 
   const entry = ENTRIES.find((item) => item.id === page);
   const groups = useMemo(() => {
@@ -233,7 +182,9 @@ export function App() {
     })).filter((group) => group.items.length > 0);
   }, [filter]);
 
-  const anchors = page === 'tokens'
+  const anchors = page === 'overview' || page === 'console'
+    ? []
+    : page === 'tokens'
     ? TOKEN_ANCHORS
     : page === 'credits'
       ? CREDITS_ANCHORS
@@ -248,58 +199,53 @@ export function App() {
   return (
     <ConfigProvider mode={mode} density={density} locale={locale}>
       <header className="topbar">
+        <button className="topbar__menu" aria-label="打开导航" onClick={() => setNavOpen((value) => !value)}>
+          <Icon name="menu" size={18} />
+        </button>
+
         <button className="topbar__brand" onClick={() => setPage('overview')}>
           <span className="topbar__mark">i</span>
           <span className="topbar__wordmark">i-design</span>
-          <span className="topbar__version">0.6.0</span>
+          <span className="topbar__version">0.7.0</span>
         </button>
 
         <nav className="topbar__nav">
-          <button className={`topbar__link${page === 'overview' ? ' topbar__link--active' : ''}`} onClick={() => setPage('overview')}>
-            概览
-          </button>
-          <button className={`topbar__link${page === 'tokens' ? ' topbar__link--active' : ''}`} onClick={() => setPage('tokens')}>
-            设计
-          </button>
-          <button className={`topbar__link${page === 'credits' ? ' topbar__link--active' : ''}`} onClick={() => setPage('credits')}>
-            各家所长
-          </button>
-          <button className={`topbar__link${entry ? ' topbar__link--active' : ''}`} onClick={() => setPage('button')}>
-            组件
-          </button>
+          {([
+            ['overview', '首页'],
+            ['console', '示例'],
+            ['tokens', '设计'],
+            ['button', '组件'],
+            ['credits', '各家所长'],
+          ] as const).map(([target, label]) => {
+            const active = target === 'button' ? Boolean(entry) : page === target;
+            return (
+              <button
+                key={target}
+                className={`topbar__link${active ? ' topbar__link--active' : ''}`}
+                onClick={() => setPage(target)}
+              >
+                {label}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="topbar__controls">
-          <Tabs size="s" variant="segment" value={mode} onChange={(value) => setMode(value as ThemeMode)}
-                items={[{ value: 'light', label: '浅' }, { value: 'dark', label: '深' }, { value: 'auto', label: '跟随' }]}>
-            {() => null}
-          </Tabs>
-          <Tabs size="s" variant="segment" value={density} onChange={(value) => setDensity(value as Density)}
-                items={[{ value: 'compact', label: '紧凑' }, { value: 'default', label: '默认' }, { value: 'loose', label: '宽松' }]}>
-            {() => null}
-          </Tabs>
-          <Tabs size="s" variant="segment" value={locale} onChange={(value) => setLocale(value as LocaleName)}
-                items={[{ value: 'zh-CN', label: '中' }, { value: 'en-US', label: 'EN' }, { value: 'ar-EG', label: 'AR' }]}>
-            {() => null}
-          </Tabs>
-          <span className="topbar__swatches">
-            {BRANDS.map((item) => (
-              <button
-                key={item.name}
-                title={item.name}
-                aria-label={item.name}
-                aria-pressed={brand.name === item.name}
-                className={`topbar__swatch${brand.name === item.name ? ' topbar__swatch--active' : ''}`}
-                style={{ background: `rgb(${item.triplet})` }}
-                onClick={() => setBrand(item)}
-              />
-            ))}
-          </span>
+          <button
+            className="topbar__icon"
+            aria-label={mode === 'dark' ? '切换到浅色' : '切换到深色'}
+            onClick={() => patch({ mode: mode === 'dark' ? 'light' : 'dark' })}
+          >
+            <Icon name={mode === 'dark' ? 'star' : 'eye'} size={16} />
+          </button>
+          <button className="topbar__icon" aria-label="外观设置" onClick={() => setSettingsOpen(true)}>
+            <Icon name="filter" size={16} />
+          </button>
         </div>
       </header>
 
-      <div className="shell">
-        <aside className="sidebar">
+      <div className={`shell${page === "console" ? " shell--full" : page === "overview" ? " shell--bleed" : ""}`}>
+        <aside className={`sidebar${navOpen ? " sidebar--open" : ""}`}>
           <div className="sidebar__search">
             <Input size="s" value={filter} onChange={setFilter} clearable placeholder="搜索组件" prefix={<span aria-hidden="true">⌕</span>} />
           </div>
@@ -335,10 +281,12 @@ export function App() {
           {groups.length === 0 && <Empty description="没有匹配的组件" />}
         </aside>
 
-        <main className="content">
-          <article className="content__body">
+        <main className={`content${page === 'console' ? ' content--full' : ''}`}>
+          <article className={`content__body${page === 'console' ? ' content__body--full' : ''}`}>
             {page === 'overview' ? (
-              <Overview onNavigate={setPage} />
+              <Landing onNavigate={setPage} />
+            ) : page === 'console' ? (
+              <Dashboard />
             ) : page === 'tokens' ? (
               <TokensPage />
             ) : page === 'credits' ? (
@@ -347,10 +295,10 @@ export function App() {
               <ComponentPage entry={entry} />
             ) : null}
 
-            <footer className="footer">
+            {page !== 'console' && <footer className="footer">
               <span>i-design · 令牌与行为在 core，React / Vue 只做翻译</span>
               <span>本文档站由 i-design 自己搭建</span>
-            </footer>
+            </footer>}
           </article>
 
           {anchors.length > 0 && (
@@ -371,6 +319,14 @@ export function App() {
           )}
         </main>
       </div>
+
+      <SettingsPanel
+        open={settingsOpen}
+        settings={settings}
+        onClose={() => setSettingsOpen(false)}
+        onChange={patch}
+        onReset={() => setSettings({ ...DEFAULT_SETTINGS, mode: settings.mode })}
+      />
     </ConfigProvider>
   );
 }

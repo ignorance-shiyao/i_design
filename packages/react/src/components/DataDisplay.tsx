@@ -6,6 +6,8 @@ import {
 } from '@i-design/core';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { toProps, useControlled } from '../utils.js';
+import { Icon } from './Icon.js';
+import type { IconName } from '@i-design/core';
 
 /* --- List --------------------------------------------------------------- */
 export interface ListProps extends Omit<ListOptions, 'extraClass'> {
@@ -85,13 +87,14 @@ export interface StatisticProps extends Omit<StatisticOptions, 'extraClass'> {
 
 export function Statistic({ label, prefix, suffix, className, ...rest }: StatisticProps) {
   const behavior = useStatistic({ ...rest, extraClass: className });
-  const arrow = rest.trend === 'up' ? '↑' : rest.trend === 'down' ? '↓' : rest.trend === 'flat' ? '→' : null;
+  const arrow: IconName | null =
+    rest.trend === 'up' ? 'arrow-up' : rest.trend === 'down' ? 'arrow-down' : rest.trend === 'flat' ? 'arrow-right' : null;
   return (
     <div {...toProps(behavior.root)}>
       {label && <div {...toProps(behavior.label)}>{label}</div>}
       <div {...toProps(behavior.value)}>
         {prefix && <span {...toProps(behavior.prefix)}>{prefix}</span>}
-        {arrow && <span {...toProps(behavior.trendIcon)}>{arrow}</span>}
+        {arrow && <span {...toProps(behavior.trendIcon)}><Icon name={arrow} size={14} /></span>}
         {behavior.text}
         {suffix && <span {...toProps(behavior.suffix)}>{suffix}</span>}
       </div>
@@ -186,7 +189,11 @@ export function Typography(props: TypographyProps) {
       <Tag {...toProps(behavior.root)} style={behavior.style as CSSProperties}>
         {children}
       </Tag>
-      {behavior.copy && <button {...toProps(behavior.copy)}>{copied ? '✓' : '⧉'}</button>}
+      {behavior.copy && (
+        <button {...toProps(behavior.copy)}>
+          <Icon name={copied ? 'check' : 'copy'} size={13} />
+        </button>
+      )}
     </>
   );
 }
@@ -201,15 +208,20 @@ export interface ResultProps {
   className?: string;
 }
 
-const RESULT_ICON: Record<string, string> = {
-  success: '✓', warning: '!', danger: '✕', info: 'ⓘ', '404': '404', '500': '500',
+const RESULT_ICON: Record<string, IconName | string> = {
+  success: 'check-circle', warning: 'warning-triangle', danger: 'close-circle',
+  info: 'info-circle', '404': '404', '500': '500',
 };
 
 export function Result({ status = 'info', title, description, extra, icon, className }: ResultProps) {
   const behavior = useResult({ status, extraClass: className });
   return (
     <div {...toProps(behavior.root)}>
-      <span {...toProps(behavior.icon)}>{icon ?? RESULT_ICON[status]}</span>
+      <span {...toProps(behavior.icon)}>
+        {icon ?? (status === '404' || status === '500'
+          ? RESULT_ICON[status]
+          : <Icon name={RESULT_ICON[status] as IconName} size={28} />)}
+      </span>
       {title && <div {...toProps(behavior.title)}>{title}</div>}
       {description && <div {...toProps(behavior.description)}>{description}</div>}
       {extra && <div {...toProps(behavior.extra)}>{extra}</div>}

@@ -11,6 +11,9 @@ import { Tooltip } from './components/Tooltip.js';
 import { Drawer } from './components/Drawer.js';
 import { Table } from './components/Table.js';
 import { Carousel } from './components/Carousel.js';
+import { Icon } from './components/Icon.js';
+import { DatePicker } from './components/DatePicker.js';
+import { Dropdown, Popconfirm } from './components/Dropdown.js';
 import { InputNumber, Slider, Rate, Upload } from './components/FormControls.js';
 import { Layout, LayoutHeader, LayoutSider, LayoutContent, LayoutFooter, Menu, Tree, Anchor, BackTop } from './components/Structure.js';
 import { List, ListItem, Descriptions, Statistic, Timeline, Segmented, Typography, Result, Watermark } from './components/DataDisplay.js';
@@ -30,6 +33,7 @@ export { ConfigProvider, useConfig, type IConfig } from './components/ConfigProv
 export { Button, Input, Checkbox, Switch, Tag, Space, FormItem, Dialog, Tooltip };
 export { Drawer, Textarea, RadioGroup, Select, Row, Col, Table, Form, FormField };
 export { Carousel, Transition, Stagger };
+export { Icon, DatePicker, Dropdown, Popconfirm };
 export { InputNumber, Slider, Rate, Upload };
 export { Layout, LayoutHeader, LayoutSider, LayoutContent, LayoutFooter, Menu, Tree, Anchor, BackTop };
 export { List, ListItem, Descriptions, Statistic, Timeline, Segmented, Typography, Result, Watermark };
@@ -49,11 +53,13 @@ export type {
   Status, TabItem, TableColumn, TableSort, ThemeMode, Variant,
   ChatRole, ChatStatus, MotionPreset, TransitionPhase, StreamController,
   AnchorItem, MenuItem, TreeNode, TimelineItem, SegmentedOption, UploadFile, UploadStatus, SliderMark,
+  IconName, CalendarCell,
 } from '@i-design/core';
 export {
   applyTheme, computedTokens, locales, FormStore, validateValue, enMessages, defaultMessages,
   createStreamController, isAtBottom, motionClass, stagger,
   highlight, formatBytes, formatStatistic, createWatermark, readComputedTokens,
+  ICONS, formatDate, parseDate, addDays, addMonths, isSameDay, startOfDay,
 } from '@i-design/core';
 
 const components: Record<string, Component> = {
@@ -123,6 +129,10 @@ const components: Record<string, Component> = {
   ITypography: Typography,
   IResult: Result,
   IWatermark: Watermark,
+  IIcon: Icon,
+  IDatePicker: DatePicker,
+  IDropdown: Dropdown,
+  IPopconfirm: Popconfirm,
 };
 
 /** `app.use(IDesign)` for the global-registration style Vue users expect. */

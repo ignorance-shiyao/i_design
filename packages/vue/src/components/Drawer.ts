@@ -2,6 +2,7 @@ import { createBem, createId, lockScroll, trapFocus, useDrawerBehavior, type Dra
 import { defineComponent, h, onBeforeUnmount, ref, Teleport, watch, type PropType } from 'vue';
 import { toProps } from '../utils.js';
 import { useConfig } from './ConfigProvider.js';
+import { Icon } from './Icon.js';
 
 const bem = createBem('drawer');
 
@@ -86,7 +87,7 @@ export const Drawer = defineComponent({
             h('div', { ...toProps(behavior.panel), ref: panel, style: behavior.panelStyle }, [
               h('div', { class: bem('header') }, [
                 h('span', { id: ids.title }, slots.title?.() ?? props.title),
-                h('button', toProps(behavior.closeButton), '×'),
+                h('button', toProps(behavior.closeButton), [h(Icon, { name: 'close', size: 16 })]),
               ]),
               h('div', { class: bem('body'), id: ids.body }, slots.default?.()),
               slots.footer ? h('div', { class: bem('footer') }, slots.footer()) : null,

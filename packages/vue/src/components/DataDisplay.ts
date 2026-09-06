@@ -5,6 +5,8 @@ import {
 } from '@i-design/core';
 import { defineComponent, h, onMounted, ref, watch, type PropType } from 'vue';
 import { toProps, useControlled } from '../utils.js';
+import { Icon } from './Icon.js';
+import type { IconName } from '@i-design/core';
 
 export const List = defineComponent({
   name: 'IList',
@@ -90,12 +92,13 @@ export const Statistic = defineComponent({
   setup(props, { slots }) {
     return () => {
       const behavior = useStatistic(props);
-      const arrow = props.trend === 'up' ? '↑' : props.trend === 'down' ? '↓' : props.trend === 'flat' ? '→' : null;
+      const arrow: IconName | null =
+        props.trend === 'up' ? 'arrow-up' : props.trend === 'down' ? 'arrow-down' : props.trend === 'flat' ? 'arrow-right' : null;
       return h('div', toProps(behavior.root), [
         props.label || slots.label ? h('div', toProps(behavior.label), slots.label?.() ?? props.label) : null,
         h('div', toProps(behavior.value), [
           props.prefix ? h('span', toProps(behavior.prefix), props.prefix) : null,
-          arrow ? h('span', toProps(behavior.trendIcon), arrow) : null,
+          arrow ? h('span', toProps(behavior.trendIcon), [h(Icon, { name: arrow, size: 14 })]) : null,
           behavior.text,
           props.suffix ? h('span', toProps(behavior.suffix), props.suffix) : null,
         ]),
@@ -194,14 +197,15 @@ export const Typography = defineComponent({
       });
       return [
         h(behavior.tag, { ...toProps(behavior.root), style: behavior.style }, slots.default?.()),
-        behavior.copy ? h('button', toProps(behavior.copy), copied.value ? '✓' : '⧉') : null,
+        behavior.copy ? h('button', toProps(behavior.copy), [h(Icon, { name: copied.value ? 'check' : 'copy', size: 13 })]) : null,
       ];
     };
   },
 });
 
-const RESULT_ICON: Record<string, string> = {
-  success: '✓', warning: '!', danger: '✕', info: 'ⓘ', '404': '404', '500': '500',
+const RESULT_ICON: Record<string, IconName | string> = {
+  success: 'check-circle', warning: 'warning-triangle', danger: 'close-circle',
+  info: 'info-circle', '404': '404', '500': '500',
 };
 
 export const Result = defineComponent({
@@ -215,7 +219,14 @@ export const Result = defineComponent({
     return () => {
       const behavior = useResult({ status: props.status });
       return h('div', toProps(behavior.root), [
-        h('span', toProps(behavior.icon), slots.icon?.() ?? RESULT_ICON[props.status]),
+        h(
+          'span',
+          toProps(behavior.icon),
+          slots.icon?.() ??
+            (props.status === '404' || props.status === '500'
+              ? RESULT_ICON[props.status]
+              : [h(Icon, { name: RESULT_ICON[props.status] as IconName, size: 28 })]),
+        ),
         props.title || slots.title ? h('div', toProps(behavior.title), slots.title?.() ?? props.title) : null,
         props.description || slots.description
           ? h('div', toProps(behavior.description), slots.description?.() ?? props.description)

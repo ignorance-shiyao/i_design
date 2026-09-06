@@ -1,5 +1,6 @@
 import { createBem, cx, type Size, type Status } from '@i-design/core';
 import type { ReactNode } from 'react';
+import { Icon } from './Icon.js';
 
 const bem = createBem('tag');
 
@@ -23,7 +24,7 @@ export function Tag(props: TagProps) {
       {children}
       {closable && (
         <button className={bem('close')} type="button" aria-label="close" onClick={onClose}>
-          ×
+          <Icon name="close" size={12} />
         </button>
       )}
     </span>

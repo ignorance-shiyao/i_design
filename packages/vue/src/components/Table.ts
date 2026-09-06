@@ -3,6 +3,7 @@ import { defineComponent, h, ref, type PropType, type VNodeChild } from 'vue';
 import { toProps } from '../utils.js';
 import { Checkbox } from './Toggle.js';
 import { Empty, Spinner } from './Display.js';
+import { Icon } from './Icon.js';
 
 type Row = Record<string, unknown>;
 
@@ -65,10 +66,15 @@ export const Table = defineComponent({
 
       const sorterIcon = (column: TableColumn<Row>): VNodeChild =>
         column.sortable || column.sorter
-          ? h('span', { class: 'i-table__sorter', 'aria-hidden': 'true' }, [
-              h('span', sort?.key === column.key && sort.order === 'asc' ? '▲' : '△'),
-              h('span', sort?.key === column.key && sort.order === 'desc' ? '▼' : '▽'),
-            ])
+          ? h(
+              'span',
+              {
+                class: 'i-table__sorter',
+                'aria-hidden': 'true',
+                'data-order': sort?.key === column.key ? sort.order ?? '' : '',
+              },
+              [h(Icon, { name: 'caret-up', size: 9 }), h(Icon, { name: 'caret-down', size: 9 })],
+            )
           : null;
 
       return h('div', toProps(behavior.wrapper), [

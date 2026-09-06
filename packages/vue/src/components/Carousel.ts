@@ -1,6 +1,7 @@
 import { useCarousel, type Orientation } from '@i-design/core';
 import { defineComponent, h, onBeforeUnmount, ref, watchEffect, type PropType } from 'vue';
 import { toProps, useControlled } from '../utils.js';
+import { Icon } from './Icon.js';
 
 export const Carousel = defineComponent({
   name: 'ICarousel',
@@ -100,7 +101,10 @@ export const Carousel = defineComponent({
             ],
           ),
           props.showArrows && count > 1
-            ? [h('button', toProps(behavior.prev), '‹'), h('button', toProps(behavior.next), '›')]
+            ? [
+                h('button', toProps(behavior.prev), [h(Icon, { name: 'chevron-left', size: 17 })]),
+                h('button', toProps(behavior.next), [h(Icon, { name: 'chevron-right', size: 17 })]),
+              ]
             : null,
           props.showDots && count > 1
             ? h(

@@ -5,6 +5,7 @@ import {
 } from '@i-design/core';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { toProps } from '../utils.js';
+import { Icon } from './Icon.js';
 
 /* --- ChatMessage -------------------------------------------------------- */
 export interface ChatMessageProps extends Omit<ChatMessageOptions, 'extraClass'> {
@@ -79,7 +80,7 @@ export function ThinkingBlock({ label = '推理过程', defaultOpen = false, chi
   return (
     <div {...toProps(behavior.root)}>
       <button {...toProps(behavior.trigger)}>
-        <span>{open ? '▾' : '▸'}</span>
+        <Icon name={open ? 'chevron-down' : 'chevron-right'} size={13} />
         {label}
       </button>
       <div {...toProps(behavior.panel)}>{children}</div>
@@ -197,7 +198,9 @@ export function PromptInput(props: PromptInputProps) {
         <span className="i-prompt__hint">{hint}</span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           {toolbar}
-          <button {...toProps(behavior.send)}>{rest.busy ? '■' : '↑'}</button>
+          <button {...toProps(behavior.send)}>
+            <Icon name={rest.busy ? 'stop' : 'arrow-up'} size={16} />
+          </button>
         </span>
       </div>
     </div>

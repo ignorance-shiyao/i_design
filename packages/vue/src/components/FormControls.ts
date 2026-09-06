@@ -5,6 +5,7 @@ import {
 import { defineComponent, h, ref, type PropType } from 'vue';
 import { toProps, useControlled } from '../utils.js';
 import { Progress } from './Display.js';
+import { Icon } from './Icon.js';
 
 export const InputNumber = defineComponent({
   name: 'IInputNumber',
@@ -40,15 +41,15 @@ export const InputNumber = defineComponent({
       });
 
       return h('div', toProps(behavior.root), [
-        props.controls === 'side' ? h('button', toProps(behavior.decrease), '−') : null,
+        props.controls === 'side' ? h('button', toProps(behavior.decrease), [h(Icon, { name: 'minus', size: 14 })]) : null,
         h('input', toProps(behavior.input)),
         props.controls === 'stack'
           ? h('span', { class: 'i-input-number__steps' }, [
-              h('button', toProps(behavior.increase), '▴'),
-              h('button', toProps(behavior.decrease), '▾'),
+              h('button', toProps(behavior.increase), [h(Icon, { name: 'caret-up', size: 9 })]),
+              h('button', toProps(behavior.decrease), [h(Icon, { name: 'caret-down', size: 9 })]),
             ])
           : null,
-        props.controls === 'side' ? h('button', toProps(behavior.increase), '+') : null,
+        props.controls === 'side' ? h('button', toProps(behavior.increase), [h(Icon, { name: 'plus', size: 14 })]) : null,
       ]);
     };
   },
@@ -243,8 +244,16 @@ export const Upload = defineComponent({
                         h(Progress, { value: file.percent ?? 0, size: 's', showLabel: false }),
                       ])
                     : h('span', { class: 'i-upload__size' }, file.size ? formatBytes(file.size) : ''),
-                  h('span', { class: 'i-upload__status' }, file.status === 'success' ? '✓' : file.status === 'error' ? '!' : ''),
-                  h('button', toProps(behavior.remove(file)), '×'),
+                  h(
+                    'span',
+                    { class: 'i-upload__status' },
+                    file.status === 'success'
+                      ? [h(Icon, { name: 'check', size: 13 })]
+                      : file.status === 'error'
+                        ? [h(Icon, { name: 'warning-triangle', size: 13 })]
+                        : '',
+                  ),
+                  h('button', toProps(behavior.remove(file)), [h(Icon, { name: 'close', size: 13 })]),
                 ]),
               ),
             )

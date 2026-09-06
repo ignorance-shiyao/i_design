@@ -1,6 +1,7 @@
 import { useCarousel, type CarouselOptions } from '@i-design/core';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { toProps, useControlled } from '../utils.js';
+import { Icon } from './Icon.js';
 
 export interface CarouselProps extends Omit<CarouselOptions, 'count' | 'index' | 'onChange' | 'extraClass'> {
   index?: number;
@@ -86,8 +87,8 @@ export function Carousel(props: CarouselProps) {
 
       {showArrows && count > 1 && (
         <>
-          <button {...toProps(behavior.prev)}>‹</button>
-          <button {...toProps(behavior.next)}>›</button>
+          <button {...toProps(behavior.prev)}><Icon name="chevron-left" size={17} /></button>
+          <button {...toProps(behavior.next)}><Icon name="chevron-right" size={17} /></button>
         </>
       )}
       {showDots && count > 1 && (

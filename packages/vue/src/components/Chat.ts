@@ -5,6 +5,7 @@ import {
 } from '@i-design/core';
 import { defineComponent, h, nextTick, onMounted, onUpdated, ref, type PropType } from 'vue';
 import { toProps } from '../utils.js';
+import { Icon } from './Icon.js';
 
 const ROLE_INITIAL: Record<ChatRole, string> = { user: '你', assistant: 'AI', system: '·' };
 
@@ -75,7 +76,7 @@ export const ThinkingBlock = defineComponent({
     return () => {
       const behavior = useThinkingBlock({ open: open.value, id, onToggle: () => (open.value = !open.value) });
       return h('div', toProps(behavior.root), [
-        h('button', toProps(behavior.trigger), [h('span', open.value ? '▾' : '▸'), props.label]),
+        h('button', toProps(behavior.trigger), [h(Icon, { name: open.value ? 'chevron-down' : 'chevron-right', size: 13 }), props.label]),
         h('div', toProps(behavior.panel), slots.default?.()),
       ]);
     };
@@ -204,7 +205,7 @@ export const PromptInput = defineComponent({
           h('span', { class: 'i-prompt__hint' }, slots.hint?.() ?? props.hint),
           h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '8px' } }, [
             slots.toolbar?.(),
-            h('button', toProps(behavior.send), props.busy ? '■' : '↑'),
+            h('button', toProps(behavior.send), [h(Icon, { name: props.busy ? 'stop' : 'arrow-up', size: 16 })]),
           ]),
         ]),
       ]);

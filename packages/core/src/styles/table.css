@@ -45,8 +45,18 @@
 .i-table__cell--sortable { cursor: pointer; }
 .i-table__cell--sortable:hover { color: var(--i-color-text-primary); }
 .i-table__cell--sorted { color: var(--i-color-brand-text); }
-.i-table__sorter { display: inline-flex; flex-direction: column; line-height: 0.6; margin-inline-start: var(--i-space-1); font-size: 8px; opacity: 0.5; vertical-align: middle; }
-.i-table__cell--sorted .i-table__sorter { opacity: 1; }
+.i-table__sorter {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-inline-start: var(--i-space-1);
+  vertical-align: middle;
+  color: var(--i-color-text-disabled);
+}
+/* The active direction lights up; the other stays muted. */
+.i-table__sorter[data-order='asc'] > :first-child,
+.i-table__sorter[data-order='desc'] > :last-child { color: var(--i-color-brand); }
+
 
 .i-table__row--selected > .i-table__cell { background: var(--i-color-brand-subtle); }
 .i-table tbody tr:last-child > .i-table__cell { border-block-end: none; }

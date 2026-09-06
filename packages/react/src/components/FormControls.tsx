@@ -5,6 +5,7 @@ import {
 import { useRef, useState, type ReactNode } from 'react';
 import { toProps, useControlled } from '../utils.js';
 import { Progress } from './Display.js';
+import { Icon } from './Icon.js';
 
 /* --- InputNumber -------------------------------------------------------- */
 export interface InputNumberProps extends Omit<NumberBehaviorOptions, 'value' | 'onChange' | 'extraClass'> {
@@ -29,15 +30,15 @@ export function InputNumber(props: InputNumberProps) {
 
   return (
     <div {...toProps(behavior.root)}>
-      {controls === 'side' && <button {...toProps(behavior.decrease)}>−</button>}
+      {controls === 'side' && <button {...toProps(behavior.decrease)}><Icon name="minus" size={14} /></button>}
       <input {...toProps(behavior.input)} />
       {controls === 'stack' && (
         <span className="i-input-number__steps">
-          <button {...toProps(behavior.increase)}>▴</button>
-          <button {...toProps(behavior.decrease)}>▾</button>
+          <button {...toProps(behavior.increase)}><Icon name="caret-up" size={9} /></button>
+          <button {...toProps(behavior.decrease)}><Icon name="caret-down" size={9} /></button>
         </span>
       )}
-      {controls === 'side' && <button {...toProps(behavior.increase)}>+</button>}
+      {controls === 'side' && <button {...toProps(behavior.increase)}><Icon name="plus" size={14} /></button>}
     </div>
   );
 }
@@ -206,8 +207,10 @@ export function Upload(props: UploadProps) {
               ) : (
                 <span className="i-upload__size">{file.size ? formatBytes(file.size) : ''}</span>
               )}
-              <span className="i-upload__status">{file.status === 'success' ? '✓' : file.status === 'error' ? '!' : ''}</span>
-              <button {...toProps(behavior.remove(file))}>×</button>
+              <span className="i-upload__status">
+                {file.status === 'success' ? <Icon name="check" size={13} /> : file.status === 'error' ? <Icon name="warning-triangle" size={13} /> : null}
+              </span>
+              <button {...toProps(behavior.remove(file))}><Icon name="close" size={13} /></button>
             </li>
           ))}
         </ul>

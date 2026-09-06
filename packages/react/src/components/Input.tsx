@@ -1,6 +1,7 @@
 import { useInputBehavior, type InputBehaviorOptions } from '@i-design/core';
 import { forwardRef, type ReactNode } from 'react';
 import { toProps, useControlled } from '../utils.js';
+import { Icon } from './Icon.js';
 import { useConfig } from './ConfigProvider.js';
 
 export interface InputProps
@@ -50,7 +51,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(pro
           {behavior.count.current}/{behavior.count.max}
         </span>
       )}
-      {behavior.clear && <button {...toProps(behavior.clear)}>×</button>}
+      {behavior.clear && <button {...toProps(behavior.clear)}><Icon name="close" size={11} /></button>}
       {suffix && <span className="i-input__suffix">{suffix}</span>}
     </div>
   );

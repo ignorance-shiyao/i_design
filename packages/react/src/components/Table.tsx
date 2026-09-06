@@ -4,6 +4,7 @@ import { toProps } from '../utils.js';
 import { Checkbox } from './Checkbox.js';
 import { Empty } from './Display.js';
 import { Spinner } from './Display.js';
+import { Icon } from './Icon.js';
 
 export interface TableProps<T = Record<string, unknown>>
   extends Omit<TableOptions<T>, 'sort' | 'selectedKeys' | 'onSortChange' | 'onSelectionChange' | 'extraClass'> {
@@ -69,9 +70,13 @@ export function Table<T = Record<string, unknown>>(props: TableProps<T>) {
               >
                 {column.title}
                 {(column.sortable || column.sorter) && (
-                  <span className="i-table__sorter" aria-hidden="true">
-                    <span>{sort?.key === column.key && sort.order === 'asc' ? '▲' : '△'}</span>
-                    <span>{sort?.key === column.key && sort.order === 'desc' ? '▼' : '▽'}</span>
+                  <span
+                    className="i-table__sorter"
+                    aria-hidden="true"
+                    data-order={sort?.key === column.key ? sort.order ?? '' : ''}
+                  >
+                    <Icon name="caret-up" size={9} />
+                    <Icon name="caret-down" size={9} />
                   </span>
                 )}
               </th>

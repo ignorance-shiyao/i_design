@@ -3,6 +3,7 @@ import { defineComponent, h, onBeforeUnmount, ref, Teleport, watch, type PropTyp
 import { toProps } from '../utils.js';
 import { useConfig } from './ConfigProvider.js';
 import { Button } from './Button.js';
+import { Icon } from './Icon.js';
 
 const bem = createBem('dialog');
 
@@ -98,7 +99,7 @@ export const Dialog = defineComponent({
             h('div', { ...toProps(behavior.panel), ref: panel }, [
               h('div', { class: bem('header') }, [
                 h('span', { id: ids.title }, slots.title?.() ?? props.title),
-                h('button', toProps(behavior.closeButton), '×'),
+                h('button', toProps(behavior.closeButton), [h(Icon, { name: 'close', size: 16 })]),
               ]),
               h('div', { class: bem('body'), id: ids.body }, slots.default?.()),
               props.showFooter ? h('div', { class: bem('footer') }, footer) : null,

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, type CSSProperties, type ReactNode } from '
 import { createPortal } from 'react-dom';
 import { toProps } from '../utils.js';
 import { useConfig } from './ConfigProvider.js';
+import { Icon } from './Icon.js';
 
 const bem = createBem('drawer');
 
@@ -46,7 +47,7 @@ export function Drawer(props: DrawerProps) {
       <div ref={panelRef} {...toProps(behavior.panel)} style={behavior.panelStyle as CSSProperties}>
         <div className={bem('header')}>
           <span id={ids.title}>{title}</span>
-          <button {...toProps(behavior.closeButton)}>×</button>
+          <button {...toProps(behavior.closeButton)}><Icon name="close" size={16} /></button>
         </div>
         <div className={bem('body')} id={ids.body}>{children}</div>
         {footer != null && <div className={bem('footer')}>{footer}</div>}

@@ -5,6 +5,8 @@ export type ThemeMode = ColorScheme | 'auto';
 export type Direction = 'ltr' | 'rtl';
 
 export interface ThemeConfig {
+  /** Turn off in-app motion, independent of the OS `prefers-reduced-motion`. */
+  motion?: 'auto' | 'off';
   /** `auto` follows `prefers-color-scheme` at the CSS level (no JS needed). */
   mode: ThemeMode;
   density: Density;
@@ -47,6 +49,7 @@ export function applyTheme(config: Partial<ThemeConfig> = {}, target?: HTMLEleme
   el.setAttribute('data-i-theme', attrs['data-i-theme']);
   el.setAttribute('data-i-density', attrs['data-i-density']);
   el.setAttribute('dir', attrs.dir);
+  if (config.motion) el.setAttribute('data-i-motion', config.motion);
   for (const [name, value] of Object.entries(themeStyle(config))) el.style.setProperty(name, value);
 }
 

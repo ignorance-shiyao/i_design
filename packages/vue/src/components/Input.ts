@@ -1,6 +1,7 @@
 import { useInputBehavior, type Size } from '@i-design/core';
 import { defineComponent, h, type PropType } from 'vue';
 import { toProps, useControlled } from '../utils.js';
+import { Icon } from './Icon.js';
 import { useConfig } from './ConfigProvider.js';
 
 export const Input = defineComponent({
@@ -52,7 +53,7 @@ export const Input = defineComponent({
         props.showCount && behavior.count
           ? h('span', { class: 'i-input__count' }, `${behavior.count.current}/${behavior.count.max}`)
           : null,
-        behavior.clear ? h('button', toProps(behavior.clear), '×') : null,
+        behavior.clear ? h('button', toProps(behavior.clear), [h(Icon, { name: 'close', size: 11 })]) : null,
         slots.suffix ? h('span', { class: 'i-input__suffix' }, slots.suffix()) : null,
       ]);
     };

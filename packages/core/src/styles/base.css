@@ -70,3 +70,28 @@
 .i-state[aria-current='true']::after { opacity: var(--i-state-selected); }
 .i-state[aria-disabled='true']::after,
 .i-state:disabled::after { opacity: 0; }
+
+/* Icons: inline-flex so they sit on the text baseline without a wrapper. */
+.i-icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: -0.15em;
+}
+.i-icon--star,
+.i-icon--caret-up,
+.i-icon--caret-down,
+.i-icon--stop { fill: currentColor; stroke: none; }
+.i-icon--spin { animation: i-spin 900ms linear infinite; }
+
+/*
+ * Motion kill-switch. `prefers-reduced-motion` covers the OS setting; this is
+ * the in-app equivalent, for people who want it off in this product only.
+ */
+[data-i-motion='off'] *,
+[data-i-motion='off'] *::before,
+[data-i-motion='off'] *::after {
+  transition-duration: 1ms !important;
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}

@@ -395,6 +395,25 @@ describe('React / Vue DOM parity', () => {
     );
   });
 
+  it('Icon renders identical SVG in both frameworks', () => {
+    for (const name of ['check', 'chevron-down', 'star', 'loading'] as const) {
+      expect(reactHtml(<R.Icon name={name} size={18} />)).toBe(vueHtml(V.Icon, { name, size: 18 }));
+    }
+    expect(reactHtml(<R.Icon name="check" label="完成" />)).toBe(
+      vueHtml(V.Icon, { name: 'check', label: '完成' }),
+    );
+  });
+
+  it('DatePicker — closed trigger and the open calendar grid', () => {
+    const value = new Date(2026, 8, 15);
+    expect(reactHtml(<R.DatePicker value={value} clearable />)).toBe(
+      vueHtml(V.DatePicker, { modelValue: value, clearable: true }),
+    );
+    expect(reactHtml(<R.DatePicker value={null} placeholder="选择日期" />)).toBe(
+      vueHtml(V.DatePicker, { modelValue: null, placeholder: '选择日期' }),
+    );
+  });
+
   it('ConfigProvider emits the same theme attributes', () => {
     expect(reactHtml(<R.ConfigProvider mode="dark" density="compact" />)).toBe(
       vueHtml(V.ConfigProvider, { mode: 'dark', density: 'compact' }),

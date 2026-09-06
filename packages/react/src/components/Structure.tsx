@@ -5,6 +5,7 @@ import {
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { toProps, useControlled } from '../utils.js';
 import { Checkbox } from './Checkbox.js';
+import { Icon } from './Icon.js';
 
 /* --- Layout ------------------------------------------------------------- */
 export interface LayoutProps {
@@ -85,7 +86,7 @@ export function Menu(props: MenuProps) {
         <div key={item.value}>
           <button {...toProps(behavior.submenuTrigger(item, depth))}>
             <span className="i-menu__label">{item.label ?? item.value}</span>
-            <span className="i-menu__arrow" aria-hidden="true">›</span>
+            <span className="i-menu__arrow" aria-hidden="true"><Icon name="chevron-right" size={13} /></span>
           </button>
           <div {...toProps(behavior.submenu(item))}>{renderItems(item.children, depth + 1)}</div>
         </div>
@@ -138,7 +139,7 @@ export function Tree(props: TreeProps) {
         return (
           <div key={entry.node.key} {...toProps(behavior.row(entry))}>
             {entry.expandable ? (
-              <button {...toProps(behavior.toggle(entry))}>›</button>
+              <button {...toProps(behavior.toggle(entry))}><Icon name="chevron-right" size={12} /></button>
             ) : (
               <span className="i-tree__spacer" />
             )}
@@ -214,5 +215,9 @@ export function BackTop({ threshold = 240, label }: { threshold?: number; label?
     return () => window.removeEventListener('scroll', update);
   }, [threshold]);
 
-  return <button {...toProps(useBackTop({ visible, label }))}>↑</button>;
+  return (
+    <button {...toProps(useBackTop({ visible, label }))}>
+      <Icon name="arrow-up" size={16} />
+    </button>
+  );
 }

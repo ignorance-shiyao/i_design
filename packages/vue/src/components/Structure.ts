@@ -5,6 +5,7 @@ import {
 import { defineComponent, h, onBeforeUnmount, onMounted, ref, type PropType, type VNodeChild } from 'vue';
 import { toProps, useControlled } from '../utils.js';
 import { Checkbox } from './Toggle.js';
+import { Icon } from './Icon.js';
 
 export const Layout = defineComponent({
   name: 'ILayout',
@@ -89,7 +90,7 @@ export const Menu = defineComponent({
             ? h('div', { key: item.value }, [
                 h('button', toProps(behavior.submenuTrigger(item, depth)), [
                   h('span', { class: 'i-menu__label' }, item.label ?? item.value),
-                  h('span', { class: 'i-menu__arrow', 'aria-hidden': 'true' }, '›'),
+                  h('span', { class: 'i-menu__arrow', 'aria-hidden': 'true' }, [h(Icon, { name: 'chevron-right', size: 13 })]),
                 ]),
                 h('div', toProps(behavior.submenu(item)), render(item.children!, depth + 1)),
               ])
@@ -146,7 +147,7 @@ export const Tree = defineComponent({
           const box = behavior.checkbox(entry);
           return h('div', { ...toProps(behavior.row(entry)), key: entry.node.key }, [
             entry.expandable
-              ? h('button', toProps(behavior.toggle(entry)), '›')
+              ? h('button', toProps(behavior.toggle(entry)), [h(Icon, { name: 'chevron-right', size: 12 })])
               : h('span', { class: 'i-tree__spacer' }),
             props.checkable
               ? h(Checkbox, {
@@ -224,6 +225,9 @@ export const BackTop = defineComponent({
     });
     onBeforeUnmount(() => window.removeEventListener('scroll', update));
 
-    return () => h('button', toProps(useBackTop({ visible: visible.value, label: props.label })), '↑');
+    return () =>
+      h('button', toProps(useBackTop({ visible: visible.value, label: props.label })), [
+        h(Icon, { name: 'arrow-up', size: 16 }),
+      ]);
   },
 });
