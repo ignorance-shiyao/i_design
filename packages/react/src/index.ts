@@ -10,6 +10,13 @@ export { Dialog, type DialogProps } from './components/Dialog.js';
 export { Tooltip, type TooltipProps } from './components/Tooltip.js';
 export { Drawer, type DrawerProps } from './components/Drawer.js';
 export { Table, type TableProps } from './components/Table.js';
+export { Carousel, type CarouselProps } from './components/Carousel.js';
+export { Transition, Stagger, type TransitionProps, type StaggerProps } from './components/Transition.js';
+export {
+  Chat, ChatMessage, ChatAction, TypingIndicator, ThinkingBlock, CodeBlock, Suggestions, PromptInput,
+  type ChatProps, type ChatMessageProps, type ChatActionProps, type ThinkingBlockProps,
+  type CodeBlockProps, type SuggestionsProps, type PromptInputProps,
+} from './components/Chat.js';
 export {
   Form, FormField, useForm,
   type FormProps, type FormFieldProps, type FieldRenderProps, type UseFormResult,
@@ -34,5 +41,9 @@ export type {
   BreadcrumbItem, CollapseItem, Density, Direction, DrawerPlacement, FormRules, FormState, Locale,
   LocaleName, Orientation, Placement, RadioOption, Rule, SelectOption, Size, SortOrder, StepItem,
   Status, TabItem, TableColumn, TableSort, ThemeMode, Variant,
+  ChatRole, ChatStatus, MotionPreset, TransitionPhase, StreamController,
 } from '@i-design/core';
-export { applyTheme, computedTokens, locales, FormStore, validateValue, enMessages, defaultMessages } from '@i-design/core';
+export {
+  applyTheme, computedTokens, locales, FormStore, validateValue, enMessages, defaultMessages,
+  createStreamController, isAtBottom, motionClass, stagger,
+} from '@i-design/core';

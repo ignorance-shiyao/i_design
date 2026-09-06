@@ -26,6 +26,9 @@ export function Tabs({ items, value: controlled, defaultValue, className, onChan
     extraClass: className,
   });
   const active = items.find((item) => item.value === value);
+  // A tab strip used purely as a control (a toolbar switch) has no panel at all;
+  // rendering an empty one would add a stray tab stop.
+  const panel = active ? children?.(active) : null;
 
   return (
     <div {...toProps(behavior.root)}>
@@ -36,7 +39,7 @@ export function Tabs({ items, value: controlled, defaultValue, className, onChan
           </button>
         ))}
       </div>
-      {active && <div {...toProps(behavior.panel(active.value))}>{children?.(active)}</div>}
+      {active && panel != null && <div {...toProps(behavior.panel(active.value))}>{panel}</div>}
     </div>
   );
 }

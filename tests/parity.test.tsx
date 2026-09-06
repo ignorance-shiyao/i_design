@@ -160,6 +160,13 @@ describe('React / Vue DOM parity', () => {
     }
   });
 
+  it('Tabs used as a control renders no panel in either framework', () => {
+    const items = [{ value: 'a', label: '浅' }, { value: 'b', label: '深' }];
+    const react = reactHtml(<R.Tabs items={items} value="a" variant="segment">{() => null}</R.Tabs>);
+    expect(react).not.toContain('i-tabs__panel');
+    expect(react).toBe(vueHtml(V.Tabs, { items, modelValue: 'a', variant: 'segment' }));
+  });
+
   it('Collapse, Pagination, Steps, Breadcrumb', () => {
     const items = [{ value: 'p1', header: '面板一' }, { value: 'p2', header: '面板二' }];
     expect(reactHtml(<R.Collapse items={items} value={['p1']}>{() => '正文'}</R.Collapse>)).toBe(
@@ -237,6 +244,45 @@ describe('React / Vue DOM parity', () => {
 
     expect(reactHtml(<R.Table columns={columns} data={[]} rowKey={rowKey} />)).toBe(
       vueHtml(V.Table, { columns, data: [], rowKey }),
+    );
+  });
+
+  it('Carousel — slide semantics, dots and nav', () => {
+    const slides = [h('div', 'A'), h('div', 'B'), h('div', 'C')];
+    expect(
+      reactHtml(
+        <R.Carousel index={1} label="产品图">
+          <div>A</div>
+          <div>B</div>
+          <div>C</div>
+        </R.Carousel>,
+      ),
+    ).toBe(vueHtml(V.Carousel, { modelValue: 1, label: '产品图' }, { default: () => slides }));
+  });
+
+  it('AI chat surface — message roles, statuses and the prompt input', () => {
+    for (const role of ['user', 'assistant', 'system'] as const) {
+      expect(reactHtml(<R.ChatMessage role={role} name="Ada" time="10:24">你好</R.ChatMessage>)).toBe(
+        vueHtml(V.ChatMessage, { role, name: 'Ada', time: '10:24' }, { default: () => '你好' }),
+      );
+    }
+    for (const status of ['sending', 'streaming', 'complete', 'error'] as const) {
+      expect(reactHtml(<R.ChatMessage role="assistant" status={status}>回答</R.ChatMessage>)).toBe(
+        vueHtml(V.ChatMessage, { role: 'assistant', status }, { default: () => '回答' }),
+      );
+    }
+    expect(reactHtml(<R.TypingIndicator />)).toBe(vueHtml(V.TypingIndicator, {}));
+    expect(reactHtml(<R.Suggestions items={['总结这段代码', '写单元测试']} />)).toBe(
+      vueHtml(V.Suggestions, { items: ['总结这段代码', '写单元测试'] }),
+    );
+    expect(reactHtml(<R.CodeBlock language="ts" code="const a = 1;" />)).toBe(
+      vueHtml(V.CodeBlock, { language: 'ts', code: 'const a = 1;' }),
+    );
+    expect(reactHtml(<R.PromptInput value="问点什么" placeholder="发消息" />)).toBe(
+      vueHtml(V.PromptInput, { modelValue: '问点什么', placeholder: '发消息' }),
+    );
+    expect(reactHtml(<R.PromptInput value="生成中" busy />)).toBe(
+      vueHtml(V.PromptInput, { modelValue: '生成中', busy: true }),
     );
   });
 

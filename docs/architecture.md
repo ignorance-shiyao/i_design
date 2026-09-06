@@ -55,6 +55,28 @@ Vue 接受 `style="..."` 字符串，React 直接抛错。所以行为层一律�
 （见 `useRow` / `useCol` / `useTable().cellStyle`），并且 `spec()` 在发现原始 style 字符串时会直接抛错，
 把这个错误挡在写代码的那一刻，而不是留到某个框架的运行时。
 
+## 动效
+
+动效不是"框架特性"，而是 **core 里的一个相位状态机 + 类名**：
+
+```
+exited → enter →（一帧后）entered → exit →（duration 后）exited
+```
+
+`createTransitionController` 负责相位与计时，适配器只负责挂载/卸载。
+所以 React 的 `<Transition>` 和 Vue 的 `<ITransition>` 时序完全一致，两边都不需要各写一份 tween。
+折叠动画用 `grid-template-rows: 0fr → 1fr`，不需要 JS 去测 `scrollHeight`。
+
+## AI 会话
+
+这类界面里最容易做错、且每个应用都要重写一遍的三件事，都在 core 里解决：
+
+1. **输入法安全的 Enter 发送**：候选词阶段按 Enter 只是确认候选，不能发送。
+   `usePromptInput` 同时检查 `isComposing`、`keyCode === 229` 和 `nativeEvent.isComposing`。
+2. **流式显示与网络分片解耦**：token 是成批到达的，直接渲染会一块块跳。
+   `createStreamController` 把分片放进缓冲区，按固定速率吐出，`flush()` 可以立即显示全部。
+3. **滚动跟随**：`isAtBottom` 决定是否继续贴底——用户往上翻历史时不该被强制拉回。
+
 ## 表单校验
 
 规则是**纯数据**（`{ required, min, max, pattern, validator, trigger, message }`），因此可以来自配置文件或服务端。

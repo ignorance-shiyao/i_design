@@ -3,14 +3,17 @@
 当前版本已经覆盖 30 个组件：令牌体系、无头核心、两个适配器、跨框架一致性测试、
 键盘导航引擎、并排演示都已就位。下面是按价值排序的推进顺序。
 
-## 已完成（0.3.0）
+## 已完成（0.4.0）
 
 基础（ConfigProvider / Button / Divider / Space / Row / Col）、
 表单（Input / Textarea / Checkbox / Switch / RadioGroup / Select / FormItem）、
 数据展示（Card / Tag / Avatar / Badge / Progress / Skeleton / Spinner / Empty）、
 导航（Tabs / Collapse / Pagination / Steps / Breadcrumb）、
 反馈（Alert / Dialog / Drawer / Tooltip / message）、
-数据（Table：排序 / 多选 / 固定列 / 粘性表头）、Form + FormField（校验引擎在 core）。
+数据（Table：排序 / 多选 / 固定列 / 粘性表头）、Form + FormField（校验引擎在 core）、
+动效（Transition / Stagger / Carousel）、AI 会话（Chat / ChatMessage / PromptInput /
+TypingIndicator / ThinkingBlock / CodeBlock / Suggestions + 流式与滚动跟随）。
+文档站：每个组件的演示、React / Vue 用法与 API 表格。
 
 ## 下一批组件
 
@@ -19,6 +22,8 @@
 | Table 进阶 | 虚拟滚动、可展开行、列宽拖拽；分页与 Pagination 组合 |
 | Form 进阶 | 动态字段数组（FieldArray）、跨字段联动校验、i18n 校验文案 |
 | Menu / Dropdown | 复用 `useRoving` + `computePosition`，加子菜单的 typeahead |
+| 会话进阶 | Markdown 渲染与代码高亮、消息编辑与分支、附件与图片上传、工具调用卡片 |
+| 轮播进阶 | 多图并列（slidesPerView）、缩略图导航、无限滚动 |
 | DatePicker | 日期计算与键盘网格导航放 core，两个适配器只负责渲染 |
 | Cascader / TreeSelect / Tree | 复用 Select 的 listbox 行为，加层级展开状态 |
 | Upload | 文件列表状态机放 core，拖拽与预览在适配器 |

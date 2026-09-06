@@ -1,27 +1,45 @@
 @import '@i-design/tokens/tokens.css';
 
-.i-reset,
 [class^='i-'],
 [class*=' i-'] {
   box-sizing: border-box;
 }
 
-body {
-  font-family: var(--i-font-family);
+[class^='i-']::before,
+[class^='i-']::after,
+[class*=' i-']::before,
+[class*=' i-']::after {
+  box-sizing: border-box;
 }
 
-/* One focus treatment for the whole library, keyboard-only. */
+/*
+ * One focus treatment for the whole library: a soft ring in the brand colour
+ * rather than a hard outline, and keyboard-only so pointer users never see it.
+ */
 [class^='i-']:focus-visible,
 [class*=' i-']:focus-visible {
-  outline: var(--i-focus-ring-width) solid var(--i-color-brand);
-  outline-offset: var(--i-focus-ring-offset);
-  border-radius: var(--i-radius-m);
+  outline: none;
+  box-shadow: 0 0 0 var(--i-focus-ring-width) var(--i-color-ring);
+  border-radius: var(--i-radius-s);
+  position: relative;
+  z-index: 1;
+}
+
+/* Text rendering: crisper stems on dark grounds, tabular digits where they line up. */
+[class^='i-'],
+[class*=' i-'] {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @media (prefers-reduced-motion: reduce) {
   [class^='i-'],
-  [class*=' i-'] {
+  [class*=' i-'],
+  [class^='i-']::before,
+  [class^='i-']::after {
     transition-duration: 1ms !important;
     animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
   }
 }

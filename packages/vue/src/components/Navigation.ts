@@ -35,6 +35,9 @@ export const Tabs = defineComponent({
         },
       });
       const active = props.items.find((item) => item.value === state.value.value);
+      // A tab strip used purely as a control (a toolbar switch) has no panel at
+      // all; rendering an empty one would add a stray tab stop.
+      const panel = active ? (slots[active.value]?.() ?? slots.default?.(active)) : null;
 
       return h('div', toProps(behavior.root), [
         h(
@@ -42,7 +45,7 @@ export const Tabs = defineComponent({
           toProps(behavior.list),
           props.items.map((item, index) => h('button', toProps(behavior.tab(item, index)), item.label ?? item.value)),
         ),
-        active ? h('div', toProps(behavior.panel(active.value)), slots[active.value]?.() ?? slots.default?.(active)) : null,
+        active && panel != null ? h('div', toProps(behavior.panel(active.value)), panel) : null,
       ]);
     };
   },

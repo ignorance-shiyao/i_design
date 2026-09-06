@@ -1,5 +1,5 @@
 import { useTextareaBehavior } from '@i-design/core';
-import { defineComponent, h, nextTick, ref, watch, type PropType } from 'vue';
+import { defineComponent, h, nextTick, onMounted, ref, watch, type PropType } from 'vue';
 import { toProps, useControlled } from '../utils.js';
 import { useConfig } from './ConfigProvider.js';
 
@@ -29,6 +29,9 @@ export const Textarea = defineComponent({
     const state = useControlled(() => props.modelValue, props.defaultValue);
     const el = ref<HTMLTextAreaElement | null>(null);
 
+    let measure: ((scrollHeight: number, lineHeight: number) => number) | null = null;
+    onMounted(() => measure && resize(measure));
+
     const resize = (autosizeHeight: (scrollHeight: number, lineHeight: number) => number): void => {
       const node = el.value;
       if (!props.autosize || !node) return;
@@ -52,6 +55,7 @@ export const Textarea = defineComponent({
         },
       });
 
+      measure = behavior.autosizeHeight;
       watch(() => state.value.value, () => nextTick(() => resize(behavior.autosizeHeight)), { flush: 'post' });
 
       return h('div', toProps(behavior.root), [

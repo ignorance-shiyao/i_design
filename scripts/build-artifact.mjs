@@ -26,7 +26,7 @@ const body = html
   .replace(/<script[^>]*><\/script>/g, '')
   .trim();
 
-const page = `<title>i-design 组件预览</title>
+const page = `<title>i-design 组件文档</title>
 <style>
 ${css}
 /* Artifact host: the page owns the full viewport and paints its own ground. */

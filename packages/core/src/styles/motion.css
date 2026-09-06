@@ -1,0 +1,57 @@
+/*
+ * Motion presets. Each preset defines a resting state plus `--enter` / `--exit`
+ * states; the core state machine decides which class is on the element, so the
+ * timing is identical in React and Vue.
+ */
+[class^='i-motion-'] {
+  transition:
+    opacity var(--i-duration-base) var(--i-ease-standard),
+    transform var(--i-duration-base) var(--i-ease-standard),
+    grid-template-rows var(--i-duration-base) var(--i-ease-standard);
+}
+
+.i-motion-fade--enter,
+.i-motion-fade--exit { opacity: 0; }
+
+.i-motion-scale { transform: none; opacity: 1; }
+.i-motion-scale--enter,
+.i-motion-scale--exit { opacity: 0; transform: scale(0.94); }
+.i-motion-scale { transition-timing-function: var(--i-ease-emphasized); }
+
+.i-motion-slide-up--enter,
+.i-motion-slide-up--exit { opacity: 0; transform: translateY(12px); }
+.i-motion-slide-down--enter,
+.i-motion-slide-down--exit { opacity: 0; transform: translateY(-12px); }
+.i-motion-slide-start--enter,
+.i-motion-slide-start--exit { opacity: 0; transform: translateX(-16px); }
+.i-motion-slide-end--enter,
+.i-motion-slide-end--exit { opacity: 0; transform: translateX(16px); }
+[dir='rtl'] .i-motion-slide-start--enter,
+[dir='rtl'] .i-motion-slide-start--exit { transform: translateX(16px); }
+[dir='rtl'] .i-motion-slide-end--enter,
+[dir='rtl'] .i-motion-slide-end--exit { transform: translateX(-16px); }
+
+/*
+ * Height collapse without measuring: a 0fr → 1fr grid row animates to the
+ * content's natural height, so no JS ever reads scrollHeight.
+ */
+.i-motion-collapse { display: grid; grid-template-rows: 1fr; }
+.i-motion-collapse > * { min-block-size: 0; overflow: hidden; }
+.i-motion-collapse--enter,
+.i-motion-collapse--exit { grid-template-rows: 0fr; opacity: 0; }
+
+/* Ambient utilities the docs and empty states use. */
+.i-motion-pulse { animation: i-pulse 2.4s var(--i-ease-standard) infinite; }
+@keyframes i-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+.i-motion-shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--i-color-bg-active) 30%,
+    var(--i-color-bg-muted) 48%,
+    var(--i-color-bg-active) 62%
+  );
+  background-size: 300% 100%;
+  animation: i-shimmer 1.6s var(--i-ease-linear) infinite;
+}
+@keyframes i-shimmer { from { background-position: 200% 0; } to { background-position: -100% 0; } }

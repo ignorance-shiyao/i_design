@@ -1,7 +1,7 @@
 {
   "name": "i-design",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "i-design \u2014 a cross-framework (React + Vue) component library with a shared headless core and one design-token system.",
   "packageManager": "pnpm@10.33.0",
   "scripts": {

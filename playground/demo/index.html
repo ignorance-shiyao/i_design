@@ -3,18 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>i-design — 同一套组件，React 与 Vue 并排运行</title>
+    <title>i-design 组件文档</title>
   </head>
   <body>
-    <header class="page-header">
-      <h1>i-design</h1>
-      <p>下面两栏是<strong>同一套设计令牌、同一份样式、同一份行为逻辑</strong>，左边由 React 渲染，右边由 Vue 渲染。</p>
-      <div id="controls"></div>
-    </header>
-    <main class="page-grid">
-      <section><h2>React</h2><div id="react-root"></div></section>
-      <section><h2>Vue</h2><div id="vue-root"></div></section>
-    </main>
-    <script type="module" src="/src/main.ts"></script>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -47,13 +47,18 @@ React 与 Vue 只是两层薄薄的“绑定层”。
    不会出现「Tabs 支持方向键、Radio 不支持」这种常见的不一致。
 10. **表单校验引擎与框架解耦**：规则是纯数据（可以来自配置或服务端），
     `FormStore` 是一个可订阅的小 store，两个框架各自只接一根线，校验语义完全一致。
+11. **动效是状态机而不是框架特性**：`createTransitionController` 决定相位与时序，
+    组件只负责挂载/卸载，所以 React 与 Vue 的进出场时序完全一致；折叠动画用 `0fr → 1fr`
+    的 grid 过渡，不需要 JS 去测 `scrollHeight`。
+12. **AI 会话组件把最容易做错的三件事做对了**：中文输入法候选期间按 Enter 不误发、
+    流式文本按可读速度匀速显示（与网络分片大小解耦）、用户往上翻历史时不被强制拉回底部。
 
 ## 快速开始
 
 ```bash
 pnpm install
 pnpm build          # 构建 4 个包
-pnpm test           # 76 个测试：核心逻辑 / 行为与键盘 / 表格与校验 / 跨框架一致性 / 交互与无障碍
+pnpm test           # 97 个测试：核心逻辑 / 键盘与动效 / 表格与校验 / AI 会话 / 跨框架一致性
 pnpm --filter @i-design/playground dev   # 打开 React 与 Vue 并排的演示页
 ```
 
@@ -89,8 +94,12 @@ app.use(IDesign);
 
 https://claude.ai/code/artifact/1b6e11f5-e3eb-44e3-9db3-b8d558666354
 
-左右两栏分别由 React 和 Vue 渲染，可实时切换主题 / 密度 / 语言 / 品牌色。
-重新生成预览页：`pnpm preview:build`（把 playground 打包成单个自包含 HTML）。
+一个带侧边导航的文档站：每个组件一份演示 + React / Vue 用法代码 + API 表格，
+可实时切换主题 / 密度 / 语言 / 品牌色。文档站本身就是用 i-design 搭的。
+重新生成：`pnpm preview:build`（打包成单个自包含 HTML）。
+
+> 演示只做一套。React 与 Vue 的差异只出现在「用法」的代码切换里——
+> 两端产出的 DOM 本就相同（由一致性测试强制保证），演示两遍没有意义。
 
 ## 当前组件（32 个，React / Vue 双端一致）
 
@@ -108,6 +117,12 @@ Avatar（含 CJK 首字缩写）、Badge、Progress（线形/环形）、Skeleto
 Pagination（省略号算法）、Steps、Breadcrumb
 
 **反馈**：Alert、Dialog、Drawer（四个方向，RTL 自动镜像）、Tooltip / Popover、message（命令式）
+
+**动效**：Transition（7 种预设，相位状态机在 core）、Stagger、Carousel（拖拽 / 键盘 / 自动播放）
+
+**AI 会话**：Chat、ChatMessage（4 种状态含流式光标）、PromptInput（输入法安全的 Enter 发送）、
+TypingIndicator、ThinkingBlock、CodeBlock、Suggestions，以及 `createStreamController`（把网络分片节流成匀速显示）
+与 `isAtBottom`（读历史时不强制拉回底部）
 
 | 能力 | 说明 |
 | --- | --- |
