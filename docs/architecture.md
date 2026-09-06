@@ -1,5 +1,22 @@
 # 架构与取舍
 
+## 令牌的两层结构
+
+```
+packages/tokens/src/palette.ts    基元：RGB 三元组
+                                  --i-brand-5: 65, 105, 239;
+packages/tokens/src/semantic.ts   语义：rgba(var(--i-brand-5), .08)
+```
+
+为什么不直接存十六进制？因为三元组可以和 alpha 组合。`--i-color-text-secondary`
+是 `rgba(var(--i-grey-9), .66)`，`--i-color-border` 是同一个灰的 `.11`，
+`--i-color-bg-hover` 是 `.05`——它们天然属于同一色系，不会各自漂移。
+深色模式只需要换三元组和几个 alpha，而不是重新挑几十个颜色。
+运行时换品牌色也因此变成设置三个变量的事。
+
+代价是：`resolveTokens()` 返回的是 `rgba(var(...))` 引用而不是真实颜色。
+需要真实值时（比如喂给 canvas 或图表库）用 `readComputedTokens()`，它从 DOM 读计算值。
+
 ## 分层
 
 ```

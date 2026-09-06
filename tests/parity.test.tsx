@@ -275,9 +275,12 @@ describe('React / Vue DOM parity', () => {
     expect(reactHtml(<R.Suggestions items={['总结这段代码', '写单元测试']} />)).toBe(
       vueHtml(V.Suggestions, { items: ['总结这段代码', '写单元测试'] }),
     );
-    expect(reactHtml(<R.CodeBlock language="ts" code="const a = 1;" />)).toBe(
-      vueHtml(V.CodeBlock, { language: 'ts', code: 'const a = 1;' }),
-    );
+    // Highlighted output must match token for token, not just as raw text.
+    const snippet = `import { Button } from '@i-design/react'; // 用法\nconst n = 42;`;
+    const reactCode = reactHtml(<R.CodeBlock language="tsx" code={snippet} />);
+    expect(reactCode).toContain('i-code-block__token--keyword');
+    expect(reactCode).toContain('i-code-block__token--comment');
+    expect(reactCode).toBe(vueHtml(V.CodeBlock, { language: 'tsx', code: snippet }));
     expect(reactHtml(<R.PromptInput value="问点什么" placeholder="发消息" />)).toBe(
       vueHtml(V.PromptInput, { modelValue: '问点什么', placeholder: '发消息' }),
     );

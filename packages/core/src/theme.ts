@@ -50,7 +50,26 @@ export function applyTheme(config: Partial<ThemeConfig> = {}, target?: HTMLEleme
   for (const [name, value] of Object.entries(themeStyle(config))) el.style.setProperty(name, value);
 }
 
-/** Resolves the concrete token values, e.g. to hand to a canvas or a chart lib. */
+/**
+ * Reads the *computed* value of every semantic token from a live element.
+ *
+ * Token colours are `rgba(var(--i-…), a)` references, so they only resolve
+ * inside a document. This is the honest way to hand real colours to a canvas or
+ * a charting library; `computedTokens()` returns the references themselves.
+ */
+export function readComputedTokens(target?: HTMLElement): Record<string, string> {
+  if (!isBrowser) return {};
+  const el = target ?? document.documentElement;
+  const styles = getComputedStyle(el);
+  const out: Record<string, string> = {};
+  for (const key of Object.keys(resolveTokens('light'))) {
+    const value = styles.getPropertyValue(`--i-${key}`).trim();
+    if (value) out[key] = value;
+  }
+  return out;
+}
+
+/** The token *references* for a scheme; see `readComputedTokens` for real values. */
 export function computedTokens(config: Partial<ThemeConfig> = {}): Record<string, string> {
   const { mode, density, tokens } = { ...defaultTheme, ...config };
   const scheme: ColorScheme =

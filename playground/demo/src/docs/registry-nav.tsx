@@ -97,6 +97,11 @@ export const navEntries: DocEntry[] = [
     cn: '标签页',
     category: '导航',
     description: '三种视觉变体。tab 与 panel 之间的 aria-controls / aria-labelledby 配对由 core 生成，方向键切换来自共享的 roving 引擎。',
+    whenToUse: [
+      '同一层级的内容分组切换，且内容之间相互独立。',
+      '内容有先后顺序或依赖关系时用 Steps，不要用 Tabs。',
+      '工具栏里的二选一 / 三选一开关可以用 variant="segment"，此时不渲染面板。',
+    ],
     demos: [
       {
         caption: 'segment / line / card',
@@ -155,6 +160,11 @@ export const navEntries: DocEntry[] = [
     cn: '浮层与动效',
     category: '导航',
     description: 'Dialog 与 Drawer 共享同一套行为：焦点锁、引用计数的滚动锁、Esc 关闭、遮罩点击。传送到 body 后会重新贴上主题属性，深色应用不会弹出亮色弹窗。Transition 由 core 的相位状态机驱动，两端时序一致。',
+    whenToUse: [
+      'Dialog 用于需要用户确认、且必须打断当前流程的操作。',
+      'Drawer 用于不打断主流程的补充信息或设置，内容较长时优先于 Dialog。',
+      '轻量结果反馈用 message，不要为"保存成功"弹一个 Dialog。',
+    ],
     demos: [
       {
         caption: '浮层与过渡',
@@ -198,6 +208,11 @@ message.success('操作成功');`,
     cn: '轮播图',
     category: '导航',
     description: '指针拖拽、键盘方向键、自动播放（悬停与聚焦时暂停）。轨道只用 transform 位移，保持在合成层上；非当前页的幻灯片会被标记 aria-hidden 与 inert，不会进入 Tab 顺序。',
+    whenToUse: [
+      '同一位置轮流展示多张等价内容，如首页banner、图集。',
+      '关键信息不要只放在非首屏的幻灯片里——用户不一定会等到它出现。',
+      '开启 autoplay 时必须允许暂停，组件已在悬停与聚焦时自动暂停。',
+    ],
     demos: [
       {
         caption: '拖拽 / 键盘 / 自动播放',

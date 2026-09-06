@@ -1,4 +1,5 @@
 import { createBem, cx } from '../classnames.js';
+import { highlight, tokenClass } from '../highlight.js';
 import { spec, type ElementSpec } from './types.js';
 
 /**
@@ -260,9 +261,12 @@ export function useThinkingBlock(options: { open: boolean; id: string; label?: s
 
 const codeBem = createBem('code-block');
 
-export function useCodeBlock(options: { language?: string; copied?: boolean; onCopy?: () => void }) {
-  const { language, copied, onCopy } = options;
+export function useCodeBlock(options: { code?: string; language?: string; copied?: boolean; onCopy?: () => void }) {
+  const { code = '', language, copied, onCopy } = options;
   return {
+    /** Tokenised source; both adapters render these spans identically. */
+    tokens: highlight(code, language ?? 'text'),
+    tokenClass,
     root: spec(codeBem(), { 'data-language': language }),
     header: spec(codeBem('header')),
     pre: spec(codeBem('pre'), { tabindex: 0 }),

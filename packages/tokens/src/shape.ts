@@ -13,18 +13,20 @@ export const shapeTokens: SemanticTokens = {
   'font-family-mono':
     "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace",
 
-  'font-size-xs': '11px',
+  /* 12 / 14 body, 16→32 headings — the scale Semi settled on, and it reads well
+     for CJK, where 13px stems get muddy. */
+  'font-size-xs': '12px',
   'font-size-s': '12px',
-  'font-size-m': '13px',
-  'font-size-l': '15px',
-  'font-size-xl': '18px',
-  'font-size-2xl': '22px',
-  'font-size-3xl': '28px',
+  'font-size-m': '14px',
+  'font-size-l': '16px',
+  'font-size-xl': '20px',
+  'font-size-2xl': '24px',
+  'font-size-3xl': '32px',
 
   'font-weight-regular': '400',
   'font-weight-medium': '500',
-  'font-weight-semibold': '580',
-  'font-weight-bold': '650',
+  'font-weight-semibold': '600',
+  'font-weight-bold': '600',
 
   'line-height-tight': '1.25',
   'line-height-snug': '1.4',
@@ -36,22 +38,24 @@ export const shapeTokens: SemanticTokens = {
   'tracking-wide': '0.02em',
   'tracking-caps': '0.06em',
 
-  'radius-xs': '4px',
-  'radius-s': '6px',
-  'radius-m': '8px',
+  /* Tight radii: 3 / 6 / 12. Large soft corners make dense UI look inflated. */
+  'radius-xs': '2px',
+  'radius-s': '3px',
+  'radius-m': '6px',
   'radius-l': '12px',
-  'radius-xl': '16px',
-  'radius-round': '999px',
+  'radius-xl': '12px',
+  'radius-round': '9999px',
 
   'border-width': '1px',
   'focus-ring-width': '3px',
   'focus-ring-offset': '1px',
 
+  'space-0': '2px',
   'space-1': '4px',
   'space-2': '8px',
   'space-3': '12px',
   'space-4': '16px',
-  'space-5': '24px',
+  'space-5': '20px',
   'space-6': '32px',
   'space-7': '48px',
   'space-8': '64px',
@@ -87,27 +91,28 @@ export type Density = 'compact' | 'default' | 'loose';
 
 export const densityTokens: Record<Density, SemanticTokens> = {
   compact: {
-    'control-height-s': '24px',
-    'control-height-m': '30px',
-    'control-height-l': '36px',
-    'control-padding-x': '10px',
+    'control-height-s': '20px',
+    'control-height-m': '28px',
+    'control-height-l': '34px',
+    'control-padding-x': '8px',
     'control-gap': '6px',
     'block-padding': '12px',
   },
+  /* 24 / 32 / 40 — the control rhythm most enterprise systems converge on. */
   default: {
-    'control-height-s': '28px',
-    'control-height-m': '36px',
-    'control-height-l': '44px',
-    'control-padding-x': '14px',
+    'control-height-s': '24px',
+    'control-height-m': '32px',
+    'control-height-l': '40px',
+    'control-padding-x': '12px',
     'control-gap': '8px',
     'block-padding': '16px',
   },
   loose: {
-    'control-height-s': '34px',
-    'control-height-m': '44px',
-    'control-height-l': '52px',
-    'control-padding-x': '18px',
+    'control-height-s': '28px',
+    'control-height-m': '40px',
+    'control-height-l': '48px',
+    'control-padding-x': '16px',
     'control-gap': '10px',
-    'block-padding': '24px',
+    'block-padding': '20px',
   },
 };

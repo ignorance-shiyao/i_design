@@ -62,9 +62,9 @@
   padding: 0;
   border: none;
   border-radius: var(--i-radius-round);
-  background: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 1px 2px rgba(16, 20, 28, 0.4);
+  background: rgba(var(--i-white), 0.5);
+  box-shadow: 0 1px 2px rgba(var(--i-black), 0.35);
   cursor: pointer;
   transition: inline-size var(--i-duration-base) var(--i-ease-emphasized), background-color var(--i-duration-base) var(--i-ease-standard);
 }
-.i-carousel__dot--active { inline-size: 18px; background: #fff; }
+.i-carousel__dot--active { inline-size: 18px; background: rgb(var(--i-white)); }

@@ -9,6 +9,8 @@ export interface PropRow {
 
 export interface Demo {
   caption: string;
+  /** One line under the demo title, explaining what the example shows. */
+  hint?: string;
   render: () => ReactNode;
   /** Usage in each framework — the only place the two APIs are shown apart. */
   react: string;
@@ -21,6 +23,8 @@ export interface DocEntry {
   cn: string;
   category: string;
   description: string;
+  /** Semi-style "when to use" bullets — the question docs most often skip. */
+  whenToUse?: string[];
   demos: Demo[];
   props?: PropRow[];
 }

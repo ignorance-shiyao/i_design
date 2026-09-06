@@ -97,6 +97,7 @@ export interface CodeBlockProps {
 export function CodeBlock({ code, language = 'text', className }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
   const behavior = useCodeBlock({
+    code,
     language,
     copied,
     onCopy: () => {
@@ -113,7 +114,17 @@ export function CodeBlock({ code, language = 'text', className }: CodeBlockProps
         <button {...toProps(behavior.copy)}>{copied ? '已复制' : '复制'}</button>
       </div>
       <pre {...toProps(behavior.pre)}>
-        <code>{code}</code>
+        <code>
+          {behavior.tokens.map((token, index) =>
+            token.type === 'plain' ? (
+              token.value
+            ) : (
+              <span key={index} className={behavior.tokenClass(token.type)}>
+                {token.value}
+              </span>
+            ),
+          )}
+        </code>
       </pre>
     </div>
   );

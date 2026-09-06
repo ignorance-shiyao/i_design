@@ -121,6 +121,11 @@ export const aiEntries: DocEntry[] = [
     category: 'AI 会话',
     description:
       'AI 对话界面里最容易做错的几件事——中文输入法候选期间按 Enter 误发、流式文本一块块跳出来、用户往上翻历史时被强制拉回底部——都在 core 里解决了一次，两端共用。',
+    whenToUse: [
+      '任何 AI 对话界面：助手、客服、问答、代码生成。',
+      '回答是流式返回时，用 createStreamController 把网络分片节流成匀速显示，不要直接把 chunk 塞进 state。',
+      '会话很长时依赖内置的滚动跟随：用户往上翻阅读历史，新消息不该把他拽回底部。',
+    ],
     demos: [
       {
         caption: '完整会话（流式回答为本地模拟）',

@@ -286,3 +286,36 @@
 .i-chat { display: flex; flex-direction: column; min-block-size: 0; }
 .i-chat__scroll { flex: 1; overflow-y: auto; scroll-behavior: smooth; padding-inline: var(--i-space-1); }
 .i-chat__footer { padding-block-start: var(--i-space-3); }
+
+/*
+ * Syntax colours. Hues are pulled from the primitive layer so they shift with
+ * the theme instead of being a second, unmanaged palette.
+ */
+.i-code-block__token--comment { color: var(--i-color-text-tertiary); font-style: italic; }
+.i-code-block__token--keyword { color: rgba(var(--i-brand-5), 1); font-weight: var(--i-font-weight-medium); }
+.i-code-block__token--string { color: rgba(var(--i-green-6), 1); }
+.i-code-block__token--number { color: rgba(var(--i-amber-6), 1); }
+.i-code-block__token--tag { color: rgba(var(--i-red-6), 1); }
+.i-code-block__token--attr { color: rgba(var(--i-amber-7), 1); }
+.i-code-block__token--property { color: rgba(var(--i-brand-6), 1); }
+.i-code-block__token--function { color: rgba(var(--i-brand-7), 1); }
+.i-code-block__token--punctuation { color: var(--i-color-text-tertiary); }
+.i-code-block__token--operator { color: var(--i-color-text-secondary); }
+
+[data-i-theme='dark'] .i-code-block__token--keyword { color: rgba(var(--i-brand-3), 1); }
+[data-i-theme='dark'] .i-code-block__token--string { color: rgba(var(--i-green-3), 1); }
+[data-i-theme='dark'] .i-code-block__token--number { color: rgba(var(--i-amber-3), 1); }
+[data-i-theme='dark'] .i-code-block__token--tag { color: rgba(var(--i-red-3), 1); }
+[data-i-theme='dark'] .i-code-block__token--attr { color: rgba(var(--i-amber-4), 1); }
+[data-i-theme='dark'] .i-code-block__token--property { color: rgba(var(--i-brand-3), 1); }
+[data-i-theme='dark'] .i-code-block__token--function { color: rgba(var(--i-brand-2), 1); }
+
+@media (prefers-color-scheme: dark) {
+  [data-i-theme='auto'] .i-code-block__token--keyword { color: rgba(var(--i-brand-3), 1); }
+  [data-i-theme='auto'] .i-code-block__token--string { color: rgba(var(--i-green-3), 1); }
+  [data-i-theme='auto'] .i-code-block__token--number { color: rgba(var(--i-amber-3), 1); }
+  [data-i-theme='auto'] .i-code-block__token--tag { color: rgba(var(--i-red-3), 1); }
+  [data-i-theme='auto'] .i-code-block__token--attr { color: rgba(var(--i-amber-4), 1); }
+  [data-i-theme='auto'] .i-code-block__token--property { color: rgba(var(--i-brand-3), 1); }
+  [data-i-theme='auto'] .i-code-block__token--function { color: rgba(var(--i-brand-2), 1); }
+}

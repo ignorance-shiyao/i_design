@@ -6,6 +6,7 @@ export * from './i18n.js';
 export * from './message.js';
 export * from './validation.js';
 export * from './motion.js';
+export * from './highlight.js';
 export * from './dom/focus.js';
 export * from './dom/position.js';
 export * from './behaviors/types.js';

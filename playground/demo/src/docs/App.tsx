@@ -1,60 +1,99 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Alert, Button, CodeBlock, ConfigProvider, Space, Table, Tabs, Tag,
+  Button, CodeBlock, ConfigProvider, Empty, Input, Table, Tabs, Tag,
   applyTheme, type Density, type LocaleName, type ThemeMode,
 } from '@i-design/react';
 import { basicEntries } from './registry-basic.js';
 import { formEntries } from './registry-form.js';
 import { navEntries } from './registry-nav.js';
 import { aiEntries } from './registry-ai.js';
-import type { DocEntry } from './types.js';
+import { TokensPage, TOKEN_ANCHORS } from './TokensPage.js';
+import type { DocEntry, Demo } from './types.js';
 
 const ENTRIES: DocEntry[] = [...basicEntries, ...formEntries, ...navEntries, ...aiEntries];
 const CATEGORIES = ['通用', '数据录入', '导航', 'AI 会话'];
 
 const BRANDS = [
-  { name: '钴蓝', base: '#4169ef', hover: '#6b90fb', active: '#2f4fd0' },
-  { name: '墨绿', base: '#12b76a', hover: '#32d583', active: '#039855' },
-  { name: '紫罗兰', base: '#7c5cf5', hover: '#9b83f8', active: '#6541e0' },
-  { name: '赤陶', base: '#dc6803', hover: '#f79009', active: '#b54708' },
+  { name: '钴蓝', triplet: '65, 105, 239', hover: '107, 144, 251', active: '47, 79, 208' },
+  { name: '墨绿', triplet: '18, 183, 106', hover: '50, 213, 131', active: '3, 152, 85' },
+  { name: '紫罗兰', triplet: '124, 92, 245', hover: '155, 131, 248', active: '101, 65, 224' },
+  { name: '赤陶', triplet: '220, 104, 3', hover: '247, 144, 9', active: '181, 71, 8' },
 ];
 
-/** Usage block: the ONE place where the two frameworks are shown side by side. */
-function Usage({ react, vue }: { react: string; vue: string }) {
+type Page = 'overview' | 'tokens' | string;
+
+/** A demo card: stage on top, collapsible source underneath. */
+function DemoCard({ demo, index }: { demo: Demo; index: number }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Tabs
-      variant="segment"
-      size="s"
-      defaultValue="react"
-      items={[{ value: 'react', label: 'React' }, { value: 'vue', label: 'Vue' }]}
-    >
-      {(item) => <CodeBlock language={item.value === 'react' ? 'tsx' : 'vue'} code={item.value === 'react' ? react : vue} />}
-    </Tabs>
+    <div className="demo" id={`demo-${index}`}>
+      <div className="demo__head">
+        <span className="demo__title">{demo.caption}</span>
+        {demo.hint && <span className="demo__hint">{demo.hint}</span>}
+      </div>
+      <div className="demo__stage">{demo.render()}</div>
+      <div className="demo__bar">
+        <button className="demo__toggle" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
+          {/* A rotated chevron rather than ▾/▸: those glyphs collapse into a dash at small sizes. */}
+          <span className={`demo__chevron${open ? ' demo__chevron--open' : ''}`} aria-hidden="true">›</span>
+          {open ? '收起代码' : '展开代码'}
+        </button>
+      </div>
+      {open && (
+        <div className="demo__code">
+          <Tabs
+            variant="segment"
+            size="s"
+            defaultValue="react"
+            items={[{ value: 'react', label: 'React' }, { value: 'vue', label: 'Vue' }]}
+          >
+            {(item) => (
+              <CodeBlock
+                language={item.value === 'react' ? 'tsx' : 'vue'}
+                code={item.value === 'react' ? demo.react : demo.vue}
+              />
+            )}
+          </Tabs>
+        </div>
+      )}
+    </div>
   );
 }
 
-function Section({ entry }: { entry: DocEntry }) {
+function ComponentPage({ entry }: { entry: DocEntry }) {
   return (
-    <section className="section" id={entry.id}>
-      <div className="section__head">
-        <h2 className="section__title">{entry.cn}</h2>
-        <span className="section__en">{entry.name}</span>
+    <>
+      <div className="page__head">
+        <h1 className="page__title">
+          {entry.cn} <span className="page__en">{entry.name}</span>
+        </h1>
+        <p className="page__lede">{entry.description}</p>
       </div>
-      <p className="section__desc">{entry.description}</p>
 
-      {entry.demos.map((demo) => (
-        <div className="demo" key={demo.caption}>
-          <div className="demo__caption">{demo.caption}</div>
-          <div className="demo__stage">{demo.render()}</div>
-          <div className="demo__usage">
-            <Usage react={demo.react} vue={demo.vue} />
-          </div>
-        </div>
-      ))}
+      {entry.whenToUse && (
+        <section className="section" id="when">
+          <h2 className="section__title">何时使用</h2>
+          <ul className="bullets">
+            {entry.whenToUse.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="section" id="demos">
+        <h2 className="section__title">代码演示</h2>
+        <p className="section__desc">
+          每个组件只演示一次。React 与 Vue 的差异在「展开代码」里切换——两端渲染出的 DOM 本就相同。
+        </p>
+        {entry.demos.map((demo, index) => (
+          <DemoCard demo={demo} index={index} key={demo.caption} />
+        ))}
+      </section>
 
       {entry.props && (
-        <div className="api">
-          <div className="api__title">API</div>
+        <section className="section" id="api">
+          <h2 className="section__title">API</h2>
           <Table
             size="s"
             rowKey={(row) => String(row.name)}
@@ -67,14 +106,92 @@ function Section({ entry }: { entry: DocEntry }) {
             data={entry.props as unknown as Record<string, unknown>[]}
             renderCell={(column, row) =>
               column.key === 'name' ? <code>{String(row.name)}</code>
-              : column.key === 'type' ? <code>{String(row.type)}</code>
+              : column.key === 'type' ? <code className="api__type">{String(row.type)}</code>
               : column.key === 'default' ? (row.default ? <code>{String(row.default)}</code> : '—')
               : undefined
             }
           />
-        </div>
+        </section>
       )}
-    </section>
+    </>
+  );
+}
+
+function Overview({ onNavigate }: { onNavigate: (page: Page) => void }) {
+  return (
+    <>
+      <div className="page__head">
+        <div className="page__eyebrow">跨框架组件库</div>
+        <h1 className="page__title page__title--hero">一套设计令牌与行为逻辑，同时驱动 React 与 Vue</h1>
+        <p className="page__lede">
+          设计令牌、样式、交互行为、无障碍语义只写一份，放在 <code>@i-design/core</code>；
+          React 与 Vue 各自只有一层约 15 行的属性翻译。同样的 props 必然产出同样的 DOM——
+          这条约束由跨框架一致性测试强制保证。
+        </p>
+        <div className="stats">
+          {[
+            { value: '32', label: '组件（双端一致）' },
+            { value: '106', label: '测试全绿' },
+            { value: '0', label: '运行时依赖' },
+            { value: '2', label: '层令牌：基元 + 语义' },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <div className="stats__value">{stat.value}</div>
+              <div className="stats__label">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <section className="section">
+        <h2 className="section__title">架构</h2>
+        <div className="arch">
+          <div className="arch__row">
+            <code className="arch__name">@i-design/tokens</code>
+            <span className="arch__desc">RGB 三元组基元 + 语义令牌，编译为 CSS 变量</span>
+          </div>
+          <div className="arch__link" aria-hidden="true" />
+          <div className="arch__row">
+            <code className="arch__name">@i-design/core</code>
+            <span className="arch__desc">无头行为、类名、无障碍语义、定位、动效状态机、语法高亮、样式表</span>
+          </div>
+          <div className="arch__link arch__link--split" aria-hidden="true" />
+          <div className="arch__pair">
+            <div className="arch__row">
+              <code className="arch__name">@i-design/react</code>
+              <span className="arch__desc">约 15 行 toProps()：class → className，click → onClick</span>
+            </div>
+            <div className="arch__row">
+              <code className="arch__name">@i-design/vue</code>
+              <span className="arch__desc">约 15 行 toProps()：同一份 ElementSpec，换一种写法</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2 className="section__title">安装</h2>
+        <CodeBlock language="bash" code={`pnpm add @i-design/react   # 或 @i-design/vue\n# 样式与令牌一并引入\n# import '@i-design/core/styles';`} />
+      </section>
+
+      <section className="section">
+        <h2 className="section__title">从这里开始</h2>
+        <div className="cards">
+          <button className="cards__item" onClick={() => onNavigate('tokens')}>
+            <div className="cards__title">设计令牌</div>
+            <div className="cards__desc">两层令牌结构、色板、圆角、阴影、密度</div>
+          </button>
+          <button className="cards__item" onClick={() => onNavigate('button')}>
+            <div className="cards__title">组件</div>
+            <div className="cards__desc">32 个组件的演示、双端用法与 API</div>
+          </button>
+          <button className="cards__item" onClick={() => onNavigate('chat')}>
+            <div className="cards__title">AI 会话</div>
+            <div className="cards__desc">流式、输入法安全发送、滚动跟随</div>
+          </button>
+        </div>
+      </section>
+    </>
   );
 }
 
@@ -86,176 +203,150 @@ export function App() {
   const [density, setDensity] = useState<Density>('default');
   const [locale, setLocale] = useState<LocaleName>('zh-CN');
   const [brand, setBrand] = useState(BRANDS[0]!);
-  const [active, setActive] = useState(ENTRIES[0]!.id);
+  const [page, setPage] = useState<Page>('overview');
+  const [filter, setFilter] = useState('');
 
-  // Theme lives on <html> so portalled dialogs, drawers and toasts inherit it.
   useEffect(() => { applyTheme({ mode, density }); }, [mode, density]);
+
+  // Rebranding is three triplets — the whole point of the primitive layer.
   useEffect(() => {
     const root = document.documentElement.style;
-    root.setProperty('--i-color-brand', brand.base);
-    root.setProperty('--i-color-brand-hover', brand.hover);
-    root.setProperty('--i-color-brand-active', brand.active);
-    root.setProperty('--i-color-ring', `${brand.base}55`);
+    root.setProperty('--i-brand-5', brand.triplet);
+    root.setProperty('--i-brand-4', brand.hover);
+    root.setProperty('--i-brand-6', brand.active);
   }, [brand]);
 
-  // Scrollspy for the sidebar.
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (records) => {
-        const visible = records.filter((record) => record.isIntersecting);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      { rootMargin: '-72px 0px -70% 0px' },
-    );
-    for (const entry of ENTRIES) {
-      const node = document.getElementById(entry.id);
-      if (node) observer.observe(node);
-    }
-    return () => observer.disconnect();
-  }, []);
+  useEffect(() => { window.scrollTo({ top: 0 }); }, [page]);
 
-  const grouped = useMemo(
-    () => CATEGORIES.map((category) => ({ category, items: ENTRIES.filter((entry) => entry.category === category) })),
-    [],
-  );
+  const entry = ENTRIES.find((item) => item.id === page);
+  const groups = useMemo(() => {
+    const needle = filter.trim().toLowerCase();
+    return CATEGORIES.map((category) => ({
+      category,
+      items: ENTRIES.filter(
+        (item) =>
+          item.category === category &&
+          (needle === '' || item.cn.includes(needle) || item.name.toLowerCase().includes(needle)),
+      ),
+    })).filter((group) => group.items.length > 0);
+  }, [filter]);
+
+  const anchors = page === 'tokens'
+    ? TOKEN_ANCHORS
+    : entry
+      ? [
+          ...(entry.whenToUse ? [{ id: 'when', label: '何时使用' }] : []),
+          { id: 'demos', label: '代码演示' },
+          ...(entry.props ? [{ id: 'api', label: 'API' }] : []),
+        ]
+      : [];
 
   return (
     <ConfigProvider mode={mode} density={density} locale={locale}>
-      <div className="site">
-        <aside className="site__sidebar">
-          <div className="site__brand">
-            <span className="site__mark">i</span>
-            <span>
-              <div className="site__wordmark">i-design</div>
-              <div className="site__version">v0.4.0 · React + Vue</div>
-            </span>
-          </div>
+      <header className="topbar">
+        <button className="topbar__brand" onClick={() => setPage('overview')}>
+          <span className="topbar__mark">i</span>
+          <span className="topbar__wordmark">i-design</span>
+          <span className="topbar__version">0.5.0</span>
+        </button>
 
-          <nav className="site__nav">
-            {grouped.map((group) => (
-              <div className="site__nav-group" key={group.category}>
-                <div className="site__nav-title">{group.category}</div>
-                {group.items.map((entry) => (
-                  <a
-                    key={entry.id}
-                    href={`#${entry.id}`}
-                    className={`site__nav-link${active === entry.id ? ' site__nav-link--active' : ''}`}
-                  >
-                    <span>{entry.cn}</span>
-                    <span className="site__nav-en">{entry.name.split(' / ')[0]}</span>
-                  </a>
-                ))}
-              </div>
+        <nav className="topbar__nav">
+          <button className={`topbar__link${page === 'overview' ? ' topbar__link--active' : ''}`} onClick={() => setPage('overview')}>
+            概览
+          </button>
+          <button className={`topbar__link${page === 'tokens' ? ' topbar__link--active' : ''}`} onClick={() => setPage('tokens')}>
+            设计
+          </button>
+          <button className={`topbar__link${entry ? ' topbar__link--active' : ''}`} onClick={() => setPage('button')}>
+            组件
+          </button>
+        </nav>
+
+        <div className="topbar__controls">
+          <Tabs size="s" variant="segment" value={mode} onChange={(value) => setMode(value as ThemeMode)}
+                items={[{ value: 'light', label: '浅' }, { value: 'dark', label: '深' }, { value: 'auto', label: '跟随' }]}>
+            {() => null}
+          </Tabs>
+          <Tabs size="s" variant="segment" value={density} onChange={(value) => setDensity(value as Density)}
+                items={[{ value: 'compact', label: '紧凑' }, { value: 'default', label: '默认' }, { value: 'loose', label: '宽松' }]}>
+            {() => null}
+          </Tabs>
+          <Tabs size="s" variant="segment" value={locale} onChange={(value) => setLocale(value as LocaleName)}
+                items={[{ value: 'zh-CN', label: '中' }, { value: 'en-US', label: 'EN' }, { value: 'ar-EG', label: 'AR' }]}>
+            {() => null}
+          </Tabs>
+          <span className="topbar__swatches">
+            {BRANDS.map((item) => (
+              <button
+                key={item.name}
+                title={item.name}
+                aria-label={item.name}
+                aria-pressed={brand.name === item.name}
+                className={`topbar__swatch${brand.name === item.name ? ' topbar__swatch--active' : ''}`}
+                style={{ background: `rgb(${item.triplet})` }}
+                onClick={() => setBrand(item)}
+              />
             ))}
-          </nav>
+          </span>
+        </div>
+      </header>
+
+      <div className="shell">
+        <aside className="sidebar">
+          <div className="sidebar__search">
+            <Input size="s" value={filter} onChange={setFilter} clearable placeholder="搜索组件" prefix={<span aria-hidden="true">⌕</span>} />
+          </div>
+          <button
+            className={`sidebar__link${page === 'tokens' ? ' sidebar__link--active' : ''}`}
+            onClick={() => setPage('tokens')}
+          >
+            <span>设计令牌</span>
+            <span className="sidebar__en">Tokens</span>
+          </button>
+          {groups.map((group) => (
+            <div className="sidebar__group" key={group.category}>
+              <div className="sidebar__title">{group.category}</div>
+              {group.items.map((item) => (
+                <button
+                  key={item.id}
+                  className={`sidebar__link${page === item.id ? ' sidebar__link--active' : ''}`}
+                  onClick={() => setPage(item.id)}
+                >
+                  <span>{item.cn}</span>
+                  <span className="sidebar__en">{item.name.split(' / ')[0]}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+          {groups.length === 0 && <Empty description="没有匹配的组件" />}
         </aside>
 
-        <main className="site__main">
-          <header className="site__header">
-            <strong style={{ fontSize: 'var(--i-font-size-m)' }}>组件文档</strong>
-            <div className="site__controls">
-              <div className="site__control">
-                <span className="site__control-label">主题</span>
-                <Tabs
-                  size="s"
-                  variant="segment"
-                  value={mode}
-                  onChange={(value) => setMode(value as ThemeMode)}
-                  items={[{ value: 'light', label: '浅' }, { value: 'dark', label: '深' }, { value: 'auto', label: '跟随' }]}
-                >
-                  {() => null}
-                </Tabs>
-              </div>
-              <div className="site__control">
-                <span className="site__control-label">密度</span>
-                <Tabs
-                  size="s"
-                  variant="segment"
-                  value={density}
-                  onChange={(value) => setDensity(value as Density)}
-                  items={[{ value: 'compact', label: '紧凑' }, { value: 'default', label: '默认' }, { value: 'loose', label: '宽松' }]}
-                >
-                  {() => null}
-                </Tabs>
-              </div>
-              <div className="site__control">
-                <span className="site__control-label">语言</span>
-                <Tabs
-                  size="s"
-                  variant="segment"
-                  value={locale}
-                  onChange={(value) => setLocale(value as LocaleName)}
-                  items={[{ value: 'zh-CN', label: '中' }, { value: 'en-US', label: 'EN' }, { value: 'ar-EG', label: 'AR' }]}
-                >
-                  {() => null}
-                </Tabs>
-              </div>
-              <div className="site__control">
-                <span className="site__control-label">品牌色</span>
-                <span className="site__swatches">
-                  {BRANDS.map((item) => (
-                    <button
-                      key={item.name}
-                      title={item.name}
-                      aria-label={item.name}
-                      className={`site__swatch${brand.name === item.name ? ' site__swatch--active' : ''}`}
-                      style={{ background: item.base }}
-                      onClick={() => setBrand(item)}
-                    />
-                  ))}
-                </span>
-              </div>
-            </div>
-          </header>
+        <main className="content">
+          <article className="content__body">
+            {page === 'overview' ? <Overview onNavigate={setPage} /> : page === 'tokens' ? <TokensPage /> : entry ? <ComponentPage entry={entry} /> : null}
 
-          <div className="site__content">
-            <section className="hero">
-              <div className="hero__eyebrow">跨框架组件库</div>
-              <h1 className="hero__title">一套设计令牌与行为逻辑，同时驱动 React 与 Vue</h1>
-              <p className="hero__lede">
-                设计令牌、样式、交互行为、无障碍语义只写一份，放在 <code>@i-design/core</code>；
-                React 与 Vue 各自只有一层约 15 行的属性翻译。同样的 props 必然产出同样的 DOM——
-                这条约束由跨框架一致性测试强制保证。
-              </p>
-              <div className="hero__stats">
-                {[
-                  { value: '32', label: '组件（双端一致）' },
-                  { value: '96', label: '测试全绿' },
-                  { value: '0', label: '运行时依赖' },
-                  { value: '3', label: '密度档位 · 3 主题模式' },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <div className="hero__stat-value">{stat.value}</div>
-                    <div className="hero__stat-label">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ marginBlockStart: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <Alert status="info" title="关于本页的演示">
-                  每个组件只演示一次。React 与 Vue 的差异放在下方「用法」的代码切换里——
-                  因为两端产出的 DOM 本就相同，演示两遍没有意义。
-                </Alert>
-                <Space wrap>
-                  <Tag status="brand">design tokens</Tag>
-                  <Tag status="success">headless core</Tag>
-                  <Tag status="warning">WAI-ARIA</Tag>
-                  <Tag>RTL</Tag>
-                  <Tag>SSR-safe</Tag>
-                  <Button size="s" variant="text" onClick={() => document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })}>
-                    直接看 AI 会话组件 →
-                  </Button>
-                </Space>
-              </div>
-            </section>
-
-            {ENTRIES.map((entry) => (
-              <Section key={entry.id} entry={entry} />
-            ))}
-
-            <footer style={{ paddingBlock: 32, color: 'var(--i-color-text-tertiary)', fontSize: 'var(--i-font-size-s)' }}>
-              i-design · 令牌与行为在 core，React / Vue 只做翻译 · 本页由 i-design 自己搭建
+            <footer className="footer">
+              <span>i-design · 令牌与行为在 core，React / Vue 只做翻译</span>
+              <span>本文档站由 i-design 自己搭建</span>
             </footer>
-          </div>
+          </article>
+
+          {anchors.length > 0 && (
+            <nav className="toc" aria-label="本页目录">
+              <div className="toc__title">本页目录</div>
+              {anchors.map((anchor) => (
+                <a className="toc__link" href={`#${anchor.id}`} key={anchor.id}>
+                  {anchor.label}
+                </a>
+              ))}
+              {entry && (
+                <div className="toc__meta">
+                  <Tag size="s">{entry.category}</Tag>
+                  <Button size="s" variant="text" onClick={() => setPage('tokens')}>查看令牌 →</Button>
+                </div>
+              )}
+            </nav>
+          )}
         </main>
       </div>
     </ConfigProvider>

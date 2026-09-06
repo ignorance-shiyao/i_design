@@ -4,6 +4,7 @@ export * from './shape.js';
 
 import { lightTokens, darkTokens, type SemanticTokens } from './semantic.js';
 import { shapeTokens, densityTokens, type Density } from './shape.js';
+import { primitiveVars } from './palette.js';
 
 /** CSS custom property prefix. Every token is emitted as `--i-<key>`. */
 export const TOKEN_PREFIX = '--i-';
@@ -19,7 +20,14 @@ export function toCssVars(tokens: SemanticTokens): Record<string, string> {
 
 export type ColorScheme = 'light' | 'dark';
 
-/** The complete token set for one (scheme, density) combination. */
+/**
+ * The complete semantic token set for one (scheme, density) combination.
+ *
+ * Colour values are `rgba(var(--i-…), a)` references, not resolved colours —
+ * they only mean something inside a document that also carries the primitive
+ * layer. Use `readComputedTokens()` from @i-design/core when you need concrete
+ * values (for a canvas or a charting library).
+ */
 export function resolveTokens(scheme: ColorScheme, density: Density = 'default'): SemanticTokens {
   return {
     ...shapeTokens,
@@ -27,3 +35,5 @@ export function resolveTokens(scheme: ColorScheme, density: Density = 'default')
     ...(scheme === 'dark' ? darkTokens : lightTokens),
   };
 }
+
+export { primitiveVars };

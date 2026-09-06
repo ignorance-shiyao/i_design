@@ -12,6 +12,11 @@ export const basicEntries: DocEntry[] = [
     cn: '按钮',
     category: '通用',
     description: '四种视觉层级（solid / outline / soft / text）× 五种语义状态 × 三种尺寸。loading 期间会吞掉点击事件，不需要业务代码再判一次。',
+    whenToUse: [
+      '需要用户在一处做出明确动作时——提交、确认、跳转。',
+      '一屏内只应有一个 status="brand" 的主按钮；并列多个主按钮会让人不知道该点哪个。',
+      '异步动作请用 loading 而不是自己禁用：loading 期间组件已经吞掉点击，语义也会通过 aria-busy 上报。',
+    ],
     demos: [
       {
         caption: '层级与状态',
@@ -72,6 +77,10 @@ import { IButton, ISpace } from '@i-design/vue';
     cn: '标签',
     category: '通用',
     description: '用于状态标记和分类。soft 变体在深浅色下都做过对比度调整，不是简单的透明度叠加。',
+    whenToUse: [
+      '标记状态、分类或属性，本身不是可点击的操作入口。',
+      '需要用户点击执行动作时用 Button，不要把 Tag 当按钮用。',
+    ],
     demos: [
       {
         caption: '变体与状态',

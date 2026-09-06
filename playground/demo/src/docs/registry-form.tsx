@@ -146,6 +146,10 @@ export const formEntries: DocEntry[] = [
     cn: '输入框',
     category: '数据录入',
     description: '受控与非受控两种用法。Textarea 的 autosize 在 core 里只负责算高度上下界，读 scrollHeight 的动作留给各自框架的生命周期。',
+    whenToUse: [
+      '单行短文本用 Input，多行或长度不确定的内容用 Textarea 并开启 autosize。',
+      '需要校验时交给 Form 管理，不要在组件上手写 status 与错误文案。',
+    ],
     demos: [
       {
         caption: '状态与自动增高',
@@ -180,6 +184,11 @@ const value = ref('');
     cn: '选择器',
     category: '数据录入',
     description: 'RadioGroup、Tabs、Select 共用 core 的同一个 roving tabindex 引擎：一组控件只占一个 Tab 停靠点，方向键在组内移动。Select 是完整的 WAI-ARIA combobox，支持首字母跳转。',
+    whenToUse: [
+      '选项少于 5 个且需要一眼看全，用 RadioGroup；更多选项用 Select。',
+      '二元开关用 Switch（立即生效），需要提交才生效的用 Checkbox。',
+      '多选且选项不多时用 Checkbox 组，选项很多时用 Select 的多选形态。',
+    ],
     demos: [
       {
         caption: '四类选择控件',
@@ -216,6 +225,11 @@ const value = ref('');
     cn: '表单校验',
     category: '数据录入',
     description: '校验规则是可序列化的纯数据，可以来自配置或服务端。FormStore 是框架无关的可订阅 store：React 用 useSyncExternalStore 接、Vue 用 shallowRef 接，校验顺序与异步语义只有一份实现。',
+    whenToUse: [
+      '任何需要校验、提交、重置的表单场景。',
+      '规则写成数据而不是回调，这样同一份规则可以来自配置、服务端，也可以在测试里单独跑。',
+      '异步校验（如查重）直接返回 Promise，不需要额外的防抖状态。',
+    ],
     demos: [
       {
         caption: '同步 + 异步规则',
@@ -281,6 +295,11 @@ const form = useForm({
     cn: '表格',
     category: '数据录入',
     description: '排序、多选、固定列、粘性表头都在 core 里算好。本地排序会复制数组而不是原地改，空值在升序降序里都排最后；可排序表头带 aria-sort 且支持键盘操作。',
+    whenToUse: [
+      '需要对比、排序、批量操作的结构化数据。',
+      '数据量大时开启 stickyHeader；列很多时用 fixed 固定关键列。',
+      '服务端排序请开 manualSort，组件不会再本地排一次。',
+    ],
     demos: [
       {
         caption: '排序 / 多选 / 固定列',

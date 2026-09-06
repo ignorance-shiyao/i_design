@@ -92,6 +92,7 @@ export const CodeBlock = defineComponent({
     const copied = ref(false);
     return () => {
       const behavior = useCodeBlock({
+        code: props.code,
         language: props.language,
         copied: copied.value,
         onCopy: () => {
@@ -105,7 +106,16 @@ export const CodeBlock = defineComponent({
           h('span', props.language),
           h('button', toProps(behavior.copy), copied.value ? '已复制' : '复制'),
         ]),
-        h('pre', toProps(behavior.pre), [h('code', props.code)]),
+        h('pre', toProps(behavior.pre), [
+          h(
+            'code',
+            behavior.tokens.map((token) =>
+              token.type === 'plain'
+                ? token.value
+                : h('span', { class: behavior.tokenClass(token.type) }, token.value),
+            ),
+          ),
+        ]),
       ]);
     };
   },
