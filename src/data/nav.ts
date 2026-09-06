@@ -28,6 +28,7 @@ export const docNav: NavGroup[] = [
     title: '数据录入',
     items: [
       { to: '/components/input', label: 'Input 输入框' },
+      { to: '/components/select', label: 'Select 下拉选择' },
       { to: '/components/switch', label: 'Switch 开关' }
     ]
   },
@@ -35,7 +36,9 @@ export const docNav: NavGroup[] = [
     title: '数据展示与反馈',
     items: [
       { to: '/components/card', label: 'Card 卡片' },
-      { to: '/components/alert', label: 'Alert 警告提示' }
+      { to: '/components/table', label: 'Table 表格' },
+      { to: '/components/alert', label: 'Alert 警告提示' },
+      { to: '/components/modal', label: 'Modal 对话框' }
     ]
   }
 ]

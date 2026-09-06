@@ -30,7 +30,7 @@ npm run preview   # 预览构建产物
 
 ## 组件
 
-Button、Input、Tag、Switch、Card、Alert —— 均支持 `sm / md / lg` 尺寸约定与深色主题。
+Button、Input、Select、Switch、Tag、Card、Table、Alert、Modal —— 统一 `sm / md / lg` 尺寸约定，深色主题开箱可用。
 
 ```ts
 import IDesign from '@/components'

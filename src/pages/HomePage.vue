@@ -56,7 +56,7 @@ const demoSwitch = ref(true)
             <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
           </div>
           <dl class="hero__stats">
-            <div><dt>6</dt><dd>基础组件</dd></div>
+            <div><dt>9</dt><dd>基础组件</dd></div>
             <div><dt>60+</dt><dd>设计令牌</dd></div>
             <div><dt>2</dt><dd>内建主题</dd></div>
           </dl>
