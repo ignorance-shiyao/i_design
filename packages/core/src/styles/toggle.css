@@ -1,0 +1,106 @@
+/* Checkbox ------------------------------------------------------------- */
+.i-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-space-2);
+  position: relative;
+  cursor: pointer;
+  font-size: var(--i-font-size-m);
+  color: var(--i-color-text-primary);
+  line-height: var(--i-line-height-snug);
+}
+.i-checkbox__input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: inherit; }
+.i-checkbox__control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--i-color-border-strong);
+  border-radius: var(--i-radius-xs);
+  background: var(--i-color-bg-container);
+  transition:
+    background-color var(--i-duration-fast) var(--i-ease-standard),
+    border-color var(--i-duration-fast) var(--i-ease-standard),
+    box-shadow var(--i-duration-fast) var(--i-ease-standard);
+}
+.i-checkbox:hover .i-checkbox__control { border-color: var(--i-color-brand); }
+.i-checkbox__control::after {
+  content: '';
+  width: 4px;
+  height: 8px;
+  border: 2px solid var(--i-color-on-brand);
+  border-top: 0;
+  border-inline-start: 0;
+  transform: rotate(45deg) scale(0.4);
+  opacity: 0;
+  transition: transform var(--i-duration-fast) var(--i-ease-emphasized), opacity var(--i-duration-instant) linear;
+}
+.i-checkbox--checked .i-checkbox__control {
+  background: var(--i-color-brand);
+  border-color: var(--i-color-brand);
+  box-shadow: var(--i-shadow-highlight);
+}
+.i-checkbox--checked .i-checkbox__control::after { transform: rotate(45deg) scale(1); opacity: 1; }
+.i-checkbox--indeterminate .i-checkbox__control { background: var(--i-color-brand); border-color: var(--i-color-brand); }
+.i-checkbox--indeterminate .i-checkbox__control::after {
+  width: 8px; height: 0; border: 1px solid var(--i-color-on-brand);
+  transform: none; opacity: 1;
+}
+.i-checkbox--size-s { font-size: var(--i-font-size-s); }
+.i-checkbox--size-s .i-checkbox__control { width: 14px; height: 14px; }
+.i-checkbox--size-l .i-checkbox__control { width: 18px; height: 18px; }
+.i-checkbox--disabled { cursor: not-allowed; color: var(--i-color-text-disabled); }
+.i-checkbox--disabled .i-checkbox__control { background: var(--i-color-bg-disabled); border-color: var(--i-color-border); }
+.i-checkbox__input:focus-visible + .i-checkbox__control {
+  box-shadow: 0 0 0 var(--i-focus-ring-width) var(--i-color-ring);
+}
+
+/* Switch --------------------------------------------------------------- */
+.i-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-space-2);
+  position: relative;
+  cursor: pointer;
+  font-size: var(--i-font-size-m);
+  color: var(--i-color-text-primary);
+}
+.i-switch__input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: inherit; }
+.i-switch__control {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  border-radius: var(--i-radius-round);
+  background: var(--i-color-border-strong);
+  box-shadow: inset 0 1px 2px rgba(var(--i-grey-9), 0.12);
+  transition: background-color var(--i-duration-base) var(--i-ease-standard);
+}
+.i-switch__control::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-start: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--i-radius-round);
+  background: rgb(var(--i-white));
+  box-shadow: 0 1px 2px rgba(var(--i-grey-9), 0.3);
+  /* Animate the transform, not the offset: it stays on the compositor. */
+  transition: transform var(--i-duration-base) var(--i-ease-emphasized);
+}
+.i-switch--checked .i-switch__control { background: var(--i-color-brand); }
+.i-switch--checked .i-switch__control::after { transform: translateX(18px); }
+[dir='rtl'] .i-switch--checked .i-switch__control::after { transform: translateX(-18px); }
+.i-switch--size-s .i-switch__control { width: 32px; height: 18px; }
+.i-switch--size-s .i-switch__control::after { width: 12px; height: 12px; }
+.i-switch--size-s.i-switch--checked .i-switch__control::after { transform: translateX(14px); }
+.i-switch--size-l .i-switch__control { width: 48px; height: 26px; }
+.i-switch--size-l .i-switch__control::after { width: 20px; height: 20px; }
+.i-switch--size-l.i-switch--checked .i-switch__control::after { transform: translateX(22px); }
+.i-switch--disabled { cursor: not-allowed; opacity: 0.45; }
+.i-switch__input:focus-visible + .i-switch__control {
+  box-shadow: 0 0 0 var(--i-focus-ring-width) var(--i-color-ring);
+}

@@ -1,0 +1,70 @@
+.i-carousel {
+  position: relative;
+  border-radius: var(--i-radius-xl);
+  overflow: hidden;
+  background: var(--i-color-bg-muted);
+  outline: none;
+}
+.i-carousel__viewport { overflow: hidden; touch-action: pan-y; }
+.i-carousel--vertical .i-carousel__viewport { touch-action: pan-x; }
+
+.i-carousel__track {
+  display: flex;
+  /* The track moves by transform only — never by layout — so it stays on the
+     compositor and drag feels 1:1. */
+  transition: transform var(--i-duration-slow) var(--i-ease-standard);
+  will-change: transform;
+}
+.i-carousel--vertical .i-carousel__track { flex-direction: column; block-size: 100%; }
+
+.i-carousel__slide {
+  flex: 0 0 100%;
+  min-inline-size: 0;
+  user-select: none;
+}
+
+.i-carousel__nav {
+  position: absolute;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 34px;
+  block-size: 34px;
+  border: var(--i-border-width) solid var(--i-color-border-subtle);
+  border-radius: var(--i-radius-round);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text-primary);
+  box-shadow: var(--i-shadow-2);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--i-duration-base) var(--i-ease-standard), transform var(--i-duration-fast) var(--i-ease-standard);
+}
+.i-carousel:hover .i-carousel__nav,
+.i-carousel:focus-within .i-carousel__nav { opacity: 1; }
+.i-carousel__nav:hover { transform: translateY(-50%) scale(1.06); }
+.i-carousel__nav--prev { inset-inline-start: var(--i-space-3); }
+.i-carousel__nav--next { inset-inline-end: var(--i-space-3); }
+.i-carousel__nav--disabled { opacity: 0 !important; pointer-events: none; }
+
+.i-carousel__dots {
+  position: absolute;
+  inset-block-end: var(--i-space-3);
+  inset-inline: 0;
+  display: flex;
+  justify-content: center;
+  gap: var(--i-space-1);
+}
+.i-carousel__dot {
+  inline-size: 6px;
+  block-size: 6px;
+  padding: 0;
+  border: none;
+  border-radius: var(--i-radius-round);
+  background: rgba(var(--i-white), 0.5);
+  box-shadow: 0 1px 2px rgba(var(--i-black), 0.35);
+  cursor: pointer;
+  transition: inline-size var(--i-duration-base) var(--i-ease-emphasized), background-color var(--i-duration-base) var(--i-ease-standard);
+}
+.i-carousel__dot--active { inline-size: 18px; background: rgb(var(--i-white)); }

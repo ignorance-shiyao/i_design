@@ -1,0 +1,21 @@
+/* Single entry point: `import '@i-design/core/styles'` in either framework. */
+@import './base.css';
+@import './button.css';
+@import './input.css';
+@import './toggle.css';
+@import './tag.css';
+@import './layout.css';
+@import './grid.css';
+@import './overlay.css';
+@import './drawer.css';
+@import './display.css';
+@import './navigation.css';
+@import './form-extra.css';
+@import './table.css';
+@import './motion.css';
+@import './carousel.css';
+@import './chat.css';
+@import './form-controls.css';
+@import './structure.css';
+@import './data-display.css';
+@import './extras.css';

@@ -1,0 +1,32 @@
+/*
+ * 24-column grid. Spans travel as custom properties so a single rule handles
+ * every width, and the responsive variants are pure CSS — no JS resize listener.
+ */
+.i-row {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--i-row-gutter-x, 0px);
+  row-gap: var(--i-row-gutter-y, 0px);
+}
+.i-row--nowrap { flex-wrap: nowrap; }
+.i-row--align-start { align-items: flex-start; }
+.i-row--align-center { align-items: center; }
+.i-row--align-end { align-items: flex-end; }
+.i-row--align-stretch { align-items: stretch; }
+.i-row--justify-start { justify-content: flex-start; }
+.i-row--justify-center { justify-content: center; }
+.i-row--justify-end { justify-content: flex-end; }
+.i-row--justify-between { justify-content: space-between; }
+.i-row--justify-around { justify-content: space-around; }
+
+.i-col {
+  --i-col-span: 24;
+  --i-col-offset: 0;
+  flex: 0 0 calc((var(--i-col-span) / 24) * 100% - var(--i-row-gutter-x, 0px) * (23 / 24));
+  max-inline-size: 100%;
+  margin-inline-start: calc((var(--i-col-offset) / 24) * 100%);
+}
+
+@media (min-width: 640px)  { .i-col--sm { --i-col-span: var(--i-col-span-sm); } }
+@media (min-width: 960px)  { .i-col--md { --i-col-span: var(--i-col-span-md); } }
+@media (min-width: 1280px) { .i-col--lg { --i-col-span: var(--i-col-span-lg); } }
