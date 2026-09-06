@@ -10,6 +10,8 @@ export interface TextareaProps
   showCount?: boolean;
   className?: string;
   onChange?: (value: string, event: unknown) => void;
+  onFocus?: (event: unknown) => void;
+  onBlur?: (event: unknown) => void;
 }
 
 export function Textarea(props: TextareaProps) {

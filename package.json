@@ -2,14 +2,15 @@
   "name": "i-design",
   "private": true,
   "version": "0.1.0",
-  "description": "i-design — a cross-framework (React + Vue) component library with a shared headless core and one design-token system.",
+  "description": "i-design \u2014 a cross-framework (React + Vue) component library with a shared headless core and one design-token system.",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "build": "pnpm -r --filter \"./packages/*\" build",
     "typecheck": "pnpm -r --filter \"./packages/*\" typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf packages/*/dist node_modules/.vite"
+    "clean": "rm -rf packages/*/dist node_modules/.vite",
+    "preview:build": "pnpm --filter @i-design/playground build && node scripts/build-artifact.mjs"
   },
   "devDependencies": {
     "@testing-library/react": "^16.1.0",

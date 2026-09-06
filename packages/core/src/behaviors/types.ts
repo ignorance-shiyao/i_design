@@ -32,4 +32,15 @@ export const spec = (
   className: string,
   attrs: Record<string, AttrValue> = {},
   on: ElementSpec['on'] = {},
-): ElementSpec => ({ class: className, attrs, on });
+): ElementSpec => {
+  // A raw `style` string is the one attribute that is NOT portable: Vue accepts
+  // it, React throws. Behaviours must return style as a separate object (see
+  // `useRow`/`useCol`/`useTable`), so catch the mistake where it is made.
+  if (typeof attrs.style === 'string') {
+    throw new Error(
+      `[i-design] ElementSpec "${className}" carries a raw style string. ` +
+        'Return styles as a separate object instead — a style string is not portable to React.',
+    );
+  }
+  return { class: className, attrs, on };
+};

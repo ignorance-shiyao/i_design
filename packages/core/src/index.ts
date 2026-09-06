@@ -4,6 +4,7 @@ export * from './id.js';
 export * from './theme.js';
 export * from './i18n.js';
 export * from './message.js';
+export * from './validation.js';
 export * from './dom/focus.js';
 export * from './dom/position.js';
 export * from './behaviors/types.js';
@@ -17,5 +18,6 @@ export * from './behaviors/navigation.js';
 export * from './behaviors/radio.js';
 export * from './behaviors/select.js';
 export * from './behaviors/grid.js';
+export * from './behaviors/table.js';
 
 export const version = '0.1.0';

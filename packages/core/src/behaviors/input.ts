@@ -19,6 +19,10 @@ export interface InputBehaviorOptions {
   describedBy?: string;
   onInput?: (value: string, event: any) => void;
   onClear?: (event: any) => void;
+  /** Wired onto the native control, not the wrapper — this is what lets a form
+   *  mark a field as touched. */
+  onFocus?: (event: any) => void;
+  onBlur?: (event: any) => void;
   extraClass?: string;
 }
 
@@ -46,6 +50,8 @@ export function useInputBehavior(options: InputBehaviorOptions = {}): InputBehav
     describedBy,
     onInput,
     onClear,
+    onFocus,
+    onBlur,
     extraClass,
   } = options;
 
@@ -75,7 +81,11 @@ export function useInputBehavior(options: InputBehaviorOptions = {}): InputBehav
         'aria-invalid': status === 'danger' || undefined,
         'aria-describedby': describedBy,
       },
-      { input: (event: any) => onInput?.(String(event?.target?.value ?? ''), event) },
+      {
+        input: (event: any) => onInput?.(String(event?.target?.value ?? ''), event),
+        focus: (event: any) => onFocus?.(event),
+        blur: (event: any) => onBlur?.(event),
+      },
     ),
     clear: showClear
       ? spec(
@@ -112,8 +122,8 @@ export interface TextareaBehavior {
 export function useTextareaBehavior(options: TextareaBehaviorOptions = {}): TextareaBehavior {
   const {
     value = '', status = 'default', disabled = false, readonly = false, placeholder,
-    maxlength, id, name, describedBy, onInput, rows = 3, autosize, minRows = 2, maxRows = 8,
-    resize = 'vertical', extraClass,
+    maxlength, id, name, describedBy, onInput, onFocus, onBlur, rows = 3, autosize,
+    minRows = 2, maxRows = 8, resize = 'vertical', extraClass,
   } = options;
 
   return {
@@ -130,7 +140,11 @@ export function useTextareaBehavior(options: TextareaBehaviorOptions = {}): Text
         'aria-invalid': status === 'danger' || undefined,
         'aria-describedby': describedBy,
       },
-      { input: (event: any) => onInput?.(String(event?.target?.value ?? ''), event) },
+      {
+        input: (event: any) => onInput?.(String(event?.target?.value ?? ''), event),
+        focus: (event: any) => onFocus?.(event),
+        blur: (event: any) => onBlur?.(event),
+      },
     ),
     count: maxlength ? { current: value.length, max: maxlength } : null,
     autosizeHeight: (scrollHeight, lineHeight) =>

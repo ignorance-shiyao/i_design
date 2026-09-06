@@ -13,6 +13,8 @@ export interface InputProps
   showCount?: boolean;
   onChange?: (value: string, event: unknown) => void;
   onClear?: () => void;
+  onFocus?: (event: unknown) => void;
+  onBlur?: (event: unknown) => void;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(props, ref) {

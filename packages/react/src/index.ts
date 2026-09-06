@@ -9,6 +9,11 @@ export { FormItem, type FormItemProps } from './components/FormItem.js';
 export { Dialog, type DialogProps } from './components/Dialog.js';
 export { Tooltip, type TooltipProps } from './components/Tooltip.js';
 export { Drawer, type DrawerProps } from './components/Drawer.js';
+export { Table, type TableProps } from './components/Table.js';
+export {
+  Form, FormField, useForm,
+  type FormProps, type FormFieldProps, type FieldRenderProps, type UseFormResult,
+} from './components/Form.js';
 export { Textarea, type TextareaProps } from './components/Textarea.js';
 export { RadioGroup, type RadioGroupProps } from './components/Radio.js';
 export { Select, type SelectProps } from './components/Select.js';
@@ -26,7 +31,8 @@ export { message, showMessage, type MessageOptions } from '@i-design/core';
 export { toProps, useControlled } from './utils.js';
 
 export type {
-  BreadcrumbItem, CollapseItem, Density, Direction, DrawerPlacement, Locale, LocaleName,
-  Orientation, Placement, RadioOption, SelectOption, Size, StepItem, Status, TabItem, ThemeMode, Variant,
+  BreadcrumbItem, CollapseItem, Density, Direction, DrawerPlacement, FormRules, FormState, Locale,
+  LocaleName, Orientation, Placement, RadioOption, Rule, SelectOption, Size, SortOrder, StepItem,
+  Status, TabItem, TableColumn, TableSort, ThemeMode, Variant,
 } from '@i-design/core';
-export { applyTheme, computedTokens, locales } from '@i-design/core';
+export { applyTheme, computedTokens, locales, FormStore, validateValue, enMessages, defaultMessages } from '@i-design/core';

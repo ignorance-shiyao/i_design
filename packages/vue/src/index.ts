@@ -9,6 +9,8 @@ import { FormItem } from './components/FormItem.js';
 import { Dialog } from './components/Dialog.js';
 import { Tooltip } from './components/Tooltip.js';
 import { Drawer } from './components/Drawer.js';
+import { Table } from './components/Table.js';
+import { Form, FormField } from './components/Form.js';
 import { Textarea } from './components/Textarea.js';
 import { RadioGroup } from './components/Radio.js';
 import { Select } from './components/Select.js';
@@ -18,7 +20,8 @@ import { Breadcrumb, Collapse, Pagination, Steps, Tabs } from './components/Navi
 
 export { ConfigProvider, useConfig, type IConfig } from './components/ConfigProvider.js';
 export { Button, Input, Checkbox, Switch, Tag, Space, FormItem, Dialog, Tooltip };
-export { Drawer, Textarea, RadioGroup, Select, Row, Col };
+export { Drawer, Textarea, RadioGroup, Select, Row, Col, Table, Form, FormField };
+export { useForm, type UseFormResult } from './components/Form.js';
 export { Alert, Avatar, Badge, Card, Divider, Empty, Progress, Skeleton, Spinner };
 export { Breadcrumb, Collapse, Pagination, Steps, Tabs };
 export { toProps, useControlled } from './utils.js';
@@ -27,10 +30,11 @@ export { toProps, useControlled } from './utils.js';
 export { message, showMessage, type MessageOptions } from '@i-design/core';
 
 export type {
-  BreadcrumbItem, CollapseItem, Density, Direction, DrawerPlacement, Locale, LocaleName,
-  Orientation, Placement, RadioOption, SelectOption, Size, StepItem, Status, TabItem, ThemeMode, Variant,
+  BreadcrumbItem, CollapseItem, Density, Direction, DrawerPlacement, FormRules, FormState, Locale,
+  LocaleName, Orientation, Placement, RadioOption, Rule, SelectOption, Size, SortOrder, StepItem,
+  Status, TabItem, TableColumn, TableSort, ThemeMode, Variant,
 } from '@i-design/core';
-export { applyTheme, computedTokens, locales } from '@i-design/core';
+export { applyTheme, computedTokens, locales, FormStore, validateValue, enMessages, defaultMessages } from '@i-design/core';
 
 const components: Record<string, Component> = {
   IConfigProvider: ConfigProvider,
@@ -63,6 +67,9 @@ const components: Record<string, Component> = {
   IPagination: Pagination,
   ISteps: Steps,
   ITabs: Tabs,
+  ITable: Table,
+  IForm: Form,
+  IFormField: FormField,
 };
 
 /** `app.use(IDesign)` for the global-registration style Vue users expect. */

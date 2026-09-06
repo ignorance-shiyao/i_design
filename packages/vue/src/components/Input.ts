@@ -21,7 +21,7 @@ export const Input = defineComponent({
     clearable: Boolean,
     showCount: Boolean,
   },
-  emits: ['update:modelValue', 'change', 'clear'],
+  emits: ['update:modelValue', 'change', 'clear', 'focus', 'blur'],
   setup(props, { slots, emit }) {
     const config = useConfig();
     const state = useControlled(() => props.modelValue, props.defaultValue);
@@ -36,6 +36,8 @@ export const Input = defineComponent({
           emit('update:modelValue', next);
           emit('change', next, event);
         },
+        onFocus: (event: Event) => emit('focus', event),
+        onBlur: (event: Event) => emit('blur', event),
         onClear: (event: Event) => {
           state.set('');
           emit('update:modelValue', '');

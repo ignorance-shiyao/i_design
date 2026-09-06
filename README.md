@@ -45,13 +45,15 @@ React 与 Vue 只是两层薄薄的“绑定层”。
 8. **零运行时依赖**：`cx`、定位引擎、焦点锁、roving tabindex 都是自带的几十行实现，不引入 clsx / floating-ui。
 9. **一份键盘导航引擎**：RadioGroup、Tabs、Select 共用 core 的 `useRoving`，
    不会出现「Tabs 支持方向键、Radio 不支持」这种常见的不一致。
+10. **表单校验引擎与框架解耦**：规则是纯数据（可以来自配置或服务端），
+    `FormStore` 是一个可订阅的小 store，两个框架各自只接一根线，校验语义完全一致。
 
 ## 快速开始
 
 ```bash
 pnpm install
 pnpm build          # 构建 4 个包
-pnpm test           # 56 个测试：核心逻辑 / 行为与键盘 / 跨框架一致性 / 交互与无障碍
+pnpm test           # 76 个测试：核心逻辑 / 行为与键盘 / 表格与校验 / 跨框架一致性 / 交互与无障碍
 pnpm --filter @i-design/playground dev   # 打开 React 与 Vue 并排的演示页
 ```
 
@@ -83,16 +85,24 @@ app.use(IDesign);
 </IConfigProvider>
 ```
 
-## 当前组件（30 个，React / Vue 双端一致）
+## 在线预览
+
+https://claude.ai/code/artifact/1b6e11f5-e3eb-44e3-9db3-b8d558666354
+
+左右两栏分别由 React 和 Vue 渲染，可实时切换主题 / 密度 / 语言 / 品牌色。
+重新生成预览页：`pnpm preview:build`（把 playground 打包成单个自包含 HTML）。
+
+## 当前组件（32 个，React / Vue 双端一致）
 
 **基础**：ConfigProvider（主题/密度/方向/语言，可嵌套）、Button（4 变体 × 5 状态 × 3 尺寸 × 4 形状）、
 Divider、Space、Row / Col（24 栅格 + 响应式断点）
 
 **表单**：Input、Textarea（自动增高）、Checkbox、Switch、RadioGroup（含分段按钮样式）、
-Select（WAI-ARIA combobox：方向键、Home/End、首字母跳转、`aria-activedescendant`）、FormItem
+Select（WAI-ARIA combobox：方向键、Home/End、首字母跳转、`aria-activedescendant`）、
+FormItem、**Form + FormField**（校验引擎在 core，支持同步/异步规则、trigger、脏值追踪）
 
-**数据展示**：Card、Tag、Avatar（含 CJK 首字缩写）、Badge、Progress（线形/环形）、
-Skeleton、Spinner、Empty
+**数据展示**：**Table**（排序 / 多选 / 固定列 / 粘性表头 / 加载与空状态）、Card、Tag、
+Avatar（含 CJK 首字缩写）、Badge、Progress（线形/环形）、Skeleton、Spinner、Empty
 
 **导航**：Tabs（line / card / segment 三种，方向键切换）、Collapse（支持手风琴）、
 Pagination（省略号算法）、Steps、Breadcrumb
@@ -104,6 +114,7 @@ Pagination（省略号算法）、Steps、Breadcrumb
 | 键盘导航 | RadioGroup / Tabs / Select 共用 core 里同一个 roving tabindex 引擎，一组控件只占一个 Tab 停靠点 |
 | 无障碍 | 每个组件的 role 与 aria 由 core 计算，两端完全一致；Dialog/Drawer 带焦点锁与 Esc |
 | 受控/非受控 | React 用 `value` / `defaultValue`，Vue 用 `v-model` / `defaultValue`，语义一致 |
+| 表单校验 | 规则是可序列化的数据；`FormStore` 是框架无关的可订阅 store，React 用 `useSyncExternalStore`、Vue 用 `shallowRef` 各接一次 |
 
 更多设计取舍见 [docs/architecture.md](docs/architecture.md)，后续规划见 [docs/roadmap.md](docs/roadmap.md)，
 新增组件的步骤见 [docs/adding-a-component.md](docs/adding-a-component.md)。

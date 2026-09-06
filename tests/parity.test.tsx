@@ -199,6 +199,47 @@ describe('React / Vue DOM parity', () => {
     );
   });
 
+  it('Table — sorting, selection, sticky columns and the empty state', () => {
+    const columns = [
+      { key: 'name', title: '姓名', sortable: true, width: 120, fixed: 'start' as const },
+      { key: 'age', title: '年龄', sortable: true, align: 'end' as const },
+      { key: 'city', title: '城市', ellipsis: true },
+    ];
+    const rows = [
+      { name: 'Cara', age: 31, city: '上海' },
+      { name: 'Alan', age: 24, city: '北京' },
+    ];
+    const rowKey = (row: { name: string }) => row.name;
+
+    expect(
+      reactHtml(
+        <R.Table
+          columns={columns}
+          data={rows}
+          rowKey={rowKey}
+          sort={{ key: 'age', order: 'desc' }}
+          selection="multiple"
+          selectedKeys={['Alan']}
+          bordered
+          striped
+        />,
+      ),
+    ).toBe(
+      vueHtml(V.Table, {
+        columns, data: rows, rowKey,
+        sort: { key: 'age', order: 'desc' },
+        selection: 'multiple',
+        selectedKeys: ['Alan'],
+        bordered: true,
+        striped: true,
+      }),
+    );
+
+    expect(reactHtml(<R.Table columns={columns} data={[]} rowKey={rowKey} />)).toBe(
+      vueHtml(V.Table, { columns, data: [], rowKey }),
+    );
+  });
+
   it('ConfigProvider emits the same theme attributes', () => {
     expect(reactHtml(<R.ConfigProvider mode="dark" density="compact" />)).toBe(
       vueHtml(V.ConfigProvider, { mode: 'dark', density: 'compact' }),

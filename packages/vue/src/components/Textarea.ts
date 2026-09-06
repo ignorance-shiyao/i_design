@@ -23,7 +23,7 @@ export const Textarea = defineComponent({
     disabled: Boolean,
     readonly: Boolean,
   },
-  emits: ['update:modelValue', 'change'],
+  emits: ['update:modelValue', 'change', 'focus', 'blur'],
   setup(props, { emit }) {
     const config = useConfig();
     const state = useControlled(() => props.modelValue, props.defaultValue);
@@ -42,6 +42,8 @@ export const Textarea = defineComponent({
         ...props,
         value: state.value.value,
         placeholder: props.placeholder ?? config.value.locale.input.placeholder,
+        onFocus: (event: Event) => emit('focus', event),
+        onBlur: (event: Event) => emit('blur', event),
         onInput: (next: string, event: Event) => {
           state.set(next);
           emit('update:modelValue', next);

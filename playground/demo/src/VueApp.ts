@@ -1,9 +1,11 @@
 import { defineComponent, h, ref, type PropType } from 'vue';
+import { ORDERS, STATUS_TONE } from './ReactApp.js';
 import {
   Alert, Avatar, Badge, Breadcrumb, Button, Card, Checkbox, Col, Collapse, ConfigProvider, Dialog,
   Divider, Drawer, Empty, FormItem, Input, message, Pagination, Progress, RadioGroup, Row, Select,
-  Skeleton, Space, Spinner, Steps, Switch, Tabs, Tag, Textarea, Tooltip,
-  type Density, type LocaleName, type ThemeMode,
+  Skeleton, Space, Spinner, Steps, Switch, Table, Tabs, Tag, Textarea, Tooltip,
+  Form, FormField, useForm,
+  type Density, type LocaleName, type TableSort, type ThemeMode,
 } from '@i-design/vue';
 
 const block = (title: string, children: unknown[]) =>
@@ -23,6 +25,27 @@ export const VueApp = defineComponent({
     const fruit = ref<string | null>('apple');
     const plan = ref('pro');
     const page = ref(6);
+    const sort = ref<TableSort | null>({ key: 'amount', order: 'desc' });
+    const selected = ref<string[]>(['o-2']);
+
+    const form = useForm({
+      initialValues: { name: '', email: '', plan: 'pro', bio: '' },
+      rules: {
+        name: [{ required: true, message: '请填写姓名' }, { min: 2, message: '至少 2 个字' }],
+        email: [
+          { required: true, message: '请填写邮箱' },
+          { pattern: /^[^@\s]+@[^@\s]+\.[^@\s]+$/, message: '邮箱格式不正确' },
+          {
+            validator: async (value: string) => {
+              await new Promise((resolve) => setTimeout(resolve, 300));
+              return value === 'taken@example.com' ? '该邮箱已被注册' : null;
+            },
+          },
+        ],
+        bio: [{ max: 60, message: '不超过 60 字' }],
+      },
+      onSubmit: (values: Record<string, unknown>) => message.success(`提交成功：${values.name}`),
+    });
     const agreed = ref(true);
     const email = ref('');
     const invalid = () => email.value.length > 0 && !email.value.includes('@');
@@ -71,6 +94,76 @@ export const VueApp = defineComponent({
             }),
             h(Button, { onClick: () => (open.value = true) }, () => '打开对话框'),
             h(Button, { variant: 'soft', onClick: () => message.success('Vue 触发的全局提示') }, () => '全局提示'),
+          ]),
+        ]),
+
+        block('Table', [
+          h(Table, {
+            striped: true,
+            bordered: true,
+            selection: 'multiple',
+            sort: sort.value,
+            selectedKeys: selected.value,
+            rowKey: (row: Record<string, unknown>) => String(row.id),
+            columns: [
+              { key: 'id', title: '订单号', width: 110, fixed: 'start' },
+              { key: 'customer', title: '客户', sortable: true },
+              { key: 'amount', title: '金额', sortable: true, align: 'end' },
+              { key: 'status', title: '状态' },
+            ],
+            data: ORDERS,
+            'onUpdate:sort': (next: TableSort) => (sort.value = next),
+            'onUpdate:selectedKeys': (keys: string[]) => (selected.value = keys),
+          }, {
+            'cell-amount': ({ row }: { row: Record<string, unknown> }) =>
+              `¥${(row.amount as number).toLocaleString()}`,
+            'cell-status': ({ row }: { row: Record<string, unknown> }) =>
+              h(Tag, { status: STATUS_TONE[row.status as string] }, () => row.status as string),
+          }),
+        ]),
+
+        block('Form 校验', [
+          h(Form, { form }, () => [
+            h(FormField, { name: 'name', label: '姓名', required: true }, {
+              default: (field: any) =>
+                h(Input, {
+                  modelValue: field.value,
+                  'onUpdate:modelValue': field.onChange,
+                  onBlur: field.onBlur,
+                }),
+            }),
+            h(FormField, { name: 'email', label: '邮箱', required: true, help: '输入 taken@example.com 触发异步校验' }, {
+              default: (field: any) =>
+                h(Input, {
+                  modelValue: field.value,
+                  'onUpdate:modelValue': field.onChange,
+                  onBlur: field.onBlur,
+                }),
+            }),
+            h(FormField, { name: 'plan', label: '套餐' }, {
+              default: (field: any) =>
+                h(Select, {
+                  modelValue: field.value,
+                  options: [{ value: 'free', label: '免费版' }, { value: 'pro', label: '专业版' }],
+                  'onUpdate:modelValue': (v: string | null) => field.onChange(v ?? ''),
+                }),
+            }),
+            h(FormField, { name: 'bio', label: '简介' }, {
+              default: (field: any) =>
+                h(Textarea, {
+                  autosize: true,
+                  maxlength: 60,
+                  showCount: true,
+                  modelValue: field.value,
+                  'onUpdate:modelValue': field.onChange,
+                  onBlur: field.onBlur,
+                }),
+            }),
+            h(Space, null, () => [
+              h(Button, { status: 'brand', type: 'submit', loading: form.state.value.submitting }, () => '提交'),
+              h(Button, { variant: 'outline', onClick: () => form.reset() }, () => '重置'),
+              form.isDirty.value ? h(Tag, { status: 'warning' }, () => '未保存') : null,
+            ]),
           ]),
         ]),
 

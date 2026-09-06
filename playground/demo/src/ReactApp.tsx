@@ -2,9 +2,23 @@ import { useState } from 'react';
 import {
   Alert, Avatar, Badge, Breadcrumb, Button, Card, Checkbox, Col, Collapse, ConfigProvider, Dialog,
   Divider, Drawer, Empty, FormItem, Input, message, Pagination, Progress, RadioGroup, Row, Select,
-  Skeleton, Space, Spinner, Steps, Switch, Tabs, Tag, Textarea, Tooltip,
-  type Density, type LocaleName, type ThemeMode,
+  Skeleton, Space, Spinner, Steps, Switch, Table, Tabs, Tag, Textarea, Tooltip,
+  Form, FormField, useForm,
+  type Density, type LocaleName, type TableSort, type ThemeMode,
 } from '@i-design/react';
+
+export const ORDERS = [
+  { id: 'o-1', customer: '张三', amount: 1280, status: '已完成' },
+  { id: 'o-2', customer: 'Alan Turing', amount: 9400, status: '处理中' },
+  { id: 'o-3', customer: '李四', amount: 320, status: '已取消' },
+  { id: 'o-4', customer: 'Ada Lovelace', amount: 5600, status: '已完成' },
+];
+
+export const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger'> = {
+  已完成: 'success',
+  处理中: 'warning',
+  已取消: 'danger',
+};
 
 export function ReactApp({ mode, density, locale }: { mode: ThemeMode; density: Density; locale: LocaleName }) {
   const [open, setOpen] = useState(false);
@@ -13,6 +27,28 @@ export function ReactApp({ mode, density, locale }: { mode: ThemeMode; density: 
   const [fruit, setFruit] = useState<string | null>('apple');
   const [plan, setPlan] = useState('pro');
   const [page, setPage] = useState(6);
+  const [sort, setSort] = useState<TableSort | null>({ key: 'amount', order: 'desc' });
+  const [selected, setSelected] = useState<string[]>(['o-2']);
+
+  const form = useForm({
+    initialValues: { name: '', email: '', plan: 'pro', bio: '' },
+    rules: {
+      name: [{ required: true, message: '请填写姓名' }, { min: 2, message: '至少 2 个字' }],
+      email: [
+        { required: true, message: '请填写邮箱' },
+        { pattern: /^[^@\s]+@[^@\s]+\.[^@\s]+$/, message: '邮箱格式不正确' },
+        {
+          // 异步校验：core 的校验引擎原生支持返回 Promise
+          validator: async (value: string) => {
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            return value === 'taken@example.com' ? '该邮箱已被注册' : null;
+          },
+        },
+      ],
+      bio: [{ max: 60, message: '不超过 60 字' }],
+    },
+    onSubmit: (values) => message.success(`提交成功：${values.name}`),
+  });
   const [agreed, setAgreed] = useState(true);
   const [email, setEmail] = useState('');
   const invalid = email.length > 0 && !email.includes('@');
@@ -54,6 +90,65 @@ export function ReactApp({ mode, density, locale }: { mode: ThemeMode; density: 
           <Button onClick={() => setOpen(true)}>打开对话框</Button>
           <Button variant="soft" onClick={() => message.success('React 触发的全局提示')}>全局提示</Button>
         </Space>
+      </div>
+
+      <div className="demo-block">
+        <h3>Table</h3>
+        <Table
+          striped
+          bordered
+          selection="multiple"
+          sort={sort}
+          selectedKeys={selected}
+          onSortChange={setSort}
+          onSelectionChange={setSelected}
+          rowKey={(row) => row.id}
+          columns={[
+            { key: 'id', title: '订单号', width: 110, fixed: 'start' },
+            { key: 'customer', title: '客户', sortable: true },
+            { key: 'amount', title: '金额', sortable: true, align: 'end' },
+            { key: 'status', title: '状态' },
+          ]}
+          data={ORDERS}
+          renderCell={(column, row) =>
+            column.key === 'amount'
+              ? `¥${(row.amount as number).toLocaleString()}`
+              : column.key === 'status'
+                ? <Tag status={STATUS_TONE[row.status as string]}>{row.status as string}</Tag>
+                : undefined
+          }
+        />
+      </div>
+
+      <div className="demo-block">
+        <h3>Form 校验</h3>
+        <Form form={form}>
+          <FormField<string> name="name" label="姓名" required>
+            {(field) => <Input value={field.value} onChange={field.onChange} onBlur={field.onBlur} />}
+          </FormField>
+          <FormField<string> name="email" label="邮箱" required help="输入 taken@example.com 触发异步校验">
+            {(field) => <Input value={field.value} onChange={field.onChange} onBlur={field.onBlur} />}
+          </FormField>
+          <FormField<string> name="plan" label="套餐">
+            {(field) => (
+              <Select
+                value={field.value}
+                options={[{ value: 'free', label: '免费版' }, { value: 'pro', label: '专业版' }]}
+                onChange={(v) => field.onChange(v ?? '')}
+              />
+            )}
+          </FormField>
+          <FormField<string> name="bio" label="简介">
+            {(field) => (
+              <Textarea autosize maxlength={60} showCount value={field.value} onChange={field.onChange} onBlur={field.onBlur} />
+            )}
+          </FormField>
+          <Space>
+            <Button status="brand" type="submit" loading={form.state.submitting}>提交</Button>
+            <Button variant="outline" onClick={() => form.reset()}>重置</Button>
+            {form.isDirty && <Tag status="warning">未保存</Tag>}
+          </Space>
+        </Form>
       </div>
 
       <div className="demo-block">

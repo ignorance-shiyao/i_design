@@ -43,8 +43,23 @@ Vue 的 `toProps()` 把 `click → onClick`（属性名 Vue 原样接受）。
 
 ### 两个框架真正无法一致的地方
 
-只有一处：`checked` 是 DOM **属性（property）**，React 会额外把它反射成 HTML attribute，Vue 不会。
-测试里对这一项做了归一化，同时单独断言两边 `input.checked` 都为 `true`——差异被显式记录，而不是被藏起来。
+只有两处，且都是 DOM **属性（property）** 与 HTML attribute 的差别：
+
+* `checked`（Checkbox / Switch）：React 会额外反射成 attribute，Vue 不会。
+* `value`（Textarea）：React 写成 attribute，Vue 设置属性、序列化时表现为元素文本。
+
+测试里对这两项做归一化，同时**单独断言**两边真实 DOM 的 `.checked` / `.value`——差异被显式记录，而不是被藏起来。
+
+还有一个陷阱值得单独说：**style 不能放进 `ElementSpec.attrs`**。
+Vue 接受 `style="..."` 字符串，React 直接抛错。所以行为层一律把样式作为独立对象返回
+（见 `useRow` / `useCol` / `useTable().cellStyle`），并且 `spec()` 在发现原始 style 字符串时会直接抛错，
+把这个错误挡在写代码的那一刻，而不是留到某个框架的运行时。
+
+## 表单校验
+
+规则是**纯数据**（`{ required, min, max, pattern, validator, trigger, message }`），因此可以来自配置文件或服务端。
+`FormStore` 是一个不依赖任何框架的可订阅 store：React 用 `useSyncExternalStore` 接、Vue 用 `shallowRef` 接，
+校验顺序、空值语义（除 `required` 外的规则对空值一律跳过）、异步规则、脏值追踪都只有一份实现。
 
 ## 为什么不用 Web Components
 
