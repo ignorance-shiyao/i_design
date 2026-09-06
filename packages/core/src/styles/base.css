@@ -43,3 +43,30 @@
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * State layer utility. An element opting in gets a same-colour overlay whose
+ * opacity comes from the state tokens, so hover/press feel identical on a white
+ * button, a brand-filled button and a menu row — no per-variant hover colours.
+ */
+.i-state {
+  position: relative;
+  isolation: isolate;
+}
+.i-state::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--i-duration-fast) var(--i-ease-standard);
+  z-index: -1;
+}
+.i-state:hover::after { opacity: var(--i-state-hover); }
+.i-state:active::after { opacity: var(--i-state-pressed); }
+.i-state[aria-selected='true']::after,
+.i-state[aria-current='true']::after { opacity: var(--i-state-selected); }
+.i-state[aria-disabled='true']::after,
+.i-state:disabled::after { opacity: 0; }

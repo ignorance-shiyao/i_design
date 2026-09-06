@@ -11,6 +11,19 @@ export { Tooltip, type TooltipProps } from './components/Tooltip.js';
 export { Drawer, type DrawerProps } from './components/Drawer.js';
 export { Table, type TableProps } from './components/Table.js';
 export { Carousel, type CarouselProps } from './components/Carousel.js';
+export {
+  InputNumber, Slider, Rate, Upload,
+  type InputNumberProps, type SliderProps, type RateProps, type UploadProps,
+} from './components/FormControls.js';
+export {
+  Layout, LayoutHeader, LayoutSider, LayoutContent, LayoutFooter, Menu, Tree, Anchor, BackTop,
+  type LayoutProps, type LayoutSiderProps, type MenuProps, type TreeProps, type AnchorProps,
+} from './components/Structure.js';
+export {
+  List, ListItem, Descriptions, Statistic, Timeline, Segmented, Typography, Result, Watermark,
+  type ListProps, type ListItemProps, type DescriptionsProps, type StatisticProps,
+  type TimelineProps, type SegmentedProps, type TypographyProps, type ResultProps, type WatermarkProps,
+} from './components/DataDisplay.js';
 export { Transition, Stagger, type TransitionProps, type StaggerProps } from './components/Transition.js';
 export {
   Chat, ChatMessage, ChatAction, TypingIndicator, ThinkingBlock, CodeBlock, Suggestions, PromptInput,
@@ -35,6 +48,7 @@ export {
   type BreadcrumbProps, type CollapseProps, type PaginationProps, type StepsProps, type TabsProps,
 } from './components/Navigation.js';
 export { message, showMessage, type MessageOptions } from '@i-design/core';
+export { notification, showNotification, type NotificationOptions } from '@i-design/core';
 export { toProps, useControlled } from './utils.js';
 
 export type {
@@ -42,8 +56,10 @@ export type {
   LocaleName, Orientation, Placement, RadioOption, Rule, SelectOption, Size, SortOrder, StepItem,
   Status, TabItem, TableColumn, TableSort, ThemeMode, Variant,
   ChatRole, ChatStatus, MotionPreset, TransitionPhase, StreamController,
+  AnchorItem, MenuItem, TreeNode, TimelineItem, SegmentedOption, UploadFile, UploadStatus, SliderMark,
 } from '@i-design/core';
 export {
   applyTheme, computedTokens, locales, FormStore, validateValue, enMessages, defaultMessages,
   createStreamController, isAtBottom, motionClass, stagger,
+  highlight, formatBytes, formatStatistic, createWatermark, readComputedTokens,
 } from '@i-design/core';

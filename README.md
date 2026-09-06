@@ -14,6 +14,23 @@ React 与 Vue 只是两层薄薄的“绑定层”。
 └──────────────────────────────────────────────────────────┘
 ```
 
+## 各家所长
+
+这套库不装作凭空长出来。能读到源码或规范的，就以源码为准：
+
+| 来源 | 采纳了什么 | 落在哪里 |
+| --- | --- | --- |
+| Semi Design | RGB 三元组 + alpha 的两层令牌；圆角 3/6/12、控件高 24/32/40 | `@i-design/tokens` |
+| Carbon (IBM) | productive / expressive 双缓动体系（曲线取自其 motion 包源码） | `--i-ease-*` |
+| Material Design | 状态层：用内容色按固定不透明度叠一层，而不是每个变体挑 hover 色 | `.i-state` / `--i-state-*` |
+| Ant Design | Result / Descriptions / Statistic / Watermark 的形态 | 数据展示、反馈 |
+| Element Plus | InputNumber 两端加减、Slider 刻度、Timeline | `controls="side"` |
+| TDesign | 命令式插件式 API（通知是函数不是组件） | `message` / `notification` |
+| WAI-ARIA APG | roving tabindex、combobox、tree 的键盘模型 | `useRoving` / `useSelect` / `useTree` |
+
+**没有照搬的**：色板是自己调的；语法高亮是自写的约 120 行分词器（不引 highlight.js）；
+定位、焦点锁、动效状态机都是自带实现。跨框架一致性测试是这套库自己的约束。
+
 ## 令牌是两层的
 
 ```
@@ -75,7 +92,7 @@ React 与 Vue 只是两层薄薄的“绑定层”。
 ```bash
 pnpm install
 pnpm build          # 构建 4 个包
-pnpm test           # 106 个测试：核心逻辑 / 键盘与动效 / 表格与校验 / AI 会话 / 跨框架一致性
+pnpm test           # 135 个测试：核心逻辑 / 键盘与动效 / 表格与校验 / AI 会话 / 跨框架一致性
 pnpm --filter @i-design/playground dev   # 打开 React 与 Vue 并排的演示页
 ```
 
@@ -120,22 +137,25 @@ https://claude.ai/code/artifact/1b6e11f5-e3eb-44e3-9db3-b8d558666354
 > 演示只做一套。React 与 Vue 的差异只出现在「用法」的代码切换里——
 > 两端产出的 DOM 本就相同（由一致性测试强制保证），演示两遍没有意义。
 
-## 当前组件（32 个，React / Vue 双端一致）
+## 当前组件（52 个，React / Vue 双端一致）
 
 **基础**：ConfigProvider（主题/密度/方向/语言，可嵌套）、Button（4 变体 × 5 状态 × 3 尺寸 × 4 形状）、
-Divider、Space、Row / Col（24 栅格 + 响应式断点）
+Divider、Space、Row / Col（24 栅格 + 响应式断点）、Layout（Header / Sider / Content / Footer）
 
 **表单**：Input、Textarea（自动增高）、Checkbox、Switch、RadioGroup（含分段按钮样式）、
 Select（WAI-ARIA combobox：方向键、Home/End、首字母跳转、`aria-activedescendant`）、
-FormItem、**Form + FormField**（校验引擎在 core，支持同步/异步规则、trigger、脏值追踪）
+FormItem、**Form + FormField**（校验引擎在 core，支持同步/异步规则、trigger、脏值追踪）、
+InputNumber（两种步进样式）、Slider（刻度 / 键盘 / 拖拽）、Rate（半星）、Upload（拖拽 + 三道限制）
 
 **数据展示**：**Table**（排序 / 多选 / 固定列 / 粘性表头 / 加载与空状态）、Card、Tag、
-Avatar（含 CJK 首字缩写）、Badge、Progress（线形/环形）、Skeleton、Spinner、Empty
+Avatar（含 CJK 首字缩写）、Badge、Progress（线形/环形）、Skeleton、Spinner、Empty、
+List、Descriptions、Statistic、Timeline、Segmented、Typography（省略 / 复制）、Tree（父子联动勾选）
 
 **导航**：Tabs（line / card / segment 三种，方向键切换）、Collapse（支持手风琴）、
-Pagination（省略号算法）、Steps、Breadcrumb
+Pagination（省略号算法）、Steps、Breadcrumb、Menu（inline / popup 同一模型）、Anchor、BackTop
 
-**反馈**：Alert、Dialog、Drawer（四个方向，RTL 自动镜像）、Tooltip / Popover、message（命令式）
+**反馈**：Alert、Dialog、Drawer（四个方向，RTL 自动镜像）、Tooltip / Popover、
+message 与 notification（均为命令式函数）、Result、Watermark（canvas 平铺）
 
 **动效**：Transition（7 种预设，相位状态机在 core）、Stagger、Carousel（拖拽 / 键盘 / 自动播放）
 

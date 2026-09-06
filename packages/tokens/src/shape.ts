@@ -70,11 +70,35 @@ export const shapeTokens: SemanticTokens = {
   'duration-base': '220ms',
   'duration-slow': '360ms',
   'duration-slower': '560ms',
-  'ease-standard': 'cubic-bezier(0.2, 0, 0, 1)',
-  'ease-enter': 'cubic-bezier(0.05, 0.7, 0.1, 1)',
-  'ease-exit': 'cubic-bezier(0.3, 0, 0.8, 0.15)',
+
+  /*
+   * Two motion families, the distinction Carbon draws: *productive* motion is
+   * for things the user does repeatedly and should not have to wait on;
+   * *expressive* motion is for moments that deserve attention. The curves are
+   * Carbon's published values.
+   */
+  'ease-standard': 'cubic-bezier(0.2, 0, 0.38, 0.9)',
+  'ease-enter': 'cubic-bezier(0, 0, 0.38, 0.9)',
+  'ease-exit': 'cubic-bezier(0.2, 0, 1, 0.9)',
+  'ease-expressive-standard': 'cubic-bezier(0.4, 0.14, 0.3, 1)',
+  'ease-expressive-enter': 'cubic-bezier(0, 0, 0.3, 1)',
+  'ease-expressive-exit': 'cubic-bezier(0.4, 0.14, 1, 1)',
+  /** Slight overshoot, for elements that should feel placed rather than faded. */
   'ease-emphasized': 'cubic-bezier(0.34, 1.4, 0.5, 1)',
   'ease-linear': 'linear',
+
+  /*
+   * State layers, the Material approach: instead of a hand-picked hover colour
+   * per variant, overlay the *content* colour at a fixed opacity. Every
+   * interactive surface then reacts identically, including on coloured grounds.
+   */
+  'state-hover': '0.06',
+  'state-focus': '0.1',
+  'state-pressed': '0.12',
+  'state-selected': '0.1',
+  'state-dragged': '0.16',
+  'state-disabled-content': '0.38',
+  'state-disabled-surface': '0.06',
 
   'z-index-sticky': '1000',
   'z-index-popup': '5000',

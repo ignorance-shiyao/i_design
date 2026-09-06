@@ -7,11 +7,13 @@ import { basicEntries } from './registry-basic.js';
 import { formEntries } from './registry-form.js';
 import { navEntries } from './registry-nav.js';
 import { aiEntries } from './registry-ai.js';
+import { moreEntries } from './registry-more.js';
 import { TokensPage, TOKEN_ANCHORS } from './TokensPage.js';
+import { CreditsPage, CREDITS_ANCHORS } from './CreditsPage.js';
 import type { DocEntry, Demo } from './types.js';
 
-const ENTRIES: DocEntry[] = [...basicEntries, ...formEntries, ...navEntries, ...aiEntries];
-const CATEGORIES = ['通用', '数据录入', '导航', 'AI 会话'];
+const ENTRIES: DocEntry[] = [...basicEntries, ...formEntries, ...navEntries, ...moreEntries, ...aiEntries];
+const CATEGORIES = ['通用', '数据录入', '导航', '数据展示', '反馈', 'AI 会话'];
 
 const BRANDS = [
   { name: '钴蓝', triplet: '65, 105, 239', hover: '107, 144, 251', active: '47, 79, 208' },
@@ -130,8 +132,8 @@ function Overview({ onNavigate }: { onNavigate: (page: Page) => void }) {
         </p>
         <div className="stats">
           {[
-            { value: '32', label: '组件（双端一致）' },
-            { value: '106', label: '测试全绿' },
+            { value: '52', label: '组件（双端一致）' },
+            { value: '132', label: '测试全绿' },
             { value: '0', label: '运行时依赖' },
             { value: '2', label: '层令牌：基元 + 语义' },
           ].map((stat) => (
@@ -233,7 +235,9 @@ export function App() {
 
   const anchors = page === 'tokens'
     ? TOKEN_ANCHORS
-    : entry
+    : page === 'credits'
+      ? CREDITS_ANCHORS
+      : entry
       ? [
           ...(entry.whenToUse ? [{ id: 'when', label: '何时使用' }] : []),
           { id: 'demos', label: '代码演示' },
@@ -247,7 +251,7 @@ export function App() {
         <button className="topbar__brand" onClick={() => setPage('overview')}>
           <span className="topbar__mark">i</span>
           <span className="topbar__wordmark">i-design</span>
-          <span className="topbar__version">0.5.0</span>
+          <span className="topbar__version">0.6.0</span>
         </button>
 
         <nav className="topbar__nav">
@@ -256,6 +260,9 @@ export function App() {
           </button>
           <button className={`topbar__link${page === 'tokens' ? ' topbar__link--active' : ''}`} onClick={() => setPage('tokens')}>
             设计
+          </button>
+          <button className={`topbar__link${page === 'credits' ? ' topbar__link--active' : ''}`} onClick={() => setPage('credits')}>
+            各家所长
           </button>
           <button className={`topbar__link${entry ? ' topbar__link--active' : ''}`} onClick={() => setPage('button')}>
             组件
@@ -303,6 +310,13 @@ export function App() {
             <span>设计令牌</span>
             <span className="sidebar__en">Tokens</span>
           </button>
+          <button
+            className={`sidebar__link${page === 'credits' ? ' sidebar__link--active' : ''}`}
+            onClick={() => setPage('credits')}
+          >
+            <span>各家所长</span>
+            <span className="sidebar__en">Credits</span>
+          </button>
           {groups.map((group) => (
             <div className="sidebar__group" key={group.category}>
               <div className="sidebar__title">{group.category}</div>
@@ -323,7 +337,15 @@ export function App() {
 
         <main className="content">
           <article className="content__body">
-            {page === 'overview' ? <Overview onNavigate={setPage} /> : page === 'tokens' ? <TokensPage /> : entry ? <ComponentPage entry={entry} /> : null}
+            {page === 'overview' ? (
+              <Overview onNavigate={setPage} />
+            ) : page === 'tokens' ? (
+              <TokensPage />
+            ) : page === 'credits' ? (
+              <CreditsPage />
+            ) : entry ? (
+              <ComponentPage entry={entry} />
+            ) : null}
 
             <footer className="footer">
               <span>i-design · 令牌与行为在 core，React / Vue 只做翻译</span>

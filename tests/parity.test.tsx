@@ -289,6 +289,112 @@ describe('React / Vue DOM parity', () => {
     );
   });
 
+  it('form controls — InputNumber, Slider, Rate, Upload', () => {
+    for (const controls of ['stack', 'side', 'none'] as const) {
+      expect(reactHtml(<R.InputNumber value={5} min={0} max={10} controls={controls} />)).toBe(
+        vueHtml(V.InputNumber, { modelValue: 5, min: 0, max: 10, controls }),
+      );
+    }
+    const marks = [{ value: 0, label: '0' }, { value: 50, label: '一半' }, { value: 100, label: '100' }];
+    expect(reactHtml(<R.Slider value={40} marks={marks} label="音量" />)).toBe(
+      vueHtml(V.Slider, { modelValue: 40, marks, label: '音量' }),
+    );
+    expect(reactHtml(<R.Rate value={2.5} allowHalf />)).toBe(vueHtml(V.Rate, { modelValue: 2.5, allowHalf: true }));
+
+    const files = [
+      { uid: '1', name: 'report.pdf', size: 1536, status: 'success' as const },
+      { uid: '2', name: 'big.zip', size: 900, status: 'error' as const },
+    ];
+    expect(reactHtml(<R.Upload files={files} variant="drag" hint="最大 5MB" />)).toBe(
+      vueHtml(V.Upload, { files, variant: 'drag', hint: '最大 5MB' }),
+    );
+  });
+
+  it('structure — Layout, Menu, Tree, Anchor, BackTop', () => {
+    expect(
+      reactHtml(
+        <R.Layout direction="row">
+          <R.LayoutSider collapsed>侧栏</R.LayoutSider>
+          <R.LayoutContent>正文</R.LayoutContent>
+        </R.Layout>,
+      ),
+    ).toBe(
+      vueHtml(V.Layout, { direction: 'row' }, {
+        default: () => [
+          h(V.LayoutSider, { collapsed: true }, () => '侧栏'),
+          h(V.LayoutContent, null, () => '正文'),
+        ],
+      }),
+    );
+
+    const menuItems = [
+      { value: 'home', label: '首页' },
+      { value: 'group', label: '分组', children: [{ value: 'a', label: '子项' }] },
+      { value: 'danger', label: '删除', danger: true, divided: true },
+    ];
+    expect(reactHtml(<R.Menu items={menuItems} value="home" expanded={['group']} />)).toBe(
+      vueHtml(V.Menu, { items: menuItems, value: 'home', expanded: ['group'] }),
+    );
+
+    const nodes = [
+      { key: 'src', label: 'src', children: [{ key: 'a', label: 'a.ts' }] },
+      { key: 'readme', label: 'README' },
+    ];
+    expect(reactHtml(<R.Tree nodes={nodes} expanded={['src']} checkable checked={['a']} />)).toBe(
+      vueHtml(V.Tree, { nodes, expanded: ['src'], checkable: true, checked: ['a'] }),
+    );
+  });
+
+  it('data display — List, Descriptions, Statistic, Timeline, Segmented, Typography, Result', () => {
+    expect(
+      reactHtml(
+        <R.List header="标题">
+          <R.ListItem title="第一项" description="说明" />
+        </R.List>,
+      ),
+    ).toBe(
+      vueHtml(V.List, { header: undefined }, {
+        header: () => '标题',
+        default: () => h(V.ListItem, { title: '第一项', description: '说明' }),
+      }),
+    );
+
+    const items = [
+      { label: '订单号', value: 'o-1024' },
+      { label: '状态', value: '已完成' },
+      { label: '备注', value: '无', span: 2 },
+    ];
+    expect(reactHtml(<R.Descriptions items={items} bordered columns={2} />)).toBe(
+      vueHtml(V.Descriptions, { items, bordered: true, columns: 2 }),
+    );
+
+    expect(reactHtml(<R.Statistic label="月活" value={1234567.891} precision={2} trend="up" suffix="人" />)).toBe(
+      vueHtml(V.Statistic, { label: '月活', value: 1234567.891, precision: 2, trend: 'up', suffix: '人' }),
+    );
+
+    const events = [
+      { key: '1', title: '创建订单', time: '10:00', status: 'success' as const },
+      { key: '2', title: '等待付款', time: '10:02', status: 'process' as const },
+    ];
+    expect(reactHtml(<R.Timeline items={events} />)).toBe(vueHtml(V.Timeline, { items: events }));
+
+    const segments = [{ value: 'day', label: '日' }, { value: 'week', label: '周' }];
+    expect(reactHtml(<R.Segmented options={segments} value="week" />)).toBe(
+      vueHtml(V.Segmented, { options: segments, modelValue: 'week' }),
+    );
+
+    expect(reactHtml(<R.Typography as="title" level={2} strong>标题</R.Typography>)).toBe(
+      vueHtml(V.Typography, { as: 'title', level: 2, strong: true }, { default: () => '标题' }),
+    );
+    expect(reactHtml(<R.Typography ellipsis={2}>很长的一段文字</R.Typography>)).toBe(
+      vueHtml(V.Typography, { ellipsis: 2 }, { default: () => '很长的一段文字' }),
+    );
+
+    expect(reactHtml(<R.Result status="success" title="提交成功" description="我们会尽快处理" />)).toBe(
+      vueHtml(V.Result, { status: 'success', title: '提交成功', description: '我们会尽快处理' }),
+    );
+  });
+
   it('ConfigProvider emits the same theme attributes', () => {
     expect(reactHtml(<R.ConfigProvider mode="dark" density="compact" />)).toBe(
       vueHtml(V.ConfigProvider, { mode: 'dark', density: 'compact' }),
