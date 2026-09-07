@@ -1,5 +1,26 @@
 <script setup lang="ts">
 import ICard from '@/components/ICard.vue'
+import mascot from '@/assets/illustrations/mascot/mascot.webp'
+import mascot2x from '@/assets/illustrations/mascot/mascot@2x.webp'
+import noData from '@/assets/illustrations/empty/no-data.webp'
+import searchEmpty from '@/assets/illustrations/empty/search-empty.webp'
+import loadFailed from '@/assets/illustrations/empty/load-failed.webp'
+import noPermission from '@/assets/illustrations/empty/no-permission.webp'
+import err404 from '@/assets/illustrations/error/404.webp'
+import err500 from '@/assets/illustrations/error/500.webp'
+import heroLight from '@/assets/illustrations/hero/hero-light.webp'
+import heroDark from '@/assets/illustrations/hero/hero-dark.webp'
+
+const illustrations = [
+  { src: noData, name: 'no-data', usage: '空状态 · 从未创建' },
+  { src: searchEmpty, name: 'search-empty', usage: '空状态 · 筛选无果' },
+  { src: loadFailed, name: 'load-failed', usage: '空状态 · 加载失败' },
+  { src: noPermission, name: 'no-permission', usage: '空状态 · 无权限' },
+  { src: err404, name: '404', usage: '错误页 · 地址不存在' },
+  { src: err500, name: '500', usage: '错误页 · 服务异常' },
+  { src: heroLight, name: 'hero-light', usage: '首页 Hero · 浅色' },
+  { src: heroDark, name: 'hero-dark', usage: '首页 Hero · 深色' }
+]
 
 const resources = [
   { title: '设计令牌表', desc: '完整的色彩、字号、间距、圆角、阴影与动效令牌，含语义层映射。', to: '/design/tokens' },
@@ -26,6 +47,45 @@ const contributing = [
         <ICard :title="item.title" hoverable>{{ item.desc }}</ICard>
       </RouterLink>
     </div>
+
+    <h2>插画</h2>
+    <p>
+      体系的吉祥物是「小白」与「十五」两只猫。插画用于空状态与错误页——这些位置本就令人
+      沮丧，一只猫能把「出问题了」说得不那么冷硬。
+    </p>
+    <div class="mascot">
+      <img :src="mascot" :srcset="`${mascot} 1x, ${mascot2x} 2x`" width="320" alt="小白与十五主形象" />
+      <div>
+        <h3>主形象</h3>
+        <p>
+          白色长毛猫「小白」与三花猫「十五」。配色沿用品牌蓝紫与中性灰阶，
+          因此插画放进任何页面都不会与界面打架。
+        </p>
+      </div>
+    </div>
+
+    <div class="gallery">
+      <figure v-for="item in illustrations" :key="item.name">
+        <img :src="item.src" :alt="item.usage" loading="lazy" />
+        <figcaption>
+          <code>{{ item.name }}</code>
+          <span>{{ item.usage }}</span>
+        </figcaption>
+      </figure>
+    </div>
+
+    <h3>为什么是 WebP 位图而不是 SVG</h3>
+    <p>
+      这批插画是带连续渐变与毛发笔触的绘画稿，单张有 7 万到 15 万种独立颜色。矢量化后要么把
+      毛发抹成色块、丢掉神态，要么产生数万条路径、体积比位图还大且渲染更慢。因此按显示尺寸
+      导出 1x / 2x 的 WebP，由 <code>srcset</code> 交给浏览器按屏幕像素密度取用——位图只有被
+      放大时才会失真，而这里始终是缩小使用。整套素材从 8.8 MB 压到 750 KB 左右。
+    </p>
+    <p>
+      需要跟随主题变色的小图形（箭头、勾选、状态标识）走的是另一条路：它们是
+      <RouterLink to="/components/icon">图标系统</RouterLink>里的内联 SVG，用
+      <code>currentColor</code> 着色。两者分工明确——图标表意，插画表情绪。
+    </p>
 
     <h2>本地运行</h2>
     <pre class="code"><code>npm install
@@ -67,5 +127,45 @@ npm run build   # 类型检查 + 生产构建</code></pre>
   overflow-x: auto;
 }
 ol { color: var(--i-color-text-secondary); padding-left: var(--i-spacing-5); }
+
+.mascot {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-6);
+  flex-wrap: wrap;
+  padding: var(--i-spacing-6);
+  margin: var(--i-spacing-5) 0;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-xl);
+  background: var(--i-gradient-surface);
+  box-shadow: var(--i-shadow-sm);
+}
+.mascot img { width: 240px; height: auto; }
+.mascot h3 { margin-bottom: var(--i-spacing-2); }
+.mascot div { flex: 1; min-width: 240px; }
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--i-spacing-4);
+  margin-top: var(--i-spacing-5);
+}
+.gallery figure {
+  margin: 0;
+  padding: var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  text-align: center;
+}
+.gallery img { width: 100%; height: auto; }
+.gallery figcaption {
+  display: grid;
+  gap: 2px;
+  margin-top: var(--i-spacing-2);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.gallery code { font-size: 11px; }
 ol li { margin-bottom: var(--i-spacing-2); }
 </style>

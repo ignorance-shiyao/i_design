@@ -1,5 +1,8 @@
 <script setup lang="ts">
-withDefaults(
+import { computed } from 'vue'
+import { emptyIllustrations } from './illustrations'
+
+const props = withDefaults(
   defineProps<{
     /** 空态成因决定文案与可用操作 */
     type?: 'empty' | 'search' | 'error' | 'permission'
@@ -9,6 +12,8 @@ withDefaults(
   }>(),
   { type: 'empty', title: '', description: '', size: 'md' }
 )
+
+const art = computed(() => emptyIllustrations[props.type])
 
 const presets: Record<string, { title: string; description: string }> = {
   empty: { title: '暂无数据', description: '这里还没有内容，创建第一条试试。' },
@@ -20,14 +25,17 @@ const presets: Record<string, { title: string; description: string }> = {
 
 <template>
   <div class="i-empty" :class="`i-empty--${size}`">
-    <!-- illustration 插槽：传入正式插画即可整体替换，默认是内置的占位线稿 -->
+    <!-- illustration 插槽：业务可整体替换；默认使用体系自带的猫咪插画 -->
     <slot name="illustration">
-      <svg class="i-empty__art" viewBox="0 0 120 90" fill="none" aria-hidden="true">
-        <ellipse cx="60" cy="76" rx="38" ry="6" class="i-empty__shadow" />
-        <path d="M26 34h68v34a6 6 0 0 1-6 6H32a6 6 0 0 1-6-6z" class="i-empty__box" />
-        <path d="M26 34 38 14h44l12 20" class="i-empty__lid" />
-        <path d="M26 34h20l5 10h18l5-10h20" class="i-empty__slot" />
-      </svg>
+      <img
+        class="i-empty__art"
+        :src="art.src"
+        :srcset="art.srcset"
+        :width="art.width"
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
     </slot>
     <p class="i-empty__title">{{ title || presets[type].title }}</p>
     <p class="i-empty__desc">{{ description || presets[type].description }}</p>
@@ -46,19 +54,14 @@ const presets: Record<string, { title: string; description: string }> = {
 .i-empty--sm { padding: var(--i-spacing-6); }
 .i-empty :deep(.i-empty__art),
 .i-empty :deep(img),
-.i-empty :deep(svg) { width: 120px; height: auto; margin-bottom: var(--i-spacing-2); }
+.i-empty :deep(svg) {
+  width: 180px;
+  height: auto;
+  margin-bottom: var(--i-spacing-2);
+}
 .i-empty--sm :deep(.i-empty__art),
 .i-empty--sm :deep(img),
-.i-empty--sm :deep(svg) { width: 84px; }
-.i-empty__shadow { fill: var(--i-color-bg-muted); }
-.i-empty__box { fill: var(--i-color-bg-subtle); stroke: var(--i-color-border-strong); stroke-width: 1.5; }
-.i-empty__lid,
-.i-empty__slot {
-  stroke: var(--i-color-border-strong);
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-  fill: none;
-}
+.i-empty--sm :deep(svg) { width: 120px; }
 .i-empty__title { color: var(--i-color-text); font-weight: 500; }
 .i-empty__desc { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); max-width: 42ch; }
 .i-empty__action { margin-top: var(--i-spacing-3); }

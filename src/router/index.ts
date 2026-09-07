@@ -50,7 +50,8 @@ const routes: RouteRecordRaw[] = [
     component: DocLayout,
     children: [{ path: '', component: () => import('@/pages/ResourcesPage.vue') }]
   },
-  { path: '/:pathMatch(.*)*', redirect: '/' }
+  // 不静默跳首页：用户需要知道是地址错了，而不是以为首页就是他要找的页面
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/pages/NotFoundPage.vue') }
 ]
 
 export default createRouter({

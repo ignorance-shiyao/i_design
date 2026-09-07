@@ -72,6 +72,14 @@ src/
 
 新增组件时：实现 `src/components/IXxx.vue` → 在 `src/components/index.ts` 注册 → 增加 `src/pages/components/XxxPage.vue` 文档页 → 在 `src/router/index.ts` 与 `src/data/nav.ts` 中登记。
 
+## 插画
+
+吉祥物「小白」与「十五」的插画用于空状态、错误页与首页 Hero，见站内 **设计资源** 页。
+
+素材为带渐变与毛发笔触的绘画稿（单张 7–15 万独立颜色），不适合矢量化，因此按显示尺寸
+导出 1x / 2x 的 WebP 并用 `srcset` 交给浏览器选择：整套从 8.8 MB 压到约 750 KB。
+需要跟随主题变色的小图形走图标系统（内联 SVG + `currentColor`）——图标表意，插画表情绪。
+
 ## License
 
 MIT

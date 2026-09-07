@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import IButton from '@/components/IButton.vue'
 import IInput from '@/components/IInput.vue'
 import ICard from '@/components/ICard.vue'
@@ -7,6 +7,11 @@ import ITag from '@/components/ITag.vue'
 import IAlert from '@/components/IAlert.vue'
 import ISwitch from '@/components/ISwitch.vue'
 import { componentCategories, plannedCount, readyCount } from '@/data/components'
+import { useTheme } from '@/composables/useTheme'
+import heroLight from '@/assets/illustrations/hero/hero-light.webp'
+import heroLight2x from '@/assets/illustrations/hero/hero-light@2x.webp'
+import heroDark from '@/assets/illustrations/hero/hero-dark.webp'
+import heroDark2x from '@/assets/illustrations/hero/hero-dark@2x.webp'
 import CodeBlock from '@/site/CodeBlock.vue'
 import IIcon from '@/components/IIcon.vue'
 import ISteps from '@/components/ISteps.vue'
@@ -37,6 +42,14 @@ const features = [
   { icon: 'moon', title: '深色模式内建', desc: '语义令牌天然支持双主题，业务组件无需任何适配代码。' },
   { icon: 'check-circle', title: '可访问性优先', desc: '语义化标签、键盘可达、可见的焦点样式与 ARIA 状态贯穿全部组件。' }
 ] as const
+
+const { theme } = useTheme()
+// 插画有明暗两版，跟随主题切换而不是靠滤镜硬套
+const hero = computed(() =>
+  theme.value === 'dark'
+    ? { src: heroDark, srcset: `${heroDark} 1x, ${heroDark2x} 2x` }
+    : { src: heroLight, srcset: `${heroLight} 1x, ${heroLight2x} 2x` }
+)
 
 const usageSnippet = `<IButton variant="primary">
   提交
@@ -79,6 +92,14 @@ const demoSwitch = ref(true)
 
         <!-- 用组件本身搭出预览面板，既是展示也是回归用例 -->
         <div class="hero__preview" aria-label="组件预览">
+          <img
+            class="hero__art"
+            :src="hero.src"
+            :srcset="hero.srcset"
+            width="600"
+            alt=""
+            fetchpriority="high"
+          />
           <ICard title="创建工作项" hoverable>
             <ISteps class="preview__steps" :items="previewSteps" :current="1" />
             <div class="preview__field">
@@ -281,6 +302,13 @@ app.use(IDesign)"
   color: var(--i-color-text-tertiary);
 }
 
+.hero__art {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  margin: 0 auto var(--i-spacing-5);
+}
 .hero__preview {
   filter: drop-shadow(var(--i-shadow-xl));
   animation: hero-float 600ms var(--i-motion-easing) both;
