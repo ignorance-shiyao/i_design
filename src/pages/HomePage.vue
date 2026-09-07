@@ -11,10 +11,7 @@ import IAlert from '@/components/IAlert.vue'
 import ISwitch from '@/components/ISwitch.vue'
 import { componentCategories, plannedCount, readyCount } from '@/data/components'
 import { useTheme } from '@/composables/useTheme'
-import heroLight from '@/assets/illustrations/hero/hero-light.webp'
-import heroLight2x from '@/assets/illustrations/hero/hero-light@2x.webp'
-import heroDark from '@/assets/illustrations/hero/hero-dark.webp'
-import heroDark2x from '@/assets/illustrations/hero/hero-dark@2x.webp'
+import { heroIllustrations } from '@i-design/common'
 import CodeBlock from '@/site/CodeBlock.vue'
 import IIcon from '@/components/IIcon.vue'
 import ISteps from '@/components/ISteps.vue'
@@ -50,8 +47,8 @@ const { theme } = useTheme()
 // 插画有明暗两版，跟随主题切换而不是靠滤镜硬套
 const hero = computed(() =>
   theme.value === 'dark'
-    ? { src: heroDark, srcset: `${heroDark} 1x, ${heroDark2x} 2x` }
-    : { src: heroLight, srcset: `${heroLight} 1x, ${heroLight2x} 2x` }
+    ? heroIllustrations.dark
+    : heroIllustrations.light
 )
 
 // Hero 预览卡随指针做 3D 倾斜，插画层浮在卡片之前形成纵深

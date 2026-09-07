@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import IButton from '@/components/IButton.vue'
 import IIcon from '@/components/IIcon.vue'
-import art from '@/assets/illustrations/error/404.webp'
-import art2x from '@/assets/illustrations/error/404@2x.webp'
+import { errorIllustrations } from '@i-design/common'
+
+const art = errorIllustrations['404']
 </script>
 
 <template>
   <section class="nf i-container">
-    <img class="nf__art" :src="art" :srcset="`${art} 1x, ${art2x} 2x`" width="360" alt="" />
+    <img class="nf__art" :src="art.src" :srcset="art.srcset" width="360" alt="" />
     <h1 class="nf__title">页面走丢了</h1>
     <p class="nf__desc">
       地址可能已经变更或删除。你可以回到首页，或直接去组件总览找想看的内容。

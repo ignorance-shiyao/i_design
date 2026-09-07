@@ -1,4 +1,5 @@
 /* IPopconfirm —— 由 Vue / React / mobile 各端共享 */
+/* 方向/状态类必须限定到 .i-popconfirm__panel：抽出 scoped 样式后，裸 .is-* 会命中页面上任何同名类 */
 .i-popconfirm { position: relative; display: inline-flex; }
 .i-popconfirm__trigger { display: inline-flex; }
 
@@ -13,10 +14,10 @@
   box-shadow: var(--i-shadow-lg);
   text-align: left;
 }
-.is-top { bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
-.is-bottom { top: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
-.is-left { right: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
-.is-right { left: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
+.i-popconfirm__panel.is-top { bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
+.i-popconfirm__panel.is-bottom { top: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
+.i-popconfirm__panel.is-left { right: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
+.i-popconfirm__panel.is-right { left: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
 
 .i-popconfirm__head { display: flex; gap: var(--i-spacing-2); }
 .i-popconfirm__icon { margin-top: 2px; }

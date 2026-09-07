@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { emptyIllustrations } from './illustrations'
+import { emptyIllustrations } from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{

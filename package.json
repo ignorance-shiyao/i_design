@@ -13,7 +13,8 @@
     "check:parity": "npm run build:tokens && npm run build:styles && node scripts/check-parity.mjs",
     "build:styles:mp": "node packages/miniprogram/scripts/build-styles.mjs",
     "build:react-demo": "vite build --config packages/react/vite.config.ts",
-    "build:styles": "node scripts/build-styles-index.mjs"
+    "build:styles": "node scripts/build-styles-index.mjs",
+    "build:react-index": "node scripts/build-react-index.mjs"
   },
   "dependencies": {
     "vue": "^3.5.13",

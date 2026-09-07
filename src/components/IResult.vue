@@ -2,10 +2,7 @@
 import { computed } from 'vue'
 import IIcon from './IIcon.vue'
 import type { IconName } from './icons'
-import err404 from '@/assets/illustrations/error/404.webp'
-import err4042x from '@/assets/illustrations/error/404@2x.webp'
-import err500 from '@/assets/illustrations/error/500.webp'
-import err5002x from '@/assets/illustrations/error/500@2x.webp'
+import { errorIllustrations } from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{
@@ -19,10 +16,7 @@ const props = withDefaults(
 )
 
 /** 404 / 500 有专门的插画；其余状态用图标即可，不必为每种都画一张 */
-const artwork: Partial<Record<string, { src: string; srcset: string }>> = {
-  '404': { src: err404, srcset: `${err404} 1x, ${err4042x} 2x` },
-  '500': { src: err500, srcset: `${err500} 1x, ${err5002x} 2x` }
-}
+const artwork: Partial<Record<string, { src: string; srcset: string }>> = errorIllustrations
 
 const icons: Record<string, IconName> = {
   success: 'check-circle',

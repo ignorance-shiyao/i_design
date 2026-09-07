@@ -1,25 +1,24 @@
 <script setup lang="ts">
 import ICard from '@/components/ICard.vue'
-import mascot from '@/assets/illustrations/mascot/mascot.webp'
-import mascot2x from '@/assets/illustrations/mascot/mascot@2x.webp'
-import noData from '@/assets/illustrations/empty/no-data.webp'
-import searchEmpty from '@/assets/illustrations/empty/search-empty.webp'
-import loadFailed from '@/assets/illustrations/empty/load-failed.webp'
-import noPermission from '@/assets/illustrations/empty/no-permission.webp'
-import err404 from '@/assets/illustrations/error/404.webp'
-import err500 from '@/assets/illustrations/error/500.webp'
-import heroLight from '@/assets/illustrations/hero/hero-light.webp'
-import heroDark from '@/assets/illustrations/hero/hero-dark.webp'
+import {
+  emptyIllustrations,
+  errorIllustrations,
+  heroIllustrations,
+  mascotIllustration
+} from '@i-design/common'
+
+const mascot = mascotIllustration.src
+const mascot2x = mascotIllustration.srcset
 
 const illustrations = [
-  { src: noData, name: 'no-data', usage: '空状态 · 从未创建' },
-  { src: searchEmpty, name: 'search-empty', usage: '空状态 · 筛选无果' },
-  { src: loadFailed, name: 'load-failed', usage: '空状态 · 加载失败' },
-  { src: noPermission, name: 'no-permission', usage: '空状态 · 无权限' },
-  { src: err404, name: '404', usage: '错误页 · 地址不存在' },
-  { src: err500, name: '500', usage: '错误页 · 服务异常' },
-  { src: heroLight, name: 'hero-light', usage: '首页 Hero · 浅色' },
-  { src: heroDark, name: 'hero-dark', usage: '首页 Hero · 深色' }
+  { src: emptyIllustrations.empty.src, name: 'no-data', usage: '空状态 · 从未创建' },
+  { src: emptyIllustrations.search.src, name: 'search-empty', usage: '空状态 · 筛选无果' },
+  { src: emptyIllustrations.error.src, name: 'load-failed', usage: '空状态 · 加载失败' },
+  { src: emptyIllustrations.permission.src, name: 'no-permission', usage: '空状态 · 无权限' },
+  { src: errorIllustrations['404'].src, name: '404', usage: '错误页 · 地址不存在' },
+  { src: errorIllustrations['500'].src, name: '500', usage: '错误页 · 服务异常' },
+  { src: heroIllustrations.light.src, name: 'hero-light', usage: '首页 Hero · 浅色' },
+  { src: heroIllustrations.dark.src, name: 'hero-dark', usage: '首页 Hero · 深色' }
 ]
 
 const resources = [
@@ -54,7 +53,7 @@ const contributing = [
       沮丧，一只猫能把「出问题了」说得不那么冷硬。
     </p>
     <div class="mascot">
-      <img :src="mascot" :srcset="`${mascot} 1x, ${mascot2x} 2x`" width="320" alt="小白与十五主形象" />
+      <img :src="mascot" :srcset="mascot2x" width="320" alt="小白与十五主形象" />
       <div>
         <h3>主形象</h3>
         <p>

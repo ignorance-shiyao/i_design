@@ -7,7 +7,7 @@
  * 覆盖：CSS（Web）/ WXSS（小程序）/ JSON / Dart（Flutter）四份产物，
  * 以及 Avatar 配色规则在 TS 与 Dart 两处实现的一致性。
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 
 const base = 'packages/common/dist/tokens'
@@ -75,7 +75,26 @@ const intSizes = [...dartLight.matchAll(/static const double (\w+) = (\d+);/g)]
 check('Dart 尺寸声明为 double（整数会让 EdgeInsets 编译失败）', intSizes.length === 0,
   intSizes.slice(0, 3).map((m) => m[1]).join(', '))
 
-/* ---------- 4. Avatar 配色规则 TS 与 Dart 一致 ---------- */
+/* ---------- 4. 共享样式不得出现会全局泄漏的通用选择器 ---------- */
+/*
+ * 组件样式从 Vue 的 scoped 块抽到全局后，像 .is-left / .is-error 这类通用状态类
+ * 会命中页面上任何带同名类的元素。曾经就有 tooltip 的 .is-left 把 Form 的
+ * 「标签左置」整体上移 83px——布局错乱，而构建与类型检查全绿。
+ */
+const styleDir = 'packages/common/src/styles/components'
+const leaks = []
+for (const file of readdirSync(styleDir).filter((f) => f.endsWith('.css'))) {
+  const css = readFileSync(`${styleDir}/${file}`, 'utf8')
+  for (const match of css.matchAll(/^([^\s@{/][^{]*)\{/gm)) {
+    for (const part of match[1].split(',')) {
+      const first = part.trim().split(/\s+/)[0]
+      if (first.startsWith('.') && !first.includes('.i-')) leaks.push(`${file}: ${first}`)
+    }
+  }
+}
+check('共享样式无全局泄漏的通用选择器', leaks.length === 0, leaks.slice(0, 4).join('; '))
+
+/* ---------- 5. Avatar 配色规则 TS 与 Dart 一致 ---------- */
 execFileSync('node_modules/.bin/esbuild',
   ['packages/common/src/logic/avatar.ts', '--bundle', '--format=esm', '--outfile=/tmp/parity-avatar.mjs'],
   { stdio: 'pipe' })

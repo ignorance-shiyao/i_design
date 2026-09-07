@@ -1,4 +1,5 @@
 /* IResult —— 由 Vue / React / mobile 各端共享 */
+/* 方向/状态类必须限定到 .i-result：抽出 scoped 样式后，裸 .is-* 会命中页面上任何同名类 */
 .i-result {
   display: grid;
   justify-items: center;
@@ -20,11 +21,11 @@
   border-radius: var(--i-radius-full);
 }
 .i-result--sm .i-result__icon { width: 52px; height: 52px; }
-.is-success .i-result__icon { color: var(--i-color-success); background: var(--i-color-success-subtle); }
-.is-info .i-result__icon { color: var(--i-color-info); background: var(--i-color-info-subtle); }
-.is-warning .i-result__icon { color: var(--i-color-warning); background: var(--i-color-warning-subtle); }
-.is-error .i-result__icon,
-.is-403 .i-result__icon { color: var(--i-color-danger); background: var(--i-color-danger-subtle); }
+.i-result.is-success .i-result__icon { color: var(--i-color-success); background: var(--i-color-success-subtle); }
+.i-result.is-info .i-result__icon { color: var(--i-color-info); background: var(--i-color-info-subtle); }
+.i-result.is-warning .i-result__icon { color: var(--i-color-warning); background: var(--i-color-warning-subtle); }
+.i-result.is-error .i-result__icon,
+.i-result.is-403 .i-result__icon { color: var(--i-color-danger); background: var(--i-color-danger-subtle); }
 
 .i-result__title { font-size: var(--i-font-size-xl); }
 .i-result--sm .i-result__title { font-size: var(--i-font-size-lg); }
