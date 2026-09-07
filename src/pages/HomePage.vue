@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useTilt } from '@/composables/useTilt'
+import { useCountUp } from '@/composables/useCountUp'
+import ValueCube from '@/site/ValueCube.vue'
 import IButton from '@/components/IButton.vue'
 import IInput from '@/components/IInput.vue'
 import ICard from '@/components/ICard.vue'
@@ -51,6 +54,14 @@ const hero = computed(() =>
     : { src: heroLight, srcset: `${heroLight} 1x, ${heroLight2x} 2x` }
 )
 
+// Hero 预览卡随指针做 3D 倾斜，插画层浮在卡片之前形成纵深
+const preview = ref<HTMLElement | null>(null)
+useTilt(preview, { max: 6 })
+
+const statsEl = ref<HTMLElement | null>(null)
+const readyDisplay = useCountUp(statsEl, readyCount)
+const categoryDisplay = useCountUp(statsEl, componentCategories.length)
+
 const usageSnippet = `<IButton variant="primary">
   提交
 </IButton>`
@@ -82,25 +93,26 @@ const demoSwitch = ref(true)
             </RouterLink>
             <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
           </div>
-          <dl class="hero__stats">
-            <div><dt>{{ readyCount }}</dt><dd>已实现组件</dd></div>
-            <div><dt>{{ componentCategories.length }}</dt><dd>场景分类</dd></div>
+          <dl ref="statsEl" class="hero__stats">
+            <div><dt>{{ readyDisplay }}</dt><dd>已实现组件</dd></div>
+            <div><dt>{{ categoryDisplay }}</dt><dd>场景分类</dd></div>
             <div><dt>60+</dt><dd>设计令牌</dd></div>
             <div><dt>2</dt><dd>内建主题</dd></div>
           </dl>
         </div>
 
         <!-- 用组件本身搭出预览面板，既是展示也是回归用例 -->
-        <div class="hero__preview" aria-label="组件预览">
+        <div ref="preview" class="hero__preview" aria-label="组件预览">
           <img
-            class="hero__art"
+            class="hero__art i-tilt__layer"
+            style="--i-layer-depth: 40"
             :src="hero.src"
             :srcset="hero.srcset"
             width="600"
             alt=""
             fetchpriority="high"
           />
-          <ICard title="创建工作项" hoverable>
+          <ICard class="i-tilt__layer" style="--i-layer-depth: 18" title="创建工作项" hoverable>
             <ISteps class="preview__steps" :items="previewSteps" :current="1" />
             <div class="preview__field">
               <label>标题</label>
@@ -132,12 +144,20 @@ const demoSwitch = ref(true)
       <span class="i-eyebrow">Principles</span>
       <h2 class="section__title">设计价值观</h2>
       <p class="section__desc i-lead">三条价值观贯穿每一次设计决策，也是评审组件是否合格的标尺。</p>
-      <div class="values">
-        <article v-for="value in values" :key="value.key" class="value">
+      <div class="values-3d">
+        <ValueCube :size="200" />
+        <div class="values">
+          <article
+            v-for="(value, index) in values"
+            :key="value.key"
+            v-reveal:left="index * 90"
+            class="value"
+          >
           <span class="value__en">{{ value.en }}</span>
           <h3 class="value__title">{{ value.key }}</h3>
-          <p>{{ value.desc }}</p>
-        </article>
+            <p>{{ value.desc }}</p>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -147,7 +167,13 @@ const demoSwitch = ref(true)
         <span class="i-eyebrow">Why</span>
         <h2 class="section__title">为什么选择 Ignorance Design</h2>
         <div class="features">
-          <ICard v-for="feature in features" :key="feature.title" hoverable class="feature">
+          <ICard
+            v-for="(feature, index) in features"
+            :key="feature.title"
+            v-reveal:depth="index * 80"
+            hoverable
+            class="feature i-lift"
+          >
             <span class="feature__icon"><IIcon :name="feature.icon" :size="20" /></span>
             <h3 class="feature__title">{{ feature.title }}</h3>
             <p class="feature__desc">{{ feature.desc }}</p>
@@ -165,7 +191,12 @@ const demoSwitch = ref(true)
         另有 {{ plannedCount }} 个在规划中——把边界写出来，比让使用者去猜要诚实。
       </p>
       <div class="coverage">
-        <div v-for="category in componentCategories" :key="category.title" class="coverage__col">
+        <div
+          v-for="(category, index) in componentCategories"
+          :key="category.title"
+          v-reveal="index * 70"
+          class="coverage__col"
+        >
           <div class="coverage__head">
             <h3>{{ category.title }}</h3>
             <span class="coverage__count">
@@ -195,12 +226,12 @@ const demoSwitch = ref(true)
       <span class="i-eyebrow">Get started</span>
       <h2 class="section__title">三步接入</h2>
       <div class="steps">
-        <div class="step">
+        <div v-reveal:depth="0" class="step i-lift">
           <span class="step__no">1</span>
           <h3>安装依赖</h3>
           <CodeBlock code="npm install" lang="bash" :copyable="false" />
         </div>
-        <div class="step">
+        <div v-reveal:depth="100" class="step i-lift">
           <span class="step__no">2</span>
           <h3>引入令牌与组件</h3>
           <CodeBlock
@@ -212,7 +243,7 @@ import IDesign from '@/components'
 app.use(IDesign)"
           />
         </div>
-        <div class="step">
+        <div v-reveal:depth="200" class="step i-lift">
           <span class="step__no">3</span>
           <h3>直接使用</h3>
           <CodeBlock
@@ -225,7 +256,7 @@ app.use(IDesign)"
     </section>
 
     <section class="i-container">
-      <div class="cta">
+      <div v-reveal:depth class="cta">
         <div>
           <h2>把设计决策沉淀成系统</h2>
           <p>浏览完整的令牌表与组件文档，或直接从组件示例开始。</p>
@@ -334,6 +365,20 @@ app.use(IDesign)"
 .preview__field--row label { margin-bottom: 0; }
 .preview__tags { display: flex; gap: var(--i-spacing-2); margin-bottom: var(--i-spacing-4); }
 .preview__footer { display: flex; justify-content: flex-end; gap: var(--i-spacing-2); }
+
+/* 价值观：立方体与文案并排 */
+.values-3d {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: var(--i-spacing-12);
+  align-items: center;
+  margin-top: var(--i-spacing-8);
+}
+.values-3d .values { grid-template-columns: 1fr; gap: var(--i-spacing-4); }
+
+@media (max-width: 860px) {
+  .values-3d { grid-template-columns: 1fr; gap: var(--i-spacing-10); }
+}
 
 /* 覆盖范围 */
 .coverage {
