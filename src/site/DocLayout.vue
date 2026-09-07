@@ -1,10 +1,28 @@
 <script setup lang="ts">
+import { nextTick, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { docNav } from '@/data/nav'
+
+const side = ref<HTMLElement | null>(null)
+const route = useRoute()
+
+/**
+ * 侧栏是独立滚动容器，进入深层页面时当前项可能在可视区之外。
+ * 路由变化后把它滚进视野，用户才知道自己在导航树的哪个位置。
+ */
+async function revealActive() {
+  await nextTick()
+  const active = side.value?.querySelector('a.router-link-exact-active')
+  active?.scrollIntoView({ block: 'nearest' })
+}
+
+onMounted(revealActive)
+watch(() => route.path, revealActive)
 </script>
 
 <template>
   <div class="i-container doc-layout">
-    <aside class="doc-layout__side">
+    <aside ref="side" class="doc-layout__side">
       <div v-for="group in docNav" :key="group.title" class="doc-layout__group">
         <p class="doc-layout__group-title">{{ group.title }}</p>
         <RouterLink v-for="item in group.items" :key="item.to" :to="item.to">{{ item.label }}</RouterLink>
@@ -29,7 +47,23 @@ import { docNav } from '@/data/nav'
   top: 84px;
   display: grid;
   gap: var(--i-spacing-6);
+  align-content: start;
+  /*
+   * 侧栏比视口高时，仅靠 sticky 会让下半截永远够不到——粘住顶部后它不随页面滚动，
+   * 只有父容器快结束时才「解锁」，表现为菜单与内容错位。因此让它自己成为滚动容器。
+   */
+  max-height: calc(100vh - 84px - var(--i-spacing-6));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: var(--i-spacing-2);
 }
+/* 细滚动条，静止时隐藏，避免侧栏出现一条常驻竖线 */
+.doc-layout__side::-webkit-scrollbar { width: 4px; }
+.doc-layout__side::-webkit-scrollbar-thumb {
+  border-radius: var(--i-radius-full);
+  background: transparent;
+}
+.doc-layout__side:hover::-webkit-scrollbar-thumb { background: var(--i-color-border); }
 .doc-layout__group { display: grid; gap: var(--i-spacing-1); }
 .doc-layout__group-title {
   font-family: var(--i-font-family-mono);
@@ -50,13 +84,14 @@ import { docNav } from '@/data/nav'
     background var(--i-motion-fast) var(--i-motion-easing);
 }
 .doc-layout__side a:hover { background: var(--i-color-bg-subtle); color: var(--i-color-text); }
-.doc-layout__side a.router-link-active {
+/* 用 exact-active：否则父路径（如 /components 总览）在所有子页都会被标记为选中 */
+.doc-layout__side a.router-link-exact-active {
   background: var(--i-color-brand-subtle);
   color: var(--i-color-brand);
   font-weight: 500;
 }
 /* 选中项左侧的短竖条，让当前位置在长列表里更好找 */
-.doc-layout__side a.router-link-active::before {
+.doc-layout__side a.router-link-exact-active::before {
   content: '';
   position: absolute;
   left: 0;
@@ -73,8 +108,11 @@ import { docNav } from '@/data/nav'
   .doc-layout__side {
     position: static;
     grid-auto-flow: column;
+    max-height: none;
     overflow-x: auto;
+    overflow-y: visible;
     gap: var(--i-spacing-4);
+    padding-right: 0;
   }
 }
 </style>

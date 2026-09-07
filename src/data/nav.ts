@@ -49,7 +49,8 @@ export const docNav: NavGroup[] = [
       { to: '/components/date-picker', label: 'DatePicker 日期选择器' },
       { to: '/components/radio', label: 'Radio 单选框' },
       { to: '/components/checkbox', label: 'Checkbox 多选框' },
-      { to: '/components/switch', label: 'Switch 开关' }
+      { to: '/components/switch', label: 'Switch 开关' },
+      { to: '/components/upload', label: 'Upload 上传' }
     ]
   },
   {
@@ -58,7 +59,10 @@ export const docNav: NavGroup[] = [
       { to: '/components/table', label: 'Table 表格' },
       { to: '/components/card', label: 'Card 卡片' },
       { to: '/components/tooltip', label: 'Tooltip 文字提示' },
-      { to: '/components/empty', label: 'Empty 空状态' }
+      { to: '/components/empty', label: 'Empty 空状态' },
+      { to: '/components/avatar', label: 'Avatar 头像' },
+      { to: '/components/badge', label: 'Badge 徽标' },
+      { to: '/components/collapse', label: 'Collapse 折叠面板' }
     ]
   },
   {

@@ -10,6 +10,11 @@ import ICheckbox from './ICheckbox.vue'
 import ICheckboxGroup from './ICheckboxGroup.vue'
 import ISwitch from './ISwitch.vue'
 import IDatePicker from './IDatePicker.vue'
+import IUpload from './IUpload.vue'
+import IAvatar from './IAvatar.vue'
+import IAvatarGroup from './IAvatarGroup.vue'
+import IBadge from './IBadge.vue'
+import ICollapse from './ICollapse.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -39,6 +44,11 @@ export {
   ICheckboxGroup,
   ISwitch,
   IDatePicker,
+  IUpload,
+  IAvatar,
+  IAvatarGroup,
+  IBadge,
+  ICollapse,
   IForm,
   IFormItem,
   ITag,
@@ -67,6 +77,8 @@ export type { MessageOptions, MessageType } from './message'
 export type { FormRule } from './validate'
 export type { IconName } from './icons'
 export * from './date'
+export type { UploadFile, UploadStatus } from './upload'
+export type { CollapseItem } from './ICollapse.vue'
 export { icons, iconNames } from './icons'
 
 const components = {
@@ -81,6 +93,11 @@ const components = {
   ICheckboxGroup,
   ISwitch,
   IDatePicker,
+  IUpload,
+  IAvatar,
+  IAvatarGroup,
+  IBadge,
+  ICollapse,
   IForm,
   IFormItem,
   ITag,

@@ -47,8 +47,11 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Switch', cn: '开关', to: '/components/switch', desc: '两个互斥状态间切换', status: 'ready' },
       { name: 'Form', cn: '表单', to: '/components/form', desc: '布局、校验与提交', status: 'ready' },
       { name: 'DatePicker', cn: '日期选择器', to: '/components/date-picker', desc: '选择日期', status: 'ready' },
-      { name: 'Upload', cn: '上传', to: '', desc: '上传文件与进度反馈', status: 'planned' },
-      { name: 'Cascader', cn: '级联选择', to: '', desc: '多级联动选择', status: 'planned' }
+      { name: 'Upload', cn: '上传', to: '/components/upload', desc: '上传文件与进度反馈', status: 'ready' },
+      { name: 'Cascader', cn: '级联选择', to: '', desc: '多级联动选择', status: 'planned' },
+      { name: 'TimePicker', cn: '时间选择器', to: '', desc: '选择时刻或区间', status: 'planned' },
+      { name: 'Slider', cn: '滑块', to: '', desc: '在连续区间内取值', status: 'planned' },
+      { name: 'Transfer', cn: '穿梭框', to: '', desc: '在两栏之间移动条目', status: 'planned' }
     ]
   },
   {
@@ -59,9 +62,12 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Card', cn: '卡片', to: '/components/card', desc: '承载一组相关信息', status: 'ready' },
       { name: 'Tooltip', cn: '文字提示', to: '/components/tooltip', desc: '悬浮时补充说明', status: 'ready' },
       { name: 'Empty', cn: '空状态', to: '/components/empty', desc: '解释为何没有内容', status: 'ready' },
-      { name: 'Avatar', cn: '头像', to: '', desc: '展示用户或实体', status: 'planned' },
-      { name: 'Badge', cn: '徽标', to: '', desc: '标记数量或状态点', status: 'planned' },
-      { name: 'Collapse', cn: '折叠面板', to: '', desc: '折叠次要内容', status: 'planned' }
+      { name: 'Avatar', cn: '头像', to: '/components/avatar', desc: '展示用户或实体', status: 'ready' },
+      { name: 'Badge', cn: '徽标', to: '/components/badge', desc: '标记数量或状态点', status: 'ready' },
+      { name: 'Collapse', cn: '折叠面板', to: '/components/collapse', desc: '折叠次要内容', status: 'ready' },
+      { name: 'Tree', cn: '树', to: '', desc: '展示层级结构', status: 'planned' },
+      { name: 'Descriptions', cn: '描述列表', to: '', desc: '成组展示只读字段', status: 'planned' },
+      { name: 'Skeleton', cn: '骨架屏', to: '', desc: '加载中的内容占位', status: 'planned' }
     ]
   },
   {
@@ -72,7 +78,9 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Modal', cn: '对话框', to: '/components/modal', desc: '打断流程要求处理', status: 'ready' },
       { name: 'Message', cn: '全局提示', to: '/components/message', desc: '操作结果的轻量反馈', status: 'ready' },
       { name: 'Drawer', cn: '抽屉', to: '/components/drawer', desc: '从边缘滑出的面板', status: 'ready' },
-      { name: 'Loading', cn: '加载中', to: '/components/loading', desc: '标识区域正在加载', status: 'ready' }
+      { name: 'Loading', cn: '加载中', to: '/components/loading', desc: '标识区域正在加载', status: 'ready' },
+      { name: 'Popconfirm', cn: '气泡确认', to: '', desc: '就地确认轻量操作', status: 'planned' },
+      { name: 'Result', cn: '结果页', to: '', desc: '操作结果的整页反馈', status: 'planned' }
     ]
   }
 ]
