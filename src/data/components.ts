@@ -44,7 +44,7 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Radio', cn: '单选框', to: '/components/radio', desc: '一组互斥选项中选一个', status: 'ready' },
       { name: 'Checkbox', cn: '多选框', to: '/components/checkbox', desc: '一组选项中选多个', status: 'ready' },
       { name: 'Switch', cn: '开关', to: '/components/switch', desc: '两个互斥状态间切换', status: 'ready' },
-      { name: 'Form', cn: '表单', to: '', desc: '布局、校验与提交', status: 'planned' },
+      { name: 'Form', cn: '表单', to: '/components/form', desc: '布局、校验与提交', status: 'ready' },
       { name: 'DatePicker', cn: '日期选择器', to: '', desc: '选择日期或区间', status: 'planned' },
       { name: 'Upload', cn: '上传', to: '', desc: '上传文件与进度反馈', status: 'planned' },
       { name: 'Cascader', cn: '级联选择', to: '', desc: '多级联动选择', status: 'planned' }

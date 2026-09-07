@@ -41,6 +41,7 @@ export const docNav: NavGroup[] = [
   {
     title: '数据录入',
     items: [
+      { to: '/components/form', label: 'Form 表单' },
       { to: '/components/input', label: 'Input 输入框' },
       { to: '/components/textarea', label: 'Textarea 多行文本框' },
       { to: '/components/select', label: 'Select 下拉选择' },

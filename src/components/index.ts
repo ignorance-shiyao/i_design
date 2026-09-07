@@ -8,6 +8,8 @@ import IRadioGroup from './IRadioGroup.vue'
 import ICheckbox from './ICheckbox.vue'
 import ICheckboxGroup from './ICheckboxGroup.vue'
 import ISwitch from './ISwitch.vue'
+import IForm from './IForm.vue'
+import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
 import IDivider from './IDivider.vue'
 import ITabs from './ITabs.vue'
@@ -33,6 +35,8 @@ export {
   ICheckbox,
   ICheckboxGroup,
   ISwitch,
+  IForm,
+  IFormItem,
   ITag,
   IDivider,
   ITabs,
@@ -56,6 +60,7 @@ export type { TabItem } from './ITabs.vue'
 export type { BreadcrumbItem } from './IBreadcrumb.vue'
 export type { StepItem } from './ISteps.vue'
 export type { MessageOptions, MessageType } from './message'
+export type { FormRule } from './validate'
 
 const components = {
   IButton,
@@ -67,6 +72,8 @@ const components = {
   ICheckbox,
   ICheckboxGroup,
   ISwitch,
+  IForm,
+  IFormItem,
   ITag,
   IDivider,
   ITabs,
