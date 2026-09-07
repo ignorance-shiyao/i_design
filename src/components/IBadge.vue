@@ -33,37 +33,3 @@ const text = computed(() => (props.count > props.max ? `${props.max}+` : String(
     </span>
   </span>
 </template>
-
-<style scoped>
-.i-badge { position: relative; display: inline-flex; vertical-align: middle; }
-
-.i-badge__mark {
-  display: inline-grid;
-  place-items: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: var(--i-radius-full);
-  color: #fff;
-  font-size: var(--i-font-size-xs);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.i-badge__mark.is-fixed {
-  position: absolute;
-  top: 0;
-  right: 0;
-  transform: translate(50%, -50%);
-  box-shadow: 0 0 0 2px var(--i-color-bg);
-}
-.i-badge__mark.is-dot {
-  min-width: 8px;
-  width: 8px;
-  height: 8px;
-  padding: 0;
-}
-.i-badge--brand { background: var(--i-color-brand); }
-.i-badge--success { background: var(--i-color-success); }
-.i-badge--warning { background: var(--i-color-warning); }
-.i-badge--danger { background: var(--i-color-danger); }
-</style>

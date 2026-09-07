@@ -66,20 +66,3 @@ const showImage = computed(() => !!props.src && !failed.value)
     <IIcon v-else :name="icon" :size="Math.round(px * 0.5)" />
   </span>
 </template>
-
-<style scoped>
-.i-avatar {
-  display: inline-grid;
-  place-items: center;
-  overflow: hidden;
-  flex: none;
-  color: #fff;
-  font-weight: 500;
-  line-height: 1;
-  user-select: none;
-  vertical-align: middle;
-}
-.i-avatar.is-circle { border-radius: var(--i-radius-full); }
-.i-avatar.is-square { border-radius: var(--i-radius-md); }
-.i-avatar img { width: 100%; height: 100%; object-fit: cover; }
-</style>

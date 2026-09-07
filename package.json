@@ -1,14 +1,15 @@
 {
-  "name": "i-design",
+  "name": "i-design-monorepo",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Ignorance Design — 一套面向企业中后台产品的设计体系与组件库",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "npm run build:tokens && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "build:tokens": "node packages/common/scripts/build-tokens.mjs"
   },
   "dependencies": {
     "vue": "^3.5.13",
@@ -16,9 +17,19 @@
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^4.7.0",
     "@vitejs/plugin-vue": "^5.2.1",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.63.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "typescript": "^5.7.3",
     "vite": "^6.0.11",
     "vue-tsc": "^2.2.0"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

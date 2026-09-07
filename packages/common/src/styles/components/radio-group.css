@@ -1,0 +1,3 @@
+/* IRadioGroup —— 由 Vue / React / mobile 各端共享 */
+.i-radio-group { display: inline-flex; gap: var(--i-spacing-5); }
+.i-radio-group.is-vertical { flex-direction: column; gap: var(--i-spacing-3); }

@@ -1,0 +1,40 @@
+/* ISkeleton —— 由 Vue / React / mobile 各端共享 */
+.i-skeleton { display: grid; gap: var(--i-spacing-3); width: 100%; }
+.i-skeleton__row { display: flex; align-items: center; gap: var(--i-spacing-3); }
+.i-skeleton__row--list + .i-skeleton__row--list { margin-top: var(--i-spacing-2); }
+.i-skeleton__col { flex: 1; display: grid; gap: var(--i-spacing-2); }
+
+.i-skeleton__bar,
+.i-skeleton__circle,
+.i-skeleton__block {
+  display: block;
+  background: var(--i-color-bg-muted);
+  border-radius: var(--i-radius-md);
+}
+.i-skeleton__bar { height: 14px; }
+.i-skeleton__bar--sm { height: 10px; }
+.i-skeleton__circle { width: 40px; height: 40px; border-radius: var(--i-radius-full); flex: none; }
+.i-skeleton__block { height: 120px; border-radius: var(--i-radius-lg); }
+
+/* 微光扫过，暗示「正在来」；比闪烁更安静 */
+.i-skeleton.is-animated .i-skeleton__bar,
+.i-skeleton.is-animated .i-skeleton__circle,
+.i-skeleton.is-animated .i-skeleton__block {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--i-color-bg) 70%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: i-skeleton-shine 1.4s ease-in-out infinite;
+}
+@keyframes i-skeleton-shine {
+  from { background-position: 180% 0; }
+  to { background-position: -80% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .i-skeleton.is-animated .i-skeleton__bar,
+  .i-skeleton.is-animated .i-skeleton__circle,
+  .i-skeleton.is-animated .i-skeleton__block { animation: none; background-image: none; }
+}

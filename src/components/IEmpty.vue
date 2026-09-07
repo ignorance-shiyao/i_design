@@ -42,27 +42,3 @@ const presets: Record<string, { title: string; description: string }> = {
     <div v-if="$slots.default" class="i-empty__action"><slot /></div>
   </div>
 </template>
-
-<style scoped>
-.i-empty {
-  display: grid;
-  justify-items: center;
-  gap: var(--i-spacing-2);
-  padding: var(--i-spacing-12) var(--i-spacing-6);
-  text-align: center;
-}
-.i-empty--sm { padding: var(--i-spacing-6); }
-.i-empty :deep(.i-empty__art),
-.i-empty :deep(img),
-.i-empty :deep(svg) {
-  width: 180px;
-  height: auto;
-  margin-bottom: var(--i-spacing-2);
-}
-.i-empty--sm :deep(.i-empty__art),
-.i-empty--sm :deep(img),
-.i-empty--sm :deep(svg) { width: 120px; }
-.i-empty__title { color: var(--i-color-text); font-weight: 500; }
-.i-empty__desc { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); max-width: 42ch; }
-.i-empty__action { margin-top: var(--i-spacing-3); }
-</style>

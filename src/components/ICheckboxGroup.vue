@@ -37,8 +37,3 @@ provide(checkboxGroupKey, {
     <slot />
   </div>
 </template>
-
-<style scoped>
-.i-checkbox-group { display: inline-flex; flex-wrap: wrap; gap: var(--i-spacing-5); }
-.i-checkbox-group.is-vertical { flex-direction: column; gap: var(--i-spacing-3); }
-</style>

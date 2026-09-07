@@ -1,0 +1,64 @@
+/* ISteps —— 由 Vue / React / mobile 各端共享 */
+.i-steps { display: flex; margin: 0; padding: 0; list-style: none; }
+.i-steps--horizontal { flex-direction: row; }
+.i-steps--vertical { flex-direction: column; }
+
+.i-step { display: flex; flex: 1; gap: var(--i-spacing-3); min-width: 0; }
+.i-steps--horizontal .i-step { flex-direction: column; }
+.i-steps--vertical .i-step { flex: none; padding-bottom: var(--i-spacing-6); }
+.i-steps.is-clickable .i-step.is-finish { cursor: pointer; }
+
+.i-step__head { display: flex; align-items: center; gap: var(--i-spacing-2); }
+.i-steps--vertical .i-step__head { flex-direction: column; align-self: stretch; }
+
+.i-step__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--i-radius-full);
+  border: 1px solid var(--i-color-border-strong);
+  background: var(--i-color-bg);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+  transition: all var(--i-motion-base) var(--i-motion-easing);
+}
+.i-step__line {
+  flex: 1;
+  min-width: 24px;
+  height: 1px;
+  background: var(--i-color-border);
+}
+.i-steps--vertical .i-step__line { width: 1px; height: auto; min-height: 24px; flex: 1; }
+
+.i-step__body { padding-right: var(--i-spacing-4); }
+.i-steps--horizontal .i-step__body { padding-top: var(--i-spacing-2); }
+.i-step__title { color: var(--i-color-text-tertiary); font-weight: 500; }
+.i-step__desc {
+  margin-top: var(--i-spacing-1);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+}
+
+.i-step.is-finish .i-step__icon {
+  background: var(--i-color-brand-subtle);
+  border-color: var(--i-color-brand);
+  color: var(--i-color-brand);
+}
+.i-step.is-finish .i-step__line { background: var(--i-color-brand); }
+.i-step.is-finish .i-step__title { color: var(--i-color-text-secondary); }
+
+.i-step.is-process .i-step__icon {
+  background: var(--i-color-brand);
+  border-color: var(--i-color-brand);
+  color: #fff;
+}
+.i-step.is-process .i-step__title { color: var(--i-color-text); }
+
+.i-step.is-error .i-step__icon {
+  background: var(--i-color-danger);
+  border-color: var(--i-color-danger);
+  color: #fff;
+}
+.i-step.is-error .i-step__title { color: var(--i-color-danger); }

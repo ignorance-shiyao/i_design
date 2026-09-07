@@ -1,0 +1,49 @@
+/* ITable —— 由 Vue / React / mobile 各端共享 */
+.i-table-wrap { width: 100%; overflow-x: auto; }
+.i-table-c {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--i-font-size-md);
+}
+.i-table-c th,
+.i-table-c td {
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-border);
+  white-space: nowrap;
+}
+.i-table-c--sm th,
+.i-table-c--sm td { padding: var(--i-spacing-2) var(--i-spacing-3); font-size: var(--i-font-size-sm); }
+
+.i-table-c th {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text);
+  font-weight: 600;
+  text-align: left;
+}
+.i-table-c th.is-sortable { cursor: pointer; user-select: none; }
+.i-table-c th.is-sortable:hover { color: var(--i-color-brand); }
+.i-table-c__th { display: inline-flex; align-items: center; gap: var(--i-spacing-2); }
+.i-table-c__sorter { display: inline-flex; flex-direction: column; gap: 2px; }
+.i-table-c__sorter i {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+.i-table-c__sorter i[data-dir='up'] { border-bottom: 5px solid var(--i-color-border-strong); }
+.i-table-c__sorter i[data-dir='down'] { border-top: 5px solid var(--i-color-border-strong); }
+.i-table-c__sorter i[data-dir='up'].is-on { border-bottom-color: var(--i-color-brand); }
+.i-table-c__sorter i[data-dir='down'].is-on { border-top-color: var(--i-color-brand); }
+
+.i-table-c td { color: var(--i-color-text-secondary); }
+.i-table-c tbody tr { transition: background var(--i-motion-fast) var(--i-motion-easing); }
+.i-table-c tbody tr:hover { background: var(--i-color-bg-subtle); }
+.i-table-c.is-striped tbody tr:nth-child(even) { background: var(--i-color-bg-subtle); }
+.i-table-c.is-striped tbody tr:nth-child(even):hover { background: var(--i-color-bg-muted); }
+
+.i-table-c__state {
+  padding: var(--i-spacing-10);
+  text-align: center;
+  color: var(--i-color-text-tertiary);
+}
+.i-table-c__state:hover { background: none; }

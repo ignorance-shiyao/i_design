@@ -1,0 +1,279 @@
+/**
+ * Ignorance Design —— 设计令牌（跨端单一数据源）
+ *
+ * 这里是整个体系唯一的「值」的来源。Web 端消费编译出的 CSS 变量，
+ * 小程序消费 WXSS 变量，Flutter 消费生成的 Dart 常量——它们都由本文件编译得到，
+ * 因此不存在「某端的蓝色跟别人差一点」这种问题。
+ *
+ * 令牌分三层：
+ *   1. 基础层 palette / scale：只描述值，不描述用途。
+ *   2. 语义层 semantic：把基础层映射到用途，主题切换只覆盖这一层。
+ *   3. 组件层：由各框架的组件消费语义层，不出现硬编码值。
+ */
+
+export type Palette = Record<string, string>
+
+/** 基础调色板：每色 9 阶，10 最浅、90 最深 */
+export const palette: Record<string, Palette> = {
+  brand: {
+    10: '#eef3ff',
+    20: '#d6e2ff',
+    30: '#adc4ff',
+    40: '#7ea1ff',
+    50: '#5e7ce0',
+    60: '#4a63c4',
+    70: '#3a4da3',
+    80: '#2b3a80',
+    90: '#1d275c'
+  },
+  gray: {
+    10: '#ffffff',
+    20: '#f7f8fa',
+    30: '#eef0f5',
+    40: '#dfe1e6',
+    50: '#c3c6cd',
+    60: '#8a8e99',
+    70: '#575d6c',
+    80: '#252b3a',
+    90: '#141822'
+  },
+  success: { 10: '#e8f8f0', 50: '#3ac295', 70: '#26996f' },
+  warning: { 10: '#fff4e6', 50: '#fa9841', 70: '#c9762c' },
+  danger: { 10: '#fdecee', 50: '#f66f6a', 70: '#cc4b46' },
+  info: { 10: '#eef3ff', 50: '#5e7ce0', 70: '#3a4da3' }
+}
+
+/** 字号刻度：以 14px 正文为基准 */
+export const fontSize = {
+  xs: '12px',
+  sm: '13px',
+  md: '14px',
+  lg: '16px',
+  xl: '20px',
+  '2xl': '24px',
+  '3xl': '32px',
+  '4xl': '44px',
+  '5xl': '56px'
+} as const
+
+export const fontWeight = {
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700'
+} as const
+
+export const lineHeight = { tight: '1.25', base: '1.6', loose: '1.8' } as const
+
+/** 间距刻度：4px 基准栅格 */
+export const spacing = {
+  0: '0px',
+  1: '4px',
+  2: '8px',
+  3: '12px',
+  4: '16px',
+  5: '20px',
+  6: '24px',
+  8: '32px',
+  10: '40px',
+  12: '48px',
+  16: '64px',
+  20: '80px',
+  24: '96px'
+} as const
+
+export const radius = {
+  none: '0px',
+  sm: '2px',
+  md: '4px',
+  lg: '8px',
+  xl: '16px',
+  full: '999px'
+} as const
+
+export const shadow = {
+  sm: '0 1px 2px rgba(20, 24, 34, 0.05), 0 1px 1px rgba(20, 24, 34, 0.03)',
+  md: '0 2px 4px rgba(20, 24, 34, 0.04), 0 8px 20px -6px rgba(20, 24, 34, 0.1)',
+  lg: '0 4px 8px rgba(20, 24, 34, 0.04), 0 16px 40px -12px rgba(20, 24, 34, 0.16)',
+  xl: '0 8px 16px rgba(20, 24, 34, 0.06), 0 32px 64px -16px rgba(20, 24, 34, 0.22)',
+  brand: '0 8px 24px -8px rgba(94, 124, 224, 0.5)'
+} as const
+
+export const shadowDark = {
+  sm: '0 1px 2px rgba(0, 0, 0, 0.5)',
+  md: '0 2px 4px rgba(0, 0, 0, 0.4), 0 8px 20px -6px rgba(0, 0, 0, 0.55)',
+  lg: '0 4px 8px rgba(0, 0, 0, 0.4), 0 16px 40px -12px rgba(0, 0, 0, 0.6)',
+  xl: '0 8px 16px rgba(0, 0, 0, 0.45), 0 32px 64px -16px rgba(0, 0, 0, 0.7)',
+  brand: '0 8px 24px -8px rgba(94, 124, 224, 0.55)'
+} as const
+
+export const motion = {
+  fast: '120ms',
+  base: '200ms',
+  slow: '320ms',
+  easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+} as const
+
+export const zIndex = {
+  base: '0',
+  dropdown: '1000',
+  sticky: '1100',
+  modal: '1300',
+  toast: '1500'
+} as const
+
+export const fontFamily = {
+  base:
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', " +
+    "'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, sans-serif",
+  mono: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace"
+} as const
+
+/** 语义层：亮色 */
+export const lightTheme: Record<string, string> = {
+  'color-brand': palette.brand[50],
+  'color-brand-hover': palette.brand[40],
+  'color-brand-active': palette.brand[60],
+  'color-brand-subtle': palette.brand[10],
+
+  'color-bg': palette.gray[10],
+  'color-bg-elevated': '#ffffff',
+  'color-bg-subtle': palette.gray[20],
+  'color-bg-muted': palette.gray[30],
+  'color-bg-inverse': palette.gray[90],
+
+  'color-text': palette.gray[80],
+  'color-text-secondary': palette.gray[70],
+  'color-text-tertiary': palette.gray[60],
+  'color-text-inverse': palette.gray[10],
+  'color-text-link': palette.brand[50],
+
+  'color-border': palette.gray[40],
+  'color-border-strong': palette.gray[50],
+  'color-hairline': 'rgba(20, 24, 34, 0.08)',
+  'color-ring': 'rgba(94, 124, 224, 0.18)',
+
+  'color-success': palette.success[50],
+  'color-success-subtle': palette.success[10],
+  'color-warning': palette.warning[50],
+  'color-warning-subtle': palette.warning[10],
+  'color-danger': palette.danger[50],
+  'color-danger-subtle': palette.danger[10],
+  'color-info': palette.info[50],
+  'color-info-subtle': palette.info[10],
+
+  'color-code-bg': '#fbfbfd',
+  'color-code-bar': '#f4f5f9',
+  'color-code-border': '#e6e8f0',
+  'color-code-text': '#2b3245',
+  'color-code-muted': '#9aa0ae'
+}
+
+/** 语义层：暗色（只覆盖语义层，组件零改动） */
+export const darkTheme: Record<string, string> = {
+  'color-brand': palette.brand[40],
+  'color-brand-hover': palette.brand[30],
+  'color-brand-active': palette.brand[50],
+  'color-brand-subtle': 'rgba(94, 124, 224, 0.16)',
+
+  'color-bg': '#171b26',
+  'color-bg-elevated': '#1f2431',
+  'color-bg-subtle': '#1e2330',
+  'color-bg-muted': '#272d3d',
+  'color-bg-inverse': palette.gray[20],
+
+  'color-text': '#e6e8ef',
+  'color-text-secondary': '#b3b8c6',
+  'color-text-tertiary': palette.gray[60],
+  'color-text-inverse': palette.gray[90],
+  'color-text-link': palette.brand[30],
+
+  'color-border': '#333a4d',
+  'color-border-strong': '#454d63',
+  'color-hairline': 'rgba(255, 255, 255, 0.08)',
+  'color-ring': 'rgba(126, 161, 255, 0.24)',
+
+  'color-success': palette.success[50],
+  'color-success-subtle': 'rgba(58, 194, 149, 0.16)',
+  'color-warning': palette.warning[50],
+  'color-warning-subtle': 'rgba(250, 152, 65, 0.16)',
+  'color-danger': palette.danger[50],
+  'color-danger-subtle': 'rgba(246, 111, 106, 0.16)',
+  'color-info': palette.info[50],
+  'color-info-subtle': 'rgba(94, 124, 224, 0.16)',
+
+  'color-code-bg': '#12151e',
+  'color-code-bar': '#171b26',
+  'color-code-border': '#262c3a',
+  'color-code-text': '#d6dae6',
+  'color-code-muted': '#6b7385'
+}
+
+/** 语法高亮 token 色，亮暗各一套 */
+export const syntaxLight: Record<string, string> = {
+  'tok-comment': '#9aa0ae',
+  'tok-keyword': '#7048e8',
+  'tok-string': '#0f766e',
+  'tok-number': '#b45309',
+  'tok-literal': '#b45309',
+  'tok-fn': '#2563a8',
+  'tok-klass': '#0f766e',
+  'tok-prop': '#2563a8',
+  'tok-tag': '#d6336c',
+  'tok-attr': '#b45309',
+  'tok-directive': '#7048e8',
+  'tok-punct': '#7c8496'
+}
+
+export const syntaxDark: Record<string, string> = {
+  'tok-comment': '#6b7385',
+  'tok-keyword': '#b197fc',
+  'tok-string': '#5fd3b5',
+  'tok-number': '#ffb86b',
+  'tok-literal': '#ffb86b',
+  'tok-fn': '#82aaff',
+  'tok-klass': '#5fd3b5',
+  'tok-prop': '#82aaff',
+  'tok-tag': '#ff86b3',
+  'tok-attr': '#ffb86b',
+  'tok-directive': '#b197fc',
+  'tok-punct': '#8a93a8'
+}
+
+export const gradient = {
+  brand: 'linear-gradient(135deg, #6d8bff 0%, #5e7ce0 50%, #4a63c4 100%)',
+  surface: 'linear-gradient(180deg, #ffffff 0%, #f9fafc 100%)'
+} as const
+
+export const gradientDark = {
+  brand: 'linear-gradient(135deg, #8fadff 0%, #6d8bff 50%, #5e7ce0 100%)',
+  surface: 'linear-gradient(180deg, #1e2330 0%, #191d28 100%)'
+} as const
+
+/** 扁平化后的完整令牌表，供编译器逐平台输出 */
+export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, string> {
+  const semantic = theme === 'dark' ? darkTheme : lightTheme
+  const syntax = theme === 'dark' ? syntaxDark : syntaxLight
+  const shadows = theme === 'dark' ? shadowDark : shadow
+  const gradients = theme === 'dark' ? gradientDark : gradient
+
+  const out: Record<string, string> = { ...semantic, ...syntax }
+  Object.entries(fontSize).forEach(([k, v]) => (out[`font-size-${k}`] = v))
+  Object.entries(fontWeight).forEach(([k, v]) => (out[`font-weight-${k}`] = v))
+  Object.entries(lineHeight).forEach(([k, v]) => (out[`line-height-${k}`] = v))
+  Object.entries(spacing).forEach(([k, v]) => (out[`spacing-${k}`] = v))
+  Object.entries(radius).forEach(([k, v]) => (out[`radius-${k}`] = v))
+  Object.entries(shadows).forEach(([k, v]) => (out[`shadow-${k}`] = v))
+  Object.entries(motion).forEach(([k, v]) => (out[`motion-${k}`] = v))
+  Object.entries(zIndex).forEach(([k, v]) => (out[`z-${k}`] = v))
+  Object.entries(fontFamily).forEach(([k, v]) => (out[`font-family${k === 'base' ? '' : `-${k}`}`] = v))
+  Object.entries(gradients).forEach(([k, v]) => (out[`gradient-${k}`] = v))
+  return out
+}
+
+/** 把令牌表展开为 CSS 自定义属性声明 */
+export function toCssVariables(tokens: Record<string, string>, prefix = 'i'): string {
+  return Object.entries(tokens)
+    .map(([key, value]) => `--${prefix}-${key}: ${value};`)
+    .join('\n  ')
+}

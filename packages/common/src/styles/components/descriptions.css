@@ -1,0 +1,51 @@
+/* IDescriptions —— 由 Vue / React / mobile 各端共享 */
+.i-desc.is-bordered {
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-xl);
+  background: var(--i-color-bg-elevated);
+  overflow: hidden;
+}
+.i-desc__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-4);
+  padding: var(--i-spacing-4) var(--i-spacing-5);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-desc__title { font-size: var(--i-font-size-lg); }
+
+.i-desc__body {
+  display: grid;
+  grid-template-columns: repeat(var(--i-desc-column), minmax(0, 1fr));
+  gap: var(--i-spacing-4) var(--i-spacing-6);
+  margin: 0;
+  padding: var(--i-spacing-5);
+}
+.i-desc:not(.is-bordered) .i-desc__body { padding: 0; }
+.i-desc--sm .i-desc__body { gap: var(--i-spacing-3) var(--i-spacing-5); font-size: var(--i-font-size-sm); }
+
+.i-desc__item { min-width: 0; }
+.i-desc.is-horizontal .i-desc__item {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--i-spacing-3);
+  align-items: baseline;
+}
+.i-desc__label {
+  color: var(--i-color-text-tertiary);
+  white-space: nowrap;
+}
+.i-desc.is-vertical .i-desc__label { margin-bottom: var(--i-spacing-1); font-size: var(--i-font-size-sm); }
+.i-desc__value {
+  margin: 0;
+  color: var(--i-color-text);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.i-desc__empty { color: var(--i-color-text-tertiary); }
+
+@media (max-width: 640px) {
+  .i-desc__body { grid-template-columns: 1fr; }
+  .i-desc__item { grid-column: span 1 !important; }
+}

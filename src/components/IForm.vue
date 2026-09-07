@@ -65,7 +65,3 @@ defineExpose({ validate, clearValidate })
     <slot />
   </form>
 </template>
-
-<style scoped>
-.i-form { display: grid; gap: var(--i-spacing-5); }
-</style>

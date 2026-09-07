@@ -37,8 +37,3 @@ provide(radioGroupKey, {
     <slot />
   </div>
 </template>
-
-<style scoped>
-.i-radio-group { display: inline-flex; gap: var(--i-spacing-5); }
-.i-radio-group.is-vertical { flex-direction: column; gap: var(--i-spacing-3); }
-</style>

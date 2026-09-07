@@ -1,0 +1,15 @@
+/* IAvatar —— 由 Vue / React / mobile 各端共享 */
+.i-avatar {
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+  flex: none;
+  color: #fff;
+  font-weight: 500;
+  line-height: 1;
+  user-select: none;
+  vertical-align: middle;
+}
+.i-avatar.is-circle { border-radius: var(--i-radius-full); }
+.i-avatar.is-square { border-radius: var(--i-radius-md); }
+.i-avatar img { width: 100%; height: 100%; object-fit: cover; }

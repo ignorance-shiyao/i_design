@@ -1,0 +1,41 @@
+/* IPopconfirm —— 由 Vue / React / mobile 各端共享 */
+.i-popconfirm { position: relative; display: inline-flex; }
+.i-popconfirm__trigger { display: inline-flex; }
+
+.i-popconfirm__panel {
+  position: absolute;
+  z-index: var(--i-z-dropdown);
+  width: 260px;
+  padding: var(--i-spacing-4);
+  background: var(--i-color-bg-elevated);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  box-shadow: var(--i-shadow-lg);
+  text-align: left;
+}
+.is-top { bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
+.is-bottom { top: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
+.is-left { right: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
+.is-right { left: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
+
+.i-popconfirm__head { display: flex; gap: var(--i-spacing-2); }
+.i-popconfirm__icon { margin-top: 2px; }
+.i-popconfirm__icon.is-brand { color: var(--i-color-brand); }
+.i-popconfirm__icon.is-danger { color: var(--i-color-danger); }
+.i-popconfirm__title { font-size: var(--i-font-size-md); font-weight: 500; color: var(--i-color-text); }
+.i-popconfirm__content {
+  margin-top: var(--i-spacing-1);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-popconfirm__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--i-spacing-2);
+  margin-top: var(--i-spacing-4);
+}
+
+.i-popconfirm-fade-enter-active,
+.i-popconfirm-fade-leave-active { transition: opacity var(--i-motion-fast) var(--i-motion-easing); }
+.i-popconfirm-fade-enter-from,
+.i-popconfirm-fade-leave-to { opacity: 0; }

@@ -3,3 +3,6 @@ dist
 .DS_Store
 *.local
 dist-single
+dist-demo
+packages/*/dist
+packages/*/.tokens.build.mjs

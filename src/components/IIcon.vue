@@ -38,17 +38,3 @@ const dimension = computed(() => (typeof props.size === 'number' ? `${props.size
     <path :d="path" />
   </svg>
 </template>
-
-<style scoped>
-.i-icon {
-  flex: none;
-  display: inline-block;
-  vertical-align: -0.125em;
-}
-.i-icon.is-spin { animation: i-icon-spin 900ms linear infinite; }
-@keyframes i-icon-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) {
-  .i-icon.is-spin { animation: i-icon-pulse 1.4s ease-in-out infinite; }
-  @keyframes i-icon-pulse { 50% { opacity: 0.4; } }
-}
-</style>

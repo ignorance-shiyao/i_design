@@ -1,0 +1,80 @@
+/* 基础样式：重置、排版与语法高亮 token，各 Web 端共享 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--i-font-family);
+  font-size: var(--i-font-size-md);
+  line-height: 1.7;
+  color: var(--i-color-text);
+  background: var(--i-color-bg);
+  /* 等宽数字让统计数字、表格数值在变化时不抖动 */
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--i-motion-base) var(--i-motion-easing),
+    color var(--i-motion-base) var(--i-motion-easing);
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  line-height: var(--i-line-height-tight);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+p { margin: 0; }
+
+a {
+  color: var(--i-color-text-link);
+  text-decoration: none;
+  transition: color var(--i-motion-fast) var(--i-motion-easing);
+}
+a:hover { color: var(--i-color-brand-hover); }
+
+/* 正文里的行内代码 */
+code {
+  font-family: var(--i-font-family-mono);
+  font-size: 0.9em;
+  color: var(--i-color-text);
+  background: var(--i-color-bg-subtle);
+  border: 1px solid var(--i-color-hairline);
+  padding: 0.1em 0.35em;
+  border-radius: var(--i-radius-sm);
+}
+
+/* 语法高亮 token */
+.tok--comment { color: var(--i-tok-comment); font-style: italic; }
+.tok--keyword { color: var(--i-tok-keyword); }
+.tok--string { color: var(--i-tok-string); }
+.tok--regexp { color: var(--i-tok-string); }
+.tok--number { color: var(--i-tok-number); }
+.tok--literal { color: var(--i-tok-literal); }
+.tok--fn { color: var(--i-tok-fn); }
+.tok--klass { color: var(--i-tok-klass); }
+.tok--prop { color: var(--i-tok-prop); }
+.tok--tag { color: var(--i-tok-tag); }
+.tok--attr { color: var(--i-tok-attr); }
+.tok--directive { color: var(--i-tok-directive); }
+.tok--mustache { color: var(--i-tok-directive); }
+.tok--selector { color: var(--i-tok-tag); }
+.tok--atrule { color: var(--i-tok-keyword); }
+.tok--variable { color: var(--i-tok-prop); }
+.tok--flag { color: var(--i-tok-attr); }
+.tok--punct { color: var(--i-tok-punct); }
+
+:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+}
+
