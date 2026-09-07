@@ -21,7 +21,8 @@ export const docNav: NavGroup[] = [
     title: '通用',
     items: [
       { to: '/components/button', label: 'Button 按钮' },
-      { to: '/components/tag', label: 'Tag 标签' }
+      { to: '/components/tag', label: 'Tag 标签' },
+      { to: '/components/tabs', label: 'Tabs 标签页' }
     ]
   },
   {
@@ -37,6 +38,7 @@ export const docNav: NavGroup[] = [
     items: [
       { to: '/components/card', label: 'Card 卡片' },
       { to: '/components/table', label: 'Table 表格' },
+      { to: '/components/pagination', label: 'Pagination 分页' },
       { to: '/components/alert', label: 'Alert 警告提示' },
       { to: '/components/modal', label: 'Modal 对话框' }
     ]

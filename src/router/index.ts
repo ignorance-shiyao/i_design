@@ -25,7 +25,9 @@ const routes: RouteRecordRaw[] = [
       { path: 'select', component: () => import('@/pages/components/SelectPage.vue') },
       { path: 'card', component: () => import('@/pages/components/CardPage.vue') },
       { path: 'table', component: () => import('@/pages/components/TablePage.vue') },
+      { path: 'pagination', component: () => import('@/pages/components/PaginationPage.vue') },
       { path: 'modal', component: () => import('@/pages/components/ModalPage.vue') },
+      { path: 'tabs', component: () => import('@/pages/components/TabsPage.vue') },
       { path: 'alert', component: () => import('@/pages/components/AlertPage.vue') }
     ]
   },
