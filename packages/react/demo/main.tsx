@@ -1,12 +1,24 @@
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Alert, Avatar, Button, Icon, Input, Switch, Tag } from '../src'
+import {
+  Alert, Avatar, Badge, Button, Card, Divider, Icon, Input, Pagination,
+  Select, Skeleton, Switch, Table, Tabs, Tag
+} from '../src'
 import '@i-design/common/styles/index.css'
 
 /** 与 Vue 端相同的用例，用于逐像素比对两端渲染结果 */
 function App() {
   const [text, setText] = useState('')
   const [on, setOn] = useState(true)
+  const [page, setPage] = useState(12)
+  const [tab, setTab] = useState('overview')
+  const [selected, setSelected] = useState<string | number | null>('requirement')
+
+  const rows = [
+    { id: 'WI-1024', title: '登录页支持短信验证码', owner: '林岚', points: 5 },
+    { id: 'WI-1031', title: '工作项列表虚拟滚动', owner: '陈序', points: 8 },
+    { id: 'WI-1042', title: '深色模式对比度校准', owner: '苏禾', points: 3 }
+  ]
 
   return (
     <div style={{ padding: 32, display: 'grid', gap: 24, maxWidth: 640 }}>
@@ -50,6 +62,72 @@ function App() {
         <Avatar name="苏禾" shape="square" size="lg" />
         <Icon name="sparkle" size={20} />
         <Icon name="refresh" size={20} spin />
+      </section>
+
+      <section style={{ display: 'grid', gap: 12, maxWidth: 260 }}>
+        <Select
+          value={selected}
+          onChange={setSelected}
+          options={[
+            { label: '需求', value: 'requirement' },
+            { label: '缺陷', value: 'bug' },
+            { label: '任务', value: 'task' },
+            { label: '风险（暂不可选）', value: 'risk', disabled: true }
+          ]}
+          clearable
+        />
+      </section>
+
+      <section>
+        <Tabs
+          value={tab}
+          onChange={setTab}
+          items={[
+            { name: 'overview', label: '概览' },
+            { name: 'members', label: '成员' },
+            { name: 'audit', label: '审计日志', disabled: true }
+          ]}
+        >
+          {tab === 'overview' ? '本迭代共 24 个工作项，已完成 18 个。' : '当前项目共 8 名成员。'}
+        </Tabs>
+      </section>
+
+      <section>
+        <Table
+          rowKey="id"
+          data={rows}
+          columns={[
+            { key: 'id', title: '编号', width: '110px' },
+            { key: 'title', title: '标题', sortable: true },
+            { key: 'owner', title: '负责人', width: '100px' },
+            {
+              key: 'points',
+              title: '故事点',
+              width: '90px',
+              align: 'right',
+              sortable: true,
+              render: (v) => <Tag type="brand">{v}</Tag>
+            }
+          ]}
+        />
+      </section>
+
+      <section>
+        <Pagination current={page} total={1000} pageSize={10} onChange={setPage} />
+      </section>
+
+      <section style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+        <Badge count={5}><Button>消息</Button></Badge>
+        <Badge count={128}><Button>通知</Button></Badge>
+        <Badge dot type="brand"><Avatar name="林岚" /></Badge>
+        <Badge count={7} type="success" />
+      </section>
+
+      <Divider>卡片与骨架屏</Divider>
+
+      <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <Card title="迭代概览" hoverable>本迭代共 24 个工作项，已完成 18 个。</Card>
+        <Card title="加载中"><Skeleton variant="paragraph" rows={3} /></Card>
       </section>
 
       <section style={{ display: 'grid', gap: 12 }}>
