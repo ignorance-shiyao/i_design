@@ -17,9 +17,12 @@ const routes: RouteRecordRaw[] = [
     path: '/components',
     component: DocLayout,
     children: [
-      { path: '', redirect: '/components/button' },
+      { path: '', component: () => import('@/pages/ComponentsOverviewPage.vue') },
       { path: 'button', component: () => import('@/pages/components/ButtonPage.vue') },
       { path: 'input', component: () => import('@/pages/components/InputPage.vue') },
+      { path: 'textarea', component: () => import('@/pages/components/TextareaPage.vue') },
+      { path: 'radio', component: () => import('@/pages/components/RadioPage.vue') },
+      { path: 'checkbox', component: () => import('@/pages/components/CheckboxPage.vue') },
       { path: 'tag', component: () => import('@/pages/components/TagPage.vue') },
       { path: 'switch', component: () => import('@/pages/components/SwitchPage.vue') },
       { path: 'select', component: () => import('@/pages/components/SelectPage.vue') },

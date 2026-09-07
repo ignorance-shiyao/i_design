@@ -10,8 +10,30 @@ import IModal from './IModal.vue'
 import ITable from './ITable.vue'
 import IPagination from './IPagination.vue'
 import ITabs from './ITabs.vue'
+import IRadio from './IRadio.vue'
+import IRadioGroup from './IRadioGroup.vue'
+import ICheckbox from './ICheckbox.vue'
+import ICheckboxGroup from './ICheckboxGroup.vue'
+import ITextarea from './ITextarea.vue'
 
-export { IButton, IInput, ICard, ITag, IAlert, ISwitch, ISelect, IModal, ITable, IPagination, ITabs }
+export {
+  IButton,
+  IInput,
+  ITextarea,
+  ICard,
+  ITag,
+  IAlert,
+  ISwitch,
+  ISelect,
+  IRadio,
+  IRadioGroup,
+  ICheckbox,
+  ICheckboxGroup,
+  IModal,
+  ITable,
+  IPagination,
+  ITabs
+}
 export type { SelectOption } from './ISelect.vue'
 export type { TableColumn, TableRow } from './ITable.vue'
 export type { TabItem } from './ITabs.vue'
@@ -27,7 +49,12 @@ const components = {
   IModal,
   ITable,
   IPagination,
-  ITabs
+  ITabs,
+  IRadio,
+  IRadioGroup,
+  ICheckbox,
+  ICheckboxGroup,
+  ITextarea
 }
 
 /** 全量注册，便于文档站与 demo 直接使用；业务侧推荐按需引入 */

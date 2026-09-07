@@ -8,7 +8,7 @@
       <nav class="footer__links">
         <RouterLink to="/design/values">设计价值观</RouterLink>
         <RouterLink to="/design/tokens">设计令牌</RouterLink>
-        <RouterLink to="/components/button">组件总览</RouterLink>
+        <RouterLink to="/components">组件总览</RouterLink>
         <RouterLink to="/resources">设计资源</RouterLink>
       </nav>
     </div>

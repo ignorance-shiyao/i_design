@@ -18,6 +18,10 @@ export const docNav: NavGroup[] = [
     ]
   },
   {
+    title: '开始',
+    items: [{ to: '/components', label: '组件总览' }]
+  },
+  {
     title: '通用',
     items: [
       { to: '/components/button', label: 'Button 按钮' },
@@ -29,6 +33,9 @@ export const docNav: NavGroup[] = [
     title: '数据录入',
     items: [
       { to: '/components/input', label: 'Input 输入框' },
+      { to: '/components/textarea', label: 'Textarea 多行文本框' },
+      { to: '/components/radio', label: 'Radio 单选框' },
+      { to: '/components/checkbox', label: 'Checkbox 多选框' },
       { to: '/components/select', label: 'Select 下拉选择' },
       { to: '/components/switch', label: 'Switch 开关' }
     ]

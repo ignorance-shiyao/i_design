@@ -4,7 +4,7 @@ import ICard from '@/components/ICard.vue'
 const resources = [
   { title: '设计令牌表', desc: '完整的色彩、字号、间距、圆角、阴影与动效令牌，含语义层映射。', to: '/design/tokens' },
   { title: '设计价值观', desc: '沉浸、灵活、至简三条原则，以及它们如何影响具体的组件默认值。', to: '/design/values' },
-  { title: '组件文档', desc: '每个组件的用法、可配置项与交互示例，示例可直接复制到业务中。', to: '/components/button' }
+  { title: '组件文档', desc: '每个组件的用法、可配置项与交互示例，示例可直接复制到业务中。', to: '/components' }
 ]
 
 const contributing = [

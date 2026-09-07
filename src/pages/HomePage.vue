@@ -6,6 +6,7 @@ import ICard from '@/components/ICard.vue'
 import ITag from '@/components/ITag.vue'
 import IAlert from '@/components/IAlert.vue'
 import ISwitch from '@/components/ISwitch.vue'
+import { readyCount } from '@/data/components'
 
 const values = [
   {
@@ -52,11 +53,11 @@ const demoSwitch = ref(true)
             让设计与研发在同一套语言下协作，把重复的决策交给系统。
           </p>
           <div class="hero__actions">
-            <RouterLink to="/components/button"><IButton variant="primary" size="lg">开始使用</IButton></RouterLink>
+            <RouterLink to="/components"><IButton variant="primary" size="lg">开始使用</IButton></RouterLink>
             <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
           </div>
           <dl class="hero__stats">
-            <div><dt>11</dt><dd>基础组件</dd></div>
+            <div><dt>{{ readyCount }}</dt><dd>基础组件</dd></div>
             <div><dt>60+</dt><dd>设计令牌</dd></div>
             <div><dt>2</dt><dd>内建主题</dd></div>
           </dl>

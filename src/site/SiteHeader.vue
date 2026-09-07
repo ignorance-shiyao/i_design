@@ -8,7 +8,7 @@ const menuOpen = ref(false)
 const links = [
   { to: '/design/values', label: '设计价值观' },
   { to: '/design/tokens', label: '设计令牌' },
-  { to: '/components/button', label: '组件' },
+  { to: '/components', label: '组件' },
   { to: '/resources', label: '资源' }
 ]
 </script>
