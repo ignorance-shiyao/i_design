@@ -30,8 +30,17 @@ const items: BreadcrumbItem[] = [
       <IBreadcrumb :items="items" />
     </DemoBlock>
 
-    <DemoBlock title="自定义分隔符" code='<IBreadcrumb :items="items" separator="›" />'>
-      <IBreadcrumb :items="items" separator="›" />
+    <DemoBlock
+      title="自定义分隔符"
+      description="默认用图标分隔；也可换成其他图标，或传字符串改用文字分隔。"
+      lang="vue"
+      code='<IBreadcrumb :items="items" separator-icon="arrow-right" />
+<IBreadcrumb :items="items" separator="/" />'
+    >
+      <div class="stack">
+        <IBreadcrumb :items="items" separator-icon="arrow-right" />
+        <IBreadcrumb :items="items" separator="/" />
+      </div>
     </DemoBlock>
 
     <h2>API</h2>
@@ -39,9 +48,14 @@ const items: BreadcrumbItem[] = [
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
       <tbody>
         <tr><td>items</td><td><code>BreadcrumbItem[]</code></td><td>—</td><td>层级列表，必填</td></tr>
-        <tr><td>separator</td><td><code>string</code></td><td><code>/</code></td><td>分隔符</td></tr>
+        <tr><td>separator</td><td><code>string</code></td><td><code>''</code></td><td>文字分隔符；留空则使用图标</td></tr>
+        <tr><td>separatorIcon</td><td><code>IconName</code></td><td><code>chevron-right</code></td><td>图标分隔符</td></tr>
       </tbody>
     </table>
     <p><code>BreadcrumbItem</code>：<code>{ label: string; to?: string }</code>，末项不传 <code>to</code>。</p>
   </article>
 </template>
+
+<style scoped>
+.stack { display: grid; gap: var(--i-spacing-3); }
+</style>
