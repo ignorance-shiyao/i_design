@@ -46,21 +46,23 @@ import ITag from '@/components/ITag.vue'
 .tile {
   display: block;
   padding: var(--i-spacing-4);
-  border: 1px solid var(--i-color-border);
-  border-radius: var(--i-radius-lg);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-xl);
   color: var(--i-color-text);
-  background: var(--i-color-bg);
+  background: var(--i-gradient-surface);
+  box-shadow: var(--i-shadow-sm);
   transition: border-color var(--i-motion-base) var(--i-motion-easing),
     box-shadow var(--i-motion-base) var(--i-motion-easing),
     transform var(--i-motion-base) var(--i-motion-easing);
 }
 .tile:not(.is-planned):hover {
-  border-color: var(--i-color-brand);
+  border-color: color-mix(in srgb, var(--i-color-brand) 40%, transparent);
   box-shadow: var(--i-shadow-md);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 .tile.is-planned {
   background: var(--i-color-bg-subtle);
+  box-shadow: none;
   border-style: dashed;
   color: var(--i-color-text-tertiary);
   cursor: default;

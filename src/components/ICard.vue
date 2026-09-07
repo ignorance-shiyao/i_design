@@ -19,13 +19,13 @@ withDefaults(
 
 <style scoped>
 .i-card {
-  background: var(--i-color-bg);
-  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  border-radius: var(--i-radius-xl);
   transition: box-shadow var(--i-motion-base) var(--i-motion-easing),
     transform var(--i-motion-base) var(--i-motion-easing),
     border-color var(--i-motion-base) var(--i-motion-easing);
 }
-.i-card.is-bordered { border: 1px solid var(--i-color-border); }
+.i-card.is-bordered { border: 1px solid var(--i-color-hairline); box-shadow: var(--i-shadow-sm); }
 .i-card.is-hoverable:hover {
   box-shadow: var(--i-shadow-lg);
   border-color: transparent;
@@ -33,12 +33,12 @@ withDefaults(
 }
 .i-card__header {
   padding: var(--i-spacing-4) var(--i-spacing-5);
-  border-bottom: 1px solid var(--i-color-border);
+  border-bottom: 1px solid var(--i-color-hairline);
 }
 .i-card__title { font-size: var(--i-font-size-lg); }
 .i-card__body { padding: var(--i-spacing-5); color: var(--i-color-text-secondary); }
 .i-card__footer {
   padding: var(--i-spacing-3) var(--i-spacing-5);
-  border-top: 1px solid var(--i-color-border);
+  border-top: 1px solid var(--i-color-hairline);
 }
 </style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import IIcon from './IIcon.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -76,7 +77,9 @@ onBeforeUnmount(() => {
         >
           <header v-if="title || closable" class="i-drawer__header">
             <h3 class="i-drawer__title">{{ title }}</h3>
-            <button v-if="closable" class="i-drawer__close" aria-label="关闭" @click="close">×</button>
+            <button v-if="closable" class="i-drawer__close" aria-label="关闭" @click="close">
+              <IIcon name="close" :size="18" />
+            </button>
           </header>
           <div class="i-drawer__body"><slot /></div>
           <footer v-if="$slots.footer" class="i-drawer__footer"><slot name="footer" /></footer>
@@ -118,12 +121,17 @@ onBeforeUnmount(() => {
 }
 .i-drawer__title { font-size: var(--i-font-size-lg); }
 .i-drawer__close {
+  display: grid;
+  place-items: center;
+  padding: var(--i-spacing-1);
   border: none;
   background: none;
-  font-size: var(--i-font-size-xl);
   line-height: 1;
   color: var(--i-color-text-tertiary);
+  border-radius: var(--i-radius-sm);
   cursor: pointer;
+  transition: color var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing);
 }
 .i-drawer__close:hover { color: var(--i-color-text); }
 .i-drawer__body { flex: 1; overflow-y: auto; padding: var(--i-spacing-5); color: var(--i-color-text-secondary); }

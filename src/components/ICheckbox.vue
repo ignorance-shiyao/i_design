@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
+import IIcon from './IIcon.vue'
 import { checkboxGroupKey } from './context'
 
 const props = withDefaults(
@@ -51,7 +52,10 @@ function toggle() {
       :aria-checked="indeterminate ? 'mixed' : checked"
       @change="toggle"
     />
-    <span class="i-checkbox__mark" aria-hidden="true" />
+    <span class="i-checkbox__mark" aria-hidden="true">
+      <IIcon v-if="checked && !indeterminate" name="check" :size="12" :stroke-width="3" />
+      <span v-else-if="indeterminate" class="i-checkbox__dash" />
+    </span>
     <span class="i-checkbox__label"><slot /></span>
   </label>
 </template>
@@ -91,27 +95,8 @@ function toggle() {
   background: var(--i-color-brand);
   border-color: var(--i-color-brand);
 }
-/* 勾：用两条边构成对勾，避免依赖图标字体 */
-.i-checkbox.is-checked:not(.is-indeterminate) .i-checkbox__mark::after {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: 1px;
-  width: 4px;
-  height: 9px;
-  border: solid #fff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-.i-checkbox.is-indeterminate .i-checkbox__mark::after {
-  content: '';
-  position: absolute;
-  left: 3px;
-  right: 3px;
-  top: 6px;
-  height: 2px;
-  background: #fff;
-}
+.i-checkbox__mark { display: grid; place-items: center; color: #fff; }
+.i-checkbox__dash { width: 8px; height: 2px; border-radius: 1px; background: currentColor; }
 .i-checkbox.is-disabled .i-checkbox__mark { background: var(--i-color-bg-muted); }
 .i-checkbox.is-disabled.is-checked .i-checkbox__mark,
 .i-checkbox.is-disabled.is-indeterminate .i-checkbox__mark {

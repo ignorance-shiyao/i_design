@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import IIcon from './IIcon.vue'
 
 export interface SelectOption {
   label: string
@@ -129,9 +130,10 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
         role="button"
         aria-label="清除"
         @click.stop="clear"
-        >×</span
       >
-      <span class="i-select__arrow" aria-hidden="true" />
+        <IIcon name="close" :size="14" />
+      </span>
+      <IIcon class="i-select__arrow" name="chevron-down" :size="16" />
     </button>
 
     <ul v-show="open" class="i-select__menu" role="listbox">
@@ -201,14 +203,10 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.i-select__clear { color: var(--i-color-text-tertiary); cursor: pointer; }
+.i-select__clear { display: grid; place-items: center; color: var(--i-color-text-tertiary); cursor: pointer; }
 .i-select__clear:hover { color: var(--i-color-text-secondary); }
 .i-select__arrow {
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid var(--i-color-text-tertiary);
+  color: var(--i-color-text-tertiary);
   transition: transform var(--i-motion-base) var(--i-motion-easing);
 }
 .i-select.is-open .i-select__arrow { transform: rotate(180deg); }

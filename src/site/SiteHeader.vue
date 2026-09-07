@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useTheme } from '@/composables/useTheme'
+import IIcon from '@/components/IIcon.vue'
 
 const { theme, toggleTheme } = useTheme()
 const menuOpen = ref(false)
@@ -29,18 +30,10 @@ const links = [
 
       <div class="header__actions">
         <button class="header__icon" :title="theme === 'dark' ? '切换到亮色' : '切换到暗色'" @click="toggleTheme">
-          <svg v-if="theme === 'dark'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round" />
-          </svg>
-          <svg v-else viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" stroke-linejoin="round" />
-          </svg>
+          <IIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="16" />
         </button>
         <button class="header__icon header__icon--menu" aria-label="菜单" @click="menuOpen = !menuOpen">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
+          <IIcon name="menu" :size="16" />
         </button>
       </div>
     </div>
@@ -52,9 +45,9 @@ const links = [
   position: sticky;
   top: 0;
   z-index: var(--i-z-sticky);
-  background: color-mix(in srgb, var(--i-color-bg) 88%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--i-color-border);
+  background: color-mix(in srgb, var(--i-color-bg) 80%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--i-color-hairline);
 }
 .header__inner {
   display: flex;
@@ -75,29 +68,42 @@ const links = [
   width: 26px;
   height: 26px;
   border-radius: var(--i-radius-md);
-  background: var(--i-color-brand);
+  background: var(--i-gradient-brand);
   color: #fff;
   font-family: var(--i-font-family-mono);
+  font-weight: 600;
+  box-shadow: var(--i-shadow-brand);
 }
 .header__nav {
   display: flex;
-  gap: var(--i-spacing-6);
+  gap: var(--i-spacing-1);
   margin-right: auto;
 }
-.header__nav a { color: var(--i-color-text-secondary); }
-.header__nav a:hover,
-.header__nav a.router-link-active { color: var(--i-color-brand); }
+.header__nav a {
+  padding: var(--i-spacing-1) var(--i-spacing-3);
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-secondary);
+  transition: color var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing);
+}
+.header__nav a:hover { color: var(--i-color-text); background: var(--i-color-bg-subtle); }
+.header__nav a.router-link-active {
+  color: var(--i-color-brand);
+  background: var(--i-color-brand-subtle);
+}
 .header__actions { display: flex; gap: var(--i-spacing-2); }
 .header__icon {
   display: grid;
   place-items: center;
   width: 32px;
   height: 32px;
-  border: 1px solid var(--i-color-border);
+  border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-md);
-  background: transparent;
+  background: var(--i-color-bg-elevated);
   color: var(--i-color-text-secondary);
   cursor: pointer;
+  transition: color var(--i-motion-fast) var(--i-motion-easing),
+    border-color var(--i-motion-fast) var(--i-motion-easing);
 }
 .header__icon:hover { border-color: var(--i-color-brand); color: var(--i-color-brand); }
 .header__icon--menu { display: none; }

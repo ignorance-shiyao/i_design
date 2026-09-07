@@ -32,22 +32,39 @@ import { docNav } from '@/data/nav'
 }
 .doc-layout__group { display: grid; gap: var(--i-spacing-1); }
 .doc-layout__group-title {
+  font-family: var(--i-font-family-mono);
   font-size: var(--i-font-size-xs);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   color: var(--i-color-text-tertiary);
   margin-bottom: var(--i-spacing-2);
+  padding-left: var(--i-spacing-3);
 }
 .doc-layout__side a {
+  position: relative;
   padding: var(--i-spacing-2) var(--i-spacing-3);
   border-radius: var(--i-radius-md);
   color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-md);
+  transition: color var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing);
 }
-.doc-layout__side a:hover { background: var(--i-color-bg-subtle); }
+.doc-layout__side a:hover { background: var(--i-color-bg-subtle); color: var(--i-color-text); }
 .doc-layout__side a.router-link-active {
   background: var(--i-color-brand-subtle);
   color: var(--i-color-brand);
   font-weight: 500;
+}
+/* 选中项左侧的短竖条，让当前位置在长列表里更好找 */
+.doc-layout__side a.router-link-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: var(--i-color-brand);
 }
 .doc-layout__main { min-width: 0; padding-bottom: var(--i-spacing-16); }
 

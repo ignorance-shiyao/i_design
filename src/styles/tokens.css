@@ -23,6 +23,34 @@
   --i-color-border: #dfe1e6;
   --i-color-border-strong: #c3c6cd;
 
+  /* 高程与描边（质感的关键：分层背景 + 极细描边 + 柔和投影） */
+  --i-color-bg-elevated: #ffffff;
+  --i-color-hairline: rgba(20, 24, 34, 0.08);
+  --i-color-ring: rgba(94, 124, 224, 0.18);
+  --i-gradient-brand: linear-gradient(135deg, #6d8bff 0%, #5e7ce0 50%, #4a63c4 100%);
+  --i-gradient-surface: linear-gradient(180deg, #ffffff 0%, #f9fafc 100%);
+
+  /* 代码表面 */
+  --i-color-code-bg: #fbfbfd;
+  --i-color-code-bar: #f4f5f9;
+  --i-color-code-border: #e6e8f0;
+  --i-color-code-text: #2b3245;
+  --i-color-code-muted: #9aa0ae;
+
+  /* 语法高亮 */
+  --i-tok-comment: #9aa0ae;
+  --i-tok-keyword: #7048e8;
+  --i-tok-string: #0f766e;
+  --i-tok-number: #b45309;
+  --i-tok-literal: #b45309;
+  --i-tok-fn: #2563a8;
+  --i-tok-klass: #0f766e;
+  --i-tok-prop: #2563a8;
+  --i-tok-tag: #d6336c;
+  --i-tok-attr: #b45309;
+  --i-tok-directive: #7048e8;
+  --i-tok-punct: #7c8496;
+
   /* 状态 */
   --i-color-success: #3ac295;
   --i-color-success-subtle: #e8f8f0;
@@ -34,8 +62,8 @@
   --i-color-info-subtle: #eef3ff;
 
   /* 字体 */
-  --i-font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --i-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --i-font-family-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   --i-font-size-xs: 12px;
   --i-font-size-sm: 13px;
@@ -71,10 +99,11 @@
   --i-radius-full: 999px;
 
   /* 阴影 */
-  --i-shadow-sm: 0 1px 2px rgba(20, 24, 34, 0.06);
-  --i-shadow-md: 0 4px 12px rgba(20, 24, 34, 0.08);
-  --i-shadow-lg: 0 8px 28px rgba(20, 24, 34, 0.12);
-  --i-shadow-xl: 0 16px 48px rgba(20, 24, 34, 0.16);
+  --i-shadow-sm: 0 1px 2px rgba(20, 24, 34, 0.05), 0 1px 1px rgba(20, 24, 34, 0.03);
+  --i-shadow-md: 0 2px 4px rgba(20, 24, 34, 0.04), 0 8px 20px -6px rgba(20, 24, 34, 0.1);
+  --i-shadow-lg: 0 4px 8px rgba(20, 24, 34, 0.04), 0 16px 40px -12px rgba(20, 24, 34, 0.16);
+  --i-shadow-xl: 0 8px 16px rgba(20, 24, 34, 0.06), 0 32px 64px -16px rgba(20, 24, 34, 0.22);
+  --i-shadow-brand: 0 8px 24px -8px rgba(94, 124, 224, 0.5);
 
   /* 动效 */
   --i-motion-fast: 120ms;
@@ -116,10 +145,36 @@
   --i-color-danger-subtle: rgba(246, 111, 106, 0.16);
   --i-color-info-subtle: rgba(94, 124, 224, 0.16);
 
-  --i-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --i-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
-  --i-shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.5);
-  --i-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --i-color-bg-elevated: #1f2431;
+  --i-color-hairline: rgba(255, 255, 255, 0.08);
+  --i-color-ring: rgba(126, 161, 255, 0.24);
+  --i-gradient-brand: linear-gradient(135deg, #8fadff 0%, #6d8bff 50%, #5e7ce0 100%);
+  --i-gradient-surface: linear-gradient(180deg, #1e2330 0%, #191d28 100%);
+
+  --i-color-code-bg: #12151e;
+  --i-color-code-bar: #171b26;
+  --i-color-code-border: #262c3a;
+  --i-color-code-text: #d6dae6;
+  --i-color-code-muted: #6b7385;
+
+  --i-tok-comment: #6b7385;
+  --i-tok-keyword: #b197fc;
+  --i-tok-string: #5fd3b5;
+  --i-tok-number: #ffb86b;
+  --i-tok-literal: #ffb86b;
+  --i-tok-fn: #82aaff;
+  --i-tok-klass: #5fd3b5;
+  --i-tok-prop: #82aaff;
+  --i-tok-tag: #ff86b3;
+  --i-tok-attr: #ffb86b;
+  --i-tok-directive: #b197fc;
+  --i-tok-punct: #8a93a8;
+
+  --i-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --i-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4), 0 8px 20px -6px rgba(0, 0, 0, 0.55);
+  --i-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.4), 0 16px 40px -12px rgba(0, 0, 0, 0.6);
+  --i-shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.45), 0 32px 64px -16px rgba(0, 0, 0, 0.7);
+  --i-shadow-brand: 0 8px 24px -8px rgba(94, 124, 224, 0.55);
 
   color-scheme: dark;
 }

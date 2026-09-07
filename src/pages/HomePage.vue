@@ -7,6 +7,8 @@ import ITag from '@/components/ITag.vue'
 import IAlert from '@/components/IAlert.vue'
 import ISwitch from '@/components/ISwitch.vue'
 import { componentCategories, plannedCount, readyCount } from '@/data/components'
+import CodeBlock from '@/site/CodeBlock.vue'
+import IIcon from '@/components/IIcon.vue'
 import ISteps from '@/components/ISteps.vue'
 import ILoading from '@/components/ILoading.vue'
 import { message } from '@/components/message'
@@ -30,11 +32,15 @@ const values = [
 ]
 
 const features = [
-  { title: '一致的设计语言', desc: '从色彩、字号到间距与动效，统一到一套 4px 栅格与语义令牌之上。' },
-  { title: 'Vue 3 + TypeScript', desc: '基于 Vite + Vue 3 组合式 API 与 TS 编写，完整类型提示，按需引入。' },
-  { title: '深色模式内建', desc: '语义令牌天然支持双主题，业务组件无需任何适配代码。' },
-  { title: '可访问性优先', desc: '语义化标签、键盘可达、可见的焦点样式与 ARIA 状态贯穿全部组件。' }
-]
+  { icon: 'palette', title: '一致的设计语言', desc: '从色彩、字号到间距与动效，统一到一套 4px 栅格与语义令牌之上。' },
+  { icon: 'code', title: 'Vue 3 + TypeScript', desc: '基于 Vite + Vue 3 组合式 API 与 TS 编写，完整类型提示，按需引入。' },
+  { icon: 'moon', title: '深色模式内建', desc: '语义令牌天然支持双主题，业务组件无需任何适配代码。' },
+  { icon: 'check-circle', title: '可访问性优先', desc: '语义化标签、键盘可达、可见的焦点样式与 ARIA 状态贯穿全部组件。' }
+] as const
+
+const usageSnippet = `<IButton variant="primary">
+  提交
+</IButton>`
 
 const previewSteps = [{ title: '基本信息' }, { title: '关联迭代' }, { title: '确认' }]
 
@@ -58,7 +64,9 @@ const demoSwitch = ref(true)
             让设计与研发在同一套语言下协作，把重复的决策交给系统。
           </p>
           <div class="hero__actions">
-            <RouterLink to="/components"><IButton variant="primary" size="lg">开始使用</IButton></RouterLink>
+            <RouterLink to="/components">
+              <IButton variant="primary" size="lg">开始使用<IIcon name="arrow-right" :size="16" /></IButton>
+            </RouterLink>
             <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
           </div>
           <dl class="hero__stats">
@@ -100,6 +108,7 @@ const demoSwitch = ref(true)
 
     <!-- 设计价值观 -->
     <section class="i-container section">
+      <span class="i-eyebrow">Principles</span>
       <h2 class="section__title">设计价值观</h2>
       <p class="section__desc i-lead">三条价值观贯穿每一次设计决策，也是评审组件是否合格的标尺。</p>
       <div class="values">
@@ -114,10 +123,13 @@ const demoSwitch = ref(true)
     <!-- 能力特性 -->
     <section class="section section--muted">
       <div class="i-container">
+        <span class="i-eyebrow">Why</span>
         <h2 class="section__title">为什么选择 Ignorance Design</h2>
         <div class="features">
-          <ICard v-for="feature in features" :key="feature.title" :title="feature.title" hoverable>
-            {{ feature.desc }}
+          <ICard v-for="feature in features" :key="feature.title" hoverable class="feature">
+            <span class="feature__icon"><IIcon :name="feature.icon" :size="20" /></span>
+            <h3 class="feature__title">{{ feature.title }}</h3>
+            <p class="feature__desc">{{ feature.desc }}</p>
           </ICard>
         </div>
       </div>
@@ -125,6 +137,7 @@ const demoSwitch = ref(true)
 
     <!-- 覆盖范围 -->
     <section class="i-container section">
+      <span class="i-eyebrow">Coverage</span>
       <h2 class="section__title">覆盖范围</h2>
       <p class="section__desc i-lead">
         按中后台的真实使用场景划分五类。已实现 {{ readyCount }} 个组件，
@@ -158,27 +171,34 @@ const demoSwitch = ref(true)
 
     <!-- 快速上手 -->
     <section class="i-container section">
+      <span class="i-eyebrow">Get started</span>
       <h2 class="section__title">三步接入</h2>
       <div class="steps">
         <div class="step">
           <span class="step__no">1</span>
           <h3>安装依赖</h3>
-          <pre><code>npm install</code></pre>
+          <CodeBlock code="npm install" lang="bash" :copyable="false" />
         </div>
         <div class="step">
           <span class="step__no">2</span>
           <h3>引入令牌与组件</h3>
-          <pre><code>import '@/styles/global.css'
+          <CodeBlock
+            lang="ts"
+            :copyable="false"
+            code="import '@/styles/global.css'
 import IDesign from '@/components'
 
-app.use(IDesign)</code></pre>
+app.use(IDesign)"
+          />
         </div>
         <div class="step">
           <span class="step__no">3</span>
           <h3>直接使用</h3>
-          <pre><code>&lt;IButton variant="primary"&gt;
-  提交
-&lt;/IButton&gt;</code></pre>
+          <CodeBlock
+            lang="vue"
+            :copyable="false"
+            :code="usageSnippet"
+          />
         </div>
       </div>
     </section>
@@ -189,7 +209,11 @@ app.use(IDesign)</code></pre>
           <h2>把设计决策沉淀成系统</h2>
           <p>浏览完整的令牌表与组件文档，或直接从组件示例开始。</p>
         </div>
-        <RouterLink to="/design/tokens"><IButton variant="primary" size="lg">查看设计令牌</IButton></RouterLink>
+        <RouterLink to="/design/tokens">
+          <IButton variant="primary" size="lg">
+            查看设计令牌<IIcon name="arrow-right" :size="16" />
+          </IButton>
+        </RouterLink>
       </div>
     </section>
   </div>
@@ -198,11 +222,28 @@ app.use(IDesign)</code></pre>
 <style scoped>
 /* Hero */
 .hero {
-  padding: var(--i-spacing-24) 0 var(--i-spacing-20);
+  position: relative;
+  padding: var(--i-spacing-20) 0 var(--i-spacing-16);
+  overflow: hidden;
   background:
-    radial-gradient(60% 80% at 15% 0%, var(--i-color-brand-subtle), transparent 70%),
+    radial-gradient(50% 60% at 12% -10%, var(--i-color-brand-subtle), transparent 70%),
+    radial-gradient(40% 50% at 90% 0%, var(--i-color-ring), transparent 70%),
     var(--i-color-bg);
 }
+/* 细网格只出现在顶部，越往下越淡，避免整块背景显脏 */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--i-color-hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--i-color-hairline) 1px, transparent 1px);
+  background-size: 40px 40px;
+  -webkit-mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
+  mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
+  pointer-events: none;
+}
+.hero__inner { position: relative; }
 .hero__inner {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
@@ -212,18 +253,26 @@ app.use(IDesign)</code></pre>
 .hero__title {
   margin: var(--i-spacing-5) 0 var(--i-spacing-4);
   font-size: var(--i-font-size-5xl);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
 }
-.hero__title-accent { color: var(--i-color-brand); }
+.hero__title-accent {
+  background: var(--i-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 .hero__actions { display: flex; gap: var(--i-spacing-3); margin-top: var(--i-spacing-8); }
 .hero__stats {
   display: flex;
   gap: var(--i-spacing-10);
-  margin: var(--i-spacing-12) 0 0;
+  margin: var(--i-spacing-10) 0 0;
 }
+.hero__stats { gap: var(--i-spacing-8); }
 .hero__stats dt {
   font-size: var(--i-font-size-2xl);
   font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--i-color-text);
 }
 .hero__stats dd {
@@ -232,7 +281,16 @@ app.use(IDesign)</code></pre>
   color: var(--i-color-text-tertiary);
 }
 
-.hero__preview { filter: drop-shadow(var(--i-shadow-xl)); }
+.hero__preview {
+  filter: drop-shadow(var(--i-shadow-xl));
+  animation: hero-float 600ms var(--i-motion-easing) both;
+}
+@keyframes hero-float {
+  from { opacity: 0; transform: translateY(12px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero__preview { animation: none; }
+}
 .preview__field { margin-bottom: var(--i-spacing-4); }
 .preview__field label {
   display: block;
@@ -311,7 +369,7 @@ app.use(IDesign)</code></pre>
 .preview__steps { margin-bottom: var(--i-spacing-5); }
 
 /* 通用区块 */
-.section { padding: var(--i-spacing-20) var(--i-spacing-6); }
+.section { padding: var(--i-spacing-16) var(--i-spacing-6); }
 .section--muted { background: var(--i-color-bg-subtle); }
 .section__title { font-size: var(--i-font-size-3xl); margin-bottom: var(--i-spacing-3); }
 .section__desc { margin-bottom: var(--i-spacing-10); }
@@ -322,11 +380,27 @@ app.use(IDesign)</code></pre>
   gap: var(--i-spacing-6);
 }
 .value {
+  position: relative;
   padding: var(--i-spacing-6);
-  border-left: 2px solid var(--i-color-brand);
-  background: var(--i-color-bg-subtle);
-  border-radius: 0 var(--i-radius-lg) var(--i-radius-lg) 0;
+  background: var(--i-gradient-surface);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-xl);
+  box-shadow: var(--i-shadow-sm);
+  overflow: hidden;
+  transition: box-shadow var(--i-motion-base) var(--i-motion-easing),
+    transform var(--i-motion-base) var(--i-motion-easing);
 }
+.value::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--i-spacing-6);
+  bottom: var(--i-spacing-6);
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: var(--i-gradient-brand);
+}
+.value:hover { transform: translateY(-2px); box-shadow: var(--i-shadow-md); }
 .value__en {
   font-family: var(--i-font-family-mono);
   font-size: var(--i-font-size-xs);
@@ -336,6 +410,19 @@ app.use(IDesign)</code></pre>
 }
 .value__title { font-size: var(--i-font-size-xl); margin: var(--i-spacing-2) 0 var(--i-spacing-3); }
 .value p { color: var(--i-color-text-secondary); }
+
+.feature__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--i-spacing-4);
+  border-radius: var(--i-radius-lg);
+  color: var(--i-color-brand);
+  background: var(--i-color-brand-subtle);
+}
+.feature__title { font-size: var(--i-font-size-lg); margin-bottom: var(--i-spacing-2); }
+.feature__desc { color: var(--i-color-text-secondary); font-size: var(--i-font-size-md); }
 
 .features {
   display: grid;
@@ -352,8 +439,10 @@ app.use(IDesign)</code></pre>
 }
 .step {
   padding: var(--i-spacing-6);
-  border: 1px solid var(--i-color-border);
-  border-radius: var(--i-radius-lg);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-xl);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-sm);
 }
 .step__no {
   display: grid;
@@ -367,18 +456,10 @@ app.use(IDesign)</code></pre>
   margin-bottom: var(--i-spacing-3);
 }
 .step h3 { font-size: var(--i-font-size-lg); margin-bottom: var(--i-spacing-3); }
-.step pre {
-  margin: 0;
-  padding: var(--i-spacing-3);
-  background: var(--i-color-bg-subtle);
-  border-radius: var(--i-radius-md);
-  font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-sm);
-  color: var(--i-color-text-secondary);
-  overflow-x: auto;
-}
+
 
 .cta {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -386,9 +467,26 @@ app.use(IDesign)</code></pre>
   gap: var(--i-spacing-6);
   padding: var(--i-spacing-12);
   border-radius: var(--i-radius-xl);
-  background: linear-gradient(135deg, var(--i-color-brand), var(--i-color-brand-active));
+  background: var(--i-gradient-brand);
   color: #fff;
+  overflow: hidden;
+  box-shadow: var(--i-shadow-brand);
 }
+.cta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-size: 20px 20px;
+  -webkit-mask-image: radial-gradient(60% 100% at 100% 0%, #000, transparent);
+  mask-image: radial-gradient(60% 100% at 100% 0%, #000, transparent);
+}
+.cta > * { position: relative; }
+.cta :deep(.i-button--primary) {
+  background: #fff;
+  color: var(--i-color-brand-active);
+}
+.cta :deep(.i-button--primary:hover) { background: rgba(255, 255, 255, 0.9); }
 .cta h2 { font-size: var(--i-font-size-2xl); }
 .cta p { margin-top: var(--i-spacing-2); opacity: 0.85; }
 

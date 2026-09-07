@@ -52,16 +52,18 @@ defineEmits<{ click: [MouseEvent] }>()
 .i-button--lg { height: 42px; padding: 0 var(--i-spacing-6); font-size: var(--i-font-size-lg); }
 
 .i-button--primary {
-  background: var(--i-color-brand);
+  background: var(--i-gradient-brand);
   color: #fff;
+  box-shadow: var(--i-shadow-sm);
 }
-.i-button--primary:hover:not(:disabled) { background: var(--i-color-brand-hover); }
-.i-button--primary:active:not(:disabled) { background: var(--i-color-brand-active); }
+.i-button--primary:hover:not(:disabled) { filter: brightness(1.06); box-shadow: var(--i-shadow-brand); }
+.i-button--primary:active:not(:disabled) { filter: brightness(0.96); box-shadow: none; }
 
 .i-button--secondary {
-  background: var(--i-color-bg);
-  border-color: var(--i-color-border-strong);
+  background: var(--i-color-bg-elevated);
+  border-color: var(--i-color-border);
   color: var(--i-color-text);
+  box-shadow: var(--i-shadow-sm);
 }
 .i-button--secondary:hover:not(:disabled) {
   border-color: var(--i-color-brand);

@@ -25,6 +25,7 @@ export const docNav: NavGroup[] = [
     title: '基础',
     items: [
       { to: '/components/button', label: 'Button 按钮' },
+      { to: '/components/icon', label: 'Icon 图标' },
       { to: '/components/tag', label: 'Tag 标签' },
       { to: '/components/divider', label: 'Divider 分割线' }
     ]

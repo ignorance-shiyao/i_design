@@ -19,6 +19,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', component: () => import('@/pages/ComponentsOverviewPage.vue') },
       { path: 'button', component: () => import('@/pages/components/ButtonPage.vue') },
+      { path: 'icon', component: () => import('@/pages/components/IconPage.vue') },
       { path: 'form', component: () => import('@/pages/components/FormPage.vue') },
       { path: 'input', component: () => import('@/pages/components/InputPage.vue') },
       { path: 'textarea', component: () => import('@/pages/components/TextareaPage.vue') },

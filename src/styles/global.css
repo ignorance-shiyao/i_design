@@ -16,9 +16,12 @@ body {
   margin: 0;
   font-family: var(--i-font-family);
   font-size: var(--i-font-size-md);
-  line-height: var(--i-line-height-base);
+  line-height: 1.7;
   color: var(--i-color-text);
   background: var(--i-color-bg);
+  /* 等宽数字让统计数字、表格数值在变化时不抖动 */
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   transition: background var(--i-motion-base) var(--i-motion-easing),
     color var(--i-motion-base) var(--i-motion-easing);
@@ -28,6 +31,7 @@ h1, h2, h3, h4 {
   margin: 0;
   line-height: var(--i-line-height-tight);
   font-weight: 600;
+  letter-spacing: -0.015em;
 }
 
 p { margin: 0; }
@@ -39,13 +43,36 @@ a {
 }
 a:hover { color: var(--i-color-brand-hover); }
 
+/* 正文里的行内代码 */
 code {
   font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-sm);
-  background: var(--i-color-bg-muted);
-  padding: 1px var(--i-spacing-1);
+  font-size: 0.9em;
+  color: var(--i-color-text);
+  background: var(--i-color-bg-subtle);
+  border: 1px solid var(--i-color-hairline);
+  padding: 0.1em 0.35em;
   border-radius: var(--i-radius-sm);
 }
+
+/* 语法高亮 token */
+.tok--comment { color: var(--i-tok-comment); font-style: italic; }
+.tok--keyword { color: var(--i-tok-keyword); }
+.tok--string { color: var(--i-tok-string); }
+.tok--regexp { color: var(--i-tok-string); }
+.tok--number { color: var(--i-tok-number); }
+.tok--literal { color: var(--i-tok-literal); }
+.tok--fn { color: var(--i-tok-fn); }
+.tok--klass { color: var(--i-tok-klass); }
+.tok--prop { color: var(--i-tok-prop); }
+.tok--tag { color: var(--i-tok-tag); }
+.tok--attr { color: var(--i-tok-attr); }
+.tok--directive { color: var(--i-tok-directive); }
+.tok--mustache { color: var(--i-tok-directive); }
+.tok--selector { color: var(--i-tok-tag); }
+.tok--atrule { color: var(--i-tok-keyword); }
+.tok--variable { color: var(--i-tok-prop); }
+.tok--flag { color: var(--i-tok-attr); }
+.tok--punct { color: var(--i-tok-punct); }
 
 :focus-visible {
   outline: 2px solid var(--i-color-brand);
@@ -60,12 +87,16 @@ code {
   padding: 0 var(--i-spacing-6);
 }
 
-.i-doc h1 { font-size: var(--i-font-size-3xl); margin-bottom: var(--i-spacing-3); }
+.i-doc h1 {
+  font-size: var(--i-font-size-3xl);
+  margin-bottom: var(--i-spacing-3);
+  letter-spacing: -0.025em;
+}
 .i-doc h2 {
   font-size: var(--i-font-size-xl);
-  margin: var(--i-spacing-10) 0 var(--i-spacing-4);
-  padding-bottom: var(--i-spacing-2);
-  border-bottom: 1px solid var(--i-color-border);
+  margin: var(--i-spacing-12) 0 var(--i-spacing-4);
+  padding-bottom: var(--i-spacing-3);
+  border-bottom: 1px solid var(--i-color-hairline);
 }
 .i-doc h3 { font-size: var(--i-font-size-lg); margin: var(--i-spacing-6) 0 var(--i-spacing-3); }
 .i-doc p { color: var(--i-color-text-secondary); margin-bottom: var(--i-spacing-4); }
@@ -82,19 +113,59 @@ code {
   font-size: var(--i-font-size-md);
   margin: var(--i-spacing-4) 0;
 }
+.i-table {
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+}
 .i-table th,
 .i-table td {
   text-align: left;
   padding: var(--i-spacing-3) var(--i-spacing-4);
-  border-bottom: 1px solid var(--i-color-border);
+  border-bottom: 1px solid var(--i-color-hairline);
 }
+.i-table tr:last-child td { border-bottom: none; }
 .i-table th {
   background: var(--i-color-bg-subtle);
   font-weight: 600;
-  color: var(--i-color-text);
+  font-size: var(--i-font-size-sm);
+  letter-spacing: 0.02em;
+  color: var(--i-color-text-secondary);
 }
+.i-table tbody tr { transition: background var(--i-motion-fast) var(--i-motion-easing); }
+.i-table tbody tr:hover { background: var(--i-color-bg-subtle); }
 .i-table td { color: var(--i-color-text-secondary); }
 
 @media (max-width: 720px) {
   .i-doc h1 { font-size: var(--i-font-size-2xl); }
+}
+
+/* 区块小标题（eyebrow）：给长页面提供节奏与层次 */
+.i-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--i-color-brand);
+}
+.i-eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+}
+
+/* 细网格底纹，给大面积留白一点质感 */
+.i-grid-bg {
+  background-image:
+    linear-gradient(var(--i-color-hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--i-color-hairline) 1px, transparent 1px);
+  background-size: 32px 32px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 0%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(70% 60% at 50% 0%, #000 30%, transparent 100%);
 }

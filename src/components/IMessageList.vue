@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { closeMessage, messages } from './messageState'
+import IIcon from './IIcon.vue'
+import type { IconName } from './icons'
 
-const icons: Record<string, string> = { info: 'i', success: '✓', warning: '!', danger: '×' }
+const iconOf: Record<string, IconName> = {
+  info: 'info-circle',
+  success: 'check-circle',
+  warning: 'warning-triangle',
+  danger: 'error-circle'
+}
 </script>
 
 <template>
@@ -9,10 +16,10 @@ const icons: Record<string, string> = { info: 'i', success: '✓', warning: '!',
   <div class="i-message-list" role="status" aria-live="polite">
     <TransitionGroup name="i-message">
       <div v-for="item in messages" :key="item.id" class="i-message" :class="`i-message--${item.type}`">
-        <span class="i-message__icon" aria-hidden="true">{{ icons[item.type] }}</span>
+        <IIcon class="i-message__icon" :name="iconOf[item.type]" :size="18" />
         <span class="i-message__text">{{ item.content }}</span>
         <button v-if="item.closable" class="i-message__close" aria-label="关闭" @click="closeMessage(item.id)">
-          ×
+          <IIcon name="close" :size="15" />
         </button>
       </div>
     </TransitionGroup>
@@ -45,27 +52,20 @@ const icons: Record<string, string> = { info: 'i', success: '✓', warning: '!',
   color: var(--i-color-text);
   pointer-events: auto;
 }
-.i-message__icon {
+.i-message--info .i-message__icon { color: var(--i-color-info); }
+.i-message--success .i-message__icon { color: var(--i-color-success); }
+.i-message--warning .i-message__icon { color: var(--i-color-warning); }
+.i-message--danger .i-message__icon { color: var(--i-color-danger); }
+.i-message__close {
   display: grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: var(--i-radius-full);
-  font-size: var(--i-font-size-xs);
-  color: #fff;
-}
-.i-message--info .i-message__icon { background: var(--i-color-info); }
-.i-message--success .i-message__icon { background: var(--i-color-success); }
-.i-message--warning .i-message__icon { background: var(--i-color-warning); }
-.i-message--danger .i-message__icon { background: var(--i-color-danger); }
-.i-message__close {
   border: none;
   background: none;
   color: var(--i-color-text-tertiary);
-  font-size: var(--i-font-size-lg);
   line-height: 1;
   cursor: pointer;
 }
+.i-message__close:hover { color: var(--i-color-text); }
 
 .i-message-enter-active,
 .i-message-leave-active { transition: all var(--i-motion-base) var(--i-motion-easing); }

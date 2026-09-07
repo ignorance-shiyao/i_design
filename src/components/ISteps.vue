@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import IIcon from './IIcon.vue'
+
 export interface StepItem {
   title: string
   description?: string
@@ -44,8 +46,8 @@ function onPick(index: number) {
     >
       <div class="i-step__head">
         <span class="i-step__icon">
-          <template v-if="stateOf(index) === 'finish'">✓</template>
-          <template v-else-if="stateOf(index) === 'error'">!</template>
+          <IIcon v-if="stateOf(index) === 'finish'" name="check" :size="14" :stroke-width="2.4" />
+          <IIcon v-else-if="stateOf(index) === 'error'" name="close" :size="14" :stroke-width="2.4" />
           <template v-else>{{ index + 1 }}</template>
         </span>
         <span v-if="index < items.length - 1" class="i-step__line" aria-hidden="true" />

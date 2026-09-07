@@ -1,4 +1,5 @@
 import type { App } from 'vue'
+import IIcon from './IIcon.vue'
 import IButton from './IButton.vue'
 import IInput from './IInput.vue'
 import ITextarea from './ITextarea.vue'
@@ -26,6 +27,7 @@ import IDrawer from './IDrawer.vue'
 import ILoading from './ILoading.vue'
 
 export {
+  IIcon,
   IButton,
   IInput,
   ITextarea,
@@ -61,8 +63,11 @@ export type { BreadcrumbItem } from './IBreadcrumb.vue'
 export type { StepItem } from './ISteps.vue'
 export type { MessageOptions, MessageType } from './message'
 export type { FormRule } from './validate'
+export type { IconName } from './icons'
+export { icons, iconNames } from './icons'
 
 const components = {
+  IIcon,
   IButton,
   IInput,
   ITextarea,

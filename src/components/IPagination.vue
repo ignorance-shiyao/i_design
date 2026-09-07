@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import IIcon from './IIcon.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -80,7 +81,7 @@ function jump(direction: 'left' | 'right') {
       :disabled="disabled || current === 1"
       @click="go(current - 1)"
     >
-      ‹
+      <IIcon name="chevron-left" :size="15" />
     </button>
 
     <template v-for="(item, index) in items" :key="`${item}-${index}`">
@@ -104,7 +105,7 @@ function jump(direction: 'left' | 'right') {
         :disabled="disabled"
         @click="jump(item)"
       >
-        ···
+        <IIcon name="more" :size="15" />
       </button>
     </template>
 
@@ -115,7 +116,7 @@ function jump(direction: 'left' | 'right') {
       :disabled="disabled || current === pageCount"
       @click="go(current + 1)"
     >
-      ›
+      <IIcon name="chevron-right" :size="15" />
     </button>
   </nav>
 </template>
@@ -135,6 +136,8 @@ function jump(direction: 'left' | 'right') {
 }
 
 .i-pagination__item {
+  display: inline-grid;
+  place-items: center;
   min-width: 30px;
   height: 30px;
   padding: 0 var(--i-spacing-2);

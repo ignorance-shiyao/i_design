@@ -20,6 +20,7 @@ export const componentCategories: ComponentCategory[] = [
     desc: '构成界面的最小交互单元。',
     items: [
       { name: 'Button', cn: '按钮', to: '/components/button', desc: '触发一个即时操作', status: 'ready' },
+      { name: 'Icon', cn: '图标', to: '/components/icon', desc: '38 个内联 SVG 图标', status: 'ready' },
       { name: 'Tag', cn: '标签', to: '/components/tag', desc: '标记分类或状态', status: 'ready' },
       { name: 'Divider', cn: '分割线', to: '/components/divider', desc: '分隔内容区块', status: 'ready' }
     ]

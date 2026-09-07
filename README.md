@@ -5,18 +5,19 @@
 
 ## 在线预览
 
-<https://claude.ai/code/artifact/e1426b9e-8399-4e65-b1dc-addad7857af7>
+推送到 `main` 或开发分支后，GitHub Actions 会自动构建并部署到 GitHub Pages：
+`https://ignorance-shiyao.github.io/i_design/`
 
-每轮改动后由 `npm run build:preview` 重新生成 `preview/index.html`（整站内联为单文件）并发布到该地址。
+首次使用需在仓库 **Settings → Pages → Source** 选择 **GitHub Actions**（一次性设置）。
+工作流见 `.github/workflows/deploy.yml`；站点使用 hash 路由，部署在子路径下也无需服务端改写。
 
 ## 快速开始
 
 ```bash
 npm install
-npm run dev            # 启动文档站
-npm run build          # 类型检查 + 生产构建
-npm run preview        # 预览构建产物
-npm run build:preview  # 生成单文件预览产物 preview/index.html
+npm run dev       # 启动文档站
+npm run build     # 类型检查 + 生产构建
+npm run preview   # 本地预览构建产物
 ```
 
 ## 设计价值观
@@ -37,11 +38,11 @@ npm run build:preview  # 生成单文件预览产物 preview/index.html
 
 ## 组件
 
-按使用场景分五类，已实现 23 个（另有 6 个在规划中，见站内「组件总览」）：
+按使用场景分五类，已实现 24 个（另有 6 个在规划中，见站内「组件总览」）：
 
 | 分类 | 组件 |
 | --- | --- |
-| 基础 | Button、Tag、Divider |
+| 基础 | Button、Icon、Tag、Divider |
 | 导航 | Tabs、Pagination、Breadcrumb、Steps |
 | 数据录入 | Form、Input、Textarea、Select、Radio、Checkbox、Switch |
 | 数据展示 | Table、Card、Tooltip、Empty |
