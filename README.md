@@ -3,13 +3,20 @@
 一套面向企业中后台产品的设计体系：**设计价值观 → 设计令牌 → Vue 3 组件库 → 文档站**。
 参考 [DevUI](https://devui.design/) 的组织方式，把设计决策沉淀成可被代码直接消费的系统。
 
+## 在线预览
+
+<https://claude.ai/code/artifact/e1426b9e-8399-4e65-b1dc-addad7857af7>
+
+每轮改动后由 `npm run build:preview` 重新生成 `preview/index.html`（整站内联为单文件）并发布到该地址。
+
 ## 快速开始
 
 ```bash
 npm install
-npm run dev       # 启动文档站
-npm run build     # 类型检查 + 生产构建
-npm run preview   # 预览构建产物
+npm run dev            # 启动文档站
+npm run build          # 类型检查 + 生产构建
+npm run preview        # 预览构建产物
+npm run build:preview  # 生成单文件预览产物 preview/index.html
 ```
 
 ## 设计价值观
