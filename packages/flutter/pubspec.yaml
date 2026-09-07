@@ -7,3 +7,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # 图标以 SVG 字符串内联渲染，与 Web / 小程序同一批形状数据
+  flutter_svg: ^2.0.9
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
