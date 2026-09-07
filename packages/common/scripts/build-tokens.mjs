@@ -30,6 +30,8 @@ const tokens = await import(pathToFileURL(tmp).href)
 
 const light = tokens.flatten('light')
 const dark = tokens.flatten('dark')
+const mobileLight = tokens.flattenMobile('light')
+const mobileDark = tokens.flattenMobile('dark')
 const PREFIX = 'i'
 
 const banner = '/* 由 packages/common/scripts/build-tokens.mjs 自动生成，请勿手改 */'
@@ -52,6 +54,19 @@ ${cssVars(dark)}
 }
 `
 
+/* ---------- 移动端 CSS（Web 令牌 + 移动覆盖层） ---------- */
+const cssMobile = `${banner}
+:root {
+${cssVars(mobileLight)}
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+${cssVars(mobileDark)}
+  color-scheme: dark;
+}
+`
+
 /* ---------- SCSS ---------- */
 const scss = `${banner}
 ${Object.entries(light)
@@ -60,7 +75,7 @@ ${Object.entries(light)
 `
 
 /* ---------- JSON ---------- */
-const json = JSON.stringify({ light, dark }, null, 2)
+const json = JSON.stringify({ light, dark, mobileLight, mobileDark }, null, 2)
 
 /* ---------- WXSS（小程序不支持 :root，作用在 page 上） ---------- */
 const wxss = `${banner}
@@ -159,6 +174,7 @@ ThemeData iDesignTheme({Brightness brightness = Brightness.light}) {
 mkdirSync(outDir, { recursive: true })
 const files = {
   'tokens.css': css,
+  'tokens.mobile.css': cssMobile,
   'tokens.scss': scss,
   'tokens.json': json,
   'tokens.wxss': wxss,
@@ -168,8 +184,9 @@ for (const [name, content] of Object.entries(files)) {
   writeFileSync(join(outDir, name), content)
 }
 
-// 同步一份 CSS 到 styles 目录，Web 端直接 import
+// 同步到 styles 目录，Web 与移动端直接 import
 writeFileSync(join(root, 'src/styles/tokens.css'), css)
+writeFileSync(join(root, 'src/styles/tokens.mobile.css'), cssMobile)
 
 execFileSync('rm', ['-f', tmp])
 

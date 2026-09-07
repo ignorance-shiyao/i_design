@@ -1,23 +1,29 @@
-/* 组件样式总入口：各 Web 端引入这一个文件即可 */
+/*
+ * 组件样式总入口：各 Web 端引入这一个文件即可。
+ * 由 scripts/build-styles-index.mjs 按目录自动生成——手写清单会漏掉新组件。
+ */
 @import './tokens.css';
 @import './base.css';
+
+@import './components/action-sheet.css';
 @import './components/alert.css';
-@import './components/avatar.css';
 @import './components/avatar-group.css';
+@import './components/avatar.css';
 @import './components/badge.css';
 @import './components/breadcrumb.css';
 @import './components/button.css';
 @import './components/card.css';
-@import './components/checkbox.css';
+@import './components/cell.css';
 @import './components/checkbox-group.css';
+@import './components/checkbox.css';
 @import './components/collapse.css';
 @import './components/date-picker.css';
 @import './components/descriptions.css';
 @import './components/divider.css';
 @import './components/drawer.css';
 @import './components/empty.css';
-@import './components/form.css';
 @import './components/form-item.css';
+@import './components/form.css';
 @import './components/icon.css';
 @import './components/input.css';
 @import './components/loading.css';
@@ -25,8 +31,8 @@
 @import './components/modal.css';
 @import './components/pagination.css';
 @import './components/popconfirm.css';
-@import './components/radio.css';
 @import './components/radio-group.css';
+@import './components/radio.css';
 @import './components/result.css';
 @import './components/select.css';
 @import './components/skeleton.css';
@@ -36,5 +42,6 @@
 @import './components/tabs.css';
 @import './components/tag.css';
 @import './components/textarea.css';
+@import './components/toast.css';
 @import './components/tooltip.css';
 @import './components/upload.css';

@@ -1,0 +1,21 @@
+/* Toast —— 移动端的轻量反馈，居中浮层而非顶部条 */
+.i-toast {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: var(--i-z-toast);
+  display: grid;
+  justify-items: center;
+  gap: var(--i-spacing-2);
+  min-width: 120px;
+  max-width: 70vw;
+  padding: var(--i-spacing-4) var(--i-spacing-5);
+  border-radius: var(--i-radius-lg);
+  background: rgba(20, 24, 34, 0.86);
+  color: #fff;
+  font-size: var(--i-font-size-md);
+  text-align: center;
+  pointer-events: none;
+}
+.i-toast__icon { color: #fff; }

@@ -250,6 +250,41 @@ export const gradientDark = {
   surface: 'linear-gradient(180deg, #1e2330 0%, #191d28 100%)'
 } as const
 
+/**
+ * 移动端覆盖层。
+ *
+ * 移动端不是「把 Web 组件缩小」：手指的命中面积远大于鼠标指针，正文字号低于 16px
+ * 会触发 iOS 的自动缩放，而 hover 在触屏上根本不存在。因此这里只覆盖受这些因素
+ * 影响的令牌，颜色与语义完全沿用 Web 端——同一套设计，不同的人机尺度。
+ */
+export const mobileOverrides: Record<string, string> = {
+  // 正文 16px：低于此值 iOS Safari 会在聚焦输入框时自动放大页面
+  'font-size-md': '16px',
+  'font-size-sm': '14px',
+  'font-size-xs': '13px',
+  'font-size-lg': '18px',
+
+  // 控件最小高度 44px，来自 Apple HIG 与 Material 的可点击区域下限
+  'control-height-sm': '36px',
+  'control-height-md': '44px',
+  'control-height-lg': '52px',
+
+  // 触屏没有 hover，过渡时长相应缩短，避免点按后有黏滞感
+  'motion-fast': '100ms',
+  'motion-base': '160ms',
+
+  // 安全区：刘海屏与手势条
+  'safe-top': 'env(safe-area-inset-top, 0px)',
+  'safe-bottom': 'env(safe-area-inset-bottom, 0px)'
+}
+
+/** Web 端的控件高度，供各端统一引用（移动端由覆盖层调大） */
+export const controlHeight = {
+  sm: '28px',
+  md: '34px',
+  lg: '42px'
+} as const
+
 /** 扁平化后的完整令牌表，供编译器逐平台输出 */
 export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, string> {
   const semantic = theme === 'dark' ? darkTheme : lightTheme
@@ -268,7 +303,13 @@ export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, strin
   Object.entries(zIndex).forEach(([k, v]) => (out[`z-${k}`] = v))
   Object.entries(fontFamily).forEach(([k, v]) => (out[`font-family${k === 'base' ? '' : `-${k}`}`] = v))
   Object.entries(gradients).forEach(([k, v]) => (out[`gradient-${k}`] = v))
+  Object.entries(controlHeight).forEach(([k, v]) => (out[`control-height-${k}`] = v))
   return out
+}
+
+/** 移动端令牌 = Web 令牌 + 覆盖层 */
+export function flattenMobile(theme: 'light' | 'dark' = 'light'): Record<string, string> {
+  return { ...flatten(theme), ...mobileOverrides }
 }
 
 /** 把令牌表展开为 CSS 自定义属性声明 */
