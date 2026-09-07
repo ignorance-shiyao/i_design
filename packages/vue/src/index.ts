@@ -1,0 +1,48 @@
+/**
+ * Ignorance Design · Vue 2（Vue 2.7 组合式 API）
+ *
+ * 令牌、图标、交互逻辑与样式全部来自 @i-design/common，与 vue-next / React 同源。
+ * 与 vue-next 的差异仅在 Vue 2 的语法约束：v-model 走 value / input，
+ * 模板必须单根，Teleport 由 _Portal.vue 代替。
+ *
+ * 本文件由 packages/vue/scripts/build-index.mjs 按目录生成。
+ */
+export { default as IAlert } from './components/IAlert.vue'
+export { default as IAvatar } from './components/IAvatar.vue'
+export { default as IAvatarGroup } from './components/IAvatarGroup.vue'
+export { default as IBadge } from './components/IBadge.vue'
+export { default as IBreadcrumb } from './components/IBreadcrumb.vue'
+export { default as IButton } from './components/IButton.vue'
+export { default as ICard } from './components/ICard.vue'
+export { default as ICheckbox } from './components/ICheckbox.vue'
+export { default as ICheckboxGroup } from './components/ICheckboxGroup.vue'
+export { default as ICollapse } from './components/ICollapse.vue'
+export { default as IDatePicker } from './components/IDatePicker.vue'
+export { default as IDescriptions } from './components/IDescriptions.vue'
+export { default as IDivider } from './components/IDivider.vue'
+export { default as IDrawer } from './components/IDrawer.vue'
+export { default as IEmpty } from './components/IEmpty.vue'
+export { default as IForm } from './components/IForm.vue'
+export { default as IFormItem } from './components/IFormItem.vue'
+export { default as IIcon } from './components/IIcon.vue'
+export { default as IInput } from './components/IInput.vue'
+export { default as ILoading } from './components/ILoading.vue'
+export { default as IMessageList } from './components/IMessageList.vue'
+export { default as IModal } from './components/IModal.vue'
+export { default as IPagination } from './components/IPagination.vue'
+export { default as IPopconfirm } from './components/IPopconfirm.vue'
+export { default as IRadio } from './components/IRadio.vue'
+export { default as IRadioGroup } from './components/IRadioGroup.vue'
+export { default as IResult } from './components/IResult.vue'
+export { default as ISelect } from './components/ISelect.vue'
+export { default as ISkeleton } from './components/ISkeleton.vue'
+export { default as ISteps } from './components/ISteps.vue'
+export { default as ISwitch } from './components/ISwitch.vue'
+export { default as ITable } from './components/ITable.vue'
+export { default as ITabs } from './components/ITabs.vue'
+export { default as ITag } from './components/ITag.vue'
+export { default as ITextarea } from './components/ITextarea.vue'
+export { default as ITooltip } from './components/ITooltip.vue'
+export { default as IUpload } from './components/IUpload.vue'
+export { message, messages, closeMessage } from './message'
+export type { MessageOptions, MessageType, MessageRecord } from './message'

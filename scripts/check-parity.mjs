@@ -94,7 +94,25 @@ for (const file of readdirSync(styleDir).filter((f) => f.endsWith('.css'))) {
 }
 check('共享样式无全局泄漏的通用选择器', leaks.length === 0, leaks.slice(0, 4).join('; '))
 
-/* ---------- 5. Avatar 配色规则 TS 与 Dart 一致 ---------- */
+/* ---------- 5. Vue 2 端不得残留 Vue 3 专有语法 ---------- */
+/*
+ * 转换器的产物必须真的能被 Vue 2.7 编译。这里静态拦下三类已经踩过的坑：
+ *   modelValue      —— Vue 2 的 v-model 走 value / input
+ *   模板里的 as 断言 —— Vue 2 的模板表达式解析器不认，直接语法错
+ *   Teleport        —— 2.7 没有，须用 _Portal.vue
+ */
+const vue2Dir = 'packages/vue/src/components'
+const vue2Issues = []
+for (const file of readdirSync(vue2Dir).filter((f) => f.endsWith('.vue'))) {
+  const src = readFileSync(`${vue2Dir}/${file}`, 'utf8')
+  const tpl = src.match(/<template>([\s\S]*?)<\/template>/)?.[1] ?? ''
+  if (/\bmodelValue\b/.test(src)) vue2Issues.push(`${file}: 残留 modelValue`)
+  if (/\s+as\s+[A-Z]/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 断言`)
+  if (/<Teleport/i.test(tpl)) vue2Issues.push(`${file}: 使用了 Teleport`)
+}
+check('Vue 2 产物无 Vue 3 专有语法', vue2Issues.length === 0, vue2Issues.slice(0, 3).join('; '))
+
+/* ---------- 6. Avatar 配色规则 TS 与 Dart 一致 ---------- */
 execFileSync('node_modules/.bin/esbuild',
   ['packages/common/src/logic/avatar.ts', '--bundle', '--format=esm', '--outfile=/tmp/parity-avatar.mjs'],
   { stdio: 'pipe' })
