@@ -46,6 +46,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/input', label: 'Input 输入框' },
       { to: '/components/textarea', label: 'Textarea 多行文本框' },
       { to: '/components/select', label: 'Select 下拉选择' },
+      { to: '/components/date-picker', label: 'DatePicker 日期选择器' },
       { to: '/components/radio', label: 'Radio 单选框' },
       { to: '/components/checkbox', label: 'Checkbox 多选框' },
       { to: '/components/switch', label: 'Switch 开关' }

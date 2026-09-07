@@ -30,7 +30,8 @@ const showCode = ref(false)
 .demo {
   border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-xl);
-  overflow: hidden;
+  /* 不能裁剪：Select、DatePicker 等浮层会溢出示例区，裁掉就看不全了 */
+  overflow: visible;
   margin-bottom: var(--i-spacing-6);
   background: var(--i-color-bg-elevated);
   box-shadow: var(--i-shadow-sm);
@@ -45,6 +46,8 @@ const showCode = ref(false)
   color: var(--i-color-text-tertiary);
 }
 .demo__stage {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

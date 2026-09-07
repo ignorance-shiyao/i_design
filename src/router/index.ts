@@ -28,6 +28,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'tag', component: () => import('@/pages/components/TagPage.vue') },
       { path: 'switch', component: () => import('@/pages/components/SwitchPage.vue') },
       { path: 'select', component: () => import('@/pages/components/SelectPage.vue') },
+      { path: 'date-picker', component: () => import('@/pages/components/DatePickerPage.vue') },
       { path: 'card', component: () => import('@/pages/components/CardPage.vue') },
       { path: 'table', component: () => import('@/pages/components/TablePage.vue') },
       { path: 'pagination', component: () => import('@/pages/components/PaginationPage.vue') },

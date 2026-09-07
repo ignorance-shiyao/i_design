@@ -1,0 +1,367 @@
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import IIcon from './IIcon.vue'
+import {
+  addDays,
+  addMonths,
+  buildCalendar,
+  formatDate,
+  isSameDay,
+  parseISO,
+  startOfMonth,
+  toISO,
+  weekdayLabels
+} from './date'
+
+const props = withDefaults(
+  defineProps<{
+    /** YYYY-MM-DD 字符串；空值用 null 表示 */
+    modelValue?: string | null
+    placeholder?: string
+    size?: 'sm' | 'md' | 'lg'
+    disabled?: boolean
+    invalid?: boolean
+    clearable?: boolean
+    /** 可选范围，闭区间，同样是 YYYY-MM-DD */
+    min?: string
+    max?: string
+    /** 更细的禁用规则，优先级低于 min/max */
+    disabledDate?: (date: Date) => boolean
+    /** 仅影响输入框里的显示，对外的值始终是 YYYY-MM-DD */
+    format?: string
+    weekStart?: 0 | 1
+  }>(),
+  {
+    modelValue: null,
+    placeholder: '请选择日期',
+    size: 'md',
+    disabled: false,
+    invalid: false,
+    clearable: false,
+    min: '',
+    max: '',
+    disabledDate: undefined,
+    format: 'YYYY-MM-DD',
+    weekStart: 1
+  }
+)
+
+const emit = defineEmits<{
+  'update:modelValue': [string | null]
+  change: [string | null]
+}>()
+
+const root = ref<HTMLElement | null>(null)
+const open = ref(false)
+
+const selected = computed(() => parseISO(props.modelValue))
+/** 面板当前展示的月份；未选中时落在今天所在月 */
+const viewDate = ref(startOfMonth(selected.value ?? new Date()))
+/** 键盘导航的焦点日期，与选中值分离，这样方向键浏览时不会立刻改值 */
+const cursor = ref<Date>(selected.value ?? new Date())
+
+const cells = computed(() => buildCalendar(viewDate.value, props.weekStart))
+const weekdays = computed(() => weekdayLabels(props.weekStart))
+const display = computed(() => (selected.value ? formatDate(selected.value, props.format) : ''))
+const title = computed(() => `${viewDate.value.getFullYear()} 年 ${viewDate.value.getMonth() + 1} 月`)
+
+function isDisabled(date: Date) {
+  const iso = toISO(date)
+  if (props.min && iso < props.min) return true
+  if (props.max && iso > props.max) return true
+  return props.disabledDate ? props.disabledDate(date) : false
+}
+
+function openPanel() {
+  if (props.disabled) return
+  open.value = true
+  const base = selected.value ?? new Date()
+  viewDate.value = startOfMonth(base)
+  cursor.value = base
+}
+
+function close() {
+  open.value = false
+}
+
+function pick(date: Date) {
+  if (isDisabled(date)) return
+  const iso = toISO(date)
+  emit('update:modelValue', iso)
+  emit('change', iso)
+  close()
+}
+
+function clear() {
+  emit('update:modelValue', null)
+  emit('change', null)
+}
+
+function shiftMonth(delta: number) {
+  viewDate.value = addMonths(viewDate.value, delta)
+}
+
+function goToday() {
+  const today = new Date()
+  viewDate.value = startOfMonth(today)
+  cursor.value = today
+  if (!isDisabled(today)) pick(today)
+}
+
+/** 方向键移动焦点日期，越出当前月时面板自动翻页 */
+function moveCursor(days: number) {
+  const next = addDays(cursor.value, days)
+  cursor.value = next
+  if (next.getMonth() !== viewDate.value.getMonth()) viewDate.value = startOfMonth(next)
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (props.disabled) return
+  if (!open.value) {
+    if (['Enter', ' ', 'ArrowDown'].includes(event.key)) {
+      event.preventDefault()
+      openPanel()
+    }
+    return
+  }
+  switch (event.key) {
+    case 'ArrowLeft': event.preventDefault(); moveCursor(-1); break
+    case 'ArrowRight': event.preventDefault(); moveCursor(1); break
+    case 'ArrowUp': event.preventDefault(); moveCursor(-7); break
+    case 'ArrowDown': event.preventDefault(); moveCursor(7); break
+    case 'PageUp': event.preventDefault(); shiftMonth(-1); break
+    case 'PageDown': event.preventDefault(); shiftMonth(1); break
+    case 'Enter':
+    case ' ':
+      event.preventDefault()
+      pick(cursor.value)
+      break
+    case 'Escape':
+      close()
+      break
+  }
+}
+
+function onClickOutside(event: MouseEvent) {
+  if (open.value && root.value && !root.value.contains(event.target as Node)) close()
+}
+
+// 外部改值时同步面板月份，避免再次打开还停在旧月份
+watch(selected, (value) => {
+  if (value) {
+    viewDate.value = startOfMonth(value)
+    cursor.value = value
+  }
+})
+
+onMounted(() => document.addEventListener('click', onClickOutside))
+onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
+</script>
+
+<template>
+  <div ref="root" class="i-date" :class="[`i-date--${size}`, { 'is-open': open }]">
+    <button
+      class="i-date__trigger"
+      :class="{ 'is-invalid': invalid, 'is-placeholder': !selected }"
+      type="button"
+      :disabled="disabled"
+      aria-haspopup="dialog"
+      :aria-expanded="open"
+      @click="open ? close() : openPanel()"
+      @keydown="onKeydown"
+    >
+      <IIcon class="i-date__calendar" name="calendar" :size="15" />
+      <span class="i-date__value">{{ display || placeholder }}</span>
+      <span
+        v-if="clearable && selected && !disabled"
+        class="i-date__clear"
+        role="button"
+        aria-label="清除日期"
+        @click.stop="clear"
+      >
+        <IIcon name="close" :size="14" />
+      </span>
+    </button>
+
+    <div v-show="open" class="i-date__panel" role="dialog" :aria-label="title">
+      <header class="i-date__head">
+        <button type="button" class="i-date__nav" aria-label="上一月" @click="shiftMonth(-1)">
+          <IIcon name="chevron-left" :size="15" />
+        </button>
+        <span class="i-date__title">{{ title }}</span>
+        <button type="button" class="i-date__nav" aria-label="下一月" @click="shiftMonth(1)">
+          <IIcon name="chevron-right" :size="15" />
+        </button>
+      </header>
+
+      <div class="i-date__week">
+        <span v-for="label in weekdays" :key="label">{{ label }}</span>
+      </div>
+
+      <div class="i-date__grid">
+        <button
+          v-for="cell in cells"
+          :key="cell.iso"
+          type="button"
+          class="i-date__cell"
+          :class="{
+            'is-outside': cell.outside,
+            'is-today': cell.today,
+            'is-selected': isSameDay(cell.date, selected),
+            'is-cursor': open && isSameDay(cell.date, cursor),
+            'is-disabled': isDisabled(cell.date)
+          }"
+          :disabled="isDisabled(cell.date)"
+          :aria-current="cell.today ? 'date' : undefined"
+          @click="pick(cell.date)"
+        >
+          {{ cell.day }}
+        </button>
+      </div>
+
+      <footer class="i-date__foot">
+        <button type="button" class="i-date__action" @click="goToday">今天</button>
+        <button v-if="clearable" type="button" class="i-date__action" @click="clear(); close()">
+          清除
+        </button>
+      </footer>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.i-date { position: relative; width: 100%; }
+
+.i-date__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  text-align: left;
+  color: var(--i-color-text);
+  background: var(--i-color-bg);
+  border: 1px solid var(--i-color-border-strong);
+  border-radius: var(--i-radius-md);
+  cursor: pointer;
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    box-shadow var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-date__trigger:hover:not(:disabled) { border-color: var(--i-color-brand); }
+.i-date__trigger:focus-visible,
+.i-date.is-open .i-date__trigger {
+  outline: none;
+  border-color: var(--i-color-brand);
+  box-shadow: 0 0 0 2px var(--i-color-brand-subtle);
+}
+.i-date__trigger:disabled {
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+.i-date__trigger.is-invalid { border-color: var(--i-color-danger); }
+.i-date__trigger.is-placeholder .i-date__value { color: var(--i-color-text-tertiary); }
+.i-date__calendar { color: var(--i-color-text-tertiary); }
+.i-date__value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.i-date__clear { display: grid; place-items: center; color: var(--i-color-text-tertiary); }
+.i-date__clear:hover { color: var(--i-color-text-secondary); }
+
+.i-date--sm .i-date__trigger { height: 28px; padding: 0 var(--i-spacing-2); font-size: var(--i-font-size-sm); }
+.i-date--md .i-date__trigger { height: 34px; padding: 0 var(--i-spacing-3); }
+.i-date--lg .i-date__trigger { height: 42px; padding: 0 var(--i-spacing-4); font-size: var(--i-font-size-lg); }
+
+.i-date__panel {
+  position: absolute;
+  top: calc(100% + var(--i-spacing-1));
+  left: 0;
+  z-index: var(--i-z-dropdown);
+  width: 268px;
+  padding: var(--i-spacing-3);
+  background: var(--i-color-bg-elevated);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  box-shadow: var(--i-shadow-lg);
+}
+
+.i-date__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--i-spacing-2);
+}
+.i-date__title { font-size: var(--i-font-size-md); font-weight: 500; }
+.i-date__nav {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: var(--i-radius-md);
+  background: none;
+  color: var(--i-color-text-secondary);
+  cursor: pointer;
+  transition: background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-date__nav:hover { background: var(--i-color-bg-subtle); color: var(--i-color-brand); }
+
+.i-date__week,
+.i-date__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.i-date__week span {
+  text-align: center;
+  padding: var(--i-spacing-1) 0;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+
+.i-date__cell {
+  height: 32px;
+  border: none;
+  border-radius: var(--i-radius-md);
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+  cursor: pointer;
+  transition: background var(--i-motion-fast) var(--i-motion-easing),
+    color var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-date__cell:hover:not(:disabled) { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
+.i-date__cell.is-outside { color: var(--i-color-text-tertiary); }
+.i-date__cell.is-today { font-weight: 600; color: var(--i-color-brand); }
+.i-date__cell.is-cursor { box-shadow: inset 0 0 0 1px var(--i-color-brand); }
+.i-date__cell.is-selected {
+  background: var(--i-gradient-brand);
+  color: #fff;
+}
+.i-date__cell.is-disabled {
+  color: var(--i-color-text-tertiary);
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.i-date__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--i-spacing-2);
+  margin-top: var(--i-spacing-2);
+  padding-top: var(--i-spacing-2);
+  border-top: 1px solid var(--i-color-hairline);
+}
+.i-date__action {
+  padding: 2px var(--i-spacing-2);
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-brand);
+  cursor: pointer;
+}
+.i-date__action:hover { background: var(--i-color-brand-subtle); }
+</style>

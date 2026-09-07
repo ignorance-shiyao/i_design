@@ -9,6 +9,7 @@ import IRadioGroup from './IRadioGroup.vue'
 import ICheckbox from './ICheckbox.vue'
 import ICheckboxGroup from './ICheckboxGroup.vue'
 import ISwitch from './ISwitch.vue'
+import IDatePicker from './IDatePicker.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -37,6 +38,7 @@ export {
   ICheckbox,
   ICheckboxGroup,
   ISwitch,
+  IDatePicker,
   IForm,
   IFormItem,
   ITag,
@@ -64,6 +66,7 @@ export type { StepItem } from './ISteps.vue'
 export type { MessageOptions, MessageType } from './message'
 export type { FormRule } from './validate'
 export type { IconName } from './icons'
+export * from './date'
 export { icons, iconNames } from './icons'
 
 const components = {
@@ -77,6 +80,7 @@ const components = {
   ICheckbox,
   ICheckboxGroup,
   ISwitch,
+  IDatePicker,
   IForm,
   IFormItem,
   ITag,

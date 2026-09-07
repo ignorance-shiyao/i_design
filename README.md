@@ -38,13 +38,13 @@ npm run preview   # 本地预览构建产物
 
 ## 组件
 
-按使用场景分五类，已实现 24 个（另有 6 个在规划中，见站内「组件总览」）：
+按使用场景分五类，已实现 25 个（另有 5 个在规划中，见站内「组件总览」）：
 
 | 分类 | 组件 |
 | --- | --- |
 | 基础 | Button、Icon、Tag、Divider |
 | 导航 | Tabs、Pagination、Breadcrumb、Steps |
-| 数据录入 | Form、Input、Textarea、Select、Radio、Checkbox、Switch |
+| 数据录入 | Form、Input、Textarea、Select、DatePicker、Radio、Checkbox、Switch |
 | 数据展示 | Table、Card、Tooltip、Empty |
 | 消息反馈 | Alert、Message、Modal、Drawer、Loading |
 

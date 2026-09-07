@@ -20,12 +20,15 @@ const presets: Record<string, { title: string; description: string }> = {
 
 <template>
   <div class="i-empty" :class="`i-empty--${size}`">
-    <svg class="i-empty__art" viewBox="0 0 120 90" fill="none" aria-hidden="true">
-      <ellipse cx="60" cy="76" rx="38" ry="6" class="i-empty__shadow" />
-      <path d="M26 34h68v34a6 6 0 0 1-6 6H32a6 6 0 0 1-6-6z" class="i-empty__box" />
-      <path d="M26 34 38 14h44l12 20" class="i-empty__lid" />
-      <path d="M26 34h20l5 10h18l5-10h20" class="i-empty__slot" />
-    </svg>
+    <!-- illustration 插槽：传入正式插画即可整体替换，默认是内置的占位线稿 -->
+    <slot name="illustration">
+      <svg class="i-empty__art" viewBox="0 0 120 90" fill="none" aria-hidden="true">
+        <ellipse cx="60" cy="76" rx="38" ry="6" class="i-empty__shadow" />
+        <path d="M26 34h68v34a6 6 0 0 1-6 6H32a6 6 0 0 1-6-6z" class="i-empty__box" />
+        <path d="M26 34 38 14h44l12 20" class="i-empty__lid" />
+        <path d="M26 34h20l5 10h18l5-10h20" class="i-empty__slot" />
+      </svg>
+    </slot>
     <p class="i-empty__title">{{ title || presets[type].title }}</p>
     <p class="i-empty__desc">{{ description || presets[type].description }}</p>
     <div v-if="$slots.default" class="i-empty__action"><slot /></div>
@@ -41,8 +44,12 @@ const presets: Record<string, { title: string; description: string }> = {
   text-align: center;
 }
 .i-empty--sm { padding: var(--i-spacing-6); }
-.i-empty__art { width: 120px; height: 90px; margin-bottom: var(--i-spacing-2); }
-.i-empty--sm .i-empty__art { width: 84px; height: 63px; }
+.i-empty :deep(.i-empty__art),
+.i-empty :deep(img),
+.i-empty :deep(svg) { width: 120px; height: auto; margin-bottom: var(--i-spacing-2); }
+.i-empty--sm :deep(.i-empty__art),
+.i-empty--sm :deep(img),
+.i-empty--sm :deep(svg) { width: 84px; }
 .i-empty__shadow { fill: var(--i-color-bg-muted); }
 .i-empty__box { fill: var(--i-color-bg-subtle); stroke: var(--i-color-border-strong); stroke-width: 1.5; }
 .i-empty__lid,
