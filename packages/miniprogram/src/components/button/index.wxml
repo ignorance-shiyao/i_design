@@ -1,0 +1,8 @@
+<button
+  class="i-button i-button--{{variant}} i-button--{{size}} {{block ? 'is-block' : ''}} {{loading ? 'is-loading' : ''}}"
+  disabled="{{disabled || loading}}"
+  bindtap="onTap"
+>
+  <view wx:if="{{loading}}" class="i-button__spinner" aria-hidden="true"></view>
+  <slot></slot>
+</button>

@@ -1,0 +1,9 @@
+name: i_design
+description: Ignorance Design 的 Flutter 实现，令牌与 Web 端同源编译
+version: 0.1.0
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+dependencies:
+  flutter:
+    sdk: flutter

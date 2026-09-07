@@ -1,0 +1,1 @@
+<view class="i-tag i-tag--{{type}} {{round ? 'is-round' : ''}}"><slot></slot></view>

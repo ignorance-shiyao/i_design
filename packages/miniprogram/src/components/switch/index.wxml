@@ -1,0 +1,8 @@
+<view
+  class="i-switch {{checked ? 'is-checked' : ''}}"
+  role="switch"
+  aria-checked="{{checked}}"
+  bindtap="onToggle"
+>
+  <view class="i-switch__thumb"></view>
+</view>

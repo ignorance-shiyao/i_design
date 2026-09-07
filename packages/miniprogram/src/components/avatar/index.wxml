@@ -1,0 +1,8 @@
+<view
+  class="i-avatar is-{{shape}}"
+  style="width:{{px}}px;height:{{px}}px;font-size:{{fontSize}}px;{{showImage ? '' : 'background:' + tint}}"
+>
+  <image wx:if="{{showImage}}" src="{{src}}" mode="aspectFill" binderror="onError" />
+  <text wx:elif="{{initials}}">{{initials}}</text>
+  <view wx:else class="i-avatar__fallback"></view>
+</view>

@@ -1,0 +1,7 @@
+{
+  "name": "@i-design/miniprogram",
+  "version": "0.1.0",
+  "description": "Ignorance Design 的小程序实现：复用公共层令牌与逻辑，样式编译为 WXSS",
+  "dependencies": { "@i-design/common": "0.1.0" },
+  "license": "MIT"
+}

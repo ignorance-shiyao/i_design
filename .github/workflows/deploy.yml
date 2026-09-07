@@ -25,6 +25,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # 跨端一致性：任何一端的令牌或规则偏离都会让构建失败
+      - run: npm run check:parity
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

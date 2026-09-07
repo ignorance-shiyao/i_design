@@ -9,7 +9,10 @@
     "build": "npm run build:tokens && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
-    "build:tokens": "node packages/common/scripts/build-tokens.mjs"
+    "build:tokens": "node packages/common/scripts/build-tokens.mjs",
+    "check:parity": "npm run build:tokens && node scripts/check-parity.mjs",
+    "build:styles:mp": "node packages/miniprogram/scripts/build-styles.mjs",
+    "build:react-demo": "vite build --config packages/react/vite.config.ts"
   },
   "dependencies": {
     "vue": "^3.5.13",
