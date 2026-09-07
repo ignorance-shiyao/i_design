@@ -7,7 +7,8 @@
  * 覆盖：CSS（Web）/ WXSS（小程序）/ JSON / Dart（Flutter）四份产物，
  * 以及 Avatar 配色规则在 TS 与 Dart 两处实现的一致性。
  */
-import { readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
 
 const base = 'packages/common/dist/tokens'
@@ -132,6 +133,23 @@ check('Avatar 调色板 TS 与 Dart 一致',
 // 用 TS 实现算出期望值，作为 Flutter 端的验收基准写进报告
 const samples = ['林岚', '陈序', '苏禾', '周迟', 'Susan Wong']
 const expectations = samples.map((n) => `${n} → ${JSON.stringify(initialsOf(n))} ${tintOf(n)}`)
+
+/* ---------- 7. vue-next 包与源头逐字节相同 ---------- */
+// 生成的包一旦落后于 src/components，使用方装到的就是旧组件，而构建不会报错
+const vueNextSrc = 'packages/vue-next/src'
+const stale = []
+if (existsSync(vueNextSrc)) {
+  for (const file of readdirSync('src/components')) {
+    const copied = join(vueNextSrc, file)
+    if (!existsSync(copied)) {
+      stale.push(`缺少 ${file}`)
+    } else if (readFileSync(copied, 'utf8') !== readFileSync(join('src/components', file), 'utf8')) {
+      stale.push(`${file} 与源头不一致`)
+    }
+  }
+}
+check('@i-design/vue-next 与 src/components 同步', existsSync(vueNextSrc) && stale.length === 0,
+  stale.slice(0, 3).join('; ') || (existsSync(vueNextSrc) ? '' : '包未生成，跑 npm run build:vue-next'))
 
 /* ---------- 报告 ---------- */
 console.log('跨端一致性校验\n')

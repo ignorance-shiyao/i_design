@@ -1,0 +1,3 @@
+<view class="i-form is-{{layout}}" style="--i-form-label-width:{{labelWidth}}">
+  <slot />
+</view>

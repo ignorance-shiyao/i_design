@@ -1,0 +1,4 @@
+<view class="i-avatar-group">
+  <slot />
+  <text wx:if="{{more > 0}}" class="i-avatar-group__more">+{{more}}</text>
+</view>

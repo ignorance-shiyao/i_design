@@ -6,6 +6,6 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "peerDependencies": { "vue": "^3.4.0" },
-  "dependencies": { "@i-design/common": "0.1.0" },
+  "dependencies": { "@i-design/common": "0.1.0", "@i-design/vue-next": "0.1.0" },
   "license": "MIT"
 }

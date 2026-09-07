@@ -1,0 +1,6 @@
+<view class="i-tooltip is-{{placement}}">
+  <view class="i-tooltip__trigger" bindtap="onToggle">
+    <slot />
+  </view>
+  <view wx:if="{{visible}}" class="i-tooltip__pop is-{{placement}}">{{content}}</view>
+</view>

@@ -11,9 +11,17 @@ packages/
 │  ├─ src/logic/      交互规则：日期、校验、上传、选择、分页、排序、头像取色
 │  ├─ src/styles/     BEM 样式，Web 各端共享同一份 CSS
 │  └─ scripts/        令牌编译器 → CSS / SCSS / JSON / WXSS / Dart
-├─ react/           React 实现
-└─ （规划）vue / vue-next / miniprogram / mobile-vue / mobile-react / flutter
+├─ vue-next/        Vue 3 实现（37 个组件，由 src/components 生成）
+├─ vue/             Vue 2.7 实现（37 个组件，由 src/components 转换）
+├─ react/           React 实现（37 个组件）
+├─ miniprogram/     微信小程序实现（37 个组件）
+├─ mobile-vue/      移动端 Vue：复用 vue-next + Cell / ActionSheet / Toast
+├─ mobile-react/    移动端 React：复用 react + Cell / ActionSheet / Toast
+└─ flutter/         Flutter 实现（36 个组件 + 移动端形态）
 ```
+
+七端覆盖情况以脚本核验，而非人工清点：`npm run check:parity` 会校验令牌逐值一致、
+生成的包与源头同步、小程序四件套与样式齐全、Flutter 的令牌与图标引用真实存在。
 
 ## 为什么这样分
 
