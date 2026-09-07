@@ -62,7 +62,9 @@ export const docNav: NavGroup[] = [
       { to: '/components/empty', label: 'Empty 空状态' },
       { to: '/components/avatar', label: 'Avatar 头像' },
       { to: '/components/badge', label: 'Badge 徽标' },
-      { to: '/components/collapse', label: 'Collapse 折叠面板' }
+      { to: '/components/collapse', label: 'Collapse 折叠面板' },
+      { to: '/components/descriptions', label: 'Descriptions 描述列表' },
+      { to: '/components/skeleton', label: 'Skeleton 骨架屏' }
     ]
   },
   {
@@ -72,7 +74,9 @@ export const docNav: NavGroup[] = [
       { to: '/components/message', label: 'Message 全局提示' },
       { to: '/components/modal', label: 'Modal 对话框' },
       { to: '/components/drawer', label: 'Drawer 抽屉' },
-      { to: '/components/loading', label: 'Loading 加载中' }
+      { to: '/components/loading', label: 'Loading 加载中' },
+      { to: '/components/popconfirm', label: 'Popconfirm 气泡确认' },
+      { to: '/components/result', label: 'Result 结果页' }
     ]
   }
 ]

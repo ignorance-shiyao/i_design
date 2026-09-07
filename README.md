@@ -38,15 +38,15 @@ npm run preview   # 本地预览构建产物
 
 ## 组件
 
-按使用场景分五类，已实现 29 个（另有 9 个在规划中，见站内「组件总览」）：
+按使用场景分五类，已实现 33 个（另有 5 个在规划中，见站内「组件总览」）：
 
 | 分类 | 组件 |
 | --- | --- |
 | 基础 | Button、Icon、Tag、Divider |
 | 导航 | Tabs、Pagination、Breadcrumb、Steps |
 | 数据录入 | Form、Input、Textarea、Select、DatePicker、Radio、Checkbox、Switch、Upload |
-| 数据展示 | Table、Card、Tooltip、Empty、Avatar、Badge、Collapse |
-| 消息反馈 | Alert、Message、Modal、Drawer、Loading |
+| 数据展示 | Table、Card、Tooltip、Empty、Avatar、Badge、Collapse、Descriptions、Skeleton |
+| 消息反馈 | Alert、Message、Modal、Drawer、Loading、Popconfirm、Result |
 
 统一尺寸约定，深色主题开箱可用，交互组件均可键盘操作。Message 为命令式 API（`message.success('…')`）。
 

@@ -15,6 +15,10 @@ import IAvatar from './IAvatar.vue'
 import IAvatarGroup from './IAvatarGroup.vue'
 import IBadge from './IBadge.vue'
 import ICollapse from './ICollapse.vue'
+import IDescriptions from './IDescriptions.vue'
+import ISkeleton from './ISkeleton.vue'
+import IResult from './IResult.vue'
+import IPopconfirm from './IPopconfirm.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -49,6 +53,10 @@ export {
   IAvatarGroup,
   IBadge,
   ICollapse,
+  IDescriptions,
+  ISkeleton,
+  IResult,
+  IPopconfirm,
   IForm,
   IFormItem,
   ITag,
@@ -79,6 +87,7 @@ export type { IconName } from './icons'
 export * from './date'
 export type { UploadFile, UploadStatus } from './upload'
 export type { CollapseItem } from './ICollapse.vue'
+export type { DescriptionItem } from './IDescriptions.vue'
 export { icons, iconNames } from './icons'
 
 const components = {
@@ -98,6 +107,10 @@ const components = {
   IAvatarGroup,
   IBadge,
   ICollapse,
+  IDescriptions,
+  ISkeleton,
+  IResult,
+  IPopconfirm,
   IForm,
   IFormItem,
   ITag,

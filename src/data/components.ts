@@ -66,8 +66,8 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Badge', cn: '徽标', to: '/components/badge', desc: '标记数量或状态点', status: 'ready' },
       { name: 'Collapse', cn: '折叠面板', to: '/components/collapse', desc: '折叠次要内容', status: 'ready' },
       { name: 'Tree', cn: '树', to: '', desc: '展示层级结构', status: 'planned' },
-      { name: 'Descriptions', cn: '描述列表', to: '', desc: '成组展示只读字段', status: 'planned' },
-      { name: 'Skeleton', cn: '骨架屏', to: '', desc: '加载中的内容占位', status: 'planned' }
+      { name: 'Descriptions', cn: '描述列表', to: '/components/descriptions', desc: '成组展示只读字段', status: 'ready' },
+      { name: 'Skeleton', cn: '骨架屏', to: '/components/skeleton', desc: '加载中的内容占位', status: 'ready' }
     ]
   },
   {
@@ -79,8 +79,8 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Message', cn: '全局提示', to: '/components/message', desc: '操作结果的轻量反馈', status: 'ready' },
       { name: 'Drawer', cn: '抽屉', to: '/components/drawer', desc: '从边缘滑出的面板', status: 'ready' },
       { name: 'Loading', cn: '加载中', to: '/components/loading', desc: '标识区域正在加载', status: 'ready' },
-      { name: 'Popconfirm', cn: '气泡确认', to: '', desc: '就地确认轻量操作', status: 'planned' },
-      { name: 'Result', cn: '结果页', to: '', desc: '操作结果的整页反馈', status: 'planned' }
+      { name: 'Popconfirm', cn: '气泡确认', to: '/components/popconfirm', desc: '就地确认轻量操作', status: 'ready' },
+      { name: 'Result', cn: '结果页', to: '/components/result', desc: '操作结果的整页反馈', status: 'ready' }
     ]
   }
 ]
