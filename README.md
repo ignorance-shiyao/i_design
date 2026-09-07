@@ -30,7 +30,17 @@ npm run preview   # 预览构建产物
 
 ## 组件
 
-Button、Input、Select、Switch、Tag、Tabs、Card、Table、Pagination、Alert、Modal —— 统一尺寸约定，深色主题开箱可用，交互组件均可键盘操作。
+按使用场景分五类，已实现 22 个（另有 7 个在规划中，见站内「组件总览」）：
+
+| 分类 | 组件 |
+| --- | --- |
+| 基础 | Button、Tag、Divider |
+| 导航 | Tabs、Pagination、Breadcrumb、Steps |
+| 数据录入 | Input、Textarea、Select、Radio、Checkbox、Switch |
+| 数据展示 | Table、Card、Tooltip、Empty |
+| 消息反馈 | Alert、Message、Modal、Drawer、Loading |
+
+统一尺寸约定，深色主题开箱可用，交互组件均可键盘操作。Message 为命令式 API（`message.success('…')`）。
 
 ```ts
 import IDesign from '@/components'

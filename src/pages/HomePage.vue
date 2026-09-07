@@ -6,7 +6,10 @@ import ICard from '@/components/ICard.vue'
 import ITag from '@/components/ITag.vue'
 import IAlert from '@/components/IAlert.vue'
 import ISwitch from '@/components/ISwitch.vue'
-import { readyCount } from '@/data/components'
+import { componentCategories, plannedCount, readyCount } from '@/data/components'
+import ISteps from '@/components/ISteps.vue'
+import ILoading from '@/components/ILoading.vue'
+import { message } from '@/components/message'
 
 const values = [
   {
@@ -33,6 +36,8 @@ const features = [
   { title: '可访问性优先', desc: '语义化标签、键盘可达、可见的焦点样式与 ARIA 状态贯穿全部组件。' }
 ]
 
+const previewSteps = [{ title: '基本信息' }, { title: '关联迭代' }, { title: '确认' }]
+
 const demoInput = ref('')
 const demoSwitch = ref(true)
 </script>
@@ -57,7 +62,8 @@ const demoSwitch = ref(true)
             <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
           </div>
           <dl class="hero__stats">
-            <div><dt>{{ readyCount }}</dt><dd>基础组件</dd></div>
+            <div><dt>{{ readyCount }}</dt><dd>已实现组件</dd></div>
+            <div><dt>{{ componentCategories.length }}</dt><dd>场景分类</dd></div>
             <div><dt>60+</dt><dd>设计令牌</dd></div>
             <div><dt>2</dt><dd>内建主题</dd></div>
           </dl>
@@ -66,6 +72,7 @@ const demoSwitch = ref(true)
         <!-- 用组件本身搭出预览面板，既是展示也是回归用例 -->
         <div class="hero__preview" aria-label="组件预览">
           <ICard title="创建工作项" hoverable>
+            <ISteps class="preview__steps" :items="previewSteps" :current="1" />
             <div class="preview__field">
               <label>标题</label>
               <IInput v-model="demoInput" placeholder="请输入工作项标题" />
@@ -83,7 +90,7 @@ const demoSwitch = ref(true)
             <template #footer>
               <div class="preview__footer">
                 <IButton variant="text">取消</IButton>
-                <IButton variant="primary">提交</IButton>
+                <IButton variant="primary" @click="message.success('工作项已创建')">提交</IButton>
               </div>
             </template>
           </ICard>
@@ -114,6 +121,39 @@ const demoSwitch = ref(true)
           </ICard>
         </div>
       </div>
+    </section>
+
+    <!-- 覆盖范围 -->
+    <section class="i-container section">
+      <h2 class="section__title">覆盖范围</h2>
+      <p class="section__desc i-lead">
+        按中后台的真实使用场景划分五类。已实现 {{ readyCount }} 个组件，
+        另有 {{ plannedCount }} 个在规划中——把边界写出来，比让使用者去猜要诚实。
+      </p>
+      <div class="coverage">
+        <div v-for="category in componentCategories" :key="category.title" class="coverage__col">
+          <div class="coverage__head">
+            <h3>{{ category.title }}</h3>
+            <span class="coverage__count">
+              {{ category.items.filter((i) => i.status === 'ready').length }} / {{ category.items.length }}
+            </span>
+          </div>
+          <ul>
+            <li
+              v-for="item in category.items"
+              :key="item.name"
+              :class="{ 'is-planned': item.status === 'planned' }"
+            >
+              <RouterLink v-if="item.status === 'ready'" :to="item.to">{{ item.name }}</RouterLink>
+              <span v-else>{{ item.name }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <p class="coverage__legend">
+        <span class="dot" /> 已实现
+        <span class="dot dot--planned" /> 规划中
+      </p>
     </section>
 
     <!-- 快速上手 -->
@@ -208,6 +248,67 @@ app.use(IDesign)</code></pre>
 .preview__field--row label { margin-bottom: 0; }
 .preview__tags { display: flex; gap: var(--i-spacing-2); margin-bottom: var(--i-spacing-4); }
 .preview__footer { display: flex; justify-content: flex-end; gap: var(--i-spacing-2); }
+
+/* 覆盖范围 */
+.coverage {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--i-spacing-6);
+  margin-top: var(--i-spacing-8);
+}
+.coverage__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: var(--i-spacing-2);
+  border-bottom: 1px solid var(--i-color-border);
+}
+.coverage__head h3 { font-size: var(--i-font-size-md); }
+.coverage__count {
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.coverage__col ul {
+  margin: var(--i-spacing-3) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--i-spacing-2);
+  font-size: var(--i-font-size-sm);
+}
+.coverage__col li::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: var(--i-spacing-2);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-brand);
+  vertical-align: middle;
+}
+.coverage__col li.is-planned { color: var(--i-color-text-tertiary); }
+.coverage__col li.is-planned::before { background: var(--i-color-border-strong); }
+.coverage__col a { color: var(--i-color-text-secondary); }
+.coverage__col a:hover { color: var(--i-color-brand); }
+.coverage__legend {
+  margin-top: var(--i-spacing-6);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+}
+.coverage__legend .dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin: 0 var(--i-spacing-2) 0 var(--i-spacing-4);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-brand);
+  vertical-align: middle;
+}
+.coverage__legend .dot:first-child { margin-left: 0; }
+.coverage__legend .dot--planned { background: var(--i-color-border-strong); }
+
+.preview__steps { margin-bottom: var(--i-spacing-5); }
 
 /* 通用区块 */
 .section { padding: var(--i-spacing-20) var(--i-spacing-6); }

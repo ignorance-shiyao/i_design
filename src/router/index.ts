@@ -30,6 +30,14 @@ const routes: RouteRecordRaw[] = [
       { path: 'table', component: () => import('@/pages/components/TablePage.vue') },
       { path: 'pagination', component: () => import('@/pages/components/PaginationPage.vue') },
       { path: 'modal', component: () => import('@/pages/components/ModalPage.vue') },
+      { path: 'divider', component: () => import('@/pages/components/DividerPage.vue') },
+      { path: 'breadcrumb', component: () => import('@/pages/components/BreadcrumbPage.vue') },
+      { path: 'steps', component: () => import('@/pages/components/StepsPage.vue') },
+      { path: 'tooltip', component: () => import('@/pages/components/TooltipPage.vue') },
+      { path: 'empty', component: () => import('@/pages/components/EmptyPage.vue') },
+      { path: 'loading', component: () => import('@/pages/components/LoadingPage.vue') },
+      { path: 'drawer', component: () => import('@/pages/components/DrawerPage.vue') },
+      { path: 'message', component: () => import('@/pages/components/MessagePage.vue') },
       { path: 'tabs', component: () => import('@/pages/components/TabsPage.vue') },
       { path: 'alert', component: () => import('@/pages/components/AlertPage.vue') }
     ]

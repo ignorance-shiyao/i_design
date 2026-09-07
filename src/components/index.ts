@@ -1,60 +1,86 @@
 import type { App } from 'vue'
 import IButton from './IButton.vue'
 import IInput from './IInput.vue'
-import ICard from './ICard.vue'
-import ITag from './ITag.vue'
-import IAlert from './IAlert.vue'
-import ISwitch from './ISwitch.vue'
+import ITextarea from './ITextarea.vue'
 import ISelect from './ISelect.vue'
-import IModal from './IModal.vue'
-import ITable from './ITable.vue'
-import IPagination from './IPagination.vue'
-import ITabs from './ITabs.vue'
 import IRadio from './IRadio.vue'
 import IRadioGroup from './IRadioGroup.vue'
 import ICheckbox from './ICheckbox.vue'
 import ICheckboxGroup from './ICheckboxGroup.vue'
-import ITextarea from './ITextarea.vue'
+import ISwitch from './ISwitch.vue'
+import ITag from './ITag.vue'
+import IDivider from './IDivider.vue'
+import ITabs from './ITabs.vue'
+import IBreadcrumb from './IBreadcrumb.vue'
+import ISteps from './ISteps.vue'
+import IPagination from './IPagination.vue'
+import ICard from './ICard.vue'
+import ITable from './ITable.vue'
+import ITooltip from './ITooltip.vue'
+import IEmpty from './IEmpty.vue'
+import IAlert from './IAlert.vue'
+import IModal from './IModal.vue'
+import IDrawer from './IDrawer.vue'
+import ILoading from './ILoading.vue'
 
 export {
   IButton,
   IInput,
   ITextarea,
-  ICard,
-  ITag,
-  IAlert,
-  ISwitch,
   ISelect,
   IRadio,
   IRadioGroup,
   ICheckbox,
   ICheckboxGroup,
-  IModal,
-  ITable,
+  ISwitch,
+  ITag,
+  IDivider,
+  ITabs,
+  IBreadcrumb,
+  ISteps,
   IPagination,
-  ITabs
+  ICard,
+  ITable,
+  ITooltip,
+  IEmpty,
+  IAlert,
+  IModal,
+  IDrawer,
+  ILoading
 }
+
+export { message } from './message'
 export type { SelectOption } from './ISelect.vue'
 export type { TableColumn, TableRow } from './ITable.vue'
 export type { TabItem } from './ITabs.vue'
+export type { BreadcrumbItem } from './IBreadcrumb.vue'
+export type { StepItem } from './ISteps.vue'
+export type { MessageOptions, MessageType } from './message'
 
 const components = {
   IButton,
   IInput,
-  ICard,
-  ITag,
-  IAlert,
-  ISwitch,
+  ITextarea,
   ISelect,
-  IModal,
-  ITable,
-  IPagination,
-  ITabs,
   IRadio,
   IRadioGroup,
   ICheckbox,
   ICheckboxGroup,
-  ITextarea
+  ISwitch,
+  ITag,
+  IDivider,
+  ITabs,
+  IBreadcrumb,
+  ISteps,
+  IPagination,
+  ICard,
+  ITable,
+  ITooltip,
+  IEmpty,
+  IAlert,
+  IModal,
+  IDrawer,
+  ILoading
 }
 
 /** 全量注册，便于文档站与 demo 直接使用；业务侧推荐按需引入 */
