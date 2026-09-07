@@ -104,7 +104,12 @@ check('共享样式无全局泄漏的通用选择器', leaks.length === 0, leaks
 const vue2Dir = 'packages/vue/src/components'
 const vue2Issues = []
 for (const file of readdirSync(vue2Dir).filter((f) => f.endsWith('.vue'))) {
+  // 注释里可能正当地提到这些词（比如解释「为什么不把 modelValue 改名成 value」），
+  // 只检查代码本身，否则说明性文字会被误判为残留语法。
   const src = readFileSync(`${vue2Dir}/${file}`, 'utf8')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '')
   const tpl = src.match(/<template>([\s\S]*?)<\/template>/)?.[1] ?? ''
   if (/\bmodelValue\b/.test(src)) vue2Issues.push(`${file}: 残留 modelValue`)
   if (/\s+as\s+[A-Z]/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 断言`)
