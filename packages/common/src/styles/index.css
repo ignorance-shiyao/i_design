@@ -4,7 +4,6 @@
  */
 @import './tokens.css';
 @import './base.css';
-@import './motion.css';
 
 @import './components/action-sheet.css';
 @import './components/alert.css';
@@ -39,6 +38,7 @@
 @import './components/skeleton.css';
 @import './components/steps.css';
 @import './components/switch.css';
+@import './components/table-mp.css';
 @import './components/table.css';
 @import './components/tabs.css';
 @import './components/tag.css';

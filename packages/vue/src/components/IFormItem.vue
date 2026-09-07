@@ -1,12 +1,12 @@
 <!--
   由 packages/vue/scripts/convert.mjs 从 src/components/IFormItem.vue 转换而来。
-  差异仅在 Vue 2 的语法约束（v-model 用 value/input、模板需单根），行为保持一致。
+  差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
-// Vue 2.7 没有 useId，用模块级计数器生成稳定且唯一的 id
+// Vue 2.7 没有 useId，用模块级计数器生成唯一 id
 let uidSeed = 0
 const useId = () => String(++uidSeed)
-import { computed, inject, onBeforeUnmount, onMounted, ref,  watch } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { formKey } from './formContext'
 import { runRules, type FormRule } from './validate'
 

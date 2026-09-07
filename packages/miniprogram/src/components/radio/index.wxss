@@ -1,0 +1,2 @@
+@import '../../../dist/styles/radio.wxss';
+@import '../../../dist/styles/icons.wxss';

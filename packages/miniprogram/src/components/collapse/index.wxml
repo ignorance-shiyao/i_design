@@ -1,0 +1,13 @@
+<view class="i-collapse {{bordered ? 'is-bordered' : ''}}">
+  <view
+    wx:for="{{states}}"
+    wx:key="name"
+    class="i-collapse__item {{item.open ? 'is-open' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+  >
+    <view class="i-collapse__head" bindtap="onToggle" data-name="{{item.name}}" data-disabled="{{item.disabled}}">
+      <view class="i-icon i-icon--chevron-right i-collapse__arrow" style="width:15px;height:15px" />
+      <text class="i-collapse__title">{{item.title}}</text>
+    </view>
+    <view wx:if="{{item.open}}" class="i-collapse__body">{{item.content}}</view>
+  </view>
+</view>

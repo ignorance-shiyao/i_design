@@ -1,0 +1,9 @@
+<input
+  class="i-input i-input--{{size}} {{invalid ? 'is-invalid' : ''}}"
+  value="{{value}}"
+  placeholder="{{placeholder}}"
+  disabled="{{disabled}}"
+  type="{{type}}"
+  bindinput="onInput"
+  bindblur="onBlur"
+/>

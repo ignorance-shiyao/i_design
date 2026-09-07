@@ -4,5 +4,5 @@
 >
   <image wx:if="{{showImage}}" src="{{src}}" mode="aspectFill" binderror="onError" />
   <text wx:elif="{{initials}}">{{initials}}</text>
-  <view wx:else class="i-avatar__fallback"></view>
+  <view wx:else class="i-icon i-icon--user" style="width:50%;height:50%" />
 </view>

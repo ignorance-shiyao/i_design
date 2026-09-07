@@ -1,0 +1,5 @@
+<view
+  class="i-divider i-divider--{{direction}} is-{{align}} {{dashed ? 'is-dashed' : ''}} {{text ? 'has-text' : ''}}"
+>
+  <text wx:if="{{text && direction === 'horizontal'}}" class="i-divider__text">{{text}}</text>
+</view>

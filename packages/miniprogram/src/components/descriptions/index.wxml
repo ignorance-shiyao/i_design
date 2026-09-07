@@ -1,0 +1,21 @@
+<view class="i-desc is-{{layout}} i-desc--{{size}} {{bordered ? 'is-bordered' : ''}}">
+  <view wx:if="{{title}}" class="i-desc__head">
+    <view class="i-desc__title">{{title}}</view>
+    <view class="i-desc__extra"><slot name="extra"></slot></view>
+  </view>
+  <view class="i-desc__body" style="--i-desc-column:{{column}}">
+    <view
+      wx:for="{{items}}"
+      wx:key="label"
+      class="i-desc__item"
+      style="grid-column: span {{item.span < column ? item.span : column}}"
+    >
+      <view class="i-desc__label">{{item.label}}</view>
+      <view class="i-desc__value">
+        <!-- 空值显示占位符而不是留白，否则分不清「没有」和「没加载出来」 -->
+        <text wx:if="{{item.value === '' || item.value === null}}" class="i-desc__empty">—</text>
+        <text wx:else>{{item.value}}</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,27 @@
+<view wx:if="{{loading}}" class="i-skeleton {{animated ? 'is-animated' : ''}}" aria-busy="true">
+  <block wx:if="{{variant === 'paragraph'}}">
+    <view wx:for="{{widths}}" wx:key="index" class="i-skeleton__bar" style="width:{{item}}"></view>
+  </block>
+  <view wx:elif="{{variant === 'avatar'}}" class="i-skeleton__row">
+    <view class="i-skeleton__circle"></view>
+    <view class="i-skeleton__col">
+      <view class="i-skeleton__bar" style="width:120px"></view>
+      <view class="i-skeleton__bar i-skeleton__bar--sm" style="width:180px"></view>
+    </view>
+  </view>
+  <block wx:elif="{{variant === 'list'}}">
+    <view wx:for="{{rowList}}" wx:key="index" class="i-skeleton__row i-skeleton__row--list">
+      <view class="i-skeleton__circle"></view>
+      <view class="i-skeleton__col">
+        <view class="i-skeleton__bar" style="width:45%"></view>
+        <view class="i-skeleton__bar i-skeleton__bar--sm" style="width:75%"></view>
+      </view>
+    </view>
+  </block>
+  <block wx:else>
+    <view class="i-skeleton__block"></view>
+    <view class="i-skeleton__bar" style="width:55%"></view>
+    <view class="i-skeleton__bar i-skeleton__bar--sm" style="width:85%"></view>
+  </block>
+</view>
+<slot wx:else></slot>

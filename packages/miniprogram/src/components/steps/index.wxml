@@ -1,0 +1,22 @@
+<view class="i-steps i-steps--{{direction}} {{clickable ? 'is-clickable' : ''}}">
+  <view
+    wx:for="{{states}}"
+    wx:key="index"
+    class="i-step is-{{item.state}}"
+    bindtap="onPick"
+    data-index="{{index}}"
+  >
+    <view class="i-step__head">
+      <view class="i-step__icon">
+        <view wx:if="{{item.state === 'finish'}}" class="i-icon i-icon--check" style="width:14px;height:14px" />
+        <view wx:elif="{{item.state === 'error'}}" class="i-icon i-icon--close" style="width:14px;height:14px" />
+        <text wx:else>{{index + 1}}</text>
+      </view>
+      <view wx:if="{{index < states.length - 1}}" class="i-step__line" />
+    </view>
+    <view class="i-step__body">
+      <view class="i-step__title">{{item.title}}</view>
+      <view wx:if="{{item.description}}" class="i-step__desc">{{item.description}}</view>
+    </view>
+  </view>
+</view>

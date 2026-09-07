@@ -1,0 +1,14 @@
+<view wx:if="{{visible}}" class="i-action-sheet" bindtap="onClose" catchtouchmove="noop">
+  <view class="i-action-sheet__panel" catchtap="noop">
+    <view wx:if="{{title}}" class="i-action-sheet__title">{{title}}</view>
+    <view
+      wx:for="{{actions}}"
+      wx:key="label"
+      class="i-action-sheet__item {{item.danger ? 'is-danger' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+      bindtap="onPick"
+      data-index="{{index}}"
+      data-disabled="{{item.disabled}}"
+    >{{item.label}}</view>
+    <view class="i-action-sheet__item i-action-sheet__cancel" bindtap="onClose">{{cancelText}}</view>
+  </view>
+</view>

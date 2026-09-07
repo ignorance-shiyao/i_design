@@ -1,0 +1,13 @@
+<view class="i-radio-group is-{{direction}}" role="radiogroup">
+  <view
+    wx:for="{{options}}"
+    wx:key="value"
+    class="i-radio i-radio--{{variant}} {{item.value === value ? 'is-checked' : ''}} {{item.disabled || disabled ? 'is-disabled' : ''}}"
+    bindtap="onPick"
+    data-value="{{item.value}}"
+    data-disabled="{{item.disabled}}"
+  >
+    <view wx:if="{{variant === 'default'}}" class="i-radio__mark" />
+    <text class="i-radio__label">{{item.label}}</text>
+  </view>
+</view>

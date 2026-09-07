@@ -1,0 +1,6 @@
+<view class="i-empty i-empty--{{size}}">
+  <image class="i-empty__art" src="{{art}}" mode="widthFix" />
+  <view class="i-empty__title">{{resolvedTitle}}</view>
+  <view class="i-empty__desc">{{resolvedDesc}}</view>
+  <view wx:if="{{hasAction}}" class="i-empty__action"><slot></slot></view>
+</view>

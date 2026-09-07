@@ -1,0 +1,13 @@
+<view class="i-tabs i-tabs--{{variant}} i-tabs--{{size}}">
+  <view class="i-tabs__nav" role="tablist">
+    <view
+      wx:for="{{items}}"
+      wx:key="name"
+      class="i-tabs__tab {{item.name === value ? 'is-active' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+      bindtap="onSelect"
+      data-name="{{item.name}}"
+      data-disabled="{{item.disabled}}"
+    >{{item.label}}</view>
+  </view>
+  <view class="i-tabs__panel"><slot></slot></view>
+</view>

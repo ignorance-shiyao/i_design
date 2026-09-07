@@ -72,12 +72,12 @@ const columns = [
 
     <section data-probe="choice" style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center">
       <IRadioGroup v-model="radio" variant="button">
-        <IRadio value="day">今日</IRadio><IRadio value="week">本周</IRadio>
-        <IRadio value="month" disabled>本月</IRadio>
+        <IRadio :value="'day'">今日</IRadio><IRadio :value="'week'">本周</IRadio>
+        <IRadio :value="'month'" disabled>本月</IRadio>
       </IRadioGroup>
       <ICheckboxGroup v-model="checks" :max="2">
-        <ICheckbox value="bug">缺陷</ICheckbox><ICheckbox value="req">需求</ICheckbox>
-        <ICheckbox value="task">任务</ICheckbox>
+        <ICheckbox :value="'bug'">缺陷</ICheckbox><ICheckbox :value="'req'">需求</ICheckbox>
+        <ICheckbox :value="'task'">任务</ICheckbox>
       </ICheckboxGroup>
       <ISwitch v-model="on" />
     </section>

@@ -19,7 +19,7 @@ export interface BreadcrumbProps {
 export function Breadcrumb({ items, separator = '', separatorIcon = 'chevron-right' }: BreadcrumbProps) {
   return (
     <nav className="i-breadcrumb" aria-label="面包屑">
-      <ol>
+      <ol className="i-breadcrumb__list">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
           const clickable = !isLast && (item.href || item.onClick)
@@ -32,10 +32,10 @@ export function Breadcrumb({ items, separator = '', separatorIcon = 'chevron-rig
             )
           } else {
             // 末项代表当前位置，不作为链接，并标记 aria-current
-            node = <span aria-current={isLast ? 'page' : undefined}>{item.label}</span>
+            node = <span className="i-breadcrumb__current" aria-current={isLast ? 'page' : undefined}>{item.label}</span>
           }
           return (
-            <li key={item.label}>
+            <li key={item.label} className="i-breadcrumb__item">
               {node}
               {!isLast && (
                 <span className="i-breadcrumb__sep" aria-hidden="true">

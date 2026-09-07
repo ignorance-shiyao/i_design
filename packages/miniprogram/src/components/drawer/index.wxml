@@ -1,0 +1,16 @@
+<view wx:if="{{visible}}" class="i-drawer" bindtap="onMask" catchtouchmove="noop">
+  <view
+    class="i-drawer__panel is-{{placement}}"
+    style="{{placement === 'left' || placement === 'right' ? 'width:' + size : 'height:' + size}}"
+    catchtap="noop"
+  >
+    <view wx:if="{{title || closable}}" class="i-drawer__header">
+      <view class="i-drawer__title">{{title}}</view>
+      <view wx:if="{{closable}}" class="i-drawer__close" bindtap="onClose">
+        <view class="i-icon i-icon--close" style="width:18px;height:18px" />
+      </view>
+    </view>
+    <view class="i-drawer__body"><slot></slot></view>
+    <view wx:if="{{hasFooter}}" class="i-drawer__footer"><slot name="footer"></slot></view>
+  </view>
+</view>

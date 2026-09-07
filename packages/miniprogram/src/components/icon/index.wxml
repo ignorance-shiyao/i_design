@@ -1,0 +1,1 @@
+<view class="i-icon i-icon--{{name}}" style="width:{{px}};height:{{px}}" aria-hidden="true" />

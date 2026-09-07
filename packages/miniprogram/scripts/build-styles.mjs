@@ -17,8 +17,10 @@ const cssDir = join(here, '../../common/src/styles/components')
 const outDir = join(here, '../dist/styles')
 
 function toWxss(css, name) {
-  let out = css
-  out = out.replace(/^\s*\*[^{]*\{[^}]*\}\s*$/gm, '')
+  // 先剥离注释：否则「去掉通配选择器」的正则会把多行注释里以 * 开头的行
+  // 当成选择器，连带吃掉后面的真实规则——breadcrumb 就被这样削掉过。
+  let out = css.replace(/\/\*[\s\S]*?\*\//g, '')
+  out = out.replace(/^\s*\*[\s,][^{]*\{[^}]*\}\s*$/gm, '')
   out = out.replace(/[^{}]*::?-webkit-scrollbar[^{}]*\{[^}]*\}/g, '')
   out = out.replace(/[^{}]*:focus-visible[^{}]*\{[^}]*\}/g, '')
   out = out.replace(/\s*backdrop-filter:[^;]+;/g, '')

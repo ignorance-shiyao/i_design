@@ -21,11 +21,19 @@ withDefaults(
 
 <template>
   <nav class="i-breadcrumb" aria-label="面包屑">
-    <ol>
-      <li v-for="(item, index) in items" :key="item.label">
-        <RouterLink v-if="item.to && index < items.length - 1" :to="item.to">{{ item.label }}</RouterLink>
+    <ol class="i-breadcrumb__list">
+      <li v-for="(item, index) in items" :key="item.label" class="i-breadcrumb__item">
+        <RouterLink
+          v-if="item.to && index < items.length - 1"
+          class="i-breadcrumb__link"
+          :to="item.to"
+        >{{ item.label }}</RouterLink>
         <!-- 末项代表当前位置，不作为链接，并标记 aria-current -->
-        <span v-else :aria-current="index === items.length - 1 ? 'page' : undefined">{{ item.label }}</span>
+        <span
+          v-else
+          class="i-breadcrumb__current"
+          :aria-current="index === items.length - 1 ? 'page' : undefined"
+        >{{ item.label }}</span>
         <span v-if="index < items.length - 1" class="i-breadcrumb__sep" aria-hidden="true">
           <template v-if="separator">{{ separator }}</template>
           <IIcon v-else :name="separatorIcon" :size="14" />

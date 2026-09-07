@@ -1,0 +1,12 @@
+<view wx:if="{{visible}}" class="i-modal" bindtap="onMask" catchtouchmove="noop">
+  <view class="i-modal__panel" style="width:{{width}}" catchtap="noop">
+    <view wx:if="{{title || closable}}" class="i-modal__header">
+      <view class="i-modal__title">{{title}}</view>
+      <view wx:if="{{closable}}" class="i-modal__close" bindtap="onClose">
+        <view class="i-icon i-icon--close" style="width:18px;height:18px" />
+      </view>
+    </view>
+    <view class="i-modal__body"><slot></slot></view>
+    <view wx:if="{{hasFooter}}" class="i-modal__footer"><slot name="footer"></slot></view>
+  </view>
+</view>
