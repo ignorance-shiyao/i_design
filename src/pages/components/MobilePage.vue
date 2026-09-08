@@ -7,6 +7,8 @@ import IPopup from '@i-design/mobile-vue/src/components/IPopup.vue'
 import IGrid from '@i-design/mobile-vue/src/components/IGrid.vue'
 import ISwipeCell from '@i-design/mobile-vue/src/components/ISwipeCell.vue'
 import ICell from '@i-design/mobile-vue/src/components/ICell.vue'
+import ISearchBar from '@i-design/mobile-vue/src/components/ISearchBar.vue'
+import ICountDown from '@i-design/mobile-vue/src/components/ICountDown.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
@@ -32,6 +34,7 @@ const entries = [
 ]
 
 const popupOpen = ref(false)
+const keyword = ref('')
 const noticeVisible = ref(true)
 
 const rows = ref([
@@ -83,7 +86,14 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
               @close="noticeVisible = false"
             />
 
+            <ISearchBar v-model="keyword" placeholder="搜索工作项" @search="(v) => message.info(`搜索：${v}`)" />
+
             <IGrid :items="entries" :columns="4" @select="(item) => message.info(item.label)" />
+
+            <div class="phone__section">
+              距本期结束
+              <ICountDown :time="2 * 3600 * 1000 + 45 * 60 * 1000" separated />
+            </div>
 
             <div class="phone__section">我的工作项（左滑试试）</div>
             <ISwipeCell

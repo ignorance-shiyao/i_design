@@ -84,6 +84,21 @@ import DemoBlock from '@/site/DemoBlock.vue'
         </ITypography>
       </div>
     </DemoBlock>
+
+    <DemoBlock
+      title="展开与复制"
+      description="截断作用在内层文本上，展开按钮和复制按钮不会被一起截掉——否则就成了「有省略号但没有展开入口」。复制在非安全上下文里会回退到旧接口，失败时静默，不打扰用户。"
+      code='<ITypography :ellipsis="2" expandable>很长的一段说明…</ITypography>
+<ITypography mono copyable>sk-live-8f21c0d4</ITypography>'
+    >
+      <div class="stack">
+        <ITypography :ellipsis="2" expandable class="clamp-demo">
+          可展开的多行省略：列表里默认只占两行，读者想读完整段时点「展开」即可，不必跳到详情页。
+          这段文字足够长，用来演示截断与展开的切换效果，展开之后应当完整显示，收起后重新回到两行。
+        </ITypography>
+        <ITypography mono copyable>sk-live-8f21c0d4e75b</ITypography>
+      </div>
+    </DemoBlock>
   </article>
 </template>
 

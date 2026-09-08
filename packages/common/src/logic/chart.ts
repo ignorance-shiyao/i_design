@@ -16,6 +16,22 @@ export interface ChartSeries {
  * 不直接把 min/max 等分：那会得到 0、13.7、27.4 这种刻度。
  * 这里把步长吸附到 1/2/5 的整数倍，坐标轴上出现的永远是人能心算的数。
  */
+/**
+ * 阈值标记：一条线（value）或一条带（from/to）。
+ *
+ * status 决定配色，走的是状态色而不是分类色——阈值不是「第 N 个系列」，
+ * 借用分类色会让读者以为它也是一组数据。
+ */
+export interface ChartThreshold {
+  /** 画一条线 */
+  value?: number
+  /** 画一条带；与 value 二选一 */
+  from?: number
+  to?: number
+  label?: string
+  status?: 'success' | 'warning' | 'danger'
+}
+
 export function niceTicks(min: number, max: number, count = 5): number[] {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return [0]
   if (min === max) {

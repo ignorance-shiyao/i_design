@@ -6,6 +6,7 @@ import {
   edgeMidpoint,
   edgePath,
   type FlowEdge,
+  type FlowEdgeType,
   type FlowNode
 } from '@i-design/common'
 import { Icon } from './Icon'
@@ -20,6 +21,8 @@ export interface FlowProps {
   onSelect?: (id: string | null) => void
   /** 拖动结束抛出新坐标；组件不改传入的数据 */
   onMove?: (next: { id: string; x: number; y: number }) => void
+  /** 整图默认连线走向；单条连线可用 edge.type 覆盖 */
+  edgeType?: FlowEdgeType
   className?: string
 }
 
@@ -31,6 +34,7 @@ export function Flow({
   selected = null,
   onSelect,
   onMove,
+  edgeType = 'polyline',
   className = ''
 }: FlowProps) {
   const root = useRef<HTMLDivElement>(null)
@@ -158,12 +162,12 @@ export function Flow({
             const from = byId.get(edge.from)
             const to = byId.get(edge.to)
             if (!from || !to) return null
-            const mid = edgeMidpoint(from, to)
+            const mid = edgeMidpoint(from, to, edge.type ?? edgeType)
             return (
               <g key={`${edge.from}-${edge.to}`}>
                 <path
                   className={['i-flow__edge', isActive(edge) ? 'is-active' : ''].filter(Boolean).join(' ')}
-                  d={edgePath(from, to)}
+                  d={edgePath(from, to, edge.type ?? edgeType)}
                   markerEnd={`url(#i-flow-arrow${isActive(edge) ? '-active' : ''})`}
                 />
                 {edge.label && (

@@ -34,10 +34,41 @@
   white-space: nowrap;
 }
 /* 多行省略：行数由 --i-typo-lines 控制 */
-.i-typo.is-clamp {
+.i-typo.is-clamp,
+.i-typo__body.is-clamp {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: var(--i-typo-lines, 2);
   line-clamp: var(--i-typo-lines, 2);
   overflow: hidden;
+}
+
+/*
+ * 展开／复制入口。
+ *
+ * 截断作用在 .i-typo__body 上而不是根元素——否则这两个按钮会被一起截掉，
+ * 变成「有省略号但没有展开入口」。
+ */
+.i-typo.has-actions { display: block; }
+.i-typo__toggle,
+.i-typo__copy {
+  border: none;
+  background: transparent;
+  color: var(--i-color-brand);
+  cursor: pointer;
+  font: inherit;
+  padding: 0 var(--i-spacing-1);
+}
+.i-typo__copy {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  color: var(--i-color-text-tertiary);
+}
+.i-typo__copy:hover { color: var(--i-color-brand); }
+.i-typo__toggle:focus-visible,
+.i-typo__copy:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+  border-radius: var(--i-radius-sm);
 }

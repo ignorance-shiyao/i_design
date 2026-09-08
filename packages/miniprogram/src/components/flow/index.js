@@ -7,6 +7,14 @@
  */
 import { NODE_H, NODE_W, anchorOf, boundsOf } from '@i-design/common'
 
+/** 端点沿所在边的法线外推：控制点必须在节点外侧，否则曲线会穿回节点里 */
+function pushOut(point, distance) {
+  if (point.side === 'left') return { x: point.x - distance, y: point.y }
+  if (point.side === 'right') return { x: point.x + distance, y: point.y }
+  if (point.side === 'top') return { x: point.x, y: point.y - distance }
+  return { x: point.x, y: point.y + distance }
+}
+
 Component({
   options: { addGlobalClass: true },
   properties: {
@@ -14,11 +22,13 @@ Component({
     edges: { type: Array, value: [] },
     height: { type: Number, value: 320 },
     readonly: { type: Boolean, value: false },
-    selected: { type: String, value: '' }
+    selected: { type: String, value: '' },
+    /** 整图默认连线走向：polyline / straight / bezier；单条连线可用 edge.type 覆盖 */
+    edgeType: { type: String, value: 'polyline' }
   },
   data: { scaleText: '100%' },
   observers: {
-    'nodes, edges, selected': function () { this.draw() }
+    'nodes, edges, selected, edgeType': function () { this.draw() }
   },
   lifetimes: {
     attached() {
@@ -122,7 +132,7 @@ Component({
     draw() {
       if (!this.canvas || !this.box) return
       const ctx = this.canvas.getContext('2d')
-      const { nodes, edges, selected } = this.data
+      const { nodes, edges, selected, edgeType } = this.data
       const { width, height } = this.box
 
       ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0)
@@ -147,21 +157,31 @@ Component({
           y: from.y + (from.height || NODE_H) / 2
         })
 
+        const kind = edge.type || edgeType
         ctx.beginPath()
         ctx.moveTo(a.x, a.y)
-        // 直角折线：斜线穿过其他节点时难辨走向
-        if (a.side === 'bottom' || a.side === 'top') {
+        if (kind === 'straight') {
+          ctx.lineTo(b.x, b.y)
+        } else if (kind === 'bezier') {
+          // 控制点沿端点所在边的法线外推，箭头进出方向才与锚点边一致
+          const push = Math.min(120, Math.max(32, Math.hypot(b.x - a.x, b.y - a.y) / 2))
+          const c1 = pushOut(a, push)
+          const c2 = pushOut(b, push)
+          ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, b.x, b.y)
+        } else if (a.side === 'bottom' || a.side === 'top') {
+          // 直角折线：斜线穿过其他节点时难辨走向
           const midY = (a.y + b.y) / 2
           ctx.lineTo(a.x, midY)
           ctx.lineTo(b.x, midY)
+          ctx.lineTo(b.x, b.y)
         } else {
           const midX = a.side === 'right'
             ? Math.max(a.x + 18, (a.x + b.x) / 2)
             : Math.min(a.x - 18, (a.x + b.x) / 2)
           ctx.lineTo(midX, a.y)
           ctx.lineTo(midX, b.y)
+          ctx.lineTo(b.x, b.y)
         }
-        ctx.lineTo(b.x, b.y)
         ctx.strokeStyle = active ? '#5e7ce0' : '#c3c6cd'
         ctx.lineWidth = active ? 2 : 1.5
         ctx.stroke()

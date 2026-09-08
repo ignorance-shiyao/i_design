@@ -334,3 +334,40 @@
 .i-sparkline__line { fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .i-sparkline__area { opacity: 0.14; }
 .i-sparkline__last { stroke: var(--i-color-bg); stroke-width: 1.5; }
+
+/*
+ * 阈值线与阈值带（markLine / markArea）。
+ *
+ * 用状态色而不是分类色：阈值不是又一组数据，借分类色会被当成第 N 个系列。
+ * 线是虚线——实线太像数据本身；带的不透明度压得很低，它是背景，不能盖住数据。
+ */
+.i-chart__mark-line {
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  fill: none;
+}
+.i-chart__mark-line.is-success { stroke: var(--i-color-success); }
+.i-chart__mark-line.is-warning { stroke: var(--i-color-warning); }
+.i-chart__mark-line.is-danger { stroke: var(--i-color-danger); }
+.i-chart__mark-area { opacity: 0.08; }
+.i-chart__mark-area.is-success { fill: var(--i-color-success); }
+.i-chart__mark-area.is-warning { fill: var(--i-color-warning); }
+.i-chart__mark-area.is-danger { fill: var(--i-color-danger); }
+.i-chart__mark-label {
+  font-size: 11px;
+  /*
+   * 描边当作衬底：阈值标签压在绘图区里，数据线正好从字上穿过时会读不出来。
+   * paint-order 先画描边再画字，等于给每个字加一圈背景色的光晕——
+   * 比加一块矩形底色省事，也不会挡住底下的网格。
+   */
+  stroke: var(--i-color-bg);
+  stroke-width: 3;
+  paint-order: stroke fill;
+  stroke-linejoin: round;
+}
+.i-chart__mark-label.is-success { fill: var(--i-color-success); }
+.i-chart__mark-label.is-warning { fill: var(--i-color-warning); }
+.i-chart__mark-label.is-danger { fill: var(--i-color-danger); }
+
+/* 数据表与导出并排：都是「把图变成可核对的数字」的出口 */
+.i-chart__actions { display: flex; gap: var(--i-spacing-2); flex-wrap: wrap; }

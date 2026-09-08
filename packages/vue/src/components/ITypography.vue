@@ -3,7 +3,8 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, useSlots } from 'vue'
+import IIcon from './IIcon.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -18,6 +19,16 @@ const props = withDefaults(
     mono?: boolean
     /** 超出显示省略号；给数字表示最多几行 */
     ellipsis?: boolean | number
+    /** 折叠时可展开：多行省略的长文案，读者要有办法读到后半段 */
+    expandable?: boolean
+    expandText?: string
+    collapseText?: string
+    /**
+     * 末尾附一个复制按钮。
+     * 不传 copyText 时复制的是插槽里的纯文本——最常见的用法是复制一段 ID 或密钥。
+     */
+    copyable?: boolean
+    copyText?: string
     /** 覆盖默认标签，例如把 h3 的样式用在 div 上 */
     as?: string
   }>(),
@@ -30,6 +41,11 @@ const props = withDefaults(
     del: false,
     mono: false,
     ellipsis: false,
+    expandable: false,
+    expandText: '展开',
+    collapseText: '收起',
+    copyable: false,
+    copyText: '',
     as: ''
   }
 )
@@ -43,6 +59,45 @@ const tag = computed(() => {
 })
 
 const lines = computed(() => (typeof props.ellipsis === 'number' ? props.ellipsis : 0))
+
+const expanded = ref(false)
+// 展开后就不该再截断：clamp 类名必须跟着展开状态走，否则按钮点了没反应
+const clamped = computed(() => lines.value > 0 && !expanded.value)
+
+const slots = useSlots()
+const root = ref<HTMLElement | null>(null)
+const copied = ref(false)
+
+async function copy() {
+  // 优先读 DOM 里的实际文本：插槽内容可能是嵌套元素，取 textContent 才准
+  const text = props.copyText || root.value?.querySelector('.i-typo__body')?.textContent?.trim() || ''
+  if (!text) return
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch {
+    /*
+     * 非安全上下文（http、部分 WebView）里 clipboard API 不可用。
+     * 回退到 execCommand：它已废弃，但这是这些环境里唯一还能用的路径，
+     * 失败时静默——弹一个「复制失败」对用户毫无帮助。
+     */
+    const area = document.createElement('textarea')
+    area.value = text
+    area.style.position = 'fixed'
+    area.style.opacity = '0'
+    document.body.appendChild(area)
+    area.select()
+    try {
+      document.execCommand('copy')
+    } catch {
+      document.body.removeChild(area)
+      return
+    }
+    document.body.removeChild(area)
+  }
+  copied.value = true
+  setTimeout(() => (copied.value = false), 1600)
+}
+void slots
 </script>
 
 <template>
@@ -59,11 +114,39 @@ const lines = computed(() => (typeof props.ellipsis === 'number' ? props.ellipsi
         'is-delete': del,
         'is-mono': mono,
         'is-ellipsis': ellipsis === true,
-        'is-clamp': lines > 0
+        'has-actions': (expandable && lines > 0) || copyable
       }
     ]"
-    :style="lines > 0 ? { '--i-typo-lines': lines } : undefined"
+    ref="root"
   >
-    <slot />
+    <!--
+      截断作用在内层而不是根元素：clamp 会把展开按钮和复制按钮一起截掉，
+      于是「有省略号但没有展开入口」——正是最该有入口的那种情况。
+    -->
+    <span
+      class="i-typo__body"
+      :class="{ 'is-clamp': clamped }"
+      :style="clamped ? { '--i-typo-lines': lines } : undefined"
+    ><slot /></span>
+
+    <button
+      v-if="expandable && lines > 0"
+      type="button"
+      class="i-typo__toggle"
+      :aria-expanded="String(expanded)"
+      @click="expanded = !expanded"
+    >
+      {{ expanded ? collapseText : expandText }}
+    </button>
+
+    <button
+      v-if="copyable"
+      type="button"
+      class="i-typo__copy"
+      :aria-label="copied ? '已复制' : '复制'"
+      @click="copy"
+    >
+      <IIcon :name="copied ? 'check' : 'copy'" />
+    </button>
   </component>
 </template>

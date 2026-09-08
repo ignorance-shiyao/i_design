@@ -8,7 +8,8 @@ import {
   niceTicks,
   scaleX,
   scaleY,
-  type ChartSeries
+  type ChartSeries,
+  type ChartThreshold
 } from '@i-design/common'
 
 export interface ChartProps {
@@ -24,6 +25,11 @@ export interface ChartProps {
   labelLast?: boolean
   title?: string
   unit?: string
+  /**
+   * 阈值线与阈值带：把「多少算正常」画进图里。
+   * 只看趋势看不出「现在是不是超了」，而后者往往才是看这张图的原因。
+   */
+  thresholds?: ChartThreshold[]
   className?: string
 }
 
@@ -39,6 +45,7 @@ export function Chart({
   labelLast = true,
   title = '',
   unit = '',
+  thresholds = [],
   className = ''
 }: ChartProps) {
   const root = useRef<HTMLElement>(null)
@@ -108,6 +115,35 @@ export function Chart({
     setHidden(next)
   }
 
+  /* 超出值域的阈值静默丢弃：压到边缘会让读者误以为「刚好卡在临界」 */
+  const marks = thresholds
+    .filter((t) => t.value === undefined || (t.value >= scale.min && t.value <= scale.max))
+    .map((t) => {
+      const status = t.status ?? 'warning'
+      if (t.value !== undefined) {
+        return { kind: 'line' as const, status, label: t.label ?? '', y: y(t.value), height: 0 }
+      }
+      const from = Math.max(scale.min, t.from ?? scale.min)
+      const to = Math.min(scale.max, t.to ?? scale.max)
+      return { kind: 'band' as const, status, label: t.label ?? '', y: y(to), height: Math.max(0, y(from) - y(to)) }
+    })
+
+  /** 导出 CSV：数据表让读屏能读到，导出让人能拿去自己算 */
+  function exportCsv() {
+    const head = [title || '类别', ...series.map((s) => s.name)]
+    const rows = labels.map((label, i) => [label, ...series.map((s) => String(s.data[i] ?? ''))])
+    // 字段里可能有逗号或引号，按 RFC 4180 转义，否则列会串位
+    const cell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
+    const csv = [head, ...rows].map((r) => r.map(cell).join(',')).join('\n')
+    // BOM：没有它 Excel 会把中文表头认成乱码
+    const url = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${title || 'chart'}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   function onMove(event: MouseEvent<SVGSVGElement>) {
     const rect = root.current?.getBoundingClientRect()
     if (!rect || !labels.length) return
@@ -145,6 +181,32 @@ export function Chart({
           y1={y(Math.max(scale.min, 0))}
           y2={y(Math.max(scale.min, 0))}
         />
+
+        {/*
+          阈值画在网格之上、数据之下：它是参考背景，不该盖住数据本身。
+          带用低不透明度填充，线用虚线——实线会被误读成又一个数据系列。
+        */}
+        {marks.map((mark, mi) => (
+          <g key={`mark-${mi}`}>
+            {mark.kind === 'band' ? (
+              <rect
+                className={`i-chart__mark-area is-${mark.status}`}
+                x={pad.left}
+                y={mark.y}
+                width={plotW}
+                height={mark.height}
+              />
+            ) : (
+              <line
+                className={`i-chart__mark-line is-${mark.status}`}
+                x1={pad.left}
+                x2={W - pad.right}
+                y1={mark.y}
+                y2={mark.y}
+              />
+            )}
+          </g>
+        ))}
 
         {labels.map((label, i) => (
           <text
@@ -220,6 +282,24 @@ export function Chart({
           </>
         )}
 
+        {/*
+          阈值标签画在数据之上，线与带留在数据之下。
+          标签跟着色带一起沉到底层时，数据线会正好从字上穿过。
+        */}
+        {marks.map((mark, mi) =>
+          mark.label ? (
+            <text
+              key={`mark-label-${mi}`}
+              className={`i-chart__mark-label is-${mark.status}`}
+              x={W - pad.right - 4}
+              y={mark.y + (mark.kind === 'band' ? 14 : -5)}
+              textAnchor="end"
+            >
+              {mark.label}
+            </text>
+          ) : null
+        )}
+
         {active !== null && !isBar && (
           <g>
             <line
@@ -282,9 +362,14 @@ export function Chart({
         </div>
       )}
 
-      <button className="i-chart__table-toggle" onClick={() => setShowTable(!showTable)}>
-        {showTable ? '收起数据表' : '查看数据表'}
-      </button>
+      <div className="i-chart__actions">
+        <button className="i-chart__table-toggle" onClick={() => setShowTable(!showTable)}>
+          {showTable ? '收起数据表' : '查看数据表'}
+        </button>
+        <button className="i-chart__table-toggle" onClick={exportCsv}>
+          导出 CSV
+        </button>
+      </div>
       {showTable && (
         <table className="i-chart__table">
           <thead>

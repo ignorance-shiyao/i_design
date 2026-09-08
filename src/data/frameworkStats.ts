@@ -7,8 +7,8 @@ export const frameworkStats: Record<string, number> = {
   "vue": 63,
   "react": 63,
   "miniprogram": 64,
-  "mobile-vue": 72,
-  "mobile-react": 72,
+  "mobile-vue": 74,
+  "mobile-react": 74,
   "flutter": 59
 }
 

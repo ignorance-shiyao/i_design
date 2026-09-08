@@ -12,6 +12,7 @@ import {
   edgeMidpoint,
   edgePath,
   type FlowEdge,
+  type FlowEdgeType,
   type FlowNode
 } from '@i-design/common'
 
@@ -23,8 +24,10 @@ const props = withDefaults(
     /** 只读：仍可平移缩放与选中，但不能拖动节点 */
     readonly?: boolean
     selected?: string | null
+    /** 整图默认连线走向；单条连线可用 edge.type 覆盖 */
+    edgeType?: FlowEdgeType
   }>(),
-  { height: 380, readonly: false, selected: null }
+  { height: 380, readonly: false, selected: null, edgeType: 'polyline' }
 )
 
 const emit = defineEmits<{ (e: 'update:selected', a0: string | null): void; (e: 'move', a0: { id: string; x: number; y: number }): void }>()
@@ -140,13 +143,13 @@ function diamondPoints(node: FlowNode) {
 const pathOf = (edge: FlowEdge) => {
   const from = nodeById.value.get(edge.from)
   const to = nodeById.value.get(edge.to)
-  return from && to ? edgePath(from, to) : ''
+  return from && to ? edgePath(from, to, edge.type ?? props.edgeType) : ''
 }
 
 const midOf = (edge: FlowEdge) => {
   const from = nodeById.value.get(edge.from)
   const to = nodeById.value.get(edge.to)
-  return from && to ? edgeMidpoint(from, to) : { x: 0, y: 0 }
+  return from && to ? edgeMidpoint(from, to, edge.type ?? props.edgeType) : { x: 0, y: 0 }
 }
 
 /** 与选中节点相连的线加重：看清「它从哪来、到哪去」是选中节点后的第一个问题 */

@@ -18,6 +18,7 @@ class IFlow extends StatefulWidget {
     this.selected,
     this.onSelect,
     this.onMove,
+    this.edgeType = FlowEdgeType.polyline,
   });
 
   final List<FlowNodeData> nodes;
@@ -31,6 +32,9 @@ class IFlow extends StatefulWidget {
 
   /// 拖动结束抛出新坐标；组件不改传入的数据
   final void Function(String id, double x, double y)? onMove;
+
+  /// 整图默认连线走向；单条连线可用 FlowEdgeData.type 覆盖
+  final FlowEdgeType edgeType;
 
   @override
   State<IFlow> createState() => _IFlowState();
@@ -131,6 +135,7 @@ class _IFlowState extends State<IFlow> {
                     nodes: widget.nodes,
                     edges: widget.edges,
                     selected: widget.selected,
+                    edgeType: widget.edgeType,
                     pan: _pan,
                     scale: _scale,
                     colors: c,
@@ -190,6 +195,7 @@ class _FlowPainter extends CustomPainter {
     required this.nodes,
     required this.edges,
     required this.selected,
+    required this.edgeType,
     required this.pan,
     required this.scale,
     required this.colors,
@@ -198,6 +204,7 @@ class _FlowPainter extends CustomPainter {
   final List<FlowNodeData> nodes;
   final List<FlowEdgeData> edges;
   final String? selected;
+  final FlowEdgeType edgeType;
   final Offset pan;
   final double scale;
   final IColors colors;
@@ -223,25 +230,42 @@ class _FlowPainter extends CustomPainter {
       final a = anchorOf(from, to.x + to.width / 2, to.y + to.height / 2);
       final b = anchorOf(to, from.x + from.width / 2, from.y + from.height / 2);
 
-      // 直角折线：斜线穿过其他节点时难辨走向
+      final kind = edge.type ?? edgeType;
       final path = Path()..moveTo(a.x, a.y);
-      if (a.side == 'bottom' || a.side == 'top') {
-        final midY = (a.y + b.y) / 2;
-        path.lineTo(a.x, midY);
-        path.lineTo(b.x, midY);
+      var labelAt = Offset((a.x + b.x) / 2, (a.y + b.y) / 2);
+
+      if (kind == FlowEdgeType.straight) {
+        path.lineTo(b.x, b.y);
+      } else if (kind == FlowEdgeType.bezier) {
+        final push = bezierPush(a.x, a.y, b.x, b.y);
+        final c1 = offsetBySide(a.x, a.y, a.side, push);
+        final c2 = offsetBySide(b.x, b.y, b.side, push);
+        path.cubicTo(c1.x, c1.y, c2.x, c2.y, b.x, b.y);
+        // 标签取 t=0.5 的曲线点：弧度大时两端点中点会离曲线很远
+        labelAt = Offset(
+          (a.x + 3 * c1.x + 3 * c2.x + b.x) / 8,
+          (a.y + 3 * c1.y + 3 * c2.y + b.y) / 8,
+        );
       } else {
-        final midX = a.side == 'right'
-            ? (a.x + 18 > (a.x + b.x) / 2 ? a.x + 18 : (a.x + b.x) / 2)
-            : (a.x - 18 < (a.x + b.x) / 2 ? a.x - 18 : (a.x + b.x) / 2);
-        path.lineTo(midX, a.y);
-        path.lineTo(midX, b.y);
+        // 直角折线：斜线穿过其他节点时难辨走向
+        if (a.side == 'bottom' || a.side == 'top') {
+          final midY = (a.y + b.y) / 2;
+          path.lineTo(a.x, midY);
+          path.lineTo(b.x, midY);
+        } else {
+          final midX = a.side == 'right'
+              ? (a.x + 18 > (a.x + b.x) / 2 ? a.x + 18 : (a.x + b.x) / 2)
+              : (a.x - 18 < (a.x + b.x) / 2 ? a.x - 18 : (a.x + b.x) / 2);
+          path.lineTo(midX, a.y);
+          path.lineTo(midX, b.y);
+        }
+        path.lineTo(b.x, b.y);
       }
-      path.lineTo(b.x, b.y);
       canvas.drawPath(path, paint);
       _arrow(canvas, Offset(b.x, b.y), b.side, paint.color);
 
       if (edge.label != null) {
-        _label(canvas, edge.label!, Offset((a.x + b.x) / 2, (a.y + b.y) / 2));
+        _label(canvas, edge.label!, labelAt);
       }
     }
 
@@ -344,6 +368,7 @@ class _FlowPainter extends CustomPainter {
   bool shouldRepaint(_FlowPainter old) =>
       old.nodes != nodes ||
       old.selected != selected ||
+      old.edgeType != edgeType ||
       old.pan != pan ||
       old.scale != scale ||
       old.colors != colors;

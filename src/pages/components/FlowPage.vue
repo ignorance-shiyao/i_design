@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import IFlow from '@/components/IFlow.vue'
 import IButton from '@/components/IButton.vue'
 import ISpace from '@/components/ISpace.vue'
+import ISegmented from '@/components/ISegmented.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { autoLayout, type FlowEdge, type FlowNode } from '@i-design/common'
 
@@ -36,6 +37,13 @@ function relayout() {
 }
 
 const readonly = ref(false)
+
+const edgeType = ref<'polyline' | 'straight' | 'bezier'>('polyline')
+const edgeTypes = [
+  { label: '折线', value: 'polyline' },
+  { label: '直连', value: 'straight' },
+  { label: '曲线', value: 'bezier' }
+]
 </script>
 
 <template>
@@ -57,9 +65,17 @@ const readonly = ref(false)
           <IButton size="sm" :variant="readonly ? 'primary' : 'secondary'" @click="readonly = !readonly">
             {{ readonly ? '只读中' : '可编辑' }}
           </IButton>
+          <ISegmented v-model="edgeType" :options="edgeTypes" />
           <span class="hint">{{ selected ? `已选中：${nodes.find((n) => n.id === selected)?.label}` : '未选中节点' }}</span>
         </ISpace>
-        <IFlow v-model:selected="selected" :nodes="nodes" :edges="edges" :readonly="readonly" @move="onMove" />
+        <IFlow
+          v-model:selected="selected"
+          :nodes="nodes"
+          :edges="edges"
+          :edge-type="edgeType"
+          :readonly="readonly"
+          @move="onMove"
+        />
       </div>
     </DemoBlock>
 
@@ -83,7 +99,15 @@ const readonly = ref(false)
       <thead><tr><th>属性</th><th>说明</th></tr></thead>
       <tbody>
         <tr><td><code>nodes</code></td><td>节点数组：id、坐标、标签与形状语义</td></tr>
-        <tr><td><code>edges</code></td><td>连线数组：from、to 与可选标签</td></tr>
+        <tr><td><code>edges</code></td><td>连线数组：from、to、可选标签与可选走向</td></tr>
+        <tr>
+          <td><code>edge-type</code></td>
+          <td>
+            整图默认连线走向：<code>polyline</code> 折线（默认，每段平行于画布，最适合审批流）、
+            <code>straight</code> 直连、<code>bezier</code> 曲线（同一对节点间有多条线时更好读）。
+            单条连线可用 <code>edge.type</code> 覆盖。
+          </td>
+        </tr>
         <tr><td><code>selected</code></td><td>当前选中节点，支持 v-model</td></tr>
         <tr><td><code>readonly</code></td><td>只读：仍可平移缩放与选中，但不能拖动节点</td></tr>
         <tr><td><code>@move</code></td><td>拖动结束抛出新坐标；组件不改传入的数据，是否落库由调用方决定</td></tr>

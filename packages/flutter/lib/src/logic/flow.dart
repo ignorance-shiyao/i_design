@@ -44,12 +44,39 @@ class FlowNodeData {
 }
 
 @immutable
+/// 连线走向：正交折线（默认）／直连／贝塞尔曲线
+enum FlowEdgeType { polyline, straight, bezier }
+
 class FlowEdgeData {
-  const FlowEdgeData({required this.from, required this.to, this.label});
+  const FlowEdgeData({required this.from, required this.to, this.label, this.type});
 
   final String from;
   final String to;
   final String? label;
+
+  /// 单条连线可以覆盖整图的默认走向
+  final FlowEdgeType? type;
+}
+
+/// 端点沿所在边的法线向外推：控制点必须在节点外侧，否则曲线会穿回节点里
+({double x, double y}) offsetBySide(double x, double y, String side, double distance) {
+  switch (side) {
+    case 'left':
+      return (x: x - distance, y: y);
+    case 'right':
+      return (x: x + distance, y: y);
+    case 'top':
+      return (x: x, y: y - distance);
+    default:
+      return (x: x, y: y + distance);
+  }
+}
+
+/// 贝塞尔控制点的外推距离：取两端点间距的一半并设上下限，
+/// 距离近时不甩出大圈，距离远时也仍有明显弧度
+double bezierPush(double ax, double ay, double bx, double by) {
+  final dist = math.sqrt(math.pow(bx - ax, 2) + math.pow(by - ay, 2));
+  return math.min(120, math.max(32, dist / 2));
 }
 
 /// 连线端点吸附到节点边缘中点，而不是中心——连到中心箭头会钻进节点里

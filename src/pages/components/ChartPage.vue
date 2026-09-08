@@ -35,6 +35,11 @@ const distribution = [
   { name: '其他', value: 310 }
 ]
 
+const thresholds = [
+  { from: 900, to: 1300, label: '健康区间', status: 'success' as const },
+  { value: 1500, label: '目标 1500', status: 'warning' as const }
+]
+
 const view = ref<'line' | 'bar'>('line')
 const views = [
   { label: '折线', value: 'line' },
@@ -94,6 +99,26 @@ const sparks = [
         <ISegmented v-model="view" :options="views" />
         <IChart :series="trend" :labels="months" :type="view" title="工作项趋势" unit=" 条" />
       </div>
+    </DemoBlock>
+
+    <h2>阈值</h2>
+    <p>
+      只看趋势看不出「现在是不是超了」，而后者往往才是看这张图的原因。
+      阈值线与阈值带把「多少算正常」画进图里：线用虚线、带用极低不透明度，
+      并且用状态色而不是分类色——阈值不是又一组数据，借分类色会被当成第 N 个系列。
+      落在值域之外的阈值会被丢弃，而不是压到边缘假装「刚好卡在临界」。
+    </p>
+    <DemoBlock
+      title="阈值线与阈值带"
+      description="虚线是目标值，色带是可接受区间。数据表下方的「导出 CSV」把这张图变回可以自己算的数字。"
+    >
+      <IChart
+        :series="trend"
+        :labels="months"
+        title="工作项趋势与目标"
+        unit=" 条"
+        :thresholds="thresholds"
+      />
     </DemoBlock>
 
     <h2>构成</h2>

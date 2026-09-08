@@ -16,10 +16,21 @@ export interface FlowNode {
   type?: 'start' | 'process' | 'decision' | 'end'
 }
 
+/**
+ * 连线走向。
+ *
+ *   polyline  正交折线（默认）——每段都平行于画布，视线能顺着走，最适合审批流
+ *   straight  直连——节点少、彼此不遮挡时最省视觉噪声
+ *   bezier    曲线——同一对节点之间有多条连线，或图偏「关系网」而非「流程」时更好读
+ */
+export type FlowEdgeType = 'polyline' | 'straight' | 'bezier'
+
 export interface FlowEdge {
   from: string
   to: string
   label?: string
+  /** 单条连线可以覆盖整图的默认走向 */
+  type?: FlowEdgeType
 }
 
 export const NODE_W = 132
@@ -59,10 +70,28 @@ export function anchorOf(node: FlowNode, toward: { x: number; y: number }) {
  * 用直角折线而不是直连斜线：流程图里斜线穿过其他节点时很难辨认走向，
  * 而直角折线的每一段都平行于画布，视线可以顺着走。
  */
-export function edgePath(from: FlowNode, to: FlowNode) {
+export function edgePath(from: FlowNode, to: FlowNode, type: FlowEdgeType = 'polyline') {
   const a = anchorOf(from, centerOf(to))
   const b = anchorOf(to, centerOf(from))
   const gap = 18
+
+  if (type === 'straight') return `M${a.x} ${a.y} L${b.x} ${b.y}`
+
+  if (type === 'bezier') {
+    /*
+     * 控制点是「端点沿它自己那条边的法线向外推一段」。
+     *
+     * 不用两点中线做控制点：那样曲线会贴着节点边缘切出去，
+     * 箭头进出的方向和锚点所在的边对不上，读者看不出线是从哪条边接出来的。
+     * 推出的距离取两点间距的一半并设上下限——距离近时不至于甩出大圈，
+     * 距离远时也仍有明显弧度。
+     */
+    const dist = Math.hypot(b.x - a.x, b.y - a.y)
+    const push = Math.min(120, Math.max(32, dist / 2))
+    const c1 = offsetBySide(a, push)
+    const c2 = offsetBySide(b, push)
+    return `M${a.x} ${a.y} C${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${b.x} ${b.y}`
+  }
 
   if (a.side === 'bottom' || a.side === 'top') {
     const midY = (a.y + b.y) / 2
@@ -72,11 +101,33 @@ export function edgePath(from: FlowNode, to: FlowNode) {
   return `M${a.x} ${a.y} L${midX} ${a.y} L${midX} ${b.y} L${b.x} ${b.y}`
 }
 
-/** 连线中点，用来放标签 */
-export function edgeMidpoint(from: FlowNode, to: FlowNode) {
+/** 端点沿所在边的法线向外推：控制点必须在节点外侧，否则曲线会穿回节点里 */
+function offsetBySide(point: { x: number; y: number; side: string }, distance: number) {
+  if (point.side === 'left') return { x: point.x - distance, y: point.y }
+  if (point.side === 'right') return { x: point.x + distance, y: point.y }
+  if (point.side === 'top') return { x: point.x, y: point.y - distance }
+  return { x: point.x, y: point.y + distance }
+}
+
+/**
+ * 连线中点，用来放标签。
+ *
+ * 曲线要按三次贝塞尔在 t=0.5 处求值，而不是取两端点中点——
+ * 弧度大时中点会离曲线很远，标签飘在空白处。
+ */
+export function edgeMidpoint(from: FlowNode, to: FlowNode, type: FlowEdgeType = 'polyline') {
   const a = anchorOf(from, centerOf(to))
   const b = anchorOf(to, centerOf(from))
-  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+  if (type !== 'bezier') return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+  const dist = Math.hypot(b.x - a.x, b.y - a.y)
+  const push = Math.min(120, Math.max(32, dist / 2))
+  const c1 = offsetBySide(a, push)
+  const c2 = offsetBySide(b, push)
+  // t=0.5 的三次贝塞尔：(P0 + 3P1 + 3P2 + P3) / 8
+  return {
+    x: (a.x + 3 * c1.x + 3 * c2.x + b.x) / 8,
+    y: (a.y + 3 * c1.y + 3 * c2.y + b.y) / 8
+  }
 }
 
 /** 所有节点的包围盒，用于「适应画布」 */

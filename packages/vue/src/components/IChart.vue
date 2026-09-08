@@ -13,7 +13,8 @@ import {
   niceTicks,
   scaleX,
   scaleY,
-  type ChartSeries
+  type ChartSeries,
+  type ChartThreshold
 } from '@i-design/common'
 
 const props = withDefaults(
@@ -33,6 +34,13 @@ const props = withDefaults(
     title?: string
     /** 数值单位，出现在提示框里 */
     unit?: string
+    /**
+     * 阈值线与阈值带：把「多少算正常」画进图里。
+     *
+     * 没有它，读者只能看出趋势，看不出「现在是不是超了」——
+     * 而后者往往才是看这张图的原因。value 是一条线，from/to 是一条带。
+     */
+    thresholds?: ChartThreshold[]
   }>(),
   {
     type: 'line',
@@ -41,7 +49,8 @@ const props = withDefaults(
     fromZero: true,
     labelLast: true,
     title: '',
-    unit: ''
+    unit: '',
+    thresholds: () => []
   }
 )
 
@@ -170,7 +179,51 @@ const tooltipStyle = computed(() => {
   return { left: `${(px / W) * 100}%`, top: `${(y(scale.value.max) / props.height) * 100}%` }
 })
 
+/*
+ * 阈值只有落在当前值域里才画得出来。
+ * 超出值域的阈值静默丢弃——把它硬压到边缘会让读者误以为「刚好卡在临界」。
+ */
+const marks = computed(() =>
+  props.thresholds
+    .filter((t) => t.value === undefined || (t.value >= scale.value.min && t.value <= scale.value.max))
+    .map((t) => {
+      const status = t.status ?? 'warning'
+      if (t.value !== undefined) {
+        return { kind: 'line' as const, status, label: t.label ?? '', y: y(t.value), height: 0 }
+      }
+      const from = Math.max(scale.value.min, t.from ?? scale.value.min)
+      const to = Math.min(scale.value.max, t.to ?? scale.value.max)
+      return {
+        kind: 'band' as const,
+        status,
+        label: t.label ?? '',
+        y: y(to),
+        height: Math.max(0, y(from) - y(to))
+      }
+    })
+)
+
 const showTable = ref(false)
+
+/**
+ * 导出 CSV：数据表解决了「读屏能读到」，导出解决了「拿去自己算」。
+ * 两者都不该逼读者回去找数据源。
+ */
+function exportCsv() {
+  const head = [props.title || '类别', ...props.series.map((s) => s.name)]
+  const rows = props.labels.map((label, i) => [label, ...props.series.map((s) => String(s.data[i] ?? ''))])
+  // 字段里可能有逗号或引号，按 RFC 4180 转义，否则列会串位
+  const cell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
+  const csv = [head, ...rows].map((r) => r.map(cell).join(',')).join('\n')
+  // BOM：没有它 Excel 会把中文表头认成乱码
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${props.title || 'chart'}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -201,6 +254,33 @@ const showTable = ref(false)
           :y1="y(Math.max(scale.min, 0))"
           :y2="y(Math.max(scale.min, 0))"
         />
+      </g>
+
+      <!--
+        阈值画在网格之上、数据之下：它是参考背景，不该盖住数据本身。
+        带用低不透明度填充，线用虚线——实线会被误读成又一个数据系列。
+      -->
+      <g v-if="marks.length">
+        <template v-for="(mark, mi) in marks" :key="`mark-${mi}`">
+          <rect
+            v-if="mark.kind === 'band'"
+            class="i-chart__mark-area"
+            :class="`is-${mark.status}`"
+            :x="PAD.left"
+            :y="mark.y"
+            :width="plotW"
+            :height="mark.height"
+          />
+          <line
+            v-else
+            class="i-chart__mark-line"
+            :class="`is-${mark.status}`"
+            :x1="PAD.left"
+            :x2="W - PAD.right"
+            :y1="mark.y"
+            :y2="mark.y"
+          />
+        </template>
       </g>
 
       <!-- x 轴标签：标签多时隔一个显示，避免叠字 -->
@@ -274,6 +354,25 @@ const showTable = ref(false)
         </template>
       </g>
 
+      <!--
+        阈值标签画在数据之上，而线与带留在数据之下。
+        标签跟着色带一起沉到底层时，数据线会正好从字上穿过——描边光晕也救不回来，
+        因为压在上面的是后画的线。层次分开，形状仍是背景，文字仍然可读。
+      -->
+      <g v-if="marks.length">
+        <text
+          v-for="(mark, mi) in marks"
+          :key="`mark-label-${mi}`"
+          class="i-chart__mark-label"
+          :class="`is-${mark.status}`"
+          :x="W - PAD.right - 4"
+          :y="mark.y + (mark.kind === 'band' ? 14 : -5)"
+          text-anchor="end"
+        >
+          {{ mark.label }}
+        </text>
+      </g>
+
       <!-- 悬停：十字线 + 命中点 -->
       <g v-if="active !== null && !isBar">
         <line
@@ -319,9 +418,12 @@ const showTable = ref(false)
       </button>
     </div>
 
-    <button class="i-chart__table-toggle" @click="showTable = !showTable">
-      {{ showTable ? '收起数据表' : '查看数据表' }}
-    </button>
+    <div class="i-chart__actions">
+      <button class="i-chart__table-toggle" @click="showTable = !showTable">
+        {{ showTable ? '收起数据表' : '查看数据表' }}
+      </button>
+      <button class="i-chart__table-toggle" @click="exportCsv">导出 CSV</button>
+    </div>
     <table v-if="showTable" class="i-chart__table">
       <thead>
         <tr>

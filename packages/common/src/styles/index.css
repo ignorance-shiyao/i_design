@@ -29,6 +29,7 @@
 @import './components/checkbox-group.css';
 @import './components/checkbox.css';
 @import './components/collapse.css';
+@import './components/countdown.css';
 @import './components/date-picker.css';
 @import './components/descriptions.css';
 @import './components/divider.css';
@@ -56,6 +57,7 @@
 @import './components/radio.css';
 @import './components/rate.css';
 @import './components/result.css';
+@import './components/search-bar.css';
 @import './components/segmented.css';
 @import './components/select.css';
 @import './components/skeleton.css';
