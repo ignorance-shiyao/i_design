@@ -1,5 +1,12 @@
 import type { App } from 'vue'
 import IIcon from './IIcon.vue'
+import IChatMessage from './IChatMessage.vue'
+import IChatTyping from './IChatTyping.vue'
+import IChatThinking from './IChatThinking.vue'
+import IChatToolCall from './IChatToolCall.vue'
+import IChatSources from './IChatSources.vue'
+import IChatSuggestions from './IChatSuggestions.vue'
+import IPromptInput from './IPromptInput.vue'
 import IButton from './IButton.vue'
 import IInput from './IInput.vue'
 import ITextarea from './ITextarea.vue'
@@ -72,7 +79,14 @@ export {
   IAlert,
   IModal,
   IDrawer,
-  ILoading
+  ILoading,
+  IChatMessage,
+  IChatTyping,
+  IChatThinking,
+  IChatToolCall,
+  IChatSources,
+  IChatSuggestions,
+  IPromptInput
 }
 
 export { message } from './message'
@@ -84,6 +98,8 @@ export type { StepItem } from './ISteps.vue'
 export type { MessageOptions, MessageType } from './message'
 export type { FormRule } from './validate'
 export type { IconName } from './icons'
+export type { ChatSource } from './IChatSources.vue'
+export type { PromptAttachment } from './IPromptInput.vue'
 export * from './date'
 export type { UploadFile, UploadStatus } from './upload'
 export type { CollapseItem } from './ICollapse.vue'
@@ -126,7 +142,14 @@ const components = {
   IAlert,
   IModal,
   IDrawer,
-  ILoading
+  ILoading,
+  IChatMessage,
+  IChatTyping,
+  IChatThinking,
+  IChatToolCall,
+  IChatSources,
+  IChatSuggestions,
+  IPromptInput
 }
 
 /** 全量注册，便于文档站与 demo 直接使用；业务侧推荐按需引入 */

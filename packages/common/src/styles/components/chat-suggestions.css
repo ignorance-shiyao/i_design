@@ -1,0 +1,38 @@
+/*
+ * IChatSuggestions —— 追问建议。
+ *
+ * 放在回答之后而不是输入框上方：它们是对这一轮回答的延伸，
+ * 挪到输入框旁边就变成了与上下文无关的通用入口。
+ */
+.i-chat-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-2);
+}
+.i-chat-suggestions__title {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-chat-suggestions__list { display: flex; flex-wrap: wrap; gap: var(--i-spacing-2); }
+.i-chat-suggestions__item {
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
+  font-family: inherit;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    color var(--i-motion-fast) var(--i-motion-easing),
+    transform var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-chat-suggestions__item:hover {
+  border-color: var(--i-color-brand);
+  color: var(--i-color-brand);
+  transform: translateY(-1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .i-chat-suggestions__item:hover { transform: none; }
+}

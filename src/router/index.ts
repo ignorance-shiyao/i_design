@@ -51,7 +51,8 @@ const routes: RouteRecordRaw[] = [
       { path: 'drawer', component: () => import('@/pages/components/DrawerPage.vue') },
       { path: 'message', component: () => import('@/pages/components/MessagePage.vue') },
       { path: 'tabs', component: () => import('@/pages/components/TabsPage.vue') },
-      { path: 'alert', component: () => import('@/pages/components/AlertPage.vue') }
+      { path: 'alert', component: () => import('@/pages/components/AlertPage.vue') },
+      { path: 'chat', component: () => import('@/pages/components/ChatPage.vue') }
     ]
   },
   {

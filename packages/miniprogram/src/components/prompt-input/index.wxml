@@ -1,0 +1,47 @@
+<view class="i-prompt {{focused ? 'is-focused' : ''}} {{disabled ? 'is-disabled' : ''}}">
+  <view wx:if="{{files.length}}" class="i-prompt__attachments">
+    <view wx:for="{{files}}" wx:key="name" class="i-prompt__file">
+      <view class="i-icon i-icon--file" style="width:12px;height:12px" />
+      <text>{{item.name}}</text>
+      <text wx:if="{{item.sizeText}}">· {{item.sizeText}}</text>
+      <view class="i-prompt__file-remove" bindtap="onRemove" data-index="{{index}}">
+        <view class="i-icon i-icon--close" style="width:12px;height:12px" />
+      </view>
+    </view>
+  </view>
+
+  <textarea
+    class="i-prompt__field"
+    value="{{value}}"
+    placeholder="{{placeholder}}"
+    disabled="{{disabled}}"
+    auto-height
+    maxlength="{{maxLength > 0 ? maxLength : -1}}"
+    bindinput="onInput"
+    bindfocus="onFocus"
+    bindblur="onBlur"
+  />
+
+  <view class="i-prompt__bar">
+    <view class="i-prompt__tools">
+      <view class="i-prompt__tool" bindtap="onAttach">
+        <view class="i-icon i-icon--plus" style="width:14px;height:14px" />
+        <text>附件</text>
+      </view>
+      <slot name="tools" />
+    </view>
+
+    <text wx:if="{{maxLength}}" class="i-prompt__count {{over ? 'is-over' : ''}}">
+      {{length}} / {{maxLength}}
+    </text>
+
+    <view wx:if="{{generating}}" class="i-prompt__send is-stop" bindtap="onStop">
+      <view class="i-icon i-icon--close" style="width:14px;height:14px" />
+    </view>
+    <view wx:else class="i-prompt__send {{canSend ? '' : 'is-disabled'}}" bindtap="onSubmit">
+      <view class="i-icon i-icon--arrow-right" style="width:16px;height:16px" />
+    </view>
+  </view>
+
+  <text wx:if="{{hint}}" class="i-prompt__hint">{{hint}}</text>
+</view>

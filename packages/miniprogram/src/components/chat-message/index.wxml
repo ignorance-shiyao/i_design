@@ -1,0 +1,37 @@
+<view class="i-chat-msg i-chat-msg--{{role}} {{error ? 'is-error' : ''}}">
+  <i-avatar
+    class="i-chat-msg__avatar"
+    name="{{name || (role === 'user' ? '我' : 'AI')}}"
+    src="{{avatar}}"
+    size="{{32}}"
+    shape="{{role === 'assistant' ? 'square' : 'circle'}}"
+  />
+
+  <view class="i-chat-msg__body">
+    <view wx:if="{{name || time}}" class="i-chat-msg__meta">
+      <text wx:if="{{name}}" class="i-chat-msg__name">{{name}}</text>
+      <text wx:if="{{time}}">{{time}}</text>
+    </view>
+
+    <slot name="before" />
+
+    <view class="i-chat-msg__content">
+      <text wx:if="{{text}}">{{text}}</text>
+      <slot />
+      <view wx:if="{{streaming}}" class="i-chat-msg__caret" />
+    </view>
+
+    <slot name="after" />
+
+    <view wx:if="{{!streaming}}" class="i-chat-msg__actions">
+      <view class="i-chat-msg__action" bindtap="onCopy">
+        <view class="i-icon i-icon--copy" style="width:12px;height:12px" />
+        <text>复制</text>
+      </view>
+      <view wx:if="{{role === 'assistant'}}" class="i-chat-msg__action" bindtap="onRetry">
+        <view class="i-icon i-icon--refresh" style="width:12px;height:12px" />
+        <text>{{error ? '重试' : '重新生成'}}</text>
+      </view>
+    </view>
+  </view>
+</view>

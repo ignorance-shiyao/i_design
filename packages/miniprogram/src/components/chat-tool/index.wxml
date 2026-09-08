@@ -1,0 +1,30 @@
+<view class="i-chat-tool i-chat-tool--{{status}} {{open ? 'is-open' : ''}}">
+  <view class="i-chat-tool__head" bindtap="onToggle">
+    <view class="i-chat-tool__arrow i-icon i-icon--chevron-right" style="width:14px;height:14px" />
+    <text class="i-chat-tool__name">{{name}}</text>
+    <text class="i-chat-tool__summary">{{summary}}</text>
+    <view class="i-chat-tool__status">
+      <i-loading wx:if="{{status === 'running'}}" size="sm" />
+      <view
+        wx:else
+        class="i-icon i-icon--{{status === 'error' ? 'error-circle' : 'check-circle'}}"
+        style="width:14px;height:14px"
+      />
+    </view>
+  </view>
+
+  <view wx:if="{{open}}" class="i-chat-tool__body">
+    <view wx:if="{{argsText}}" class="i-chat-tool__section">
+      <text class="i-chat-tool__label">入参</text>
+      <view class="i-chat-tool__code">{{argsText}}</view>
+    </view>
+    <view wx:if="{{error}}" class="i-chat-tool__section">
+      <text class="i-chat-tool__label">错误</text>
+      <text class="i-chat-tool__error">{{error}}</text>
+    </view>
+    <view wx:elif="{{resultText}}" class="i-chat-tool__section">
+      <text class="i-chat-tool__label">结果</text>
+      <view class="i-chat-tool__code">{{resultText}}</view>
+    </view>
+  </view>
+</view>

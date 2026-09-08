@@ -139,6 +139,110 @@ ISelect(
 )`
   },
 
+  chatMessage: {
+    'vue-next': `<script setup lang="ts">
+import { IChatMessage, IChatSuggestions } from '@i-design/vue-next'
+</script>
+
+<template>
+  <IChatMessage role="user" name="我">分页的省略号是怎么算的？</IChatMessage>
+
+  <IChatMessage name="Ignorance 助手" :streaming="loading" @retry="resend">
+    {{ answer }}
+    <template #after>
+      <IChatSuggestions :items="followUps" @select="ask" />
+    </template>
+  </IChatMessage>
+</template>`,
+    vue: `<template>
+  <div>
+    <IChatMessage role="user" name="我">分页的省略号是怎么算的？</IChatMessage>
+    <IChatMessage name="Ignorance 助手" :streaming="loading" @retry="resend">
+      {{ answer }}
+    </IChatMessage>
+  </div>
+</template>`,
+    react: `import { ChatMessage, ChatSuggestions } from '@i-design/react'
+
+<ChatMessage role="user" name="我">分页的省略号是怎么算的？</ChatMessage>
+
+<ChatMessage
+  name="Ignorance 助手"
+  streaming={loading}
+  onRetry={resend}
+  after={<ChatSuggestions items={followUps} onSelect={ask} />}
+>
+  {answer}
+</ChatMessage>`,
+    miniprogram: `<!-- index.json: { "usingComponents": { "i-chat-message": "/components/chat-message/index" } } -->
+<i-chat-message role="user" name="我" text="分页的省略号是怎么算的？" />
+
+<i-chat-message
+  name="Ignorance 助手"
+  text="{{answer}}"
+  streaming="{{loading}}"
+  bindretry="onResend"
+/>`,
+    flutter: `import 'package:i_design/i_design.dart';
+
+IChatMessage(
+  role: IChatRole.assistant,
+  name: 'Ignorance 助手',
+  streaming: loading,
+  onRetry: resend,
+  after: IChatSuggestions(items: followUps, onSelect: ask),
+  child: Text(answer),
+)`
+  },
+
+  promptInput: {
+    'vue-next': `<script setup lang="ts">
+import { ref } from 'vue'
+import { IPromptInput } from '@i-design/vue-next'
+
+const draft = ref('')
+</script>
+
+<template>
+  <IPromptInput
+    v-model="draft"
+    :generating="generating"
+    :max-length="2000"
+    hint="Enter 发送，Shift + Enter 换行"
+    @submit="send"
+    @stop="stop"
+  />
+</template>`,
+    react: `import { PromptInput } from '@i-design/react'
+
+<PromptInput
+  value={draft}
+  generating={generating}
+  maxLength={2000}
+  hint="Enter 发送，Shift + Enter 换行"
+  onChange={setDraft}
+  onSubmit={send}
+  onStop={stop}
+/>`,
+    miniprogram: `<i-prompt-input
+  value="{{draft}}"
+  generating="{{generating}}"
+  max-length="{{2000}}"
+  hint="Enter 发送，Shift + Enter 换行"
+  bindchange="onDraftChange"
+  bindsubmit="onSend"
+  bindstop="onStop"
+/>`,
+    flutter: `IPromptInput(
+  controller: controller,
+  generating: generating,
+  maxLength: 2000,
+  hint: '点击右侧按钮发送',
+  onSubmit: send,
+  onStop: stop,
+)`
+  },
+
   pagination: {
     'vue-next': `<script setup lang="ts">
 import { ref } from 'vue'

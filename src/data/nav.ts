@@ -79,5 +79,9 @@ export const docNav: NavGroup[] = [
       { to: '/components/popconfirm', label: 'Popconfirm 气泡确认' },
       { to: '/components/result', label: 'Result 结果页' }
     ]
+  },
+  {
+    title: 'AI 会话',
+    items: [{ to: '/components/chat', label: 'Chat AI 会话' }]
   }
 ]

@@ -1,0 +1,12 @@
+<view class="i-chat-sources">
+  <view
+    wx:for="{{sources}}"
+    wx:key="title"
+    class="i-chat-sources__item"
+    bindtap="onTap"
+    data-index="{{index}}"
+  >
+    <text class="i-chat-sources__index">{{index + 1}}</text>
+    <text class="i-chat-sources__title">{{item.title}}</text>
+  </view>
+</view>

@@ -14,6 +14,12 @@
 @import './components/button.css';
 @import './components/card.css';
 @import './components/cell.css';
+@import './components/chat-message.css';
+@import './components/chat-sources.css';
+@import './components/chat-suggestions.css';
+@import './components/chat-thinking.css';
+@import './components/chat-tool.css';
+@import './components/chat-typing.css';
 @import './components/checkbox-group.css';
 @import './components/checkbox.css';
 @import './components/collapse.css';
@@ -31,6 +37,7 @@
 @import './components/modal.css';
 @import './components/pagination.css';
 @import './components/popconfirm.css';
+@import './components/prompt-input.css';
 @import './components/radio-group.css';
 @import './components/radio.css';
 @import './components/result.css';

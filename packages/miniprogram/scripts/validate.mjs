@@ -9,6 +9,7 @@
  *   2. JS 语法可解析，且 styleIsolation 设为 apply-shared（否则共享类名被隔离挡掉）
  *   3. WXML 里用到的每个 i- 类名，都能在编译出的 WXSS 里找到
  *   4. 引用的每个图标名都存在于生成的图标样式中
+ *   5. 嵌套使用的组件都在 usingComponents 里声明过
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -45,6 +46,15 @@ for (const name of components) {
   }
   const json = JSON.parse(readFileSync(join(dir, 'index.json'), 'utf8'))
   if (json.styleIsolation !== 'apply-shared') problems.push(`${name}: styleIsolation 未设为 apply-shared`)
+
+  // 嵌套用到的组件必须在 usingComponents 里声明：漏了不会报错，
+  // 那个标签只是什么都不渲染——一片空白，最难查的一类问题
+  const wxmlSrc = readFileSync(join(dir, 'index.wxml'), 'utf8')
+  for (const [, tag] of wxmlSrc.matchAll(/<(i-[a-z0-9-]+)/g)) {
+    if (!json.usingComponents || !json.usingComponents[tag]) {
+      problems.push(`${name}: 用到了 <${tag}> 但 index.json 的 usingComponents 未声明`)
+    }
+  }
 
   // WXML 引用的类名与图标名
   const wxml = readFileSync(join(dir, 'index.wxml'), 'utf8')

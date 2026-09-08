@@ -85,8 +85,31 @@ function attrsInTemplate(code, tagPattern) {
 
 function reactAttrs(code, component) {
   const found = new Set()
-  for (const [, attrBlock] of code.matchAll(new RegExp(`<${component}\\b([\\s\\S]*?)/?>`, 'g'))) {
-    for (const [, name] of attrBlock.matchAll(/(?:^|\s)(\w+)(?:=|\s*\n|\s*\/?>)/g)) {
+  const re = new RegExp(`<${component}\\b`, 'g')
+  for (const match of code.matchAll(re)) {
+    // 手动扫到本标签的结束尖括号，并跳过 {} 里的内容：
+    // 属性值里可以嵌套别的组件（after={<ChatSuggestions items={…} />}），
+    // 用正则一路匹配到 /> 会把内层组件的属性也算成外层的。
+    let i = match.index + match[0].length
+    let depth = 0
+    let attrs = ''
+    while (i < code.length) {
+      const ch = code[i]
+      // 字符串值整段跳过：hint="Enter 发送…" 里的词不是属性名
+      if (depth === 0 && (ch === '"' || ch === "'")) {
+        const end = code.indexOf(ch, i + 1)
+        if (end === -1) break
+        attrs += ' '.repeat(end - i + 1)
+        i = end + 1
+        continue
+      }
+      if (ch === '{') depth++
+      else if (ch === '}') depth--
+      else if (ch === '>' && depth === 0) break
+      attrs += depth === 0 ? ch : ' '
+      i++
+    }
+    for (const [, name] of attrs.matchAll(/(?:^|\s)(\w+)(?:=|\s|$)/g)) {
       if (htmlGlobals.has(name)) continue
       found.add(name)
     }
@@ -105,7 +128,9 @@ function dartAttrs(code, className) {
 const targets = {
   button: { vue: 'IButton', mp: 'button', react: 'Button', dart: 'i_button', dartClass: 'IButton' },
   select: { vue: 'ISelect', mp: 'select', react: 'Select', dart: 'i_select', dartClass: 'ISelect' },
-  pagination: { vue: 'IPagination', mp: 'pagination', react: 'Pagination', dart: 'i_pagination', dartClass: 'IPagination' }
+  pagination: { vue: 'IPagination', mp: 'pagination', react: 'Pagination', dart: 'i_pagination', dartClass: 'IPagination' },
+  chatMessage: { vue: 'IChatMessage', mp: 'chat-message', react: 'ChatMessage', dart: 'i_chat_message', dartClass: 'IChatMessage' },
+  promptInput: { vue: 'IPromptInput', mp: 'prompt-input', react: 'PromptInput', dart: 'i_prompt_input', dartClass: 'IPromptInput' }
 }
 
 for (const [key, set] of Object.entries(snippets)) {

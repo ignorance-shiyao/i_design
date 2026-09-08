@@ -1,0 +1,2 @@
+@import '../../../dist/styles/prompt-input.wxss';
+@import '../../../dist/styles/icons.wxss';

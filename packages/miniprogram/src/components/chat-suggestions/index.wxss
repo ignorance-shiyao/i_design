@@ -1,0 +1,2 @@
+@import '../../../dist/styles/chat-suggestions.wxss';
+@import '../../../dist/styles/icons.wxss';
