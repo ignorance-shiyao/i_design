@@ -15,7 +15,8 @@ export const docNav: NavGroup[] = [
     items: [
       { to: '/design/values', label: '设计价值观' },
       { to: '/design/tokens', label: '设计令牌' },
-      { to: '/design/cross-platform', label: '跨端支持' }
+      { to: '/design/cross-platform', label: '跨端支持' },
+      { to: '/design/antd-coverage', label: '对照 Ant Design' }
     ]
   },
   {
@@ -26,6 +27,7 @@ export const docNav: NavGroup[] = [
     title: '基础',
     items: [
       { to: '/components/button', label: 'Button 按钮' },
+      { to: '/components/layout', label: 'Space / Grid / Typography' },
       { to: '/components/icon', label: 'Icon 图标' },
       { to: '/components/tag', label: 'Tag 标签' },
       { to: '/components/divider', label: 'Divider 分割线' }
@@ -65,7 +67,8 @@ export const docNav: NavGroup[] = [
       { to: '/components/badge', label: 'Badge 徽标' },
       { to: '/components/collapse', label: 'Collapse 折叠面板' },
       { to: '/components/descriptions', label: 'Descriptions 描述列表' },
-      { to: '/components/skeleton', label: 'Skeleton 骨架屏' }
+      { to: '/components/skeleton', label: 'Skeleton 骨架屏' },
+      { to: '/components/data-display', label: 'Segmented / Progress / Statistic / Timeline' }
     ]
   },
   {

@@ -1,0 +1,17 @@
+<view class="i-timeline">
+  <view
+    wx:for="{{items}}"
+    wx:key="title"
+    class="i-timeline__item {{item.type ? 'i-timeline__item--' + item.type : ''}} {{item.current ? 'is-current' : ''}}"
+  >
+    <view class="i-timeline__rail">
+      <view class="i-timeline__dot" />
+      <view class="i-timeline__line" />
+    </view>
+    <view class="i-timeline__content">
+      <view class="i-timeline__title">{{item.title}}</view>
+      <view wx:if="{{item.time}}" class="i-timeline__time">{{item.time}}</view>
+      <view wx:if="{{item.description}}" class="i-timeline__desc">{{item.description}}</view>
+    </view>
+  </view>
+</view>

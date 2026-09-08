@@ -1,0 +1,77 @@
+/*
+ * IProgress —— 线形与环形进度。
+ *
+ * 100% 不自动变成成功色：进度走完不等于任务成功，上传完成还可能校验失败。
+ * 状态由调用方显式给出。
+ */
+.i-progress { display: flex; align-items: center; gap: var(--i-spacing-3); }
+.i-progress--vertical { flex-direction: column; }
+
+.i-progress__track {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-muted);
+  overflow: hidden;
+}
+.i-progress--sm .i-progress__track { height: 4px; }
+.i-progress--lg .i-progress__track { height: 12px; }
+
+.i-progress__bar {
+  height: 100%;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-brand);
+  transition: width var(--i-motion-slow) var(--i-motion-easing);
+}
+.i-progress--success .i-progress__bar { background: var(--i-color-success); }
+.i-progress--warning .i-progress__bar { background: var(--i-color-warning); }
+.i-progress--danger .i-progress__bar { background: var(--i-color-danger); }
+
+/* 不确定进度：来回滑动的一小段，表示「在动但不知道还剩多少」 */
+.i-progress.is-indeterminate .i-progress__bar {
+  width: 30% !important;
+  animation: i-progress-slide 1.4s ease-in-out infinite;
+}
+@keyframes i-progress-slide {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(340%); }
+}
+
+.i-progress__text {
+  flex: none;
+  min-width: 40px;
+  text-align: right;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 环形 */
+.i-progress--circle { display: inline-grid; place-items: center; }
+/*
+ * 环与文字必须落在同一个网格单元：只给文字写 grid-area 时，自动布局会
+ * 避开被显式占用的单元，把 svg 推到第二行——于是百分比浮在圆环上方。
+ */
+.i-progress__circle { grid-area: 1 / 1; transform: rotate(-90deg); }
+.i-progress__circle-track { stroke: var(--i-color-bg-muted); fill: none; }
+.i-progress__circle-bar {
+  stroke: var(--i-color-brand);
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--i-motion-slow) var(--i-motion-easing);
+}
+.i-progress--success .i-progress__circle-bar { stroke: var(--i-color-success); }
+.i-progress--warning .i-progress__circle-bar { stroke: var(--i-color-warning); }
+.i-progress--danger .i-progress__circle-bar { stroke: var(--i-color-danger); }
+.i-progress__circle-label {
+  grid-area: 1 / 1;
+  font-size: var(--i-font-size-lg);
+  color: var(--i-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .i-progress__bar,
+  .i-progress__circle-bar { transition: none; }
+  .i-progress.is-indeterminate .i-progress__bar { animation: none; width: 100% !important; opacity: 0.5; }
+}

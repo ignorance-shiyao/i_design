@@ -1,0 +1,28 @@
+/*
+ * ISpace —— 一组元素之间的等距排列。
+ *
+ * 存在的意义是把「相邻元素间距」这件事收敛到令牌上：
+ * 各处手写 margin-right 会长出十几种不同的间距，且删元素时容易留下孤儿边距。
+ */
+.i-space { display: inline-flex; }
+.i-space--horizontal { flex-direction: row; align-items: center; }
+.i-space--vertical { flex-direction: column; align-items: stretch; }
+.i-space.is-wrap { flex-wrap: wrap; }
+.i-space.is-block { display: flex; width: 100%; }
+
+.i-space--sm { gap: var(--i-spacing-2); }
+.i-space--md { gap: var(--i-spacing-3); }
+.i-space--lg { gap: var(--i-spacing-5); }
+
+.i-space--start { justify-content: flex-start; }
+.i-space--center { justify-content: center; }
+.i-space--end { justify-content: flex-end; }
+.i-space--between { justify-content: space-between; }
+
+/* 分隔符：只在元素之间出现，两端不留 */
+.i-space__split {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  color: var(--i-color-text-tertiary);
+}

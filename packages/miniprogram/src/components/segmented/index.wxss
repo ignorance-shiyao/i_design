@@ -1,0 +1,2 @@
+@import '../../../dist/styles/segmented.wxss';
+@import '../../../dist/styles/icons.wxss';

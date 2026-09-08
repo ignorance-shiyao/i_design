@@ -1,0 +1,15 @@
+<view class="i-segmented i-segmented--{{size}} {{block ? 'is-block' : ''}}">
+  <view
+    wx:if="{{thumb.width > 0}}"
+    class="i-segmented__thumb"
+    style="transform:translateX({{thumb.left}}px);width:{{thumb.width}}px"
+  />
+  <view
+    wx:for="{{options}}"
+    wx:key="value"
+    class="i-segmented__item {{item.value === value ? 'is-active' : ''}} {{disabled || item.disabled ? 'is-disabled' : ''}}"
+    bindtap="onPick"
+    data-value="{{item.value}}"
+    data-disabled="{{item.disabled}}"
+  >{{item.label}}</view>
+</view>

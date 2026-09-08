@@ -6,9 +6,14 @@ import ITag from '@/components/ITag.vue'
 import { frameworks, componentCountOf } from '@/data/frameworks'
 import { snippets, sharedLogicSnippet } from '@/data/snippets'
 import { currentFramework } from '@/composables/useFramework'
+import { componentMatrix } from '@/data/componentMatrix'
 import type { IconName } from '@/components/icons'
 
 /** 共享层的四件东西，以及它们各自覆盖到哪些端 */
+// 移动两端复用各自的基础包，因此它们的覆盖情况就是基础包的覆盖情况
+const matrixKey = (id: string) =>
+  id === 'mobile-vue' ? 'vue-next' : id === 'mobile-react' ? 'react' : id
+
 const sharedLayers: { icon: IconName; title: string; detail: string; covers: string }[] = [
   {
     icon: 'palette',
@@ -79,6 +84,32 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
 
     <h3>Pagination 分页</h3>
     <div class="cp-code"><FrameworkTabs :snippets="snippets.pagination" /></div>
+
+    <h2>覆盖矩阵</h2>
+    <p>
+      下表由 <code>scripts/build-component-matrix.mjs</code> 按目录统计生成，只认文件里
+      是否真的有这个组件——「已实现」不该是一个可以手写的状态。
+    </p>
+    <div class="cp-matrix">
+      <table class="i-table">
+        <thead>
+          <tr>
+            <th>组件</th>
+            <th v-for="f in frameworks" :key="f.id">{{ f.label }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in componentMatrix" :key="row.name">
+            <td><code>{{ row.name }}</code></td>
+            <td v-for="f in frameworks" :key="f.id" class="cp-cell">
+              <span :class="row.ends[matrixKey(f.id)] ? 'cp-yes' : 'cp-no'">
+                {{ row.ends[matrixKey(f.id)] ? '✓' : '—' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <h2>共享的是什么</h2>
     <div class="cp-layers">
@@ -170,6 +201,10 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
   overflow: hidden;
   margin-bottom: var(--i-spacing-6);
 }
+.cp-matrix { overflow-x: auto; margin: var(--i-spacing-4) 0 var(--i-spacing-8); }
+.cp-cell { text-align: center; }
+.cp-yes { color: var(--i-color-success); font-weight: 600; }
+.cp-no { color: var(--i-color-text-tertiary); }
 .cp-layers {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));

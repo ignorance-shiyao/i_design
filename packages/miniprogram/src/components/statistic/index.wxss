@@ -1,0 +1,2 @@
+@import '../../../dist/styles/statistic.wxss';
+@import '../../../dist/styles/icons.wxss';

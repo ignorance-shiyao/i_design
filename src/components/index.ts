@@ -1,5 +1,13 @@
 import type { App } from 'vue'
 import IIcon from './IIcon.vue'
+import ISpace from './ISpace.vue'
+import ITypography from './ITypography.vue'
+import IRow from './IRow.vue'
+import ICol from './ICol.vue'
+import ISegmented from './ISegmented.vue'
+import IProgress from './IProgress.vue'
+import IStatistic from './IStatistic.vue'
+import ITimeline from './ITimeline.vue'
 import IChatMessage from './IChatMessage.vue'
 import IChatTyping from './IChatTyping.vue'
 import IChatThinking from './IChatThinking.vue'
@@ -86,7 +94,15 @@ export {
   IChatToolCall,
   IChatSources,
   IChatSuggestions,
-  IPromptInput
+  IPromptInput,
+  ISpace,
+  ITypography,
+  IRow,
+  ICol,
+  ISegmented,
+  IProgress,
+  IStatistic,
+  ITimeline
 }
 
 export { message } from './message'
@@ -100,6 +116,8 @@ export type { FormRule } from './validate'
 export type { IconName } from './icons'
 export type { ChatSource } from './IChatSources.vue'
 export type { PromptAttachment } from './IPromptInput.vue'
+export type { SegmentedOption } from './ISegmented.vue'
+export type { TimelineItem } from './ITimeline.vue'
 export * from './date'
 export type { UploadFile, UploadStatus } from './upload'
 export type { CollapseItem } from './ICollapse.vue'
@@ -149,7 +167,15 @@ const components = {
   IChatToolCall,
   IChatSources,
   IChatSuggestions,
-  IPromptInput
+  IPromptInput,
+  ISpace,
+  ITypography,
+  IRow,
+  ICol,
+  ISegmented,
+  IProgress,
+  IStatistic,
+  ITimeline
 }
 
 /** 全量注册，便于文档站与 demo 直接使用；业务侧推荐按需引入 */

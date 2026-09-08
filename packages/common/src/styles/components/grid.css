@@ -1,0 +1,38 @@
+/*
+ * IRow / ICol —— 24 栅格。
+ *
+ * 用负 margin 抵消列内边距，而不是 gap：gap 会让「跨行时首尾列与容器对齐」
+ * 这条规则失效，中后台的表单区块对齐要求比这严格。
+ */
+.i-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: calc(var(--i-row-gutter, 0px) / -2);
+  margin-right: calc(var(--i-row-gutter, 0px) / -2);
+}
+.i-row--top { align-items: flex-start; }
+.i-row--middle { align-items: center; }
+.i-row--bottom { align-items: flex-end; }
+.i-row--start { justify-content: flex-start; }
+.i-row--center { justify-content: center; }
+.i-row--end { justify-content: flex-end; }
+.i-row--between { justify-content: space-between; }
+
+.i-col {
+  padding-left: calc(var(--i-row-gutter, 0px) / 2);
+  padding-right: calc(var(--i-row-gutter, 0px) / 2);
+  /* 跨度由 --i-col-span 决定，24 等分 */
+  flex: 0 0 calc(var(--i-col-span, 24) / 24 * 100%);
+  max-width: calc(var(--i-col-span, 24) / 24 * 100%);
+  min-width: 0;
+}
+.i-col.is-offset { margin-left: calc(var(--i-col-offset, 0) / 24 * 100%); }
+.i-col.is-flex { flex: 1 1 0; max-width: none; }
+
+/* 窄屏下整栏铺满：中后台表单在小屏上并排两列几乎不可用 */
+@media (max-width: 768px) {
+  .i-col:not(.is-keep) {
+    flex: 0 0 calc(var(--i-col-span-sm, 24) / 24 * 100%);
+    max-width: calc(var(--i-col-span-sm, 24) / 24 * 100%);
+  }
+}

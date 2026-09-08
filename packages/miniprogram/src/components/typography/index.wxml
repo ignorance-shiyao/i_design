@@ -1,0 +1,4 @@
+<text
+  class="i-typo i-typo--{{variant}} {{type === 'default' ? '' : 'i-typo--' + type}} {{strong ? 'is-strong' : ''}} {{italic ? 'is-italic' : ''}} {{underline ? 'is-underline' : ''}} {{del ? 'is-delete' : ''}} {{mono ? 'is-mono' : ''}} {{ellipsis ? 'is-ellipsis' : ''}} {{lines > 0 ? 'is-clamp' : ''}}"
+  style="{{lines > 0 ? '--i-typo-lines:' + lines : ''}}"
+>{{text}}<slot /></text>

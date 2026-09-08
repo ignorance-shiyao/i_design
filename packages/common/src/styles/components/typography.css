@@ -1,0 +1,43 @@
+/*
+ * ITypography —— 标题、正文与辅助文字。
+ *
+ * 字号与行高全部取自令牌，不接受任意数值：正文排版一旦允许「就这里大一号」，
+ * 一个产品里很快会出现七种正文字号。
+ */
+.i-typo { margin: 0; color: var(--i-color-text); }
+
+.i-typo--h1 { font-size: var(--i-font-size-4xl); font-weight: 600; line-height: 1.25; letter-spacing: -0.02em; }
+.i-typo--h2 { font-size: var(--i-font-size-3xl); font-weight: 600; line-height: 1.3; letter-spacing: -0.015em; }
+.i-typo--h3 { font-size: var(--i-font-size-2xl); font-weight: 600; line-height: 1.35; }
+.i-typo--h4 { font-size: var(--i-font-size-xl); font-weight: 600; line-height: 1.4; }
+.i-typo--h5 { font-size: var(--i-font-size-lg); font-weight: 600; line-height: 1.5; }
+.i-typo--body { font-size: var(--i-font-size-md); line-height: 1.75; }
+.i-typo--caption { font-size: var(--i-font-size-sm); line-height: 1.6; }
+
+.i-typo--secondary { color: var(--i-color-text-secondary); }
+.i-typo--tertiary { color: var(--i-color-text-tertiary); }
+.i-typo--brand { color: var(--i-color-brand); }
+.i-typo--success { color: var(--i-color-success); }
+.i-typo--warning { color: var(--i-color-warning); }
+.i-typo--danger { color: var(--i-color-danger); }
+
+.i-typo.is-strong { font-weight: 600; }
+.i-typo.is-italic { font-style: italic; }
+.i-typo.is-underline { text-decoration: underline; }
+.i-typo.is-delete { text-decoration: line-through; color: var(--i-color-text-tertiary); }
+.i-typo.is-mono { font-family: var(--i-font-family-mono); }
+
+/* 单行省略 */
+.i-typo.is-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* 多行省略：行数由 --i-typo-lines 控制 */
+.i-typo.is-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--i-typo-lines, 2);
+  line-clamp: var(--i-typo-lines, 2);
+  overflow: hidden;
+}

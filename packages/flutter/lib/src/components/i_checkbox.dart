@@ -63,3 +63,76 @@ class ICheckbox extends StatelessWidget {
     );
   }
 }
+
+@immutable
+class ICheckboxOption<T> {
+  const ICheckboxOption({required this.value, required this.label, this.disabled = false});
+
+  final T value;
+  final String label;
+  final bool disabled;
+}
+
+/// 一组可多选的选项。
+///
+/// [max] 达到上限后未选中项自动禁用，已选中的仍可取消——
+/// 不让用户陷入「既不能选也不知道该取消谁」的死角。这条规则与 Web 端一致。
+class ICheckboxGroup<T> extends StatelessWidget {
+  const ICheckboxGroup({
+    super.key,
+    required this.options,
+    required this.value,
+    required this.onChanged,
+    this.direction = Axis.horizontal,
+    this.max = 0,
+    this.enabled = true,
+  });
+
+  final List<ICheckboxOption<T>> options;
+  final List<T> value;
+  final ValueChanged<List<T>> onChanged;
+  final Axis direction;
+  final int max;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final atMax = max > 0 && value.length >= max;
+
+    void toggle(T item, bool checked) {
+      final next = List<T>.from(value);
+      checked ? next.add(item) : next.remove(item);
+      onChanged(next);
+    }
+
+    final children = [
+      for (final option in options)
+        Builder(builder: (context) {
+          final checked = value.contains(option.value);
+          final usable = enabled && !option.disabled && !(atMax && !checked);
+          return ICheckbox(
+            checked: checked,
+            label: option.label,
+            onChanged: usable ? (next) => toggle(option.value, next) : null,
+          );
+        }),
+    ];
+
+    return direction == Axis.horizontal
+        ? Wrap(
+            spacing: IDesignTokensLight.spacing5,
+            runSpacing: IDesignTokensLight.spacing3,
+            children: children,
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0) const SizedBox(height: IDesignTokensLight.spacing3),
+                children[i],
+              ],
+            ],
+          );
+  }
+}

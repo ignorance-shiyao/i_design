@@ -1,0 +1,42 @@
+/*
+ * IStatistic —— 一个关键数字。
+ *
+ * 数字用等宽数位（tabular-nums）：仪表盘上的数字会随刷新变化，
+ * 比例数位会让整块内容左右抖动。
+ */
+.i-statistic__title {
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+  margin-bottom: var(--i-spacing-2);
+}
+.i-statistic__value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--i-spacing-1);
+  font-size: var(--i-font-size-3xl);
+  font-weight: 600;
+  color: var(--i-color-text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.i-statistic--sm .i-statistic__value { font-size: var(--i-font-size-2xl); }
+.i-statistic--brand .i-statistic__value { color: var(--i-color-brand); }
+.i-statistic--success .i-statistic__value { color: var(--i-color-success); }
+.i-statistic--danger .i-statistic__value { color: var(--i-color-danger); }
+
+.i-statistic__affix {
+  font-size: var(--i-font-size-lg);
+  font-weight: 400;
+  color: var(--i-color-text-secondary);
+}
+.i-statistic__extra {
+  margin-top: var(--i-spacing-2);
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+}
+.i-statistic__trend { display: inline-flex; align-items: center; gap: 2px; }
+.i-statistic__trend.is-up { color: var(--i-color-success); }
+.i-statistic__trend.is-down { color: var(--i-color-danger); }

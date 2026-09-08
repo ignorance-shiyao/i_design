@@ -1,0 +1,6 @@
+<view
+  class="i-row i-row--{{align}} i-row--{{justify}}"
+  style="--i-row-gutter:{{gutter}}px"
+>
+  <slot />
+</view>

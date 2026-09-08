@@ -30,6 +30,7 @@
 @import './components/empty.css';
 @import './components/form-item.css';
 @import './components/form.css';
+@import './components/grid.css';
 @import './components/icon.css';
 @import './components/input.css';
 @import './components/loading.css';
@@ -37,12 +38,16 @@
 @import './components/modal.css';
 @import './components/pagination.css';
 @import './components/popconfirm.css';
+@import './components/progress.css';
 @import './components/prompt-input.css';
 @import './components/radio-group.css';
 @import './components/radio.css';
 @import './components/result.css';
+@import './components/segmented.css';
 @import './components/select.css';
 @import './components/skeleton.css';
+@import './components/space.css';
+@import './components/statistic.css';
 @import './components/steps.css';
 @import './components/switch.css';
 @import './components/table-mp.css';
@@ -50,6 +55,8 @@
 @import './components/tabs.css';
 @import './components/tag.css';
 @import './components/textarea.css';
+@import './components/timeline.css';
 @import './components/toast.css';
 @import './components/tooltip.css';
+@import './components/typography.css';
 @import './components/upload.css';

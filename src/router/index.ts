@@ -11,7 +11,8 @@ const routes: RouteRecordRaw[] = [
       { path: '', redirect: '/design/values' },
       { path: 'values', component: () => import('@/pages/DesignValuesPage.vue') },
       { path: 'tokens', component: () => import('@/pages/DesignTokensPage.vue') },
-      { path: 'cross-platform', component: () => import('@/pages/CrossPlatformPage.vue') }
+      { path: 'cross-platform', component: () => import('@/pages/CrossPlatformPage.vue') },
+      { path: 'antd-coverage', component: () => import('@/pages/AntdCoveragePage.vue') }
     ]
   },
   {
@@ -52,7 +53,9 @@ const routes: RouteRecordRaw[] = [
       { path: 'message', component: () => import('@/pages/components/MessagePage.vue') },
       { path: 'tabs', component: () => import('@/pages/components/TabsPage.vue') },
       { path: 'alert', component: () => import('@/pages/components/AlertPage.vue') },
-      { path: 'chat', component: () => import('@/pages/components/ChatPage.vue') }
+      { path: 'chat', component: () => import('@/pages/components/ChatPage.vue') },
+      { path: 'layout', component: () => import('@/pages/components/LayoutPage.vue') },
+      { path: 'data-display', component: () => import('@/pages/components/DataDisplayPage.vue') }
     ]
   },
   {
