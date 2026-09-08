@@ -45,8 +45,11 @@
 @import './components/loading.css';
 @import './components/message-list.css';
 @import './components/modal.css';
+@import './components/nav-bar.css';
+@import './components/notice-bar.css';
 @import './components/pagination.css';
 @import './components/popconfirm.css';
+@import './components/popup.css';
 @import './components/progress.css';
 @import './components/prompt-input.css';
 @import './components/radio-group.css';
@@ -60,7 +63,9 @@
 @import './components/space.css';
 @import './components/statistic.css';
 @import './components/steps.css';
+@import './components/swipe-cell.css';
 @import './components/switch.css';
+@import './components/tabbar.css';
 @import './components/table-mp.css';
 @import './components/table.css';
 @import './components/tabs.css';

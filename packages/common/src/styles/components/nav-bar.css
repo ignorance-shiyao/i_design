@@ -1,0 +1,57 @@
+/*
+ * INavBar —— 移动端顶部导航。
+ *
+ * 标题居中、返回在左、操作在右：这是移动端二十年没变过的约定，
+ * 换个位置用户就得重新找。左右两侧等宽，标题才不会因为一侧多一个按钮就偏移。
+ */
+.i-nav-bar {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--i-safe-top, 0) var(--i-spacing-2) 0;
+  background: var(--i-color-bg);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-nav-bar--transparent { background: none; border-bottom: none; }
+.i-nav-bar.is-fixed {
+  position: sticky;
+  top: 0;
+  z-index: var(--i-z-sticky);
+}
+.i-nav-bar__side {
+  flex: 0 0 64px;
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  min-height: 44px;
+}
+.i-nav-bar__side--right { justify-content: flex-end; }
+/*
+ * 用两级选择器提高优先级：标题是 h1，而宿主页面里往往有 `.article h1` 这类
+ * 全局排版规则——那条规则的优先级更高，会把导航栏标题放大成页面主标题。
+ */
+.i-nav-bar .i-nav-bar__title {
+  flex: 1;
+  margin: 0;
+  text-align: center;
+  font-size: var(--i-font-size-lg);
+  font-weight: 600;
+  color: var(--i-color-text);
+  /* 标题过长省略而不是换行：导航栏高度必须稳定 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.i-nav-bar__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: none;
+  color: var(--i-color-text);
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  cursor: pointer;
+}

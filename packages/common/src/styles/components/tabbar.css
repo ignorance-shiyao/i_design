@@ -1,0 +1,67 @@
+/*
+ * ITabbar —— 移动端底部标签栏。
+ *
+ * 固定在底部并让出手势条区域：iPhone 的横条会盖住最后 34px，
+ * 不留安全区的话，最下面一排图标点不到。
+ */
+.i-tabbar {
+  display: flex;
+  align-items: stretch;
+  background: var(--i-color-bg);
+  border-top: 1px solid var(--i-color-hairline);
+  padding-bottom: var(--i-safe-bottom, 0);
+}
+.i-tabbar.is-fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--i-z-sticky);
+}
+.i-tabbar__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 50px;
+  padding: var(--i-spacing-1) 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+  /* 点击时的整块反馈，触屏上没有 hover 可依赖 */
+  -webkit-tap-highlight-color: transparent;
+}
+.i-tabbar__item:active { background: var(--i-color-bg-subtle); }
+.i-tabbar__item.is-active { color: var(--i-color-brand); }
+.i-tabbar__icon { position: relative; display: inline-flex; }
+/* 角标：贴在图标右上角，数字多时向左延展而不是撑开图标 */
+.i-tabbar__badge {
+  position: absolute;
+  top: -4px;
+  left: 100%;
+  transform: translateX(-40%);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-danger);
+  color: #fff;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+}
+.i-tabbar__dot {
+  position: absolute;
+  top: -2px;
+  left: 100%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-danger);
+}

@@ -1,0 +1,178 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import INavBar from '@i-design/mobile-vue/src/components/INavBar.vue'
+import ITabbar from '@i-design/mobile-vue/src/components/ITabbar.vue'
+import INoticeBar from '@i-design/mobile-vue/src/components/INoticeBar.vue'
+import IPopup from '@i-design/mobile-vue/src/components/IPopup.vue'
+import IGrid from '@i-design/mobile-vue/src/components/IGrid.vue'
+import ISwipeCell from '@i-design/mobile-vue/src/components/ISwipeCell.vue'
+import ICell from '@i-design/mobile-vue/src/components/ICell.vue'
+import IButton from '@/components/IButton.vue'
+import DemoBlock from '@/site/DemoBlock.vue'
+import { message } from '@/components/message'
+import type { IconName } from '@/components/icons'
+
+const tab = ref('home')
+const tabs = [
+  { value: 'home', label: '首页', icon: 'grid' as IconName },
+  { value: 'flow', label: '工作台', icon: 'layers' as IconName, badge: 5 },
+  { value: 'msg', label: '消息', icon: 'info-circle' as IconName, dot: true },
+  { value: 'me', label: '我的', icon: 'user' as IconName }
+]
+
+const entries = [
+  { label: '待办', icon: 'check' as IconName },
+  { label: '审批', icon: 'file' as IconName },
+  { label: '报表', icon: 'grid' as IconName },
+  { label: '成员', icon: 'user' as IconName },
+  { label: '日程', icon: 'calendar' as IconName },
+  { label: '文档', icon: 'folder' as IconName },
+  { label: '设置', icon: 'edit' as IconName },
+  { label: '更多', icon: 'more' as IconName }
+]
+
+const popupOpen = ref(false)
+const noticeVisible = ref(true)
+
+const rows = ref([
+  { title: 'WI-1024 登录页表单校验缺失', description: '林岚 · 2 小时前' },
+  { title: 'WI-1025 列表页分页丢失当前页', description: '陈序 · 昨天' }
+])
+
+const swipeActions = [
+  { text: '置顶', type: 'brand' as const },
+  { text: '删除', type: 'danger' as const }
+]
+
+function onSwipe(action: { text: string }, index: number, rowIndex: number) {
+  if (action.text === '删除') {
+    rows.value = rows.value.filter((_, i) => i !== rowIndex)
+    message.success('已删除')
+    return
+  }
+  message.info(`${action.text}：第 ${rowIndex + 1} 条`)
+}
+</script>
+
+<template>
+  <article>
+    <h1>移动端形态</h1>
+    <p class="i-lead">
+      有些形态只在触屏上成立：底部标签栏、从边缘滑出的浮层、左滑出操作的单元格。
+      它们与桌面端共用同一套令牌与语义色，因此同一个产品的两端看起来仍是一家的东西——
+      只是把尺度调到了手指而不是鼠标指针。
+    </p>
+
+    <DemoBlock
+      title="一屏完整的移动界面"
+      description="导航栏、通告栏、宫格入口、可左滑的列表与底部标签栏，装在真实的手机尺寸里。"
+    >
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone__screen">
+            <INavBar title="工作台" back back-text="返回" @back="message.info('返回上一页')">
+              <template #right>
+                <button class="phone__link" @click="popupOpen = true">筛选</button>
+              </template>
+            </INavBar>
+
+            <INoticeBar
+              v-if="noticeVisible"
+              text="系统将于本周六 02:00 - 04:00 维护升级，期间审批流将暂停处理，请提前安排。"
+              closable
+              @close="noticeVisible = false"
+            />
+
+            <IGrid :items="entries" :columns="4" @select="(item) => message.info(item.label)" />
+
+            <div class="phone__section">我的工作项（左滑试试）</div>
+            <ISwipeCell
+              v-for="(row, index) in rows"
+              :key="row.title"
+              :actions="swipeActions"
+              @action="(action) => onSwipe(action, index, index)"
+            >
+              <ICell :title="row.title" :description="row.description" clickable />
+            </ISwipeCell>
+            <p v-if="!rows.length" class="phone__empty">全部处理完了</p>
+
+            <div class="phone__spacer" />
+            <ITabbar v-model="tab" :items="tabs" />
+          </div>
+        </div>
+
+        <IPopup v-model="popupOpen">
+          <div class="sheet">
+            <h3>筛选</h3>
+            <p>弹层的内容完全由调用方决定：这里可以是选择器、表单，或一段说明。</p>
+            <IButton variant="primary" block @click="popupOpen = false">确定</IButton>
+          </div>
+        </IPopup>
+      </div>
+    </DemoBlock>
+
+    <h2>与桌面端的分工</h2>
+    <ul class="rules">
+      <li><strong>标签栏不是标签页</strong>：Tabs 切换的是页面内的一块区域，标签栏切换的是整个页面，且常驻在拇指够得到的位置。</li>
+      <li><strong>浮层不是抽屉</strong>：抽屉是桌面端的侧边面板，自带标题与关闭按钮；移动端的浮层是裸容器，内容全交给调用方。</li>
+      <li><strong>通告栏不是警告提示</strong>：警告提示针对当前操作，通告栏是与操作无关的广播，因此常驻顶部且默认不可关闭。</li>
+      <li><strong>滑动操作不能是唯一入口</strong>：不是所有用户都知道可以左滑，删除这类操作在详情页里也要能找到。</li>
+    </ul>
+
+    <h2>安全区</h2>
+    <p>
+      标签栏与底部浮层都让出手势条区域：iPhone 的横条会盖住最下面 34px，
+      不留安全区的话，最下面一排图标点不到。导航栏同理让出状态栏。
+    </p>
+  </article>
+</template>
+
+<style scoped>
+.phone-wrap { display: flex; justify-content: center; width: 100%; }
+/* 手机外框：让桌面读者一眼看出这些形态的实际尺度 */
+.phone {
+  width: 375px;
+  border: 10px solid var(--i-color-text);
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: var(--i-shadow-lg);
+  background: var(--i-color-text);
+}
+.phone__screen {
+  display: flex;
+  flex-direction: column;
+  height: 640px;
+  overflow-y: auto;
+  background: var(--i-color-bg-subtle);
+}
+.phone__section {
+  padding: var(--i-spacing-4) var(--i-spacing-4) var(--i-spacing-2);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+}
+.phone__empty {
+  padding: var(--i-spacing-6);
+  text-align: center;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}
+.phone__spacer { flex: 1; }
+.phone__link {
+  border: none;
+  background: none;
+  color: var(--i-color-brand);
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  cursor: pointer;
+  min-height: 44px;
+}
+.sheet { padding: var(--i-spacing-5); }
+.sheet h3 { margin: 0 0 var(--i-spacing-2); }
+.sheet p {
+  margin: 0 0 var(--i-spacing-4);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+}
+.rules { line-height: 1.9; }
+.rules li { margin-bottom: var(--i-spacing-2); }
+</style>

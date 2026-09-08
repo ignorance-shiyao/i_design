@@ -1,0 +1,51 @@
+/*
+ * IPopup —— 从边缘滑出的浮层容器。
+ *
+ * 与 Drawer 的分工：Drawer 是桌面端的侧边面板，有标题栏与关闭按钮；
+ * Popup 是移动端的裸容器，内容完全由调用方决定，常用来承载选择器、筛选面板。
+ */
+.i-popup { position: fixed; inset: 0; z-index: var(--i-z-modal); }
+.i-popup__mask { position: absolute; inset: 0; background: rgba(20, 24, 34, 0.45); }
+.i-popup__panel {
+  position: absolute;
+  background: var(--i-color-bg);
+  box-shadow: var(--i-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+.i-popup--bottom .i-popup__panel {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--i-radius-xl) var(--i-radius-xl) 0 0;
+  /* 底部让出手势条：内容贴着屏幕最下沿会被横条压住 */
+  padding-bottom: var(--i-safe-bottom, 0);
+}
+.i-popup--top .i-popup__panel {
+  left: 0;
+  right: 0;
+  top: 0;
+  border-radius: 0 0 var(--i-radius-xl) var(--i-radius-xl);
+  padding-top: var(--i-safe-top, 0);
+}
+.i-popup--left .i-popup__panel { left: 0; top: 0; bottom: 0; width: 78%; max-width: 320px; }
+.i-popup--right .i-popup__panel { right: 0; top: 0; bottom: 0; width: 78%; max-width: 320px; }
+.i-popup--center .i-popup__panel {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 340px;
+  border-radius: var(--i-radius-xl);
+}
+.i-popup__body { overflow-y: auto; overscroll-behavior: contain; }
+/* 顶部的拖拽提示条：告诉用户这层可以往下拉关掉 */
+.i-popup__handle {
+  width: 36px;
+  height: 4px;
+  margin: var(--i-spacing-2) auto;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-border-strong);
+  flex: none;
+}

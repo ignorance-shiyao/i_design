@@ -87,6 +87,10 @@ export const docNav: NavGroup[] = [
     ]
   },
   {
+    title: '移动端',
+    items: [{ to: '/components/mobile', label: '移动端形态' }]
+  },
+  {
     title: 'AI 会话',
     items: [{ to: '/components/chat', label: 'Chat AI 会话' }]
   }
