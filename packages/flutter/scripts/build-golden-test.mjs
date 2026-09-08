@@ -24,6 +24,10 @@ const bundle = (entry, name) => {
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
 const { moveActive, moveActiveLoop } = await bundle('packages/common/src/logic/select.ts', 'select')
+const { clampNumber, roundTo, stepValue, ratioOf, valueFromRatio } = await bundle(
+  'packages/common/src/logic/number.ts',
+  'number'
+)
 
 /* ---------- 分页 ---------- */
 const pageCases = [
@@ -84,12 +88,34 @@ const moveExpectations = moveCases.flatMap(([current, step]) => [
   `    expect(moveActiveLoop(disabled, ${current}, ${step}), ${moveActiveLoop(options, current, step)});`,
 ])
 
+/* ---------- 数值：夹取、取整、步进、比例 ---------- */
+const numberExpectations = [
+  ...[[5, 0, 10], [-3, 0, 10], [99, 0, 10]].map(
+    ([v, lo, hi]) => `    expect(clampNumber(${v}, ${lo}, ${hi}), ${clampNumber(v, lo, hi)});`
+  ),
+  ...[[0.30000000000000004, 2], [1.005, 2], [2.5, 0]].map(
+    ([v, p]) => `    expect(roundTo(${v}, ${p}), ${roundTo(v, p)});`
+  ),
+  ...[[0.1, 0.2, 0, 1, 2], [9.5, 1, 0, 10, 1], [0, -1, 0, 10, 0]].map(
+    ([cur, st, lo, hi, p]) =>
+      `    expect(stepValue(${cur}, ${st}, ${lo}, ${hi}, ${p}), ${stepValue(cur, st, lo, hi, p)});`
+  ),
+  ...[[25, 0, 100], [0, 0, 100], [7, 5, 5]].map(
+    ([v, lo, hi]) => `    expect(ratioOf(${v}, ${lo}, ${hi}), ${ratioOf(v, lo, hi)});`
+  ),
+  ...[[0.37, 0, 100, 5, 0], [0.5, 0, 1, 0.1, 1], [1.2, 0, 10, 1, 0]].map(
+    ([r, lo, hi, st, p]) =>
+      `    expect(valueFromRatio(${r}, ${lo}, ${hi}, ${st}, ${p}), ${valueFromRatio(r, lo, hi, st, p)});`
+  )
+]
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
 // 「Dart 移植与公共层是否一致」，而不是「Dart 移植与自己是否一致」。
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_design/src/logic/pagination.dart';
+import 'package:i_design/src/logic/number.dart';
 import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
 
@@ -121,6 +147,10 @@ ${orderExpectations.join('\n')}
   test('sortRows 顺序与 Web 端一致（空值恒在末尾）', () {
     final rows = ${dartRows};
 ${sortExpectations.join('\n')}
+  });
+
+  test('数值夹取 / 取整 / 步进 / 比例换算与 Web 端一致', () {
+${numberExpectations.join('\n')}
   });
 
   test('moveActive / moveActiveLoop 与 Web 端一致', () {

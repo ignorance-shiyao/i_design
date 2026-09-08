@@ -11,12 +11,12 @@ withDefaults(
 
 <template>
   <div class="i-card" :class="{ 'is-hoverable': hoverable, 'is-bordered': bordered }">
-    <div v-if="title || $slots.header" class="i-card__header">
+    <div v-if="title || $scopedSlots.header" class="i-card__header">
       <slot name="header">
         <h3 class="i-card__title">{{ title }}</h3>
       </slot>
     </div>
     <div class="i-card__body"><slot /></div>
-    <div v-if="$slots.footer" class="i-card__footer"><slot name="footer" /></div>
+    <div v-if="$scopedSlots.footer" class="i-card__footer"><slot name="footer" /></div>
   </div>
 </template>

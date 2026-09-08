@@ -17,9 +17,9 @@ withDefaults(
 <template>
   <div
     class="i-divider"
-    :class="[`i-divider--${direction}`, `is-${align}`, { 'is-dashed': dashed, 'has-text': !!$slots.default }]"
+    :class="[`i-divider--${direction}`, `is-${align}`, { 'is-dashed': dashed, 'has-text': !!$scopedSlots.default }]"
     role="separator"
   >
-    <span v-if="$slots.default && direction === 'horizontal'" class="i-divider__text"><slot /></span>
+    <span v-if="$scopedSlots.default && direction === 'horizontal'" class="i-divider__text"><slot /></span>
   </div>
 </template>

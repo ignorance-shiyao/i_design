@@ -53,7 +53,7 @@ const text = computed(() => presets[props.status])
     </slot>
     <h2 class="i-result__title">{{ title || text.title }}</h2>
     <p class="i-result__desc">{{ description || text.description }}</p>
-    <div v-if="$slots.default" class="i-result__actions"><slot /></div>
-    <div v-if="$slots.extra" class="i-result__extra"><slot name="extra" /></div>
+    <div v-if="$scopedSlots.default" class="i-result__actions"><slot /></div>
+    <div v-if="$scopedSlots.extra" class="i-result__extra"><slot name="extra" /></div>
   </div>
 </template>

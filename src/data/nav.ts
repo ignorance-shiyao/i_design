@@ -53,7 +53,8 @@ export const docNav: NavGroup[] = [
       { to: '/components/radio', label: 'Radio 单选框' },
       { to: '/components/checkbox', label: 'Checkbox 多选框' },
       { to: '/components/switch', label: 'Switch 开关' },
-      { to: '/components/upload', label: 'Upload 上传' }
+      { to: '/components/upload', label: 'Upload 上传' },
+      { to: '/components/data-entry', label: 'InputNumber / Slider / Rate / List' }
     ]
   },
   {

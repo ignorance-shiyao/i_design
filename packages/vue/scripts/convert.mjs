@@ -115,8 +115,16 @@ function convert(source, name) {
     )
   }
 
-  // defineSlots 在 2.7 不存在，模板里用 $slots 判断即可
+  // defineSlots 在 2.7 不存在，模板里用插槽对象判断即可
   s = s.replace(/^.*defineSlots<[\s\S]*?>\(\).*$/gm, '')
+
+  /*
+   * Vue 3 的 $slots 同时包含普通插槽与作用域插槽；Vue 2 把作用域插槽单独放在
+   * $scopedSlots 里，$slots 拿不到，于是 `v-if="$slots.media"` 恒为假——
+   * 插槽内容一行都不会渲染，而且不报错。2.6 起 $scopedSlots 同时包含两类插槽，
+   * 因此统一改写过去是安全的。
+   */
+  s = s.replace(/\$slots\./g, '$scopedSlots.')
 
   s = convertTemplate(s)
 

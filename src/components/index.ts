@@ -1,5 +1,9 @@
 import type { App } from 'vue'
 import IIcon from './IIcon.vue'
+import IInputNumber from './IInputNumber.vue'
+import ISlider from './ISlider.vue'
+import IRate from './IRate.vue'
+import IList from './IList.vue'
 import ISpace from './ISpace.vue'
 import ITypography from './ITypography.vue'
 import IRow from './IRow.vue'
@@ -102,7 +106,11 @@ export {
   ISegmented,
   IProgress,
   IStatistic,
-  ITimeline
+  ITimeline,
+  IInputNumber,
+  ISlider,
+  IRate,
+  IList
 }
 
 export { message } from './message'
@@ -118,6 +126,8 @@ export type { ChatSource } from './IChatSources.vue'
 export type { PromptAttachment } from './IPromptInput.vue'
 export type { SegmentedOption } from './ISegmented.vue'
 export type { TimelineItem } from './ITimeline.vue'
+export type { SliderMark } from './ISlider.vue'
+export type { ListItem } from './IList.vue'
 export * from './date'
 export type { UploadFile, UploadStatus } from './upload'
 export type { CollapseItem } from './ICollapse.vue'
@@ -175,7 +185,11 @@ const components = {
   ISegmented,
   IProgress,
   IStatistic,
-  ITimeline
+  ITimeline,
+  IInputNumber,
+  ISlider,
+  IRate,
+  IList
 }
 
 /** 全量注册，便于文档站与 demo 直接使用；业务侧推荐按需引入 */

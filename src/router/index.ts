@@ -55,7 +55,8 @@ const routes: RouteRecordRaw[] = [
       { path: 'alert', component: () => import('@/pages/components/AlertPage.vue') },
       { path: 'chat', component: () => import('@/pages/components/ChatPage.vue') },
       { path: 'layout', component: () => import('@/pages/components/LayoutPage.vue') },
-      { path: 'data-display', component: () => import('@/pages/components/DataDisplayPage.vue') }
+      { path: 'data-display', component: () => import('@/pages/components/DataDisplayPage.vue') },
+      { path: 'data-entry', component: () => import('@/pages/components/DataEntryPage.vue') }
     ]
   },
   {

@@ -1,0 +1,21 @@
+<view class="i-list {{plain ? 'i-list--plain' : ''}}">
+  <view wx:if="{{header}}" class="i-list__header">{{header}}</view>
+
+  <view
+    wx:for="{{items}}"
+    wx:key="title"
+    class="i-list__item {{clickable && !item.disabled ? 'is-clickable' : ''}}"
+    bindtap="onSelect"
+    data-index="{{index}}"
+  >
+    <view class="i-list__body">
+      <view class="i-list__title">{{item.title}}</view>
+      <view wx:if="{{item.description}}" class="i-list__desc">{{item.description}}</view>
+      <view wx:if="{{item.meta.length}}" class="i-list__meta">
+        <text wx:for="{{item.meta}}" wx:for-item="meta" wx:key="*this">{{meta}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{footer}}" class="i-list__footer">{{footer}}</view>
+</view>

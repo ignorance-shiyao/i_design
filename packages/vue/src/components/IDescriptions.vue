@@ -28,9 +28,9 @@ withDefaults(
 
 <template>
   <section class="i-desc" :class="[`is-${layout}`, `i-desc--${size}`, { 'is-bordered': bordered }]">
-    <header v-if="title || $slots.extra" class="i-desc__head">
+    <header v-if="title || $scopedSlots.extra" class="i-desc__head">
       <h3 class="i-desc__title">{{ title }}</h3>
-      <div v-if="$slots.extra" class="i-desc__extra"><slot name="extra" /></div>
+      <div v-if="$scopedSlots.extra" class="i-desc__extra"><slot name="extra" /></div>
     </header>
 
     <dl class="i-desc__body" :style="{ '--i-desc-column': column }">

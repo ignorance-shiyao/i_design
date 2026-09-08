@@ -4,6 +4,7 @@
 // 「Dart 移植与公共层是否一致」，而不是「Dart 移植与自己是否一致」。
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_design/src/logic/pagination.dart';
+import 'package:i_design/src/logic/number.dart';
 import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
 
@@ -76,6 +77,24 @@ void main() {
         <String>['b', 'd', 'a', 'c']);
     expect(sortRows(rows, 'name', ISortOrder.asc).map((r) => r['name']).toList(),
         <String>['a', 'b', 'c', 'd']);
+  });
+
+  test('数值夹取 / 取整 / 步进 / 比例换算与 Web 端一致', () {
+    expect(clampNumber(5, 0, 10), 5);
+    expect(clampNumber(-3, 0, 10), 0);
+    expect(clampNumber(99, 0, 10), 10);
+    expect(roundTo(0.30000000000000004, 2), 0.3);
+    expect(roundTo(1.005, 2), 1);
+    expect(roundTo(2.5, 0), 3);
+    expect(stepValue(0.1, 0.2, 0, 1, 2), 0.3);
+    expect(stepValue(9.5, 1, 0, 10, 1), 10);
+    expect(stepValue(0, -1, 0, 10, 0), 0);
+    expect(ratioOf(25, 0, 100), 0.25);
+    expect(ratioOf(0, 0, 100), 0);
+    expect(ratioOf(7, 5, 5), 0);
+    expect(valueFromRatio(0.37, 0, 100, 5, 0), 35);
+    expect(valueFromRatio(0.5, 0, 1, 0.1, 1), 0.5);
+    expect(valueFromRatio(1.2, 0, 10, 1, 0), 10);
   });
 
   test('moveActive / moveActiveLoop 与 Web 端一致', () {

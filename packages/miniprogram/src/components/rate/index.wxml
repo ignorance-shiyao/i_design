@@ -1,0 +1,16 @@
+<view class="i-rate {{disabled ? 'is-disabled' : ''}}">
+  <view
+    wx:for="{{stars}}"
+    wx:key="index"
+    id="star-{{item.index}}"
+    class="i-rate__item {{item.on ? 'is-on' : ''}} {{readonly || disabled ? 'is-readonly' : ''}}"
+    bindtap="onTap"
+    data-index="{{item.index}}"
+  >
+    <view class="i-icon i-icon--sparkle" style="width:{{size}}px;height:{{size}}px" />
+    <view wx:if="{{item.halfOn}}" class="i-rate__half">
+      <view class="i-icon i-icon--sparkle" style="width:{{size}}px;height:{{size}}px" />
+    </view>
+  </view>
+  <text wx:if="{{text}}" class="i-rate__text">{{text}}</text>
+</view>

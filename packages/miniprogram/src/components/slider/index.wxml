@@ -1,0 +1,14 @@
+<view
+  class="i-slider {{disabled ? 'is-disabled' : ''}}"
+  bindtouchstart="onTouchStart"
+  bindtouchmove="onTouchMove"
+>
+  <view class="i-slider__track">
+    <view class="i-slider__fill" style="left:0;width:{{percent}}%" />
+    <block wx:for="{{markViews}}" wx:key="value">
+      <view class="i-slider__mark {{item.passed ? 'is-passed' : ''}}" style="left:{{item.left}}%" />
+      <view wx:if="{{item.label}}" class="i-slider__label" style="left:{{item.left}}%">{{item.label}}</view>
+    </block>
+    <view class="i-slider__handle" style="left:{{percent}}%" />
+  </view>
+</view>

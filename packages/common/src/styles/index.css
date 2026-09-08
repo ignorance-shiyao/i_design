@@ -32,7 +32,9 @@
 @import './components/form.css';
 @import './components/grid.css';
 @import './components/icon.css';
+@import './components/input-number.css';
 @import './components/input.css';
+@import './components/list.css';
 @import './components/loading.css';
 @import './components/message-list.css';
 @import './components/modal.css';
@@ -42,10 +44,12 @@
 @import './components/prompt-input.css';
 @import './components/radio-group.css';
 @import './components/radio.css';
+@import './components/rate.css';
 @import './components/result.css';
 @import './components/segmented.css';
 @import './components/select.css';
 @import './components/skeleton.css';
+@import './components/slider.css';
 @import './components/space.css';
 @import './components/statistic.css';
 @import './components/steps.css';

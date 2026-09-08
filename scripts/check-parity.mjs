@@ -116,6 +116,24 @@ for (const file of readdirSync(vue2Dir).filter((f) => f.endsWith('.vue'))) {
   if (/\s+as\s+[A-Z]/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 断言`)
   if (/<Teleport/i.test(tpl)) vue2Issues.push(`${file}: 使用了 Teleport`)
 }
+/*
+ * Vue 2 的 $slots 里没有作用域插槽（那些在 $scopedSlots），因此
+ * `v-if="$slots.media"` 对一个带绑定的插槽恒为假，内容一行都不渲染且不报错。
+ * 普通插槽用 $slots 判断是正确的，所以只检查确实带绑定的那些。
+ */
+for (const file of readdirSync('packages/vue/src/components')) {
+  if (!file.endsWith('.vue')) continue
+  const src = readFileSync(join('packages/vue/src/components', file), 'utf8')
+  const scoped = new Set(
+    [...src.matchAll(/<slot\s+name="([\w-]+)"[^>]*\s:[\w-]+=/g)].map((m) => m[1])
+  )
+  for (const name of scoped) {
+    if (new RegExp(`\\$slots\\.${name}\\b`).test(src)) {
+      vue2Issues.push(`${file}: 作用域插槽 ${name} 用 $slots 判断，Vue 2 取不到`)
+    }
+  }
+}
+
 check('Vue 2 产物无 Vue 3 专有语法', vue2Issues.length === 0, vue2Issues.slice(0, 3).join('; '))
 
 /* ---------- 6. Avatar 配色规则 TS 与 Dart 一致 ---------- */

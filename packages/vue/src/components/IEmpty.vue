@@ -43,6 +43,6 @@ const presets: Record<string, { title: string; description: string }> = {
     </slot>
     <p class="i-empty__title">{{ title || presets[type].title }}</p>
     <p class="i-empty__desc">{{ description || presets[type].description }}</p>
-    <div v-if="$slots.default" class="i-empty__action"><slot /></div>
+    <div v-if="$scopedSlots.default" class="i-empty__action"><slot /></div>
   </div>
 </template>

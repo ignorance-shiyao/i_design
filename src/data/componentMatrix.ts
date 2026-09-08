@@ -269,6 +269,26 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IInputNumber",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IList",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ILoading",
     "ends": {
       "vue-next": true,
@@ -349,6 +369,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IRate",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IResult",
     "ends": {
       "vue-next": true,
@@ -390,6 +420,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "ISkeleton",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ISlider",
     "ends": {
       "vue-next": true,
       "vue": true,

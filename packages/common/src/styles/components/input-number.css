@@ -1,0 +1,68 @@
+/*
+ * IInputNumber —— 数字输入。
+ *
+ * 与 IInput 的差别不只是限定字符：它要处理步进、精度与边界，
+ * 而这些规则一旦分散到各个业务里，同一个「库存」字段在两个页面会有两种取整方式。
+ */
+.i-input-number {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--i-color-border-strong);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg);
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    box-shadow var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-input-number.is-focused {
+  border-color: var(--i-color-brand);
+  box-shadow: 0 0 0 3px var(--i-color-ring);
+}
+.i-input-number.is-invalid { border-color: var(--i-color-danger); }
+.i-input-number.is-disabled { background: var(--i-color-bg-muted); }
+
+.i-input-number--sm { height: 28px; }
+.i-input-number--md { height: 34px; }
+.i-input-number--lg { height: 42px; }
+
+.i-input-number__field {
+  width: 100%;
+  min-width: 0;
+  padding: 0 var(--i-spacing-3);
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  color: var(--i-color-text);
+  /* 等宽数位：按住步进按钮时数字不会左右跳 */
+  font-variant-numeric: tabular-nums;
+}
+.i-input-number__field:focus { outline: none; }
+.i-input-number__field:disabled { color: var(--i-color-text-tertiary); }
+/* 隐藏浏览器自带的步进箭头：它们太小，且样式无法与体系统一 */
+.i-input-number__field::-webkit-outer-spin-button,
+.i-input-number__field::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.i-input-number__field[type='number'] { appearance: textfield; }
+
+.i-input-number__step {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  align-self: stretch;
+  border: none;
+  background: none;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-input-number__step:hover:not(:disabled) {
+  color: var(--i-color-brand);
+  background: var(--i-color-bg-subtle);
+}
+.i-input-number__step:disabled { color: var(--i-color-border-strong); cursor: not-allowed; }
+.i-input-number__step--minus { border-right: 1px solid var(--i-color-hairline); }
+.i-input-number__step--plus { border-left: 1px solid var(--i-color-hairline); }

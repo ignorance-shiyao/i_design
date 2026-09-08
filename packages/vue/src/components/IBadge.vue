@@ -30,7 +30,7 @@ const text = computed(() => (props.count > props.max ? `${props.max}+` : String(
     <span
       v-if="visible"
       class="i-badge__mark"
-      :class="[`i-badge--${type}`, { 'is-dot': dot, 'is-fixed': !!$slots.default }]"
+      :class="[`i-badge--${type}`, { 'is-dot': dot, 'is-fixed': !!$scopedSlots.default }]"
       :aria-label="dot ? '有新内容' : `${count} 条`"
     >
       <template v-if="!dot">{{ text }}</template>
