@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import { snippets } from '@/data/snippets'
 </script>
 
 <template>
   <article>
     <h1>Button 按钮</h1>
     <p class="i-lead">触发一个即时操作。一屏之内主按钮应当只有一个，指向该页面最主要的动作。</p>
+
+    <DemoBlock
+      title="七端用法"
+      description="同一个按钮在 Vue 3 / Vue 2 / React / 小程序 / 移动端 / Flutter 上怎么写——属性名由校验脚本核对，不会与实现分叉。"
+      :snippets="snippets.button"
+    >
+      <IButton variant="primary">提交</IButton>
+      <IButton :loading="true">保存</IButton>
+    </DemoBlock>
 
     <DemoBlock
       title="视觉层级"

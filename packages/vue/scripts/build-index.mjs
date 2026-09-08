@@ -2,8 +2,14 @@
 import { readdirSync, writeFileSync } from 'node:fs'
 
 const dir = 'packages/vue/src/components'
+
+// IMessageList 是 message() 的承载组件，与 vue-next / React 一样属于内部实现：
+// 三端对外的消息 API 都是 message()，只有这里曾把宿主组件也导出去，
+// 于是同一个设计体系在 Vue 2 上多出一个别处没有的组件。
+const internal = ['IMessageList.vue']
+
 const files = readdirSync(dir)
-  .filter((f) => f.endsWith('.vue') && !f.startsWith('_'))
+  .filter((f) => f.endsWith('.vue') && !f.startsWith('_') && !internal.includes(f))
   .sort()
 
 const lines = files.map((f) => {

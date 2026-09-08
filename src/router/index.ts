@@ -10,7 +10,8 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', redirect: '/design/values' },
       { path: 'values', component: () => import('@/pages/DesignValuesPage.vue') },
-      { path: 'tokens', component: () => import('@/pages/DesignTokensPage.vue') }
+      { path: 'tokens', component: () => import('@/pages/DesignTokensPage.vue') },
+      { path: 'cross-platform', component: () => import('@/pages/CrossPlatformPage.vue') }
     ]
   },
   {

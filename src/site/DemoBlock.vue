@@ -1,9 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import CodeBlock from './CodeBlock.vue'
+import FrameworkTabs from './FrameworkTabs.vue'
 import IIcon from '@/components/IIcon.vue'
+import type { SnippetSet } from '@/data/snippets'
 
-defineProps<{ title?: string; description?: string; code?: string; lang?: string }>()
+defineProps<{
+  title?: string
+  description?: string
+  code?: string
+  lang?: string
+  /** 传入后代码区变成七端标签页；片段的属性名由 scripts/check-snippets.mjs 核对 */
+  snippets?: SnippetSet
+}>()
 const showCode = ref(false)
 </script>
 
@@ -14,14 +23,15 @@ const showCode = ref(false)
       <p v-if="description" class="demo__desc">{{ description }}</p>
     </header>
     <div class="demo__stage"><slot /></div>
-    <footer v-if="code" class="demo__foot">
+    <footer v-if="code || snippets" class="demo__foot">
       <button class="demo__toggle" :aria-expanded="showCode" @click="showCode = !showCode">
         <IIcon :name="showCode ? 'chevron-up' : 'code'" :size="14" />
         {{ showCode ? '隐藏代码' : '查看代码' }}
       </button>
     </footer>
-    <div v-if="code && showCode" class="demo__code">
-      <CodeBlock :code="code" :lang="lang" />
+    <div v-if="showCode" class="demo__code">
+      <FrameworkTabs v-if="snippets" :snippets="snippets" />
+      <CodeBlock v-else-if="code" :code="code" :lang="lang" />
     </div>
   </section>
 </template>

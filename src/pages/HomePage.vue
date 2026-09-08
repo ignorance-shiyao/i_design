@@ -17,6 +17,7 @@ import IIcon from '@/components/IIcon.vue'
 import ISteps from '@/components/ISteps.vue'
 import ILoading from '@/components/ILoading.vue'
 import { message } from '@/components/message'
+import { frameworks, componentCountOf } from '@/data/frameworks'
 
 const values = [
   {
@@ -216,6 +217,34 @@ const demoSwitch = ref(true)
         <span class="dot" /> 已实现
         <span class="dot dot--planned" /> 规划中
       </p>
+    </section>
+
+    <!-- 跨端 -->
+    <section class="section section--muted">
+      <div class="i-container">
+        <span class="i-eyebrow">Cross-platform</span>
+        <h2 class="section__title">一套体系，七个技术栈</h2>
+        <p class="section__desc i-lead">
+          令牌、图标与交互规则抽在公共层，各端只写渲染适配。下面的组件数由脚本按各端
+          真实导出统计，不是手填的——手填的数字第二天就会和代码对不上。
+        </p>
+        <div class="stacks">
+          <RouterLink
+            v-for="(f, index) in frameworks"
+            :key="f.id"
+            v-reveal="index * 60"
+            class="stack"
+            to="/design/cross-platform"
+          >
+            <span class="stack__count">{{ componentCountOf(f.id) }}</span>
+            <span class="stack__label">{{ f.label }}</span>
+            <span class="stack__runtime">{{ f.runtime }}</span>
+          </RouterLink>
+        </div>
+        <p class="stacks__foot">
+          <RouterLink to="/design/cross-platform">看同一个组件在七端怎么写 →</RouterLink>
+        </p>
+      </div>
     </section>
 
     <!-- 快速上手 -->
@@ -439,6 +468,38 @@ app.use(IDesign)"
 .preview__steps { margin-bottom: var(--i-spacing-5); }
 
 /* 通用区块 */
+.stacks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--i-spacing-3);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-1);
+  padding: var(--i-spacing-5) var(--i-spacing-4);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  text-decoration: none;
+  transition: transform var(--i-motion-base) var(--i-motion-easing),
+    box-shadow var(--i-motion-base) var(--i-motion-easing),
+    border-color var(--i-motion-fast) var(--i-motion-easing);
+}
+.stack:hover {
+  transform: translateY(-3px);
+  border-color: var(--i-color-brand);
+  box-shadow: var(--i-shadow-md);
+}
+.stack__count {
+  font-size: var(--i-font-size-2xl);
+  font-weight: 600;
+  color: var(--i-color-brand);
+  line-height: 1.1;
+}
+.stack__label { font-size: var(--i-font-size-md); color: var(--i-color-text); }
+.stack__runtime { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
+.stacks__foot { margin-top: var(--i-spacing-6); font-size: var(--i-font-size-md); }
 .section { padding: var(--i-spacing-16) var(--i-spacing-6); }
 .section--muted { background: var(--i-color-bg-subtle); }
 .section__title { font-size: var(--i-font-size-3xl); margin-bottom: var(--i-spacing-3); }

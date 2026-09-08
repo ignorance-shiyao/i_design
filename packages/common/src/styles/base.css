@@ -53,6 +53,19 @@ code {
   border-radius: var(--i-radius-sm);
 }
 
+/*
+ * 代码块里的 <code> 由外层 <pre> 负责排版，必须把行内样式全部退掉。
+ * 否则那圈边框会按行盒逐行绘制——多行代码的每一行下面都多出一道横线，
+ * 看起来像是加了下划线。站点上所有代码块都中过这一枪。
+ */
+pre code {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
 /* 语法高亮 token */
 .tok--comment { color: var(--i-tok-comment); font-style: italic; }
 .tok--keyword { color: var(--i-tok-keyword); }

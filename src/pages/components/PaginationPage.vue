@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import IPagination from '@/components/IPagination.vue'
 import ITable, { type TableColumn, type TableRow } from '@/components/ITable.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import { snippets } from '@/data/snippets'
 
 const basic = ref(1)
 const many = ref(12)
@@ -35,6 +36,14 @@ const pagedRows = computed(() =>
       把长列表切成可控的片段。页码区间始终保留首尾页，中间窗口跟随当前页滑动，
       让用户无论翻到哪里都能一步回到开头或结尾。
     </p>
+
+    <DemoBlock
+      title="七端用法"
+      description="页码序列由公共层的 buildPages 计算，七端逐项相同——Flutter 端另有黄金测试逐个用例比对。"
+      :snippets="snippets.pagination"
+    >
+      <IPagination v-model="basic" :total="240" :page-size="10" />
+    </DemoBlock>
 
     <DemoBlock
       title="基础用法"

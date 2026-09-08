@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import ISelect, { type SelectOption } from '@/components/ISelect.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import { snippets } from '@/data/snippets'
 
 const options: SelectOption[] = [
   { label: '需求', value: 'requirement' },
@@ -21,6 +22,14 @@ const empty = ref<string | number | null>(null)
     <p class="i-lead">
       从一组预设项中选择一个值。选项少于三个时优先考虑单选框，用户可以少一次点击。
     </p>
+
+    <DemoBlock
+      title="七端用法"
+      description="选项禁用、键盘移动这些规则来自公共层，七端是同一份实现，因此不会某一端「少跳过一个禁用项」。"
+      :snippets="snippets.select"
+    >
+      <div class="w"><ISelect v-model="basic" :options="options" clearable /></div>
+    </DemoBlock>
 
     <DemoBlock
       title="基础用法"

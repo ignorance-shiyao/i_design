@@ -14,7 +14,8 @@ export const docNav: NavGroup[] = [
     title: '设计',
     items: [
       { to: '/design/values', label: '设计价值观' },
-      { to: '/design/tokens', label: '设计令牌' }
+      { to: '/design/tokens', label: '设计令牌' },
+      { to: '/design/cross-platform', label: '跨端支持' }
     ]
   },
   {
