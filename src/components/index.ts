@@ -1,5 +1,6 @@
 import type { App } from 'vue'
 import IIcon from './IIcon.vue'
+import IFlow from './IFlow.vue'
 import IChart from './IChart.vue'
 import IChartPie from './IChartPie.vue'
 import ISparkline from './ISparkline.vue'
@@ -116,7 +117,8 @@ export {
   IList,
   IChart,
   IChartPie,
-  ISparkline
+  ISparkline,
+  IFlow
 }
 
 export { message } from './message'
@@ -199,7 +201,8 @@ const components = {
   IList,
   IChart,
   IChartPie,
-  ISparkline
+  ISparkline,
+  IFlow
 }
 
 /** 全量注册，便于文档站与 demo 直接使用；业务侧推荐按需引入 */

@@ -249,6 +249,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IFlow",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": false,
+      "flutter": false
+    }
+  },
+  {
     "name": "IForm",
     "ends": {
       "vue-next": true,

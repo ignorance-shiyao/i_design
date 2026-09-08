@@ -1,0 +1,89 @@
+/*
+ * IFlow —— 流程图画布。
+ *
+ * 节点形状承担语义：开始/结束是胶囊，判断是菱形，其余是矩形。
+ * 形状比颜色更可靠——打印成黑白、或读者有色觉障碍时，颜色会失效，形状不会。
+ */
+.i-flow {
+  position: relative;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg);
+  overflow: hidden;
+  /* 点阵底纹提示这是一块可拖动的画布，而不是一张静态图片 */
+  background-image: radial-gradient(var(--i-color-hairline) 1px, transparent 1px);
+  background-size: 16px 16px;
+  touch-action: none;
+}
+.i-flow__canvas { display: block; width: 100%; cursor: grab; }
+.i-flow.is-panning .i-flow__canvas { cursor: grabbing; }
+
+.i-flow__node { cursor: pointer; }
+.i-flow__shape {
+  fill: var(--i-color-bg-elevated);
+  stroke: var(--i-color-border-strong);
+  stroke-width: 1.5;
+  transition: stroke var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-flow__node:hover .i-flow__shape { stroke: var(--i-color-brand); }
+.i-flow__node.is-selected .i-flow__shape {
+  stroke: var(--i-color-brand);
+  stroke-width: 2;
+  filter: drop-shadow(0 2px 6px rgba(94, 124, 224, 0.25));
+}
+.i-flow__node--start .i-flow__shape { fill: var(--i-color-brand-subtle); stroke: var(--i-color-brand); }
+.i-flow__node--end .i-flow__shape { fill: var(--i-color-success-subtle); stroke: var(--i-color-success); }
+.i-flow__node--decision .i-flow__shape { fill: var(--i-color-warning-subtle); stroke: var(--i-color-warning); }
+
+.i-flow__label {
+  fill: var(--i-color-text);
+  font-size: 13px;
+  pointer-events: none;
+  user-select: none;
+}
+.i-flow__edge {
+  fill: none;
+  stroke: var(--i-color-border-strong);
+  stroke-width: 1.5;
+}
+.i-flow__edge.is-active { stroke: var(--i-color-brand); stroke-width: 2; }
+.i-flow__edge-label {
+  fill: var(--i-color-text-tertiary);
+  font-size: 11px;
+  pointer-events: none;
+}
+.i-flow__edge-label-bg { fill: var(--i-color-bg); }
+
+.i-flow__toolbar {
+  position: absolute;
+  right: var(--i-spacing-3);
+  bottom: var(--i-spacing-3);
+  display: flex;
+  gap: var(--i-spacing-1);
+  padding: var(--i-spacing-1);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-sm);
+}
+.i-flow__tool {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  color: var(--i-color-text-secondary);
+  cursor: pointer;
+}
+.i-flow__tool:hover { background: var(--i-color-bg-subtle); color: var(--i-color-brand); }
+.i-flow__zoom {
+  min-width: 48px;
+  padding: 0 var(--i-spacing-2);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  display: grid;
+  place-items: center;
+  font-variant-numeric: tabular-nums;
+}

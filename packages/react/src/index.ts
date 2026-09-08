@@ -30,6 +30,7 @@ export { Descriptions, type DescriptionItem, type DescriptionsProps } from './co
 export { Divider, type DividerProps } from './components/Divider'
 export { Drawer, type DrawerProps } from './components/Drawer'
 export { Empty, type EmptyProps } from './components/Empty'
+export { Flow, type FlowProps } from './components/Flow'
 export { Form, FormContext, useForm, type FormItemHandle, type FormContextValue, type FormProps } from './components/Form'
 export { FormItem, type FormItemRenderProps, type FormItemProps } from './components/FormItem'
 export { Row, Col, type RowProps, type ColProps } from './components/Grid'
