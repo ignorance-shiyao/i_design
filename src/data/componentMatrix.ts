@@ -84,8 +84,8 @@ export const componentMatrix: ComponentRow[] = [
       "vue-next": true,
       "vue": true,
       "react": true,
-      "miniprogram": false,
-      "flutter": false
+      "miniprogram": true,
+      "flutter": true
     }
   },
   {
@@ -94,8 +94,8 @@ export const componentMatrix: ComponentRow[] = [
       "vue-next": true,
       "vue": true,
       "react": true,
-      "miniprogram": false,
-      "flutter": false
+      "miniprogram": true,
+      "flutter": true
     }
   },
   {
@@ -254,8 +254,8 @@ export const componentMatrix: ComponentRow[] = [
       "vue-next": true,
       "vue": true,
       "react": true,
-      "miniprogram": false,
-      "flutter": false
+      "miniprogram": true,
+      "flutter": true
     }
   },
   {
@@ -484,8 +484,8 @@ export const componentMatrix: ComponentRow[] = [
       "vue-next": true,
       "vue": true,
       "react": true,
-      "miniprogram": false,
-      "flutter": false
+      "miniprogram": true,
+      "flutter": true
     }
   },
   {

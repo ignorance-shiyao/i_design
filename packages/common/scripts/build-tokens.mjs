@@ -206,6 +206,14 @@ for (const [name, content] of Object.entries(files)) {
   writeFileSync(join(outDir, name), content)
 }
 
+/*
+ * 直接写进 Flutter 包，而不是让它自己留一份拷贝。
+ *
+ * 之前那份是手工复制来的：新增令牌时编译器写的是 dist，Flutter 包里那份纹丝不动，
+ * 而校验脚本读的也是 dist——于是「令牌已同步」通过了校验，Flutter 端却什么都没拿到。
+ */
+writeFileSync(join(root, '../flutter/lib/src/tokens/tokens.dart'), dart)
+
 // 同步到 styles 目录，Web 与移动端直接 import
 writeFileSync(join(root, 'src/styles/tokens.css'), css)
 writeFileSync(join(root, 'src/styles/tokens.mobile.css'), cssMobile)

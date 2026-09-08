@@ -48,6 +48,24 @@ class IDesignTokensLight {
   static const tokAttr = Color(0xFFB45309);
   static const tokDirective = Color(0xFF7048E8);
   static const tokPunct = Color(0xFF7C8496);
+  static const chart1 = Color(0xFF5E7CE0);
+  static const chart2 = Color(0xFFB7622A);
+  static const chart3 = Color(0xFF0F8A68);
+  static const chart4 = Color(0xFF7A4EE0);
+  static const chart5 = Color(0xFFD64F8D);
+  static const chart6 = Color(0xFF1F86B8);
+  static const chart7 = Color(0xFFB08A1E);
+  static const chart8 = Color(0xFFC2413D);
+  static const chartSeq1 = Color(0xFFEEF3FF);
+  static const chartSeq2 = Color(0xFFADC4FF);
+  static const chartSeq3 = Color(0xFF7EA1FF);
+  static const chartSeq4 = Color(0xFF5E7CE0);
+  static const chartSeq5 = Color(0xFF3A4DA3);
+  static const chartDiv1 = Color(0xFFC2413D);
+  static const chartDiv2 = Color(0xFFE8A09E);
+  static const chartDiv3 = Color(0xFFDFE1E6);
+  static const chartDiv4 = Color(0xFF8FB0E8);
+  static const chartDiv5 = Color(0xFF3A4DA3);
 
   static const double fontSizeXs = 12.0;
   static const double fontSizeSm = 13.0;
@@ -77,6 +95,9 @@ class IDesignTokensLight {
   static const double radiusLg = 8.0;
   static const double radiusXl = 16.0;
   static const double radiusFull = 999.0;
+  static const double controlHeightSm = 28.0;
+  static const double controlHeightMd = 34.0;
+  static const double controlHeightLg = 42.0;
 
   static const motionFast = Duration(milliseconds: 120);
   static const motionBase = Duration(milliseconds: 200);
@@ -130,6 +151,24 @@ class IDesignTokensDark {
   static const tokAttr = Color(0xFFFFB86B);
   static const tokDirective = Color(0xFFB197FC);
   static const tokPunct = Color(0xFF8A93A8);
+  static const chart1 = Color(0xFF5E7CE0);
+  static const chart2 = Color(0xFFB7622A);
+  static const chart3 = Color(0xFF0F8A68);
+  static const chart4 = Color(0xFF7A4EE0);
+  static const chart5 = Color(0xFFD64F8D);
+  static const chart6 = Color(0xFF1F86B8);
+  static const chart7 = Color(0xFFB08A1E);
+  static const chart8 = Color(0xFFC2413D);
+  static const chartSeq1 = Color(0xFFEEF3FF);
+  static const chartSeq2 = Color(0xFFADC4FF);
+  static const chartSeq3 = Color(0xFF7EA1FF);
+  static const chartSeq4 = Color(0xFF5E7CE0);
+  static const chartSeq5 = Color(0xFF3A4DA3);
+  static const chartDiv1 = Color(0xFFC2413D);
+  static const chartDiv2 = Color(0xFFE8A09E);
+  static const chartDiv3 = Color(0xFFDFE1E6);
+  static const chartDiv4 = Color(0xFF8FB0E8);
+  static const chartDiv5 = Color(0xFF3A4DA3);
 
   static const double fontSizeXs = 12.0;
   static const double fontSizeSm = 13.0;
@@ -159,6 +198,9 @@ class IDesignTokensDark {
   static const double radiusLg = 8.0;
   static const double radiusXl = 16.0;
   static const double radiusFull = 999.0;
+  static const double controlHeightSm = 28.0;
+  static const double controlHeightMd = 34.0;
+  static const double controlHeightLg = 42.0;
 
   static const motionFast = Duration(milliseconds: 120);
   static const motionBase = Duration(milliseconds: 200);

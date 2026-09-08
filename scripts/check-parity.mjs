@@ -23,7 +23,9 @@ function check(name, condition, detail = '') {
 const json = JSON.parse(readFileSync(`${base}/tokens.json`, 'utf8'))
 const css = readFileSync(`${base}/tokens.css`, 'utf8')
 const wxss = readFileSync(`${base}/tokens.wxss`, 'utf8')
-const dart = readFileSync(`${base}/tokens.dart`, 'utf8')
+// 读 Flutter 包里的那份，而不是 dist：Flutter 端编译进去的是前者，
+// 校验 dist 只能证明编译器算对了，证明不了那一端拿到了
+const dart = readFileSync('packages/flutter/lib/src/tokens/tokens.dart', 'utf8')
 
 const parseVars = (text, block) => {
   const section = text.split(block)[1]?.split('}')[0] ?? ''

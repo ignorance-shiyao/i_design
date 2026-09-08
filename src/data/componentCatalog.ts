@@ -120,6 +120,19 @@ export const componentCatalog: CatalogGroup[] = [
     ]
   },
   {
+    title: '数据可视化',
+    intent: '让数字自己说话：趋势、构成、占比与流程走向。',
+    items: [
+      { label: '折线 / 面积 / 柱状图', api: 'IChart', status: 'ready', note: '趋势与构成，带十字线、图例与数据表' },
+      { label: '占比图', api: 'IChartPie', status: 'ready', note: '环形，数值随图例给出' },
+      { label: '迷你走势', api: 'ISparkline', status: 'ready', note: '嵌在指标卡或表格行里的形状' },
+      { label: '流程图', api: 'IFlow', status: 'ready', note: '可拖拽的节点与连线，自动分层' },
+      { label: '散点图', status: 'planned', note: '两个连续量之间的关系' },
+      { label: '热力图', status: 'planned', note: '二维密度，如按小时分布' },
+      { label: '漏斗图', status: 'planned', note: '转化各环节的流失' }
+    ]
+  },
+  {
     title: '反馈',
     intent: '操作之后告诉用户发生了什么，以及接下来该做什么。',
     items: [
@@ -157,6 +170,12 @@ export const componentCatalog: CatalogGroup[] = [
       { label: '列表单元格', api: 'ICell', status: 'ready', note: '移动端最常见的一行' },
       { label: '动作面板', api: 'IActionSheet', status: 'ready', note: '从底部升起的一组操作' },
       { label: '轻提示', api: 'IToast', status: 'ready', note: '不打断操作的短反馈' },
+      { label: '顶部导航栏', api: 'INavBar', status: 'ready', note: '标题居中，返回在左，操作在右' },
+      { label: '底部标签栏', api: 'ITabbar', status: 'ready', note: '切换整个页面，带角标与红点' },
+      { label: '通告栏', api: 'INoticeBar', status: 'ready', note: '与操作无关的广播，超长自动滚动' },
+      { label: '边缘浮层', api: 'IPopup', status: 'ready', note: '从四边或中心弹出的裸容器' },
+      { label: '宫格入口', api: 'IGrid', status: 'ready', note: '首页的功能入口区' },
+      { label: '左滑单元格', api: 'ISwipeCell', status: 'ready', note: '滑动露出操作，删除不应只有这一个入口' },
       { label: '吸顶', status: 'planned', note: '滚动到边界后固定' }
     ]
   }

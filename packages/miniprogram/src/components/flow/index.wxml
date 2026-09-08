@@ -1,0 +1,22 @@
+<view class="i-flow" style="height:{{height}}px">
+  <canvas
+    class="i-flow__canvas"
+    type="2d"
+    style="width:100%;height:{{height}}px"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+  />
+  <view class="i-flow__toolbar">
+    <view class="i-flow__tool" bindtap="zoom" data-delta="-0.2">
+      <view class="i-icon i-icon--minus" style="width:14px;height:14px" />
+    </view>
+    <text class="i-flow__zoom">{{scaleText}}</text>
+    <view class="i-flow__tool" bindtap="zoom" data-delta="0.2">
+      <view class="i-icon i-icon--plus" style="width:14px;height:14px" />
+    </view>
+    <view class="i-flow__tool" bindtap="fit">
+      <view class="i-icon i-icon--grid" style="width:14px;height:14px" />
+    </view>
+  </view>
+</view>
