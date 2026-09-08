@@ -43,6 +43,39 @@ export const palette: Record<string, Palette> = {
   info: { 10: '#eef3ff', 50: '#5e7ce0', 70: '#3a4da3' }
 }
 
+/**
+ * 图表分类色：8 个色相，固定顺序，按序分配，绝不循环使用。
+ *
+ * 顺序本身就是色觉安全机制，因此不能随意调换：这组取值与排序经过校验——
+ * 明暗两种底色下都落在合规亮度带内，相邻色在红绿色觉模拟下的色差达到阈值，
+ * 且每个色对纯白/深色底的对比度都不低于 3:1。
+ *
+ * 第 9 个系列不是「再生成一个颜色」：那会破坏上面这组保证。
+ * 超过 8 个系列时应当合并为「其他」，或改用分面小图。
+ */
+export const chartCategorical = [
+  '#5e7ce0', // 1 品牌蓝：第一系列永远是它，图表与产品同一个识别色
+  '#b7622a', // 2 橙
+  '#0f8a68', // 3 绿
+  '#7a4ee0', // 4 紫
+  '#d64f8d', // 5 粉
+  '#1f86b8', // 6 青
+  '#b08a1e', // 7 金
+  '#c2413d' // 8 红
+] as const
+
+/**
+ * 顺序色阶：表示「多少」，同一色相由浅到深。
+ * 与分类色不同，它编码的是量级，因此不能用多色相彩虹。
+ */
+export const chartSequential = ['#eef3ff', '#adc4ff', '#7ea1ff', '#5e7ce0', '#3a4da3'] as const
+
+/**
+ * 双向色阶：表示「偏向哪一侧」，两端两个色相，中点为中性灰。
+ * 中点必须是灰：任何有色中点都会让「零」看起来像一种倾向。
+ */
+export const chartDiverging = ['#c2413d', '#e8a09e', '#dfe1e6', '#8fb0e8', '#3a4da3'] as const
+
 /** 字号刻度：以 14px 正文为基准 */
 export const fontSize = {
   xs: '12px',
@@ -304,6 +337,9 @@ export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, strin
   Object.entries(fontFamily).forEach(([k, v]) => (out[`font-family${k === 'base' ? '' : `-${k}`}`] = v))
   Object.entries(gradients).forEach(([k, v]) => (out[`gradient-${k}`] = v))
   Object.entries(controlHeight).forEach(([k, v]) => (out[`control-height-${k}`] = v))
+  chartCategorical.forEach((v, i) => (out[`chart-${i + 1}`] = v))
+  chartSequential.forEach((v, i) => (out[`chart-seq-${i + 1}`] = v))
+  chartDiverging.forEach((v, i) => (out[`chart-div-${i + 1}`] = v))
   return out
 }
 

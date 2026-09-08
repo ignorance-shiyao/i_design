@@ -1,0 +1,176 @@
+/*
+ * 图表基础样式，各端共享。
+ *
+ * 几条贯穿全部图表的规则：
+ *   - 网格与坐标轴是背景，用最淡的分隔色，绝不与数据抢注意力；
+ *   - 文字永远用文字色，不用系列色——系列身份由旁边那个色块承担；
+ *   - 相邻填充之间留 2px 底色缝隙，堆叠段与相邻柱都靠它分开，
+ *     这在色觉障碍下是比颜色更可靠的分界。
+ */
+.i-chart {
+  position: relative;
+  width: 100%;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-chart__svg { display: block; width: 100%; overflow: visible; }
+.i-chart__title {
+  margin-bottom: var(--i-spacing-3);
+  font-size: var(--i-font-size-md);
+  font-weight: 500;
+  color: var(--i-color-text);
+}
+/* 环心：总量用大号数字，说明文字降一档 */
+.i-chart__center {
+  fill: var(--i-color-text);
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.i-chart__center-label { fill: var(--i-color-text-tertiary); font-size: 11px; }
+
+.i-chart__grid { stroke: var(--i-color-hairline); stroke-width: 1; }
+/* 零轴比其他网格线重一档：它是正负的分界，不是普通刻度 */
+.i-chart__axis { stroke: var(--i-color-border); stroke-width: 1; }
+.i-chart__tick {
+  fill: var(--i-color-text-tertiary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.i-chart__line { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.i-chart__area { opacity: 0.22; }
+.i-chart__dot { stroke: var(--i-color-bg); stroke-width: 2; }
+.i-chart__bar { stroke: var(--i-color-bg); stroke-width: 2; }
+.i-chart__slice { stroke: var(--i-color-bg); stroke-width: 2; }
+
+/* 直接标注：只标末点或极值，不是每个点都写数字 */
+.i-chart__label {
+  fill: var(--i-color-text-secondary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.i-chart__crosshair { stroke: var(--i-color-border-strong); stroke-width: 1; stroke-dasharray: 3 3; }
+
+.i-chart__tooltip {
+  position: absolute;
+  z-index: 2;
+  min-width: 120px;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  border: 1px solid var(--i-color-border);
+  box-shadow: var(--i-shadow-md);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-sm);
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+}
+.i-chart__tooltip-title {
+  margin-bottom: var(--i-spacing-1);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+.i-chart__tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  line-height: 1.8;
+}
+.i-chart__tooltip-value {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--i-color-text);
+}
+
+.i-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2) var(--i-spacing-4);
+  margin-top: var(--i-spacing-3);
+}
+.i-chart__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+  cursor: pointer;
+}
+.i-chart__legend-item.is-off { color: var(--i-color-text-tertiary); opacity: 0.55; }
+.i-chart__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+
+/* 数据表：读屏与色觉障碍用户的兜底通道，也方便复制数值 */
+.i-chart__table-toggle {
+  margin-top: var(--i-spacing-2);
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.i-chart__table-toggle:hover { color: var(--i-color-brand); }
+.i-chart__table { width: 100%; margin-top: var(--i-spacing-3); border-collapse: collapse; }
+.i-chart__table th,
+.i-chart__table td {
+  padding: var(--i-spacing-2);
+  border-bottom: 1px solid var(--i-color-hairline);
+  font-size: var(--i-font-size-sm);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--i-color-text);
+}
+.i-chart__table th:first-child,
+.i-chart__table td:first-child { text-align: left; color: var(--i-color-text-secondary); }
+
+/* 占比图：图例同时承担数值标注 */
+.i-chart__pie {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-6);
+  flex-wrap: wrap;
+}
+.i-chart__pie-legend {
+  flex: 1;
+  min-width: 180px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.i-chart__pie-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) 0;
+  border-bottom: 1px solid var(--i-color-hairline);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-chart__pie-legend li:last-child { border-bottom: none; }
+.i-chart__pie-legend li.is-active { color: var(--i-color-text); }
+.i-chart__pie-name { flex: 1; }
+.i-chart__pie-value { color: var(--i-color-text); font-variant-numeric: tabular-nums; }
+.i-chart__pie-value em {
+  margin-left: var(--i-spacing-2);
+  font-style: normal;
+  color: var(--i-color-text-tertiary);
+}
+
+/* 迷你图：嵌在表格或指标卡里，没有坐标轴 */
+.i-sparkline { display: inline-block; vertical-align: middle; line-height: 0; }
+.i-sparkline__line { fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.i-sparkline__area { opacity: 0.14; }
+.i-sparkline__last { stroke: var(--i-color-bg); stroke-width: 1.5; }

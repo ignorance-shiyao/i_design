@@ -56,7 +56,8 @@ const routes: RouteRecordRaw[] = [
       { path: 'chat', component: () => import('@/pages/components/ChatPage.vue') },
       { path: 'layout', component: () => import('@/pages/components/LayoutPage.vue') },
       { path: 'data-display', component: () => import('@/pages/components/DataDisplayPage.vue') },
-      { path: 'data-entry', component: () => import('@/pages/components/DataEntryPage.vue') }
+      { path: 'data-entry', component: () => import('@/pages/components/DataEntryPage.vue') },
+      { path: 'chart', component: () => import('@/pages/components/ChartPage.vue') }
     ]
   },
   {

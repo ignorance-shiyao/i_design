@@ -79,6 +79,26 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IChart",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": false,
+      "flutter": false
+    }
+  },
+  {
+    "name": "IChartPie",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": false,
+      "flutter": false
+    }
+  },
+  {
     "name": "IChatMessage",
     "ends": {
       "vue-next": true,
@@ -446,6 +466,16 @@ export const componentMatrix: ComponentRow[] = [
       "react": true,
       "miniprogram": true,
       "flutter": true
+    }
+  },
+  {
+    "name": "ISparkline",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": false,
+      "flutter": false
     }
   },
   {
