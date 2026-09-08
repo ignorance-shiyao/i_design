@@ -1,0 +1,12 @@
+<view class="i-chart i-chart--radar">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <view class="i-chart__radar" style="width:{{size}}px;height:{{size}}px">
+    <canvas class="i-chart__radar-canvas" type="2d" style="width:{{size}}px;height:{{size}}px" />
+  </view>
+  <view wx:if="{{legend.length > 1}}" class="i-chart__legend">
+    <view wx:for="{{legend}}" wx:key="name" class="i-chart__legend-item">
+      <view class="i-chart__swatch" style="background:{{item.color}}" />
+      <text>{{item.name}}</text>
+    </view>
+  </view>
+</view>

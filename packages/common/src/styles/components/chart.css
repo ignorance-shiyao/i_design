@@ -10,6 +10,7 @@
 .i-chart {
   position: relative;
   width: 100%;
+  margin: 0;
   font-size: var(--i-font-size-xs);
   color: var(--i-color-text-tertiary);
 }
@@ -136,6 +137,9 @@
 .i-chart__table th:first-child,
 .i-chart__table td:first-child { text-align: left; color: var(--i-color-text-secondary); }
 
+/* 仪表盘按内容收宽：它常常几个并排，撑满一行就只能一个一个往下排 */
+.i-chart--gauge { width: auto; }
+
 /* 占比图：图例同时承担数值标注 */
 .i-chart__pie {
   display: flex;
@@ -195,6 +199,133 @@
   color: var(--i-color-text-secondary);
 }
 .i-chart__pie-percent { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-xs); }
+
+/* 漏斗：图形在左，数值与转化率在右——写在梯形里，窄的那几层放不下 */
+.i-chart__funnel { display: flex; gap: var(--i-spacing-6); align-items: center; flex-wrap: wrap; }
+.i-chart__funnel svg { flex: 1; min-width: 240px; }
+.i-chart__funnel-legend { flex: 1; min-width: 220px; margin: 0; padding: 0; list-style: none; }
+.i-chart__funnel-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) 0;
+  border-bottom: 1px solid var(--i-color-hairline);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-chart__funnel-legend li:last-child { border-bottom: none; }
+.i-chart__funnel-legend li.is-active { color: var(--i-color-text); }
+.i-chart__funnel-name { flex: 1; }
+.i-chart__funnel-value { color: var(--i-color-text); font-variant-numeric: tabular-nums; }
+.i-chart__funnel-rate {
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  min-width: 110px;
+  text-align: right;
+}
+
+/* 仪表盘 */
+.i-chart__gauge { position: relative; }
+.i-chart__gauge svg { position: absolute; inset: 0; }
+.i-chart__gauge-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.i-chart__gauge-label strong { font-size: var(--i-font-size-2xl); font-variant-numeric: tabular-nums; }
+.i-chart__gauge-label span { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
+
+/* 雷达 */
+.i-chart__radar { display: flex; justify-content: center; }
+
+/* 热力图 */
+.i-chart__heat { overflow-x: auto; }
+.i-chart__heat-grid { border-collapse: separate; border-spacing: 2px; font-size: var(--i-font-size-xs); }
+.i-chart__heat-grid th {
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  color: var(--i-color-text-tertiary);
+  font-weight: 400;
+  white-space: nowrap;
+}
+.i-chart__heat-grid tbody th { text-align: right; }
+.i-chart__heat-grid td {
+  min-width: 44px;
+  padding: var(--i-spacing-2);
+  border-radius: var(--i-radius-sm);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  outline: 2px solid transparent;
+  transition: outline-color var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-chart__heat-grid td.is-active { outline-color: var(--i-color-text); }
+.i-chart__heat-scale {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--i-spacing-3);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-chart__heat-swatch { width: 22px; height: 10px; border-radius: 2px; }
+
+/*
+ * 小程序端：没有 SVG，图形走 canvas，表格走 view。
+ * 类名与 Web 端有意错开（-canvas / -row / -cell），因为盒模型职责不同——
+ * Web 端这些位置由 SVG 与 table 自己撑开，这里必须显式给尺寸。
+ */
+.i-chart__gauge-canvas,
+.i-chart__radar-canvas,
+.i-chart__funnel-canvas { display: block; }
+.i-chart__gauge-value {
+  display: block;
+  font-size: var(--i-font-size-2xl);
+  font-variant-numeric: tabular-nums;
+}
+.i-chart__gauge-range {
+  display: block;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-chart__funnel-row {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) 0;
+  border-bottom: 1px solid var(--i-color-hairline);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-chart__heat-head,
+.i-chart__heat-row { display: flex; align-items: center; gap: 2px; }
+.i-chart__heat-head { margin-bottom: 2px; }
+.i-chart__heat-label {
+  flex: none;
+  width: 64px;
+  padding-right: var(--i-spacing-2);
+  text-align: right;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-chart__heat-col {
+  flex: 1;
+  min-width: 44px;
+  text-align: center;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-chart__heat-cell {
+  flex: 1;
+  min-width: 44px;
+  padding: var(--i-spacing-2) 0;
+  border-radius: var(--i-radius-sm);
+  text-align: center;
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
 
 /* 迷你图：嵌在表格或指标卡里，没有坐标轴 */
 .i-sparkline { display: inline-block; vertical-align: middle; line-height: 0; }

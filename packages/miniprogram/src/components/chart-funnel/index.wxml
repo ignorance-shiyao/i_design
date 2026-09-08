@@ -1,0 +1,12 @@
+<view class="i-chart">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <canvas class="i-chart__funnel-canvas" type="2d" style="width:100%;height:{{height}}px" />
+  <view class="i-chart__funnel-legend">
+    <view wx:for="{{rows}}" wx:key="name" class="i-chart__funnel-row">
+      <view class="i-chart__swatch" style="background:{{item.color}}" />
+      <text class="i-chart__funnel-name">{{item.name}}</text>
+      <text class="i-chart__funnel-value">{{item.valueText}}{{unit}}</text>
+      <text class="i-chart__funnel-rate">{{item.stepText}}</text>
+    </view>
+  </view>
+</view>

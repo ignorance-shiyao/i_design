@@ -127,9 +127,11 @@ export const componentCatalog: CatalogGroup[] = [
       { label: '占比图', api: 'IChartPie', status: 'ready', note: '环形，数值随图例给出' },
       { label: '迷你走势', api: 'ISparkline', status: 'ready', note: '嵌在指标卡或表格行里的形状' },
       { label: '流程图', api: 'IFlow', status: 'ready', note: '可拖拽的节点与连线，自动分层' },
-      { label: '散点图', status: 'planned', note: '两个连续量之间的关系' },
-      { label: '热力图', status: 'planned', note: '二维密度，如按小时分布' },
-      { label: '漏斗图', status: 'planned', note: '转化各环节的流失' }
+      { label: '漏斗图', api: 'IChartFunnel', status: 'ready', note: '转化各环节的流失与环比' },
+      { label: '仪表盘', api: 'IChartGauge', status: 'ready', note: '单值相对阈值的位置' },
+      { label: '雷达图', api: 'IChartRadar', status: 'ready', note: '多维度能力的形状对比' },
+      { label: '热力图', api: 'IChartHeatmap', status: 'ready', note: '二维密度，如按小时分布' },
+      { label: '散点图', status: 'planned', note: '两个连续量之间的关系' }
     ]
   },
   {

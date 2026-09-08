@@ -8,6 +8,10 @@ import IStatistic from '@/components/IStatistic.vue'
 import IRow from '@/components/IRow.vue'
 import ICol from '@/components/ICol.vue'
 import ISegmented from '@/components/ISegmented.vue'
+import IChartFunnel from '@/components/IChartFunnel.vue'
+import IChartGauge from '@/components/IChartGauge.vue'
+import IChartRadar from '@/components/IChartRadar.vue'
+import IChartHeatmap from '@/components/IChartHeatmap.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 
 const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月']
@@ -35,6 +39,30 @@ const view = ref<'line' | 'bar'>('line')
 const views = [
   { label: '折线', value: 'line' },
   { label: '柱状', value: 'bar' }
+]
+
+const funnel = [
+  { name: '访问', value: 12800 },
+  { name: '注册', value: 6400 },
+  { name: '创建工作项', value: 3100 },
+  { name: '完成首个流程', value: 1420 },
+  { name: '次周留存', value: 860 }
+]
+
+const radarAxes = ['响应速度', '功能完整', '易用性', '稳定性', '可扩展']
+const radarSeries = [
+  { name: '本季度', data: [82, 74, 68, 90, 61] },
+  { name: '上季度', data: [65, 70, 55, 76, 58] }
+]
+
+const hours = ['0-4', '4-8', '8-12', '12-16', '16-20', '20-24']
+const weekdays = ['周一', '周二', '周三', '周四', '周五']
+const heat = [
+  [2, 6, 42, 38, 30, 9],
+  [1, 5, 45, 41, 33, 8],
+  [2, 7, 48, 44, 29, 11],
+  [3, 8, 51, 47, 35, 14],
+  [2, 6, 39, 36, 24, 18]
 ]
 
 const sparks = [
@@ -112,6 +140,50 @@ const sparks = [
       </div>
     </DemoBlock>
 
+    <h2>转化</h2>
+    <p>
+      漏斗回答的是「在哪一步流失最多」，所以每层旁边写的是相对上一层的转化率，
+      而不只是占起点的百分比。层宽按数值比例缩，不做等差递减——等差看着更顺，
+      但那是画出来的顺，不是数据里的顺。层级有序，因此用单色阶而不是分类色。
+    </p>
+    <DemoBlock title="转化漏斗">
+      <div class="chart-demo">
+        <IChartFunnel :stages="funnel" title="新用户转化" unit=" 人" />
+      </div>
+    </DemoBlock>
+
+    <h2>单值与阈值</h2>
+    <p>
+      仪表盘用于「一个值离目标还有多远」。开口朝下的 270° 而不是整圆——
+      整圆会让满值与零值落在同一个位置，无法分辨。越过阈值时整条弧转为对应的状态色。
+    </p>
+    <DemoBlock title="仪表盘">
+      <div class="chart-demo chart-demo--row">
+        <IChartGauge :value="86" title="接口可用性" unit="%" :thresholds="[{ value: 0, status: 'danger' }, { value: 80, status: 'warning' }, { value: 95, status: 'success' }]" />
+        <IChartGauge :value="97" title="任务完成率" unit="%" :thresholds="[{ value: 0, status: 'danger' }, { value: 80, status: 'warning' }, { value: 95, status: 'success' }]" />
+        <IChartGauge :value="42" title="资源水位" unit="%" />
+      </div>
+    </DemoBlock>
+
+    <h2>多维对比</h2>
+    <p>雷达图适合看「同一对象在多个维度上的形状」，维度超过八个就该换成条形图——顶点太密时形状不再可读。</p>
+    <DemoBlock title="能力雷达">
+      <div class="chart-demo">
+        <IChartRadar :axes="radarAxes" :series="radarSeries" title="产品能力评估" />
+      </div>
+    </DemoBlock>
+
+    <h2>二维密度</h2>
+    <p>
+      热力图看「什么时候最忙」这类二维分布。用单色阶而不是彩虹：彩虹会让读者以为
+      不同颜色代表不同类别，而不是多与少。深色格子上的数字自动转为反色，任何一格都读得出来。
+    </p>
+    <DemoBlock title="时段分布">
+      <div class="chart-demo">
+        <IChartHeatmap :matrix="heat" :rows="weekdays" :columns="hours" title="工作项创建时段" unit=" 条" />
+      </div>
+    </DemoBlock>
+
     <h2>色彩规则</h2>
     <ul class="rules">
       <li><strong>身份用分类色，按固定顺序分配</strong>：第一个系列永远是品牌蓝，第九个系列不再生成新颜色，而应合并为「其他」或改用分面小图。</li>
@@ -125,6 +197,7 @@ const sparks = [
 
 <style scoped>
 .chart-demo { display: flex; flex-direction: column; gap: var(--i-spacing-6); width: 100%; }
+.chart-demo--row { flex-direction: row; flex-wrap: wrap; gap: var(--i-spacing-8); }
 .spark { margin-top: var(--i-spacing-3); }
 .rules { line-height: 1.9; }
 .rules li { margin-bottom: var(--i-spacing-2); }

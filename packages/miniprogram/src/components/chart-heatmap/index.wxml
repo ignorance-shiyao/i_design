@@ -1,0 +1,24 @@
+<view class="i-chart">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <scroll-view class="i-chart__heat" scroll-x>
+    <view class="i-chart__heat-head">
+      <view class="i-chart__heat-label" />
+      <view wx:for="{{columns}}" wx:key="*this" class="i-chart__heat-col">{{item}}</view>
+    </view>
+    <view wx:for="{{grid}}" wx:key="label" class="i-chart__heat-row">
+      <view class="i-chart__heat-label">{{item.label}}</view>
+      <view
+        wx:for="{{item.cells}}"
+        wx:for-item="cell"
+        wx:key="text"
+        class="i-chart__heat-cell"
+        style="background:{{cell.background}};color:{{cell.color}}"
+      >{{cell.text}}</view>
+    </view>
+  </scroll-view>
+  <view class="i-chart__heat-scale">
+    <text>{{minText}}{{unit}}</text>
+    <view wx:for="{{scale}}" wx:key="*this" class="i-chart__heat-swatch" style="background:{{item}}" />
+    <text>{{maxText}}{{unit}}</text>
+  </view>
+</view>

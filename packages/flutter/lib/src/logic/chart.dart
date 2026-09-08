@@ -5,6 +5,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show Offset;
 
 /// 生成「好看的」刻度值：步长吸附到 1/2/5 的整数倍，
 /// 坐标轴上出现的永远是人能心算的数。
@@ -83,6 +84,53 @@ String _trim(double v) {
   return fixed.endsWith('.00')
       ? fixed.substring(0, fixed.length - 3)
       : (fixed.endsWith('0') ? fixed.substring(0, fixed.length - 1) : fixed);
+}
+
+/// 漏斗每层的梯形顶点，以及相对上一层的转化率
+List<({double topWidth, double bottomWidth, double y, double height, double step})> funnelShapes(
+  List<double> values,
+  double width,
+  double height, {
+  double gap = 4,
+}) {
+  if (values.isEmpty) return [];
+  final maxV = values.reduce(math.max);
+  final rowH = (height - gap * (values.length - 1)) / values.length;
+  return [
+    for (var i = 0; i < values.length; i++)
+      (
+        // 宽度按数值比例，不做等差递减——等差是画出来的顺，不是数据里的顺
+        topWidth: values[i] / (maxV == 0 ? 1 : maxV) * width,
+        bottomWidth: (i + 1 < values.length ? values[i + 1] : values[i]) /
+            (maxV == 0 ? 1 : maxV) *
+            width,
+        y: i * (rowH + gap),
+        height: rowH,
+        step: i == 0 ? 1 : (values[i - 1] == 0 ? 0 : values[i] / values[i - 1]),
+      )
+  ];
+}
+
+/// 仪表盘的起止角：开口朝下的 270°。
+/// 整圆会让满值与零值落在同一个位置，无法分辨。
+const double kGaugeStart = math.pi * 0.75;
+const double kGaugeSweep = math.pi * 1.5;
+
+/// 雷达图顶点：从 12 点方向开始顺时针分布
+List<Offset> radarPoints(List<double> values, double max, double radius) => [
+      for (var i = 0; i < values.length; i++)
+        () {
+          final angle = -math.pi / 2 + (i / values.length) * math.pi * 2;
+          final r = (values[i].clamp(0, max) / (max == 0 ? 1 : max)) * radius;
+          return Offset(radius + r * math.cos(angle), radius + r * math.sin(angle));
+        }()
+    ];
+
+/// 热力图色阶档位：单色阶而不是彩虹——彩虹会让读者以为颜色代表类别
+int heatLevel(double value, double min, double max, [int steps = 5]) {
+  if (max == min) return 0;
+  final ratio = (value - min) / (max - min);
+  return (ratio * (steps - 1)).round().clamp(0, steps - 1);
 }
 
 String _group(int value) {

@@ -153,6 +153,99 @@ export function formatTick(value: number) {
   return String(Number(value.toFixed(2)))
 }
 
+/* ---------- 其他图形 ---------- */
+
+/**
+ * 漏斗：每层画成上下宽度不同的梯形。
+ *
+ * 宽度按数值比例而不是按层级等差递减：等差看起来更"顺"，
+ * 但那是画出来的顺，不是数据里的顺——转化率的落差正是要看的东西。
+ */
+export function funnelShapes(values: number[], width: number, height: number, gap = 4) {
+  const max = Math.max(...values, 1)
+  const rowH = (height - gap * (values.length - 1)) / Math.max(1, values.length)
+
+  return values.map((value, i) => {
+    const next = values[i + 1] ?? value
+    const top = (value / max) * width
+    const bottom = (next / max) * width
+    const y = i * (rowH + gap)
+    const points = [
+      [(width - top) / 2, y],
+      [(width + top) / 2, y],
+      [(width + bottom) / 2, y + rowH],
+      [(width - bottom) / 2, y + rowH]
+    ]
+    return {
+      value,
+      percent: values[0] ? value / values[0] : 0,
+      /** 相对上一层的转化率——漏斗真正要回答的问题 */
+      step: i === 0 ? 1 : values[i - 1] ? value / values[i - 1] : 0,
+      points: points.map(([x, py]) => `${x.toFixed(2)},${py.toFixed(2)}`).join(' '),
+      centerY: y + rowH / 2
+    }
+  })
+}
+
+/**
+ * 仪表盘：起止角固定为下方开口的 220°。
+ * 整圆会让"满值"与"零值"落在同一个位置，无法分辨。
+ */
+export function gaugeArc(percent: number, radius: number, stroke: number) {
+  const START = Math.PI * 0.75
+  const SWEEP = Math.PI * 1.5
+  const clamped = Math.min(1, Math.max(0, percent))
+  const r = radius - stroke / 2
+  const point = (angle: number) => ({
+    x: radius + r * Math.cos(angle),
+    y: radius + r * Math.sin(angle)
+  })
+  const from = point(START)
+  const to = point(START + SWEEP * clamped)
+  const large = SWEEP * clamped > Math.PI ? 1 : 0
+  const full = point(START + SWEEP)
+
+  return {
+    track: `M${from.x.toFixed(2)} ${from.y.toFixed(2)} A${r} ${r} 0 1 1 ${full.x.toFixed(2)} ${full.y.toFixed(2)}`,
+    value: clamped === 0
+      ? ''
+      : `M${from.x.toFixed(2)} ${from.y.toFixed(2)} A${r} ${r} 0 ${large} 1 ${to.x.toFixed(2)} ${to.y.toFixed(2)}`
+  }
+}
+
+/** 雷达：每个维度一个顶点，按比例落在半径上 */
+export function radarPoints(values: number[], max: number, radius: number) {
+  const count = values.length
+  return values.map((value, i) => {
+    // 从 12 点方向开始顺时针分布，第一个维度永远在正上方
+    const angle = -Math.PI / 2 + (i / count) * Math.PI * 2
+    const r = (Math.min(Math.max(value, 0), max) / max) * radius
+    return {
+      x: radius + r * Math.cos(angle),
+      y: radius + r * Math.sin(angle),
+      /** 轴线端点，用来画蛛网 */
+      axisX: radius + radius * Math.cos(angle),
+      axisY: radius + radius * Math.sin(angle)
+    }
+  })
+}
+
+/** 把点集连成闭合多边形路径 */
+export const polygonPath = (points: { x: number; y: number }[]) =>
+  points.length
+    ? `${points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ')} Z`
+    : ''
+
+/**
+ * 热力图的色阶取值：把数值映射到单色阶的某一档。
+ * 用单色阶而不是彩虹——彩虹会让读者以为颜色之间存在类别差异。
+ */
+export function heatLevel(value: number, min: number, max: number, steps = 5) {
+  if (max === min) return 0
+  const ratio = (value - min) / (max - min)
+  return Math.min(steps - 1, Math.max(0, Math.round(ratio * (steps - 1))))
+}
+
 /** 第 n 个系列用第几号分类色；超过 8 个不再循环，返回 -1 由调用方合并处理 */
 export function colorSlot(index: number, total = 8) {
   return index < total ? index + 1 : -1

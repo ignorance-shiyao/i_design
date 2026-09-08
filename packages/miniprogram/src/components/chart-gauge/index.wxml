@@ -1,0 +1,10 @@
+<view class="i-chart i-chart--gauge">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <view class="i-chart__gauge" style="width:{{size}}px;height:{{size * 0.78}}px">
+    <canvas class="i-chart__gauge-canvas" type="2d" style="width:{{size}}px;height:{{size}}px" />
+    <view class="i-chart__gauge-label">
+      <text class="i-chart__gauge-value" style="color:{{color}}">{{valueText}}{{unit}}</text>
+      <text class="i-chart__gauge-range">{{rangeText}}{{unit}}</text>
+    </view>
+  </view>
+</view>

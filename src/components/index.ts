@@ -2,6 +2,10 @@ import type { App } from 'vue'
 import IIcon from './IIcon.vue'
 import IFlow from './IFlow.vue'
 import IChart from './IChart.vue'
+import IChartFunnel from './IChartFunnel.vue'
+import IChartGauge from './IChartGauge.vue'
+import IChartRadar from './IChartRadar.vue'
+import IChartHeatmap from './IChartHeatmap.vue'
 import IChartPie from './IChartPie.vue'
 import ISparkline from './ISparkline.vue'
 import IInputNumber from './IInputNumber.vue'
@@ -118,7 +122,11 @@ export {
   IChart,
   IChartPie,
   ISparkline,
-  IFlow
+  IFlow,
+  IChartFunnel,
+  IChartGauge,
+  IChartRadar,
+  IChartHeatmap
 }
 
 export { message } from './message'
@@ -137,6 +145,8 @@ export type { TimelineItem } from './ITimeline.vue'
 export type { SliderMark } from './ISlider.vue'
 export type { ListItem } from './IList.vue'
 export type { PieItem } from './IChartPie.vue'
+export type { FunnelStage } from './IChartFunnel.vue'
+export type { RadarSeries } from './IChartRadar.vue'
 export * from './date'
 export type { UploadFile, UploadStatus } from './upload'
 export type { CollapseItem } from './ICollapse.vue'
@@ -202,7 +212,11 @@ const components = {
   IChart,
   IChartPie,
   ISparkline,
-  IFlow
+  IFlow,
+  IChartFunnel,
+  IChartGauge,
+  IChartRadar,
+  IChartHeatmap
 }
 
 /** 全量注册，便于文档站与 demo 直接使用；业务侧推荐按需引入 */
