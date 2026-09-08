@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useTilt } from '@/composables/useTilt'
-import { useCountUp } from '@/composables/useCountUp'
 import ValueCube from '@/site/ValueCube.vue'
 import IButton from '@/components/IButton.vue'
 import IInput from '@/components/IInput.vue'
@@ -9,7 +8,7 @@ import ICard from '@/components/ICard.vue'
 import ITag from '@/components/ITag.vue'
 import IAlert from '@/components/IAlert.vue'
 import ISwitch from '@/components/ISwitch.vue'
-import { componentCategories, plannedCount, readyCount } from '@/data/components'
+import { componentCategories } from '@/data/components'
 import { useTheme } from '@/composables/useTheme'
 import { heroIllustrations } from '@i-design/common'
 import CodeBlock from '@/site/CodeBlock.vue'
@@ -17,7 +16,7 @@ import IIcon from '@/components/IIcon.vue'
 import ISteps from '@/components/ISteps.vue'
 import ILoading from '@/components/ILoading.vue'
 import { message } from '@/components/message'
-import { frameworks, componentCountOf } from '@/data/frameworks'
+import { frameworks } from '@/data/frameworks'
 
 const values = [
   {
@@ -56,10 +55,6 @@ const hero = computed(() =>
 const preview = ref<HTMLElement | null>(null)
 useTilt(preview, { max: 6 })
 
-const statsEl = ref<HTMLElement | null>(null)
-const readyDisplay = useCountUp(statsEl, readyCount)
-const categoryDisplay = useCountUp(statsEl, componentCategories.length)
-
 const usageSnippet = `<IButton variant="primary">
   提交
 </IButton>`
@@ -77,13 +72,14 @@ const demoSwitch = ref(true)
       <div class="i-container hero__inner">
         <div class="hero__text">
           <ITag type="brand" round>v0.1.0 · 开源设计体系</ITag>
+          <!-- 不写死换行：窄屏上「的」会被挤成单独一行，交给 text-wrap 平衡断行 -->
           <h1 class="hero__title">
-            为企业中后台而生的<br />
-            <span class="hero__title-accent">设计体系</span>
+            为企业中后台而生的<span class="hero__title-accent">设计体系</span>
           </h1>
           <p class="hero__desc i-lead">
-            Ignorance Design 提供一套从设计价值观、设计令牌到 Vue 3 组件库的完整解决方案，
-            让设计与研发在同一套语言下协作，把重复的决策交给系统。
+            Ignorance Design 把设计价值观、设计令牌与组件实现收成一套语言，
+            让设计与研发不再各写各的；同一套决策落到 Web、小程序、移动端与 Flutter，
+            改一次颜色，处处生效。
           </p>
           <div class="hero__actions">
             <RouterLink to="/components">
@@ -91,12 +87,12 @@ const demoSwitch = ref(true)
             </RouterLink>
             <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
           </div>
-          <dl ref="statsEl" class="hero__stats">
-            <div><dt>{{ readyDisplay }}</dt><dd>已实现组件</dd></div>
-            <div><dt>{{ categoryDisplay }}</dt><dd>场景分类</dd></div>
-            <div><dt>60+</dt><dd>设计令牌</dd></div>
-            <div><dt>2</dt><dd>内建主题</dd></div>
-          </dl>
+          <ul class="hero__facts">
+            <li><IIcon name="layers" :size="16" /><span>一套令牌驱动全部端</span></li>
+            <li><IIcon name="palette" :size="16" /><span>深浅色与品牌换肤内建</span></li>
+            <li><IIcon name="code" :size="16" /><span>组件行为跨端一致</span></li>
+            <li><IIcon name="check-circle" :size="16" /><span>无障碍与触控尺度默认到位</span></li>
+          </ul>
         </div>
 
         <!-- 用组件本身搭出预览面板，既是展示也是回归用例 -->
@@ -185,8 +181,8 @@ const demoSwitch = ref(true)
       <span class="i-eyebrow">Coverage</span>
       <h2 class="section__title">覆盖范围</h2>
       <p class="section__desc i-lead">
-        按中后台的真实使用场景划分五类。已实现 {{ readyCount }} 个组件，
-        另有 {{ plannedCount }} 个在规划中——把边界写出来，比让使用者去猜要诚实。
+        按中后台的真实使用场景分类，而不是按实现难度。标注为规划中的，
+        是我们认为该有、但还没做到可用的——把边界写出来，比让使用者去猜要诚实。
       </p>
       <div class="coverage">
         <div
@@ -225,8 +221,8 @@ const demoSwitch = ref(true)
         <span class="i-eyebrow">Cross-platform</span>
         <h2 class="section__title">一套体系，七个技术栈</h2>
         <p class="section__desc i-lead">
-          令牌、图标与交互规则抽在公共层，各端只写渲染适配。下面的组件数由脚本按各端
-          真实导出统计，不是手填的——手填的数字第二天就会和代码对不上。
+          令牌、图标与交互规则只存在一份，各端只写渲染适配。因此同一个组件在任意一端
+          的外观与行为都对得上，不需要为某个端单独维护一套设计稿。
         </p>
         <div class="stacks">
           <RouterLink
@@ -236,13 +232,12 @@ const demoSwitch = ref(true)
             class="stack"
             to="/design/cross-platform"
           >
-            <span class="stack__count">{{ componentCountOf(f.id) }}</span>
             <span class="stack__label">{{ f.label }}</span>
             <span class="stack__runtime">{{ f.runtime }}</span>
           </RouterLink>
         </div>
         <p class="stacks__foot">
-          <RouterLink to="/design/cross-platform">看同一个组件在七端怎么写 →</RouterLink>
+          <RouterLink to="/design/cross-platform">看同一个组件在各端怎么写 →</RouterLink>
         </p>
       </div>
     </section>
@@ -333,6 +328,8 @@ app.use(IDesign)"
   font-size: var(--i-font-size-5xl);
   letter-spacing: -0.03em;
   line-height: 1.15;
+  /* 让浏览器平衡各行长度，避免末行只剩一两个字 */
+  text-wrap: balance;
 }
 .hero__title-accent {
   background: var(--i-gradient-brand);
@@ -341,23 +338,23 @@ app.use(IDesign)"
   color: transparent;
 }
 .hero__actions { display: flex; gap: var(--i-spacing-3); margin-top: var(--i-spacing-8); }
-.hero__stats {
-  display: flex;
-  gap: var(--i-spacing-10);
+.hero__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--i-spacing-3) var(--i-spacing-6);
   margin: var(--i-spacing-10) 0 0;
+  padding: 0;
+  list-style: none;
 }
-.hero__stats { gap: var(--i-spacing-8); }
-.hero__stats dt {
-  font-size: var(--i-font-size-2xl);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--i-color-text);
-}
-.hero__stats dd {
-  margin: var(--i-spacing-1) 0 0;
+.hero__facts li {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
   font-size: var(--i-font-size-sm);
-  color: var(--i-color-text-tertiary);
+  color: var(--i-color-text-secondary);
 }
+.hero__facts svg { color: var(--i-color-brand); flex: none; }
 
 .hero__art {
   display: block;
@@ -491,13 +488,11 @@ app.use(IDesign)"
   border-color: var(--i-color-brand);
   box-shadow: var(--i-shadow-md);
 }
-.stack__count {
-  font-size: var(--i-font-size-2xl);
+.stack__label {
+  font-size: var(--i-font-size-lg);
   font-weight: 600;
-  color: var(--i-color-brand);
-  line-height: 1.1;
+  color: var(--i-color-text);
 }
-.stack__label { font-size: var(--i-font-size-md); color: var(--i-color-text); }
 .stack__runtime { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
 .stacks__foot { margin-top: var(--i-spacing-6); font-size: var(--i-font-size-md); }
 .section { padding: var(--i-spacing-16) var(--i-spacing-6); }
@@ -625,6 +620,7 @@ app.use(IDesign)"
   .hero { padding-top: var(--i-spacing-16); }
   .hero__inner { grid-template-columns: 1fr; gap: var(--i-spacing-10); }
   .hero__title { font-size: var(--i-font-size-4xl); }
+  .hero__facts { grid-template-columns: 1fr; gap: var(--i-spacing-3); }
   .cta { padding: var(--i-spacing-8); }
 }
 </style>

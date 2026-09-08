@@ -25,6 +25,6 @@
 .i-input.is-invalid { border-color: var(--i-color-danger); }
 .i-input.is-invalid:focus { box-shadow: 0 0 0 2px var(--i-color-danger-subtle); }
 
-.i-input--sm { height: 28px; padding: 0 var(--i-spacing-2); font-size: var(--i-font-size-sm); }
-.i-input--md { height: 34px; padding: 0 var(--i-spacing-3); }
-.i-input--lg { height: 42px; padding: 0 var(--i-spacing-4); font-size: var(--i-font-size-lg); }
+.i-input--sm { height: var(--i-control-height-sm); padding: 0 var(--i-spacing-2); font-size: var(--i-font-size-sm); }
+.i-input--md { height: var(--i-control-height-md); padding: 0 var(--i-spacing-3); }
+.i-input--lg { height: var(--i-control-height-lg); padding: 0 var(--i-spacing-4); font-size: var(--i-font-size-lg); }

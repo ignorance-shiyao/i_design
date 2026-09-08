@@ -91,4 +91,11 @@ const showCode = ref(false)
 .demo__toggle:hover { color: var(--i-color-brand); background: var(--i-color-brand-subtle); }
 .demo__code { padding: 0 var(--i-spacing-4) var(--i-spacing-4); }
 .demo__code :deep(.code) { border-radius: var(--i-radius-lg); }
+
+@media (max-width: 768px) {
+  /* 窄屏把内边距收一档：示例区本身才是内容，边距吃掉的是可用宽度 */
+  .demo__head { padding: var(--i-spacing-4) var(--i-spacing-4) 0; }
+  .demo__stage { padding: var(--i-spacing-5) var(--i-spacing-4); }
+  .demo { margin-bottom: var(--i-spacing-5); }
+}
 </style>

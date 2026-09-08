@@ -10,10 +10,10 @@ import DemoBlock from '@/site/DemoBlock.vue'
 
 <template>
   <article>
-    <h1>Space / Grid / Typography 布局与排版</h1>
+    <h1>布局与排版</h1>
     <p class="i-lead">
       三个用来「把东西摆正」的基础件。它们本身没有视觉主张，作用是让间距、栅格与字号
-      只能取自令牌——一旦允许就地写数值，一个产品里很快会出现七种正文字号与十几种间距。
+      只能取自令牌——一旦允许就地写数值，一个产品里很快会长出七种正文字号与十几种间距。
     </p>
 
     <h2>Space 间距</h2>

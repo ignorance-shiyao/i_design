@@ -44,7 +44,7 @@
 
 .i-radio--button {
   padding: 0 var(--i-spacing-4);
-  height: 34px;
+  height: var(--i-control-height-md);
   border: 1px solid var(--i-color-border-strong);
   border-radius: var(--i-radius-md);
   background: var(--i-color-bg);

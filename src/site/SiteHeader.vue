@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useTheme } from '@/composables/useTheme'
 import IIcon from '@/components/IIcon.vue'
+import MobileNav from './MobileNav.vue'
+import { mobileNavOpen } from '@/composables/useMobileNav'
 
 const { theme, toggleTheme } = useTheme()
-const menuOpen = ref(false)
 
 const links = [
   { to: '/design/values', label: '设计价值观' },
@@ -22,21 +22,25 @@ const links = [
         <span class="header__name">Ignorance Design</span>
       </RouterLink>
 
-      <nav class="header__nav" :class="{ 'is-open': menuOpen }">
-        <RouterLink v-for="link in links" :key="link.to" :to="link.to" @click="menuOpen = false">
-          {{ link.label }}
-        </RouterLink>
+      <nav class="header__nav">
+        <RouterLink v-for="link in links" :key="link.to" :to="link.to">{{ link.label }}</RouterLink>
       </nav>
 
       <div class="header__actions">
         <button class="header__icon" :title="theme === 'dark' ? '切换到亮色' : '切换到暗色'" @click="toggleTheme">
           <IIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="16" />
         </button>
-        <button class="header__icon header__icon--menu" aria-label="菜单" @click="menuOpen = !menuOpen">
-          <IIcon name="menu" :size="16" />
+        <button
+          class="header__icon header__icon--menu"
+          aria-label="打开导航"
+          :aria-expanded="mobileNavOpen"
+          @click="mobileNavOpen = true"
+        >
+          <IIcon name="menu" :size="18" />
         </button>
       </div>
     </div>
+    <MobileNav />
   </header>
 </template>
 
@@ -109,20 +113,15 @@ const links = [
 .header__icon--menu { display: none; }
 
 @media (max-width: 860px) {
+  .header__inner { gap: var(--i-spacing-3); }
+  /* 顶部导航整体收进抽屉：窄屏上并排四个入口会挤掉产品名 */
+  .header__nav { display: none; }
+  .header__actions { margin-left: auto; }
+  .header__icon--menu { display: grid; }
+  .header__icon { width: 40px; height: 40px; }
+}
+@media (max-width: 380px) {
+  /* 极窄屏才让位：产品名是身份，能留则留 */
   .header__name { display: none; }
-  .header__icon--menu { display: block; }
-  .header__nav {
-    position: absolute;
-    top: 60px;
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    gap: 0;
-    background: var(--i-color-bg);
-    border-bottom: 1px solid var(--i-color-border);
-    display: none;
-  }
-  .header__nav.is-open { display: flex; }
-  .header__nav a { padding: var(--i-spacing-3) var(--i-spacing-6); }
 }
 </style>

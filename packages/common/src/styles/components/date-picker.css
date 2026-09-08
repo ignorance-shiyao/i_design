@@ -36,9 +36,9 @@
 .i-date__clear { display: grid; place-items: center; color: var(--i-color-text-tertiary); }
 .i-date__clear:hover { color: var(--i-color-text-secondary); }
 
-.i-date--sm .i-date__trigger { height: 28px; padding: 0 var(--i-spacing-2); font-size: var(--i-font-size-sm); }
-.i-date--md .i-date__trigger { height: 34px; padding: 0 var(--i-spacing-3); }
-.i-date--lg .i-date__trigger { height: 42px; padding: 0 var(--i-spacing-4); font-size: var(--i-font-size-lg); }
+.i-date--sm .i-date__trigger { height: var(--i-control-height-sm); padding: 0 var(--i-spacing-2); font-size: var(--i-font-size-sm); }
+.i-date--md .i-date__trigger { height: var(--i-control-height-md); padding: 0 var(--i-spacing-3); }
+.i-date--lg .i-date__trigger { height: var(--i-control-height-lg); padding: 0 var(--i-spacing-4); font-size: var(--i-font-size-lg); }
 
 .i-date__panel {
   position: absolute;

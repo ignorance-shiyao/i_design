@@ -20,9 +20,9 @@
 .i-input-number.is-invalid { border-color: var(--i-color-danger); }
 .i-input-number.is-disabled { background: var(--i-color-bg-muted); }
 
-.i-input-number--sm { height: 28px; }
-.i-input-number--md { height: 34px; }
-.i-input-number--lg { height: 42px; }
+.i-input-number--sm { height: var(--i-control-height-sm); }
+.i-input-number--md { height: var(--i-control-height-md); }
+.i-input-number--lg { height: var(--i-control-height-lg); }
 
 .i-input-number__field {
   width: 100%;

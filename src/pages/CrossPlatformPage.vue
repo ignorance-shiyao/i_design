@@ -3,7 +3,7 @@ import CodeBlock from '@/site/CodeBlock.vue'
 import FrameworkTabs from '@/site/FrameworkTabs.vue'
 import IIcon from '@/components/IIcon.vue'
 import ITag from '@/components/ITag.vue'
-import { frameworks, componentCountOf } from '@/data/frameworks'
+import { frameworks } from '@/data/frameworks'
 import { snippets, sharedLogicSnippet } from '@/data/snippets'
 import { currentFramework } from '@/composables/useFramework'
 import { componentMatrix } from '@/data/componentMatrix'
@@ -46,8 +46,9 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
   <article>
     <h1>跨端支持</h1>
     <p class="i-lead">
-      同一套设计体系，落到 7 个技术栈上。做法不是把组件抄 7 遍，而是把与框架无关的部分
-      抽成公共层，各端只写渲染适配——所以「改一次颜色，七端同时生效」不是口号，是构建的结果。
+      一套设计体系，同时落在 Web、小程序、移动端与 Flutter 上。与框架无关的部分——
+      令牌、图标、交互规则——只存在一份，各端只写渲染适配。所以「改一次颜色，处处生效」
+      不是口号，而是构建的结果。
     </p>
 
     <h2>七端一览</h2>
@@ -61,9 +62,8 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
       >
         <header class="cp-card__head">
           <h3 class="cp-card__title">{{ f.label }}</h3>
-          <ITag type="brand">{{ componentCountOf(f.id) }} 个组件</ITag>
+          <ITag type="brand">{{ f.runtime }}</ITag>
         </header>
-        <p class="cp-card__runtime">{{ f.runtime }}</p>
         <p class="cp-card__note">{{ f.note }}</p>
         <div class="cp-card__foot"><code class="cp-card__pkg">{{ f.install }}</code></div>
       </section>
@@ -87,8 +87,8 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
 
     <h2>覆盖矩阵</h2>
     <p>
-      下表由 <code>scripts/build-component-matrix.mjs</code> 按目录统计生成，只认文件里
-      是否真的有这个组件——「已实现」不该是一个可以手写的状态。
+      每个组件在各端的可用情况。这张表由构建时扫描各端源码生成，而不是人工维护——
+      手写的清单会在补完第一个端的当天就写上「已支持」。
     </p>
     <div class="cp-matrix">
       <table class="i-table">

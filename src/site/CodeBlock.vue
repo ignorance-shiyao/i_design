@@ -95,4 +95,12 @@ async function copy() {
   tab-size: 2;
 }
 .code__body code { background: none; padding: 0; font-size: inherit; }
+
+@media (max-width: 768px) {
+  /*
+   * 代码不跟随移动端正文放大：放大后一行装不下几个字符，横向滚动反而更难读。
+   * 这里显式钉回桌面尺度。
+   */
+  .code pre { font-size: 12px; }
+}
 </style>

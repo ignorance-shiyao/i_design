@@ -26,7 +26,7 @@ const events = [
 
 <template>
   <article>
-    <h1>Segmented / Progress / Statistic / Timeline 数据展示</h1>
+    <h1>数据展示</h1>
     <p class="i-lead">
       仪表盘与详情页里最常出现的四件：切换视角、表示进度、突出一个数字、罗列已发生的事。
     </p>

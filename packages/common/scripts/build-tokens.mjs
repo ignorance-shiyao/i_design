@@ -67,6 +67,27 @@ ${cssVars(mobileDark)}
 }
 `
 
+/* ---------- 自适应 CSS（同一份网页在窄屏上自动切到移动尺度） ---------- */
+/*
+ * 移动覆盖层此前只给移动端包用，于是同一个网页在手机上仍跑桌面尺度：
+ * 正文 14px、控件 34px、输入框低于 16px——iOS Safari 会在聚焦时自动放大整页。
+ * 这份产物把覆盖层包进媒体查询，任何 Web 站点引一次就同时具备两套尺度。
+ */
+const mobileOnly = (map) =>
+  Object.fromEntries(Object.entries(map).filter(([k, v]) => light[k] !== v && dark[k] !== v))
+
+const cssResponsive = `${banner}
+@media (max-width: 768px), (pointer: coarse) {
+  :root {
+${cssVars(mobileOnly(mobileLight), '    ')}
+  }
+
+  :root[data-theme='dark'] {
+${cssVars(mobileOnly(mobileDark), '    ')}
+  }
+}
+`
+
 /* ---------- SCSS ---------- */
 const scss = `${banner}
 ${Object.entries(light)
@@ -175,6 +196,7 @@ mkdirSync(outDir, { recursive: true })
 const files = {
   'tokens.css': css,
   'tokens.mobile.css': cssMobile,
+  'tokens.responsive.css': cssResponsive,
   'tokens.scss': scss,
   'tokens.json': json,
   'tokens.wxss': wxss,
@@ -187,6 +209,7 @@ for (const [name, content] of Object.entries(files)) {
 // 同步到 styles 目录，Web 与移动端直接 import
 writeFileSync(join(root, 'src/styles/tokens.css'), css)
 writeFileSync(join(root, 'src/styles/tokens.mobile.css'), cssMobile)
+writeFileSync(join(root, 'src/styles/tokens.responsive.css'), cssResponsive)
 
 execFileSync('rm', ['-f', tmp])
 

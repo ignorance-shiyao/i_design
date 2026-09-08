@@ -16,7 +16,7 @@ export const docNav: NavGroup[] = [
       { to: '/design/values', label: '设计价值观' },
       { to: '/design/tokens', label: '设计令牌' },
       { to: '/design/cross-platform', label: '跨端支持' },
-      { to: '/design/antd-coverage', label: '对照 Ant Design' }
+      { to: '/design/catalog', label: '组件全景' }
     ]
   },
   {
@@ -27,7 +27,7 @@ export const docNav: NavGroup[] = [
     title: '基础',
     items: [
       { to: '/components/button', label: 'Button 按钮' },
-      { to: '/components/layout', label: 'Space / Grid / Typography' },
+      { to: '/components/layout', label: '布局与排版' },
       { to: '/components/icon', label: 'Icon 图标' },
       { to: '/components/tag', label: 'Tag 标签' },
       { to: '/components/divider', label: 'Divider 分割线' }
@@ -54,7 +54,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/checkbox', label: 'Checkbox 多选框' },
       { to: '/components/switch', label: 'Switch 开关' },
       { to: '/components/upload', label: 'Upload 上传' },
-      { to: '/components/data-entry', label: 'InputNumber / Slider / Rate / List' }
+      { to: '/components/data-entry', label: '数值、区间与列表' }
     ]
   },
   {
@@ -69,7 +69,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/collapse', label: 'Collapse 折叠面板' },
       { to: '/components/descriptions', label: 'Descriptions 描述列表' },
       { to: '/components/skeleton', label: 'Skeleton 骨架屏' },
-      { to: '/components/data-display', label: 'Segmented / Progress / Statistic / Timeline' }
+      { to: '/components/data-display', label: '数据展示' }
     ]
   },
   {

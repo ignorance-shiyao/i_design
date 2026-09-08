@@ -12,7 +12,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'values', component: () => import('@/pages/DesignValuesPage.vue') },
       { path: 'tokens', component: () => import('@/pages/DesignTokensPage.vue') },
       { path: 'cross-platform', component: () => import('@/pages/CrossPlatformPage.vue') },
-      { path: 'antd-coverage', component: () => import('@/pages/AntdCoveragePage.vue') }
+      { path: 'catalog', component: () => import('@/pages/CatalogPage.vue') }
     ]
   },
   {

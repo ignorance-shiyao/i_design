@@ -32,9 +32,9 @@
 .i-select__trigger.is-invalid { border-color: var(--i-color-danger); }
 .i-select__trigger.is-placeholder .i-select__label { color: var(--i-color-text-tertiary); }
 
-.i-select--sm .i-select__trigger { height: 28px; padding: 0 var(--i-spacing-2); font-size: var(--i-font-size-sm); }
-.i-select--md .i-select__trigger { height: 34px; padding: 0 var(--i-spacing-3); }
-.i-select--lg .i-select__trigger { height: 42px; padding: 0 var(--i-spacing-4); font-size: var(--i-font-size-lg); }
+.i-select--sm .i-select__trigger { height: var(--i-control-height-sm); padding: 0 var(--i-spacing-2); font-size: var(--i-font-size-sm); }
+.i-select--md .i-select__trigger { height: var(--i-control-height-md); padding: 0 var(--i-spacing-3); }
+.i-select--lg .i-select__trigger { height: var(--i-control-height-lg); padding: 0 var(--i-spacing-4); font-size: var(--i-font-size-lg); }
 
 .i-select__label {
   flex: 1;

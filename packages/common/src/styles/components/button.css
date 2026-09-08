@@ -18,9 +18,9 @@
 .i-button:disabled { cursor: not-allowed; opacity: 0.5; }
 .i-button.is-block { display: flex; width: 100%; }
 
-.i-button--sm { height: 28px; padding: 0 var(--i-spacing-3); font-size: var(--i-font-size-sm); }
-.i-button--md { height: 34px; padding: 0 var(--i-spacing-4); }
-.i-button--lg { height: 42px; padding: 0 var(--i-spacing-6); font-size: var(--i-font-size-lg); }
+.i-button--sm { height: var(--i-control-height-sm); padding: 0 var(--i-spacing-3); font-size: var(--i-font-size-sm); }
+.i-button--md { height: var(--i-control-height-md); padding: 0 var(--i-spacing-4); }
+.i-button--lg { height: var(--i-control-height-lg); padding: 0 var(--i-spacing-6); font-size: var(--i-font-size-lg); }
 
 .i-button--primary {
   background: var(--i-gradient-brand);

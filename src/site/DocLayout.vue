@@ -104,15 +104,12 @@ watch(() => route.path, revealActive)
 .doc-layout__main { min-width: 0; padding-bottom: var(--i-spacing-16); }
 
 @media (max-width: 860px) {
-  .doc-layout { grid-template-columns: 1fr; gap: var(--i-spacing-6); }
-  .doc-layout__side {
-    position: static;
-    grid-auto-flow: column;
-    max-height: none;
-    overflow-x: auto;
-    overflow-y: visible;
-    gap: var(--i-spacing-4);
-    padding-right: 0;
-  }
+  /*
+   * 窄屏不再把侧栏摊平：横向排列会把几十个入口铺成好几屏，正文被挤到视野之外。
+   * 导航改由页头的抽屉承担（MobileNav），这里只留正文。
+   */
+  .doc-layout { grid-template-columns: 1fr; gap: 0; padding-top: var(--i-spacing-6); }
+  .doc-layout__side { display: none; }
+  .doc-layout__main { padding-bottom: var(--i-spacing-10); }
 }
 </style>

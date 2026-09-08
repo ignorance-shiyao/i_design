@@ -3,6 +3,11 @@
  * 由 scripts/build-styles-index.mjs 按目录自动生成——手写清单会漏掉新组件。
  */
 @import './tokens.css';
+/*
+ * 自适应层：窄屏或触屏设备自动切到移动尺度（正文 16px、控件 44px）。
+ * 只覆盖令牌，不覆盖组件样式，因此必须排在 tokens 之后、组件之前。
+ */
+@import './tokens.responsive.css';
 @import './base.css';
 
 @import './components/action-sheet.css';
