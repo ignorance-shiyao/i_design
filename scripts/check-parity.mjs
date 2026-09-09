@@ -146,6 +146,31 @@ const { avatarPalette, initialsOf, tintOf } = await import('/tmp/parity-avatar.m
 
 const dartAvatar = readFileSync('packages/flutter/lib/src/components/i_avatar.dart', 'utf8')
 const dartPalette = [...dartAvatar.matchAll(/Color\(0xFF([0-9A-F]{6})\)/g)].map((m) => `#${m[1].toLowerCase()}`)
+/* ---------- 文件类型映射两端一致 ---------- */
+/*
+ * 扩展名 → 类型的映射在 TS 与 Dart 各有一份（Dart 跑不了 TS）。
+ * 一旦分叉，同一个文件在 Web 与 Flutter 上会显示不同的图标与配色，
+ * 而两端各自都「看起来正常」。这里逐个扩展名比对。
+ */
+{
+  const tsSrc = readFileSync('packages/common/src/logic/file.ts', 'utf8')
+  const dartSrc = readFileSync('packages/flutter/lib/src/logic/file.dart', 'utf8')
+  const tsMap = {}
+  const tsBlock = tsSrc.split('const EXT:')[1]?.split('}')[0] ?? ''
+  for (const [, ext, kind] of tsBlock.matchAll(/'?([\w]+)'?:\s*'(\w+)'/g)) tsMap[ext] = kind
+  const dartMap = {}
+  for (const [, ext, kind] of dartSrc.matchAll(/'([\w]+)':\s*IFileKind\.(\w+)/g)) dartMap[ext] = kind
+
+  const tsKeys = Object.keys(tsMap)
+  const mismatch = tsKeys.filter((k) => dartMap[k] !== tsMap[k])
+  const missing = tsKeys.filter((k) => !(k in dartMap))
+  check(
+    '文件类型映射 TS 与 Dart 一致',
+    tsKeys.length > 0 && mismatch.length === 0 && missing.length === 0,
+    `已校验 ${tsKeys.length} 个扩展名${mismatch.length ? `，不一致：${mismatch.slice(0, 4).join(', ')}` : ''}`
+  )
+}
+
 check('Avatar 调色板 TS 与 Dart 一致',
   JSON.stringify(dartPalette) === JSON.stringify(avatarPalette),
   `dart ${dartPalette.length} 色 vs ts ${avatarPalette.length} 色`)

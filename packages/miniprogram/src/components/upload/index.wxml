@@ -10,10 +10,14 @@
       wx:for="{{items}}"
       wx:key="uid"
       class="i-upload__item is-{{item.status}}"
+      style="--i-file-color: var(--i-chart-{{item.typeSlot}})"
     >
       <view class="i-upload__row">
-        <view class="i-upload__file-icon i-icon i-icon--file" style="width:16px;height:16px" />
+        <view class="i-upload__file-icon">
+          <view class="i-icon i-icon--{{item.typeIcon}}" style="width:16px;height:16px" />
+        </view>
         <text class="i-upload__name">{{item.name}}</text>
+        <text class="i-upload__size">{{item.typeLabel}} · {{item.sizeText}}</text>
         <view class="i-upload__act">
           <view
             wx:if="{{item.status === 'error'}}"

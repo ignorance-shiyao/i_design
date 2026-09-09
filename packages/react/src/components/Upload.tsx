@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import { formatSize, matchAccept, nextUid, type UploadFile } from '@i-design/common'
+import { fileTypeOf, formatSize, matchAccept, nextUid, type UploadFile } from '@i-design/common'
 import { Icon } from './Icon'
 import { Button } from './Button'
 
@@ -182,12 +182,25 @@ export function Upload({
       {!!value.length && (
         <ul className="i-upload__list">
           {value.map((item) => (
-            <li key={item.uid} className={`i-upload__item is-${item.status}`}>
-              <Icon className="i-upload__file-icon" name="file" size={16} />
+            <li
+              key={item.uid}
+              className={`i-upload__item is-${item.status}`}
+              style={
+                {
+                  '--i-file-color': `var(--i-chart-${fileTypeOf(item.name).slot || 1})`
+                } as React.CSSProperties
+              }
+            >
+              {/* 类型图标带底色方块：一列文件里靠形状与色相区分类型，比一律灰色好扫 */}
+              <span className="i-upload__file-icon">
+                <Icon name={fileTypeOf(item.name).icon} size={16} />
+              </span>
               <div className="i-upload__meta">
                 <div className="i-upload__row">
                   <span className="i-upload__name" title={item.name}>{item.name}</span>
-                  <span className="i-upload__size">{formatSize(item.size)}</span>
+                  <span className="i-upload__size">
+                    {fileTypeOf(item.name).label} · {formatSize(item.size)}
+                  </span>
                 </div>
                 {item.status === 'uploading' && (
                   <div className="i-upload__progress">

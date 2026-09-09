@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../logic/upload.dart';
 import '../theme/i_theme.dart';
+import '../logic/file.dart';
 import '../tokens/tokens.dart';
 import 'i_icon.dart';
 
@@ -38,7 +39,7 @@ class IUpload extends StatelessWidget {
         padding: const EdgeInsets.only(top: IDesignTokensLight.spacing2),
         child: Row(
           children: [
-            IIcon('file', size: 16, color: failed ? c.danger : c.textTertiary),
+            _typeIcon(file.name, failed, c),
             const SizedBox(width: IDesignTokensLight.spacing2),
             Expanded(
               child: Column(
@@ -66,7 +67,10 @@ class IUpload extends StatelessWidget {
                   ] else
                     Text(
                       // 失败时把原因顶到显眼位置，文件大小让位
-                      failed ? (file.error ?? '上传失败') : formatSize(file.size),
+                      // 颜色不作为唯一线索：类型名同时以文字给出
+                      failed
+                          ? (file.error ?? '上传失败')
+                          : '${fileTypeOf(file.name).label} · ${formatSize(file.size)}',
                       style: TextStyle(
                         color: failed ? c.danger : c.textTertiary,
                         fontSize: IDesignTokensLight.fontSizeXs,
@@ -194,4 +198,23 @@ class _DashedRectPainter extends CustomPainter {
   @override
   bool shouldRepaint(_DashedRectPainter old) =>
       old.color != color || old.radius != radius || old.dash != dash || old.gap != gap;
+}
+
+/// 类型图标放进一个带底色的方块：一列文件里靠形状与色相区分类型，
+/// 比一律灰色的通用文件图标好扫。失败时让位给危险色，状态优先于类型。
+Widget _typeIcon(String name, bool failed, IColors c) {
+  final type = fileTypeOf(name);
+  final color = failed
+      ? c.danger
+      : Color(kChartSlots[(type.slot == 0 ? 1 : type.slot) - 1]);
+  return Container(
+    width: 32,
+    height: 32,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: color.withAlpha(31),
+      borderRadius: BorderRadius.circular(IDesignTokensLight.radiusMd),
+    ),
+    child: IIcon(failed ? 'warning-triangle' : type.icon, size: 16, color: color),
+  );
 }

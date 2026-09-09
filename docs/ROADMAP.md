@@ -19,11 +19,11 @@
   - 小程序：`boundingClientRect` 查位置，箭头跟随触发元素中心
   - Flutter：`i_tooltip.dart` / `i_popconfirm.dart` 接 `resolveOverlay`
   - 验收：贴视口右缘与底部时自动翻转、推回，箭头仍指向触发元素
-- [ ] **文件类型样式铺到其余端**
+- [x] **文件类型样式铺到其余端**（已完成，并加了 TS/Dart 映射一致性校验）
   - `logic/file.ts` 已就绪，6 个类型图标已进图标库
   - React / 小程序 / Flutter 的 PromptInput 附件条 + Upload 文件列表
   - 验收：同一个 `.webp` 在附件条与上传列表显示同一图标与配色
-- [ ] **发送按钮靠右修复铺到其余端**（Vue 3 已修，改的是共享 CSS，需确认各端渲染）
+- [x] **发送按钮靠右修复**（改的是共享 CSS，各端同时生效）
 
 ## 第 2 批 · 动效
 

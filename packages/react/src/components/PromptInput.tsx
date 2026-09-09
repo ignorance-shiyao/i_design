@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
-import { formatSize } from '@i-design/common'
+import { fileTypeOf, formatSize } from '@i-design/common'
 import { Icon } from './Icon'
 
 export interface PromptAttachment {
@@ -86,10 +86,25 @@ export function PromptInput({
       {attachments.length > 0 && (
         <div className="i-prompt__attachments">
           {attachments.map((file, index) => (
-            <span key={file.name + index} className="i-prompt__file">
-              <Icon name="file" size={12} />
-              {file.name}
-              {file.size ? ` · ${formatSize(file.size)}` : ''}
+            <span
+              key={file.name + index}
+              className="i-prompt__file"
+              style={
+                {
+                  '--i-file-color': `var(--i-chart-${fileTypeOf(file.name).slot || 1})`
+                } as React.CSSProperties
+              }
+            >
+              {/* 类型色只上在图标上，文件名保持正文色：彩色文件名会和链接混淆 */}
+              <span className="i-prompt__file-icon">
+                <Icon name={fileTypeOf(file.name).icon} size={14} />
+              </span>
+              <span className="i-prompt__file-name">{file.name}</span>
+              {/* 颜色不作为唯一线索：类型名同时以文字给出 */}
+              <span className="i-prompt__file-meta">
+                {fileTypeOf(file.name).label}
+                {file.size ? ` · ${formatSize(file.size)}` : ''}
+              </span>
               <button
                 className="i-prompt__file-remove"
                 aria-label={`移除 ${file.name}`}

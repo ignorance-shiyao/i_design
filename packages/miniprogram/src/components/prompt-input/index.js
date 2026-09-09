@@ -5,7 +5,7 @@
  * 量 scrollHeight 的做法；但它也会盖在其他元素之上，所以发送按钮与它同级平铺，
  * 而不是浮在输入框内部。
  */
-import { formatSize } from '@i-design/common'
+import { fileTypeOf, formatSize } from '@i-design/common'
 
 Component({
   options: { addGlobalClass: true, multipleSlots: true },
@@ -31,7 +31,17 @@ Component({
     },
     attachments: function (files) {
       this.setData({
-        files: files.map((f) => ({ ...f, sizeText: f.size ? formatSize(f.size) : '' }))
+        // 类型图标与配色在这里算好：WXML 里调不了函数
+        files: files.map((f) => {
+          const type = fileTypeOf(f.name || '')
+          return {
+            ...f,
+            sizeText: f.size ? formatSize(f.size) : '',
+            typeIcon: type.icon,
+            typeLabel: type.label,
+            typeSlot: type.slot || 1
+          }
+        })
       })
     }
   },

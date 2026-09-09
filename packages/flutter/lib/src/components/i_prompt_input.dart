@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../logic/upload.dart';
 import '../theme/i_theme.dart';
+import '../logic/file.dart';
 import '../tokens/tokens.dart';
 import 'i_icon.dart';
 
@@ -252,11 +253,34 @@ class _FileChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IIcon('file', size: 12, color: c.textTertiary),
+          // 类型色只上在图标上，文件名保持正文色：彩色文件名会和链接混淆
+          Builder(builder: (context) {
+            final type = fileTypeOf(file.name);
+            final color =
+                Color(kChartSlots[(type.slot == 0 ? 1 : type.slot) - 1]);
+            return Container(
+              width: 20,
+              height: 20,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: color.withAlpha(31),
+                borderRadius: BorderRadius.circular(IDesignTokensLight.radiusSm),
+              ),
+              child: IIcon(type.icon, size: 14, color: color),
+            );
+          }),
           const SizedBox(width: IDesignTokensLight.spacing2),
           Text(
-            file.size == null ? file.name : '${file.name} · ${formatSize(file.size!)}',
-            style: TextStyle(color: c.textSecondary, fontSize: IDesignTokensLight.fontSizeXs),
+            file.name,
+            style: TextStyle(color: c.text, fontSize: IDesignTokensLight.fontSizeXs),
+          ),
+          const SizedBox(width: IDesignTokensLight.spacing1),
+          // 颜色不作为唯一线索：类型名同时以文字给出
+          Text(
+            file.size == null
+                ? fileTypeOf(file.name).label
+                : '${fileTypeOf(file.name).label} · ${formatSize(file.size!)}',
+            style: TextStyle(color: c.textTertiary, fontSize: IDesignTokensLight.fontSizeXs),
           ),
           if (onRemove != null) ...[
             const SizedBox(width: IDesignTokensLight.spacing2),

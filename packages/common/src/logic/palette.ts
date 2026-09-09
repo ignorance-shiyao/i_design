@@ -163,10 +163,14 @@ export function contrastRatio(a: string, b: string): number {
 
 /**
  * 在给定底色上选一个可读的文字色。
- * 一律用白字在浅色主题色（比如明黄）上会低到 1.5:1，几乎看不见。
+ *
+ * 不是「哪个对比度更高就用哪个」——那条规则在中等明度的底色上会选出深字：
+ * 品牌蓝 #5e7ce0 上白字 3.86、深字 4.18，取最大值得到深字，
+ * 数值上略高，视觉上完全不对，饱和色底上的深字看起来像没渲染完。
+ *
+ * 实际做法是优先白字，只有白字连控件文字的 3:1 下限都达不到
+ * （明黄 1.30、亮青 2.37 这类本身就浅的底色）才换深字。
  */
 export function contrastText(background: string): string {
-  return contrastRatio(background, '#ffffff') >= contrastRatio(background, '#1d2129')
-    ? '#ffffff'
-    : '#1d2129'
+  return contrastRatio(background, '#ffffff') >= 3 ? '#ffffff' : '#1d2129'
 }

@@ -6,7 +6,7 @@
  * 点击触发区只抛 pick 事件，由页面决定用哪个 API，选完把文件列表回传。
  * 这样组件在小游戏、企业微信等环境里同样可用。
  */
-import { formatSize } from '@i-design/common'
+import { fileTypeOf, formatSize } from '@i-design/common'
 
 Component({
   options: { addGlobalClass: true },
@@ -20,12 +20,19 @@ Component({
   observers: {
     files: function (files) {
       this.setData({
-        items: files.map((f) => ({
-          ...f,
-          status: f.status || 'ready',
-          percent: f.percent || 0,
-          sizeText: formatSize(f.size || 0)
-        }))
+        // 类型图标与配色在这里算好：WXML 里调不了函数
+        items: files.map((f) => {
+          const type = fileTypeOf(f.name || '')
+          return {
+            ...f,
+            status: f.status || 'ready',
+            percent: f.percent || 0,
+            sizeText: formatSize(f.size || 0),
+            typeIcon: type.icon,
+            typeLabel: type.label,
+            typeSlot: type.slot || 1
+          }
+        })
       })
     }
   },

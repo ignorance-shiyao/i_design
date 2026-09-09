@@ -1,9 +1,16 @@
 <view class="i-prompt {{focused ? 'is-focused' : ''}} {{disabled ? 'is-disabled' : ''}}">
   <view wx:if="{{files.length}}" class="i-prompt__attachments">
-    <view wx:for="{{files}}" wx:key="name" class="i-prompt__file">
-      <view class="i-icon i-icon--file" style="width:12px;height:12px" />
-      <text>{{item.name}}</text>
-      <text wx:if="{{item.sizeText}}">· {{item.sizeText}}</text>
+    <view
+      wx:for="{{files}}"
+      wx:key="name"
+      class="i-prompt__file"
+      style="--i-file-color: var(--i-chart-{{item.typeSlot}})"
+    >
+      <view class="i-prompt__file-icon">
+        <view class="i-icon i-icon--{{item.typeIcon}}" style="width:14px;height:14px" />
+      </view>
+      <text class="i-prompt__file-name">{{item.name}}</text>
+      <text class="i-prompt__file-meta">{{item.typeLabel}}<block wx:if="{{item.sizeText}}"> · {{item.sizeText}}</block></text>
       <view class="i-prompt__file-remove" bindtap="onRemove" data-index="{{index}}">
         <view class="i-icon i-icon--close" style="width:12px;height:12px" />
       </view>

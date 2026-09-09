@@ -12,6 +12,7 @@ export 'src/theme/i_theme.dart';
 export 'src/icons/icons.dart';
 export 'src/logic/anchor.dart';
 export 'src/logic/chart.dart';
+export 'src/logic/file.dart';
 export 'src/logic/flow.dart';
 export 'src/logic/menu.dart';
 export 'src/logic/number.dart';
