@@ -1,0 +1,24 @@
+<view class="i-tree-select">
+  <view
+    class="i-select__trigger {{disabled ? 'is-disabled' : ''}} {{display ? '' : 'is-placeholder'}}"
+    bindtap="onToggle"
+  >
+    <text class="i-select__label">{{display || placeholder}}</text>
+    <i-icon name="chevron-down" size="14" />
+  </view>
+
+  <view wx:if="{{visible}}" class="i-overlay-mask" bindtap="close" />
+  <view wx:if="{{visible}}" class="i-popover i-tree-select__pop">
+    <view class="i-tree-select__panel">
+      <i-tree
+        data="{{data}}"
+        checkable="{{multiple}}"
+        searchable="{{searchable}}"
+        checked="{{checked}}"
+        selected="{{value}}"
+        bindselect="onSelect"
+        bindcheckchange="onCheckChange"
+      />
+    </view>
+  </view>
+</view>

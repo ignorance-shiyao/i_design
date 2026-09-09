@@ -157,8 +157,10 @@ export const SCATTER_MAX_SERIES = 3
 已完成的不再列。以下是真实缺口,按"能立刻动手"的粒度写:
 
 ### 图表(对照 ECharts / Highcharts)
+从 Highcharts 的 `SeriesOptionsType` 联合类型里枚举出真实 series 名,与 ECharts 取交集后
+本体系仍缺的是下面这些(其余多为金融指标线,中后台用不上):
 - [ ] **dataZoom**:图表下方的区间缩放条,以及框选放大。逻辑放 `logic/chart.ts`,五端各接一次
-- [ ] **箱线图**:统计分布,Highcharts 与 ECharts 都有,本体系完全没有
+- [ ] **箱线图 boxplot**、**瀑布图 waterfall**:统计分布与增减归因,两家都有
 - [ ] **桑基图 / 树图**:流量与层级占比
 - [ ] **图表导出**:导出 PNG / SVG。Web 端可由 SVG 序列化,Flutter 走 `RepaintBoundary`,
       小程序走 `canvasToTempFilePath`——三端机制不同,注意不要强求同一份实现
@@ -179,12 +181,15 @@ export const SCATTER_MAX_SERIES = 3
 - [ ] **数字键盘**:金额与验证码场景
 
 ### 中后台(对照 Semi Design)
-- [ ] **下拉菜单 Dropdown** 与 **气泡卡片 Popover**——两者共用一套定位逻辑,
-      建议先抽 `logic/overlay.ts`(触发方式、翻转避让、点击外部关闭),再让两者与已有的
-      Tooltip / Popconfirm 都接上去,避免第四份定位实现
-- [ ] **导航菜单 Menu**:侧栏/顶栏多级
-- [ ] **树 Tree** 与 **树选择 TreeSelect**——先写 `logic/tree.ts`(展开态、半选态、受控搜索)
-- [ ] **级联选择 Cascader**、**穿梭框 Transfer**、**自动完成 AutoComplete**
+Dropdown / Popover / Tree / TreeSelect / Cascader **已完成**,并沉淀了两份共享逻辑:
+`logic/overlay.ts`(翻转避让、贴边推回、主轴对齐)与 `logic/tree.ts`(拍平索引、
+半选传播、禁用继承、搜索命中路径、级联列)。后续同类组件应当复用它们,而不是另起一份。
+
+剩下:
+- [ ] **Tooltip 与 Popconfirm 接入 `logic/overlay`**——这两个目前仍是纯 CSS 定位,
+      没有视口避让。接上去之后四处浮层的行为才真正统一(优先做这条)
+- [ ] **导航菜单 Menu**:侧栏/顶栏多级,可复用 `logic/tree` 的展开态
+- [ ] **穿梭框 Transfer**、**自动完成 AutoComplete**、**输入标签 TagInput**
 - [ ] **通知 Notification**(角落、带操作,区别于已有的 Message)
 - [ ] **时间选择 TimePicker**、**页内锚点 Anchor**、**图片预览**、**页面框架 Layout**
 

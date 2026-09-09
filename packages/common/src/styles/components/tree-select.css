@@ -1,0 +1,17 @@
+/* 树选择：触发器沿用 Select 的外观，面板里装一棵树 */
+.i-tree-select { display: inline-block; width: 100%; max-width: 320px; }
+
+.i-tree-select__panel {
+  /*
+   * 面板给一个下限宽度：树的行本来就短，面板跟着内容收缩会窄到放不下搜索框，
+   * 上限则防止层级很深时横向撑爆。
+   */
+  min-width: 240px;
+  max-width: 360px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* 小程序端：浮层就在组件内，位置固定在触发器下方 */
+.i-tree-select { position: relative; }
+.i-tree-select__pop { position: absolute; left: 0; top: calc(100% + 4px); padding: var(--i-spacing-2); }

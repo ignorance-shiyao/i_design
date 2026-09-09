@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import ITree from '@/components/ITree.vue'
+import ITreeSelect from '@/components/ITreeSelect.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import type { TreeNode } from '@i-design/common'
 
@@ -34,6 +35,8 @@ const data: TreeNode[] = [
 const checked = ref<string[]>([])
 const expanded = ref<string[]>(['platform', 'auth'])
 const selected = ref('account')
+const picked = ref('')
+const pickedMany = ref<string[]>([])
 </script>
 
 <template>
@@ -77,6 +80,37 @@ const selected = ref('account')
       code='<ITree :data="data" searchable checkable v-model:checked="checked" />'
     >
       <ITree :data="data" searchable checkable v-model:checked="checked" style="max-width: 320px" />
+    </DemoBlock>
+    <h2>TreeSelect 树选择</h2>
+    <p>
+      当层级数据只是「一个字段的候选值」时，整棵树摊在页面上太占地方。
+      树选择把同一棵树收进下拉面板，触发器上显示已选路径。
+    </p>
+
+    <DemoBlock
+      title="单选"
+      description="触发器显示完整路径，用户不必展开也知道选的是哪一层的哪一项。选完即收起。"
+      lang="vue"
+      code='<ITreeSelect :data="data" v-model="picked" />'
+    >
+      <div>
+        <ITreeSelect :data="data" v-model="picked" />
+        <p class="i-tree-demo-value">当前值：{{ picked || '（未选择）' }}</p>
+      </div>
+    </DemoBlock>
+
+    <DemoBlock
+      title="多选"
+      description="多选时只展示叶子节点——父节点出现在选中集合里只是「它的子节点都选了」的推论，把它也列出来会让用户以为多选了一项。超过两项折叠为「等 N 项」。多选不自动收起，方便连续勾选。"
+      lang="vue"
+      code='<ITreeSelect :data="data" multiple v-model:checked="pickedMany" />'
+    >
+      <div>
+        <ITreeSelect :data="data" multiple v-model:checked="pickedMany" />
+        <p class="i-tree-demo-value">
+          当前值：{{ pickedMany.length ? pickedMany.join('、') : '（未选择）' }}
+        </p>
+      </div>
     </DemoBlock>
   </article>
 </template>
