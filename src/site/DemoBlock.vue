@@ -10,7 +10,7 @@ defineProps<{
   description?: string
   code?: string
   lang?: string
-  /** 传入后代码区变成七端标签页；片段的属性名由 scripts/check-snippets.mjs 核对 */
+  /** 传入后代码区变成多端标签页；片段的属性名由 scripts/check-snippets.mjs 核对 */
   snippets?: SnippetSet
 }>()
 const showCode = ref(false)

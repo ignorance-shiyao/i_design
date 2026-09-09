@@ -22,7 +22,7 @@ export interface Framework {
   note: string
 }
 
-/** 七端的顺序：Web 三端 → 小程序 → 移动两端 → Flutter，与文档站的叙述顺序一致 */
+/** 各端的顺序：Web 三端 → 小程序 → 移动两端 → Flutter，与文档站的叙述顺序一致 */
 export const frameworks: Framework[] = [
   {
     id: 'vue-next',

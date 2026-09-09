@@ -10,7 +10,7 @@
 
 ## 1. 这个项目是什么
 
-一套设计体系,不是"一个组件库"。同一套设计决策同时落到七个端:
+一套设计体系,不是"一个组件库"。同一套设计决策同时落到多个端:
 
 | 端 | 目录 | 技术 |
 | --- | --- | --- |
@@ -24,7 +24,7 @@
 
 核心约定一句话:**令牌、图标、交互算法只存在一份(`packages/common`),各端只写渲染适配。**
 
-当前规模:117 个令牌 · 40 个图标 · 五端组件覆盖 64/64 · 移动专有组件 12 个。
+当前规模:117 个令牌 · 40 个图标 · 各端组件覆盖 64/64 · 移动专有组件 12 个。
 
 ---
 
@@ -94,7 +94,7 @@ React 端 17 个组件实现了却从未导出;移动端三个组件样式没进
 8. 跑第 5 节的校验,全绿再提交。
 
 **移动专有形态**(NavBar / Tabbar / Popup / SwipeCell / Picker 这类)只放 `mobile-vue` 与 `mobile-react`,
-不进 Web 五端矩阵。
+不进 Web 各端矩阵。
 
 ---
 
@@ -159,7 +159,7 @@ export const SCATTER_MAX_SERIES = 3
 ### 图表(对照 ECharts / Highcharts)
 从 Highcharts 的 `SeriesOptionsType` 联合类型里枚举出真实 series 名,与 ECharts 取交集后
 本体系仍缺的是下面这些(其余多为金融指标线,中后台用不上):
-- [ ] **dataZoom**:图表下方的区间缩放条,以及框选放大。逻辑放 `logic/chart.ts`,五端各接一次
+- [ ] **dataZoom**:图表下方的区间缩放条,以及框选放大。逻辑放 `logic/chart.ts`,各端各接一次
 - [ ] **箱线图 boxplot**、**瀑布图 waterfall**:统计分布与增减归因,两家都有
 - [ ] **桑基图 / 树图**:流量与层级占比
 - [ ] **图表导出**:导出 PNG / SVG。Web 端可由 SVG 序列化,Flutter 走 `RepaintBoundary`,
@@ -240,4 +240,4 @@ vim src/data/componentCatalog.ts                # planned → ready
 npm run build && npm run check:parity
 ```
 
-提交前确认 `git status` 干净、五端覆盖矩阵没有回退。
+提交前确认 `git status` 干净、各端覆盖矩阵没有回退。

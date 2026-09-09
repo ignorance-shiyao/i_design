@@ -49,7 +49,7 @@ const canPlus = computed(
   () => !props.disabled && (props.modelValue === null || props.modelValue < props.max)
 )
 
-/** 夹取与取整走公共层，七端同一套规则 */
+/** 夹取与取整走公共层，各端同一套规则 */
 function normalize(value: number) {
   return roundTo(clampNumber(value, props.min, props.max), props.precision)
 }

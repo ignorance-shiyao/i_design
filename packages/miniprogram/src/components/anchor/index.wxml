@@ -1,0 +1,12 @@
+<view class="i-anchor">
+  <view class="i-anchor__list">
+    <view
+      wx:for="{{items}}"
+      wx:key="key"
+      class="i-anchor__link {{active === item.key ? 'is-active' : ''}}"
+      data-level="{{item.level || 2}}"
+      data-key="{{item.key}}"
+      bindtap="onJump"
+    >{{item.label}}</view>
+  </view>
+</view>

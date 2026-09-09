@@ -20,7 +20,7 @@ interface Turn {
 
 const answer =
   '分页的页码序列由公共层的 buildPages 计算：首尾页恒在，中间窗口跟随当前页滑动，' +
-  '断开处用省略号占位。七端引用同一份实现，因此同一组参数在任意一端都会得到同样的序列。'
+  '断开处用省略号占位。各端引用同一份实现，因此同一组参数在任意一端都会得到同样的序列。'
 
 const turns = ref<Turn[]>([
   { role: 'user', text: '分页组件的省略号是怎么算的？' },
@@ -140,7 +140,7 @@ function copy(text: string) {
     </DemoBlock>
 
     <p class="i-note">
-      这组组件同样是七端齐备的：Vue 3 / Vue 2 / React / 小程序 / 移动两端 / Flutter，
+      这组组件同样是多端齐备的：Vue 3 / Vue 2 / React / 小程序 / 移动两端 / Flutter，
       共用同一份样式与语义色。下面每个示例的「查看代码」里都能切换到对应端的写法，
       片段里的属性名由校验脚本与各端实现逐个核对。
     </p>
@@ -176,7 +176,7 @@ function copy(text: string) {
         <IChatThinking :pending="true" label="正在推理" />
         <IChatThinking duration="思考了 12 秒" :default-open="true">
 先确认分页规则写在哪一层：如果写在组件里，各端就会各写一份。
-查到 packages/common/src/logic/pagination.ts，七端共用同一份实现。
+查到 packages/common/src/logic/pagination.ts，多端共用同一份实现。
         </IChatThinking>
       </div>
     </DemoBlock>

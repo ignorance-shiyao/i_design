@@ -52,6 +52,9 @@ import IDropdown from './IDropdown.vue'
 import ITree from './ITree.vue'
 import ICascader from './ICascader.vue'
 import ITreeSelect from './ITreeSelect.vue'
+import IMenu from './IMenu.vue'
+import IAnchor from './IAnchor.vue'
+import INotificationLayer from './INotificationLayer.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -95,6 +98,9 @@ export {
   ITree,
   ICascader,
   ITreeSelect,
+  IMenu,
+  IAnchor,
+  INotificationLayer,
   IForm,
   IFormItem,
   ITag,

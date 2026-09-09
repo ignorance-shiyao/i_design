@@ -9,6 +9,7 @@
  * 之前就漏掉了 17 个已实现但从未导出的组件。
  */
 export { Alert, type AlertProps } from './components/Alert'
+export { Anchor, type AnchorItem, type AnchorProps } from './components/Anchor'
 export { Avatar, type AvatarProps } from './components/Avatar'
 export { AvatarGroup, type AvatarGroupProps } from './components/AvatarGroup'
 export { Badge, type BadgeProps } from './components/Badge'
@@ -46,8 +47,10 @@ export { Input, type InputProps } from './components/Input'
 export { InputNumber, type InputNumberProps } from './components/InputNumber'
 export { List, type ListItem, type ListProps } from './components/List'
 export { Loading, type LoadingProps } from './components/Loading'
+export { Menu, type MenuProps } from './components/Menu'
 export { message, type MessageOptions } from './components/Message'
 export { Modal, type ModalProps } from './components/Modal'
+export { closeNotification, NotificationLayer, notification, type NotificationAction, type NotificationItem, type NotifyOptions } from './components/NotificationLayer'
 export { Pagination, type PaginationProps } from './components/Pagination'
 export { Popconfirm, type PopconfirmProps } from './components/Popconfirm'
 export { Popover, type PopoverProps } from './components/Popover'

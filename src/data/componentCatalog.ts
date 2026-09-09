@@ -63,8 +63,8 @@ export const componentCatalog: CatalogGroup[] = [
       { label: '分页', api: 'IPagination', status: 'ready', note: '长列表分段浏览' },
       { label: '分段控制器', api: 'ISegmented', status: 'ready', note: '切换同一块区域内的数据视角' },
       { label: '下拉菜单', api: 'IDropdown', status: 'ready', note: '收纳次级操作，自动避让视口边缘' },
-      { label: '导航菜单', status: 'planned', note: '侧栏或顶栏的多级菜单' },
-      { label: '页内锚点', status: 'planned', note: '长文档的章节跳转与高亮' }
+      { label: '导航菜单', api: 'IMenu', status: 'ready', note: '多级入口，选中项祖先自动展开' },
+      { label: '页内锚点', api: 'IAnchor', status: 'ready', note: '章节跳转，触底自动选中末节' }
     ]
   },
   {
@@ -147,7 +147,7 @@ export const componentCatalog: CatalogGroup[] = [
       { label: '加载中', api: 'ILoading', status: 'ready', note: '等待中的占位与遮罩' },
       { label: '骨架屏', api: 'ISkeleton', status: 'ready', note: '首屏加载时的结构预览' },
       { label: '进度', api: 'IProgress', status: 'ready', note: '线形与环形，可表示未知进度' },
-      { label: '通知', status: 'planned', note: '带标题与操作的角落通知' },
+      { label: '通知', api: 'notification', status: 'ready', note: '角落常驻，带操作时不自动关闭' },
       { label: '水印', status: 'planned', note: '页面级的防泄露标记' }
     ]
   },

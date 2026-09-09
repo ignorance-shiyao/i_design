@@ -19,25 +19,25 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
     icon: 'palette',
     title: '设计令牌',
     detail: '颜色、字号、间距、圆角、阴影、动效共 99 个令牌，编译成 CSS / SCSS / JSON / WXSS / Dart 五种产物。',
-    covers: '七端全部'
+    covers: '全部端'
   },
   {
     icon: 'grid',
     title: '图标数据',
     detail: '38 个图标只存 SVG path，不含任何框架代码；Web 内联、小程序用 CSS mask、Flutter 走 flutter_svg。',
-    covers: '七端全部'
+    covers: '全部端'
   },
   {
     icon: 'code',
     title: '交互规则',
     detail: '分页序列、表格排序、选项移动、日期日历、表单校验、上传状态——纯函数，与渲染无关。',
-    covers: 'Web 五端直接复用，Flutter 按同一算法移植'
+    covers: 'Web 各端直接复用，Flutter 按同一算法移植'
   },
   {
     icon: 'layers',
     title: 'BEM 样式',
     detail: '一份 CSS。React 版与 Vue 版加载的是同一个文件，因此「两端长得不一样」在架构上不可能发生。',
-    covers: 'Web 五端 + 小程序（自动降级为 WXSS）'
+    covers: 'Web 各端 + 小程序（自动降级为 WXSS）'
   }
 ]
 </script>
@@ -51,7 +51,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
       不是口号，而是构建的结果。
     </p>
 
-    <h2>七端一览</h2>
+    <h2>支持的端</h2>
     <div class="cp-grid">
       <section
         v-for="f in frameworks"
@@ -69,7 +69,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
       </section>
     </div>
 
-    <h2>同一个用法，七端怎么写</h2>
+    <h2>同一个用法，各端怎么写</h2>
     <p>
       下面三个片段里出现的每一个属性名，都由
       <code>scripts/check-snippets.mjs</code> 与那一端的真实实现核对过——文档写错的用法，
@@ -125,7 +125,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
 
     <p>
       举个具体的：分页要显示哪些页码、省略号断在哪里，是一段与框架毫无关系的计算。
-      它只写一次，七端引用同一份。
+      它只写一次，各端引用同一份。
     </p>
     <CodeBlock :code="sharedLogicSnippet" lang="ts" />
 

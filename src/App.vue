@@ -2,6 +2,7 @@
 import SiteHeader from '@/site/SiteHeader.vue'
 import SiteFooter from '@/site/SiteFooter.vue'
 import ThemePanel from '@/site/ThemePanel.vue'
+import INotificationLayer from '@/components/INotificationLayer.vue'
 </script>
 
 <template>
@@ -14,4 +15,5 @@ import ThemePanel from '@/site/ThemePanel.vue'
   </RouterView>
   <SiteFooter />
   <ThemePanel />
+  <INotificationLayer />
 </template>

@@ -20,7 +20,9 @@ const mpAlias = {
   'form-item': 'form-item',
   'chat-tool-call': 'chat-tool',
   loading: 'loading',
-  'avatar-group': 'avatar-group'
+  'avatar-group': 'avatar-group',
+  // 通知层在小程序端就叫 notification，Web 端多了 Layer 后缀表示它是挂载点
+  'notification-layer': 'notification'
 }
 
 /*

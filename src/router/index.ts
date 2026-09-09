@@ -42,6 +42,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'overlay', component: () => import('@/pages/components/OverlayPage.vue') },
       { path: 'tree', component: () => import('@/pages/components/TreePage.vue') },
       { path: 'cascader', component: () => import('@/pages/components/CascaderPage.vue') },
+      { path: 'navigation', component: () => import('@/pages/components/NavigationPage.vue') },
       { path: 'card', component: () => import('@/pages/components/CardPage.vue') },
       { path: 'table', component: () => import('@/pages/components/TablePage.vue') },
       { path: 'pagination', component: () => import('@/pages/components/PaginationPage.vue') },

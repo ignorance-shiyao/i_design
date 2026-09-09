@@ -1,0 +1,25 @@
+/* 页内锚点：长文档的章节跳转 */
+.i-anchor { position: relative; font-size: var(--i-font-size-sm); }
+.i-anchor__list { margin: 0; padding: 0; list-style: none; }
+.i-anchor__link {
+  display: block;
+  padding: var(--i-spacing-1) var(--i-spacing-3);
+  border-radius: var(--i-radius-sm);
+  color: var(--i-color-text-tertiary);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-anchor__link:hover { color: var(--i-color-text); background: var(--i-color-bg-subtle); }
+/* 当前章节：底色 + 文字色，不用左侧竖条 */
+.i-anchor__link.is-active {
+  color: var(--i-color-brand);
+  background: var(--i-color-brand-subtle);
+  font-weight: 500;
+}
+/* 二级标题缩进，让层级一眼可读 */
+.i-anchor__link[data-level='3'] { padding-left: var(--i-spacing-6); }
+.i-anchor__link[data-level='4'] { padding-left: var(--i-spacing-8); }

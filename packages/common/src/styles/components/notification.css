@@ -1,0 +1,81 @@
+/*
+ * 通知：屏幕角落、带标题与操作，可长期停留。
+ * 与 Message 的分界——一句话的结果反馈用 Message（居中、自动消失），
+ * 需要用户读完甚至去点一下的用 Notification。
+ */
+.i-notification-layer {
+  position: fixed;
+  top: var(--i-spacing-6);
+  right: var(--i-spacing-6);
+  z-index: 1300;
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  /* 容器不拦截点击，否则右上角整块区域都点不了 */
+  pointer-events: none;
+}
+.i-notification {
+  pointer-events: auto;
+  display: flex;
+  gap: var(--i-spacing-3);
+  width: 340px;
+  padding: var(--i-spacing-4);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-lg);
+}
+/* 状态由图标与其淡底表达，不改整块底色，也不加边线 */
+.i-notification__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--i-radius-md);
+}
+.i-notification--info .i-notification__icon { color: var(--i-color-info); background: var(--i-color-info-subtle); }
+.i-notification--success .i-notification__icon { color: var(--i-color-success); background: var(--i-color-success-subtle); }
+.i-notification--warning .i-notification__icon { color: var(--i-color-warning); background: var(--i-color-warning-subtle); }
+.i-notification--danger .i-notification__icon { color: var(--i-color-danger); background: var(--i-color-danger-subtle); }
+
+.i-notification__body { flex: 1; min-width: 0; }
+.i-notification__title { font-size: var(--i-font-size-md); font-weight: 500; color: var(--i-color-text); }
+.i-notification__desc {
+  margin-top: var(--i-spacing-1);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  line-height: var(--i-line-height-base);
+}
+.i-notification__actions { display: flex; gap: var(--i-spacing-2); margin-top: var(--i-spacing-3); }
+.i-notification__close {
+  flex: none;
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+}
+.i-notification__close:hover { color: var(--i-color-text); }
+
+/* 从右侧滑入，暗示它来自屏幕外而不是原地出现 */
+.i-notification-enter-active,
+.i-notification-leave-active {
+  transition: opacity var(--i-motion-base) var(--i-motion-easing),
+    transform var(--i-motion-base) var(--i-motion-easing);
+}
+.i-notification-enter-from,
+.i-notification-leave-to { opacity: 0; transform: translateX(16px); }
+.i-notification-move { transition: transform var(--i-motion-base) var(--i-motion-easing); }
+
+@media (max-width: 600px) {
+  .i-notification-layer { left: var(--i-spacing-4); right: var(--i-spacing-4); }
+  .i-notification { width: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .i-notification-enter-active,
+  .i-notification-leave-active,
+  .i-notification-move { transition: none; }
+}

@@ -86,6 +86,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/overlay', label: 'Popover / Dropdown 浮层' },
       { to: '/components/tree', label: 'Tree 树形控件' },
       { to: '/components/cascader', label: 'Cascader 级联选择' },
+      { to: '/components/navigation', label: 'Menu / Anchor / Notification' },
       { to: '/components/result', label: 'Result 结果页' }
     ]
   },

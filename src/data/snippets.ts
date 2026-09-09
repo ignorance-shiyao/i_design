@@ -277,7 +277,7 @@ const page = ref(1)
 }
 
 /** 各端共享的那部分——放在跨端页上说明「为什么它们必然一致」 */
-export const sharedLogicSnippet = `// packages/common/src/logic/pagination.ts —— 七端共用的同一份规则
+export const sharedLogicSnippet = `// packages/common/src/logic/pagination.ts —— 多端共用的同一份规则
 export function buildPages(current: number, pageCount: number, maxVisible = 5): PageItem[] {
   const count = Math.max(1, pageCount)
   const window = Math.max(1, maxVisible)

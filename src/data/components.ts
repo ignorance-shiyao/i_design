@@ -85,6 +85,9 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Tree', cn: '树形控件', to: '/components/tree', desc: '层级数据的展开、勾选与搜索', status: 'ready' },
       { name: 'Cascader', cn: '级联选择', to: '/components/cascader', desc: '逐级选择层级数据', status: 'ready' },
       { name: 'TreeSelect', cn: '树选择', to: '/components/tree', desc: '把树收进下拉面板里选', status: 'ready' },
+      { name: 'Menu', cn: '导航菜单', to: '/components/navigation', desc: '侧栏多级入口，可收起为图标栏', status: 'ready' },
+      { name: 'Anchor', cn: '页内锚点', to: '/components/navigation', desc: '章节跳转与跟随高亮', status: 'ready' },
+      { name: 'Notification', cn: '通知', to: '/components/navigation', desc: '角落通知，可常驻并带操作', status: 'ready' },
       { name: 'Result', cn: '结果页', to: '/components/result', desc: '操作结果的整页反馈', status: 'ready' }
     ]
   }

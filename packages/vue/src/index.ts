@@ -8,6 +8,7 @@
  * 本文件由 packages/vue/scripts/build-index.mjs 按目录生成。
  */
 export { default as IAlert } from './components/IAlert.vue'
+export { default as IAnchor } from './components/IAnchor.vue'
 export { default as IAvatar } from './components/IAvatar.vue'
 export { default as IAvatarGroup } from './components/IAvatarGroup.vue'
 export { default as IBadge } from './components/IBadge.vue'
@@ -46,7 +47,9 @@ export { default as IInput } from './components/IInput.vue'
 export { default as IInputNumber } from './components/IInputNumber.vue'
 export { default as IList } from './components/IList.vue'
 export { default as ILoading } from './components/ILoading.vue'
+export { default as IMenu } from './components/IMenu.vue'
 export { default as IModal } from './components/IModal.vue'
+export { default as INotificationLayer } from './components/INotificationLayer.vue'
 export { default as IPagination } from './components/IPagination.vue'
 export { default as IPopconfirm } from './components/IPopconfirm.vue'
 export { default as IPopover } from './components/IPopover.vue'

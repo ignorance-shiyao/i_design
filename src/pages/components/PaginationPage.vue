@@ -38,8 +38,8 @@ const pagedRows = computed(() =>
     </p>
 
     <DemoBlock
-      title="七端用法"
-      description="页码序列由公共层的 buildPages 计算，七端逐项相同——Flutter 端另有黄金测试逐个用例比对。"
+      title="多端用法"
+      description="页码序列由公共层的 buildPages 计算，各端逐项相同——Flutter 端另有黄金测试逐个用例比对。"
       :snippets="snippets.pagination"
     >
       <IPagination v-model="basic" :total="240" :page-size="10" />

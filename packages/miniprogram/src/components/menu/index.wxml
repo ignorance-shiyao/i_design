@@ -1,0 +1,36 @@
+<view class="i-menu i-menu--vertical {{collapsed ? 'is-collapsed' : ''}}">
+  <block wx:for="{{rows}}" wx:key="key">
+    <block wx:if="{{item.isGroup}}">
+      <view class="i-menu__group-head" data-key="{{item.key}}" bindtap="onToggle">
+        <i-icon wx:if="{{item.icon}}" name="{{item.icon}}" size="16" class="i-menu__icon" />
+        <text class="i-menu__label">{{item.label}}</text>
+        <i-icon class="i-menu__arrow {{item.expanded ? 'is-open' : ''}}" name="chevron-right" size="14" />
+      </view>
+      <view wx:if="{{item.expanded}}" class="i-menu__sub">
+        <view
+          wx:for="{{item.children}}"
+          wx:for-item="child"
+          wx:key="key"
+          class="i-menu__item {{child.active ? 'is-active' : ''}} {{child.disabled ? 'is-disabled' : ''}}"
+          style="padding-left:32px"
+          data-key="{{child.key}}"
+          data-disabled="{{child.disabled}}"
+          bindtap="onSelect"
+        >
+          <i-icon wx:if="{{child.icon}}" name="{{child.icon}}" size="16" class="i-menu__icon" />
+          <text class="i-menu__label">{{child.label}}</text>
+        </view>
+      </view>
+    </block>
+    <view
+      wx:else
+      class="i-menu__item {{item.active ? 'is-active' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+      data-key="{{item.key}}"
+      data-disabled="{{item.disabled}}"
+      bindtap="onSelect"
+    >
+      <i-icon wx:if="{{item.icon}}" name="{{item.icon}}" size="16" class="i-menu__icon" />
+      <text class="i-menu__label">{{item.label}}</text>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,30 @@
+<view class="i-notification-layer">
+  <view
+    wx:for="{{items}}"
+    wx:key="id"
+    class="i-notification i-notification--{{item.type || 'info'}}"
+  >
+    <view class="i-notification__icon">
+      <i-icon name="{{icons[item.type || 'info']}}" size="18" />
+    </view>
+    <view class="i-notification__body">
+      <view class="i-notification__title">{{item.title}}</view>
+      <view wx:if="{{item.description}}" class="i-notification__desc">{{item.description}}</view>
+      <view wx:if="{{item.actions.length}}" class="i-notification__actions">
+        <i-button
+          wx:for="{{item.actions}}"
+          wx:for-item="action"
+          wx:for-index="ai"
+          wx:key="label"
+          size="sm"
+          data-id="{{item.id}}"
+          data-index="{{ai}}"
+          bindtap="onAction"
+        >{{action.label}}</i-button>
+      </view>
+    </view>
+    <view class="i-notification__close" data-id="{{item.id}}" bindtap="onClose">
+      <i-icon name="close" size="14" />
+    </view>
+  </view>
+</view>

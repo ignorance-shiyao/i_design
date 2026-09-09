@@ -12,6 +12,7 @@
 
 @import './components/action-sheet.css';
 @import './components/alert.css';
+@import './components/anchor.css';
 @import './components/avatar-group.css';
 @import './components/avatar.css';
 @import './components/badge.css';
@@ -45,10 +46,12 @@
 @import './components/input.css';
 @import './components/list.css';
 @import './components/loading.css';
+@import './components/menu.css';
 @import './components/message-list.css';
 @import './components/modal.css';
 @import './components/nav-bar.css';
 @import './components/notice-bar.css';
+@import './components/notification.css';
 @import './components/overlay.css';
 @import './components/pagination.css';
 @import './components/picker.css';
