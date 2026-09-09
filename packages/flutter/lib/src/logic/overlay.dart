@@ -7,6 +7,12 @@ library;
 
 enum IPlacement { top, bottom, left, right }
 
+/// 主轴对齐方式。
+/// center 让浮层以触发元素为中心，适合气泡与提示；
+/// start 让起始边与触发元素对齐，适合下拉菜单与选择器——
+/// 面板通常比触发器宽得多，居中会让它向左溢出、压住旁边的内容。
+enum IOverlayAlign { center, start }
+
 class IOverlayRect {
   const IOverlayRect(this.x, this.y, this.width, this.height);
   final double x;
@@ -77,6 +83,7 @@ IOverlayPosition resolveOverlay({
   double offset = 8,
   double padding = 8,
   bool flip = true,
+  IOverlayAlign align = IOverlayAlign.center,
 }) {
   var finalPlacement = placement;
   if (flip &&
@@ -92,7 +99,9 @@ IOverlayPosition resolveOverlay({
         ? trigger.y - popup.height - offset
         : trigger.y + trigger.height + offset;
     x = _clamp(
-      trigger.x + trigger.width / 2 - popup.width / 2,
+      align == IOverlayAlign.start
+          ? trigger.x
+          : trigger.x + trigger.width / 2 - popup.width / 2,
       viewport.x + padding,
       viewport.x + viewport.width - popup.width - padding,
     );
@@ -101,7 +110,9 @@ IOverlayPosition resolveOverlay({
         ? trigger.x - popup.width - offset
         : trigger.x + trigger.width + offset;
     y = _clamp(
-      trigger.y + trigger.height / 2 - popup.height / 2,
+      align == IOverlayAlign.start
+          ? trigger.y
+          : trigger.y + trigger.height / 2 - popup.height / 2,
       viewport.y + padding,
       viewport.y + viewport.height - popup.height - padding,
     );

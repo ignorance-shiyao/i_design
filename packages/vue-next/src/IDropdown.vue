@@ -44,14 +44,22 @@ const navItems = computed(() =>
 async function place() {
   await nextTick()
   const t = triggerEl.value?.getBoundingClientRect()
-  const p = popupEl.value?.getBoundingClientRect()
-  if (!t || !p) return
+  const el = popupEl.value
+  if (!t || !el) return
+  /*
+   * 浮层尺寸用 offsetWidth/offsetHeight，而不是 getBoundingClientRect：
+   * 出现动画带 scale(0.97)，用外接矩形会量到缩放中的尺寸，
+   * 于是按偏小的宽度算中心，浮层最终停在偏移几像素的位置。
+   */
+  const p = { x: 0, y: 0, width: el.offsetWidth, height: el.offsetHeight }
   pos.value = resolveOverlay({
     trigger: t,
     popup: p,
     viewport: { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight },
     placement: props.placement,
-    offset: 4
+    offset: 4,
+    // 菜单通常比触发按钮宽，居中会向左溢出压住旁边的内容
+    align: 'start'
   })
 }
 

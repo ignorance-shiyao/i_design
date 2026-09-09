@@ -9,6 +9,13 @@ export interface PopoverProps {
   /** 点击触发适合承载可交互内容，悬浮适合纯说明 */
   trigger?: 'click' | 'hover'
   disabled?: boolean
+  /**
+   * 受控开合。不传时组件自己管；传了则以外部为准——
+   * Select、Cascader 这类「选完就该收起」的控件需要在选中时主动关闭。
+   */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  align?: 'center' | 'start'
   children?: ReactNode
 }
 
@@ -18,28 +25,44 @@ export function Popover({
   placement = 'top',
   trigger = 'click',
   disabled = false,
+  open: openProp,
+  onOpenChange,
+  align = 'center',
   children
 }: PopoverProps) {
   const triggerRef = useRef<HTMLSpanElement | null>(null)
   const popupRef = useRef<HTMLDivElement | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const [visible, setVisible] = useState(false)
+  const [inner, setInner] = useState(false)
+  const controlled = openProp !== undefined
+  const visible = controlled ? !!openProp : inner
+  const setVisible = (next: boolean) => {
+    if (!controlled) setInner(next)
+    onOpenChange?.(next)
+  }
   const [pos, setPos] = useState({ x: 0, y: 0, placement, arrow: 0 })
 
   // 位置要等浮层挂上去、量得到尺寸之后再算，否则首次打开会落在错误的位置
   const place = useCallback(() => {
     const t = triggerRef.current?.getBoundingClientRect()
-    const p = popupRef.current?.getBoundingClientRect()
-    if (!t || !p) return
+    const el = popupRef.current
+    if (!t || !el) return
+    /*
+     * 浮层尺寸用 offsetWidth/offsetHeight，而不是 getBoundingClientRect：
+     * 出现动画带 scale(0.97)，用外接矩形会量到缩放中的尺寸，
+     * 于是按偏小的宽度算中心，浮层最终停在偏移几像素的位置。
+     */
+    const p = { x: 0, y: 0, width: el.offsetWidth, height: el.offsetHeight }
     setPos(
       resolveOverlay({
         trigger: t,
         popup: p,
         viewport: { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight },
-        placement
+        placement,
+        align
       })
     )
-  }, [placement])
+  }, [placement, align])
 
   useEffect(() => {
     if (!visible) return

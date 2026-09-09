@@ -33,7 +33,8 @@ const { resolveOverlay, moveMenuActive, firstMenuActive } = await bundle(
   'overlay'
 )
 const {
-  flattenTree, resolveCheckState, toggleChecked, searchTree, leafKeys
+  flattenTree, resolveCheckState, toggleChecked, searchTree, leafKeys,
+  cascaderColumns, cascaderActivate, nodePath
 } = await bundle('packages/common/src/logic/tree.ts', 'tree')
 
 /* ---------- 浮层定位 ---------- */
@@ -52,6 +53,31 @@ const overlayCases = [
   [960, 300, 40, 32, 200, 100, 'right'],   // 右侧放不下 → 翻到左侧
 ]
 const dartPlacement = (p) => `IPlacement.${p}`
+
+// start 对齐：下拉菜单与选择器用，面板起始边贴齐触发器
+const alignCases = [
+  [400, 300, 80, 32, 300, 100, 'bottom'],
+  [900, 300, 80, 32, 300, 100, 'bottom'],  // 贴右缘仍要推回视口
+  [400, 300, 80, 32, 200, 300, 'right'],
+]
+const alignExpectations = alignCases.map(([tx, ty, tw, th, pw, ph, placement]) => {
+  const r = resolveOverlay({
+    trigger: { x: tx, y: ty, width: tw, height: th },
+    popup: { x: 0, y: 0, width: pw, height: ph },
+    viewport: { x: 0, y: 0, width: 1000, height: 600 },
+    placement, align: 'start'
+  })
+  return `    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(${tx}, ${ty}, ${tw}, ${th}),
+          popup: const IOverlayRect(0, 0, ${pw}, ${ph}),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: ${dartPlacement(placement)},
+          align: IOverlayAlign.start,
+        ),
+        ${r.x}, ${r.y}, ${dartPlacement(r.placement)}, ${r.arrow},
+        'resolveOverlay(${tx},${ty} ${placement} start)');`
+})
 const overlayExpectations = overlayCases.map(([tx, ty, tw, th, pw, ph, placement]) => {
   const r = resolveOverlay({
     trigger: { x: tx, y: ty, width: tw, height: th },
@@ -143,6 +169,49 @@ const leafExpectation = (() => {
         (leafKeys(entities, resolveCheckState(entities, toggleChecked(entities, <String>[], 'a', true)).checked)..sort()),
         <String>[${leaves.map((k) => `'${k}'`).join(', ')}]);`
 })()
+
+/* ---------- 级联：列生成与换列截断 ----------
+ * 「在第 2 列换一个选项时第 3 列必须作废」是级联最常见的错误，
+ * 只追加不截断的实现在界面上表现为右侧残留上一次的子项。
+ */
+const cascaderData = [
+  { key: 'cn', label: '中国', children: [
+    { key: 'zj', label: '浙江', children: [{ key: 'hz', label: '杭州' }, { key: 'nb', label: '宁波' }] },
+    { key: 'js', label: '江苏', children: [{ key: 'nj', label: '南京' }] }
+  ]},
+  { key: 'us', label: '美国', children: [{ key: 'ca', label: '加州' }] }
+]
+const cascaderEntities = flattenTree(cascaderData)
+const dartCascaderData = `<ITreeNode>[
+      ITreeNode(key: 'cn', label: '中国', children: <ITreeNode>[
+        ITreeNode(key: 'zj', label: '浙江', children: <ITreeNode>[
+          ITreeNode(key: 'hz', label: '杭州'),
+          ITreeNode(key: 'nb', label: '宁波'),
+        ]),
+        ITreeNode(key: 'js', label: '江苏', children: <ITreeNode>[
+          ITreeNode(key: 'nj', label: '南京'),
+        ]),
+      ]),
+      ITreeNode(key: 'us', label: '美国', children: <ITreeNode>[
+        ITreeNode(key: 'ca', label: '加州'),
+      ]),
+    ]`
+const dartList = (arr) => `<String>[${arr.map((k) => `'${k}'`).join(', ')}]`
+
+const columnCases = [[], ['cn'], ['cn', 'zj'], ['cn', 'zj', 'hz']]
+const columnExpectations = columnCases.map((path) => {
+  const cols = cascaderColumns(cascaderData, cascaderEntities, path)
+  const shape = cols.map((c) => c.map((n) => n.key))
+  return `    _expectColumns(cascaderColumns(data, entities, ${dartList(path)}),
+        <List<String>>[${shape.map((c) => dartList(c)).join(', ')}],
+        'cascaderColumns(${path.join('/')})');`
+})
+
+// 从 cn/zj/hz 切到 js：路径必须被截断为 cn/js
+const activateCases = [[['cn', 'zj', 'hz'], 'js'], [['cn'], 'us'], [[], 'hz']]
+const activateExpectations = activateCases.map(([path, key]) =>
+  `    expect(cascaderActivate(entities, ${dartList(path)}, '${key}'),
+        ${dartList(cascaderActivate(cascaderEntities, path, key))});`)
 
 /* ---------- 分页 ---------- */
 const pageCases = [
@@ -295,6 +364,15 @@ void _expectTreeSearch(ITreeSearchResult actual, Set<String> visible,
   expect(actual.matched, matched, reason: '\$label 命中集合不一致');
 }
 
+void _expectColumns(List<List<ITreeNode>> actual, List<List<String>> expected,
+    String label) {
+  expect(actual.length, expected.length, reason: '\$label 列数不一致');
+  for (var i = 0; i < expected.length; i++) {
+    expect(actual[i].map((n) => n.key).toList(), expected[i],
+        reason: '\$label 第 \$i 列内容不一致');
+  }
+}
+
 void main() {
   test('buildPages 与 Web 端逐项一致', () {
 ${pageExpectations.join('\n')}
@@ -336,6 +414,7 @@ ${moveExpectations.join('\n')}
 
   test('resolveOverlay 落点、翻转与箭头位置与 Web 端一致', () {
 ${overlayExpectations.join('\n')}
+${alignExpectations.join('\n')}
   });
 
   test('moveMenuActive / firstMenuActive 与 Web 端一致', () {
@@ -353,6 +432,13 @@ ${leafExpectation}
   test('树的搜索命中与祖先展开与 Web 端一致', () {
     final entities = flattenTree(${dartTreeData});
 ${searchExpectations.join('\n')}
+  });
+
+  test('级联列生成与换列截断与 Web 端一致', () {
+    final data = ${dartCascaderData};
+    final entities = flattenTree(data);
+${columnExpectations.join('\n')}
+${activateExpectations.join('\n')}
   });
 }
 `

@@ -1,0 +1,2 @@
+@import '../../../dist/styles/cascader.wxss';
+@import '../../../dist/styles/icons.wxss';

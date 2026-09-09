@@ -52,15 +52,23 @@ export function Dropdown({
 
   const place = useCallback(() => {
     const t = triggerRef.current?.getBoundingClientRect()
-    const p = popupRef.current?.getBoundingClientRect()
-    if (!t || !p) return
+    const el = popupRef.current
+    if (!t || !el) return
+    /*
+     * 浮层尺寸用 offsetWidth/offsetHeight，而不是 getBoundingClientRect：
+     * 出现动画带 scale(0.97)，用外接矩形会量到缩放中的尺寸，
+     * 于是按偏小的宽度算中心，浮层最终停在偏移几像素的位置。
+     */
+    const p = { x: 0, y: 0, width: el.offsetWidth, height: el.offsetHeight }
     setPos(
       resolveOverlay({
         trigger: t,
         popup: p,
         viewport: { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight },
         placement,
-        offset: 4
+        offset: 4,
+        // 菜单通常比触发按钮宽，居中会向左溢出压住旁边的内容
+        align: 'start'
       })
     )
   }, [placement])

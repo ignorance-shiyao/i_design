@@ -1,0 +1,29 @@
+<view class="i-cascader">
+  <view
+    class="i-select__trigger {{disabled ? 'is-disabled' : ''}} {{display ? '' : 'is-placeholder'}}"
+    bindtap="onToggle"
+  >
+    <text class="i-select__label">{{display || placeholder}}</text>
+    <i-icon name="chevron-down" size="14" />
+  </view>
+
+  <view wx:if="{{visible}}" class="i-overlay-mask" bindtap="close" />
+  <view wx:if="{{visible}}" class="i-popover i-cascader__pop">
+    <view class="i-cascader__panel">
+      <view wx:for="{{columns}}" wx:for-item="column" wx:for-index="level" wx:key="level" class="i-cascader__column">
+        <view
+          wx:for="{{column}}"
+          wx:key="key"
+          class="i-cascader__option {{item.active ? 'is-active' : ''}} {{item.selected ? 'is-selected' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+          data-key="{{item.key}}"
+          data-disabled="{{item.disabled}}"
+          data-leaf="{{!item.hasChildren}}"
+          bindtap="onPick"
+        >
+          <text>{{item.label}}</text>
+          <i-icon wx:if="{{item.hasChildren}}" name="chevron-right" size="14" class="i-cascader__arrow" />
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

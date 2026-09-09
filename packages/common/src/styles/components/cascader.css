@@ -1,0 +1,52 @@
+/* 级联选择：一列一层，选中的那一项高亮并把下一列带出来 */
+.i-cascader { position: relative; display: inline-block; width: 100%; max-width: 320px; }
+
+.i-cascader__panel {
+  display: flex;
+  align-items: stretch;
+  max-height: 240px;
+  overflow: hidden;
+}
+.i-cascader__column {
+  min-width: 120px;
+  max-height: 240px;
+  margin: 0;
+  padding: var(--i-spacing-1) 0;
+  overflow-y: auto;
+  list-style: none;
+  border-right: 1px solid var(--i-color-hairline);
+}
+.i-cascader__column:last-child { border-right: none; }
+
+.i-cascader__option {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--i-control-height-md);
+  padding: 0 var(--i-spacing-3);
+  border: none;
+  background: none;
+  color: var(--i-color-text);
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.i-cascader__option:hover:not(:disabled) { background: var(--i-color-bg-subtle); }
+/*
+ * 激活项（当前展开的那一列的来源）与最终选中项要能分辨：
+ * 激活只是「路径经过这里」，选中才是结果，所以前者只加底色，后者才上品牌色。
+ */
+.i-cascader__option.is-active { background: var(--i-color-bg-subtle); }
+.i-cascader__option.is-selected { color: var(--i-color-brand); font-weight: 600; }
+.i-cascader__option:disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }
+.i-cascader__option:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+.i-cascader__arrow { margin-left: auto; color: var(--i-color-text-tertiary); }
+
+.i-cascader__empty { padding: var(--i-spacing-4); color: var(--i-color-text-tertiary); }
+
+/* 小程序端：浮层就在组件内，位置固定在触发器下方 */
+.i-cascader__pop { position: absolute; left: 0; top: calc(100% + 4px); padding: 0; }
+.i-cascader__option.is-disabled { color: var(--i-color-text-tertiary); }

@@ -79,6 +79,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ICascader",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IChart",
     "ends": {
       "vue-next": true,

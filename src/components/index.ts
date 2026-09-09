@@ -50,6 +50,7 @@ import IPopconfirm from './IPopconfirm.vue'
 import IPopover from './IPopover.vue'
 import IDropdown from './IDropdown.vue'
 import ITree from './ITree.vue'
+import ICascader from './ICascader.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -91,6 +92,7 @@ export {
   IPopover,
   IDropdown,
   ITree,
+  ICascader,
   IForm,
   IFormItem,
   ITag,

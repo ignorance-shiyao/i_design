@@ -10,11 +10,25 @@ const props = withDefaults(
     /** 点击触发适合承载可交互内容，悬浮适合纯说明 */
     trigger?: 'click' | 'hover'
     disabled?: boolean
+    /**
+     * 受控开合。不传时组件自己管；传了则以外部为准——
+     * Select、Cascader 这类「选完就该收起」的控件需要在选中时主动关闭。
+     */
+    open?: boolean
+    align?: 'center' | 'start'
   }>(),
-  { title: '', content: '', placement: 'top', trigger: 'click', disabled: false }
+  { title: '', content: '', placement: 'top', trigger: 'click', disabled: false, open: undefined, align: 'center' }
 )
 
-const visible = ref(false)
+const emit = defineEmits<{ 'update:open': [value: boolean] }>()
+
+const inner = ref(false)
+const controlled = computed(() => props.open !== undefined)
+const visible = computed(() => (controlled.value ? !!props.open : inner.value))
+function setVisible(next: boolean) {
+  if (!controlled.value) inner.value = next
+  emit('update:open', next)
+}
 const triggerEl = ref<HTMLElement>()
 const popupEl = ref<HTMLElement>()
 const pos = ref({ x: 0, y: 0, placement: props.placement, arrow: 0 })
@@ -28,25 +42,32 @@ let timer: ReturnType<typeof setTimeout> | undefined
 async function place() {
   await new Promise(requestAnimationFrame)
   const t = triggerEl.value?.getBoundingClientRect()
-  const p = popupEl.value?.getBoundingClientRect()
-  if (!t || !p) return
+  const el = popupEl.value
+  if (!t || !el) return
+  /*
+   * 浮层尺寸用 offsetWidth/offsetHeight，而不是 getBoundingClientRect：
+   * 出现动画带 scale(0.97)，用外接矩形会量到缩放中的尺寸，
+   * 于是按偏小的宽度算中心，浮层最终停在偏移几像素的位置。
+   */
+  const p = { x: 0, y: 0, width: el.offsetWidth, height: el.offsetHeight }
   pos.value = resolveOverlay({
     trigger: t,
     popup: p,
     viewport: { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight },
-    placement: props.placement
+    placement: props.placement,
+    align: props.align
   })
 }
 
 function open() {
   if (props.disabled) return
   clearTimeout(timer)
-  visible.value = true
+  setVisible(true)
 }
 
 function close() {
   clearTimeout(timer)
-  visible.value = false
+  setVisible(false)
 }
 
 // 悬浮触发要留出移动时间：鼠标从触发元素挪到浮层上会经过一段空隙，

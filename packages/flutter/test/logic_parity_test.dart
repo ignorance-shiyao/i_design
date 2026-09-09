@@ -40,6 +40,15 @@ void _expectTreeSearch(ITreeSearchResult actual, Set<String> visible,
   expect(actual.matched, matched, reason: '$label 命中集合不一致');
 }
 
+void _expectColumns(List<List<ITreeNode>> actual, List<List<String>> expected,
+    String label) {
+  expect(actual.length, expected.length, reason: '$label 列数不一致');
+  for (var i = 0; i < expected.length; i++) {
+    expect(actual[i].map((n) => n.key).toList(), expected[i],
+        reason: '$label 第 $i 列内容不一致');
+  }
+}
+
 void main() {
   test('buildPages 与 Web 端逐项一致', () {
     _expectPages(buildPages(1, 100, 5), <IPageItem>[const IPageItem.page(1), const IPageItem.page(2), const IPageItem.page(3), const IPageItem.page(4), const IPageItem.page(5), const IPageItem.page(6), const IPageItem.gap('right'), const IPageItem.page(100)],
@@ -227,6 +236,36 @@ void main() {
         ),
         752, 266, IPlacement.left, 50,
         'resolveOverlay(960,300 right)');
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(400, 300, 80, 32),
+          popup: const IOverlayRect(0, 0, 300, 100),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.bottom,
+          align: IOverlayAlign.start,
+        ),
+        400, 340, IPlacement.bottom, 40,
+        'resolveOverlay(400,300 bottom start)');
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(900, 300, 80, 32),
+          popup: const IOverlayRect(0, 0, 300, 100),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.bottom,
+          align: IOverlayAlign.start,
+        ),
+        692, 340, IPlacement.bottom, 248,
+        'resolveOverlay(900,300 bottom start)');
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(400, 300, 80, 32),
+          popup: const IOverlayRect(0, 0, 200, 300),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.right,
+          align: IOverlayAlign.start,
+        ),
+        488, 292, IPlacement.right, 24,
+        'resolveOverlay(400,300 right start)');
   });
 
   test('moveMenuActive / firstMenuActive 与 Web 端一致', () {
@@ -302,5 +341,41 @@ void main() {
         <String>{'a', 'a1', 'a2', 'a2x', 'a2y'}, <String>{}, <String>{'a'}, 'searchTree(平台)');
     _expectTreeSearch(searchTree(entities, '账'),
         <String>{'a', 'a1', 'b', 'b1'}, <String>{'a', 'b'}, <String>{'a1', 'b1'}, 'searchTree(账)');
+  });
+
+  test('级联列生成与换列截断与 Web 端一致', () {
+    final data = <ITreeNode>[
+      ITreeNode(key: 'cn', label: '中国', children: <ITreeNode>[
+        ITreeNode(key: 'zj', label: '浙江', children: <ITreeNode>[
+          ITreeNode(key: 'hz', label: '杭州'),
+          ITreeNode(key: 'nb', label: '宁波'),
+        ]),
+        ITreeNode(key: 'js', label: '江苏', children: <ITreeNode>[
+          ITreeNode(key: 'nj', label: '南京'),
+        ]),
+      ]),
+      ITreeNode(key: 'us', label: '美国', children: <ITreeNode>[
+        ITreeNode(key: 'ca', label: '加州'),
+      ]),
+    ];
+    final entities = flattenTree(data);
+    _expectColumns(cascaderColumns(data, entities, <String>[]),
+        <List<String>>[<String>['cn', 'us']],
+        'cascaderColumns()');
+    _expectColumns(cascaderColumns(data, entities, <String>['cn']),
+        <List<String>>[<String>['cn', 'us'], <String>['zj', 'js']],
+        'cascaderColumns(cn)');
+    _expectColumns(cascaderColumns(data, entities, <String>['cn', 'zj']),
+        <List<String>>[<String>['cn', 'us'], <String>['zj', 'js'], <String>['hz', 'nb']],
+        'cascaderColumns(cn/zj)');
+    _expectColumns(cascaderColumns(data, entities, <String>['cn', 'zj', 'hz']),
+        <List<String>>[<String>['cn', 'us'], <String>['zj', 'js'], <String>['hz', 'nb']],
+        'cascaderColumns(cn/zj/hz)');
+    expect(cascaderActivate(entities, <String>['cn', 'zj', 'hz'], 'js'),
+        <String>['cn', 'js']);
+    expect(cascaderActivate(entities, <String>['cn'], 'us'),
+        <String>['us']);
+    expect(cascaderActivate(entities, <String>[], 'hz'),
+        <String>['cn', 'zj', 'hz']);
   });
 }

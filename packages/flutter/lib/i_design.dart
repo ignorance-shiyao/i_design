@@ -27,6 +27,7 @@ export 'src/components/i_badge.dart';
 export 'src/components/i_breadcrumb.dart';
 export 'src/components/i_button.dart';
 export 'src/components/i_card.dart';
+export 'src/components/i_cascader.dart';
 export 'src/components/i_cell.dart';
 export 'src/components/i_chart.dart';
 export 'src/components/i_chart_extras.dart';

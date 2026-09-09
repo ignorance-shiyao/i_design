@@ -84,7 +84,7 @@ export const componentCatalog: CatalogGroup[] = [
       { label: '评分', api: 'IRate', status: 'ready', note: '整星或半星打分' },
       { label: '上传', api: 'IUpload', status: 'ready', note: '文件选择、进度与失败重试' },
       { label: '时间选择', status: 'planned', note: '时分秒的选择与范围' },
-      { label: '级联选择', status: 'planned', note: '省市区这类层级数据' },
+      { label: '级联选择', api: 'ICascader', status: 'ready', note: '逐级选择，换列时右侧自动收起' },
       { label: '树形选择', status: 'planned', note: '从树中挑选一个或多个节点' },
       { label: '穿梭框', status: 'planned', note: '在两栏之间搬运条目' },
       { label: '自动完成', status: 'planned', note: '边输入边给候选' },

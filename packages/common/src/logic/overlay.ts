@@ -31,6 +31,13 @@ export interface OverlayOptions {
   /** 与可用区边缘至少保留的距离 */
   padding?: number
   /**
+   * 主轴对齐方式。
+   * center 让浮层以触发元素为中心，适合气泡与提示；
+   * start 让浮层的起始边与触发元素对齐，适合下拉菜单与选择器——
+   * 面板通常比触发器宽得多，居中会让它向左溢出、压住旁边的内容。
+   */
+  align?: 'center' | 'start'
+  /**
    * 是否允许翻转到对侧。
    * 关掉它用于「方向本身有语义」的场景，比如级联菜单必须始终向右展开。
    */
@@ -93,7 +100,8 @@ export function resolveOverlay(options: OverlayOptions): OverlayPosition {
     placement = 'top',
     offset = 8,
     padding = 8,
-    flip = true
+    flip = true,
+    align = 'center'
   } = options
   const base = { trigger, popup, viewport, offset, padding }
 
@@ -106,16 +114,16 @@ export function resolveOverlay(options: OverlayOptions): OverlayPosition {
   let y: number
   if (isVertical(final)) {
     y = final === 'top' ? trigger.y - popup.height - offset : trigger.y + trigger.height + offset
-    // 主轴对齐触发元素中心，再夹回视口
+    // 先按对齐方式定位，再夹回视口
     x = clamp(
-      trigger.x + trigger.width / 2 - popup.width / 2,
+      align === 'start' ? trigger.x : trigger.x + trigger.width / 2 - popup.width / 2,
       viewport.x + padding,
       viewport.x + viewport.width - popup.width - padding
     )
   } else {
     x = final === 'left' ? trigger.x - popup.width - offset : trigger.x + trigger.width + offset
     y = clamp(
-      trigger.y + trigger.height / 2 - popup.height / 2,
+      align === 'start' ? trigger.y : trigger.y + trigger.height / 2 - popup.height / 2,
       viewport.y + padding,
       viewport.y + viewport.height - popup.height - padding
     )

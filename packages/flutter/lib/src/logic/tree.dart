@@ -258,3 +258,42 @@ ITreeSearchResult searchTree(
   }
   return ITreeSearchResult(visible: visible, expand: expand, matched: matched);
 }
+
+/// 从根到该节点的完整 key 路径
+List<String> nodePath(Map<String, ITreeEntity> entities, String key) {
+  if (!entities.containsKey(key)) return const [];
+  return [...ancestorKeys(entities, key).reversed, key];
+}
+
+/// 路径对应的标签，用于在触发器上显示「平台 / 权限 / 角色」
+List<String> labelPath(Map<String, ITreeEntity> entities, String key) =>
+    nodePath(entities, key)
+        .map((k) => entities[k]?.node.label ?? k)
+        .toList();
+
+/// 级联选择的列：第一列是根节点，之后每列是上一列激活项的子节点。
+/// 列数由激活路径决定，因此回退时右侧的列会一并收起。
+List<List<ITreeNode>> cascaderColumns(
+  List<ITreeNode> nodes,
+  Map<String, ITreeEntity> entities,
+  List<String> activePath,
+) {
+  final columns = <List<ITreeNode>>[nodes];
+  for (final key in activePath) {
+    final children = entities[key]?.node.children ?? const <ITreeNode>[];
+    if (children.isEmpty) break;
+    columns.add(children);
+  }
+  return columns;
+}
+
+/// 点击某一列的节点后的新激活路径。
+/// 关键在「截断」：在第 2 列换一个选项时，第 3 列及之后必须全部作废。
+List<String> cascaderActivate(
+  Map<String, ITreeEntity> entities,
+  List<String> activePath,
+  String key,
+) {
+  if (!entities.containsKey(key)) return activePath;
+  return [...ancestorKeys(entities, key).reversed, key];
+}

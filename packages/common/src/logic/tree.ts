@@ -226,3 +226,52 @@ export function searchTree(entities: TreeEntities, keyword: string): SearchResul
   }
   return { visible, expand, matched }
 }
+
+/** 从根到该节点的完整 key 路径 */
+export function nodePath(entities: TreeEntities, key: string): string[] {
+  if (!entities.has(key)) return []
+  return [...ancestorKeys(entities, key).reverse(), key]
+}
+
+/** 路径对应的标签，用于在触发器上显示「平台 / 权限 / 角色」 */
+export function labelPath(entities: TreeEntities, key: string): string[] {
+  return nodePath(entities, key).map((k) => entities.get(k)?.node.label ?? k)
+}
+
+/**
+ * 级联选择的列。
+ *
+ * 第一列永远是根节点；之后每一列是「上一列中激活项的子节点」。
+ * 因此列数由激活路径决定，而不是由数据深度决定——这样用户回退到上一列时，
+ * 右侧的列会一并收起，不会留下一串与当前选择无关的旧列。
+ */
+export function cascaderColumns(
+  nodes: TreeNode[],
+  entities: TreeEntities,
+  activePath: string[]
+): TreeNode[][] {
+  const columns: TreeNode[][] = [nodes]
+  for (const key of activePath) {
+    const children = entities.get(key)?.node.children
+    if (!children?.length) break
+    columns.push(children)
+  }
+  return columns
+}
+
+/**
+ * 点击某一列的某个节点后的新激活路径。
+ *
+ * 关键在于「截断」：在第 2 列换一个选项时，第 3 列及之后必须全部作废。
+ * 只往路径尾部追加而不截断，是级联选择最常见的错误——
+ * 界面上表现为右侧还留着上一次选择的子项。
+ */
+export function cascaderActivate(
+  entities: TreeEntities,
+  activePath: string[],
+  key: string
+): string[] {
+  const entity = entities.get(key)
+  if (!entity) return activePath
+  return [...ancestorKeys(entities, key).reverse(), key]
+}

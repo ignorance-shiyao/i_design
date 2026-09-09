@@ -50,7 +50,9 @@ Component({
           popup,
           viewport: { x: 0, y: 0, width: viewport.width, height: viewport.height },
           placement: this.data.placement,
-          offset: 4
+          offset: 4,
+          // 菜单通常比触发按钮宽，居中会向左溢出压住旁边的内容
+          align: 'start'
         })
         this.setData({ left: pos.x, top: pos.y })
       })

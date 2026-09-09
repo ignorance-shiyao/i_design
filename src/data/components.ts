@@ -83,6 +83,7 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Popover', cn: '气泡卡片', to: '/components/overlay', desc: '承载比文字提示更复杂的内容', status: 'ready' },
       { name: 'Dropdown', cn: '下拉菜单', to: '/components/overlay', desc: '收纳次级操作，自动避让视口边缘', status: 'ready' },
       { name: 'Tree', cn: '树形控件', to: '/components/tree', desc: '层级数据的展开、勾选与搜索', status: 'ready' },
+      { name: 'Cascader', cn: '级联选择', to: '/components/cascader', desc: '逐级选择层级数据', status: 'ready' },
       { name: 'Result', cn: '结果页', to: '/components/result', desc: '操作结果的整页反馈', status: 'ready' }
     ]
   }
