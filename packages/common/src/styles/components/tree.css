@@ -1,0 +1,64 @@
+/* 树：层级靠缩进与连接线表达，不靠颜色——颜色要留给选中态 */
+/*
+ * 显式占满容器宽度：树常被放进 flex 布局（侧栏、演示区），
+ * 不声明宽度时它会被压成内容宽度，于是选中行的底色只铺到文字处就断了。
+ */
+.i-tree { width: 100%; font-size: var(--i-font-size-sm); color: var(--i-color-text); }
+
+.i-tree__search { margin-bottom: var(--i-spacing-2); }
+
+.i-tree__list { margin: 0; padding: 0; list-style: none; }
+
+.i-tree__row {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  min-height: var(--i-control-height-md);
+  padding-right: var(--i-spacing-2);
+  border-radius: var(--i-radius-sm);
+  cursor: pointer;
+}
+.i-tree__row:hover { background: var(--i-color-bg-subtle); }
+.i-tree__row.is-selected { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
+.i-tree__row.is-disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }
+.i-tree__row.is-disabled:hover { background: none; }
+.i-tree__row:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+
+/*
+ * 展开箭头占位即使无子节点也保留：否则同级的叶子与分组左边缘对不齐，
+ * 一眼扫下去层级就散了。
+ */
+.i-tree__toggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+  transition: transform var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-tree__toggle.is-expanded { transform: rotate(90deg); }
+.i-tree__toggle.is-leaf { visibility: hidden; cursor: default; }
+
+.i-tree__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 搜索命中用底色标出，而不是改字色——改字色会和选中态抢同一个通道 */
+.i-tree__label mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: var(--i-color-warning-subtle);
+  color: inherit;
+}
+.i-tree__count { flex: none; color: var(--i-color-text-tertiary); font-size: var(--i-font-size-xs); }
+.i-tree__empty { padding: var(--i-spacing-4); color: var(--i-color-text-tertiary); text-align: center; }
+
+/* 小程序端没有 <mark>，用同样的样式挂在类名上 */
+.i-tree__hit {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: var(--i-color-warning-subtle);
+}

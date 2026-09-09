@@ -32,6 +32,9 @@ const { resolveOverlay, moveMenuActive, firstMenuActive } = await bundle(
   'packages/common/src/logic/overlay.ts',
   'overlay'
 )
+const {
+  flattenTree, resolveCheckState, toggleChecked, searchTree, leafKeys
+} = await bundle('packages/common/src/logic/tree.ts', 'tree')
 
 /* ---------- 浮层定位 ---------- */
 /*
@@ -73,6 +76,73 @@ const menuItems = menuSelectable.map((ok) => (ok ? {} : { disabled: true }))
 const menuCases = [[0, 1], [0, -1], [3, 1], [4, 1], [4, -1]]
 const menuExpectations = menuCases.map(([current, step]) =>
   `    expect(moveMenuActive(selectable, ${current}, ${step}), ${moveMenuActive(menuItems, current, step)});`)
+
+/* ---------- 树：半选传播与禁用继承 ----------
+ * 这两处是移植时最容易抄错的分支，尤其「禁用子节点不该拖住父节点」——
+ * 抄错了界面上表现为父节点永远勾不上，很难复现。
+ */
+const treeData = [
+  { key: 'a', label: '平台', children: [
+    { key: 'a1', label: '账号' },
+    { key: 'a2', label: '权限', children: [
+      { key: 'a2x', label: '角色' },
+      { key: 'a2y', label: '策略', disabled: true }
+    ]}
+  ]},
+  { key: 'b', label: '计费', children: [{ key: 'b1', label: '账单' }] },
+  { key: 'c', label: '归档', disabled: true, children: [{ key: 'c1', label: '旧数据' }] }
+]
+const treeEntities = flattenTree(treeData)
+const dartTreeData = `<ITreeNode>[
+      ITreeNode(key: 'a', label: '平台', children: <ITreeNode>[
+        ITreeNode(key: 'a1', label: '账号'),
+        ITreeNode(key: 'a2', label: '权限', children: <ITreeNode>[
+          ITreeNode(key: 'a2x', label: '角色'),
+          ITreeNode(key: 'a2y', label: '策略', disabled: true),
+        ]),
+      ]),
+      ITreeNode(key: 'b', label: '计费', children: <ITreeNode>[
+        ITreeNode(key: 'b1', label: '账单'),
+      ]),
+      ITreeNode(key: 'c', label: '归档', disabled: true, children: <ITreeNode>[
+        ITreeNode(key: 'c1', label: '旧数据'),
+      ]),
+    ]`
+const sorted = (set) => [...set].sort()
+const dartSet = (set) => `<String>{${sorted(set).map((k) => `'${k}'`).join(', ')}}`
+
+// [起始选中, 要切换的 key, 切换为]
+const checkCases = [
+  [[], 'a2', true],
+  [[], 'a', true],
+  [['a1'], 'a2', true],
+  [['a1', 'a2'], 'a2x', false],
+  [[], 'c', true],
+]
+const checkExpectations = checkCases.map(([start, key, next]) => {
+  const result = toggleChecked(treeEntities, start, key, next)
+  const state = resolveCheckState(treeEntities, result)
+  const startLiteral = `<String>[${start.map((k) => `'${k}'`).join(', ')}]`
+  return `    _expectTreeState(
+        resolveCheckState(entities, toggleChecked(entities, ${startLiteral}, '${key}', ${next})),
+        ${dartSet(state.checked)}, ${dartSet(state.halfChecked)},
+        'toggleChecked(${key}, ${next})');`
+})
+
+const searchCases = ['角色', '平台', '账']
+const searchExpectations = searchCases.map((word) => {
+  const r = searchTree(treeEntities, word)
+  return `    _expectTreeSearch(searchTree(entities, '${word}'),
+        ${dartSet(r.visible)}, ${dartSet(r.expand)}, ${dartSet(r.matched)}, 'searchTree(${word})');`
+})
+
+const leafExpectation = (() => {
+  const state = resolveCheckState(treeEntities, toggleChecked(treeEntities, [], 'a', true))
+  const leaves = leafKeys(treeEntities, state.checked).sort()
+  return `    expect(
+        (leafKeys(entities, resolveCheckState(entities, toggleChecked(entities, <String>[], 'a', true)).checked)..sort()),
+        <String>[${leaves.map((k) => `'${k}'`).join(', ')}]);`
+})()
 
 /* ---------- 分页 ---------- */
 const pageCases = [
@@ -193,6 +263,7 @@ import 'package:i_design/src/logic/number.dart';
 import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
 import 'package:i_design/src/logic/overlay.dart';
+import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/chart.dart';
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
@@ -209,6 +280,19 @@ void _expectOverlay(IOverlayPosition actual, double x, double y,
   expect(actual.y, closeTo(y, 1e-9), reason: '\$label y 不一致');
   expect(actual.placement, placement, reason: '\$label 方向不一致');
   expect(actual.arrow, closeTo(arrow, 1e-9), reason: '\$label 箭头位置不一致');
+}
+
+void _expectTreeState(ITreeCheckState actual, Set<String> checked,
+    Set<String> halfChecked, String label) {
+  expect(actual.checked, checked, reason: '\$label 选中集合不一致');
+  expect(actual.halfChecked, halfChecked, reason: '\$label 半选集合不一致');
+}
+
+void _expectTreeSearch(ITreeSearchResult actual, Set<String> visible,
+    Set<String> expand, Set<String> matched, String label) {
+  expect(actual.visible, visible, reason: '\$label 可见集合不一致');
+  expect(actual.expand, expand, reason: '\$label 展开集合不一致');
+  expect(actual.matched, matched, reason: '\$label 命中集合不一致');
 }
 
 void main() {
@@ -258,6 +342,17 @@ ${overlayExpectations.join('\n')}
     final selectable = ${JSON.stringify(menuSelectable)};
     expect(firstMenuActive(selectable), ${firstMenuActive(menuItems)});
 ${menuExpectations.join('\n')}
+  });
+
+  test('树的选中/半选传播与 Web 端一致（含禁用继承）', () {
+    final entities = flattenTree(${dartTreeData});
+${checkExpectations.join('\n')}
+${leafExpectation}
+  });
+
+  test('树的搜索命中与祖先展开与 Web 端一致', () {
+    final entities = flattenTree(${dartTreeData});
+${searchExpectations.join('\n')}
   });
 }
 `

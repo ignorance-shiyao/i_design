@@ -107,7 +107,7 @@ export const componentCatalog: CatalogGroup[] = [
       { label: '文字提示', api: 'ITooltip', status: 'ready', note: '补充一句简短说明' },
       { label: '空状态', api: 'IEmpty', status: 'ready', note: '没有数据时给出下一步' },
       { label: '气泡卡片', api: 'IPopover', status: 'ready', note: '承载比文字提示更复杂的内容' },
-      { label: '树形控件', status: 'planned', note: '层级数据的展开与选择' },
+      { label: '树形控件', api: 'ITree', status: 'ready', note: '展开、父子联动勾选、半选与搜索' },
       { label: '图片预览', status: 'planned', note: '点击放大、缩放与切换' },
       { label: '走马灯', status: 'planned', note: '同一位置轮播多屏内容' },
       { label: '日历', status: 'planned', note: '按月查看与标记日程' },

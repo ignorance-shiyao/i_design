@@ -8,6 +8,7 @@ import 'package:i_design/src/logic/number.dart';
 import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
 import 'package:i_design/src/logic/overlay.dart';
+import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/chart.dart';
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
@@ -24,6 +25,19 @@ void _expectOverlay(IOverlayPosition actual, double x, double y,
   expect(actual.y, closeTo(y, 1e-9), reason: '$label y 不一致');
   expect(actual.placement, placement, reason: '$label 方向不一致');
   expect(actual.arrow, closeTo(arrow, 1e-9), reason: '$label 箭头位置不一致');
+}
+
+void _expectTreeState(ITreeCheckState actual, Set<String> checked,
+    Set<String> halfChecked, String label) {
+  expect(actual.checked, checked, reason: '$label 选中集合不一致');
+  expect(actual.halfChecked, halfChecked, reason: '$label 半选集合不一致');
+}
+
+void _expectTreeSearch(ITreeSearchResult actual, Set<String> visible,
+    Set<String> expand, Set<String> matched, String label) {
+  expect(actual.visible, visible, reason: '$label 可见集合不一致');
+  expect(actual.expand, expand, reason: '$label 展开集合不一致');
+  expect(actual.matched, matched, reason: '$label 命中集合不一致');
 }
 
 void main() {
@@ -223,5 +237,70 @@ void main() {
     expect(moveMenuActive(selectable, 3, 1), 4);
     expect(moveMenuActive(selectable, 4, 1), 0);
     expect(moveMenuActive(selectable, 4, -1), 3);
+  });
+
+  test('树的选中/半选传播与 Web 端一致（含禁用继承）', () {
+    final entities = flattenTree(<ITreeNode>[
+      ITreeNode(key: 'a', label: '平台', children: <ITreeNode>[
+        ITreeNode(key: 'a1', label: '账号'),
+        ITreeNode(key: 'a2', label: '权限', children: <ITreeNode>[
+          ITreeNode(key: 'a2x', label: '角色'),
+          ITreeNode(key: 'a2y', label: '策略', disabled: true),
+        ]),
+      ]),
+      ITreeNode(key: 'b', label: '计费', children: <ITreeNode>[
+        ITreeNode(key: 'b1', label: '账单'),
+      ]),
+      ITreeNode(key: 'c', label: '归档', disabled: true, children: <ITreeNode>[
+        ITreeNode(key: 'c1', label: '旧数据'),
+      ]),
+    ]);
+    _expectTreeState(
+        resolveCheckState(entities, toggleChecked(entities, <String>[], 'a2', true)),
+        <String>{'a2', 'a2x'}, <String>{'a'},
+        'toggleChecked(a2, true)');
+    _expectTreeState(
+        resolveCheckState(entities, toggleChecked(entities, <String>[], 'a', true)),
+        <String>{'a', 'a1', 'a2', 'a2x'}, <String>{},
+        'toggleChecked(a, true)');
+    _expectTreeState(
+        resolveCheckState(entities, toggleChecked(entities, <String>['a1'], 'a2', true)),
+        <String>{'a', 'a1', 'a2', 'a2x'}, <String>{},
+        'toggleChecked(a2, true)');
+    _expectTreeState(
+        resolveCheckState(entities, toggleChecked(entities, <String>['a1', 'a2'], 'a2x', false)),
+        <String>{'a1'}, <String>{'a'},
+        'toggleChecked(a2x, false)');
+    _expectTreeState(
+        resolveCheckState(entities, toggleChecked(entities, <String>[], 'c', true)),
+        <String>{}, <String>{},
+        'toggleChecked(c, true)');
+    expect(
+        (leafKeys(entities, resolveCheckState(entities, toggleChecked(entities, <String>[], 'a', true)).checked)..sort()),
+        <String>['a1', 'a2x']);
+  });
+
+  test('树的搜索命中与祖先展开与 Web 端一致', () {
+    final entities = flattenTree(<ITreeNode>[
+      ITreeNode(key: 'a', label: '平台', children: <ITreeNode>[
+        ITreeNode(key: 'a1', label: '账号'),
+        ITreeNode(key: 'a2', label: '权限', children: <ITreeNode>[
+          ITreeNode(key: 'a2x', label: '角色'),
+          ITreeNode(key: 'a2y', label: '策略', disabled: true),
+        ]),
+      ]),
+      ITreeNode(key: 'b', label: '计费', children: <ITreeNode>[
+        ITreeNode(key: 'b1', label: '账单'),
+      ]),
+      ITreeNode(key: 'c', label: '归档', disabled: true, children: <ITreeNode>[
+        ITreeNode(key: 'c1', label: '旧数据'),
+      ]),
+    ]);
+    _expectTreeSearch(searchTree(entities, '角色'),
+        <String>{'a', 'a2', 'a2x'}, <String>{'a', 'a2'}, <String>{'a2x'}, 'searchTree(角色)');
+    _expectTreeSearch(searchTree(entities, '平台'),
+        <String>{'a', 'a1', 'a2', 'a2x', 'a2y'}, <String>{}, <String>{'a'}, 'searchTree(平台)');
+    _expectTreeSearch(searchTree(entities, '账'),
+        <String>{'a', 'a1', 'b', 'b1'}, <String>{'a', 'b'}, <String>{'a1', 'b1'}, 'searchTree(账)');
   });
 }

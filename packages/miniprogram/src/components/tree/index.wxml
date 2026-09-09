@@ -1,0 +1,42 @@
+<view class="i-tree">
+  <input
+    wx:if="{{searchable}}"
+    class="i-input i-tree__search"
+    placeholder="搜索节点"
+    value="{{keyword}}"
+    bindinput="onSearch"
+  />
+
+  <view class="i-tree__list">
+    <view
+      wx:for="{{rows}}"
+      wx:key="key"
+      class="i-tree__row {{item.selected ? 'is-selected' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+      style="padding-left:{{item.indent}}px"
+      data-key="{{item.key}}"
+      data-disabled="{{item.disabled}}"
+      bindtap="onRow"
+    >
+      <view
+        class="i-tree__toggle {{item.expanded ? 'is-expanded' : ''}} {{item.hasChildren ? '' : 'is-leaf'}}"
+        data-key="{{item.key}}"
+        catchtap="onToggle"
+      >
+        <i-icon name="chevron-right" size="14" />
+      </view>
+
+      <i-checkbox
+        wx:if="{{checkable}}"
+        checked="{{item.checked}}"
+        indeterminate="{{item.half}}"
+        disabled="{{item.disabled}}"
+      />
+
+      <view class="i-tree__label">
+        <text wx:for="{{item.parts}}" wx:for-item="part" wx:key="index" class="{{part.hit ? 'i-tree__hit' : ''}}">{{part.text}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{rows.length === 0}}" class="i-tree__empty">{{emptyText}}</view>
+</view>

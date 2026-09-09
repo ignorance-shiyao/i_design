@@ -84,6 +84,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/loading', label: 'Loading 加载中' },
       { to: '/components/popconfirm', label: 'Popconfirm 气泡确认' },
       { to: '/components/overlay', label: 'Popover / Dropdown 浮层' },
+      { to: '/components/tree', label: 'Tree 树形控件' },
       { to: '/components/result', label: 'Result 结果页' }
     ]
   },

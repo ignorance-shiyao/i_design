@@ -40,6 +40,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'result', component: () => import('@/pages/components/ResultPage.vue') },
       { path: 'popconfirm', component: () => import('@/pages/components/PopconfirmPage.vue') },
       { path: 'overlay', component: () => import('@/pages/components/OverlayPage.vue') },
+      { path: 'tree', component: () => import('@/pages/components/TreePage.vue') },
       { path: 'card', component: () => import('@/pages/components/CardPage.vue') },
       { path: 'table', component: () => import('@/pages/components/TablePage.vue') },
       { path: 'pagination', component: () => import('@/pages/components/PaginationPage.vue') },

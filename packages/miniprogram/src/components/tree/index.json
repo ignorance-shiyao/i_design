@@ -1,0 +1,8 @@
+{
+  "component": true,
+  "styleIsolation": "apply-shared",
+  "usingComponents": {
+    "i-checkbox": "../checkbox/index",
+    "i-icon": "../icon/index"
+  }
+}
