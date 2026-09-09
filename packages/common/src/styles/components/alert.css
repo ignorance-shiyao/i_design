@@ -5,7 +5,6 @@
   gap: var(--i-spacing-3);
   padding: var(--i-spacing-3) var(--i-spacing-4);
   border-radius: var(--i-radius-md);
-  border-left: 3px solid transparent;
   font-size: var(--i-font-size-md);
 }
 .i-alert__icon { margin-top: 3px; }

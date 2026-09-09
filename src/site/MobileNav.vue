@@ -35,6 +35,14 @@ watch(() => route.fullPath, () => (mobileNavOpen.value = false))
               <RouterLink v-for="link in primary" :key="link.to" :to="link.to" class="mnav__link is-primary">
                 {{ link.label }}
               </RouterLink>
+              <a
+                class="mnav__link is-primary"
+                href="https://github.com/ignorance-shiyao/i_design"
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub 源码
+              </a>
             </div>
 
             <div v-for="group in docNav" :key="group.title" class="mnav__group">

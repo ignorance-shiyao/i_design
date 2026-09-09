@@ -10,6 +10,9 @@
         <RouterLink to="/design/tokens">设计令牌</RouterLink>
         <RouterLink to="/components">组件总览</RouterLink>
         <RouterLink to="/resources">设计资源</RouterLink>
+        <a href="https://github.com/ignorance-shiyao/i_design" target="_blank" rel="noreferrer">
+          GitHub 源码
+        </a>
       </nav>
     </div>
     <div class="i-container footer__bottom">© 2026 Ignorance Design · MIT License</div>

@@ -67,6 +67,18 @@ const Map<String, String> kIDesignIconPaths = <String, String>{
       'M4 6h6l2 2h8v11H4z',
   'file':
       'M6 3h8l4 4v14H6zM14 3v4h4',
+  'file-text':
+      'M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h4',
+  'file-image':
+      'M6 3h8l4 4v14H6zM14 3v4h4M9 17l2.5-3 2 2.2 1.5-1.7L18 17z',
+  'file-sheet':
+      'M6 3h8l4 4v14H6zM14 3v4h4M9 12h8M9 16h8M13 12v8',
+  'file-code':
+      'M6 3h8l4 4v14H6zM14 3v4h4M10.5 12.5 8.5 15l2 2.5M14 12.5l2 2.5-2 2.5',
+  'file-zip':
+      'M6 3h8l4 4v14H6zM14 3v4h4M10 5h2M10 8h2M10 11h2M10 14h2',
+  'file-media':
+      'M6 3h8l4 4v14H6zM14 3v4h4M10.5 12.5v5l4.5-2.5z',
   'layers':
       'M12 3 3 8l9 5 9-5zM3 13l9 5 9-5',
   'grid':
@@ -131,6 +143,12 @@ const List<String> kIDesignIconNames = <String>[
   'clock',
   'folder',
   'file',
+  'file-text',
+  'file-image',
+  'file-sheet',
+  'file-code',
+  'file-zip',
+  'file-media',
   'layers',
   'grid',
   'palette',

@@ -42,16 +42,43 @@
   gap: var(--i-spacing-2);
   padding: var(--i-spacing-3) var(--i-spacing-4) 0;
 }
+/*
+ * 附件条按文件类型着色。类型色只上在图标上，文件名保持正文色：
+ * 彩色文件名会和链接混淆，而颜色本身也不该是唯一的类型线索——
+ * 所以旁边同时给出「图片」「表格」这样的文字类型名。
+ */
 .i-prompt__file {
   display: inline-flex;
   align-items: center;
   gap: var(--i-spacing-2);
+  max-width: 260px;
   padding: var(--i-spacing-1) var(--i-spacing-2);
+  border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-md);
   background: var(--i-color-bg-subtle);
   font-size: var(--i-font-size-xs);
   color: var(--i-color-text-secondary);
 }
+/* 类型色以图标 + 淡底方块表达，不靠边线 */
+.i-prompt__file-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--i-radius-sm);
+  color: var(--i-file-color, var(--i-color-brand));
+  background: color-mix(in srgb, var(--i-file-color, var(--i-color-brand)) 12%, transparent);
+}
+.i-prompt__file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--i-color-text);
+}
+.i-prompt__file-meta { flex: none; color: var(--i-color-text-tertiary); }
+
 .i-prompt__file-remove {
   border: none;
   background: none;
@@ -68,7 +95,8 @@
   gap: var(--i-spacing-2);
   padding: 0 var(--i-spacing-3) var(--i-spacing-2) var(--i-spacing-3);
 }
-.i-prompt__tools { display: flex; align-items: center; gap: var(--i-spacing-1); }
+/* 工具区占满剩余空间，把计数与发送按钮推到右侧——否则三者会挤在左边 */
+.i-prompt__tools { flex: 1; display: flex; align-items: center; gap: var(--i-spacing-1); }
 .i-prompt__tool {
   display: inline-flex;
   align-items: center;

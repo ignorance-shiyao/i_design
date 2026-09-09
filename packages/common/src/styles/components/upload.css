@@ -47,7 +47,21 @@
   background: var(--i-color-bg-elevated);
 }
 .i-upload__item.is-error { border-color: color-mix(in srgb, var(--i-color-danger) 40%, transparent); }
-.i-upload__file-icon { color: var(--i-color-text-tertiary); }
+/*
+ * 类型图标放进一个带底色的方块：一列文件里靠形状与色相区分类型，
+ * 比一律灰色的通用文件图标好扫。底色用 color-mix 从类型色调出，
+ * 不必为每种类型再定义一个浅色令牌。
+ */
+.i-upload__file-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--i-radius-md);
+  color: var(--i-file-color, var(--i-color-brand));
+  background: color-mix(in srgb, var(--i-file-color, var(--i-color-brand)) 12%, transparent);
+}
 .i-upload__meta { flex: 1; min-width: 0; }
 .i-upload__row { display: flex; align-items: baseline; gap: var(--i-spacing-3); }
 .i-upload__name {
@@ -71,7 +85,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--i-gradient-brand);
+  background: var(--i-color-brand);
   transition: width var(--i-motion-base) var(--i-motion-easing);
 }
 .i-upload__error { margin-top: 2px; font-size: var(--i-font-size-sm); color: var(--i-color-danger); }

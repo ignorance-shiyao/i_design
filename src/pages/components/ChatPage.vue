@@ -139,21 +139,11 @@ function copy(text: string) {
       </div>
     </DemoBlock>
 
-    <h2>七端用法</h2>
-    <p>
+    <p class="i-note">
       这组组件同样是七端齐备的：Vue 3 / Vue 2 / React / 小程序 / 移动两端 / Flutter，
-      共用同一份样式与语义色。片段里的属性名由校验脚本与各端实现逐个核对。
+      共用同一份样式与语义色。下面每个示例的「查看代码」里都能切换到对应端的写法，
+      片段里的属性名由校验脚本与各端实现逐个核对。
     </p>
-    <DemoBlock title="消息" :snippets="snippets.chatMessage">
-      <div class="chat chat--plain">
-        <IChatMessage role="user" name="我">分页的省略号是怎么算的？</IChatMessage>
-      </div>
-    </DemoBlock>
-    <DemoBlock title="输入台" :snippets="snippets.promptInput">
-      <div class="chat chat--plain">
-        <IPromptInput v-model="draft" hint="Enter 发送，Shift + Enter 换行" />
-      </div>
-    </DemoBlock>
 
     <h2>消息</h2>
     <p>
@@ -163,9 +153,7 @@ function copy(text: string) {
     <DemoBlock
       title="角色与状态"
       description="复制、重新生成这类操作默认隐藏，悬停消息时才浮现；生成过程中不出现，因为此时复制到的是半截内容。"
-      code='<IChatMessage role="user" name="我">帮我把这段配置改成按环境区分</IChatMessage>
-<IChatMessage name="Ignorance 助手" :streaming="true">好的，我先看一下现有结构…</IChatMessage>
-<IChatMessage name="Ignorance 助手" :error="true" @retry="resend">生成失败：上游超时</IChatMessage>'
+      :snippets="snippets.chatMessage"
     >
       <div class="chat chat--plain">
         <IChatMessage role="user" name="我" time="14:03">帮我把这段配置改成按环境区分</IChatMessage>
@@ -237,8 +225,8 @@ function copy(text: string) {
     </p>
     <DemoBlock
       title="输入台"
-      description="回车发送、Shift + 回车换行；输入法组字过程中的回车是确认候选词，不会误发。"
-      code='<IPromptInput v-model="draft" :max-length="2000" hint="Enter 发送，Shift + Enter 换行" @submit="send" @stop="stop" />'
+      description="回车发送、Shift + 回车换行；输入法组字过程中的回车是确认候选词，不会误发。附件按文件类型给出图标与配色。"
+      :snippets="snippets.promptInput"
     >
       <div class="chat chat--plain">
         <IPromptInput

@@ -90,17 +90,10 @@ watch(() => route.path, revealActive)
   color: var(--i-color-brand);
   font-weight: 500;
 }
-/* 选中项左侧的短竖条，让当前位置在长列表里更好找 */
-.doc-layout__side a.router-link-exact-active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 2px;
-  border-radius: 0 2px 2px 0;
-  background: var(--i-color-brand);
-}
+/*
+ * 选中态只用底色 + 文字色 + 字重，不加左侧竖条。
+ * 那种「一条更粗更深的边线」的标记方式在本体系里是禁止的，见 CLAUDE.md。
+ */
 .doc-layout__main { min-width: 0; padding-bottom: var(--i-spacing-16); }
 
 @media (max-width: 860px) {

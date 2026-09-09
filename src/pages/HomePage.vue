@@ -332,7 +332,7 @@ app.use(IDesign)"
   text-wrap: balance;
 }
 .hero__title-accent {
-  background: var(--i-gradient-brand);
+  background: var(--i-color-brand);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -508,7 +508,7 @@ app.use(IDesign)"
 .value {
   position: relative;
   padding: var(--i-spacing-6);
-  background: var(--i-gradient-surface);
+  background: var(--i-color-bg-elevated);
   border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-xl);
   box-shadow: var(--i-shadow-sm);
@@ -524,7 +524,7 @@ app.use(IDesign)"
   bottom: var(--i-spacing-6);
   width: 2px;
   border-radius: 0 2px 2px 0;
-  background: var(--i-gradient-brand);
+  background: var(--i-color-brand);
 }
 .value:hover { transform: translateY(-2px); box-shadow: var(--i-shadow-md); }
 .value__en {
@@ -593,7 +593,7 @@ app.use(IDesign)"
   gap: var(--i-spacing-6);
   padding: var(--i-spacing-12);
   border-radius: var(--i-radius-xl);
-  background: var(--i-gradient-brand);
+  background: var(--i-color-brand);
   color: #fff;
   overflow: hidden;
   box-shadow: var(--i-shadow-brand);

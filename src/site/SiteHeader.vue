@@ -27,6 +27,16 @@ const links = [
       </nav>
 
       <div class="header__actions">
+        <a
+          class="header__icon"
+          href="https://github.com/ignorance-shiyao/i_design"
+          target="_blank"
+          rel="noreferrer"
+          title="在 GitHub 上查看源码"
+          aria-label="在 GitHub 上查看源码"
+        >
+          <IIcon name="github" :size="16" />
+        </a>
         <button class="header__icon" :title="theme === 'dark' ? '切换到亮色' : '切换到暗色'" @click="toggleTheme">
           <IIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="16" />
         </button>
@@ -72,7 +82,7 @@ const links = [
   width: 26px;
   height: 26px;
   border-radius: var(--i-radius-md);
-  background: var(--i-gradient-brand);
+  background: var(--i-color-brand);
   color: #fff;
   font-family: var(--i-font-family-mono);
   font-weight: 600;

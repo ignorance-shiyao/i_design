@@ -1,10 +1,14 @@
 /* IPopconfirm —— 由 Vue / React / mobile 各端共享 */
 /* 方向/状态类必须限定到 .i-popconfirm__panel：抽出 scoped 样式后，裸 .is-* 会命中页面上任何同名类 */
-.i-popconfirm { position: relative; display: inline-flex; }
+/*
+ * 浮层用 fixed 定位，坐标由 logic/overlay 的 resolveOverlay 算出后写在行内 style 上，
+ * 因此贴近视口边缘时会自动翻转与推回，而不是被裁掉。
+ */
+.i-popconfirm { display: inline-flex; }
 .i-popconfirm__trigger { display: inline-flex; }
 
 .i-popconfirm__panel {
-  position: absolute;
+  position: fixed;
   z-index: var(--i-z-dropdown);
   width: 260px;
   padding: var(--i-spacing-4);
@@ -14,10 +18,29 @@
   box-shadow: var(--i-shadow-lg);
   text-align: left;
 }
-.i-popconfirm__panel.is-top { bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
-.i-popconfirm__panel.is-bottom { top: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
-.i-popconfirm__panel.is-left { right: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
-.i-popconfirm__panel.is-right { left: calc(100% + 8px); top: 50%; transform: translateY(-50%); }
+/*
+ * 箭头用旋转的方块拼出来：只有相邻两条边描边，才能和面板的边框接成一条线。
+ * 它跟着触发元素中心走，不能固定在面板的 50%——面板被推回视口后，
+ * 固定在中间的箭头会指向旁边一个控件。
+ */
+.i-popconfirm__arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--i-color-bg-elevated);
+  border: 1px solid var(--i-color-hairline);
+  transform: rotate(45deg);
+}
+.i-popconfirm__panel.is-top .i-popconfirm__arrow { bottom: -5px; border-top: none; border-left: none; }
+.i-popconfirm__panel.is-bottom .i-popconfirm__arrow { top: -5px; border-bottom: none; border-right: none; }
+.i-popconfirm__panel.is-left .i-popconfirm__arrow { right: -5px; border-bottom: none; border-left: none; }
+.i-popconfirm__panel.is-right .i-popconfirm__arrow { left: -5px; border-top: none; border-right: none; }
+
+/* transform-origin 跟着方向变，否则向上弹出的面板会从下边缘缩放，看起来像掉下来 */
+.i-popconfirm__panel.is-top { transform-origin: bottom center; }
+.i-popconfirm__panel.is-bottom { transform-origin: top center; }
+.i-popconfirm__panel.is-left { transform-origin: right center; }
+.i-popconfirm__panel.is-right { transform-origin: left center; }
 
 .i-popconfirm__head { display: flex; gap: var(--i-spacing-2); }
 .i-popconfirm__icon { margin-top: 2px; }
@@ -37,6 +60,14 @@
 }
 
 .i-popconfirm-fade-enter-active,
-.i-popconfirm-fade-leave-active { transition: opacity var(--i-motion-fast) var(--i-motion-easing); }
+.i-popconfirm-fade-leave-active {
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing),
+    transform var(--i-motion-fast) var(--i-motion-easing);
+}
 .i-popconfirm-fade-enter-from,
-.i-popconfirm-fade-leave-to { opacity: 0; }
+.i-popconfirm-fade-leave-to { opacity: 0; transform: scale(0.96); }
+
+@media (prefers-reduced-motion: reduce) {
+  .i-popconfirm-fade-enter-active,
+  .i-popconfirm-fade-leave-active { transition: none; }
+}

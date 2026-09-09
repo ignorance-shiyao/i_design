@@ -23,8 +23,13 @@
 .i-button--lg { height: var(--i-control-height-lg); padding: 0 var(--i-spacing-6); font-size: var(--i-font-size-lg); }
 
 .i-button--primary {
-  background: var(--i-gradient-brand);
-  color: #fff;
+  background: var(--i-color-brand);
+  /*
+   * 不写死白色：主题色换成浅色（比如明黄）时白字会低到看不清。
+   * --i-color-text-on-brand 由主题配置按对比度推导；没有配置面板的项目
+   * 回退到白色，与原先行为一致。
+   */
+  color: var(--i-color-text-on-brand, #fff);
   box-shadow: var(--i-shadow-sm);
 }
 .i-button--primary:hover:not(:disabled) { filter: brightness(1.06); box-shadow: var(--i-shadow-brand); }

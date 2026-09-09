@@ -17,9 +17,18 @@ export interface UploadFile {
 
 /** 把字节数换成人能读的单位；上传场景不需要精确到字节 */
 export function formatSize(bytes: number) {
+  // 非法值返回空串而不是 NaN B：调用方通常直接把它拼进界面
+  if (!Number.isFinite(bytes) || bytes < 0) return ''
   if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  const units = ['KB', 'MB', 'GB', 'TB']
+  let value = bytes / 1024
+  let unit = 0
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024
+    unit += 1
+  }
+  // 小于 10 时保留一位小数：1.4 MB 比 1 MB 有用得多；再大就没必要了
+  return `${value < 10 ? value.toFixed(1) : Math.round(value)} ${units[unit]}`
 }
 
 /**

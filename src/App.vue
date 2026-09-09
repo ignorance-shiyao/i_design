@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import SiteHeader from '@/site/SiteHeader.vue'
 import SiteFooter from '@/site/SiteFooter.vue'
+import ThemePanel from '@/site/ThemePanel.vue'
 </script>
 
 <template>
@@ -12,4 +13,5 @@ import SiteFooter from '@/site/SiteFooter.vue'
     </Transition>
   </RouterView>
   <SiteFooter />
+  <ThemePanel />
 </template>

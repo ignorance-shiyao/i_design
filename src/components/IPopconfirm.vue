@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import type { Placement } from '@i-design/common'
 import IButton from './IButton.vue'
 import IIcon from './IIcon.vue'
 import type { IconName } from './icons'
+import { arrowStyle, useOverlayPosition } from './overlayPosition'
 
 const props = withDefaults(
   defineProps<{
@@ -12,7 +14,7 @@ const props = withDefaults(
     cancelText?: string
     /** 破坏性操作用 danger，让确认按钮本身说明后果 */
     type?: 'brand' | 'danger'
-    placement?: 'top' | 'bottom' | 'left' | 'right'
+    placement?: Placement
     icon?: IconName
     disabled?: boolean
   }>(),
@@ -30,9 +32,17 @@ const props = withDefaults(
 
 const emit = defineEmits<{ confirm: []; cancel: []; 'update:visible': [boolean] }>()
 
-const root = ref<HTMLElement | null>(null)
-const panel = ref<HTMLElement | null>(null)
+const triggerEl = ref<HTMLElement>()
+const panel = ref<HTMLElement>()
 const visible = ref(false)
+
+const { pos } = useOverlayPosition(
+  triggerEl,
+  panel,
+  visible,
+  { placement: () => props.placement, closeOnOutsideClick: true },
+  () => close()
+)
 
 async function open() {
   if (props.disabled) return
@@ -44,8 +54,11 @@ async function open() {
 }
 
 function close() {
+  if (!visible.value) return
   visible.value = false
   emit('update:visible', false)
+  // 焦点交还触发元素，否则关闭后键盘用户会失去位置
+  triggerEl.value?.querySelector<HTMLElement>('button, [tabindex]:not([tabindex="-1"])')?.focus()
 }
 
 function onConfirm() {
@@ -58,37 +71,33 @@ function onCancel() {
   close()
 }
 
-function onClickOutside(event: MouseEvent) {
-  if (visible.value && root.value && !root.value.contains(event.target as Node)) close()
-}
-
 function onKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape' && visible.value) close()
 }
 
-onMounted(() => {
-  document.addEventListener('click', onClickOutside)
-  document.addEventListener('keydown', onKeydown)
-})
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onClickOutside)
-  document.removeEventListener('keydown', onKeydown)
-})
+onMounted(() => document.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
+
+const style = computed(() => ({ left: `${pos.value.x}px`, top: `${pos.value.y}px` }))
 </script>
 
 <template>
-  <span ref="root" class="i-popconfirm">
+  <span ref="triggerEl" class="i-popconfirm">
     <span class="i-popconfirm__trigger" @click="visible ? close() : open()"><slot /></span>
+  </span>
 
+  <Teleport to="body">
     <Transition name="i-popconfirm-fade">
       <div
         v-if="visible"
         ref="panel"
         class="i-popconfirm__panel"
-        :class="`is-${placement}`"
+        :class="`is-${pos.placement}`"
+        :style="style"
         role="dialog"
         :aria-label="title"
       >
+        <span class="i-popconfirm__arrow" :style="arrowStyle(pos)" />
         <div class="i-popconfirm__head">
           <IIcon class="i-popconfirm__icon" :class="`is-${type}`" :name="icon" :size="17" />
           <div>
@@ -104,5 +113,5 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </Transition>
-  </span>
+  </Teleport>
 </template>

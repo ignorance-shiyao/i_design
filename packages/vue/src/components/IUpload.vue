@@ -6,7 +6,7 @@
 import { computed, ref, watch } from 'vue'
 import IIcon from './IIcon.vue'
 import IButton from './IButton.vue'
-import { formatSize, matchAccept, nextUid, type UploadFile } from './upload'
+import { fileTypeOf, formatSize, matchAccept, nextUid, type UploadFile } from './upload'
 
 const props = withDefaults(
   defineProps<{
@@ -194,12 +194,24 @@ defineExpose({ openPicker })
     </div>
 
     <ul v-if="files.length" class="i-upload__list">
-      <li v-for="item in files" :key="item.uid" class="i-upload__item" :class="`is-${item.status}`">
-        <IIcon class="i-upload__file-icon" name="file" :size="16" />
+      <li
+        v-for="item in files"
+        :key="item.uid"
+        class="i-upload__item"
+        :class="`is-${item.status}`"
+        :style="{ '--i-file-color': `var(--i-chart-${fileTypeOf(item.name).slot || 1})` }"
+      >
+        <!-- 类型图标带底色方块：一列文件里靠形状与色相区分类型，比一律灰色的通用文件图标好扫 -->
+        <span class="i-upload__file-icon">
+          <IIcon :name="fileTypeOf(item.name).icon" :size="16" />
+        </span>
         <div class="i-upload__meta">
           <div class="i-upload__row">
             <span class="i-upload__name" :title="item.name">{{ item.name }}</span>
-            <span class="i-upload__size">{{ formatSize(item.size) }}</span>
+            <!-- 颜色不作为唯一线索：类型名同时以文字给出 -->
+            <span class="i-upload__size">
+              {{ fileTypeOf(item.name).label }} · {{ formatSize(item.size) }}
+            </span>
           </div>
           <!-- 进度条只在上传中出现，成功后让位给状态图标，避免残留一条满进度 -->
           <div v-if="item.status === 'uploading'" class="i-upload__progress">

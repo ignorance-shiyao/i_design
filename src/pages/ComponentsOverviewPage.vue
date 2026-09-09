@@ -49,7 +49,7 @@ import ITag from '@/components/ITag.vue'
   border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-xl);
   color: var(--i-color-text);
-  background: var(--i-gradient-surface);
+  background: var(--i-color-bg-elevated);
   box-shadow: var(--i-shadow-sm);
   transition: border-color var(--i-motion-base) var(--i-motion-easing),
     box-shadow var(--i-motion-base) var(--i-motion-easing),

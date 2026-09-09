@@ -136,7 +136,7 @@ ol { color: var(--i-color-text-secondary); padding-left: var(--i-spacing-5); }
   margin: var(--i-spacing-5) 0;
   border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-xl);
-  background: var(--i-gradient-surface);
+  background: var(--i-color-bg-elevated);
   box-shadow: var(--i-shadow-sm);
 }
 .mascot img { width: 240px; height: auto; }

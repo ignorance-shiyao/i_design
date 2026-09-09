@@ -1,10 +1,14 @@
 /* ITooltip —— 由 Vue / React / mobile 各端共享 */
-/* 方向/状态类必须限定到 .i-tooltip__pop：抽出 scoped 样式后，裸 .is-* 会命中页面上任何同名类 */
-.i-tooltip { position: relative; display: inline-flex; }
+/*
+ * 浮层用 fixed 定位，坐标由 logic/overlay 的 resolveOverlay 算出后写在行内 style 上。
+ * 早先是 absolute + translate 的纯 CSS 方案：不需要 JS，但也因此没有视口避让——
+ * 贴着屏幕边缘的提示会被裁掉,而这在任何构建与类型检查里都看不出来。
+ */
+.i-tooltip { display: inline-flex; }
 .i-tooltip__trigger { display: inline-flex; }
 
 .i-tooltip__pop {
-  position: absolute;
+  position: fixed;
   z-index: var(--i-z-dropdown);
   max-width: 260px;
   width: max-content;
@@ -17,21 +21,37 @@
   box-shadow: var(--i-shadow-md);
   pointer-events: none;
 }
-.i-tooltip__pop::after {
-  content: '';
+
+/* 箭头改为可定位的元素：它要跟着触发元素中心走，不能固定在浮层的 50% */
+.i-tooltip__arrow {
   position: absolute;
+  width: 0;
+  height: 0;
   border: 5px solid transparent;
 }
-.i-tooltip__pop.is-top { bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); }
-.i-tooltip__pop.is-top::after { top: 100%; left: 50%; margin-left: -5px; border-top-color: var(--i-color-bg-inverse); }
-.i-tooltip__pop.is-bottom { top: calc(100% + 6px); left: 50%; transform: translateX(-50%); }
-.i-tooltip__pop.is-bottom::after { bottom: 100%; left: 50%; margin-left: -5px; border-bottom-color: var(--i-color-bg-inverse); }
-.i-tooltip__pop.is-left { right: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
-.i-tooltip__pop.is-left::after { left: 100%; top: 50%; margin-top: -5px; border-left-color: var(--i-color-bg-inverse); }
-.i-tooltip__pop.is-right { left: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
-.i-tooltip__pop.is-right::after { right: 100%; top: 50%; margin-top: -5px; border-right-color: var(--i-color-bg-inverse); }
+.i-tooltip__pop.is-top .i-tooltip__arrow { top: 100%; border-top-color: var(--i-color-bg-inverse); }
+.i-tooltip__pop.is-bottom .i-tooltip__arrow { bottom: 100%; border-bottom-color: var(--i-color-bg-inverse); }
+.i-tooltip__pop.is-left .i-tooltip__arrow { left: 100%; border-left-color: var(--i-color-bg-inverse); }
+.i-tooltip__pop.is-right .i-tooltip__arrow { right: 100%; border-right-color: var(--i-color-bg-inverse); }
+
+/*
+ * 出现动画从触发元素方向轻微推出，暗示两者的从属关系。
+ * transform-origin 跟着方向变，否则向上弹出的提示会从下边缘缩放，看起来像掉下来。
+ */
+.i-tooltip__pop.is-top { transform-origin: bottom center; }
+.i-tooltip__pop.is-bottom { transform-origin: top center; }
+.i-tooltip__pop.is-left { transform-origin: right center; }
+.i-tooltip__pop.is-right { transform-origin: left center; }
 
 .i-tooltip-fade-enter-active,
-.i-tooltip-fade-leave-active { transition: opacity var(--i-motion-fast) var(--i-motion-easing); }
+.i-tooltip-fade-leave-active {
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing),
+    transform var(--i-motion-fast) var(--i-motion-easing);
+}
 .i-tooltip-fade-enter-from,
-.i-tooltip-fade-leave-to { opacity: 0; }
+.i-tooltip-fade-leave-to { opacity: 0; transform: scale(0.96); }
+
+@media (prefers-reduced-motion: reduce) {
+  .i-tooltip-fade-enter-active,
+  .i-tooltip-fade-leave-active { transition: none; }
+}

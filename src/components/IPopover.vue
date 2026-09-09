@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, useId, watch } from 'vue'
-import { resolveOverlay, type Placement } from '@i-design/common'
+import { computed, ref, useId } from 'vue'
+import type { Placement } from '@i-design/common'
+import { arrowStyle, useOverlayPosition } from './overlayPosition'
 
 const props = withDefaults(
   defineProps<{
@@ -17,7 +18,15 @@ const props = withDefaults(
     open?: boolean
     align?: 'center' | 'start'
   }>(),
-  { title: '', content: '', placement: 'top', trigger: 'click', disabled: false, open: undefined, align: 'center' }
+  {
+    title: '',
+    content: '',
+    placement: 'top',
+    trigger: 'click',
+    disabled: false,
+    open: undefined,
+    align: 'center'
+  }
 )
 
 const emit = defineEmits<{ 'update:open': [value: boolean] }>()
@@ -29,35 +38,24 @@ function setVisible(next: boolean) {
   if (!controlled.value) inner.value = next
   emit('update:open', next)
 }
+
 const triggerEl = ref<HTMLElement>()
 const popupEl = ref<HTMLElement>()
-const pos = ref({ x: 0, y: 0, placement: props.placement, arrow: 0 })
 const id = `i-popover-${useId()}`
 let timer: ReturnType<typeof setTimeout> | undefined
 
-/*
- * 定位必须在浮层渲染出来之后算——尺寸未知时无法判断放不放得下。
- * 这里等一帧再量，比预估尺寸准确，也避免了「首次打开位置不对、第二次才对」。
- */
-async function place() {
-  await new Promise(requestAnimationFrame)
-  const t = triggerEl.value?.getBoundingClientRect()
-  const el = popupEl.value
-  if (!t || !el) return
-  /*
-   * 浮层尺寸用 offsetWidth/offsetHeight，而不是 getBoundingClientRect：
-   * 出现动画带 scale(0.97)，用外接矩形会量到缩放中的尺寸，
-   * 于是按偏小的宽度算中心，浮层最终停在偏移几像素的位置。
-   */
-  const p = { x: 0, y: 0, width: el.offsetWidth, height: el.offsetHeight }
-  pos.value = resolveOverlay({
-    trigger: t,
-    popup: p,
-    viewport: { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight },
-    placement: props.placement,
-    align: props.align
-  })
-}
+const { pos } = useOverlayPosition(
+  triggerEl,
+  popupEl,
+  visible,
+  {
+    placement: () => props.placement,
+    align: () => props.align,
+    // 悬浮触发靠移出关闭，点击触发才需要监听外部点击
+    closeOnOutsideClick: props.trigger === 'click'
+  },
+  () => close()
+)
 
 function open() {
   if (props.disabled) return
@@ -70,47 +68,17 @@ function close() {
   setVisible(false)
 }
 
-// 悬浮触发要留出移动时间：鼠标从触发元素挪到浮层上会经过一段空隙，
-// 立即关闭会让浮层根本点不到
+/*
+ * 悬浮触发要留出移动时间：鼠标从触发元素挪到浮层上会经过一段空隙，
+ * 立即关闭会让浮层根本点不到。
+ */
 function delayedClose() {
   if (props.trigger !== 'hover') return
   clearTimeout(timer)
   timer = setTimeout(close, 120)
 }
 
-function onDocumentClick(event: MouseEvent) {
-  const target = event.target as Node
-  if (triggerEl.value?.contains(target) || popupEl.value?.contains(target)) return
-  close()
-}
-
-watch(visible, (open) => {
-  if (open) {
-    place()
-    // 滚动与缩放都会让已算好的位置失效；passive 避免拖累滚动性能
-    window.addEventListener('scroll', place, { passive: true, capture: true })
-    window.addEventListener('resize', place)
-    if (props.trigger === 'click') document.addEventListener('click', onDocumentClick)
-  } else {
-    window.removeEventListener('scroll', place, true)
-    window.removeEventListener('resize', place)
-    document.removeEventListener('click', onDocumentClick)
-  }
-})
-
-onBeforeUnmount(() => {
-  clearTimeout(timer)
-  window.removeEventListener('scroll', place, true)
-  window.removeEventListener('resize', place)
-  document.removeEventListener('click', onDocumentClick)
-})
-
 const style = computed(() => ({ left: `${pos.value.x}px`, top: `${pos.value.y}px` }))
-const arrowStyle = computed(() =>
-  pos.value.placement === 'top' || pos.value.placement === 'bottom'
-    ? { left: `${pos.value.arrow - 4}px` }
-    : { top: `${pos.value.arrow - 4}px` }
-)
 </script>
 
 <template>
@@ -139,7 +107,7 @@ const arrowStyle = computed(() =>
         @mouseenter="trigger === 'hover' && open()"
         @mouseleave="delayedClose"
       >
-        <span class="i-popover__arrow" :style="arrowStyle" />
+        <span class="i-popover__arrow" :style="arrowStyle(pos)" />
         <p v-if="title" class="i-popover__title">{{ title }}</p>
         <div class="i-popover__body"><slot name="content">{{ content }}</slot></div>
       </div>
