@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/i_theme.dart';
+import '../logic/overlay.dart';
 import '../tokens/tokens.dart';
 import 'i_button.dart';
 import 'i_icon.dart';
@@ -7,8 +8,10 @@ import 'i_icon.dart';
 /// 气泡确认：就地确认一次轻量的、可能有后果的操作。
 ///
 /// 与 IModal 的分工同 Web 端一致——删一行用 Popconfirm，删整个项目用 Modal。
-/// Flutter 没有锚定浮层的通用能力，这里用 showMenu 挂在触发点旁边，
-/// 位置由触发器的屏幕坐标算出，因此不会飘到屏幕另一头。
+///
+/// 位置由共享的 resolveOverlay 算出（与 Web 端同一套规则：空间不足翻到对侧、
+/// 贴边推回可用区），再交给 showMenu 呈现——此前只是「挂在触发点下方」，
+/// 触发器靠近屏幕底部时面板会被裁掉。
 class IPopconfirm extends StatelessWidget {
   const IPopconfirm({
     super.key,
@@ -39,13 +42,30 @@ class IPopconfirm extends StatelessWidget {
     final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     final topLeft = box.localToGlobal(Offset.zero, ancestor: overlay);
 
+    // 面板高度按内容估一个上界：showMenu 之前量不到未渲染的尺寸。
+    // 估高只影响「翻不翻转」的判断，偏大比偏小安全——宁可提前翻转，
+    // 也不要面板贴出屏幕。
+    const estimatedHeight = 160.0;
+    final pos = resolveOverlay(
+      trigger: IOverlayRect(
+        topLeft.dx,
+        topLeft.dy,
+        box.size.width,
+        box.size.height,
+      ),
+      popup: const IOverlayRect(0, 0, 260, estimatedHeight),
+      viewport: IOverlayRect(0, 0, overlay.size.width, overlay.size.height),
+      placement: IPlacement.bottom,
+      align: IOverlayAlign.start,
+    );
+
     final confirmed = await showMenu<bool>(
       context: context,
       color: c.bgElevated,
       position: RelativeRect.fromLTRB(
-        topLeft.dx,
-        topLeft.dy + box.size.height + IDesignTokensLight.spacing2,
-        overlay.size.width - topLeft.dx - box.size.width,
+        pos.x,
+        pos.y,
+        overlay.size.width - pos.x - 260,
         0,
       ),
       constraints: const BoxConstraints(minWidth: 240, maxWidth: 280),

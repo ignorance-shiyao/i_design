@@ -1,9 +1,17 @@
-<view class="i-popconfirm is-{{placement}}">
+<view class="i-popconfirm">
   <view class="i-popconfirm__trigger" bindtap="onToggle">
     <slot />
   </view>
 
-  <view wx:if="{{visible}}" class="i-popconfirm__panel is-{{placement}}">
+  <view
+    wx:if="{{visible}}"
+    class="i-popconfirm__panel is-{{actual}}"
+    style="left:{{left}}px;top:{{top}}px"
+  >
+    <view
+      class="i-popconfirm__arrow"
+      style="{{actual === 'top' || actual === 'bottom' ? 'left:' : 'top:'}}{{arrow}}px"
+    />
     <view class="i-popconfirm__head">
       <view
         class="i-popconfirm__icon i-icon i-icon--{{theme === 'danger' ? 'warning-triangle' : 'help-circle'}}"

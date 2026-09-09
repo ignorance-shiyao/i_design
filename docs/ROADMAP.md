@@ -13,7 +13,7 @@
 前几轮在 Vue 3 上做完了，其余端还欠着。**先还债，再加新组件**——
 否则「各端一致」这条承诺会先烂在这里。
 
-- [ ] **Tooltip / Popconfirm 接入 `logic/overlay`**
+- [x] **Tooltip / Popconfirm 接入 `logic/overlay`**（已完成，各端齐备）
   - React 两个组件改为 `resolveOverlay` + fixed 定位 + Portal
   - Vue 2：Teleport 换 `_Portal`，加入 `convert.mjs` 人工清单
   - 小程序：`boundingClientRect` 查位置，箭头跟随触发元素中心
