@@ -39,12 +39,17 @@
   padding-bottom: var(--i-spacing-4);
 }
 .footer__brand strong { font-size: var(--i-font-size-md); }
+/*
+ * 不设 max-width：这句话本来就短，限宽只会把结尾一两个字挤到第二行，
+ * 看起来像排版坏了。让它跟着容器走，横向空间不够时才自然换行。
+ */
 .footer__inner p {
   margin-top: var(--i-spacing-1);
   color: var(--i-color-text-tertiary);
   font-size: var(--i-font-size-sm);
-  max-width: 44ch;
 }
+/* 品牌块占据剩余空间，链接靠右 */
+.footer__brand { flex: 1; min-width: 260px; }
 .footer__links {
   display: flex;
   flex-wrap: wrap;
