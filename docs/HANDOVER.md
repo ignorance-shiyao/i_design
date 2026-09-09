@@ -152,51 +152,14 @@ export const SCATTER_MAX_SERIES = 3
 
 ---
 
-## 7. 待办(按参考体系分组)
+## 7. 待办
 
-已完成的不再列。以下是真实缺口,按"能立刻动手"的粒度写:
+详细计划见 **`docs/ROADMAP.md`**：按批次排好顺序，每项写明了做什么、
+可以复用哪份共享逻辑、以及验收标准。进度以站内「组件全景」页
+（`src/data/componentCatalog.ts`）的 `ready` / `planned` 为准。
 
-### 图表(对照 ECharts / Highcharts)
-从 Highcharts 的 `SeriesOptionsType` 联合类型里枚举出真实 series 名,与 ECharts 取交集后
-本体系仍缺的是下面这些(其余多为金融指标线,中后台用不上):
-- [ ] **dataZoom**:图表下方的区间缩放条,以及框选放大。逻辑放 `logic/chart.ts`,各端各接一次
-- [ ] **箱线图 boxplot**、**瀑布图 waterfall**:统计分布与增减归因,两家都有
-- [ ] **桑基图 / 树图**:流量与层级占比
-- [ ] **图表导出**:导出 PNG / SVG。Web 端可由 SVG 序列化,Flutter 走 `RepaintBoundary`,
-      小程序走 `canvasToTempFilePath`——三端机制不同,注意不要强求同一份实现
-
-### 流程图(对照 LogicFlow)
-- 连线走向(polyline / straight / bezier)与撤销重做**已完成**,剩下:
-- [ ] **框选**:拖拽矩形多选节点,配合批量移动
-- [ ] **缩略图 minimap**:大图时的导航
-- [ ] **节点缩放**:拖拽边角改变节点尺寸
-- [ ] **快照导出**
-
-### 移动端(对照 NutUI)
-- Picker / SearchBar / CountDown / SwipeCell / NoticeBar **已完成**,剩下:
-- [ ] **日历 Calendar**:按月查看与标记,含区间选择
-- [ ] **走马灯 Swiper**
-- [ ] **无限滚动加载**
-- [ ] **回到顶部 BackTop** 与 **吸顶 Sticky**
-- [ ] **数字键盘**:金额与验证码场景
-
-### 中后台(对照 Semi Design)
-Dropdown / Popover / Tree / TreeSelect / Cascader **已完成**,并沉淀了两份共享逻辑:
-`logic/overlay.ts`(翻转避让、贴边推回、主轴对齐)与 `logic/tree.ts`(拍平索引、
-半选传播、禁用继承、搜索命中路径、级联列)。后续同类组件应当复用它们,而不是另起一份。
-
-剩下:
-- [ ] **Tooltip 与 Popconfirm 接入 `logic/overlay`**——这两个目前仍是纯 CSS 定位,
-      没有视口避让。接上去之后四处浮层的行为才真正统一(优先做这条)
-- [ ] **导航菜单 Menu**:侧栏/顶栏多级,可复用 `logic/tree` 的展开态
-- [ ] **穿梭框 Transfer**、**自动完成 AutoComplete**、**输入标签 TagInput**
-- [ ] **通知 Notification**(角落、带操作,区别于已有的 Message)
-- [ ] **时间选择 TimePicker**、**页内锚点 Anchor**、**图片预览**、**页面框架 Layout**
-
-站内「组件全景」页(`src/data/componentCatalog.ts`,路由 `/design/catalog`)是这份待办的
-用户可见版本,新增组件时记得把对应条目从 `planned` 改成 `ready`。
-
----
+下一批是「补完浮层与文件类型的其余端」——先还债再加新组件，
+否则「各端一致」这条承诺会先烂在这里。
 
 ## 8. 几个容易踩的坑
 
