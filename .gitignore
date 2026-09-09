@@ -1,6 +1,9 @@
-node_modules/
-dist/
-*.log
+node_modules
+dist
 .DS_Store
-coverage/
-playground/demo/dist/
+*.local
+dist-single
+dist-demo
+packages/*/dist
+packages/*/.tokens.build.mjs
+packages/vue/node_modules

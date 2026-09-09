@@ -1,37 +1,50 @@
 {
-  "name": "i-design",
+  "name": "i-design-monorepo",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.7.0",
-  "description": "i-design \u2014 a cross-framework (React + Vue) component library with a shared headless core and one design-token system.",
-  "packageManager": "pnpm@10.33.0",
+  "type": "module",
+  "description": "Ignorance Design — 一套面向企业中后台产品的设计体系与组件库",
   "scripts": {
-    "build": "pnpm -r --filter \"./packages/*\" build",
-    "typecheck": "pnpm -r --filter \"./packages/*\" typecheck",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "clean": "rm -rf packages/*/dist node_modules/.vite",
-    "preview:build": "pnpm --filter @i-design/playground build && node scripts/build-artifact.mjs"
+    "dev": "vite",
+    "build": "npm run build:tokens && vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "build:tokens": "node packages/common/scripts/build-tokens.mjs",
+    "check:parity": "npm run build:tokens && npm run build:styles && npm run build:vue-next && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:stats && npm run build:matrix && npm run check:snippets",
+    "build:styles:mp": "node packages/miniprogram/scripts/build-styles.mjs",
+    "build:react-demo": "vite build --config packages/react/vite.config.ts",
+    "build:styles": "node scripts/build-styles-index.mjs",
+    "build:react-index": "node scripts/build-react-index.mjs",
+    "build:vue-next": "node scripts/build-vue-next.mjs",
+    "build:stats": "node scripts/build-framework-stats.mjs",
+    "build:matrix": "node scripts/build-component-matrix.mjs",
+    "check:snippets": "node scripts/check-snippets.mjs",
+    "build:mp": "node packages/miniprogram/scripts/build-styles.mjs && node packages/miniprogram/scripts/build-icons.mjs && node packages/miniprogram/scripts/scaffold.mjs",
+    "check:mp": "npm run build:mp && node packages/miniprogram/scripts/validate.mjs",
+    "build:flutter": "node packages/flutter/scripts/build-icons.mjs && node packages/flutter/scripts/build-barrel.mjs && node packages/flutter/scripts/build-golden-test.mjs",
+    "check:flutter": "npm run build:flutter && node packages/flutter/scripts/validate.mjs"
+  },
+  "dependencies": {
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.1.0",
-    "@types/node": "^22.10.0",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^4.7.0",
     "@vitejs/plugin-vue": "^5.2.1",
-    "@vue/test-utils": "^2.4.6",
-    "happy-dom": "^15.11.7",
-    "playwright": "1.49.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.3",
-    "vitest": "^2.1.8",
-    "vue": "^3.5.13"
+    "@vitejs/plugin-vue2": "^2.3.4",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.63.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.11",
+    "vue-tsc": "^2.2.0",
+    "vue2": "npm:vue@^2.7.16"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  }
+  "workspaces": [
+    "packages/*"
+  ]
 }

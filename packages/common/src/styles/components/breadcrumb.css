@@ -1,0 +1,25 @@
+/*
+ * IBreadcrumb —— 各端共享。
+ *
+ * 用类名而非 ol / li / a 元素选择器：小程序的 WXML 没有这些标签，
+ * 元素选择器会让同一份样式在小程序端整个失效。
+ */
+.i-breadcrumb__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--i-font-size-md);
+}
+.i-breadcrumb__item {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+}
+.i-breadcrumb__link { color: var(--i-color-text-secondary); }
+.i-breadcrumb__link:hover { color: var(--i-color-brand); }
+.i-breadcrumb__current { color: var(--i-color-text); font-weight: 500; }
+.i-breadcrumb__sep { display: inline-flex; color: var(--i-color-text-tertiary); }

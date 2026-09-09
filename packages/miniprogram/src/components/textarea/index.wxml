@@ -1,0 +1,14 @@
+<view class="i-textarea {{disabled ? 'is-disabled' : ''}}">
+  <textarea
+    class="i-textarea__inner {{invalid || overLimit ? 'is-invalid' : ''}}"
+    value="{{value}}"
+    placeholder="{{placeholder}}"
+    disabled="{{disabled}}"
+    maxlength="{{maxlength}}"
+    style="height:{{rows * 24 + 16}}px"
+    bindinput="onInput"
+  />
+  <text wx:if="{{showCount && maxlength > 0}}" class="i-textarea__count {{overLimit ? 'is-over' : ''}}">
+    {{value.length}} / {{maxlength}}
+  </text>
+</view>

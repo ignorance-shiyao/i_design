@@ -1,0 +1,55 @@
+/*
+ * IChatSources —— 回答引用的来源。
+ *
+ * 编号与正文里的角标一一对应：来源如果不能被追溯回具体某句话，
+ * 它就只是一排装饰性的链接。
+ */
+.i-chat-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+}
+.i-chat-sources__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  max-width: 260px;
+  padding: var(--i-spacing-1) var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+  text-decoration: none;
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    color var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-chat-sources__item:hover { border-color: var(--i-color-brand); color: var(--i-color-brand); }
+.i-chat-sources__index {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text-tertiary);
+  font-size: 10px;
+}
+.i-chat-sources__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 正文里的角标 */
+.i-chat-cite {
+  display: inline-grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  margin: 0 2px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand);
+  font-size: 10px;
+  vertical-align: 0.2em;
+  cursor: pointer;
+}

@@ -1,0 +1,59 @@
+/*
+ * ISegmented —— 分段控制器。
+ *
+ * 与 Tabs 的分工：Tabs 切换的是页面区域，Segmented 切换的是同一块区域内的
+ * 数据视角（日/周/月）。滑块用 transform 移动而不是给选中项加底色，
+ * 这样切换时有连续的位移，视线不会丢。
+ */
+.i-segmented {
+  position: relative;
+  display: inline-flex;
+  /*
+   * 行内元素放进纵向 flex 容器时会被 align-items: stretch 拉满整行，
+   * 于是「分段控制器」看起来像一排通栏按钮。显式收到内容宽度，
+   * 需要通栏时用 is-block，而不是靠父容器碰巧没拉伸它。
+   */
+  width: fit-content;
+  align-self: flex-start;
+  padding: 2px;
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-muted);
+  font-size: var(--i-font-size-sm);
+}
+.i-segmented--lg { font-size: var(--i-font-size-md); }
+.i-segmented.is-block { display: flex; width: 100%; align-self: stretch; }
+
+.i-segmented__thumb {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border-radius: calc(var(--i-radius-md) - 2px);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-sm);
+  transition: transform var(--i-motion-base) var(--i-motion-easing),
+    width var(--i-motion-base) var(--i-motion-easing);
+}
+
+.i-segmented__item {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: var(--i-spacing-1) var(--i-spacing-4);
+  border: none;
+  border-radius: calc(var(--i-radius-md) - 2px);
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--i-color-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-segmented__item:hover:not(.is-disabled) { color: var(--i-color-text); }
+.i-segmented__item.is-active { color: var(--i-color-text); font-weight: 500; }
+.i-segmented__item.is-disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }
+.i-segmented__item:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .i-segmented__thumb { transition: none; }
+}

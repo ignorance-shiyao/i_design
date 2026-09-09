@@ -1,0 +1,4 @@
+<view wx:if="{{record}}" class="i-toast" role="status">
+  <view wx:if="{{record.icon}}" class="i-icon i-icon--{{record.icon}} i-toast__icon" style="width:26px;height:26px" />
+  <text>{{record.content}}</text>
+</view>

@@ -1,0 +1,12 @@
+<view wx:if="{{items.length}}" class="i-chat-suggestions">
+  <text wx:if="{{title}}" class="i-chat-suggestions__title">{{title}}</text>
+  <view class="i-chat-suggestions__list">
+    <view
+      wx:for="{{items}}"
+      wx:key="*this"
+      class="i-chat-suggestions__item"
+      bindtap="onSelect"
+      data-value="{{item}}"
+    >{{item}}</view>
+  </view>
+</view>

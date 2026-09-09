@@ -1,0 +1,45 @@
+/* ActionSheet —— 从底部升起的操作列表，移动端替代右键菜单与下拉 */
+.i-action-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: var(--i-z-modal);
+  background: rgba(20, 24, 34, 0.45);
+}
+.i-action-sheet__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-bottom: var(--i-safe-bottom, 0px);
+  background: var(--i-color-bg-subtle);
+  border-radius: var(--i-radius-xl) var(--i-radius-xl) 0 0;
+  overflow: hidden;
+}
+.i-action-sheet__title {
+  padding: var(--i-spacing-4);
+  text-align: center;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+  background: var(--i-color-bg-elevated);
+}
+.i-action-sheet__item {
+  display: block;
+  width: 100%;
+  padding: var(--i-spacing-4);
+  border: none;
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  font-family: inherit;
+  font-size: var(--i-font-size-lg);
+  text-align: center;
+  box-shadow: inset 0 1px 0 var(--i-color-hairline);
+}
+.i-action-sheet__item:active { background: var(--i-color-bg-subtle); }
+.i-action-sheet__item.is-danger { color: var(--i-color-danger); }
+.i-action-sheet__item.is-disabled { color: var(--i-color-text-tertiary); }
+/* 取消项与操作项之间留出间隙，避免误触 */
+.i-action-sheet__cancel {
+  margin-top: var(--i-spacing-2);
+  box-shadow: none;
+  font-weight: 500;
+}

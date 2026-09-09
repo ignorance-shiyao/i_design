@@ -1,0 +1,26 @@
+<view class="i-chart i-chart--scatter">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <canvas
+    class="i-chart__scatter-canvas"
+    type="2d"
+    style="width:100%;height:{{height}}px"
+  />
+  <view wx:if="{{legend.length > 1}}" class="i-chart__legend">
+    <view wx:for="{{legend}}" wx:key="name" class="i-chart__legend-item">
+      <view class="i-chart__swatch" style="background:{{item.color}}" />
+      <text>{{item.name}}</text>
+    </view>
+  </view>
+  <view class="i-chart__table-mp">
+    <view class="i-chart__row i-chart__row--head">
+      <text class="i-chart__cell">系列</text>
+      <text class="i-chart__cell">{{xLabel || 'x'}}</text>
+      <text class="i-chart__cell">{{yLabel || 'y'}}</text>
+    </view>
+    <view wx:for="{{rows}}" wx:key="index" class="i-chart__row">
+      <text class="i-chart__cell">{{item.name}}</text>
+      <text class="i-chart__cell">{{item.x}}{{xUnit}}</text>
+      <text class="i-chart__cell">{{item.y}}{{yUnit}}</text>
+    </view>
+  </view>
+</view>

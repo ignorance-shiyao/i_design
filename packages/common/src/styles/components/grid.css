@@ -1,0 +1,40 @@
+/*
+ * IGrid —— 宫格入口。
+ *
+ * 移动端首页最常见的功能入口区。每格是等分的正方形区域，
+ * 图标在上文字在下——横排图文在小屏上一行放不下三个以上。
+ */
+.i-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--i-grid-columns, 4), minmax(0, 1fr));
+  background: var(--i-color-bg);
+}
+.i-grid--bordered { gap: 1px; background: var(--i-color-hairline); }
+.i-grid--bordered .i-grid__item { background: var(--i-color-bg); }
+
+.i-grid__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-4) var(--i-spacing-2);
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.i-grid__item:active { background: var(--i-color-bg-subtle); }
+.i-grid__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand);
+}
+.i-grid__text { text-align: center; line-height: 1.4; }

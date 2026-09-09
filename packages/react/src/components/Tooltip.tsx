@@ -1,81 +1,54 @@
-import {
-  computePosition, createId, cx, rectOf, usePopupBehavior,
-  type Placement,
-} from '@i-design/core';
-import { cloneElement, isValidElement, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
-import { toProps } from '../utils.js';
-import { useConfig } from './ConfigProvider.js';
+import { useId, useRef, useState, type ReactNode } from 'react'
 
 export interface TooltipProps {
-  content: ReactNode;
-  placement?: Placement;
-  trigger?: 'hover' | 'click' | 'focus' | 'manual';
-  open?: boolean;
-  disabled?: boolean;
-  offset?: number;
-  /** `panel` renders a light popover surface instead of the dark tooltip bubble. */
-  appearance?: 'tooltip' | 'panel';
-  children: ReactElement;
-  onOpenChange?: (open: boolean) => void;
+  content?: ReactNode
+  placement?: 'top' | 'bottom' | 'left' | 'right'
+  /** 悬浮多久后出现，避免鼠标划过一排按钮时连续闪烁 */
+  delay?: number
+  disabled?: boolean
+  children?: ReactNode
 }
 
-export function Tooltip(props: TooltipProps) {
-  const { content, placement = 'top', trigger = 'hover', open: controlled, disabled, offset = 8, appearance = 'tooltip', children, onOpenChange } = props;
-  const { mode, density, dir } = useConfig();
-  const [internalOpen, setInternalOpen] = useState(false);
-  const open = controlled ?? internalOpen;
-  const id = useMemo(() => createId('i-popup'), []);
-  const anchorRef = useRef<HTMLElement>(null);
-  const floatingRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+export function Tooltip({
+  content,
+  placement = 'top',
+  delay = 100,
+  disabled = false,
+  children
+}: TooltipProps) {
+  const [visible, setVisible] = useState(false)
+  // React 19 的 useRef 必须显式给初始值
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const id = `i-tooltip-${useId()}`
 
-  const behavior = usePopupBehavior({
-    open, id, trigger, disabled,
-    onOpenChange: (next) => {
-      if (controlled === undefined) setInternalOpen(next);
-      onOpenChange?.(next);
-    },
-  });
-
-  useLayoutEffect(() => {
-    if (!open || !anchorRef.current || !floatingRef.current) return;
-    const update = () => {
-      const next = computePosition(rectOf(anchorRef.current!), rectOf(floatingRef.current!), { placement, offset });
-      setPos({ x: next.x, y: next.y });
-    };
-    update();
-    window.addEventListener('scroll', update, true);
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update, true);
-      window.removeEventListener('resize', update);
-    };
-  }, [open, placement, offset]);
-
-  const anchorProps = toProps(behavior.anchor);
-  const trigger_ = isValidElement(children)
-    ? cloneElement(children as never, { ...anchorProps, ref: anchorRef, className: cx((children.props as { className?: string }).className, 'i-popup__anchor') })
-    : children;
+  const show = () => {
+    if (disabled) return
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setVisible(true), delay)
+  }
+  const hide = () => {
+    clearTimeout(timer.current)
+    setVisible(false)
+  }
 
   return (
-    <>
-      {trigger_}
-      {open && typeof document !== 'undefined' &&
-        createPortal(
-          <div
-            ref={floatingRef}
-            {...toProps(behavior.content)}
-            className={cx(behavior.content.class, appearance === 'panel' && 'i-popup--panel')}
-            data-i-theme={mode}
-            data-i-density={density}
-            dir={dir}
-            style={{ insetInlineStart: pos.x, insetBlockStart: pos.y }}
-          >
-            {content}
-          </div>,
-          document.body,
-        )}
-    </>
-  );
+    <span
+      className="i-tooltip"
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      // 同时响应 focus：键盘用户 Tab 过来也要能看到提示
+      onFocus={show}
+      onBlur={hide}
+      onKeyDown={(e) => e.key === 'Escape' && hide()}
+    >
+      <span className="i-tooltip__trigger" aria-describedby={visible ? id : undefined}>
+        {children}
+      </span>
+      {visible && content && (
+        <span id={id} className={`i-tooltip__pop is-${placement}`} role="tooltip">
+          {content}
+        </span>
+      )}
+    </span>
+  )
 }

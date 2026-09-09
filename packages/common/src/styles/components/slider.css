@@ -1,0 +1,65 @@
+/*
+ * ISlider —— 在连续区间里取值。
+ *
+ * 轨道高度只有 4px，但可点击区域撑到 20px：细轨道好看，细的点击区难用。
+ */
+.i-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  cursor: pointer;
+  touch-action: none;
+}
+.i-slider.is-disabled { cursor: not-allowed; opacity: 0.6; }
+
+.i-slider__track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-muted);
+}
+.i-slider__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-brand);
+}
+.i-slider__handle {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: var(--i-radius-full);
+  border: 2px solid var(--i-color-brand);
+  background: var(--i-color-bg);
+  transform: translateY(-50%);
+  transition: box-shadow var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-slider__handle:focus-visible,
+.i-slider:hover .i-slider__handle { box-shadow: 0 0 0 4px var(--i-color-ring); }
+
+/* 刻度点 */
+.i-slider__mark {
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-border-strong);
+  transform: translateY(-50%);
+}
+.i-slider__mark.is-passed { background: var(--i-color-brand); }
+.i-slider__label {
+  position: absolute;
+  top: 20px;
+  transform: translateX(-50%);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  white-space: nowrap;
+}

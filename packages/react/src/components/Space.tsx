@@ -1,31 +1,41 @@
-import { createBem, cx } from '@i-design/core';
-import type { CSSProperties, ReactNode } from 'react';
-
-const bem = createBem('space');
+import type { ReactNode } from 'react'
 
 export interface SpaceProps {
-  direction?: 'horizontal' | 'vertical';
-  gap?: 's' | 'm' | 'l';
-  wrap?: boolean;
-  align?: 'start' | 'center' | 'end';
-  justify?: 'between';
-  className?: string;
-  style?: CSSProperties;
-  children?: ReactNode;
+  direction?: 'horizontal' | 'vertical'
+  size?: 'sm' | 'md' | 'lg'
+  align?: 'start' | 'center' | 'end' | 'between'
+  wrap?: boolean
+  /** 占满一行；默认是行内元素 */
+  block?: boolean
+  className?: string
+  children?: ReactNode
 }
 
-export function Space(props: SpaceProps) {
-  const { direction = 'horizontal', gap = 'm', wrap, align, justify, className, style, children } = props;
+/** 把「相邻元素间距」收敛到令牌上，避免各处手写 margin 长出十几种间距 */
+export function Space({
+  direction = 'horizontal',
+  size = 'md',
+  align = 'start',
+  wrap = false,
+  block = false,
+  className = '',
+  children
+}: SpaceProps) {
   return (
     <div
-      className={cx(bem(), bem(null, direction), bem(null, `gap-${gap}`), {
-        [bem(null, 'wrap')]: wrap,
-        [bem(null, `align-${align}`)]: !!align,
-        [bem(null, `justify-${justify}`)]: !!justify,
-      }, className)}
-      style={style}
+      className={[
+        'i-space',
+        `i-space--${direction}`,
+        `i-space--${size}`,
+        `i-space--${align}`,
+        wrap ? 'is-wrap' : '',
+        block ? 'is-block' : '',
+        className
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       {children}
     </div>
-  );
+  )
 }

@@ -1,34 +1,42 @@
-import { useButtonBehavior, type ButtonBehaviorOptions } from '@i-design/core';
-import { forwardRef, type ReactNode } from 'react';
-import { toProps } from '../utils.js';
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-export interface ButtonProps
-  extends Omit<ButtonBehaviorOptions, 'onClick' | 'extraClass'>,
-    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'className'> {
-  className?: string;
-  icon?: ReactNode;
-  suffixIcon?: ReactNode;
-  children?: ReactNode;
+export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {
+  /** 视觉层级：主按钮 / 次按钮 / 文字按钮 / 危险操作 */
+  variant?: 'primary' | 'secondary' | 'text' | 'danger'
+  size?: 'sm' | 'md' | 'lg'
+  loading?: boolean
+  block?: boolean
+  /** 原生 type，默认 button，避免在表单里意外提交 */
+  htmlType?: 'button' | 'submit' | 'reset'
+  children?: ReactNode
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(props, ref) {
-  const {
-    variant, status, size, block, disabled, loading, shape, href, type,
-    className, icon, suffixIcon, children, onClick, ...rest
-  } = props;
+export function Button({
+  variant = 'secondary',
+  size = 'md',
+  loading = false,
+  block = false,
+  htmlType = 'button',
+  disabled,
+  className = '',
+  children,
+  ...rest
+}: ButtonProps) {
+  const classes = [
+    'i-button',
+    `i-button--${variant}`,
+    `i-button--${size}`,
+    block ? 'is-block' : '',
+    loading ? 'is-loading' : '',
+    className
+  ]
+    .filter(Boolean)
+    .join(' ')
 
-  const behavior = useButtonBehavior({
-    variant, status, size, block, disabled, loading, shape, href, type,
-    onClick: onClick as ButtonBehaviorOptions['onClick'],
-    extraClass: className,
-  });
-
-  const Tag = behavior.tag as 'button';
   return (
-    <Tag ref={ref as never} {...rest} {...toProps(behavior.root)}>
-      {behavior.showSpinner ? <span className="i-button__spinner" /> : icon}
-      {children != null && <span className="i-button__content">{children}</span>}
-      {suffixIcon}
-    </Tag>
-  );
-});
+    <button className={classes} type={htmlType} disabled={disabled || loading} {...rest}>
+      {loading && <span className="i-button__spinner" aria-hidden="true" />}
+      {children}
+    </button>
+  )
+}

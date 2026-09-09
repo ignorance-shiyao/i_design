@@ -1,23 +1,24 @@
 {
   "name": "@i-design/vue",
   "version": "0.1.0",
-  "description": "Vue 3 adapter for i-design.",
+  "description": "Ignorance Design 的 Vue 2 实现（Vue 2.7 组合式 API），复用公共层令牌、样式与逻辑",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./styles": "@i-design/core/styles"
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "vue": "^2.7.0"
   },
-  "files": ["dist"],
   "dependencies": {
-    "@i-design/core": "workspace:*",
-    "@i-design/tokens": "workspace:*"
+    "@i-design/common": "file:../common"
   },
-  "peerDependencies": { "vue": ">=3.3" },
+  "license": "MIT",
+  "devDependencies": {
+    "vue": "^2.7.16",
+    "@vitejs/plugin-vue2": "^2.3.4",
+    "vite": "^6.0.11"
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "build:demo": "vite build",
+    "preview": "vite preview"
   }
 }

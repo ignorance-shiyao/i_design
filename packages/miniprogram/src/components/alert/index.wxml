@@ -1,0 +1,7 @@
+<view class="i-alert i-alert--{{type}}" role="alert">
+  <view class="i-alert__content">
+    <text wx:if="{{title}}" class="i-alert__title">{{title}}</text>
+    <view class="i-alert__desc"><slot></slot></view>
+  </view>
+  <view wx:if="{{closable}}" class="i-alert__close" bindtap="onClose">×</view>
+</view>

@@ -1,0 +1,12 @@
+<view class="i-chat-thinking {{open ? 'is-open' : ''}}">
+  <view class="i-chat-thinking__head" bindtap="onToggle">
+    <view wx:if="{{pending}}" class="i-chat-thinking__pulse" />
+    <view class="i-chat-thinking__arrow i-icon i-icon--chevron-right" style="width:14px;height:14px" />
+    <text class="i-chat-thinking__label">{{label}}</text>
+    <text wx:if="{{duration}}" class="i-chat-thinking__duration">{{duration}}</text>
+  </view>
+  <view wx:if="{{open}}" class="i-chat-thinking__body">
+    <text wx:if="{{text}}">{{text}}</text>
+    <slot />
+  </view>
+</view>

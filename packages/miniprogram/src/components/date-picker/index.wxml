@@ -1,0 +1,41 @@
+<view class="i-date i-date--{{size}} {{open ? 'is-open' : ''}} {{disabled ? 'is-disabled' : ''}}">
+  <view class="i-date__trigger" bindtap="onToggle">
+    <view class="i-date__calendar i-icon i-icon--calendar" style="width:15px;height:15px" />
+    <text class="i-date__value {{display ? '' : 'is-placeholder'}}">{{display || placeholder}}</text>
+    <view wx:if="{{clearable && display && !disabled}}" class="i-date__clear" catchtap="onClear">
+      <view class="i-icon i-icon--close" style="width:14px;height:14px" />
+    </view>
+  </view>
+
+  <view wx:if="{{open}}" class="i-date__panel">
+    <view class="i-date__head">
+      <view class="i-date__nav" bindtap="onShiftMonth" data-delta="-1">
+        <view class="i-icon i-icon--chevron-left" style="width:16px;height:16px" />
+      </view>
+      <text class="i-date__title">{{title}}</text>
+      <view class="i-date__nav" bindtap="onShiftMonth" data-delta="1">
+        <view class="i-icon i-icon--chevron-right" style="width:16px;height:16px" />
+      </view>
+    </view>
+
+    <view class="i-date__week">
+      <text wx:for="{{weekdays}}" wx:key="*this">{{item}}</text>
+    </view>
+
+    <view class="i-date__grid">
+      <view
+        wx:for="{{cells}}"
+        wx:key="iso"
+        class="i-date__cell {{item.outside ? 'is-outside' : ''}} {{item.today ? 'is-today' : ''}} {{item.selected ? 'is-selected' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+        bindtap="onPick"
+        data-iso="{{item.iso}}"
+        data-disabled="{{item.disabled}}"
+      >{{item.day}}</view>
+    </view>
+
+    <view class="i-date__foot">
+      <view class="i-date__action" bindtap="onToday">今天</view>
+      <view wx:if="{{clearable}}" class="i-date__action" bindtap="onClear">清除</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,15 @@
+<view class="i-form-item is-{{layout}} {{error ? 'is-error' : ''}}">
+  <view
+    wx:if="{{label}}"
+    class="i-form-item__label"
+    style="{{layout === 'horizontal' ? 'width:' + labelWidth : ''}}"
+  >
+    <text wx:if="{{required}}" class="i-form-item__required">*</text>
+    <text>{{label}}</text>
+  </view>
+  <view class="i-form-item__control">
+    <slot />
+    <view wx:if="{{error}}" class="i-form-item__error">{{error}}</view>
+    <view wx:elif="{{help}}" class="i-form-item__help">{{help}}</view>
+  </view>
+</view>

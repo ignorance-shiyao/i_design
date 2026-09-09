@@ -1,0 +1,9 @@
+<view class="i-cell {{clickable ? 'is-clickable' : ''}}" bindtap="onTap">
+  <view class="i-cell__body">
+    <text class="i-cell__title">{{title}}</text>
+    <text wx:if="{{description}}" class="i-cell__desc">{{description}}</text>
+  </view>
+  <text wx:if="{{value}}" class="i-cell__value">{{value}}</text>
+  <slot name="value"></slot>
+  <view wx:if="{{clickable}}" class="i-icon i-icon--chevron-right i-cell__arrow" style="width:16px;height:16px" />
+</view>

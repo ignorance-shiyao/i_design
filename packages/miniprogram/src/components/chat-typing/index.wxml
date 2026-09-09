@@ -1,0 +1,5 @@
+<view class="i-chat-typing">
+  <view class="i-chat-typing__dot" />
+  <view class="i-chat-typing__dot" />
+  <view class="i-chat-typing__dot" />
+</view>

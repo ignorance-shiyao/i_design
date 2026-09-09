@@ -1,0 +1,11 @@
+{
+  "name": "@i-design/mobile-vue",
+  "version": "0.1.0",
+  "description": "Ignorance Design 移动端 Vue 实现：Web 令牌 + 移动覆盖层，补充移动特有组件",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": { "vue": "^3.4.0" },
+  "dependencies": { "@i-design/common": "0.1.0", "@i-design/vue-next": "0.1.0" },
+  "license": "MIT"
+}

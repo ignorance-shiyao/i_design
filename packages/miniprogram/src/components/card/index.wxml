@@ -1,0 +1,7 @@
+<view class="i-card {{hoverable ? 'is-hoverable' : ''}} {{bordered ? 'is-bordered' : ''}}">
+  <view wx:if="{{title}}" class="i-card__header">
+    <view class="i-card__title">{{title}}</view>
+  </view>
+  <view class="i-card__body"><slot></slot></view>
+  <view wx:if="{{hasFooter}}" class="i-card__footer"><slot name="footer"></slot></view>
+</view>

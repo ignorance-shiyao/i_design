@@ -1,0 +1,50 @@
+/*
+ * IChatThinking —— 推理过程，默认折叠。
+ *
+ * 默认折叠是有意的：思考过程对排查问题很有用，但它不是答案。
+ * 展开后用更小的字号与次级文字色，让它在视觉上明确从属于回答。
+ */
+.i-chat-thinking {
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-subtle);
+  overflow: hidden;
+}
+.i-chat-thinking__head {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  cursor: pointer;
+  text-align: left;
+}
+.i-chat-thinking__head:hover { color: var(--i-color-text); }
+.i-chat-thinking__label { flex: 1; }
+.i-chat-thinking__duration { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-xs); }
+.i-chat-thinking__arrow { transition: transform var(--i-motion-base) var(--i-motion-easing); }
+.i-chat-thinking.is-open .i-chat-thinking__arrow { transform: rotate(90deg); }
+.i-chat-thinking__body {
+  padding: 0 var(--i-spacing-3) var(--i-spacing-3);
+  font-size: var(--i-font-size-sm);
+  line-height: 1.8;
+  color: var(--i-color-text-tertiary);
+  white-space: pre-wrap;
+}
+/* 进行中的推理：标题左侧的点缓慢呼吸，表示还没结束 */
+.i-chat-thinking__pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-brand);
+  animation: i-chat-pulse 1.6s ease-in-out infinite;
+}
+@keyframes i-chat-pulse { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) {
+  .i-chat-thinking__pulse { animation: none; }
+}

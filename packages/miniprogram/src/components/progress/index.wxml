@@ -1,0 +1,8 @@
+<view
+  class="i-progress i-progress--{{status}} i-progress--{{size}} {{indeterminate ? 'is-indeterminate' : ''}}"
+>
+  <view class="i-progress__track">
+    <view class="i-progress__bar" style="width:{{clamped}}%" />
+  </view>
+  <text wx:if="{{showText && !indeterminate}}" class="i-progress__text">{{label}}</text>
+</view>

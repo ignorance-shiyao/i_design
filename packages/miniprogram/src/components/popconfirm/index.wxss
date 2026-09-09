@@ -1,0 +1,2 @@
+@import '../../../dist/styles/popconfirm.wxss';
+@import '../../../dist/styles/icons.wxss';

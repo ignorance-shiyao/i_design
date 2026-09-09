@@ -1,0 +1,93 @@
+@import '@i-design/common/styles/index.css';
+
+/* 以下是文档站自身的排版，不属于组件库 */
+/* 文档站通用排版 */
+.i-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--i-spacing-6);
+}
+
+.i-doc h1 {
+  font-size: var(--i-font-size-3xl);
+  margin-bottom: var(--i-spacing-3);
+  letter-spacing: -0.025em;
+}
+.i-doc h2 {
+  font-size: var(--i-font-size-xl);
+  margin: var(--i-spacing-12) 0 var(--i-spacing-4);
+  padding-bottom: var(--i-spacing-3);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-doc h3 { font-size: var(--i-font-size-lg); margin: var(--i-spacing-6) 0 var(--i-spacing-3); }
+.i-doc p { color: var(--i-color-text-secondary); margin-bottom: var(--i-spacing-4); }
+
+.i-lead {
+  font-size: var(--i-font-size-lg);
+  color: var(--i-color-text-secondary);
+  max-width: 68ch;
+}
+
+.i-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--i-font-size-md);
+  margin: var(--i-spacing-4) 0;
+}
+.i-table {
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.i-table th,
+.i-table td {
+  text-align: left;
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-table tr:last-child td { border-bottom: none; }
+.i-table th {
+  background: var(--i-color-bg-subtle);
+  font-weight: 600;
+  font-size: var(--i-font-size-sm);
+  letter-spacing: 0.02em;
+  color: var(--i-color-text-secondary);
+}
+.i-table tbody tr { transition: background var(--i-motion-fast) var(--i-motion-easing); }
+.i-table tbody tr:hover { background: var(--i-color-bg-subtle); }
+.i-table td { color: var(--i-color-text-secondary); }
+
+@media (max-width: 720px) {
+  .i-doc h1 { font-size: var(--i-font-size-2xl); }
+}
+
+/* 区块小标题（eyebrow）：给长页面提供节奏与层次 */
+.i-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--i-color-brand);
+}
+.i-eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+}
+
+/* 细网格底纹，给大面积留白一点质感 */
+.i-grid-bg {
+  background-image:
+    linear-gradient(var(--i-color-hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--i-color-hairline) 1px, transparent 1px);
+  background-size: 32px 32px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 0%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(70% 60% at 50% 0%, #000 30%, transparent 100%);
+}

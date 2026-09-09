@@ -1,0 +1,21 @@
+<view class="i-chart i-chart--pie">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <view class="i-chart__pie">
+    <view class="i-chart__pie-figure" style="width:{{size}}px;height:{{size}}px">
+      <canvas class="i-chart__pie-canvas" type="2d" style="width:{{size}}px;height:{{size}}px" />
+      <view wx:if="{{donut}}" class="i-chart__pie-center">
+        <text class="i-chart__pie-total">{{totalText}}{{unit}}</text>
+        <text wx:if="{{centerLabel}}" class="i-chart__pie-caption">{{centerLabel}}</text>
+      </view>
+    </view>
+
+    <view class="i-chart__pie-legend">
+      <view wx:for="{{rows}}" wx:key="name" class="i-chart__pie-row">
+        <view class="i-chart__swatch" style="background:{{item.color}}" />
+        <text class="i-chart__pie-name">{{item.name}}</text>
+        <text class="i-chart__pie-value">{{item.valueText}}{{unit}}</text>
+        <text class="i-chart__pie-percent">{{item.percent}}%</text>
+      </view>
+    </view>
+  </view>
+</view>

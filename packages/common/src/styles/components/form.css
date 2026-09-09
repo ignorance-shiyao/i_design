@@ -1,0 +1,2 @@
+/* IForm —— 由 Vue / React / mobile 各端共享 */
+.i-form { display: grid; gap: var(--i-spacing-5); }

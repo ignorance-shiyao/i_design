@@ -1,0 +1,14 @@
+<view class="i-chart">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <canvas
+    class="i-chart__canvas"
+    type="2d"
+    style="width:100%;height:{{height}}px"
+  />
+  <view wx:if="{{legend.length > 1}}" class="i-chart__legend">
+    <view wx:for="{{legend}}" wx:key="name" class="i-chart__legend-item">
+      <view class="i-chart__swatch" style="background:{{item.color}}" />
+      <text>{{item.name}}</text>
+    </view>
+  </view>
+</view>

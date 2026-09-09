@@ -1,0 +1,87 @@
+/* ISelect —— 由 Vue / React / mobile 各端共享 */
+.i-select { position: relative; width: 100%; }
+
+.i-select__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  text-align: left;
+  color: var(--i-color-text);
+  background: var(--i-color-bg);
+  border: 1px solid var(--i-color-border-strong);
+  border-radius: var(--i-radius-md);
+  cursor: pointer;
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    box-shadow var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-select__trigger:hover:not(:disabled) { border-color: var(--i-color-brand); }
+.i-select__trigger:focus-visible,
+.i-select.is-open .i-select__trigger {
+  outline: none;
+  border-color: var(--i-color-brand);
+  box-shadow: 0 0 0 2px var(--i-color-brand-subtle);
+}
+.i-select__trigger:disabled {
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+.i-select__trigger.is-invalid { border-color: var(--i-color-danger); }
+.i-select__trigger.is-placeholder .i-select__label { color: var(--i-color-text-tertiary); }
+
+.i-select--sm .i-select__trigger { height: var(--i-control-height-sm); padding: 0 var(--i-spacing-2); font-size: var(--i-font-size-sm); }
+.i-select--md .i-select__trigger { height: var(--i-control-height-md); padding: 0 var(--i-spacing-3); }
+.i-select--lg .i-select__trigger { height: var(--i-control-height-lg); padding: 0 var(--i-spacing-4); font-size: var(--i-font-size-lg); }
+
+.i-select__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.i-select__clear { display: grid; place-items: center; color: var(--i-color-text-tertiary); cursor: pointer; }
+.i-select__clear:hover { color: var(--i-color-text-secondary); }
+.i-select__arrow {
+  color: var(--i-color-text-tertiary);
+  transition: transform var(--i-motion-base) var(--i-motion-easing);
+}
+.i-select.is-open .i-select__arrow { transform: rotate(180deg); }
+
+.i-select__menu {
+  position: absolute;
+  top: calc(100% + var(--i-spacing-1));
+  left: 0;
+  right: 0;
+  z-index: var(--i-z-dropdown);
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--i-spacing-1);
+  list-style: none;
+  background: var(--i-color-bg);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  box-shadow: var(--i-shadow-md);
+}
+.i-select__option {
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-sm);
+  color: var(--i-color-text);
+  cursor: pointer;
+}
+.i-select__option.is-active { background: var(--i-color-bg-subtle); }
+.i-select__option.is-selected { color: var(--i-color-brand); font-weight: 500; }
+.i-select__option.is-disabled {
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+  background: none;
+}
+.i-select__empty {
+  padding: var(--i-spacing-3);
+  text-align: center;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}

@@ -1,0 +1,121 @@
+/*
+ * IPromptInput —— 会话输入框。
+ *
+ * 与普通 Textarea 的差别在于它是一个「操作台」：文本随内容增高但有上限，
+ * 附件、模型选择、发送/停止都排在同一个框里。做成独立组件而不是给 Textarea
+ * 加十个属性，是因为这些东西只在会话场景成立。
+ */
+.i-prompt {
+  border: 1px solid var(--i-color-border-strong);
+  border-radius: var(--i-radius-xl);
+  background: var(--i-color-bg);
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    box-shadow var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-prompt.is-focused {
+  border-color: var(--i-color-brand);
+  box-shadow: 0 0 0 3px var(--i-color-ring);
+}
+.i-prompt.is-disabled { background: var(--i-color-bg-muted); }
+
+.i-prompt__field {
+  display: block;
+  width: 100%;
+  padding: var(--i-spacing-3) var(--i-spacing-4) var(--i-spacing-2);
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  line-height: 1.7;
+  color: var(--i-color-text);
+  resize: none;
+  /* 高度由脚本按内容设置，这里只兜住上限，避免长输入把页面顶没 */
+  max-height: 200px;
+  overflow-y: auto;
+}
+.i-prompt__field:focus { outline: none; }
+.i-prompt__field::placeholder { color: var(--i-color-text-tertiary); }
+
+.i-prompt__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-3) var(--i-spacing-4) 0;
+}
+.i-prompt__file {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+}
+.i-prompt__file-remove {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--i-color-text-tertiary);
+  display: inline-flex;
+}
+.i-prompt__file-remove:hover { color: var(--i-color-danger); }
+
+.i-prompt__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: 0 var(--i-spacing-3) var(--i-spacing-2) var(--i-spacing-3);
+}
+.i-prompt__tools { display: flex; align-items: center; gap: var(--i-spacing-1); }
+.i-prompt__tool {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border: none;
+  border-radius: var(--i-radius-md);
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-prompt__tool:hover { color: var(--i-color-text); background: var(--i-color-bg-muted); }
+.i-prompt__tool.is-on { color: var(--i-color-brand); background: var(--i-color-brand-subtle); }
+
+.i-prompt__count {
+  margin-left: auto;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.i-prompt__count.is-over { color: var(--i-color-danger); }
+
+.i-prompt__send {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-brand);
+  color: var(--i-color-text-inverse);
+  cursor: pointer;
+  transition: background var(--i-motion-fast) var(--i-motion-easing),
+    opacity var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-prompt__send:hover:not(:disabled) { background: var(--i-color-brand-hover); }
+.i-prompt__send:disabled { opacity: 0.45; cursor: not-allowed; }
+/* 生成中：同一个位置变成「停止」，用户不必去别处找中断入口 */
+.i-prompt__send.is-stop { background: var(--i-color-text); }
+
+.i-prompt__hint {
+  padding: 0 var(--i-spacing-4) var(--i-spacing-2);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}

@@ -1,0 +1,54 @@
+/*
+ * ITimeline —— 按时间排列的一串事件。
+ *
+ * 与 Steps 的分工：Steps 描述一个还没走完的流程（有「当前步」），
+ * Timeline 记录已经发生的事，没有「当前」这个概念。
+ */
+.i-timeline { display: flex; flex-direction: column; }
+.i-timeline__item { position: relative; display: flex; gap: var(--i-spacing-3); }
+.i-timeline__rail {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 12px;
+}
+.i-timeline__dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: var(--i-radius-full);
+  border: 2px solid var(--i-color-brand);
+  background: var(--i-color-bg);
+  box-sizing: border-box;
+}
+.i-timeline__item--success .i-timeline__dot { border-color: var(--i-color-success); }
+.i-timeline__item--warning .i-timeline__dot { border-color: var(--i-color-warning); }
+.i-timeline__item--danger .i-timeline__dot { border-color: var(--i-color-danger); }
+.i-timeline__item--muted .i-timeline__dot { border-color: var(--i-color-border-strong); }
+/* 实心点表示当前正在发生的事 */
+.i-timeline__item.is-current .i-timeline__dot { background: var(--i-color-brand); }
+
+.i-timeline__line {
+  flex: 1;
+  width: 2px;
+  margin: var(--i-spacing-1) 0;
+  background: var(--i-color-hairline);
+}
+.i-timeline__item:last-child .i-timeline__line { display: none; }
+
+.i-timeline__content { flex: 1; padding-bottom: var(--i-spacing-5); }
+.i-timeline__item:last-child .i-timeline__content { padding-bottom: 0; }
+.i-timeline__title { font-size: var(--i-font-size-md); color: var(--i-color-text); }
+.i-timeline__time {
+  margin-top: 2px;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-timeline__desc {
+  margin-top: var(--i-spacing-1);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  line-height: 1.7;
+}

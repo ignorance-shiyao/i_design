@@ -1,96 +1,84 @@
-import { FormStore, type FormState, type FormStoreOptions } from '@i-design/core';
-import {
-  createContext, useContext, useMemo, useRef, useSyncExternalStore,
-  type FormEvent, type ReactNode,
-} from 'react';
-import { FormItem } from './FormItem.js';
+import { createContext, useCallback, useContext, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import type { FormRule } from '@i-design/common'
 
-export interface UseFormResult<Values extends Record<string, unknown>> {
-  store: FormStore<Values>;
-  state: FormState<Values>;
-  submit: () => Promise<boolean>;
-  reset: (values?: Partial<Values>) => void;
-  isDirty: boolean;
+export interface FormItemHandle {
+  prop: string
+  validate: (trigger?: 'change' | 'blur') => Promise<string | null>
+  clear: () => void
 }
 
-/**
- * The store lives in core; this hook only wires it to React's scheduler through
- * `useSyncExternalStore`, so validation semantics are identical to Vue's.
- */
-export function useForm<Values extends Record<string, unknown>>(
-  options: FormStoreOptions<Values>,
-): UseFormResult<Values> {
-  const ref = useRef<FormStore<Values>>();
-  ref.current ??= new FormStore<Values>(options);
-  const store = ref.current;
-
-  const state = useSyncExternalStore(store.subscribe, store.getState, store.getState);
-
-  return useMemo(
-    () => ({ store, state, submit: store.submit, reset: store.reset, isDirty: store.isDirty() }),
-    [store, state],
-  );
+export interface FormContextValue {
+  model: Record<string, any>
+  rules: Record<string, FormRule[]>
+  labelWidth: string
+  labelPlacement: 'left' | 'top'
+  disabled: boolean
+  /** 提交前不打扰用户：只有提交过一次后，change 才立即报错 */
+  submitted: boolean
+  register: (item: FormItemHandle) => void
+  unregister: (prop: string) => void
 }
 
-const FormContext = createContext<FormStore<Record<string, unknown>> | null>(null);
+export const FormContext = createContext<FormContextValue | null>(null)
+export const useForm = () => useContext(FormContext)
 
-export interface FormProps<Values extends Record<string, unknown>> {
-  form: UseFormResult<Values>;
-  className?: string;
-  children?: ReactNode;
+export interface FormProps {
+  model: Record<string, any>
+  rules?: Record<string, FormRule[]>
+  labelWidth?: string
+  labelPlacement?: 'left' | 'top'
+  disabled?: boolean
+  onSubmit?: (model: Record<string, any>) => void
+  /** 校验失败时抛出逐字段错误，便于埋点或滚动定位 */
+  onInvalid?: (errors: Record<string, string>) => void
+  children?: ReactNode
 }
 
-export function Form<Values extends Record<string, unknown>>({ form, className, children }: FormProps<Values>) {
+export function Form({
+  model,
+  rules = {},
+  labelWidth = '96px',
+  labelPlacement = 'left',
+  disabled = false,
+  onSubmit,
+  onInvalid,
+  children
+}: FormProps) {
+  const items = useRef(new Map<string, FormItemHandle>())
+  const [submitted, setSubmitted] = useState(false)
+
+  const register = useCallback((item: FormItemHandle) => {
+    items.current.set(item.prop, item)
+  }, [])
+  const unregister = useCallback((prop: string) => {
+    items.current.delete(prop)
+  }, [])
+
+  /** 并行校验全部字段，返回是否通过与逐字段错误 */
+  const validate = useCallback(async () => {
+    setSubmitted(true)
+    const entries = await Promise.all(
+      [...items.current.values()].map(async (item) => [item.prop, await item.validate()] as const)
+    )
+    const errors: Record<string, string> = {}
+    for (const [prop, error] of entries) if (error) errors[prop] = error
+    return { valid: Object.keys(errors).length === 0, errors }
+  }, [])
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    const { valid, errors } = await validate()
+    if (valid) onSubmit?.(model)
+    else onInvalid?.(errors)
+  }
+
   return (
-    <FormContext.Provider value={form.store as unknown as FormStore<Record<string, unknown>>}>
-      <form
-        className={className}
-        noValidate
-        onSubmit={(event: FormEvent) => {
-          event.preventDefault();
-          void form.submit();
-        }}
-      >
+    <FormContext.Provider
+      value={{ model, rules, labelWidth, labelPlacement, disabled, submitted, register, unregister }}
+    >
+      <form className={`i-form is-${labelPlacement}`} noValidate onSubmit={handleSubmit}>
         {children}
       </form>
     </FormContext.Provider>
-  );
-}
-
-export interface FieldRenderProps<V> {
-  value: V;
-  error?: string;
-  onChange: (value: V) => void;
-  onBlur: () => void;
-}
-
-export interface FormFieldProps<V> {
-  name: string;
-  label?: ReactNode;
-  help?: ReactNode;
-  required?: boolean;
-  children: (field: FieldRenderProps<V>) => ReactNode;
-}
-
-/**
- * Render-prop field: it owns the wiring (value, error, blur) and leaves the
- * control entirely to the caller, so any component — ours or theirs — can be used.
- */
-export function FormField<V = unknown>({ name, label, help, required, children }: FormFieldProps<V>) {
-  const store = useContext(FormContext);
-  if (!store) throw new Error('<FormField> must be used inside a <Form>');
-
-  const state = useSyncExternalStore(store.subscribe, store.getState, store.getState);
-  const error = state.touched[name] ? state.errors[name] : undefined;
-
-  return (
-    <FormItem label={label} help={help} error={error} required={required}>
-      {children({
-        value: state.values[name] as V,
-        error,
-        onChange: (value: V) => store.setFieldValue(name, value as never),
-        onBlur: () => store.touch(name),
-      }) as never}
-    </FormItem>
-  );
+  )
 }

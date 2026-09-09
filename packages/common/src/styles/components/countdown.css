@@ -1,0 +1,22 @@
+/* 倒计时 */
+.i-countdown {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--i-color-text);
+  /* 等宽数字：不等宽时秒数每跳一格整行都在抖 */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+.i-countdown__text { font-size: var(--i-font-size-lg); font-weight: 600; }
+.i-countdown__group { display: inline-flex; align-items: baseline; gap: 2px; }
+.i-countdown__cell {
+  min-width: 26px;
+  padding: 2px 4px;
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-fill);
+  text-align: center;
+  font-size: var(--i-font-size-md);
+  font-weight: 600;
+}
+.i-countdown__unit { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }

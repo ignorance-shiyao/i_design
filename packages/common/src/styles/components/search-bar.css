@@ -1,0 +1,58 @@
+/* 移动端搜索栏 */
+.i-search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  background: var(--i-color-bg);
+}
+.i-search-bar__field {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  flex: 1;
+  min-width: 0;
+  height: var(--i-control-height-md);
+  padding: 0 var(--i-spacing-3);
+  background: var(--i-color-fill);
+  color: var(--i-color-text-tertiary);
+}
+.i-search-bar__field--round { border-radius: 999px; }
+.i-search-bar__field--square { border-radius: var(--i-radius-md); }
+.i-search-bar__field.is-disabled { opacity: 0.5; }
+.i-search-bar__icon { flex: none; }
+.i-search-bar__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--i-color-text);
+  /* 字号跟随控件令牌：低于 16px 时 iOS Safari 会在聚焦时自动放大整页 */
+  font-size: var(--i-font-size-md);
+  outline: none;
+}
+.i-search-bar__input::placeholder { color: var(--i-color-text-tertiary); }
+/* 去掉 WebKit 自带的清除按钮：形状与本组件的清除键不一致，会出现两个 */
+.i-search-bar__input::-webkit-search-cancel-button { display: none; }
+.i-search-bar__clear,
+.i-search-bar__cancel {
+  flex: none;
+  border: none;
+  background: transparent;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+}
+.i-search-bar__clear {
+  display: inline-flex;
+  align-items: center;
+  /* 触控目标 44px：图标本身只有 16px，靠内边距把可点区域撑起来 */
+  padding: var(--i-spacing-2);
+  margin-right: calc(var(--i-spacing-2) * -1);
+}
+.i-search-bar__cancel {
+  min-height: 44px;
+  padding: 0 var(--i-spacing-1);
+  color: var(--i-color-brand);
+  font-size: var(--i-font-size-md);
+  white-space: nowrap;
+}

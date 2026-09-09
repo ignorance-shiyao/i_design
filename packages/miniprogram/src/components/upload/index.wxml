@@ -1,0 +1,42 @@
+<view class="i-upload {{disabled ? 'is-disabled' : ''}}">
+  <view class="i-upload__zone" bindtap="onPick">
+    <view class="i-upload__zone-icon i-icon i-icon--plus" style="width:20px;height:20px" />
+    <text class="i-upload__zone-text">{{text}}</text>
+    <text wx:if="{{tip}}" class="i-upload__tip">{{tip}}</text>
+  </view>
+
+  <view wx:if="{{items.length}}" class="i-upload__list">
+    <view
+      wx:for="{{items}}"
+      wx:key="uid"
+      class="i-upload__item is-{{item.status}}"
+    >
+      <view class="i-upload__row">
+        <view class="i-upload__file-icon i-icon i-icon--file" style="width:16px;height:16px" />
+        <text class="i-upload__name">{{item.name}}</text>
+        <view class="i-upload__act">
+          <view
+            wx:if="{{item.status === 'error'}}"
+            class="i-icon i-icon--refresh"
+            style="width:14px;height:14px"
+            bindtap="onRetry"
+            data-uid="{{item.uid}}"
+          />
+          <view
+            class="i-icon i-icon--trash"
+            style="width:14px;height:14px"
+            bindtap="onRemove"
+            data-uid="{{item.uid}}"
+          />
+        </view>
+      </view>
+
+      <view wx:if="{{item.status === 'uploading'}}" class="i-upload__progress">
+        <view class="i-upload__bar" style="width:{{item.percent}}%" />
+        <text class="i-upload__percent">{{item.percent}}%</text>
+      </view>
+      <text wx:elif="{{item.status === 'error'}}" class="i-upload__error">{{item.error || '上传失败'}}</text>
+      <text wx:else class="i-upload__size">{{item.sizeText}}</text>
+    </view>
+  </view>
+</view>

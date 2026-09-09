@@ -1,0 +1,32 @@
+<script setup lang="ts">
+import { closeMessage, messages } from '../message'
+import IIcon from './IIcon.vue'
+import type { IconName } from '@i-design/common'
+
+const iconOf: Record<string, IconName> = {
+  info: 'info-circle',
+  success: 'check-circle',
+  warning: 'warning-triangle',
+  danger: 'error-circle'
+}
+</script>
+
+<template>
+  <!-- aria-live 让读屏软件在不抢焦点的前提下播报新消息 -->
+  <div class="i-message-list" role="status" aria-live="polite">
+    <transition-group name="i-message">
+      <div v-for="item in messages" :key="item.id" class="i-message" :class="`i-message--${item.type}`">
+        <IIcon class="i-message__icon" :name="iconOf[item.type]" :size="18" />
+        <span class="i-message__text">{{ item.content }}</span>
+        <button
+          v-if="item.closable"
+          class="i-message__close"
+          aria-label="关闭"
+          @click="closeMessage(item.id)"
+        >
+          <IIcon name="close" :size="15" />
+        </button>
+      </div>
+    </transition-group>
+  </div>
+</template>

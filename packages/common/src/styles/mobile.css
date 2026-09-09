@@ -1,0 +1,52 @@
+/*
+ * 移动端样式覆盖层。
+ *
+ * 只改受「手指 vs 鼠标」影响的部分：控件高度、可点击区域、hover 行为。
+ * 颜色、圆角、语义完全沿用 Web 端——这是同一套设计在不同人机尺度下的表达，
+ * 不是另一套设计。
+ */
+@import './tokens.mobile.css';
+
+/* 控件统一抬高到触控下限 */
+.i-button--sm { height: var(--i-control-height-sm); padding: 0 var(--i-spacing-4); }
+.i-button--md { height: var(--i-control-height-md); padding: 0 var(--i-spacing-5); }
+.i-button--lg { height: var(--i-control-height-lg); padding: 0 var(--i-spacing-6); }
+
+.i-input--sm { height: var(--i-control-height-sm); }
+.i-input--md { height: var(--i-control-height-md); }
+.i-input--lg { height: var(--i-control-height-lg); }
+
+.i-select--sm .i-select__trigger { height: var(--i-control-height-sm); }
+.i-select--md .i-select__trigger { height: var(--i-control-height-md); }
+.i-select--lg .i-select__trigger { height: var(--i-control-height-lg); }
+
+/* 开关放大到易于拨动的尺寸 */
+.i-switch { width: 52px; height: 30px; }
+.i-switch__thumb { width: 26px; height: 26px; }
+.i-switch.is-checked .i-switch__thumb { transform: translateX(22px); }
+
+/* 勾选类控件的命中区扩大到 44px，视觉尺寸不变 */
+.i-checkbox,
+.i-radio { position: relative; min-height: 44px; }
+.i-checkbox::after,
+.i-radio::after {
+  content: '';
+  position: absolute;
+  inset: -12px -8px;
+}
+
+/* 触屏没有 hover：悬浮态会在点击后「粘住」，必须关掉 */
+@media (hover: none) {
+  .i-button:hover:not(:disabled),
+  .i-card.is-hoverable:hover,
+  .i-tabs__tab:hover:not(.is-disabled),
+  .i-pagination__item:hover:not(:disabled) {
+    filter: none;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* 底部浮层避让手势条 */
+.i-drawer__panel.is-bottom { padding-bottom: var(--i-safe-bottom); }
+.i-modal { padding-bottom: calc(var(--i-spacing-6) + var(--i-safe-bottom)); }

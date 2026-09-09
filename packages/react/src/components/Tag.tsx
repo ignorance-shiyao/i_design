@@ -1,32 +1,15 @@
-import { createBem, cx, type Size, type Status } from '@i-design/core';
-import type { ReactNode } from 'react';
-import { Icon } from './Icon.js';
-
-const bem = createBem('tag');
+import type { ReactNode } from 'react'
 
 export interface TagProps {
-  variant?: 'solid' | 'outline' | 'soft';
-  status?: Status;
-  size?: Extract<Size, 's' | 'm'>;
-  round?: boolean;
-  closable?: boolean;
-  className?: string;
-  children?: ReactNode;
-  onClose?: (event: unknown) => void;
+  type?: 'default' | 'brand' | 'success' | 'warning' | 'danger'
+  round?: boolean
+  className?: string
+  children?: ReactNode
 }
 
-export function Tag(props: TagProps) {
-  const { variant = 'soft', status = 'default', size = 's', round, closable, className, children, onClose } = props;
-  return (
-    <span
-      className={cx(bem(), bem(null, variant), bem(null, `status-${status}`), bem(null, `size-${size}`), { [bem(null, 'round')]: round }, className)}
-    >
-      {children}
-      {closable && (
-        <button className={bem('close')} type="button" aria-label="close" onClick={onClose}>
-          <Icon name="close" size={12} />
-        </button>
-      )}
-    </span>
-  );
+export function Tag({ type = 'default', round = false, className = '', children }: TagProps) {
+  const classes = ['i-tag', `i-tag--${type}`, round ? 'is-round' : '', className]
+    .filter(Boolean)
+    .join(' ')
+  return <span className={classes}>{children}</span>
 }

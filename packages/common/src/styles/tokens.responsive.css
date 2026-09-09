@@ -1,0 +1,30 @@
+/* 由 packages/common/scripts/build-tokens.mjs 自动生成，请勿手改 */
+@media (max-width: 768px), (pointer: coarse) {
+  :root {
+    --i-font-size-xs: 13px;
+    --i-font-size-sm: 14px;
+    --i-font-size-md: 16px;
+    --i-font-size-lg: 18px;
+    --i-motion-fast: 100ms;
+    --i-motion-base: 160ms;
+    --i-control-height-sm: 36px;
+    --i-control-height-md: 44px;
+    --i-control-height-lg: 52px;
+    --i-safe-top: env(safe-area-inset-top, 0px);
+    --i-safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  :root[data-theme='dark'] {
+    --i-font-size-xs: 13px;
+    --i-font-size-sm: 14px;
+    --i-font-size-md: 16px;
+    --i-font-size-lg: 18px;
+    --i-motion-fast: 100ms;
+    --i-motion-base: 160ms;
+    --i-control-height-sm: 36px;
+    --i-control-height-md: 44px;
+    --i-control-height-lg: 52px;
+    --i-safe-top: env(safe-area-inset-top, 0px);
+    --i-safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}

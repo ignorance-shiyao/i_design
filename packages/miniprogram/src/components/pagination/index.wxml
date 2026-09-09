@@ -1,0 +1,31 @@
+<view class="i-pagination i-pagination--{{size}} {{disabled ? 'is-disabled' : ''}}" aria-label="分页">
+  <text wx:if="{{showTotal}}" class="i-pagination__total">{{rangeText}}</text>
+  <view
+    class="i-pagination__item {{page === 1 ? 'is-disabled' : ''}}"
+    bindtap="onPrev"
+  >
+    <view class="i-icon i-icon--chevron-left" style="width:15px;height:15px" />
+  </view>
+  <block wx:for="{{items}}" wx:key="index">
+    <view
+      wx:if="{{item.type === 'page'}}"
+      class="i-pagination__item {{item.value === page ? 'is-active' : ''}}"
+      bindtap="onPage"
+      data-page="{{item.value}}"
+    >{{item.value}}</view>
+    <view
+      wx:else
+      class="i-pagination__item i-pagination__ellipsis"
+      bindtap="onJump"
+      data-dir="{{item.type}}"
+    >
+      <view class="i-icon i-icon--more" style="width:15px;height:15px" />
+    </view>
+  </block>
+  <view
+    class="i-pagination__item {{page === pageCount ? 'is-disabled' : ''}}"
+    bindtap="onNext"
+  >
+    <view class="i-icon i-icon--chevron-right" style="width:15px;height:15px" />
+  </view>
+</view>

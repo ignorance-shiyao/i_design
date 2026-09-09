@@ -1,0 +1,18 @@
+<view class="i-statistic i-statistic--{{type}} i-statistic--{{size}}">
+  <view wx:if="{{title}}" class="i-statistic__title">{{title}}</view>
+  <view class="i-statistic__value">
+    <text wx:if="{{prefix}}" class="i-statistic__affix">{{prefix}}</text>
+    <text>{{display}}</text>
+    <text wx:if="{{suffix}}" class="i-statistic__affix">{{suffix}}</text>
+  </view>
+  <view wx:if="{{trend !== 0 || extra}}" class="i-statistic__extra">
+    <view wx:if="{{trend !== 0}}" class="i-statistic__trend {{trend > 0 ? 'is-up' : 'is-down'}}">
+      <view
+        class="i-icon i-icon--{{trend > 0 ? 'chevron-up' : 'chevron-down'}}"
+        style="width:12px;height:12px"
+      />
+      <text>{{trendAbs}}%</text>
+    </view>
+    <text wx:if="{{extra}}">{{extra}}</text>
+  </view>
+</view>

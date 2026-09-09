@@ -1,0 +1,72 @@
+/*
+ * IChatToolCall —— 一次工具调用：名称、状态、参数与结果。
+ *
+ * 状态色沿用体系里既有的语义色，不为 AI 场景另造一套，
+ * 否则同一个红色在别处表示「删除」、在这里表示「调用失败」，用户要学两遍。
+ */
+.i-chat-tool {
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  overflow: hidden;
+  font-size: var(--i-font-size-sm);
+}
+.i-chat-tool__head {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--i-color-text);
+  cursor: pointer;
+  text-align: left;
+}
+.i-chat-tool__name {
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text);
+}
+.i-chat-tool__summary {
+  flex: 1;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.i-chat-tool__arrow { transition: transform var(--i-motion-base) var(--i-motion-easing); }
+.i-chat-tool.is-open .i-chat-tool__arrow { transform: rotate(90deg); }
+
+.i-chat-tool__status { display: inline-flex; }
+.i-chat-tool--running .i-chat-tool__status { color: var(--i-color-brand); }
+.i-chat-tool--success .i-chat-tool__status { color: var(--i-color-success); }
+.i-chat-tool--error .i-chat-tool__status { color: var(--i-color-danger); }
+.i-chat-tool--running { border-color: var(--i-color-brand); }
+.i-chat-tool--error { border-color: var(--i-color-danger); }
+
+.i-chat-tool__body { border-top: 1px solid var(--i-color-hairline); }
+.i-chat-tool__section { padding: var(--i-spacing-3); }
+.i-chat-tool__section + .i-chat-tool__section { border-top: 1px solid var(--i-color-hairline); }
+.i-chat-tool__label {
+  display: block;
+  margin-bottom: var(--i-spacing-1);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-chat-tool__code {
+  margin: 0;
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-xs);
+  line-height: 1.7;
+  color: var(--i-color-code-text);
+  background: var(--i-color-code-bg);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-md);
+  overflow-x: auto;
+  white-space: pre;
+}
+.i-chat-tool__error { color: var(--i-color-danger); }

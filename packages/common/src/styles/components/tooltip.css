@@ -1,0 +1,37 @@
+/* ITooltip —— 由 Vue / React / mobile 各端共享 */
+/* 方向/状态类必须限定到 .i-tooltip__pop：抽出 scoped 样式后，裸 .is-* 会命中页面上任何同名类 */
+.i-tooltip { position: relative; display: inline-flex; }
+.i-tooltip__trigger { display: inline-flex; }
+
+.i-tooltip__pop {
+  position: absolute;
+  z-index: var(--i-z-dropdown);
+  max-width: 260px;
+  width: max-content;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  font-size: var(--i-font-size-sm);
+  line-height: var(--i-line-height-base);
+  color: var(--i-color-text-inverse);
+  background: var(--i-color-bg-inverse);
+  border-radius: var(--i-radius-md);
+  box-shadow: var(--i-shadow-md);
+  pointer-events: none;
+}
+.i-tooltip__pop::after {
+  content: '';
+  position: absolute;
+  border: 5px solid transparent;
+}
+.i-tooltip__pop.is-top { bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); }
+.i-tooltip__pop.is-top::after { top: 100%; left: 50%; margin-left: -5px; border-top-color: var(--i-color-bg-inverse); }
+.i-tooltip__pop.is-bottom { top: calc(100% + 6px); left: 50%; transform: translateX(-50%); }
+.i-tooltip__pop.is-bottom::after { bottom: 100%; left: 50%; margin-left: -5px; border-bottom-color: var(--i-color-bg-inverse); }
+.i-tooltip__pop.is-left { right: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
+.i-tooltip__pop.is-left::after { left: 100%; top: 50%; margin-top: -5px; border-left-color: var(--i-color-bg-inverse); }
+.i-tooltip__pop.is-right { left: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
+.i-tooltip__pop.is-right::after { right: 100%; top: 50%; margin-top: -5px; border-right-color: var(--i-color-bg-inverse); }
+
+.i-tooltip-fade-enter-active,
+.i-tooltip-fade-leave-active { transition: opacity var(--i-motion-fast) var(--i-motion-easing); }
+.i-tooltip-fade-enter-from,
+.i-tooltip-fade-leave-to { opacity: 0; }

@@ -1,0 +1,103 @@
+/*
+ * IChatMessage —— AI 会话中的一条消息，各端共享。
+ *
+ * 两个角色的排版刻意不对称：用户消息是带底色的气泡、右对齐、宽度受限，
+ * 助手消息则是左对齐的通栏正文。理由是二者的阅读量差着数量级——
+ * 把一段几百字的回答塞进气泡里，行长会被压到难以阅读。
+ */
+.i-chat-msg {
+  display: flex;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-4) 0;
+}
+.i-chat-msg--user { flex-direction: row-reverse; }
+
+.i-chat-msg__avatar { flex: none; }
+
+.i-chat-msg__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-2);
+}
+.i-chat-msg--user .i-chat-msg__body { align-items: flex-end; max-width: 78%; }
+.i-chat-msg--assistant .i-chat-msg__body { flex: 1; }
+
+.i-chat-msg__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-chat-msg__name { color: var(--i-color-text-secondary); font-weight: 500; }
+
+.i-chat-msg__content {
+  font-size: var(--i-font-size-md);
+  line-height: 1.75;
+  color: var(--i-color-text);
+  word-break: break-word;
+}
+.i-chat-msg--user .i-chat-msg__content {
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-brand-subtle);
+  /* 尖角朝向发送者一侧，指明这句话是谁说的 */
+  border-top-right-radius: var(--i-radius-sm);
+}
+.i-chat-msg--assistant .i-chat-msg__content { padding-top: 2px; }
+
+/* 出错的回答：整段转为危险色底，而不是只在末尾加一行小字 */
+.i-chat-msg.is-error .i-chat-msg__content {
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-danger-subtle);
+  color: var(--i-color-danger);
+}
+
+/* 流式输出时跟在文字末尾的光标 */
+.i-chat-msg__caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--i-color-brand);
+  animation: i-chat-caret 1s steps(2, start) infinite;
+}
+@keyframes i-chat-caret { 50% { opacity: 0; } }
+
+/* 操作区：默认隐形，悬停该条消息时才浮现，避免每条消息都挂三个按钮 */
+.i-chat-msg__actions {
+  display: flex;
+  gap: var(--i-spacing-1);
+  opacity: 0;
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-chat-msg:hover .i-chat-msg__actions,
+.i-chat-msg__actions:focus-within { opacity: 1; }
+.i-chat-msg__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  padding: 2px var(--i-spacing-2);
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-chat-msg__action:hover { color: var(--i-color-text); background: var(--i-color-bg-muted); }
+
+/* 触屏没有悬停，操作区常驻显示 */
+@media (hover: none) {
+  .i-chat-msg__actions { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .i-chat-msg__caret { animation: none; }
+}

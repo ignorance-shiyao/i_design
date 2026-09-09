@@ -1,0 +1,30 @@
+/*
+ * IChatTyping —— 等待首个字符时的三点提示。
+ *
+ * 只在「请求已发出、还没有任何内容」这段空窗里出现；
+ * 一旦开始流式输出就换成光标，否则用户会同时看到两种「正在进行」的信号。
+ */
+.i-chat-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-subtle);
+}
+.i-chat-typing__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-text-tertiary);
+  animation: i-chat-typing 1.4s ease-in-out infinite;
+}
+.i-chat-typing__dot:nth-child(2) { animation-delay: 0.2s; }
+.i-chat-typing__dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes i-chat-typing {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .i-chat-typing__dot { animation: none; opacity: 0.6; }
+}

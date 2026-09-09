@@ -1,0 +1,32 @@
+<view
+  class="i-input-number i-input-number--{{size}} {{focused ? 'is-focused' : ''}} {{disabled ? 'is-disabled' : ''}} {{invalid ? 'is-invalid' : ''}}"
+>
+  <view
+    wx:if="{{!hideStep}}"
+    class="i-input-number__step i-input-number__step--minus {{canMinus ? '' : 'is-disabled'}}"
+    bindtap="stepBy"
+    data-delta="-1"
+  >
+    <view class="i-icon i-icon--minus" style="width:14px;height:14px" />
+  </view>
+
+  <input
+    class="i-input-number__field"
+    type="digit"
+    value="{{display}}"
+    placeholder="{{placeholder}}"
+    disabled="{{disabled}}"
+    bindinput="onInput"
+    bindfocus="onFocus"
+    bindblur="onBlur"
+  />
+
+  <view
+    wx:if="{{!hideStep}}"
+    class="i-input-number__step i-input-number__step--plus {{canPlus ? '' : 'is-disabled'}}"
+    bindtap="stepBy"
+    data-delta="1"
+  >
+    <view class="i-icon i-icon--plus" style="width:14px;height:14px" />
+  </view>
+</view>

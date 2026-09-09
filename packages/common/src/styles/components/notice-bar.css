@@ -1,0 +1,49 @@
+/*
+ * INoticeBar —— 通告栏。
+ *
+ * 与 Alert 的分工：Alert 是针对当前操作的反馈，通告栏是与操作无关的广播
+ * （系统维护、活动公告）。因此它常驻在页面顶部，且默认不可关闭。
+ */
+.i-notice-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  min-height: 40px;
+  padding: var(--i-spacing-2) var(--i-spacing-4);
+  background: var(--i-color-warning-subtle);
+  color: var(--i-color-warning);
+  font-size: var(--i-font-size-sm);
+  overflow: hidden;
+}
+.i-notice-bar--info { background: var(--i-color-info-subtle); color: var(--i-color-info); }
+.i-notice-bar--danger { background: var(--i-color-danger-subtle); color: var(--i-color-danger); }
+/* 必须裁切：跑马灯的文字滚出去之后会从左侧图标底下穿过 */
+.i-notice-bar__content { flex: 1; min-width: 0; overflow: hidden; }
+.i-notice-bar__text { display: block; white-space: nowrap; }
+/* 跑马灯：内容超出时横向滚动。不滚动的长文案会被截断，用户永远读不到后半句 */
+.i-notice-bar.is-scrolling .i-notice-bar__text {
+  animation: i-notice-scroll var(--i-notice-duration, 12s) linear infinite;
+}
+@keyframes i-notice-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+.i-notice-bar__close {
+  flex: none;
+  display: inline-flex;
+  min-width: 32px;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.i-notice-bar__close:hover { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* 关掉滚动后改为换行显示，信息不能因为不滚就丢 */
+  .i-notice-bar.is-scrolling .i-notice-bar__text { animation: none; white-space: normal; }
+}

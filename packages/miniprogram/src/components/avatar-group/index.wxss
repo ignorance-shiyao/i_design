@@ -1,0 +1,2 @@
+@import '../../../dist/styles/avatar-group.wxss';
+@import '../../../dist/styles/icons.wxss';

@@ -1,0 +1,35 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import ISwitch from '@/components/ISwitch.vue'
+import DemoBlock from '@/site/DemoBlock.vue'
+
+const on = ref(true)
+const off = ref(false)
+</script>
+
+<template>
+  <article>
+    <h1>Switch 开关</h1>
+    <p class="i-lead">在两个互斥状态间切换，且立即生效。若变更需要提交后才生效，请改用复选框。</p>
+
+    <DemoBlock title="基础用法" code='<ISwitch v-model="value" />'>
+      <ISwitch v-model="on" />
+      <ISwitch v-model="off" />
+    </DemoBlock>
+
+    <DemoBlock title="禁用" code='<ISwitch :model-value="true" disabled />'>
+      <ISwitch :model-value="true" disabled />
+      <ISwitch :model-value="false" disabled />
+    </DemoBlock>
+
+    <h2>API</h2>
+    <table class="i-table">
+      <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>modelValue</td><td><code>boolean</code></td><td><code>false</code></td><td>开关状态，支持 v-model</td></tr>
+        <tr><td>disabled</td><td><code>boolean</code></td><td><code>false</code></td><td>是否禁用</td></tr>
+      </tbody>
+    </table>
+    <p>组件渲染为 <code>role="switch"</code> 的按钮并同步 <code>aria-checked</code>，可直接通过键盘操作。</p>
+  </article>
+</template>

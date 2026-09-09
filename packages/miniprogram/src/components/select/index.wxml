@@ -1,0 +1,30 @@
+<view class="i-select i-select--{{size}} {{open ? 'is-open' : ''}} {{disabled ? 'is-disabled' : ''}}">
+  <view class="i-select__trigger" bindtap="onToggle">
+    <text class="i-select__label {{hasValue ? '' : 'is-placeholder'}}">{{hasValue ? label : placeholder}}</text>
+    <view
+      wx:if="{{clearable && hasValue && !disabled}}"
+      class="i-select__clear"
+      catchtap="onClear"
+    >
+      <view class="i-icon i-icon--close" style="width:14px;height:14px" />
+    </view>
+    <view wx:else class="i-select__arrow">
+      <view class="i-icon i-icon--chevron-down" style="width:14px;height:14px" />
+    </view>
+  </view>
+
+  <view wx:if="{{open}}" class="i-select__menu">
+    <view
+      wx:for="{{options}}"
+      wx:key="value"
+      class="i-select__option {{item.value === value ? 'is-selected' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+      bindtap="onPick"
+      data-value="{{item.value}}"
+      data-disabled="{{item.disabled}}"
+    >
+      <text>{{item.label}}</text>
+      <view wx:if="{{item.value === value}}" class="i-icon i-icon--check" style="width:14px;height:14px" />
+    </view>
+    <view wx:if="{{options.length === 0}}" class="i-select__empty">{{emptyText}}</view>
+  </view>
+</view>

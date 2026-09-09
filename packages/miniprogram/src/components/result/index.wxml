@@ -1,0 +1,9 @@
+<view class="i-result i-result--{{size}} is-{{status}}">
+  <image wx:if="{{art}}" class="i-result__art" src="{{art}}" mode="widthFix" />
+  <view wx:else class="i-result__icon">
+    <view class="i-icon i-icon--{{icon}}" style="width:{{size === 'sm' ? 28 : 40}}px;height:{{size === 'sm' ? 28 : 40}}px" />
+  </view>
+  <view class="i-result__title">{{resolvedTitle}}</view>
+  <view class="i-result__desc">{{resolvedDesc}}</view>
+  <view wx:if="{{hasAction}}" class="i-result__actions"><slot></slot></view>
+</view>

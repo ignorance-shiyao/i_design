@@ -1,0 +1,15 @@
+<view class="i-checkbox-group is-{{direction}}" role="group">
+  <view
+    wx:for="{{states}}"
+    wx:key="value"
+    class="i-checkbox {{item.checked ? 'is-checked' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+    bindtap="onToggle"
+    data-value="{{item.value}}"
+    data-disabled="{{item.disabled}}"
+  >
+    <view class="i-checkbox__mark">
+      <view wx:if="{{item.checked}}" class="i-icon i-icon--check" style="width:12px;height:12px" />
+    </view>
+    <text class="i-checkbox__label">{{item.label}}</text>
+  </view>
+</view>

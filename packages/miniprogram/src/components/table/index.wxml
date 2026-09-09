@@ -1,0 +1,33 @@
+<scroll-view class="i-table-wrap" scroll-x>
+  <view class="i-table-c i-table-c--{{size}} {{striped ? 'is-striped' : ''}}">
+    <view class="i-table-c__head">
+      <view
+        wx:for="{{columns}}"
+        wx:key="key"
+        class="i-table-c__cell i-table-c__th {{item.sortable ? 'is-sortable' : ''}}"
+        style="{{item.width ? 'width:' + item.width + ';' : 'flex:1;'}}text-align:{{item.align || 'left'}}"
+        bindtap="onSort"
+        data-key="{{item.key}}"
+        data-sortable="{{item.sortable}}"
+      >
+        <text>{{item.title}}</text>
+        <view wx:if="{{item.sortable}}" class="i-table-c__sorter">
+          <view class="i-table-c__arrow is-up {{sortKey === item.key && sortOrder === 'asc' ? 'is-on' : ''}}" />
+          <view class="i-table-c__arrow is-down {{sortKey === item.key && sortOrder === 'desc' ? 'is-on' : ''}}" />
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{loading}}" class="i-table-c__state">加载中…</view>
+    <view wx:elif="{{rows.length === 0}}" class="i-table-c__state">{{emptyText}}</view>
+    <view wx:else class="i-table-c__row" wx:for="{{rows}}" wx:key="_key" wx:for-item="row">
+      <view
+        wx:for="{{columns}}"
+        wx:key="key"
+        wx:for-item="col"
+        class="i-table-c__cell"
+        style="{{col.width ? 'width:' + col.width + ';' : 'flex:1;'}}text-align:{{col.align || 'left'}}"
+      >{{row[col.key]}}</view>
+    </view>
+  </view>
+</scroll-view>

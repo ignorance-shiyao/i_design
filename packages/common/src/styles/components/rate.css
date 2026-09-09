@@ -1,0 +1,41 @@
+/*
+ * IRate —— 评分。
+ *
+ * 未选中的星形保留描边而不是整片变浅：全灰的星形在深色模式下几乎看不见，
+ * 用户不知道总共可以打几分。
+ */
+.i-rate { display: inline-flex; align-items: center; gap: var(--i-spacing-1); }
+.i-rate__item {
+  position: relative;
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--i-color-border-strong);
+  cursor: pointer;
+  transition: transform var(--i-motion-fast) var(--i-motion-easing),
+    color var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-rate__item:hover:not(.is-readonly) { transform: scale(1.15); }
+.i-rate__item.is-on { color: var(--i-color-warning); }
+.i-rate.is-disabled .i-rate__item,
+.i-rate__item.is-readonly { cursor: default; }
+.i-rate.is-disabled { opacity: 0.6; }
+
+/* 半星：用一层裁切过的实心星盖在描边星上 */
+.i-rate__half {
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  overflow: hidden;
+  color: var(--i-color-warning);
+}
+.i-rate__text {
+  margin-left: var(--i-spacing-2);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .i-rate__item:hover:not(.is-readonly) { transform: none; }
+}

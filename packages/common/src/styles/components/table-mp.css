@@ -1,0 +1,32 @@
+/* Table 在小程序里用 flex 模拟表格，因此需要一小段专用布局；配色仍来自共享令牌 */
+.i-table-c__head,
+.i-table-c__row {
+  display: flex;
+  align-items: center;
+}
+.i-table-c__cell {
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+  font-size: var(--i-font-size-md);
+  color: var(--i-color-text-secondary);
+  box-sizing: border-box;
+}
+.i-table-c__th {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-weight: 600;
+  font-size: var(--i-font-size-sm);
+}
+.i-table-c__arrow {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+.i-table-c__arrow.is-up { border-bottom: 5px solid var(--i-color-border-strong); }
+.i-table-c__arrow.is-down { border-top: 5px solid var(--i-color-border-strong); }
+.i-table-c__arrow.is-up.is-on { border-bottom-color: var(--i-color-brand); }
+.i-table-c__arrow.is-down.is-on { border-top-color: var(--i-color-brand); }

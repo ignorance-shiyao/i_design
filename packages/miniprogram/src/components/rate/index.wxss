@@ -1,0 +1,2 @@
+@import '../../../dist/styles/rate.wxss';
+@import '../../../dist/styles/icons.wxss';

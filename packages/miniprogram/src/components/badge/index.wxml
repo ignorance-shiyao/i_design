@@ -1,0 +1,9 @@
+<view class="i-badge">
+  <slot></slot>
+  <view
+    wx:if="{{visible}}"
+    class="i-badge__mark i-badge--{{type}} {{dot ? 'is-dot' : ''}} {{fixed ? 'is-fixed' : ''}}"
+  >
+    <text wx:if="{{!dot}}">{{text}}</text>
+  </view>
+</view>

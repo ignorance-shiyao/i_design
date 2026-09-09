@@ -1,0 +1,14 @@
+name: i_design
+description: Ignorance Design 的 Flutter 实现，令牌与 Web 端同源编译
+version: 0.1.0
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  # 图标以 SVG 字符串内联渲染，与 Web / 小程序同一批形状数据
+  flutter_svg: ^2.0.9
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

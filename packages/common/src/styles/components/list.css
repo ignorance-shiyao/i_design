@@ -1,0 +1,57 @@
+/*
+ * IList —— 结构化的条目列表。
+ *
+ * 与 ITable 的分工：表格用于横向比较多个字段，列表用于逐条阅读。
+ * 字段超过三个还在用列表，说明其实需要的是表格。
+ */
+.i-list {
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  overflow: hidden;
+}
+.i-list--plain { border: none; border-radius: 0; background: none; }
+
+.i-list__header,
+.i-list__footer {
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+  background: var(--i-color-bg-subtle);
+}
+.i-list__header { border-bottom: 1px solid var(--i-color-hairline); }
+.i-list__footer { border-top: 1px solid var(--i-color-hairline); }
+
+.i-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-4);
+  transition: background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-list__item + .i-list__item { border-top: 1px solid var(--i-color-hairline); }
+.i-list__item.is-clickable { cursor: pointer; }
+.i-list__item.is-clickable:hover { background: var(--i-color-bg-subtle); }
+
+.i-list__media { flex: none; }
+.i-list__body { flex: 1; min-width: 0; }
+.i-list__title {
+  font-size: var(--i-font-size-md);
+  color: var(--i-color-text);
+  font-weight: 500;
+}
+.i-list__desc {
+  margin-top: 2px;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  line-height: 1.7;
+}
+.i-list__meta {
+  margin-top: var(--i-spacing-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-3);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-list__extra { flex: none; display: flex; align-items: center; gap: var(--i-spacing-2); }

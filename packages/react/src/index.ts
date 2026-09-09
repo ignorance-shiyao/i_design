@@ -1,86 +1,72 @@
-export { ConfigProvider, useConfig, type ConfigProviderProps, type IConfig } from './components/ConfigProvider.js';
-export { Button, type ButtonProps } from './components/Button.js';
-export { Input, type InputProps } from './components/Input.js';
-export { Checkbox, type CheckboxProps } from './components/Checkbox.js';
-export { Switch, type SwitchProps } from './components/Switch.js';
-export { Tag, type TagProps } from './components/Tag.js';
-export { Space, type SpaceProps } from './components/Space.js';
-export { FormItem, type FormItemProps } from './components/FormItem.js';
-export { Dialog, type DialogProps } from './components/Dialog.js';
-export { Tooltip, type TooltipProps } from './components/Tooltip.js';
-export { Drawer, type DrawerProps } from './components/Drawer.js';
-export { Table, type TableProps } from './components/Table.js';
-export { Carousel, type CarouselProps } from './components/Carousel.js';
-export { Icon, type IconProps } from './components/Icon.js';
-export { DatePicker, type DatePickerProps } from './components/DatePicker.js';
-export { Dropdown, Popconfirm, type DropdownProps, type PopconfirmProps } from './components/Dropdown.js';
-export {
-  InputNumber, Slider, Rate, Upload,
-  type InputNumberProps, type SliderProps, type RateProps, type UploadProps,
-} from './components/FormControls.js';
-export {
-  Layout, LayoutHeader, LayoutSider, LayoutContent, LayoutFooter, Menu, Tree, Anchor, BackTop,
-  type LayoutProps, type LayoutSiderProps, type MenuProps, type TreeProps, type AnchorProps,
-} from './components/Structure.js';
-export {
-  List, ListItem, Descriptions, Statistic, Timeline, Segmented, Typography, Result, Watermark,
-  type ListProps, type ListItemProps, type DescriptionsProps, type StatisticProps,
-  type TimelineProps, type SegmentedProps, type TypographyProps, type ResultProps, type WatermarkProps,
-} from './components/DataDisplay.js';
-export { Transition, Stagger, type TransitionProps, type StaggerProps } from './components/Transition.js';
-export {
-  Chat, ChatMessage, ChatAction, TypingIndicator, ThinkingBlock, CodeBlock, Suggestions, PromptInput,
-  type ChatProps, type ChatMessageProps, type ChatActionProps, type ThinkingBlockProps,
-  type CodeBlockProps, type SuggestionsProps, type PromptInputProps,
-} from './components/Chat.js';
-export {
-  Form, FormField, useForm,
-  type FormProps, type FormFieldProps, type FieldRenderProps, type UseFormResult,
-} from './components/Form.js';
-export { Textarea, type TextareaProps } from './components/Textarea.js';
-export { RadioGroup, type RadioGroupProps } from './components/Radio.js';
-export { Select, type SelectProps } from './components/Select.js';
-export { Row, Col, type RowProps, type ColProps } from './components/Grid.js';
-export {
-  Alert, Avatar, Badge, Card, Divider, Empty, Progress, Skeleton, Spinner,
-  type AlertProps, type AvatarProps, type BadgeProps, type CardProps, type DividerProps,
-  type EmptyProps, type ProgressProps, type SkeletonProps, type SpinnerProps,
-} from './components/Display.js';
-export {
-  Breadcrumb, Collapse, Pagination, Steps, Tabs,
-  type BreadcrumbProps, type CollapseProps, type PaginationProps, type StepsProps, type TabsProps,
-} from './components/Navigation.js';
-export { message, showMessage, type MessageOptions } from '@i-design/core';
-export { notification, showNotification, type NotificationOptions } from '@i-design/core';
-export { toProps, useControlled } from './utils.js';
-
-export type {
-  BreadcrumbItem, CollapseItem, Density, Direction, DrawerPlacement, FormRules, FormState, Locale,
-  LocaleName, Orientation, Placement, RadioOption, Rule, SelectOption, Size, SortOrder, StepItem,
-  Status, TabItem, TableColumn, TableSort, ThemeMode, Variant,
-  ChatRole, ChatStatus, MotionPreset, TransitionPhase, StreamController,
-  AnchorItem, MenuItem, TreeNode, TimelineItem, SegmentedOption, UploadFile, UploadStatus, SliderMark,
-  IconName, CalendarCell,
-} from '@i-design/core';
-export {
-  applyTheme, computedTokens, locales, FormStore, validateValue, enMessages, defaultMessages,
-  createStreamController, isAtBottom, motionClass, stagger,
-  highlight, formatBytes, formatStatistic, createWatermark, readComputedTokens,
-  ICONS, formatDate, parseDate, addDays, addMonths, isSameDay, startOfDay,
-} from '@i-design/core';
-
-export {
-  AutoComplete, Cascader, ColorPicker, Countdown, InputOtp, InputTag, TimePicker, Transfer,
-  type AutoCompleteProps, type CascaderProps, type ColorPickerProps, type CountdownProps,
-  type InputOtpProps, type InputTagProps, type TimePickerProps, type TransferProps,
-} from './components/Advanced.js';
-export {
-  Affix, ButtonGroup, FloatButton, Image, Link, PageHeader, Splitter, Tour,
-  type FloatButtonProps, type ImageProps, type LinkProps, type PageHeaderProps,
-  type SplitterProps, type TourProps,
-} from './components/Utility.js';
-export type { CascaderNode, TimeValue, TourStep, TransferItem } from '@i-design/core';
-export {
-  generateRamp, hexToRgb, rgbToHex, hexToTriplet, rgbToHsl, hslToRgb,
-  formatTime, parseTime, formatCountdown, countdownParts, resolvePath,
-} from '@i-design/core';
+/**
+ * Ignorance Design · React
+ *
+ * 组件只负责渲染：令牌、图标数据、交互规则全部来自 @i-design/common，
+ * 与 Vue 端共用同一份 CSS（@i-design/common/styles/index.css）。
+ * 因此「React 版和 Vue 版长得不一样」在架构上就不可能发生。
+ *
+ * 本文件由 scripts/build-react-index.mjs 按目录生成——手写导出清单会漏，
+ * 之前就漏掉了 17 个已实现但从未导出的组件。
+ */
+export { Alert, type AlertProps } from './components/Alert'
+export { Avatar, type AvatarProps } from './components/Avatar'
+export { AvatarGroup, type AvatarGroupProps } from './components/AvatarGroup'
+export { Badge, type BadgeProps } from './components/Badge'
+export { Breadcrumb, type BreadcrumbItem, type BreadcrumbProps } from './components/Breadcrumb'
+export { Button, type ButtonProps } from './components/Button'
+export { Card, type CardProps } from './components/Card'
+export { Chart, type ChartProps } from './components/Chart'
+export { ChartFunnel, type FunnelStage, type ChartFunnelProps } from './components/ChartFunnel'
+export { ChartGauge, type ChartGaugeProps } from './components/ChartGauge'
+export { ChartHeatmap, type ChartHeatmapProps } from './components/ChartHeatmap'
+export { ChartPie, type PieItem, type ChartPieProps } from './components/ChartPie'
+export { ChartRadar, type RadarSeries, type ChartRadarProps } from './components/ChartRadar'
+export { ChartScatter, type ChartScatterProps } from './components/ChartScatter'
+export { ChatMessage, type ChatMessageProps } from './components/ChatMessage'
+export { ChatSources, type ChatSource, type ChatSourcesProps } from './components/ChatSources'
+export { ChatSuggestions, type ChatSuggestionsProps } from './components/ChatSuggestions'
+export { ChatThinking, type ChatThinkingProps } from './components/ChatThinking'
+export { ChatToolCall, type ChatToolCallProps } from './components/ChatToolCall'
+export { ChatTyping } from './components/ChatTyping'
+export { CheckboxGroup, Checkbox, type CheckboxGroupProps, type CheckboxProps } from './components/Checkbox'
+export { Collapse, type CollapseItem, type CollapseProps } from './components/Collapse'
+export { DatePicker, type DatePickerProps } from './components/DatePicker'
+export { Descriptions, type DescriptionItem, type DescriptionsProps } from './components/Descriptions'
+export { Divider, type DividerProps } from './components/Divider'
+export { Drawer, type DrawerProps } from './components/Drawer'
+export { Empty, type EmptyProps } from './components/Empty'
+export { Flow, type FlowProps } from './components/Flow'
+export { Form, FormContext, useForm, type FormItemHandle, type FormContextValue, type FormProps } from './components/Form'
+export { FormItem, type FormItemRenderProps, type FormItemProps } from './components/FormItem'
+export { Row, Col, type RowProps, type ColProps } from './components/Grid'
+export { Icon, type IconProps } from './components/Icon'
+export { Input, type InputProps } from './components/Input'
+export { InputNumber, type InputNumberProps } from './components/InputNumber'
+export { List, type ListItem, type ListProps } from './components/List'
+export { Loading, type LoadingProps } from './components/Loading'
+export { message, type MessageOptions } from './components/Message'
+export { Modal, type ModalProps } from './components/Modal'
+export { Pagination, type PaginationProps } from './components/Pagination'
+export { Popconfirm, type PopconfirmProps } from './components/Popconfirm'
+export { Progress, type ProgressProps } from './components/Progress'
+export { PromptInput, type PromptAttachment, type PromptInputProps } from './components/PromptInput'
+export { RadioGroup, Radio, type RadioGroupProps, type RadioProps } from './components/Radio'
+export { Rate, type RateProps } from './components/Rate'
+export { Result, type ResultProps } from './components/Result'
+export { Segmented, type SegmentedOption, type SegmentedProps } from './components/Segmented'
+export { Select, type SelectOption, type SelectProps } from './components/Select'
+export { Skeleton, type SkeletonProps } from './components/Skeleton'
+export { Slider, type SliderMark, type SliderProps } from './components/Slider'
+export { Space, type SpaceProps } from './components/Space'
+export { Sparkline, type SparklineProps } from './components/Sparkline'
+export { Statistic, type StatisticProps } from './components/Statistic'
+export { Steps, type StepItem, type StepsProps } from './components/Steps'
+export { Switch, type SwitchProps } from './components/Switch'
+export { Table, type TableColumn, type TableProps } from './components/Table'
+export { Tabs, type TabItem, type TabsProps } from './components/Tabs'
+export { Tag, type TagProps } from './components/Tag'
+export { Textarea, type TextareaProps } from './components/Textarea'
+export { Timeline, type TimelineItem, type TimelineProps } from './components/Timeline'
+export { Tooltip, type TooltipProps } from './components/Tooltip'
+export { Typography, type TypographyProps } from './components/Typography'
+export { Upload, type UploadProps } from './components/Upload'

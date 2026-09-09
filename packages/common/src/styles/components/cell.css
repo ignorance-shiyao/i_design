@@ -1,0 +1,23 @@
+/* Cell —— 移动端列表行，是移动信息架构的基本单元 */
+.i-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  min-height: 52px;
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-md);
+}
+.i-cell + .i-cell { box-shadow: inset 0 1px 0 var(--i-color-hairline); }
+.i-cell__body { flex: 1; min-width: 0; }
+.i-cell__title { display: block; }
+.i-cell__desc {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+}
+.i-cell__value { color: var(--i-color-text-secondary); }
+.i-cell__arrow { color: var(--i-color-text-tertiary); }
+.i-cell.is-clickable:active { background: var(--i-color-bg-subtle); }

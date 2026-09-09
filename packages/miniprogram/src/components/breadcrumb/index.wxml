@@ -1,0 +1,19 @@
+<view class="i-breadcrumb" aria-label="面包屑">
+  <view class="i-breadcrumb__list">
+    <view wx:for="{{items}}" wx:key="label" class="i-breadcrumb__item">
+      <navigator
+        wx:if="{{item.to && index < items.length - 1}}"
+        class="i-breadcrumb__link"
+        url="{{item.to}}"
+        open-type="navigate"
+      >
+        {{item.label}}
+      </navigator>
+      <text wx:else class="i-breadcrumb__current">{{item.label}}</text>
+      <view wx:if="{{index < items.length - 1}}" class="i-breadcrumb__sep">
+        <text wx:if="{{separator}}">{{separator}}</text>
+        <view wx:else class="i-icon i-icon--chevron-right" style="width:14px;height:14px" />
+      </view>
+    </view>
+  </view>
+</view>

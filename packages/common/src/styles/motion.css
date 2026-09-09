@@ -1,0 +1,185 @@
+/*
+ * 动效层：可复用的进场、悬停与 3D 变换。
+ *
+ * 三条自律：
+ *   1. 只做「解释空间关系」的动效——元素从哪来、到哪去、和谁是一组。装饰性动画不做。
+ *   2. 只动 transform 与 opacity。改 width/top 会触发布局重排，在长列表上必卡。
+ *   3. 全部受 prefers-reduced-motion 约束。前庭敏感的用户会因视差与旋转产生眩晕，
+ *      这不是偏好问题，是可访问性问题。
+ */
+
+/* ---------- 进场：由 IntersectionObserver 添加 is-in ---------- */
+.i-reveal {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  transition:
+    opacity 620ms var(--i-motion-easing),
+    transform 620ms var(--i-motion-easing);
+  transition-delay: var(--i-reveal-delay, 0ms);
+  will-change: transform, opacity;
+}
+.i-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* 侧向进场，用于左右分栏 */
+.i-reveal--left { transform: translate3d(-24px, 0, 0); }
+.i-reveal--right { transform: translate3d(24px, 0, 0); }
+/* 纵深进场：从远处推近，比单纯位移更能表达「浮出」 */
+.i-reveal--depth { transform: translate3d(0, 24px, -60px) scale(0.96); }
+
+/* ---------- 3D 悬浮：卡片随指针倾斜 ---------- */
+.i-tilt {
+  transform-style: preserve-3d;
+  transition: transform var(--i-motion-base) var(--i-motion-easing);
+  will-change: transform;
+}
+/* 变量由 JS 写入，CSS 只负责合成，避免每帧触发样式重算 */
+.i-tilt.is-active {
+  transform: perspective(900px)
+    rotateX(var(--i-tilt-x, 0deg))
+    rotateY(var(--i-tilt-y, 0deg))
+    translate3d(0, 0, 12px);
+  transition: none;
+}
+/* 子元素按 data-depth 分层浮起，形成真实的纵深而非贴图 */
+.i-tilt__layer {
+  transform: translate3d(0, 0, calc(var(--i-layer-depth, 0) * 1px));
+  transition: transform var(--i-motion-base) var(--i-motion-easing);
+}
+
+/* ---------- 3D 抬升：卡片悬停 ---------- */
+.i-lift {
+  transition:
+    transform var(--i-motion-base) var(--i-motion-easing),
+    box-shadow var(--i-motion-base) var(--i-motion-easing);
+}
+.i-lift:hover {
+  transform: perspective(800px) translate3d(0, -4px, 8px) rotateX(1.5deg);
+  box-shadow: var(--i-shadow-lg);
+}
+
+/* ---------- 3D 立方体 ---------- */
+.i-cube-stage {
+  position: relative;
+  perspective: 640px;
+  perspective-origin: 50% 45%;
+}
+.i-cube {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: i-cube-spin 18s linear infinite;
+}
+.i-cube__face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: var(--i-spacing-2);
+  text-align: center;
+  /* 半透明玻璃：能透出后面的面，体积感才出得来；纯白面在白底上等于隐形 */
+  border: 1px solid color-mix(in srgb, var(--i-color-brand) 35%, transparent);
+  border-radius: var(--i-radius-lg);
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--i-color-brand) 12%, transparent),
+      color-mix(in srgb, var(--i-color-brand) 4%, transparent)
+    ),
+    color-mix(in srgb, var(--i-color-bg-elevated) 72%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 60%, transparent),
+    0 0 24px -8px color-mix(in srgb, var(--i-color-brand) 40%, transparent);
+  /*
+   * 隐藏背面。半透明面板会把对面的字反着透出来，六面同时可读只会糊成一团；
+   * backface-visibility 必须作用在被旋转的面本身——加在子元素上无效，
+   * 因为子元素已被压平进面所在的平面。
+   */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* 落影：没有影子的立方体像贴纸，有了才像浮在页面上 */
+.i-cube-stage::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6%;
+  width: 62%;
+  height: 14px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--i-color-brand) 26%, transparent);
+  filter: blur(12px);
+  animation: i-cube-shadow 18s linear infinite;
+}
+@keyframes i-cube-shadow {
+  0%, 100% { width: 62%; opacity: 0.9; }
+  50% { width: 48%; opacity: 0.6; }
+}
+@keyframes i-cube-spin {
+  from { transform: rotateX(-18deg) rotateY(0deg); }
+  to { transform: rotateX(-18deg) rotateY(360deg); }
+}
+
+/* ---------- 微交互 ---------- */
+.i-pop { animation: i-pop 420ms var(--i-motion-easing) both; }
+@keyframes i-pop {
+  from { opacity: 0; transform: scale(0.92); }
+  60% { transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 按压深度：按钮被按下时向内退，而不是变个颜色 */
+.i-press:active:not(:disabled) { transform: translate3d(0, 1px, 0) scale(0.985); }
+
+/* 光泽扫过，用于强调一次性事件（如复制成功） */
+.i-shine { position: relative; overflow: hidden; }
+.i-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+}
+.i-shine.is-shining::after { animation: i-shine 900ms var(--i-motion-easing); }
+@keyframes i-shine {
+  to { transform: translateX(100%); }
+}
+
+/* ---------- 路由过渡 ---------- */
+.i-page-enter-active { transition: opacity 260ms var(--i-motion-easing), transform 260ms var(--i-motion-easing); }
+.i-page-leave-active { transition: opacity 140ms var(--i-motion-easing); }
+.i-page-enter-from { opacity: 0; transform: translate3d(0, 10px, 0); }
+.i-page-leave-to { opacity: 0; }
+
+/* ---------- 减少动效 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .i-reveal,
+  .i-reveal--left,
+  .i-reveal--right,
+  .i-reveal--depth {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .i-tilt,
+  .i-tilt.is-active,
+  .i-tilt__layer,
+  .i-lift:hover,
+  .i-press:active:not(:disabled) {
+    transform: none;
+  }
+  .i-cube { animation: none; transform: rotateX(-18deg) rotateY(-24deg); }
+  .i-cube-stage::after { animation: none; }
+  .i-pop,
+  .i-shine.is-shining::after { animation: none; }
+  .i-page-enter-active,
+  .i-page-leave-active { transition: none; }
+}

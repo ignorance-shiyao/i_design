@@ -1,0 +1,22 @@
+/* IEmpty —— 由 Vue / React / mobile 各端共享 */
+.i-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-12) var(--i-spacing-6);
+  text-align: center;
+}
+.i-empty--sm { padding: var(--i-spacing-6); }
+.i-empty .i-empty__art,
+.i-empty img,
+.i-empty svg {
+  width: 180px;
+  height: auto;
+  margin-bottom: var(--i-spacing-2);
+}
+.i-empty--sm .i-empty__art,
+.i-empty--sm img,
+.i-empty--sm svg { width: 120px; }
+.i-empty__title { color: var(--i-color-text); font-weight: 500; }
+.i-empty__desc { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); max-width: 42ch; }
+.i-empty__action { margin-top: var(--i-spacing-3); }

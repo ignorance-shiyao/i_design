@@ -1,0 +1,5 @@
+<view
+  class="i-space i-space--{{direction}} i-space--{{size}} i-space--{{align}} {{wrap ? 'is-wrap' : ''}} {{block ? 'is-block' : ''}}"
+>
+  <slot />
+</view>

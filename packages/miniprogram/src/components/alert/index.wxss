@@ -1,0 +1,2 @@
+@import '../../../dist/styles/alert.wxss';
+@import '../../../dist/styles/icons.wxss';
