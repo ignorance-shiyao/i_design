@@ -49,6 +49,7 @@
 @import './components/nav-bar.css';
 @import './components/notice-bar.css';
 @import './components/pagination.css';
+@import './components/picker.css';
 @import './components/popconfirm.css';
 @import './components/popup.css';
 @import './components/progress.css';

@@ -78,6 +78,13 @@
   cursor: pointer;
 }
 .i-flow__tool:hover { background: var(--i-color-bg-subtle); color: var(--i-color-brand); }
+/* 撤销组放左下：与右下的缩放分开，两组按钮的职责本就不同，挨在一起容易误点 */
+.i-flow__toolbar--history { right: auto; left: var(--i-spacing-3); }
+/* 无可撤销时按钮变淡且不可点：不隐藏——工具栏宽度跳变比一个灰按钮更扰人 */
+.i-flow__tool:disabled { opacity: 0.35; cursor: default; }
+.i-flow__tool:disabled:hover { background: none; color: var(--i-color-text-secondary); }
+/* 画布获得焦点时给出提示：快捷键只在它聚焦时生效，用户得知道自己在不在这儿 */
+.i-flow:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
 .i-flow__zoom {
   min-width: 48px;
   padding: 0 var(--i-spacing-2);

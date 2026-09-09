@@ -4,6 +4,10 @@ import ITag from '@/components/ITag.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 
+import { ref } from 'vue'
+
+const picked = ref<(string | number)[]>([])
+
 const columns: TableColumn[] = [
   { key: 'id', title: '编号', width: '90px' },
   { key: 'title', title: '标题', sortable: true },
@@ -55,6 +59,21 @@ const actionColumns: TableColumn[] = [
           <ITag :type="statusMap[value].type">{{ statusMap[value].label }}</ITag>
         </template>
       </ITable>
+    </DemoBlock>
+
+    <DemoBlock
+      title="行选择"
+      description="表头的复选框只作用于当前这一页：分页表格里若「全选」悄悄勾上没显示出来的行，用户点下删除时删掉的会远比他看到的多。部分勾选时表头是半选态，不会看上去像一个都没选。"
+      code='<ITable v-model:selected="picked" :columns="columns" :data="data" row-key="id" selectable />'
+    >
+      <div class="stack">
+        <ITable v-model:selected="picked" :columns="columns" :data="data" row-key="id" selectable>
+          <template #status="{ value }">
+            <ITag :type="statusMap[value].type">{{ statusMap[value].label }}</ITag>
+          </template>
+        </ITable>
+        <p class="picked-hint">已选 {{ picked.length }} 项{{ picked.length ? `：${picked.join('、')}` : '' }}</p>
+      </div>
     </DemoBlock>
 
     <DemoBlock
@@ -120,5 +139,6 @@ const actionColumns: TableColumn[] = [
 </template>
 
 <style scoped>
+.picked-hint { margin: 0; font-size: var(--i-font-size-sm); color: var(--i-color-text-tertiary); }
 .stack { display: grid; gap: var(--i-spacing-6); width: 100%; }
 </style>

@@ -1,0 +1,59 @@
+/* 移动端选择器 */
+.i-picker { background: var(--i-color-bg-elevated); }
+.i-picker__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 var(--i-spacing-3);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-picker__title { font-size: var(--i-font-size-md); color: var(--i-color-text); font-weight: 500; }
+.i-picker__action {
+  /* 44px 触控目标：这两个按钮是整个选择器唯一的出口，点不中就出不去 */
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: none;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-md);
+  cursor: pointer;
+}
+.i-picker__action.is-primary { color: var(--i-color-brand); }
+
+.i-picker__body { position: relative; display: flex; overflow: hidden; }
+.i-picker__wheel {
+  flex: 1;
+  overflow-y: auto;
+  /* 吸附交给浏览器：自己写惯性与回弹，在不同浏览器上手感永远对不齐 */
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.i-picker__wheel::-webkit-scrollbar { display: none; }
+.i-picker__option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: center;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-md);
+  transition: color var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-picker__option.is-active { color: var(--i-color-text); font-weight: 500; }
+.i-picker__option.is-disabled { opacity: 0.4; }
+/*
+ * 选中行的指示线。
+ * pointer-events: none 是必须的——盖在滚轮上会把滚动手势吃掉，
+ * 表现为「正中间那一行滑不动」，最难查的一类问题。
+ */
+.i-picker__indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 1px solid var(--i-color-border);
+  border-bottom: 1px solid var(--i-color-border);
+  pointer-events: none;
+}

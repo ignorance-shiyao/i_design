@@ -49,12 +49,67 @@ function toCanvas(event: PointerEvent) {
   }
 }
 
+/*
+ * 撤销 / 重做。
+ *
+ * 节点数据归调用方所有，组件不改它——所以这里记的不是「快照」，而是每次拖动的
+ * 起止坐标；撤销就是反着 emit 一次 move。这样与「组件不持有数据」的约定不冲突，
+ * 调用方也不必为了支持撤销改数据结构。
+ *
+ * 只记完整的一次拖动（按下到抬起），不记拖动过程中的每一帧——
+ * 否则撤销一次只退回一个像素，按上一百次才回到原处。
+ */
+interface MoveRecord {
+  id: string
+  from: { x: number; y: number }
+  to: { x: number; y: number }
+}
+const undoStack = ref<MoveRecord[]>([])
+const redoStack = ref<MoveRecord[]>([])
+let dragStart: { x: number; y: number } | null = null
+let dragLatest: { x: number; y: number } | null = null
+
+const canUndo = computed(() => undoStack.value.length > 0)
+const canRedo = computed(() => redoStack.value.length > 0)
+
+function undo() {
+  const record = undoStack.value.pop()
+  if (!record) return
+  redoStack.value.push(record)
+  emit('move', { id: record.id, x: record.from.x, y: record.from.y })
+}
+
+function redo() {
+  const record = redoStack.value.pop()
+  if (!record) return
+  undoStack.value.push(record)
+  emit('move', { id: record.id, x: record.to.x, y: record.to.y })
+}
+
+/*
+ * 快捷键绑在画布上而不是 window：同一页可能有多张画布，也可能有输入框，
+ * 绑到全局会把别处的撤销一起劫走。画布需要 tabindex 才能接到键盘事件。
+ */
+function onKeydown(event: KeyboardEvent) {
+  if (!(event.metaKey || event.ctrlKey)) return
+  const key = event.key.toLowerCase()
+  if (key === 'z' && !event.shiftKey) {
+    event.preventDefault()
+    undo()
+  } else if ((key === 'z' && event.shiftKey) || key === 'y') {
+    event.preventDefault()
+    redo()
+  }
+}
+
 function onNodeDown(event: PointerEvent, node: FlowNode) {
   event.stopPropagation()
   emit('update:selected', node.id)
   if (props.readonly) return
   const point = toCanvas(event)
   dragging.value = { id: node.id, dx: point.x - node.x, dy: point.y - node.y }
+  dragStart = { x: node.x, y: node.y }
+  dragLatest = null
   ;(event.target as Element).setPointerCapture?.(event.pointerId)
 }
 
@@ -71,12 +126,13 @@ let last = { x: 0, y: 0 }
 function onMove(event: PointerEvent) {
   if (dragging.value) {
     const point = toCanvas(event)
-    emit('move', {
-      id: dragging.value.id,
-      // 吸附到 8px 网格：手绘位置总是差几像素，对齐后整张图才显得整齐
+    // 吸附到 8px 网格：手绘位置总是差几像素，对齐后整张图才显得整齐
+    const next = {
       x: Math.round((point.x - dragging.value.dx) / 8) * 8,
       y: Math.round((point.y - dragging.value.dy) / 8) * 8
-    })
+    }
+    dragLatest = next
+    emit('move', { id: dragging.value.id, ...next })
     return
   }
   if (!panning.value) return
@@ -90,6 +146,14 @@ function onMove(event: PointerEvent) {
 
 function onUp() {
   panning.value = false
+  // 一次拖动记一条：没真的移动过就不入栈，否则「撤销」会在原地空点几次
+  if (dragging.value && dragStart && dragLatest && (dragLatest.x !== dragStart.x || dragLatest.y !== dragStart.y)) {
+    undoStack.value.push({ id: dragging.value.id, from: dragStart, to: dragLatest })
+    // 新动作让重做栈作废：分支历史会让「重做」跳到一条读者没走过的路径上
+    redoStack.value = []
+  }
+  dragStart = null
+  dragLatest = null
   dragging.value = null
 }
 
@@ -125,7 +189,7 @@ watch(() => props.nodes.length, async () => {
   fit()
 })
 
-defineExpose({ fit, zoom })
+defineExpose({ fit, zoom, undo, redo })
 
 const transform = computed(
   () => `translate(${view.value.x} ${view.value.y}) scale(${view.value.scale})`
@@ -158,7 +222,15 @@ const isActive = (edge: FlowEdge) =>
 </script>
 
 <template>
-  <div ref="root" class="i-flow" :class="{ 'is-panning': panning }" :style="{ height: `${height}px` }">
+  <!-- tabindex 让画布能接到键盘：快捷键绑在画布上，不劫持页面其他地方的撤销 -->
+  <div
+    ref="root"
+    class="i-flow"
+    :class="{ 'is-panning': panning }"
+    :style="{ height: `${height}px` }"
+    tabindex="0"
+    @keydown="onKeydown"
+  >
     <svg
       class="i-flow__canvas"
       :height="height"
@@ -228,6 +300,15 @@ const isActive = (edge: FlowEdge) =>
         </g>
       </g>
     </svg>
+
+    <div v-if="!readonly" class="i-flow__toolbar i-flow__toolbar--history">
+      <button class="i-flow__tool" aria-label="撤销" :disabled="!canUndo" @click="undo">
+        <IIcon name="undo" :size="14" />
+      </button>
+      <button class="i-flow__tool" aria-label="重做" :disabled="!canRedo" @click="redo">
+        <IIcon name="redo" :size="14" />
+      </button>
+    </div>
 
     <div class="i-flow__toolbar">
       <button class="i-flow__tool" aria-label="缩小" @click="zoom(-0.2)"><IIcon name="minus" :size="14" /></button>

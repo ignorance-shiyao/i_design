@@ -12,6 +12,7 @@ import IChartFunnel from '@/components/IChartFunnel.vue'
 import IChartGauge from '@/components/IChartGauge.vue'
 import IChartRadar from '@/components/IChartRadar.vue'
 import IChartHeatmap from '@/components/IChartHeatmap.vue'
+import IChartScatter from '@/components/IChartScatter.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 
 const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月']
@@ -38,6 +39,27 @@ const distribution = [
 const thresholds = [
   { from: 900, to: 1300, label: '健康区间', status: 'success' as const },
   { value: 1500, label: '目标 1500', status: 'warning' as const }
+]
+
+const scatter = [
+  {
+    name: '平台组',
+    data: [
+      { x: 42, y: 18, size: 6, label: '平台 · 一季度' },
+      { x: 58, y: 26, size: 6, label: '平台 · 二季度' },
+      { x: 71, y: 30, size: 7, label: '平台 · 三季度' },
+      { x: 96, y: 44, size: 8, label: '平台 · 四季度' }
+    ]
+  },
+  {
+    name: '业务组',
+    data: [
+      { x: 35, y: 22, size: 4, label: '业务 · 一季度' },
+      { x: 52, y: 35, size: 5, label: '业务 · 二季度' },
+      { x: 64, y: 39, size: 5, label: '业务 · 三季度' },
+      { x: 88, y: 58, size: 6, label: '业务 · 四季度' }
+    ]
+  }
 ]
 
 const view = ref<'line' | 'bar'>('line')
@@ -196,6 +218,32 @@ const sparks = [
       <div class="chart-demo">
         <IChartRadar :axes="radarAxes" :series="radarSeries" title="产品能力评估" />
       </div>
+    </DemoBlock>
+
+    <h2>相关性</h2>
+    <p>
+      散点回答的是「这两个量之间有没有关系」。两个轴都要写清楚在量什么，
+      只标数字读者不知道自己在看什么。气泡半径按<strong>面积</strong>映射而不是按半径——
+      直接拿数值当半径，数值翻一倍看上去会是四倍大。
+    </p>
+    <p>
+      散点的系列上限是 3，这不是随手定的：折线与柱状里只有相邻系列会挨在一起，
+      散点则是任意两个点都可能贴着，所以配色必须按「所有两两组合」校验。
+      本体系的分类色在这个更严的口径下，亮色与暗色两种模式都只有前三槽同时通过；
+      第四槽与品牌蓝的常色差低于可分辨下限，色觉正常的人也难分。
+      超出的系列会合并成「其他」，而不是再调一个颜色把问题藏起来。
+    </p>
+    <DemoBlock
+      title="散点与拟合线"
+      description="气泡面积表示团队规模，虚线是最小二乘拟合，R² 把「看着像有关系」变成可核对的数字。"
+    >
+      <IChartScatter
+        :series="scatter"
+        x-label="投入人天"
+        y-label="交付工作项"
+        title="投入与产出"
+        trend
+      />
     </DemoBlock>
 
     <h2>二维密度</h2>

@@ -22,9 +22,60 @@ const props = withDefaults(
     striped?: boolean
     loading?: boolean
     emptyText?: string
+    /** 开启行选择：多选场景下的批量操作靠它 */
+    selectable?: boolean
+    /** 已选行的 rowKey 值 */
+    selected?: (string | number)[]
   }>(),
-  { rowKey: 'id', size: 'md', striped: false, loading: false, emptyText: '暂无数据' }
+  {
+    rowKey: 'id',
+    size: 'md',
+    striped: false,
+    loading: false,
+    emptyText: '暂无数据',
+    selectable: false,
+    selected: () => []
+  }
 )
+
+const emit = defineEmits<{ 'update:selected': [(string | number)[]] }>()
+
+const keyOf = (row: TableRow) => row[props.rowKey] as string | number
+const isChecked = (row: TableRow) => props.selected.includes(keyOf(row))
+
+/*
+ * 全选只作用于当前这一页的数据，而不是整份数据源。
+ *
+ * 分页表格里「全选」若悄悄勾上没显示出来的行，用户点下删除时删掉的
+ * 远比他看到的多——这是最典型的一种误操作，代价还不可逆。
+ */
+const allKeys = computed(() => sortedData.value.map(keyOf))
+const allChecked = computed(
+  () => allKeys.value.length > 0 && allKeys.value.every((k) => props.selected.includes(k))
+)
+// 半选：部分勾选时表头必须是第三种状态，否则看上去像「一个都没选」
+const someChecked = computed(
+  () => !allChecked.value && allKeys.value.some((k) => props.selected.includes(k))
+)
+
+function toggleRow(row: TableRow) {
+  const key = keyOf(row)
+  emit(
+    'update:selected',
+    isChecked(row) ? props.selected.filter((k) => k !== key) : [...props.selected, key]
+  )
+}
+
+function toggleAll() {
+  if (allChecked.value) {
+    emit('update:selected', props.selected.filter((k) => !allKeys.value.includes(k)))
+    return
+  }
+  // 合并而不是覆盖：其他页选中的行不该因为这一页全选而丢掉
+  const next = new Set(props.selected)
+  allKeys.value.forEach((k) => next.add(k))
+  emit('update:selected', [...next])
+}
 
 type SortOrder = 'asc' | 'desc' | null
 const sortKey = ref<string | null>(null)
@@ -69,6 +120,16 @@ function ariaSort(column: TableColumn) {
     <table class="i-table-c" :class="[`i-table-c--${size}`, { 'is-striped': striped }]">
       <thead>
         <tr>
+          <th v-if="selectable" class="i-table-c__check-cell">
+            <input
+              type="checkbox"
+              class="i-table-c__check"
+              aria-label="全选本页"
+              :checked="allChecked"
+              :indeterminate="someChecked"
+              @change="toggleAll"
+            />
+          </th>
           <th
             v-for="column in columns"
             :key="column.key"
@@ -89,12 +150,26 @@ function ariaSort(column: TableColumn) {
       </thead>
       <tbody>
         <tr v-if="loading">
-          <td :colspan="columns.length" class="i-table-c__state">加载中…</td>
+          <td :colspan="columns.length + (selectable ? 1 : 0)" class="i-table-c__state">加载中…</td>
         </tr>
         <tr v-else-if="!sortedData.length">
-          <td :colspan="columns.length" class="i-table-c__state">{{ emptyText }}</td>
+          <td :colspan="columns.length + (selectable ? 1 : 0)" class="i-table-c__state">{{ emptyText }}</td>
         </tr>
-        <tr v-for="(row, index) in sortedData" v-else :key="row[rowKey] ?? index">
+        <tr
+          v-for="(row, index) in sortedData"
+          v-else
+          :key="row[rowKey] ?? index"
+          :class="{ 'is-selected': selectable && isChecked(row) }"
+        >
+          <td v-if="selectable" class="i-table-c__check-cell">
+            <input
+              type="checkbox"
+              class="i-table-c__check"
+              :aria-label="`选择第 ${index + 1} 行`"
+              :checked="isChecked(row)"
+              @change="toggleRow(row)"
+            />
+          </td>
           <td
             v-for="column in columns"
             :key="column.key"

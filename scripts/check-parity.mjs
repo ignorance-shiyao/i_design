@@ -171,6 +171,30 @@ if (existsSync(vueNextSrc)) {
 check('@i-design/vue-next 与 src/components 同步', existsSync(vueNextSrc) && stale.length === 0,
   stale.slice(0, 3).join('; ') || (existsSync(vueNextSrc) ? '' : '包未生成，跑 npm run build:vue-next'))
 
+/* ---------- 8. 每个组件都在桶文件里导出 ---------- */
+/*
+ * src/components/index.ts 是手写的，新组件很容易写完文件却忘了加导出——
+ * 文档站因为直接 import 单文件照样能跑，使用方装包后却找不到这个组件，
+ * 而构建不会报任何错。这一项把它变成会失败的检查。
+ */
+const barrel = readFileSync('src/components/index.ts', 'utf8')
+/*
+ * 命令式 API 自己挂载的宿主组件不必导出：IMessageList 由 message() 创建，
+ * 使用方拿到的是 message 函数而不是这个组件，导出它反而会被误用成普通组件。
+ * 这里按「被同目录的 .ts 模块 import」自动识别，而不是写死一份白名单。
+ */
+const hosts = new Set(
+  readdirSync('src/components')
+    .filter((f) => f.endsWith('.ts') && f !== 'index.ts')
+    .flatMap((f) => [...readFileSync(join('src/components', f), 'utf8').matchAll(/import (\w+) from '\.\/(\w+)\.vue'/g)].map((m) => m[2]))
+)
+const unexported = readdirSync('src/components')
+  .filter((f) => f.endsWith('.vue') && !f.startsWith('_'))
+  .map((f) => f.replace(/\.vue$/, ''))
+  .filter((name) => !hosts.has(name) && !new RegExp(`\\b${name}\\b`).test(barrel))
+check('src/components 的组件都已在 index.ts 导出', unexported.length === 0,
+  unexported.length ? `未导出：${unexported.join(', ')}` : `已核对 ${readdirSync('src/components').filter((f) => f.endsWith('.vue')).length} 个`)
+
 /* ---------- 报告 ---------- */
 console.log('跨端一致性校验\n')
 for (const line of ok) console.log(`  通过  ${line}`)

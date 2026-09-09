@@ -9,6 +9,7 @@ import ISwipeCell from '@i-design/mobile-vue/src/components/ISwipeCell.vue'
 import ICell from '@i-design/mobile-vue/src/components/ICell.vue'
 import ISearchBar from '@i-design/mobile-vue/src/components/ISearchBar.vue'
 import ICountDown from '@i-design/mobile-vue/src/components/ICountDown.vue'
+import IPicker from '@i-design/mobile-vue/src/components/IPicker.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
@@ -35,6 +36,37 @@ const entries = [
 
 const popupOpen = ref(false)
 const keyword = ref('')
+
+// 级联：下一列的候选由上一列决定，children 里放下级
+const regions = [
+  {
+    text: '广东省',
+    value: 'gd',
+    children: [
+      { text: '深圳市', value: 'sz' },
+      { text: '广州市', value: 'gz' },
+      { text: '珠海市', value: 'zh' }
+    ]
+  },
+  {
+    text: '浙江省',
+    value: 'zj',
+    children: [
+      { text: '杭州市', value: 'hz' },
+      { text: '宁波市', value: 'nb' }
+    ]
+  },
+  {
+    text: '四川省',
+    value: 'sc',
+    children: [
+      { text: '成都市', value: 'cd' },
+      { text: '绵阳市', value: 'my' }
+    ]
+  }
+]
+const region = ref<(string | number)[]>(['gd', 'sz'])
+const pickerOpen = ref(false)
 const noticeVisible = ref(true)
 
 const rows = ref([
@@ -91,6 +123,10 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
             <IGrid :items="entries" :columns="4" @select="(item) => message.info(item.label)" />
 
             <div class="phone__section">
+              <button class="phone__link" @click="pickerOpen = true">选择地区</button>
+            </div>
+
+            <div class="phone__section">
               距本期结束
               <ICountDown :time="2 * 3600 * 1000 + 45 * 60 * 1000" separated />
             </div>
@@ -110,6 +146,16 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
             <ITabbar v-model="tab" :items="tabs" />
           </div>
         </div>
+
+        <IPopup v-model="pickerOpen">
+          <IPicker
+            v-model="region"
+            :columns="regions"
+            title="选择地区"
+            @confirm="pickerOpen = false"
+            @cancel="pickerOpen = false"
+          />
+        </IPopup>
 
         <IPopup v-model="popupOpen">
           <div class="sheet">

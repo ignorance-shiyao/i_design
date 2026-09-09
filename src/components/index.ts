@@ -6,6 +6,7 @@ import IChartFunnel from './IChartFunnel.vue'
 import IChartGauge from './IChartGauge.vue'
 import IChartRadar from './IChartRadar.vue'
 import IChartHeatmap from './IChartHeatmap.vue'
+import IChartScatter from './IChartScatter.vue'
 import IChartPie from './IChartPie.vue'
 import ISparkline from './ISparkline.vue'
 import IInputNumber from './IInputNumber.vue'
@@ -126,7 +127,8 @@ export {
   IChartFunnel,
   IChartGauge,
   IChartRadar,
-  IChartHeatmap
+  IChartHeatmap,
+  IChartScatter
 }
 
 export { message } from './message'
@@ -216,7 +218,8 @@ const components = {
   IChartFunnel,
   IChartGauge,
   IChartRadar,
-  IChartHeatmap
+  IChartHeatmap,
+  IChartScatter
 }
 
 /** 全量注册，便于文档站与 demo 直接使用；业务侧推荐按需引入 */

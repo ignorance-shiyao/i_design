@@ -371,3 +371,39 @@
 
 /* 数据表与导出并排：都是「把图变成可核对的数字」的出口 */
 .i-chart__actions { display: flex; gap: var(--i-spacing-2); flex-wrap: wrap; }
+
+/* 散点 / 气泡 */
+.i-chart__point {
+  /*
+   * 每个点描一圈背景色：点密集时重叠区域会糊成一块，
+   * 有了这道缝隙才数得清到底是几个点。
+   */
+  stroke: var(--i-color-bg);
+  stroke-width: 2;
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-chart__point:hover { opacity: 0.85; }
+/* 拟合线：虚线且更细，读者不会把它当成一组数据 */
+.i-chart__trend { stroke-width: 1.5; stroke-dasharray: 6 4; opacity: 0.7; }
+.i-chart__axis-name { font-size: 11px; fill: var(--i-color-text-tertiary); }
+.i-chart__legend-note,
+.i-chart__note {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-chart__note { margin: var(--i-spacing-2) 0 0; }
+/* 散点的提示框不跟随指针：坐标已在点上，框跟着跑反而遮住邻近的点 */
+.i-chart__tooltip.is-static { position: static; margin-top: var(--i-spacing-2); }
+
+/* 小程序端散点：画布上的坐标读屏读不出来，下面这张表是唯一能读到的形式 */
+.i-chart__scatter-canvas { display: block; }
+.i-chart__table-mp { margin-top: var(--i-spacing-3); }
+.i-chart__row {
+  display: flex;
+  padding: var(--i-spacing-2) 0;
+  border-bottom: 1px solid var(--i-color-hairline);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+}
+.i-chart__row--head { color: var(--i-color-text-tertiary); }
+.i-chart__cell { flex: 1; font-variant-numeric: tabular-nums; }

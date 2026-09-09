@@ -109,6 +109,35 @@ const numberExpectations = [
   )
 ]
 
+/* ---------- 散点：气泡半径与最小二乘拟合 ----------
+ * 拟合最容易在移植时抄错分母，一旦抄错，两端的趋势线会指向不同方向。
+ */
+const { bubbleRadius, trendLine } = await bundle('packages/common/src/logic/chart.ts', 'chart')
+
+const bubbleCases = [[0, 0, 100], [50, 0, 100], [100, 0, 100], [7, 5, 5], [-3, 0, 10]]
+const bubbleExpectations = bubbleCases.map(
+  ([v, lo, hi]) =>
+    `    expect(bubbleRadius(${v.toFixed(1)}, ${lo.toFixed(1)}, ${hi.toFixed(1)}),
+        closeTo(${bubbleRadius(v, lo, hi)}, 1e-9));`
+)
+
+const trendCases = [
+  [[1, 2], [2, 4], [3, 6], [4, 8]],
+  [[1, 3], [2, 1], [3, 4], [4, 2], [5, 6]],
+  [[1, 5], [2, 5]],
+  [[2, 1], [2, 4], [2, 9]]
+]
+const dartPoints = (pts) =>
+  `<ScatterPoint>[${pts.map(([x, y]) => `ScatterPoint(x: ${x.toFixed(1)}, y: ${y.toFixed(1)})`).join(', ')}]`
+const trendExpectations = trendCases.map((pts, i) => {
+  const fit = trendLine(pts.map(([x, y]) => ({ x, y })))
+  if (fit === null) return `    expect(trendLine(${dartPoints(pts)}), isNull, reason: '第 ${i} 组应当不拟合');`
+  return `    final fit${i} = trendLine(${dartPoints(pts)})!;
+    expect(fit${i}.slope, closeTo(${fit.slope}, 1e-9));
+    expect(fit${i}.intercept, closeTo(${fit.intercept}, 1e-9));
+    expect(fit${i}.r2, closeTo(${fit.r2}, 1e-9));`
+})
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -118,6 +147,7 @@ import 'package:i_design/src/logic/pagination.dart';
 import 'package:i_design/src/logic/number.dart';
 import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
+import 'package:i_design/src/logic/chart.dart';
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
   expect(actual.length, expected.length, reason: '\$label 长度不一致');
@@ -151,6 +181,14 @@ ${sortExpectations.join('\n')}
 
   test('数值夹取 / 取整 / 步进 / 比例换算与 Web 端一致', () {
 ${numberExpectations.join('\n')}
+  });
+
+  test('bubbleRadius 按面积映射，与 Web 端一致', () {
+${bubbleExpectations.join('\n')}
+  });
+
+  test('trendLine 斜率、截距与 R² 与 Web 端一致', () {
+${trendExpectations.join('\n')}
   });
 
   test('moveActive / moveActiveLoop 与 Web 端一致', () {

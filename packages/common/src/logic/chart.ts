@@ -11,12 +11,6 @@ export interface ChartSeries {
 }
 
 /**
- * 生成「好看的」刻度值。
- *
- * 不直接把 min/max 等分：那会得到 0、13.7、27.4 这种刻度。
- * 这里把步长吸附到 1/2/5 的整数倍，坐标轴上出现的永远是人能心算的数。
- */
-/**
  * 阈值标记：一条线（value）或一条带（from/to）。
  *
  * status 决定配色，走的是状态色而不是分类色——阈值不是「第 N 个系列」，
@@ -32,6 +26,12 @@ export interface ChartThreshold {
   status?: 'success' | 'warning' | 'danger'
 }
 
+/**
+ * 生成「好看的」刻度值。
+ *
+ * 不直接把 min/max 等分：那会得到 0、13.7、27.4 这种刻度。
+ * 这里把步长吸附到 1/2/5 的整数倍，坐标轴上出现的永远是人能心算的数。
+ */
 export function niceTicks(min: number, max: number, count = 5): number[] {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return [0]
   if (min === max) {
@@ -265,4 +265,83 @@ export function heatLevel(value: number, min: number, max: number, steps = 5) {
 /** 第 n 个系列用第几号分类色；超过 8 个不再循环，返回 -1 由调用方合并处理 */
 export function colorSlot(index: number, total = 8) {
   return index < total ? index + 1 : -1
+}
+
+/* ---------- 散点 ---------- */
+
+export interface ScatterPoint {
+  x: number
+  y: number
+  /** 气泡大小的原始值；不传则所有点同样大 */
+  size?: number
+  /** 悬停时显示的标识，例如项目名 */
+  label?: string
+}
+
+export interface ScatterSeries {
+  name: string
+  data: ScatterPoint[]
+}
+
+/**
+ * 散点图的系列上限是 3，这不是拍脑袋定的。
+ *
+ * 折线和柱状里只有相邻系列会挨在一起，散点则是任意两个点都可能贴着，
+ * 因此配色必须按「所有两两组合」校验而不是「相邻组合」。本体系的分类色
+ * 在这个更严的口径下，亮色与暗色两种模式都只有前三槽同时通过
+ * （第四槽与品牌蓝的常色差 ΔE 只有 10.8，低于 15 的硬下限——
+ * 就是色觉正常的人也难分辨）。
+ *
+ * 超出的系列不该靠「再调一个颜色」解决，那是把问题藏起来：
+ * 合并成「其他」或者拆成多张小图，才是真的还能读。
+ */
+export const SCATTER_MAX_SERIES = 3
+
+/** 一组点在某一维度上的值域 */
+export function extentOf(points: ScatterPoint[], key: 'x' | 'y' | 'size') {
+  const values = points.map((p) => p[key]).filter((v): v is number => Number.isFinite(v))
+  if (!values.length) return { min: 0, max: 1 }
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  return { min, max: max === min ? min + 1 : max }
+}
+
+/**
+ * 气泡半径按面积映射，而不是按半径。
+ *
+ * 直接把数值当半径会让差异被平方放大：数值翻一倍，看上去是四倍大。
+ * 视觉面积与数值成正比，读者估出来的比例才是对的。
+ */
+export function bubbleRadius(value: number, min: number, max: number, rMin = 4, rMax = 18) {
+  if (max === min) return rMin
+  const ratio = (Math.min(Math.max(value, min), max) - min) / (max - min)
+  const aMin = Math.PI * rMin * rMin
+  const aMax = Math.PI * rMax * rMax
+  return Math.sqrt((aMin + ratio * (aMax - aMin)) / Math.PI)
+}
+
+/**
+ * 最小二乘拟合的趋势线。
+ *
+ * 散点常见的问题是「看着像有关系，但说不清多强」——一条拟合线加上 R²
+ * 就把这句话变成可核对的数字。点少于 3 个不拟合：两点连线必然 R²=1，
+ * 那不是相关性，只是把两个点连起来。
+ */
+export function trendLine(points: ScatterPoint[]) {
+  const pts = points.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y))
+  const n = pts.length
+  if (n < 3) return null
+  const sx = pts.reduce((a, p) => a + p.x, 0)
+  const sy = pts.reduce((a, p) => a + p.y, 0)
+  const sxx = pts.reduce((a, p) => a + p.x * p.x, 0)
+  const sxy = pts.reduce((a, p) => a + p.x * p.y, 0)
+  const denom = n * sxx - sx * sx
+  // 所有点 x 相同：竖直方向没有斜率可言，拟合线没有意义
+  if (denom === 0) return null
+  const slope = (n * sxy - sx * sy) / denom
+  const intercept = (sy - slope * sx) / n
+  const meanY = sy / n
+  const ssTot = pts.reduce((a, p) => a + (p.y - meanY) ** 2, 0)
+  const ssRes = pts.reduce((a, p) => a + (p.y - (slope * p.x + intercept)) ** 2, 0)
+  return { slope, intercept, r2: ssTot === 0 ? 1 : 1 - ssRes / ssTot }
 }

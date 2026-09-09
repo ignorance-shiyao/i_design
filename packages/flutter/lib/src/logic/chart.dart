@@ -142,3 +142,74 @@ String _group(int value) {
   }
   return '${value < 0 ? '-' : ''}$buffer';
 }
+
+/* ---------- 散点 ---------- */
+
+class ScatterPoint {
+  const ScatterPoint({required this.x, required this.y, this.size, this.label});
+
+  final double x;
+  final double y;
+
+  /// 气泡大小的原始值；不传则所有点同样大
+  final double? size;
+
+  /// 悬停时显示的标识，例如项目名
+  final String? label;
+}
+
+class ScatterSeriesData {
+  const ScatterSeriesData({required this.name, required this.data});
+
+  final String name;
+  final List<ScatterPoint> data;
+}
+
+/// 散点图的系列上限是 3。
+///
+/// 折线和柱状里只有相邻系列会挨在一起，散点则是任意两点都可能贴着，
+/// 因此配色要按「所有两两组合」校验；本体系的分类色在这个更严的口径下，
+/// 亮色与暗色两种模式都只有前三槽同时通过。
+const int kScatterMaxSeries = 3;
+
+/// 一组点在某一维度上的值域
+({double min, double max}) extentOf(List<double> values) {
+  final finite = values.where((v) => v.isFinite).toList();
+  if (finite.isEmpty) return (min: 0, max: 1);
+  final lo = finite.reduce(math.min);
+  final hi = finite.reduce(math.max);
+  return (min: lo, max: hi == lo ? lo + 1 : hi);
+}
+
+/// 气泡半径按面积映射，而不是按半径——
+/// 直接把数值当半径会让差异被平方放大：数值翻一倍，看上去是四倍大。
+double bubbleRadius(double value, double min, double max,
+    [double rMin = 4, double rMax = 18]) {
+  if (max == min) return rMin;
+  final ratio = (value.clamp(min, max) - min) / (max - min);
+  final aMin = math.pi * rMin * rMin;
+  final aMax = math.pi * rMax * rMax;
+  return math.sqrt((aMin + ratio * (aMax - aMin)) / math.pi);
+}
+
+/// 最小二乘拟合的趋势线；点少于 3 个不拟合——
+/// 两点连线必然 R²=1，那不是相关性，只是把两个点连起来。
+({double slope, double intercept, double r2})? trendLine(List<ScatterPoint> points) {
+  final pts = points.where((p) => p.x.isFinite && p.y.isFinite).toList();
+  final n = pts.length;
+  if (n < 3) return null;
+  final sx = pts.fold<double>(0, (a, p) => a + p.x);
+  final sy = pts.fold<double>(0, (a, p) => a + p.y);
+  final sxx = pts.fold<double>(0, (a, p) => a + p.x * p.x);
+  final sxy = pts.fold<double>(0, (a, p) => a + p.x * p.y);
+  final denom = n * sxx - sx * sx;
+  // 所有点 x 相同：竖直方向没有斜率可言
+  if (denom == 0) return null;
+  final slope = (n * sxy - sx * sy) / denom;
+  final intercept = (sy - slope * sx) / n;
+  final meanY = sy / n;
+  final ssTot = pts.fold<double>(0, (a, p) => a + math.pow(p.y - meanY, 2));
+  final ssRes =
+      pts.fold<double>(0, (a, p) => a + math.pow(p.y - (slope * p.x + intercept), 2));
+  return (slope: slope, intercept: intercept, r2: ssTot == 0 ? 1 : 1 - ssRes / ssTot);
+}

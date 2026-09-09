@@ -7,6 +7,7 @@ import 'package:i_design/src/logic/pagination.dart';
 import 'package:i_design/src/logic/number.dart';
 import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
+import 'package:i_design/src/logic/chart.dart';
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
   expect(actual.length, expected.length, reason: '$label 长度不一致');
@@ -95,6 +96,32 @@ void main() {
     expect(valueFromRatio(0.37, 0, 100, 5, 0), 35);
     expect(valueFromRatio(0.5, 0, 1, 0.1, 1), 0.5);
     expect(valueFromRatio(1.2, 0, 10, 1, 0), 10);
+  });
+
+  test('bubbleRadius 按面积映射，与 Web 端一致', () {
+    expect(bubbleRadius(0.0, 0.0, 100.0),
+        closeTo(4, 1e-9));
+    expect(bubbleRadius(50.0, 0.0, 100.0),
+        closeTo(13.038404810405298, 1e-9));
+    expect(bubbleRadius(100.0, 0.0, 100.0),
+        closeTo(18, 1e-9));
+    expect(bubbleRadius(7.0, 5.0, 5.0),
+        closeTo(4, 1e-9));
+    expect(bubbleRadius(-3.0, 0.0, 10.0),
+        closeTo(4, 1e-9));
+  });
+
+  test('trendLine 斜率、截距与 R² 与 Web 端一致', () {
+    final fit0 = trendLine(<ScatterPoint>[ScatterPoint(x: 1.0, y: 2.0), ScatterPoint(x: 2.0, y: 4.0), ScatterPoint(x: 3.0, y: 6.0), ScatterPoint(x: 4.0, y: 8.0)])!;
+    expect(fit0.slope, closeTo(2, 1e-9));
+    expect(fit0.intercept, closeTo(0, 1e-9));
+    expect(fit0.r2, closeTo(1, 1e-9));
+    final fit1 = trendLine(<ScatterPoint>[ScatterPoint(x: 1.0, y: 3.0), ScatterPoint(x: 2.0, y: 1.0), ScatterPoint(x: 3.0, y: 4.0), ScatterPoint(x: 4.0, y: 2.0), ScatterPoint(x: 5.0, y: 6.0)])!;
+    expect(fit1.slope, closeTo(0.7, 1e-9));
+    expect(fit1.intercept, closeTo(1.1, 1e-9));
+    expect(fit1.r2, closeTo(0.33108108108108114, 1e-9));
+    expect(trendLine(<ScatterPoint>[ScatterPoint(x: 1.0, y: 5.0), ScatterPoint(x: 2.0, y: 5.0)]), isNull, reason: '第 2 组应当不拟合');
+    expect(trendLine(<ScatterPoint>[ScatterPoint(x: 2.0, y: 1.0), ScatterPoint(x: 2.0, y: 4.0), ScatterPoint(x: 2.0, y: 9.0)]), isNull, reason: '第 3 组应当不拟合');
   });
 
   test('moveActive / moveActiveLoop 与 Web 端一致', () {

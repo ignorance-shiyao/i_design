@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent } from 'react'
 import {
   NODE_H,
   NODE_W,
@@ -10,6 +10,12 @@ import {
   type FlowNode
 } from '@i-design/common'
 import { Icon } from './Icon'
+
+interface MoveRecord {
+  id: string
+  from: { x: number; y: number }
+  to: { x: number; y: number }
+}
 
 export interface FlowProps {
   nodes: FlowNode[]
@@ -75,12 +81,58 @@ export function Flow({
     }
   }
 
+  /*
+   * 撤销 / 重做。
+   *
+   * 节点数据归调用方所有，组件不改它——所以记的不是快照，而是每次拖动的起止坐标；
+   * 撤销就是反着回调一次 onMove。只记完整的一次拖动（按下到抬起），
+   * 不记过程中的每一帧，否则撤销一次只退回一个像素。
+   */
+  const [undoStack, setUndoStack] = useState<MoveRecord[]>([])
+  const [redoStack, setRedoStack] = useState<MoveRecord[]>([])
+  const dragStart = useRef<{ x: number; y: number } | null>(null)
+  const dragLatest = useRef<{ x: number; y: number } | null>(null)
+
+  function undo() {
+    const record = undoStack[undoStack.length - 1]
+    if (!record) return
+    setUndoStack(undoStack.slice(0, -1))
+    setRedoStack([...redoStack, record])
+    onMove?.({ id: record.id, x: record.from.x, y: record.from.y })
+  }
+
+  function redo() {
+    const record = redoStack[redoStack.length - 1]
+    if (!record) return
+    setRedoStack(redoStack.slice(0, -1))
+    setUndoStack([...undoStack, record])
+    onMove?.({ id: record.id, x: record.to.x, y: record.to.y })
+  }
+
+  /*
+   * 快捷键绑在画布上而不是 window：同一页可能有多张画布，也可能有输入框，
+   * 绑到全局会把别处的撤销一起劫走。画布需要 tabIndex 才能接到键盘事件。
+   */
+  function onKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    if (!(event.metaKey || event.ctrlKey)) return
+    const key = event.key.toLowerCase()
+    if (key === 'z' && !event.shiftKey) {
+      event.preventDefault()
+      undo()
+    } else if ((key === 'z' && event.shiftKey) || key === 'y') {
+      event.preventDefault()
+      redo()
+    }
+  }
+
   function onNodeDown(event: PointerEvent<SVGGElement>, node: FlowNode) {
     event.stopPropagation()
     onSelect?.(node.id)
     if (readOnly) return
     const point = toCanvas(event)
     drag.current = { id: node.id, dx: point.x - node.x, dy: point.y - node.y }
+    dragStart.current = { x: node.x, y: node.y }
+    dragLatest.current = null
   }
 
   function onDown(event: PointerEvent<SVGSVGElement>) {
@@ -93,12 +145,13 @@ export function Flow({
   function onPointerMove(event: PointerEvent<SVGSVGElement>) {
     if (drag.current) {
       const point = toCanvas(event)
-      onMove?.({
-        id: drag.current.id,
-        // 吸附到 8px 网格：手绘位置总差几像素，对齐后整张图才整齐
+      // 吸附到 8px 网格：手绘位置总差几像素，对齐后整张图才整齐
+      const next = {
         x: Math.round((point.x - drag.current.dx) / 8) * 8,
         y: Math.round((point.y - drag.current.dy) / 8) * 8
-      })
+      }
+      dragLatest.current = next
+      onMove?.({ id: drag.current.id, ...next })
       return
     }
     if (!panning) return
@@ -112,6 +165,16 @@ export function Flow({
 
   const stop = () => {
     setPanning(false)
+    // 一次拖动记一条；没真的移动过就不入栈，否则「撤销」会在原地空点几次
+    const from = dragStart.current
+    const to = dragLatest.current
+    if (drag.current && from && to && (to.x !== from.x || to.y !== from.y)) {
+      setUndoStack((stack) => [...stack, { id: drag.current!.id, from, to }])
+      // 新动作让重做栈作废：分支历史会让「重做」跳到用户没走过的路径上
+      setRedoStack([])
+    }
+    dragStart.current = null
+    dragLatest.current = null
     drag.current = null
   }
 
@@ -131,6 +194,9 @@ export function Flow({
       ref={root}
       className={['i-flow', panning ? 'is-panning' : '', className].filter(Boolean).join(' ')}
       style={{ height }}
+      // tabIndex 让画布能接到键盘：快捷键绑在画布上，不劫持页面别处的撤销
+      tabIndex={0}
+      onKeyDown={onKeyDown}
     >
       <svg
         className="i-flow__canvas"
@@ -221,6 +287,17 @@ export function Flow({
           })}
         </g>
       </svg>
+
+      {!readOnly && (
+        <div className="i-flow__toolbar i-flow__toolbar--history">
+          <button className="i-flow__tool" aria-label="撤销" disabled={undoStack.length === 0} onClick={undo}>
+            <Icon name="undo" size={14} />
+          </button>
+          <button className="i-flow__tool" aria-label="重做" disabled={redoStack.length === 0} onClick={redo}>
+            <Icon name="redo" size={14} />
+          </button>
+        </div>
+      )}
 
       <div className="i-flow__toolbar">
         <button className="i-flow__tool" aria-label="缩小" onClick={() => zoom(-0.2)}>

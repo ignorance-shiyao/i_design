@@ -18,6 +18,9 @@ export const icons = {
   trash: 'M4 7h16M10 4h4M6 7l1 13h10l1-13M10 11v6M14 11v6',
   download: 'M12 4v11M7 11l5 5 5-5M4 20h16',
   refresh: 'M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5',
+  // 撤销 / 重做：箭头指回起点，方向相反，避免与 refresh 的整圈弧混淆
+  undo: 'M4 9h11a5 5 0 0 1 0 10h-6M4 9l4-4M4 9l4 4',
+  redo: 'M20 9H9a5 5 0 0 0 0 10h6M20 9l-4-4M20 9l-4 4',
   more: 'M6 12h.01M12 12h.01M18 12h.01',
 
   // 方向
