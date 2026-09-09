@@ -131,7 +131,7 @@ export const componentCatalog: CatalogGroup[] = [
       { label: '仪表盘', api: 'IChartGauge', status: 'ready', note: '单值相对阈值的位置' },
       { label: '雷达图', api: 'IChartRadar', status: 'ready', note: '多维度能力的形状对比' },
       { label: '热力图', api: 'IChartHeatmap', status: 'ready', note: '二维密度，如按小时分布' },
-      { label: '散点图', status: 'planned', note: '两个连续量之间的关系' }
+      { label: '散点图', api: 'IChartScatter', status: 'ready', note: '两个连续量之间的关系；系列数受配色校验约束' }
     ]
   },
   {
