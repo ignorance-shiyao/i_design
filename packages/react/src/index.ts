@@ -84,3 +84,6 @@ export {
   generateRamp, hexToRgb, rgbToHex, hexToTriplet, rgbToHsl, hslToRgb,
   formatTime, parseTime, formatCountdown, countdownParts, resolvePath,
 } from '@i-design/core';
+
+export { ApprovalCard, ToolChip, TaskList, ContextCard, type ApprovalCardProps, type ToolChipProps, type TaskListProps, type ContextCardProps } from './components/Agent.js';
+export type { AgentStatus, AgentTask, ApprovalStatus, AgentLabels } from '@i-design/core';

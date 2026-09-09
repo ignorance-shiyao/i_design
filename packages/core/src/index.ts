@@ -40,3 +40,5 @@ export * from './behaviors/time.js';
 export * from './behaviors/misc.js';
 
 export const version = '0.1.0';
+
+export * from './behaviors/agent.js';

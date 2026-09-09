@@ -28,6 +28,7 @@ React 与 Vue 只是两层薄薄的“绑定层”。
 | TDesign | 命令式插件式 API（通知是函数不是组件） | `message` / `notification` |
 | WAI-ARIA APG | roving tabindex、combobox、tree 的键盘模型 | `useRoving` / `useSelect` / `useTree` |
 | TDesign Starter | 控制台示例页的信息结构（筛选栏 → 表格 → 详情抽屉） | 文档站「示例」 |
+| [Beautiful UI](https://www.beautifului.dev/) | 紧凑工具状态、任务进度、人工确认与来源卡片的交互形态（独立实现） | AI 会话扩展 |
 | Ant / Arco / Naive | 首页的信息层次与实时主题配置面板 | 文档站首页与设置面板 |
 
 **没有照搬的**：色板是自己调的；语法高亮是自写的约 120 行分词器（不引 highlight.js）；
@@ -184,3 +185,20 @@ TypingIndicator、ThinkingBlock、CodeBlock、Suggestions，以及 `createStream
 
 更多设计取舍见 [docs/architecture.md](docs/architecture.md)，后续规划见 [docs/roadmap.md](docs/roadmap.md)，
 新增组件的步骤见 [docs/adding-a-component.md](docs/adding-a-component.md)。
+
+## AI 交互扩展
+
+新增 `ApprovalCard`、`ToolChip`、`TaskList`、`ContextCard`，React / Vue 双端导出，Vue 全局注册名以 `I` 开头。
+文档站「AI 会话」提供交互示例、双端代码与 API。所有示例为本地模拟。
+
+审批 `status` 和 `busy` 由宿主控制：在 `onApprove` / `@approve` 中设置 busy，成功后写入 approved，失败时解除 busy 并呈现错误。组件不持久化决策、不调用工具。
+`TaskList` 的任务 id 必须唯一；只有失败项且提供重试回调时显示重试按钮。
+`labels` 可覆盖操作及状态文案；`ContextCard.meta` 可自定义来源标签。所有新增样式跟随共享主题令牌，支持 RTL 和减少动态效果偏好。
+
+新增组件默认文案继承 `ConfigProvider.locale`（中 / 英 / 阿语）；自定义 Locale 可通过可选的 `agent` 字段补充翻译，组件 `labels` 优先级最高。
+
+### 构建产物验证
+
+`pnpm build && pnpm test:package` 从消费端解析公共入口、声明文件和样式入口，不使用文档站的源码 alias。
+React / Vue 的 `styles` 子路径现在指向包内 CSS 桥接文件，避免安装后导入触发 `ERR_INVALID_PACKAGE_TARGET`。
+CI 在 PR 上运行构建、类型检查、测试、包入口检查和文档站生产构建。

@@ -7,7 +7,7 @@ const FEATURES: Array<{ icon: IconName; title: string; desc: string }> = [
   { icon: 'star', title: '两层设计令牌', desc: 'RGB 三元组基元 + alpha 组合出语义令牌；换肤只需替换三元组。' },
   { icon: 'user', title: '无障碍是默认值', desc: 'roving tabindex、combobox、tree 的键盘模型按 WAI-ARIA 实现，不是事后补丁。' },
   { icon: 'refresh', title: '动效是状态机', desc: '相位与时序在 core，两端进出场完全同步；折叠动画不需要 JS 测高度。' },
-  { icon: 'send', title: 'AI 会话开箱即用', desc: '输入法安全发送、流式匀速显示、滚动跟随——这类界面最容易做错的三件事。' },
+  { icon: 'send', title: 'AI 交互组件', desc: '从流式会话到任务进度、工具调用、来源引用与操作确认。' },
 ];
 
 /** Pointer-driven parallax on the hero. Disabled entirely for reduced motion. */
@@ -57,7 +57,7 @@ export function Landing({ onNavigate }: { onNavigate: (page: string) => void }) 
         <div className="hero__copy">
           <div className="hero__eyebrow">
             <Tag size="s" status="brand">v0.7.0</Tag>
-            <span>跨框架组件库 · 62 个组件</span>
+            <span>跨框架组件库 · React / Vue</span>
           </div>
           <h1 className="hero__title">
             一套设计语言

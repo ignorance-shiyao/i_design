@@ -8,7 +8,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./styles": "@i-design/core/styles"
+    "./styles": "./dist/styles/index.css"
   },
   "files": ["dist"],
   "dependencies": {
@@ -17,7 +17,7 @@
   },
   "peerDependencies": { "vue": ">=3.3" },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node ../../scripts/copy-styles.mjs vue",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

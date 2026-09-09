@@ -21,6 +21,10 @@ const ATTR_PROP: Record<string, string> = {
   maxlength: 'maxLength',
   readonly: 'readOnly',
   autocomplete: 'autoComplete',
+  inputmode: 'inputMode',
+  'stroke-width': 'strokeWidth',
+  'stroke-linecap': 'strokeLinecap',
+  'stroke-linejoin': 'strokeLinejoin',
 };
 
 /**

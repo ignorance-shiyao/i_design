@@ -1,3 +1,4 @@
+import { ApprovalCard, ToolChip, TaskList, ContextCard } from './components/Agent.js';
 import type { App, Component } from 'vue';
 import { ConfigProvider } from './components/ConfigProvider.js';
 import { Button } from './components/Button.js';
@@ -76,6 +77,7 @@ export {
 } from '@i-design/core';
 
 const components: Record<string, Component> = {
+  IApprovalCard: ApprovalCard, IToolChip: ToolChip, ITaskList: TaskList, IContextCard: ContextCard,
   IConfigProvider: ConfigProvider,
   IButton: Button,
   IInput: Input,
@@ -170,3 +172,6 @@ export default {
     for (const [name, component] of Object.entries(components)) app.component(name, component);
   },
 };
+
+export { ApprovalCard, ToolChip, TaskList, ContextCard };
+export type { AgentStatus, AgentTask, ApprovalStatus, AgentLabels } from '@i-design/core';

@@ -1,5 +1,7 @@
+import type { AgentLabels } from './behaviors/agent.js';
 /** Strings every component may need. Adding a key is a minor version bump. */
 export interface Locale {
+  agent?: Partial<AgentLabels>;
   name: string;
   dir: 'ltr' | 'rtl';
   common: { ok: string; cancel: string; close: string; clear: string; loading: string };

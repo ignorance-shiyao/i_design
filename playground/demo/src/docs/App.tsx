@@ -1,3 +1,4 @@
+import { agentEntries } from './registry-agent.js';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Button, CodeBlock, ConfigProvider, Empty, Icon, Input, Table, Tabs, Tag,
@@ -15,7 +16,7 @@ import { Dashboard } from './Dashboard.js';
 import { SettingsPanel, DEFAULT_SETTINGS, BRANDS, type SiteSettings } from './SettingsPanel.js';
 import type { DocEntry, Demo } from './types.js';
 
-const ENTRIES: DocEntry[] = [...basicEntries, ...formEntries, ...navEntries, ...moreEntries, ...advancedEntries, ...aiEntries];
+const ENTRIES: DocEntry[] = [...basicEntries, ...formEntries, ...navEntries, ...moreEntries, ...advancedEntries, ...aiEntries, ...agentEntries];
 const CATEGORIES = ['通用', '数据录入', '导航', '数据展示', '反馈', 'AI 会话'];
 
 type Page = 'overview' | 'console' | 'tokens' | string;
