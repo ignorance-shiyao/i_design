@@ -62,7 +62,7 @@ export const componentCatalog: CatalogGroup[] = [
       { label: '步骤条', api: 'ISteps', status: 'ready', note: '描述一个尚未走完的流程' },
       { label: '分页', api: 'IPagination', status: 'ready', note: '长列表分段浏览' },
       { label: '分段控制器', api: 'ISegmented', status: 'ready', note: '切换同一块区域内的数据视角' },
-      { label: '下拉菜单', status: 'planned', note: '收纳次级操作，避免一行摆满按钮' },
+      { label: '下拉菜单', api: 'IDropdown', status: 'ready', note: '收纳次级操作，自动避让视口边缘' },
       { label: '导航菜单', status: 'planned', note: '侧栏或顶栏的多级菜单' },
       { label: '页内锚点', status: 'planned', note: '长文档的章节跳转与高亮' }
     ]
@@ -106,7 +106,7 @@ export const componentCatalog: CatalogGroup[] = [
       { label: '头像', api: 'IAvatar / IAvatarGroup', status: 'ready', note: '人员标识，无图时取字' },
       { label: '文字提示', api: 'ITooltip', status: 'ready', note: '补充一句简短说明' },
       { label: '空状态', api: 'IEmpty', status: 'ready', note: '没有数据时给出下一步' },
-      { label: '气泡卡片', status: 'planned', note: '承载比文字提示更复杂的内容' },
+      { label: '气泡卡片', api: 'IPopover', status: 'ready', note: '承载比文字提示更复杂的内容' },
       { label: '树形控件', status: 'planned', note: '层级数据的展开与选择' },
       { label: '图片预览', status: 'planned', note: '点击放大、缩放与切换' },
       { label: '走马灯', status: 'planned', note: '同一位置轮播多屏内容' },

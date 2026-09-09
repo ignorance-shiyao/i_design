@@ -48,6 +48,7 @@
 @import './components/modal.css';
 @import './components/nav-bar.css';
 @import './components/notice-bar.css';
+@import './components/overlay.css';
 @import './components/pagination.css';
 @import './components/picker.css';
 @import './components/popconfirm.css';

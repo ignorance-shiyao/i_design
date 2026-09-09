@@ -7,6 +7,7 @@ import 'package:i_design/src/logic/pagination.dart';
 import 'package:i_design/src/logic/number.dart';
 import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
+import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/chart.dart';
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
@@ -15,6 +16,14 @@ void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label
     expect(actual[i].page, expected[i].page, reason: '$label 第 $i 项页码不一致');
     expect(actual[i].gap, expected[i].gap, reason: '$label 第 $i 项省略位不一致');
   }
+}
+
+void _expectOverlay(IOverlayPosition actual, double x, double y,
+    IPlacement placement, double arrow, String label) {
+  expect(actual.x, closeTo(x, 1e-9), reason: '$label x 不一致');
+  expect(actual.y, closeTo(y, 1e-9), reason: '$label y 不一致');
+  expect(actual.placement, placement, reason: '$label 方向不一致');
+  expect(actual.arrow, closeTo(arrow, 1e-9), reason: '$label 箭头位置不一致');
 }
 
 void main() {
@@ -138,5 +147,81 @@ void main() {
     expect(moveActiveLoop(disabled, 4, -1), 2);
     expect(moveActive(disabled, 2, -1), 0);
     expect(moveActiveLoop(disabled, 2, -1), 0);
+  });
+
+  test('resolveOverlay 落点、翻转与箭头位置与 Web 端一致', () {
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(400, 300, 80, 32),
+          popup: const IOverlayRect(0, 0, 200, 100),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.top,
+        ),
+        340, 192, IPlacement.top, 100,
+        'resolveOverlay(400,300 top)');
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(400, 10, 80, 32),
+          popup: const IOverlayRect(0, 0, 200, 100),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.top,
+        ),
+        340, 50, IPlacement.bottom, 100,
+        'resolveOverlay(400,10 top)');
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(400, 560, 80, 32),
+          popup: const IOverlayRect(0, 0, 200, 100),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.bottom,
+        ),
+        340, 452, IPlacement.top, 100,
+        'resolveOverlay(400,560 bottom)');
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(960, 300, 40, 32),
+          popup: const IOverlayRect(0, 0, 200, 100),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.bottom,
+        ),
+        792, 340, IPlacement.bottom, 188,
+        'resolveOverlay(960,300 bottom)');
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(4, 300, 40, 32),
+          popup: const IOverlayRect(0, 0, 200, 100),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.bottom,
+        ),
+        8, 340, IPlacement.bottom, 16,
+        'resolveOverlay(4,300 bottom)');
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(400, 300, 80, 32),
+          popup: const IOverlayRect(0, 0, 200, 100),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.right,
+        ),
+        488, 266, IPlacement.right, 50,
+        'resolveOverlay(400,300 right)');
+    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(960, 300, 40, 32),
+          popup: const IOverlayRect(0, 0, 200, 100),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: IPlacement.right,
+        ),
+        752, 266, IPlacement.left, 50,
+        'resolveOverlay(960,300 right)');
+  });
+
+  test('moveMenuActive / firstMenuActive 与 Web 端一致', () {
+    final selectable = [true,false,false,true,true];
+    expect(firstMenuActive(selectable), 0);
+    expect(moveMenuActive(selectable, 0, 1), 3);
+    expect(moveMenuActive(selectable, 0, -1), 4);
+    expect(moveMenuActive(selectable, 3, 1), 4);
+    expect(moveMenuActive(selectable, 4, 1), 0);
+    expect(moveMenuActive(selectable, 4, -1), 3);
   });
 }

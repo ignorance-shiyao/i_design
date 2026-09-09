@@ -1,0 +1,16 @@
+<view class="i-overlay-trigger" bindtap="onToggle">
+  <slot />
+</view>
+
+<view wx:if="{{visible}}" class="i-overlay-mask" bindtap="close" />
+<view wx:if="{{visible}}" class="i-popover is-{{actual}}" style="left:{{left}}px;top:{{top}}px">
+  <view
+    class="i-popover__arrow"
+    style="{{actual === 'top' || actual === 'bottom' ? 'left:' : 'top:'}}{{arrow}}px"
+  />
+  <view wx:if="{{title}}" class="i-popover__title">{{title}}</view>
+  <view class="i-popover__body">
+    <slot name="content" />
+    <text wx:if="{{content}}">{{content}}</text>
+  </view>
+</view>

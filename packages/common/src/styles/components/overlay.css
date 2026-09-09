@@ -1,0 +1,107 @@
+/*
+ * 浮层：Popover 与 Dropdown 共用的外观。
+ * 位置由 logic/overlay 计算后写在行内 style 上，这里只管长相与层级。
+ */
+.i-popover,
+.i-dropdown {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  background: var(--i-color-bg-elevated);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  box-shadow: var(--i-shadow-lg);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-sm);
+}
+
+.i-popover { max-width: 320px; padding: var(--i-spacing-3) var(--i-spacing-4); }
+.i-popover__title {
+  margin: 0 0 var(--i-spacing-1);
+  font-size: var(--i-font-size-sm);
+  font-weight: 600;
+}
+.i-popover__body { color: var(--i-color-text-secondary); line-height: 1.6; }
+
+/*
+ * 箭头用旋转的方块拼出来：只有相邻两条边描边，才能和浮层的边框接成一条线。
+ * 纯三角形（border 技巧）画不出描边，在有边框的浮层上会露出接缝。
+ */
+.i-popover__arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--i-color-bg-elevated);
+  border: 1px solid var(--i-color-border);
+  transform: rotate(45deg);
+}
+.i-popover.is-top .i-popover__arrow { bottom: -5px; border-top: none; border-left: none; }
+.i-popover.is-bottom .i-popover__arrow { top: -5px; border-bottom: none; border-right: none; }
+.i-popover.is-left .i-popover__arrow { right: -5px; border-bottom: none; border-left: none; }
+.i-popover.is-right .i-popover__arrow { left: -5px; border-top: none; border-right: none; }
+
+/* 下拉菜单 */
+.i-dropdown { min-width: 160px; padding: var(--i-spacing-1) 0; }
+.i-dropdown__list { margin: 0; padding: 0; list-style: none; }
+.i-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  box-sizing: border-box;
+  /* 控件高度走令牌：窄屏或触屏时自动变为 44px 的可点区域 */
+  min-height: var(--i-control-height-md);
+  padding: 0 var(--i-spacing-4);
+  border: none;
+  background: none;
+  color: var(--i-color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.i-dropdown__item:hover:not(:disabled),
+.i-dropdown__item.is-active { background: var(--i-color-bg-subtle); }
+.i-dropdown__item:disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }
+.i-dropdown__item.is-danger { color: var(--i-color-danger); }
+.i-dropdown__item:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: -2px;
+}
+.i-dropdown__icon { flex: none; }
+/* 快捷键提示推到右侧，右对齐后一列键位是齐的，比跟在文字后面好扫 */
+.i-dropdown__hint {
+  margin-left: auto;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.i-dropdown__divider {
+  height: 1px;
+  margin: var(--i-spacing-1) 0;
+  background: var(--i-color-hairline);
+}
+.i-dropdown__group {
+  padding: var(--i-spacing-2) var(--i-spacing-4) var(--i-spacing-1);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+
+.i-overlay-trigger { display: inline-flex; }
+
+/* 出现动画：从触发元素方向轻微推出，暗示两者的从属关系 */
+.i-overlay-fade-enter-active,
+.i-overlay-fade-leave-active { transition: opacity var(--i-motion-fast) var(--i-motion-easing), transform var(--i-motion-fast) var(--i-motion-easing); }
+.i-overlay-fade-enter-from,
+.i-overlay-fade-leave-to { opacity: 0; transform: scale(0.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  .i-overlay-fade-enter-active,
+  .i-overlay-fade-leave-active { transition: none; }
+}
+
+/*
+ * 小程序端补充：没有 Teleport，浮层就在组件内；关闭要靠一层透明遮罩接管点击。
+ * 遮罩不做压暗——菜单不是模态，压暗整页会让人误以为页面被锁住。
+ */
+.i-overlay-mask { position: fixed; inset: 0; z-index: 999; }
+.i-dropdown__item.is-disabled { color: var(--i-color-text-tertiary); }

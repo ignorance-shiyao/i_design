@@ -1,0 +1,113 @@
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { resolveOverlay, type Placement } from '@i-design/common'
+
+export interface PopoverProps {
+  title?: string
+  content?: ReactNode
+  placement?: Placement
+  /** 点击触发适合承载可交互内容，悬浮适合纯说明 */
+  trigger?: 'click' | 'hover'
+  disabled?: boolean
+  children?: ReactNode
+}
+
+export function Popover({
+  title = '',
+  content = null,
+  placement = 'top',
+  trigger = 'click',
+  disabled = false,
+  children
+}: PopoverProps) {
+  const triggerRef = useRef<HTMLSpanElement | null>(null)
+  const popupRef = useRef<HTMLDivElement | null>(null)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const [visible, setVisible] = useState(false)
+  const [pos, setPos] = useState({ x: 0, y: 0, placement, arrow: 0 })
+
+  // 位置要等浮层挂上去、量得到尺寸之后再算，否则首次打开会落在错误的位置
+  const place = useCallback(() => {
+    const t = triggerRef.current?.getBoundingClientRect()
+    const p = popupRef.current?.getBoundingClientRect()
+    if (!t || !p) return
+    setPos(
+      resolveOverlay({
+        trigger: t,
+        popup: p,
+        viewport: { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight },
+        placement
+      })
+    )
+  }, [placement])
+
+  useEffect(() => {
+    if (!visible) return
+    place()
+    const onDocumentClick = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (triggerRef.current?.contains(target) || popupRef.current?.contains(target)) return
+      setVisible(false)
+    }
+    // 滚动与缩放都会让算好的位置失效
+    window.addEventListener('scroll', place, { passive: true, capture: true })
+    window.addEventListener('resize', place)
+    if (trigger === 'click') document.addEventListener('click', onDocumentClick)
+    return () => {
+      window.removeEventListener('scroll', place, true)
+      window.removeEventListener('resize', place)
+      document.removeEventListener('click', onDocumentClick)
+    }
+  }, [visible, place, trigger])
+
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  const open = () => {
+    if (disabled) return
+    clearTimeout(timer.current)
+    setVisible(true)
+  }
+  // 鼠标从触发元素挪到浮层要经过一段空隙，立即关闭会让浮层点不到
+  const delayedClose = () => {
+    if (trigger !== 'hover') return
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setVisible(false), 120)
+  }
+
+  const arrowStyle =
+    pos.placement === 'top' || pos.placement === 'bottom'
+      ? { left: `${pos.arrow - 4}px` }
+      : { top: `${pos.arrow - 4}px` }
+
+  return (
+    <>
+      <span
+        ref={triggerRef}
+        className="i-overlay-trigger"
+        onClick={() => trigger === 'click' && (visible ? setVisible(false) : open())}
+        onMouseEnter={() => trigger === 'hover' && open()}
+        onMouseLeave={delayedClose}
+        onKeyDown={(e) => e.key === 'Escape' && setVisible(false)}
+      >
+        {children}
+      </span>
+      {visible &&
+        createPortal(
+          <div
+            ref={popupRef}
+            className={`i-popover is-${pos.placement}`}
+            style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
+            role="dialog"
+            aria-label={title || undefined}
+            onMouseEnter={() => trigger === 'hover' && open()}
+            onMouseLeave={delayedClose}
+          >
+            <span className="i-popover__arrow" style={arrowStyle} />
+            {title && <p className="i-popover__title">{title}</p>}
+            <div className="i-popover__body">{content}</div>
+          </div>,
+          document.body
+        )}
+    </>
+  )
+}

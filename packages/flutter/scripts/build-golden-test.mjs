@@ -28,6 +28,51 @@ const { clampNumber, roundTo, stepValue, ratioOf, valueFromRatio } = await bundl
   'packages/common/src/logic/number.ts',
   'number'
 )
+const { resolveOverlay, moveMenuActive, firstMenuActive } = await bundle(
+  'packages/common/src/logic/overlay.ts',
+  'overlay'
+)
+
+/* ---------- 浮层定位 ---------- */
+/*
+ * 覆盖三类容易在移植时抄错的分支：正常摆放、空间不足翻转、贴边推回。
+ * 箭头位置一并断言——它错了不会报任何错，只是气泡指向旁边一个控件。
+ */
+const overlayCases = [
+  // [触发x, 触发y, 触发宽, 触发高, 浮层宽, 浮层高, 方向]
+  [400, 300, 80, 32, 200, 100, 'top'],
+  [400, 10, 80, 32, 200, 100, 'top'],      // 顶部放不下 → 翻到下方
+  [400, 560, 80, 32, 200, 100, 'bottom'],  // 底部放不下 → 翻到上方
+  [960, 300, 40, 32, 200, 100, 'bottom'],  // 贴右缘 → 推回视口
+  [4, 300, 40, 32, 200, 100, 'bottom'],    // 贴左缘 → 推回视口
+  [400, 300, 80, 32, 200, 100, 'right'],
+  [960, 300, 40, 32, 200, 100, 'right'],   // 右侧放不下 → 翻到左侧
+]
+const dartPlacement = (p) => `IPlacement.${p}`
+const overlayExpectations = overlayCases.map(([tx, ty, tw, th, pw, ph, placement]) => {
+  const r = resolveOverlay({
+    trigger: { x: tx, y: ty, width: tw, height: th },
+    popup: { x: 0, y: 0, width: pw, height: ph },
+    viewport: { x: 0, y: 0, width: 1000, height: 600 },
+    placement
+  })
+  return `    _expectOverlay(
+        resolveOverlay(
+          trigger: const IOverlayRect(${tx}, ${ty}, ${tw}, ${th}),
+          popup: const IOverlayRect(0, 0, ${pw}, ${ph}),
+          viewport: const IOverlayRect(0, 0, 1000, 600),
+          placement: ${dartPlacement(placement)},
+        ),
+        ${r.x}, ${r.y}, ${dartPlacement(r.placement)}, ${r.arrow},
+        'resolveOverlay(${tx},${ty} ${placement})');`
+})
+
+// 菜单导航：true 表示可选，false 表示禁用或分隔线
+const menuSelectable = [true, false, false, true, true]
+const menuItems = menuSelectable.map((ok) => (ok ? {} : { disabled: true }))
+const menuCases = [[0, 1], [0, -1], [3, 1], [4, 1], [4, -1]]
+const menuExpectations = menuCases.map(([current, step]) =>
+  `    expect(moveMenuActive(selectable, ${current}, ${step}), ${moveMenuActive(menuItems, current, step)});`)
 
 /* ---------- 分页 ---------- */
 const pageCases = [
@@ -147,6 +192,7 @@ import 'package:i_design/src/logic/pagination.dart';
 import 'package:i_design/src/logic/number.dart';
 import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
+import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/chart.dart';
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
@@ -155,6 +201,14 @@ void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label
     expect(actual[i].page, expected[i].page, reason: '\$label 第 \$i 项页码不一致');
     expect(actual[i].gap, expected[i].gap, reason: '\$label 第 \$i 项省略位不一致');
   }
+}
+
+void _expectOverlay(IOverlayPosition actual, double x, double y,
+    IPlacement placement, double arrow, String label) {
+  expect(actual.x, closeTo(x, 1e-9), reason: '\$label x 不一致');
+  expect(actual.y, closeTo(y, 1e-9), reason: '\$label y 不一致');
+  expect(actual.placement, placement, reason: '\$label 方向不一致');
+  expect(actual.arrow, closeTo(arrow, 1e-9), reason: '\$label 箭头位置不一致');
 }
 
 void main() {
@@ -194,6 +248,16 @@ ${trendExpectations.join('\n')}
   test('moveActive / moveActiveLoop 与 Web 端一致', () {
     final disabled = ${disabledLiteral};
 ${moveExpectations.join('\n')}
+  });
+
+  test('resolveOverlay 落点、翻转与箭头位置与 Web 端一致', () {
+${overlayExpectations.join('\n')}
+  });
+
+  test('moveMenuActive / firstMenuActive 与 Web 端一致', () {
+    final selectable = ${JSON.stringify(menuSelectable)};
+    expect(firstMenuActive(selectable), ${firstMenuActive(menuItems)});
+${menuExpectations.join('\n')}
   });
 }
 `

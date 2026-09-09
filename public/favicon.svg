@@ -1,0 +1,6 @@
+<!-- 站点图标：品牌色方块内的字母 i，与体系图标同为线性风格 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#5e7ce0"/>
+  <circle cx="16" cy="9" r="2.1" fill="#fff"/>
+  <rect x="14.1" y="13.4" width="3.8" height="11.2" rx="1.9" fill="#fff"/>
+</svg>

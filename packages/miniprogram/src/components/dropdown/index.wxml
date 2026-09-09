@@ -1,0 +1,24 @@
+<view class="i-overlay-trigger" bindtap="onToggle">
+  <slot />
+</view>
+
+<!-- 遮罩只负责关闭，不做视觉：菜单不是模态，压暗整页会让人误以为页面被锁住 -->
+<view wx:if="{{visible}}" class="i-overlay-mask" bindtap="close" />
+<view wx:if="{{visible}}" class="i-dropdown" style="left:{{left}}px;top:{{top}}px">
+  <view class="i-dropdown__list">
+    <block wx:for="{{items}}" wx:key="key">
+      <view wx:if="{{item.divider}}" class="i-dropdown__divider" />
+      <view wx:elif="{{item.group}}" class="i-dropdown__group">{{item.group}}</view>
+      <view
+        wx:else
+        class="i-dropdown__item {{index === active ? 'is-active' : ''}} {{item.danger ? 'is-danger' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+        data-index="{{index}}"
+        bindtap="onSelect"
+      >
+        <i-icon wx:if="{{item.icon}}" name="{{item.icon}}" size="16" class="i-dropdown__icon" />
+        <text>{{item.label}}</text>
+        <text wx:if="{{item.hint}}" class="i-dropdown__hint">{{item.hint}}</text>
+      </view>
+    </block>
+  </view>
+</view>

@@ -80,6 +80,8 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Drawer', cn: '抽屉', to: '/components/drawer', desc: '从边缘滑出的面板', status: 'ready' },
       { name: 'Loading', cn: '加载中', to: '/components/loading', desc: '标识区域正在加载', status: 'ready' },
       { name: 'Popconfirm', cn: '气泡确认', to: '/components/popconfirm', desc: '就地确认轻量操作', status: 'ready' },
+      { name: 'Popover', cn: '气泡卡片', to: '/components/overlay', desc: '承载比文字提示更复杂的内容', status: 'ready' },
+      { name: 'Dropdown', cn: '下拉菜单', to: '/components/overlay', desc: '收纳次级操作，自动避让视口边缘', status: 'ready' },
       { name: 'Result', cn: '结果页', to: '/components/result', desc: '操作结果的整页反馈', status: 'ready' }
     ]
   }

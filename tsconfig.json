@@ -34,6 +34,7 @@
     "src/**/*.d.ts",
     "src/**/*.vue",
     "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
     "vite.config.ts"
   ],
   "//": "Vue 2 包用的是另一套框架类型（vue@2.7），由它自己的构建校验；混进 Vue 3 的 vue-tsc 只会误报",

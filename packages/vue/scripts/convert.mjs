@@ -29,7 +29,10 @@ const manual = new Set([
   'IPopconfirm.vue',
   'ITooltip.vue',
   'ISkeleton.vue',
-  'ILoading.vue'
+  'ILoading.vue',
+  // Teleport 在 2.7 不存在，改用 _Portal.vue 在挂载后把节点搬到 body
+  'IPopover.vue',
+  'IDropdown.vue'
 ])
 
 /**
