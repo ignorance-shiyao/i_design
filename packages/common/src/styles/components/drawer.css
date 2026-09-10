@@ -57,7 +57,7 @@
 .i-drawer-left-enter-active, .i-drawer-left-leave-active,
 .i-drawer-top-enter-active, .i-drawer-top-leave-active,
 .i-drawer-bottom-enter-active, .i-drawer-bottom-leave-active {
-  transition: opacity var(--i-motion-base) var(--i-motion-easing);
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing);
 }
 .i-drawer-right-enter-from, .i-drawer-right-leave-to,
 .i-drawer-left-enter-from, .i-drawer-left-leave-to,
@@ -70,9 +70,11 @@
 .i-drawer-left-leave-active .i-drawer__panel,
 .i-drawer-top-enter-active .i-drawer__panel,
 .i-drawer-top-leave-active .i-drawer__panel,
-.i-drawer-bottom-enter-active .i-drawer__panel,
+.i-drawer-bottom-enter-active .i-drawer__panel {
+  transition: transform var(--i-motion-slow) var(--i-motion-easing-out);
+}
 .i-drawer-bottom-leave-active .i-drawer__panel {
-  transition: transform var(--i-motion-slow) var(--i-motion-easing);
+  transition: transform var(--i-motion-slow) var(--i-motion-easing-in);
 }
 .i-drawer-right-enter-from .i-drawer__panel,
 .i-drawer-right-leave-to .i-drawer__panel { transform: translateX(100%); }

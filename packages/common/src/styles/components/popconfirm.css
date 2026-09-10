@@ -59,10 +59,13 @@
   margin-top: var(--i-spacing-4);
 }
 
-.i-popconfirm-fade-enter-active,
+.i-popconfirm-fade-enter-active {
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing-out),
+    transform var(--i-motion-fast) var(--i-motion-easing-out);
+}
 .i-popconfirm-fade-leave-active {
-  transition: opacity var(--i-motion-fast) var(--i-motion-easing),
-    transform var(--i-motion-fast) var(--i-motion-easing);
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing-in),
+    transform var(--i-motion-fast) var(--i-motion-easing-in);
 }
 .i-popconfirm-fade-enter-from,
 .i-popconfirm-fade-leave-to { opacity: 0; transform: scale(0.96); }

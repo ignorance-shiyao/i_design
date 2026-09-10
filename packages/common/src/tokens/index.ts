@@ -140,11 +140,26 @@ export const shadowDark = {
   brand: '0 8px 24px -8px rgba(94, 124, 224, 0.55)'
 } as const
 
+/*
+ * 动效令牌。
+ *
+ * 曲线分进场与出场两条，而不是一律用同一条——
+ * 元素出现时应当「快进慢停」（decelerate），让人看清它停在哪里；
+ * 消失时应当「慢起快走」（accelerate），因为没人需要看清一个正在离开的东西。
+ * 两边用同一条对称曲线是最常见的动效毛病：出现显得迟钝，消失显得拖沓。
+ */
 export const motion = {
   fast: '120ms',
   base: '200ms',
   slow: '320ms',
-  easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+  /** 通用曲线，用于颜色、边框这类没有方向感的属性 */
+  easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  /** 进场：快进慢停 */
+  'easing-out': 'cubic-bezier(0, 0, 0.2, 1)',
+  /** 出场：慢起快走 */
+  'easing-in': 'cubic-bezier(0.4, 0, 1, 1)',
+  /** 轻微回弹，用于按压反馈与拖拽落位这类需要「手感」的动作 */
+  'easing-spring': 'cubic-bezier(0.34, 1.36, 0.64, 1)'
 } as const
 
 export const zIndex = {

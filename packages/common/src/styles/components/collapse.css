@@ -33,7 +33,29 @@
 .i-collapse__item.is-open .i-collapse__arrow { transform: rotate(90deg); color: var(--i-color-brand); }
 .i-collapse__title { flex: 1; }
 
+/*
+ * 展开/收起用 grid-template-rows 从 0fr 过渡到 1fr，而不是猜一个 max-height。
+ * max-height 猜小了长内容会被截断，猜大了收起时前半程「没有动静」——
+ * 因为它先从 999px 掉到内容实际高度，这段是看不见的。
+ * grid 方案不需要知道内容多高。
+ */
+.i-collapse__wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--i-motion-base) var(--i-motion-easing-out);
+}
+.i-collapse__item.is-open .i-collapse__wrap { grid-template-rows: 1fr; }
+
 .i-collapse__body {
+  /* grid 子项必须能被压到 0 高，overflow 不设 hidden 会漏出内容 */
+  min-height: 0;
+  overflow: hidden;
   padding: 0 var(--i-spacing-5) var(--i-spacing-5) calc(var(--i-spacing-5) + 15px + var(--i-spacing-2));
   color: var(--i-color-text-secondary);
+}
+/* 收起时内边距也要归零，否则塌到 0fr 后仍留一条空白 */
+.i-collapse__item:not(.is-open) .i-collapse__body { padding-top: 0; padding-bottom: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .i-collapse__wrap { transition: none; }
 }

@@ -61,10 +61,13 @@
 .i-menu--horizontal .i-menu__item { width: auto; min-height: var(--i-control-height-md); }
 
 /* 展开/收起过渡 */
-.i-menu-sub-enter-active,
+.i-menu-sub-enter-active {
+  transition: grid-template-rows var(--i-motion-base) var(--i-motion-easing-out),
+    opacity var(--i-motion-base) var(--i-motion-easing-out);
+}
 .i-menu-sub-leave-active {
-  transition: grid-template-rows var(--i-motion-base) var(--i-motion-easing),
-    opacity var(--i-motion-base) var(--i-motion-easing);
+  transition: grid-template-rows var(--i-motion-fast) var(--i-motion-easing-in),
+    opacity var(--i-motion-fast) var(--i-motion-easing-in);
 }
 @media (prefers-reduced-motion: reduce) {
   .i-menu__arrow,

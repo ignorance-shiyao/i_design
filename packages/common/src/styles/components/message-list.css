@@ -39,8 +39,8 @@
 }
 .i-message__close:hover { color: var(--i-color-text); }
 
-.i-message-enter-active,
-.i-message-leave-active { transition: all var(--i-motion-base) var(--i-motion-easing); }
+.i-message-enter-active { transition: all var(--i-motion-base) var(--i-motion-easing-out); }
+.i-message-leave-active { transition: all var(--i-motion-fast) var(--i-motion-easing-in); }
 .i-message-enter-from,
 .i-message-leave-to { opacity: 0; transform: translateY(-12px); }
 .i-message-leave-active { position: absolute; }

@@ -89,8 +89,8 @@
 .i-overlay-trigger { display: inline-flex; }
 
 /* 出现动画：从触发元素方向轻微推出，暗示两者的从属关系 */
-.i-overlay-fade-enter-active,
-.i-overlay-fade-leave-active { transition: opacity var(--i-motion-fast) var(--i-motion-easing), transform var(--i-motion-fast) var(--i-motion-easing); }
+.i-overlay-fade-enter-active { transition: opacity var(--i-motion-fast) var(--i-motion-easing-out), transform var(--i-motion-fast) var(--i-motion-easing-out); }
+.i-overlay-fade-leave-active { transition: opacity var(--i-motion-fast) var(--i-motion-easing-in), transform var(--i-motion-fast) var(--i-motion-easing-in); }
 .i-overlay-fade-enter-from,
 .i-overlay-fade-leave-to { opacity: 0; transform: scale(0.97); }
 

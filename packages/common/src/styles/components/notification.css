@@ -61,10 +61,13 @@
 .i-notification__close:hover { color: var(--i-color-text); }
 
 /* 从右侧滑入，暗示它来自屏幕外而不是原地出现 */
-.i-notification-enter-active,
+.i-notification-enter-active {
+  transition: opacity var(--i-motion-base) var(--i-motion-easing-out),
+    transform var(--i-motion-base) var(--i-motion-easing-out);
+}
 .i-notification-leave-active {
-  transition: opacity var(--i-motion-base) var(--i-motion-easing),
-    transform var(--i-motion-base) var(--i-motion-easing);
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing-in),
+    transform var(--i-motion-fast) var(--i-motion-easing-in);
 }
 .i-notification-enter-from,
 .i-notification-leave-to { opacity: 0; transform: translateX(16px); }

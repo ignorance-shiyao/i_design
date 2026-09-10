@@ -1,0 +1,51 @@
+
+/*
+ * 列表增删的补位过渡。
+ *
+ * 删掉中间一项时，其余项若不做过渡会瞬间跳到新位置，读者会以为「又刷新了一次」，
+ * 也看不出到底哪一项没了。-move 让它们平滑补位，删除的位置就一目了然。
+ * 各端的 TransitionGroup / motion 都认这个类名后缀。
+ */
+.i-list-move,
+.i-table-row-move,
+.i-tag-move,
+.i-notification-move,
+.i-prompt-file-move {
+  transition: transform var(--i-motion-base) var(--i-motion-easing-out);
+}
+/*
+ * 离场元素脱离文档流，否则它占着位置，后面的项要等它消失完才开始补位，
+ * 看起来像卡了一下。
+ */
+.i-list-leave-active,
+.i-table-row-leave-active,
+.i-tag-leave-active,
+.i-prompt-file-leave-active {
+  position: absolute;
+}
+
+/*
+ * 按压反馈。移动端没有 hover，按下去没有任何变化就像点了个没反应的死区；
+ * 缩放幅度必须很小（0.97），大了会显得廉价。
+ */
+.i-button:active:not(:disabled),
+.i-menu__item:active:not(.is-disabled),
+.i-dropdown__item:active:not(:disabled),
+.i-cell:active,
+.i-tree__row:active:not(.is-disabled) {
+  transform: scale(0.97);
+  transition: transform var(--i-motion-fast) var(--i-motion-easing-spring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .i-list-move,
+  .i-table-row-move,
+  .i-tag-move,
+  .i-notification-move,
+  .i-prompt-file-move { transition: none; }
+  .i-button:active:not(:disabled),
+  .i-menu__item:active:not(.is-disabled),
+  .i-dropdown__item:active:not(:disabled),
+  .i-cell:active,
+  .i-tree__row:active:not(.is-disabled) { transform: none; }
+}

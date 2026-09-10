@@ -60,9 +60,12 @@ export function Collapse({
               <Icon className="i-collapse__arrow" name="chevron-right" size={15} />
               <span className="i-collapse__title">{item.title}</span>
             </button>
-            {/* 用 hidden 而非卸载：保留内容状态，展开时不重新挂载 */}
-            <div className="i-collapse__body" hidden={!isOpen}>
-              {item.content}
+            {/*
+              不卸载内容：保留状态，展开时不重新挂载。
+              外层 wrap 承担高度过渡（grid 0fr → 1fr），内容本身不需要知道自己多高。
+            */}
+            <div className="i-collapse__wrap">
+              <div className="i-collapse__body">{item.content}</div>
             </div>
           </div>
         )

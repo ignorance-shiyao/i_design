@@ -58,9 +58,14 @@ function toggle(item: CollapseItem) {
         <IIcon class="i-collapse__arrow" name="chevron-right" :size="15" />
         <span class="i-collapse__title">{{ item.title }}</span>
       </button>
-      <!-- v-show 而非 v-if：保留内容状态，展开时不重新挂载 -->
-      <div v-show="openSet.has(item.name)" class="i-collapse__body">
-        <slot :name="item.name" :item="item">{{ item.content }}</slot>
+      <!--
+        v-show 而非 v-if：保留内容状态，展开时不重新挂载。
+        外层 wrap 承担高度过渡（grid 0fr → 1fr），内容本身不需要知道自己多高。
+      -->
+      <div class="i-collapse__wrap">
+        <div class="i-collapse__body">
+          <slot :name="item.name" :item="item">{{ item.content }}</slot>
+        </div>
       </div>
     </div>
   </div>

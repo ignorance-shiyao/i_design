@@ -87,6 +87,9 @@
   --i-motion-base: 160ms;
   --i-motion-slow: 320ms;
   --i-motion-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --i-motion-easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --i-motion-easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --i-motion-easing-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
   --i-z-base: 0;
   --i-z-dropdown: 1000;
   --i-z-sticky: 1100;
@@ -210,6 +213,9 @@
   --i-motion-base: 160ms;
   --i-motion-slow: 320ms;
   --i-motion-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --i-motion-easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --i-motion-easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --i-motion-easing-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
   --i-z-base: 0;
   --i-z-dropdown: 1000;
   --i-z-sticky: 1100;
