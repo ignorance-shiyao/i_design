@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useTilt } from '@/composables/useTilt'
 import ValueCube from '@/site/ValueCube.vue'
+import TokenScene from '@/site/TokenScene.vue'
 import IButton from '@/components/IButton.vue'
 import IInput from '@/components/IInput.vue'
 import ICard from '@/components/ICard.vue'
@@ -147,15 +148,24 @@ const cubeFaces = [
 
         <!-- 用组件本身搭出预览面板，既是展示也是回归用例 -->
         <div ref="preview" class="hero__preview" aria-label="组件预览">
-          <img
-            class="hero__art i-tilt__layer"
-            style="--i-layer-depth: 24"
-            :src="hero.src"
-            :srcset="hero.srcset"
-            width="600"
-            alt=""
-            fetchpriority="high"
-          />
+          <!--
+            首屏的三维物件：一块令牌基座，几片浮在上面的端面板。
+            材质颜色全部从 CSS 令牌读——顶栏换主题、主题面板调主色，它当场重新上色，
+            演的正是标题那句「换一个主色，各端同时生效」。
+            WebGL 起不来或 chunk 拉不到时退回原来的插画，首屏不会留空。
+          -->
+          <TokenScene class="hero__scene i-tilt__layer" style="--i-layer-depth: 24" :height="300">
+            <template #fallback>
+              <img
+                class="hero__art"
+                :src="hero.src"
+                :srcset="hero.srcset"
+                width="600"
+                alt=""
+                fetchpriority="high"
+              />
+            </template>
+          </TokenScene>
           <ICard class="i-tilt__layer" style="--i-layer-depth: 10" title="创建工作项" hoverable>
             <ISteps class="preview__steps" :items="previewSteps" :current="1" />
             <div class="preview__field">
@@ -446,6 +456,8 @@ app.use(IDesign)"
   height: auto;
   margin: 0 0 calc(var(--i-spacing-4) * -1) auto;
 }
+/* 三维画布压在预览卡上方一点，两者叠出层次；负边距让它不额外占高 */
+.hero__scene { margin-bottom: calc(var(--i-spacing-6) * -1); }
 .hero__preview {
   filter: drop-shadow(var(--i-shadow-xl));
   /* 时长与「不超过 320ms」这条价值观对齐；曲线用 easing-out，进场要快进慢停 */
