@@ -60,9 +60,9 @@
 - [ ] **Tool Chips 工具芯片**：把工具调用压缩成一行芯片，附带改动统计
       （`flavors.css +13`、`ChurnSchedule.tsx +74 -41`）
 - [x] **Recommendation Card 建议卡**：智能体的主动建议 + 置信度计量 + 采纳/换一个
-- [ ] **Context Cards 上下文卡**：检索到的知识片段与它们的出处，
+- [x] **Context Cards 上下文卡**：检索到的知识片段与它们的出处，
       标出字符数与来源文件类型（复用 logic/file 的类型识别）
-- [ ] **Diff Table 差异表**：智能体提出的成批表格改动，逐行可勾选，底部「应用 N 处」
+- [x] **Diff Table 差异表**：智能体提出的成批表格改动，逐行可勾选，底部「应用 N 处」
 - [ ] **Insight Cards 洞察卡**：分页的洞察 + 可擦洗的实时图表（复用现有图表能力）
 - [ ] **Selection Actions 选区操作**：选中一段文字后就地交给智能体改写
 - [ ] **Code Block 代码块**：带行号的列表与统一 diff 视图（站点内已有实现，抽成组件）

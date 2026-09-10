@@ -1,0 +1,40 @@
+<view class="i-difftable i-difftable--flat">
+  <view class="i-difftable__head">
+    <text class="i-difftable__title">{{title}}</text>
+    <text class="i-difftable__hint">点击改动行可以取消采纳</text>
+  </view>
+
+  <view class="i-difftable__grid">
+    <view class="i-difftable__thead">
+      <view class="i-difftable__cell i-difftable__cell--pick" />
+      <view wx:for="{{columns}}" wx:key="key" class="i-difftable__cell i-difftable__th">{{item.label}}</view>
+    </view>
+
+    <view
+      wx:for="{{view}}"
+      wx:key="id"
+      class="i-difftable__row is-{{item.kind}} {{item.off ? 'is-off' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onToggle"
+    >
+      <view class="i-difftable__cell i-difftable__cell--pick">
+        <i-checkbox wx:if="{{item.changeable}}" checked="{{item.picked}}" />
+      </view>
+      <view wx:for="{{item.cells}}" wx:for-item="cell" wx:key="key" class="i-difftable__cell">
+        <!-- 符号 + 淡底双重表达：只用红绿底色的话，色觉障碍用户看到的是两块一样的灰 -->
+        <text wx:if="{{cell.sign}}" class="i-difftable__sign">{{cell.sign}}</text>
+        <text wx:if="{{cell.before}}" class="i-difftable__before">{{cell.before}}</text>
+        <text>{{cell.value}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="i-difftable__foot">
+    <text class="i-difftable__stat">
+      {{summary.removed}} 处删除 · {{summary.added}} 处新增 · {{summary.changed}} 处修改
+    </text>
+    <i-button variant="primary" size="sm" disabled="{{summary.selected === 0}}" bindtap="onApply">
+      {{label}}
+    </i-button>
+  </view>
+</view>

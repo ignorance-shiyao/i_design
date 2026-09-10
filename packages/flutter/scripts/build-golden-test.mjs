@@ -36,10 +36,11 @@ const {
   flattenTree, resolveCheckState, toggleChecked, searchTree, leafKeys,
   cascaderColumns, cascaderActivate, nodePath
 } = await bundle('packages/common/src/logic/tree.ts', 'tree')
-const { summarizeTasks, confidenceOf, approvalProgress } = await bundle(
-  'packages/common/src/logic/agent.ts',
-  'agent'
-)
+const {
+  summarizeTasks, confidenceOf, approvalProgress,
+  chunkLength, chunkPreview, summarizeDiff, defaultDiffSelection,
+  toggleDiffRow, diffActionLabel
+} = await bundle('packages/common/src/logic/agent.ts', 'agent')
 
 /* ---------- 浮层定位 ---------- */
 /*
@@ -251,6 +252,43 @@ const progressExpectations = [[0, 3], [1, 3], [2, 3], [9, 3], [0, 1]].map(
   ([i, t]) => `    expect(approvalProgress(${i}, ${t}), '${approvalProgress(i, t)}');`
 )
 
+/* ---------- 上下文片段与差异表 ----------
+ * chunkLength 按码点计数：Dart 的 String.length 是 UTF-16 单元数，
+ * emoji 会被算成 2；截断同理，按 UTF-16 切会把 emoji 劈成两半。
+ */
+const chunkCases = ['冷链认证', 'a🎉b', '', 'x'.repeat(200), '🎉'.repeat(20)]
+const chunkExpectations = chunkCases.flatMap((text) => {
+  const literal = JSON.stringify(text)
+  return [
+    `    expect(chunkLength(${literal}), ${chunkLength(text)});`,
+    `    expect(chunkPreview(${literal}, 10), ${JSON.stringify(chunkPreview(text, 10))});`
+  ]
+})
+
+const dartKind = (k) => `IDiffRowKind.${k}`
+const diffKinds = ['removed', 'removed', 'unchanged', 'added', 'changed']
+const diffRows = diffKinds.map((k, i) => ({ id: `r${i}`, kind: k, cells: {} }))
+const dartDiffRows = `<IDiffRow>[${diffKinds
+  .map((k, i) => `IDiffRow(id: 'r${i}', kind: ${dartKind(k)}, cells: const {})`)
+  .join(', ')}]`
+const dartIds = (arr) => `<String>[${arr.map((k) => `'${k}'`).join(', ')}]`
+
+const allPicked = defaultDiffSelection(diffRows)
+const diffSelectionCases = [allPicked, toggleDiffRow(diffRows, allPicked, 'r0'), []]
+const diffExpectations = [
+  `    expect(defaultDiffSelection(rows), ${dartIds(allPicked)});`,
+  // 未变行点不动，不存在的行安全返回
+  `    expect(toggleDiffRow(rows, ${dartIds(allPicked)}, 'r2').length, ${toggleDiffRow(diffRows, allPicked, 'r2').length});`,
+  `    expect(toggleDiffRow(rows, ${dartIds(allPicked)}, 'zz').length, ${toggleDiffRow(diffRows, allPicked, 'zz').length});`,
+  ...diffSelectionCases.map((sel) => {
+    const s = summarizeDiff(diffRows, sel)
+    return `    _expectDiff(summarizeDiff(rows, ${dartIds(sel)}),
+        ${s.added}, ${s.removed}, ${s.changed}, ${s.selected}, ${s.total},
+        ${JSON.stringify(diffActionLabel(s))}, 'summarizeDiff(${sel.length} 选中)');`
+  }),
+  `    expect(diffActionLabel(summarizeDiff(<IDiffRow>[], <String>[])), ${JSON.stringify(diffActionLabel(summarizeDiff([], [])))});`
+]
+
 /* ---------- 分页 ---------- */
 const pageCases = [
   [1, 100, 5], [7, 100, 5], [50, 100, 5], [98, 100, 5], [100, 100, 5],
@@ -429,6 +467,16 @@ void _expectConfidence(IConfidence actual, IConfidenceLevel level, int bars,
   expect(actual.label, labelText, reason: '\$label 文案不一致');
 }
 
+void _expectDiff(IDiffSummary actual, int added, int removed, int changed,
+    int selected, int total, String label, String reason) {
+  expect(actual.added, added, reason: '\$reason added 不一致');
+  expect(actual.removed, removed, reason: '\$reason removed 不一致');
+  expect(actual.changed, changed, reason: '\$reason changed 不一致');
+  expect(actual.selected, selected, reason: '\$reason selected 不一致');
+  expect(actual.total, total, reason: '\$reason total 不一致');
+  expect(diffActionLabel(actual), label, reason: '\$reason 按钮文案不一致');
+}
+
 void main() {
   test('buildPages 与 Web 端逐项一致', () {
 ${pageExpectations.join('\n')}
@@ -504,6 +552,15 @@ ${taskExpectations.join('\n')}
   test('置信度分档与进度文本与 Web 端一致', () {
 ${confidenceExpectations.join('\n')}
 ${progressExpectations.join('\n')}
+  });
+
+  test('片段字符数与截断按码点计算，与 Web 端一致', () {
+${chunkExpectations.join('\n')}
+  });
+
+  test('差异统计、默认全选与按钮文案与 Web 端一致', () {
+    final rows = ${dartDiffRows};
+${diffExpectations.join('\n')}
   });
 }
 `

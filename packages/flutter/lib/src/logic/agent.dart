@@ -164,3 +164,135 @@ IConfidence confidenceOf(double score) {
   }
   return const IConfidence(level: IConfidenceLevel.low, bars: 1, label: '低置信度');
 }
+
+
+/* ---------- 上下文卡（检索到的知识片段） ---------- */
+
+class IContextChunk {
+  const IContextChunk({
+    required this.id,
+    required this.title,
+    required this.content,
+    this.source,
+    this.href,
+    this.score,
+  });
+
+  final String id;
+  final String title;
+  final String content;
+
+  /// 出处文件名，用于取类型图标
+  final String? source;
+  final String? href;
+
+  /// 检索相关度 0–1
+  final double? score;
+}
+
+/// 片段的字符数。
+/// 用字符数而不是 token 数：token 是模型的内部单位，同一段文字在不同模型下
+/// 数值不同，用户无从判断这个数字意味着什么。
+/// 按 runes 计数而不是 length——Dart 的 String.length 是 UTF-16 单元数，
+/// emoji 会被算成 2。
+int chunkLength(String content) => content.runes.length;
+
+/// 超长片段折叠后的预览文本，按字符截断并补省略号
+String chunkPreview(String content, [int limit = 140]) {
+  final runes = content.runes.toList();
+  if (runes.length <= limit) return content;
+  return '\${String.fromCharCodes(runes.take(limit))}…';
+}
+
+/* ---------- 差异表（智能体提出的成批改动） ---------- */
+
+enum IDiffRowKind { added, removed, changed, unchanged }
+
+class IDiffCell {
+  const IDiffCell({required this.value, this.before});
+  final String value;
+
+  /// 变更前的值；有它才渲染删除线
+  final String? before;
+}
+
+class IDiffRow {
+  const IDiffRow({required this.id, required this.kind, required this.cells});
+  final String id;
+  final IDiffRowKind kind;
+  final Map<String, IDiffCell> cells;
+}
+
+class IDiffSummary {
+  const IDiffSummary({
+    required this.added,
+    required this.removed,
+    required this.changed,
+    required this.selected,
+    required this.total,
+  });
+
+  final int added;
+  final int removed;
+  final int changed;
+
+  /// 已勾选的改动数 —— 底部按钮上的 N
+  final int selected;
+
+  /// 有改动的行总数（不含未变行）
+  final int total;
+}
+
+/// 差异统计。
+/// 未变的行不计入总数——它们只是上下文，让用户看清改动落在哪里。
+/// 把它们算进「共 N 处改动」会让数字大得没有意义。
+IDiffSummary summarizeDiff(List<IDiffRow> rows, Iterable<String> selected) {
+  final picked = selected.toSet();
+  final changedRows =
+      rows.where((r) => r.kind != IDiffRowKind.unchanged).toList();
+  return IDiffSummary(
+    added: changedRows.where((r) => r.kind == IDiffRowKind.added).length,
+    removed: changedRows.where((r) => r.kind == IDiffRowKind.removed).length,
+    changed: changedRows.where((r) => r.kind == IDiffRowKind.changed).length,
+    selected: changedRows.where((r) => picked.contains(r.id)).length,
+    total: changedRows.length,
+  );
+}
+
+/// 默认全选所有改动：智能体给的是一整套方案，逐个勾选反而是例外
+List<String> defaultDiffSelection(List<IDiffRow> rows) => rows
+    .where((r) => r.kind != IDiffRowKind.unchanged)
+    .map((r) => r.id)
+    .toList();
+
+/// 切换一行的采纳状态；未变行不可切换
+List<String> toggleDiffRow(
+  List<IDiffRow> rows,
+  Iterable<String> selected,
+  String id,
+) {
+  IDiffRow? row;
+  for (final r in rows) {
+    if (r.id == id) {
+      row = r;
+      break;
+    }
+  }
+  if (row == null || row.kind == IDiffRowKind.unchanged) {
+    return selected.toList();
+  }
+  final next = <String>{...selected};
+  if (next.contains(id)) {
+    next.remove(id);
+  } else {
+    next.add(id);
+  }
+  return next.toList();
+}
+
+/// 底部按钮文案：没有勾选时说清楚为什么不能点
+String diffActionLabel(IDiffSummary summary) {
+  if (summary.total == 0) return '没有需要应用的改动';
+  if (summary.selected == 0) return '未选择改动';
+  return '应用 \${summary.selected} 处改动';
+}

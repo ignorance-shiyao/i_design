@@ -25,6 +25,7 @@ export 'src/logic/tree.dart';
 export 'src/logic/upload.dart';
 export 'src/components/i_action_sheet.dart';
 export 'src/components/i_agent.dart';
+export 'src/components/i_agent_context.dart';
 export 'src/components/i_alert.dart';
 export 'src/components/i_anchor.dart';
 export 'src/components/i_avatar.dart';

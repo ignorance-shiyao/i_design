@@ -293,9 +293,9 @@ export const componentMatrix: ComponentRow[] = [
     "ends": {
       "vue-next": true,
       "vue": true,
-      "react": false,
-      "miniprogram": false,
-      "flutter": false
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
     }
   },
   {
@@ -323,9 +323,9 @@ export const componentMatrix: ComponentRow[] = [
     "ends": {
       "vue-next": true,
       "vue": true,
-      "react": false,
-      "miniprogram": false,
-      "flutter": false
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
     }
   },
   {

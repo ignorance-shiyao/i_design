@@ -303,3 +303,35 @@
 }
 .i-difftable__stat { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); }
 .i-difftable__foot .i-button { margin-left: auto; }
+
+/*
+ * 小程序端的差异表：没有 <table>，用 flex 排成行列。
+ * 因此列宽由 flex 均分而不是内容撑开——小程序里也没有 table-layout 可用。
+ *
+ * 必须限定在 .i-difftable--flat 之下：这些类名与 Web 端的 <tr>/<td> 同名，
+ * 不限定的话 display:flex 会打在 <tr> 上，把表格布局整个拆掉
+ * （表现为每列被压成竖排单字）。
+ */
+.i-difftable--flat .i-difftable__thead {
+  display: flex;
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-difftable--flat .i-difftable__row { display: flex; }
+.i-difftable--flat .i-difftable__cell {
+  flex: 1;
+  min-width: 0;
+  padding: var(--i-spacing-2) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* 勾选列不参与均分：它只放一个复选框，跟着均分会挤掉正文的空间 */
+.i-difftable--flat .i-difftable__cell--pick {
+  flex: none;
+  width: 40px;
+  padding-left: var(--i-spacing-3);
+}
+.i-difftable--flat .i-difftable__th { color: var(--i-color-text-tertiary); }

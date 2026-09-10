@@ -67,6 +67,16 @@ void _expectConfidence(IConfidence actual, IConfidenceLevel level, int bars,
   expect(actual.label, labelText, reason: '$label 文案不一致');
 }
 
+void _expectDiff(IDiffSummary actual, int added, int removed, int changed,
+    int selected, int total, String label, String reason) {
+  expect(actual.added, added, reason: '$reason added 不一致');
+  expect(actual.removed, removed, reason: '$reason removed 不一致');
+  expect(actual.changed, changed, reason: '$reason changed 不一致');
+  expect(actual.selected, selected, reason: '$reason selected 不一致');
+  expect(actual.total, total, reason: '$reason total 不一致');
+  expect(diffActionLabel(actual), label, reason: '$reason 按钮文案不一致');
+}
+
 void main() {
   test('buildPages 与 Web 端逐项一致', () {
     _expectPages(buildPages(1, 100, 5), <IPageItem>[const IPageItem.page(1), const IPageItem.page(2), const IPageItem.page(3), const IPageItem.page(4), const IPageItem.page(5), const IPageItem.page(6), const IPageItem.gap('right'), const IPageItem.page(100)],
@@ -432,5 +442,35 @@ void main() {
     expect(approvalProgress(2, 3), '3/3');
     expect(approvalProgress(9, 3), '3/3');
     expect(approvalProgress(0, 1), '1/1');
+  });
+
+  test('片段字符数与截断按码点计算，与 Web 端一致', () {
+    expect(chunkLength("冷链认证"), 4);
+    expect(chunkPreview("冷链认证", 10), "冷链认证");
+    expect(chunkLength("a🎉b"), 3);
+    expect(chunkPreview("a🎉b", 10), "a🎉b");
+    expect(chunkLength(""), 0);
+    expect(chunkPreview("", 10), "");
+    expect(chunkLength("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"), 200);
+    expect(chunkPreview("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 10), "xxxxxxxxxx…");
+    expect(chunkLength("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"), 20);
+    expect(chunkPreview("🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉", 10), "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉…");
+  });
+
+  test('差异统计、默认全选与按钮文案与 Web 端一致', () {
+    final rows = <IDiffRow>[IDiffRow(id: 'r0', kind: IDiffRowKind.removed, cells: const {}), IDiffRow(id: 'r1', kind: IDiffRowKind.removed, cells: const {}), IDiffRow(id: 'r2', kind: IDiffRowKind.unchanged, cells: const {}), IDiffRow(id: 'r3', kind: IDiffRowKind.added, cells: const {}), IDiffRow(id: 'r4', kind: IDiffRowKind.changed, cells: const {})];
+    expect(defaultDiffSelection(rows), <String>['r0', 'r1', 'r3', 'r4']);
+    expect(toggleDiffRow(rows, <String>['r0', 'r1', 'r3', 'r4'], 'r2').length, 4);
+    expect(toggleDiffRow(rows, <String>['r0', 'r1', 'r3', 'r4'], 'zz').length, 4);
+    _expectDiff(summarizeDiff(rows, <String>['r0', 'r1', 'r3', 'r4']),
+        1, 2, 1, 4, 4,
+        "应用 4 处改动", 'summarizeDiff(4 选中)');
+    _expectDiff(summarizeDiff(rows, <String>['r1', 'r3', 'r4']),
+        1, 2, 1, 3, 4,
+        "应用 3 处改动", 'summarizeDiff(3 选中)');
+    _expectDiff(summarizeDiff(rows, <String>[]),
+        1, 2, 1, 0, 4,
+        "未选择改动", 'summarizeDiff(0 选中)');
+    expect(diffActionLabel(summarizeDiff(<IDiffRow>[], <String>[])), "没有需要应用的改动");
   });
 }

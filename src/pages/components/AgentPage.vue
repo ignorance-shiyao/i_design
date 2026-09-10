@@ -3,11 +3,13 @@ import { ref } from 'vue'
 import IApprovalCard from '@/components/IApprovalCard.vue'
 import IAgentTasks from '@/components/IAgentTasks.vue'
 import IRecommendCard from '@/components/IRecommendCard.vue'
+import IContextCards from '@/components/IContextCards.vue'
+import IDiffTable from '@/components/IDiffTable.vue'
 import ISegmented from '@/components/ISegmented.vue'
 import ITag from '@/components/ITag.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
-import type { AgentTask, ApprovalQuestion } from '@i-design/common'
+import type { AgentTask, ApprovalQuestion, ContextChunk, DiffRow } from '@i-design/common'
 
 const questions: ApprovalQuestion[] = [
   {
@@ -42,6 +44,61 @@ const tasks = ref<AgentTask[]>([
 ])
 const variant = ref<'capsule' | 'list'>('capsule')
 const confidence = ref(0.85)
+
+const chunks: ContextChunk[] = [
+  {
+    id: 'c1',
+    title: '供应商准入规则',
+    content: '新增乳制品供应商前必须核验冷链认证，认证有效期不足 30 天的一律不予接入。',
+    source: '供应商准入规范.pdf',
+    href: '#'
+  },
+  {
+    id: 'c2',
+    title: '季节性需求表',
+    content:
+      '第四季度动销：开心果 +18%、香草 +6%、石板街 −11%、黑芝麻 +24%、抹茶 −3%。周动销低于 40 桶的口味进入淘汰观察期，连续两个月未回升则下架。淘汰前需通知门店备货，避免出现菜单已改而库存未清的情况。历史数据显示，提前两周通知可以把滞销损耗压到 3% 以内；不通知的情况下，平均损耗为 11%。区域差异也需考虑：南方门店的当季口味动销普遍高出北方 6 到 9 个百分点，淘汰判定应按区域分别计算，不宜一刀切。',
+    source: '动销明细.csv'
+  }
+]
+
+const columns = [
+  { key: 'flavor', label: '口味' },
+  { key: 'category', label: '分类' },
+  { key: 'supplier', label: '供应商' }
+]
+
+const diffRows: DiffRow[] = [
+  {
+    id: 'r1',
+    kind: 'removed',
+    cells: { flavor: { value: '石板街' }, category: { value: '经典' }, supplier: { value: '晨光牧场' } }
+  },
+  {
+    id: 'r2',
+    kind: 'removed',
+    cells: { flavor: { value: '泡泡糖' }, category: { value: '复古' }, supplier: { value: '云顶乳业' } }
+  },
+  {
+    id: 'r3',
+    kind: 'unchanged',
+    cells: { flavor: { value: '薄荷脆片' }, category: { value: '经典' }, supplier: { value: '枫轨农场' } }
+  },
+  {
+    id: 'r4',
+    kind: 'changed',
+    cells: {
+      flavor: { value: '开心果' },
+      category: { value: '当季', before: '经典' },
+      supplier: { value: '枫轨农场' }
+    }
+  },
+  {
+    id: 'r5',
+    kind: 'added',
+    cells: { flavor: { value: '黑芝麻' }, category: { value: '当季' }, supplier: { value: '南岭食品' } }
+  }
+]
 </script>
 
 <template>
@@ -121,6 +178,38 @@ const confidence = ref(0.85)
           <input v-model.number="confidence" type="range" min="0" max="1" step="0.05" style="width: 100%" />
         </label>
       </div>
+    </DemoBlock>
+    <h2>上下文卡</h2>
+    <p>
+      智能体回答时读了哪些资料。标出字符数而不是 token 数——token 是模型的内部单位，
+      同一段文字在不同模型下数值不同，用户无从判断这个数字意味着什么。
+    </p>
+    <DemoBlock
+      title="检索片段与出处"
+      description="超长片段折叠，可展开全文。出处按文件类型给图标与配色——读者看完片段最常问的下一个问题就是「这句话哪儿来的」。"
+      lang="vue"
+      code='<IContextCards :chunks="chunks" />'
+    >
+      <IContextCards :chunks="chunks" style="max-width: 520px" />
+    </DemoBlock>
+
+    <h2>差异表</h2>
+    <p>
+      智能体提出的成批表格改动，逐行可取消。未变的行也留着当上下文，
+      让人看清改动落在哪里，但不计入「共 N 处改动」——否则数字大得没有意义。
+    </p>
+    <DemoBlock
+      title="逐行采纳"
+      description="默认全选：智能体给的是一整套方案，逐个勾选反而是例外。改动类型用符号加淡底双重表达，只用红绿底色的话，色觉障碍用户看到的是两块一样的灰。"
+      lang="vue"
+      code='<IDiffTable :columns="columns" :rows="diffRows" @apply="onApply" />'
+    >
+      <IDiffTable
+        :columns="columns"
+        :rows="diffRows"
+        style="max-width: 620px"
+        @apply="(ids) => message.success(`已应用 ${ids.length} 处改动`)"
+      />
     </DemoBlock>
   </article>
 </template>

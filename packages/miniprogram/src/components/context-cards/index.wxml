@@ -1,0 +1,33 @@
+<view class="i-context">
+  <view class="i-context__head">
+    <text>{{title}}</text>
+    <text class="i-context__count">{{rows.length}}</text>
+  </view>
+
+  <view wx:for="{{rows}}" wx:key="id" class="i-chunk">
+    <view class="i-chunk__head">
+      <i-icon name="layers" size="14" />
+      <text class="i-chunk__title">{{item.title}}</text>
+      <!-- 字符数而不是 token 数：token 是模型的内部单位，用户无从判断它的含义 -->
+      <text class="i-chunk__length">{{item.length}} 字</text>
+    </view>
+
+    <view class="i-chunk__body">{{item.text}}</view>
+    <view wx:if="{{item.foldable}}" class="i-chunk__more" data-id="{{item.id}}" bindtap="onToggle">
+      {{item.expanded ? '收起' : '展开全文'}}
+    </view>
+
+    <!-- 出处：读者看完片段最常问的下一个问题就是「这句话哪儿来的」 -->
+    <view
+      wx:if="{{item.source}}"
+      class="i-chunk__source"
+      style="--i-file-color: var(--i-chart-{{item.slot}})"
+      data-id="{{item.id}}"
+      bindtap="onSource"
+    >
+      <i-icon class="i-chunk__source-icon" name="{{item.icon}}" size="13" />
+      <text>{{item.source}}</text>
+      <i-icon wx:if="{{item.href}}" name="external-link" size="11" />
+    </view>
+  </view>
+</view>
