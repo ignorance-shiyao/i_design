@@ -8,8 +8,10 @@
  * 本文件由 scripts/build-react-index.mjs 按目录生成——手写导出清单会漏，
  * 之前就漏掉了 17 个已实现但从未导出的组件。
  */
+export { AgentTasks, type AgentTasksProps } from './components/AgentTasks'
 export { Alert, type AlertProps } from './components/Alert'
 export { Anchor, type AnchorItem, type AnchorProps } from './components/Anchor'
+export { ApprovalCard, type ApprovalCardProps } from './components/ApprovalCard'
 export { Avatar, type AvatarProps } from './components/Avatar'
 export { AvatarGroup, type AvatarGroupProps } from './components/AvatarGroup'
 export { Badge, type BadgeProps } from './components/Badge'
@@ -58,6 +60,7 @@ export { Progress, type ProgressProps } from './components/Progress'
 export { PromptInput, type PromptAttachment, type PromptInputProps } from './components/PromptInput'
 export { RadioGroup, Radio, type RadioGroupProps, type RadioProps } from './components/Radio'
 export { Rate, type RateProps } from './components/Rate'
+export { RecommendCard, type RecommendCardProps } from './components/RecommendCard'
 export { Result, type ResultProps } from './components/Result'
 export { Segmented, type SegmentedOption, type SegmentedProps } from './components/Segmented'
 export { Select, type SelectOption, type SelectProps } from './components/Select'

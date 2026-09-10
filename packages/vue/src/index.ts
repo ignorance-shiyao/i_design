@@ -7,8 +7,10 @@
  *
  * 本文件由 packages/vue/scripts/build-index.mjs 按目录生成。
  */
+export { default as IAgentTasks } from './components/IAgentTasks.vue'
 export { default as IAlert } from './components/IAlert.vue'
 export { default as IAnchor } from './components/IAnchor.vue'
+export { default as IApprovalCard } from './components/IApprovalCard.vue'
 export { default as IAvatar } from './components/IAvatar.vue'
 export { default as IAvatarGroup } from './components/IAvatarGroup.vue'
 export { default as IBadge } from './components/IBadge.vue'
@@ -58,6 +60,7 @@ export { default as IPromptInput } from './components/IPromptInput.vue'
 export { default as IRadio } from './components/IRadio.vue'
 export { default as IRadioGroup } from './components/IRadioGroup.vue'
 export { default as IRate } from './components/IRate.vue'
+export { default as IRecommendCard } from './components/IRecommendCard.vue'
 export { default as IResult } from './components/IResult.vue'
 export { default as IRow } from './components/IRow.vue'
 export { default as ISegmented } from './components/ISegmented.vue'

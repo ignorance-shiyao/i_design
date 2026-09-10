@@ -9,6 +9,7 @@ import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
 import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/tree.dart';
+import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
@@ -47,6 +48,23 @@ void _expectColumns(List<List<ITreeNode>> actual, List<List<String>> expected,
     expect(actual[i].map((n) => n.key).toList(), expected[i],
         reason: '$label 第 $i 列内容不一致');
   }
+}
+
+void _expectTaskSummary(ITaskSummary actual, int total, int completed, int failed,
+    int running, bool settled, int percent, String label) {
+  expect(actual.total, total, reason: '$label total 不一致');
+  expect(actual.completed, completed, reason: '$label completed 不一致');
+  expect(actual.failed, failed, reason: '$label failed 不一致');
+  expect(actual.running, running, reason: '$label running 不一致');
+  expect(actual.settled, settled, reason: '$label settled 不一致');
+  expect(actual.percent, percent, reason: '$label percent 不一致');
+}
+
+void _expectConfidence(IConfidence actual, IConfidenceLevel level, int bars,
+    String labelText, String label) {
+  expect(actual.level, level, reason: '$label 档位不一致');
+  expect(actual.bars, bars, reason: '$label 格数不一致');
+  expect(actual.label, labelText, reason: '$label 文案不一致');
 }
 
 void main() {
@@ -377,5 +395,42 @@ void main() {
         <String>['us']);
     expect(cascaderActivate(entities, <String>[], 'hz'),
         <String>['cn', 'zj', 'hz']);
+  });
+
+  test('任务汇总与 Web 端一致（失败计入已结束）', () {
+    _expectTaskSummary(summarizeTasks(<IAgentTask>[IAgentTask(id: '0', title: 't', status: IAgentTaskStatus.completed), IAgentTask(id: '1', title: 't', status: IAgentTaskStatus.failed), IAgentTask(id: '2', title: 't', status: IAgentTaskStatus.running), IAgentTask(id: '3', title: 't', status: IAgentTaskStatus.pending)]),
+        4, 1, 1, 1, false, 50,
+        'summarizeTasks(completed/failed/running/pending)');
+    _expectTaskSummary(summarizeTasks(<IAgentTask>[IAgentTask(id: '0', title: 't', status: IAgentTaskStatus.completed), IAgentTask(id: '1', title: 't', status: IAgentTaskStatus.completed)]),
+        2, 2, 0, 0, true, 100,
+        'summarizeTasks(completed/completed)');
+    _expectTaskSummary(summarizeTasks(<IAgentTask>[IAgentTask(id: '0', title: 't', status: IAgentTaskStatus.failed), IAgentTask(id: '1', title: 't', status: IAgentTaskStatus.failed)]),
+        2, 0, 2, 0, true, 100,
+        'summarizeTasks(failed/failed)');
+    _expectTaskSummary(summarizeTasks(<IAgentTask>[IAgentTask(id: '0', title: 't', status: IAgentTaskStatus.running)]),
+        1, 0, 0, 1, false, 0,
+        'summarizeTasks(running)');
+    _expectTaskSummary(summarizeTasks(const <IAgentTask>[]),
+        0, 0, 0, 0, false, 0,
+        'summarizeTasks(空)');
+  });
+
+  test('置信度分档与进度文本与 Web 端一致', () {
+    _expectConfidence(confidenceOf(0.00), IConfidenceLevel.low, 1, '低置信度', 'confidenceOf(0)');
+    _expectConfidence(confidenceOf(0.20), IConfidenceLevel.low, 1, '低置信度', 'confidenceOf(0.2)');
+    _expectConfidence(confidenceOf(0.44), IConfidenceLevel.low, 1, '低置信度', 'confidenceOf(0.44)');
+    _expectConfidence(confidenceOf(0.45), IConfidenceLevel.medium, 2, '中等置信度', 'confidenceOf(0.45)');
+    _expectConfidence(confidenceOf(0.60), IConfidenceLevel.medium, 2, '中等置信度', 'confidenceOf(0.6)');
+    _expectConfidence(confidenceOf(0.74), IConfidenceLevel.medium, 2, '中等置信度', 'confidenceOf(0.74)');
+    _expectConfidence(confidenceOf(0.75), IConfidenceLevel.high, 3, '高置信度', 'confidenceOf(0.75)');
+    _expectConfidence(confidenceOf(0.90), IConfidenceLevel.high, 3, '高置信度', 'confidenceOf(0.9)');
+    _expectConfidence(confidenceOf(1.00), IConfidenceLevel.high, 3, '高置信度', 'confidenceOf(1)');
+    _expectConfidence(confidenceOf(5.00), IConfidenceLevel.high, 3, '高置信度', 'confidenceOf(5)');
+    _expectConfidence(confidenceOf(-1.00), IConfidenceLevel.low, 1, '低置信度', 'confidenceOf(-1)');
+    expect(approvalProgress(0, 3), '1/3');
+    expect(approvalProgress(1, 3), '2/3');
+    expect(approvalProgress(2, 3), '3/3');
+    expect(approvalProgress(9, 3), '3/3');
+    expect(approvalProgress(0, 1), '1/1');
   });
 }

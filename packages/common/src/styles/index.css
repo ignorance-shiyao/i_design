@@ -11,6 +11,7 @@
 @import './base.css';
 
 @import './components/action-sheet.css';
+@import './components/agent.css';
 @import './components/alert.css';
 @import './components/anchor.css';
 @import './components/avatar-group.css';

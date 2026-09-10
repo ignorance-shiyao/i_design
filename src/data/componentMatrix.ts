@@ -9,6 +9,16 @@ export interface ComponentRow {
 
 export const componentMatrix: ComponentRow[] = [
   {
+    "name": "IAgentTasks",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IAlert",
     "ends": {
       "vue-next": true,
@@ -20,6 +30,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IAnchor",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IApprovalCard",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -510,6 +530,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IRate",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IRecommendCard",
     "ends": {
       "vue-next": true,
       "vue": true,

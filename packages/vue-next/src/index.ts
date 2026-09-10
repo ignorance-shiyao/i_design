@@ -55,6 +55,9 @@ import ITreeSelect from './ITreeSelect.vue'
 import IMenu from './IMenu.vue'
 import IAnchor from './IAnchor.vue'
 import INotificationLayer from './INotificationLayer.vue'
+import IApprovalCard from './IApprovalCard.vue'
+import IAgentTasks from './IAgentTasks.vue'
+import IRecommendCard from './IRecommendCard.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -101,6 +104,9 @@ export {
   IMenu,
   IAnchor,
   INotificationLayer,
+  IApprovalCard,
+  IAgentTasks,
+  IRecommendCard,
   IForm,
   IFormItem,
   ITag,

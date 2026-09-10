@@ -88,6 +88,9 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Menu', cn: '导航菜单', to: '/components/navigation', desc: '侧栏多级入口，可收起为图标栏', status: 'ready' },
       { name: 'Anchor', cn: '页内锚点', to: '/components/navigation', desc: '章节跳转与跟随高亮', status: 'ready' },
       { name: 'Notification', cn: '通知', to: '/components/navigation', desc: '角落通知，可常驻并带操作', status: 'ready' },
+      { name: 'ApprovalCard', cn: '征求确认', to: '/components/agent', desc: '智能体行动前的人类介入', status: 'ready' },
+      { name: 'AgentTasks', cn: '任务行', to: '/components/agent', desc: '智能体任务的实时状态', status: 'ready' },
+      { name: 'RecommendCard', cn: '建议卡', to: '/components/agent', desc: '带置信度的主动建议', status: 'ready' },
       { name: 'Result', cn: '结果页', to: '/components/result', desc: '操作结果的整页反馈', status: 'ready' }
     ]
   }

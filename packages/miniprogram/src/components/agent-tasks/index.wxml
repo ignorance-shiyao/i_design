@@ -1,0 +1,31 @@
+<view class="i-tasks i-tasks--{{variant}}">
+  <view wx:for="{{rows}}" wx:key="id">
+    <view
+      class="i-task is-{{item.status}}"
+      data-id="{{item.id}}"
+      data-detail="{{item.detail}}"
+      bindtap="onToggle"
+    >
+      <!-- 状态同时用形状与颜色：只靠颜色的话灰绿两色在灰度下分不出来 -->
+      <view class="i-task__mark">
+        <i-icon wx:if="{{item.status === 'completed'}}" name="check" size="13" />
+        <i-icon wx:elif="{{item.status === 'failed'}}" name="close" size="13" />
+        <i-loading wx:elif="{{item.status === 'running'}}" size="sm" />
+        <text wx:else>{{item.step || ''}}</text>
+      </view>
+      <text class="i-task__title">{{item.title}}</text>
+      <text wx:if="{{item.meta}}" class="i-task__meta">{{item.meta}}</text>
+      <i-icon
+        wx:if="{{item.detail}}"
+        class="i-task__arrow {{item.expanded ? 'is-open' : ''}}"
+        name="chevron-right"
+        size="14"
+      />
+    </view>
+    <view wx:if="{{item.detail && item.expanded}}" class="i-task__detail">{{item.detail}}</view>
+  </view>
+
+  <view wx:if="{{showSummary && rows.length}}" class="i-tasks__summary">
+    {{summary.completed}} / {{summary.total}} 已完成
+  </view>
+</view>

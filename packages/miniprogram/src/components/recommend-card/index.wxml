@@ -1,0 +1,18 @@
+<view class="i-agent-card i-recommend">
+  <text class="i-recommend__title">{{title}}</text>
+  <view class="i-recommend__body"><slot /></view>
+
+  <view class="i-recommend__foot">
+    <!-- 格子是视觉线索，文字才是主要表达 -->
+    <view class="i-confidence is-{{level.level}}">
+      <view class="i-confidence__bars">
+        <view wx:for="{{bars}}" wx:key="n" class="i-confidence__bar {{item.on ? 'is-on' : ''}}" />
+      </view>
+      <text>{{level.label}}</text>
+    </view>
+    <view class="i-recommend__actions">
+      <i-button wx:if="{{showAlternative}}" size="sm" bindtap="onAlternative">{{alternativeText}}</i-button>
+      <i-button size="sm" variant="primary" bindtap="onAccept">{{acceptText}}</i-button>
+    </view>
+  </view>
+</view>

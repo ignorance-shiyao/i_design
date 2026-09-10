@@ -1,0 +1,170 @@
+/*
+ * 智能体交互组件：征求确认、任务行、建议卡。
+ * 共同的视觉基调——它们都是「插在对话流里的卡片」，
+ * 因此用同一种描边与圆角，不各自造一套外观。
+ */
+.i-agent-card {
+  box-sizing: border-box;
+  padding: var(--i-spacing-4);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  font-size: var(--i-font-size-md);
+  color: var(--i-color-text);
+}
+
+/* ---------- 征求确认 ---------- */
+/* 标题与关闭按钮同行，关闭靠右 */
+.i-approval__head { display: flex; align-items: flex-start; gap: var(--i-spacing-3); }
+.i-approval__head .i-approval__nav { margin-left: auto; }
+
+.i-approval__title {
+  flex: 1;
+  margin-bottom: var(--i-spacing-3);
+  font-size: var(--i-font-size-md);
+  font-weight: 500;
+}
+.i-approval__options { display: grid; gap: 2px; }
+.i-approval__option {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--i-spacing-2);
+  border: none;
+  border-radius: var(--i-radius-md);
+  background: none;
+  color: var(--i-color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.i-approval__option:hover { background: var(--i-color-bg-subtle); }
+.i-approval__option.is-selected { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
+.i-approval__option:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+.i-approval__hint { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); }
+
+.i-approval__custom {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: var(--i-spacing-2);
+  padding: var(--i-spacing-2);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg);
+  color: var(--i-color-text);
+  font: inherit;
+}
+.i-approval__custom:focus { outline: none; border-color: var(--i-color-brand); }
+
+.i-approval__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  margin-top: var(--i-spacing-4);
+  padding-top: var(--i-spacing-3);
+  border-top: 1px solid var(--i-color-hairline);
+}
+/* 进度在左、操作在右：读者先知道「还有几问」再决定怎么点 */
+.i-approval__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+.i-approval__nav {
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+}
+.i-approval__nav:disabled { opacity: 0.4; cursor: not-allowed; }
+.i-approval__actions { display: flex; gap: var(--i-spacing-2); margin-left: auto; }
+
+/* ---------- 任务行 ---------- */
+.i-tasks { display: grid; gap: var(--i-spacing-2); }
+.i-task {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
+  cursor: pointer;
+}
+/* 列表形态：不用胶囊，贴合密集场景 */
+.i-tasks--list .i-task { border-radius: var(--i-radius-md); }
+.i-task__mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--i-radius-full);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.i-task.is-completed .i-task__mark { color: var(--i-color-success); background: var(--i-color-success-subtle); }
+.i-task.is-failed .i-task__mark { color: var(--i-color-danger); background: var(--i-color-danger-subtle); }
+.i-task.is-running .i-task__mark,
+.i-task.is-pending .i-task__mark {
+  color: var(--i-color-text-secondary);
+  border: 1px solid var(--i-color-border);
+}
+.i-task__title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.i-task__meta { flex: none; color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); }
+.i-task__arrow { flex: none; color: var(--i-color-text-tertiary); transition: transform var(--i-motion-fast) var(--i-motion-easing); }
+.i-task__arrow.is-open { transform: rotate(90deg); }
+.i-task__detail {
+  padding: 0 var(--i-spacing-4) var(--i-spacing-3) 52px;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  line-height: var(--i-line-height-base);
+}
+.i-tasks__summary {
+  margin-top: var(--i-spacing-2);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}
+
+/* ---------- 建议卡 ---------- */
+.i-recommend__title { font-size: var(--i-font-size-md); font-weight: 500; }
+.i-recommend__body {
+  margin-top: var(--i-spacing-2);
+  color: var(--i-color-text-secondary);
+  line-height: var(--i-line-height-base);
+}
+.i-recommend__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  margin-top: var(--i-spacing-4);
+}
+.i-recommend__actions { display: flex; gap: var(--i-spacing-2); margin-left: auto; }
+
+/*
+ * 置信度计量：三格。用格子而不是百分比——模型给的 0.73 并不比 0.71 更可信，
+ * 显示成精确数字会让人过度解读。旁边的文字标签才是主要表达。
+ */
+.i-confidence { display: inline-flex; align-items: center; gap: var(--i-spacing-2); font-size: var(--i-font-size-sm); }
+.i-confidence__bars { display: inline-flex; align-items: flex-end; gap: 2px; }
+.i-confidence__bar {
+  width: 3px;
+  border-radius: 1px;
+  background: var(--i-color-border);
+}
+.i-confidence__bar:nth-child(1) { height: 7px; }
+.i-confidence__bar:nth-child(2) { height: 10px; }
+.i-confidence__bar:nth-child(3) { height: 13px; }
+.i-confidence.is-high .i-confidence__bar.is-on { background: var(--i-color-success); }
+.i-confidence.is-medium .i-confidence__bar.is-on { background: var(--i-color-warning); }
+.i-confidence.is-low .i-confidence__bar.is-on { background: var(--i-color-text-tertiary); }
+.i-confidence.is-high { color: var(--i-color-success); }
+.i-confidence.is-medium { color: var(--i-color-warning); }
+.i-confidence.is-low { color: var(--i-color-text-tertiary); }

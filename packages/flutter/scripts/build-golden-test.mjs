@@ -36,6 +36,10 @@ const {
   flattenTree, resolveCheckState, toggleChecked, searchTree, leafKeys,
   cascaderColumns, cascaderActivate, nodePath
 } = await bundle('packages/common/src/logic/tree.ts', 'tree')
+const { summarizeTasks, confidenceOf, approvalProgress } = await bundle(
+  'packages/common/src/logic/agent.ts',
+  'agent'
+)
 
 /* ---------- 浮层定位 ---------- */
 /*
@@ -213,6 +217,40 @@ const activateExpectations = activateCases.map(([path, key]) =>
   `    expect(cascaderActivate(entities, ${dartList(path)}, '${key}'),
         ${dartList(cascaderActivate(cascaderEntities, path, key))});`)
 
+/* ---------- 智能体：任务汇总与置信度分档 ----------
+ * 进度百分比把失败算作已结束——抄错这一处会让一个永远失败的任务
+ * 把进度条卡在 90% 不动，用户以为还在跑。
+ */
+const dartStatus = (s) => `IAgentTaskStatus.${s}`
+const taskCases = [
+  ['completed', 'failed', 'running', 'pending'],
+  ['completed', 'completed'],
+  ['failed', 'failed'],
+  ['running'],
+  [],
+]
+const taskExpectations = taskCases.map((statuses) => {
+  const tasks = statuses.map((s, i) => ({ id: `${i}`, title: 't', status: s }))
+  const r = summarizeTasks(tasks)
+  const literal = statuses.length
+    ? `<IAgentTask>[${statuses.map((s, i) => `IAgentTask(id: '${i}', title: 't', status: ${dartStatus(s)})`).join(', ')}]`
+    : 'const <IAgentTask>[]'
+  return `    _expectTaskSummary(summarizeTasks(${literal}),
+        ${r.total}, ${r.completed}, ${r.failed}, ${r.running}, ${r.settled}, ${r.percent},
+        'summarizeTasks(${statuses.join('/') || '空'})');`
+})
+
+const confidenceCases = [0, 0.2, 0.44, 0.45, 0.6, 0.74, 0.75, 0.9, 1, 5, -1]
+const dartLevel = (l) => `IConfidenceLevel.${l}`
+const confidenceExpectations = confidenceCases.map((v) => {
+  const r = confidenceOf(v)
+  return `    _expectConfidence(confidenceOf(${v.toFixed(2)}), ${dartLevel(r.level)}, ${r.bars}, '${r.label}', 'confidenceOf(${v})');`
+})
+
+const progressExpectations = [[0, 3], [1, 3], [2, 3], [9, 3], [0, 1]].map(
+  ([i, t]) => `    expect(approvalProgress(${i}, ${t}), '${approvalProgress(i, t)}');`
+)
+
 /* ---------- 分页 ---------- */
 const pageCases = [
   [1, 100, 5], [7, 100, 5], [50, 100, 5], [98, 100, 5], [100, 100, 5],
@@ -333,6 +371,7 @@ import 'package:i_design/src/logic/select.dart';
 import 'package:i_design/src/logic/table.dart';
 import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/tree.dart';
+import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
@@ -371,6 +410,23 @@ void _expectColumns(List<List<ITreeNode>> actual, List<List<String>> expected,
     expect(actual[i].map((n) => n.key).toList(), expected[i],
         reason: '\$label 第 \$i 列内容不一致');
   }
+}
+
+void _expectTaskSummary(ITaskSummary actual, int total, int completed, int failed,
+    int running, bool settled, int percent, String label) {
+  expect(actual.total, total, reason: '\$label total 不一致');
+  expect(actual.completed, completed, reason: '\$label completed 不一致');
+  expect(actual.failed, failed, reason: '\$label failed 不一致');
+  expect(actual.running, running, reason: '\$label running 不一致');
+  expect(actual.settled, settled, reason: '\$label settled 不一致');
+  expect(actual.percent, percent, reason: '\$label percent 不一致');
+}
+
+void _expectConfidence(IConfidence actual, IConfidenceLevel level, int bars,
+    String labelText, String label) {
+  expect(actual.level, level, reason: '\$label 档位不一致');
+  expect(actual.bars, bars, reason: '\$label 格数不一致');
+  expect(actual.label, labelText, reason: '\$label 文案不一致');
 }
 
 void main() {
@@ -439,6 +495,15 @@ ${searchExpectations.join('\n')}
     final entities = flattenTree(data);
 ${columnExpectations.join('\n')}
 ${activateExpectations.join('\n')}
+  });
+
+  test('任务汇总与 Web 端一致（失败计入已结束）', () {
+${taskExpectations.join('\n')}
+  });
+
+  test('置信度分档与进度文本与 Web 端一致', () {
+${confidenceExpectations.join('\n')}
+${progressExpectations.join('\n')}
   });
 }
 `

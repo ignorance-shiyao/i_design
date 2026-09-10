@@ -1,0 +1,44 @@
+<view wx:if="{{current}}" class="i-agent-card i-approval">
+  <view class="i-approval__head">
+    <text class="i-approval__title">{{current.title}}</text>
+    <view wx:if="{{closable}}" class="i-approval__nav" bindtap="onClose">
+      <i-icon name="close" size="14" />
+    </view>
+  </view>
+
+  <view class="i-approval__options">
+    <view
+      wx:for="{{options}}"
+      wx:key="value"
+      class="i-approval__option {{item.on ? 'is-selected' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="onPick"
+    >
+      <i-icon name="{{item.on ? 'check-circle' : (current.multiple ? 'plus' : 'info-circle')}}" size="16" />
+      <text>{{item.label}}</text>
+      <text wx:if="{{item.hint}}" class="i-approval__hint">{{item.hint}}</text>
+    </view>
+  </view>
+
+  <input
+    wx:if="{{current.allowCustom}}"
+    class="i-approval__custom"
+    value="{{custom}}"
+    placeholder="{{current.customPlaceholder || '其他……'}}"
+    bindinput="onCustom"
+  />
+
+  <view class="i-approval__foot">
+    <view wx:if="{{questions.length > 1}}" class="i-approval__progress">
+      <view class="i-approval__nav" bindtap="onPrev"><i-icon name="chevron-up" size="14" /></view>
+      <text>{{progress}}</text>
+      <view class="i-approval__nav" bindtap="onNext"><i-icon name="chevron-down" size="14" /></view>
+    </view>
+    <view class="i-approval__actions">
+      <i-button wx:if="{{current.skippable}}" size="sm" bindtap="onSkip">{{skipText}}</i-button>
+      <i-button size="sm" variant="primary" disabled="{{!advanceable}}" bindtap="onNext">
+        {{isLast ? confirmText : '下一题'}}
+      </i-button>
+    </view>
+  </view>
+</view>
