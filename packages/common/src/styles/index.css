@@ -23,6 +23,7 @@
 @import './components/base.css';
 @import './components/breadcrumb.css';
 @import './components/button.css';
+@import './components/calendar.css';
 @import './components/card.css';
 @import './components/carousel.css';
 @import './components/cascader.css';
@@ -56,6 +57,7 @@
 @import './components/keypad.css';
 @import './components/list.css';
 @import './components/loading.css';
+@import './components/mentions.css';
 @import './components/menu.css';
 @import './components/message-list.css';
 @import './components/modal.css';
@@ -82,6 +84,7 @@
 @import './components/splitter.css';
 @import './components/statistic.css';
 @import './components/steps.css';
+@import './components/sticky.css';
 @import './components/swipe-cell.css';
 @import './components/switch.css';
 @import './components/tabbar.css';

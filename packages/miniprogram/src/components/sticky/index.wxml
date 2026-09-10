@@ -1,0 +1,7 @@
+<view class="i-sticky">
+  <!-- 哨兵：零高、不吸附。吸顶元素自己吸住后永远停在阈值上，量它量不出状态 -->
+  <view class="i-sticky__sentinel" />
+  <view class="i-sticky__inner {{stuck ? 'is-stuck' : ''}}" style="top:{{top}}px">
+    <slot />
+  </view>
+</view>

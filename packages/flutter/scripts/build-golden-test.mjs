@@ -23,6 +23,18 @@ const bundle = (entry, name) => {
 
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
+const { buildCalendar, weekdayLabels, toISO: dateToISO } = await bundle(
+  'packages/common/src/logic/date.ts',
+  'date'
+)
+const { selectRange, isInRange, isRangeEdge, moveFocus, groupMarks } = await bundle(
+  'packages/common/src/logic/calendar.ts',
+  'calendar'
+)
+const { findMention, applyMention, filterMentions } = await bundle(
+  'packages/common/src/logic/mention.ts',
+  'mention'
+)
 const {
   resizePane, paneRatio, paneSize, keyboardStep
 } = await bundle('packages/common/src/logic/splitter.ts', 'splitter')
@@ -1127,6 +1139,114 @@ const readoutExpectations = ['#5e7ce0', '#ffe066', '#1d2129', '#ffffff'].flatMap
   ]
 })
 
+/* ---------- 日历与提及 ----------
+ * 「点第二下是结束日期还是重新开始选」「邮箱里的 @ 该不该弹」
+ * 都是两种答案都说得通的地方，各端各写一遍必然分叉，而且都不报错。
+ */
+const dartRange = (r) =>
+  `const IDateRange(start: ${r.start === null ? 'null' : `'${r.start}'`}, ` +
+  `end: ${r.end === null || r.end === undefined ? 'null' : `'${r.end}'`})`
+
+// 固定一个日期，避免测试在跨月那天变红
+const calAnchor = new Date(2026, 8, 15)
+const calCells = buildCalendar(calAnchor, 1)
+const calExpectations = [
+  `    final cells = buildCalendar(DateTime(2026, 9, 15), weekStart: 1);`,
+  `    expect(cells.length, 42);`,
+  `    expect(cells.first.iso, '${calCells[0].iso}');`,
+  `    expect(cells.last.iso, '${calCells[41].iso}');`,
+  `    expect(cells.where((c) => !c.outside).length, ${calCells.filter((c) => !c.outside).length});`,
+  `    expect(weekdayLabels(weekStart: 1), <String>[${weekdayLabels(1).map((l) => `'${l}'`).join(', ')}]);`,
+  `    expect(weekdayLabels(weekStart: 0), <String>[${weekdayLabels(0).map((l) => `'${l}'`).join(', ')}]);`
+]
+
+// 选完一段再点是「重新开始选」；从右往左点自动对调
+const rangeSteps = [
+  [{ start: null, end: null }, '2026-09-10'],
+  [{ start: '2026-09-10', end: null }, '2026-09-15'],
+  [{ start: '2026-09-10', end: null }, '2026-09-05'],
+  [{ start: '2026-09-10', end: '2026-09-15' }, '2026-09-20'],
+  [{ start: '2026-09-10', end: null }, '2026-09-10'],
+]
+const rangeExpectationsCal = rangeSteps.map(([range, iso]) =>
+  `    expect(selectRange(${dartRange(range)}, '${iso}'), ${dartRange(selectRange(range, iso))});`)
+
+const inRangeExpectations = [
+  ['2026-09-12', { start: '2026-09-10', end: '2026-09-15' }],
+  ['2026-09-10', { start: '2026-09-10', end: '2026-09-15' }],
+  ['2026-09-16', { start: '2026-09-10', end: '2026-09-15' }],
+  ['2026-09-12', { start: '2026-09-10', end: null }],
+].map(([iso, range]) =>
+  `    expect(isInRange('${iso}', ${dartRange(range)}), ${isInRange(iso, range)});`)
+  .concat(
+    [
+      ['2026-09-10', { start: '2026-09-10', end: '2026-09-15' }],
+      ['2026-09-15', { start: '2026-09-10', end: '2026-09-15' }],
+      ['2026-09-12', { start: '2026-09-10', end: '2026-09-15' }],
+    ].map(([iso, range]) => {
+      const got = isRangeEdge(iso, range)
+      return `    expect(isRangeEdge('${iso}', ${dartRange(range)}), ${got === null ? 'isNull' : `'${got}'`});`
+    })
+  )
+
+const focusExpectations = [
+  ['2026-09-15', 'ArrowLeft'], ['2026-09-15', 'ArrowRight'],
+  ['2026-09-15', 'ArrowUp'], ['2026-09-15', 'ArrowDown'],
+  ['2026-09-01', 'ArrowLeft'], ['2026-09-30', 'ArrowDown'],
+  ['2026-09-15', 'Enter'],
+].map(([iso, key]) => {
+  const got = moveFocus(iso, key)
+  return `    expect(moveFocus('${iso}', '${key}'), ${got === null ? 'isNull' : `'${got}'`});`
+})
+
+// 三条判定：邮箱不弹、空格后收起、超长不认
+const mentionCases = [
+  ['@', 1], ['@zh', 3], ['把这条同步给 @陈', 10],
+  ['user@exam', 9], ['@张三 然后', 6], ['', 0],
+  ['a@b', 3], ['\n@x', 3],
+]
+const mentionExpectations = mentionCases.map(([text, caret]) => {
+  const got = findMention(text, caret)
+  const literal = JSON.stringify(text).replace(/\$/g, '\\$')
+  return got
+    ? `    expect(findMention(${literal}, ${caret}),
+        const IMentionTrigger(at: ${got.at}, symbol: '${got.symbol}', query: ${JSON.stringify(got.query)}));`
+    : `    expect(findMention(${literal}, ${caret}), isNull);`
+})
+
+// 末尾补空格：不补的话光标紧贴名字，接着打字会立刻又触发一次候选
+const applyCases = [
+  ['@陈', 2, '陈序'],
+  ['把这条同步给 @陈', 10, '陈序'],
+  ['@a 尾巴', 2, '林岚'],
+]
+const applyExpectations = applyCases.flatMap(([text, caret, label]) => {
+  const trigger = findMention(text, caret)
+  if (!trigger) return []
+  const got = applyMention(text, trigger, label, caret)
+  const literal = JSON.stringify(text).replace(/\$/g, '\\$')
+  return [
+    `    expect(applyMention(${literal},
+        const IMentionTrigger(at: ${trigger.at}, symbol: '${trigger.symbol}', query: ${JSON.stringify(trigger.query)}),
+        '${label}', ${caret}).text, ${JSON.stringify(got.text).replace(/\$/g, '\\$')});`,
+    `    expect(applyMention(${literal},
+        const IMentionTrigger(at: ${trigger.at}, symbol: '${trigger.symbol}', query: ${JSON.stringify(trigger.query)}),
+        '${label}', ${caret}).caret, ${got.caret});`
+  ]
+})
+
+const mentionOptions = [
+  { value: 'lin', label: '林岚', keywords: ['linlan'] },
+  { value: 'chen', label: '陈序', keywords: ['chenxu'] },
+  { value: 'su', label: '苏禾', keywords: ['suhe'] },
+]
+const dartOptions = `<IMentionOption>[${mentionOptions
+  .map((o) => `const IMentionOption(value: '${o.value}', label: '${o.label}', keywords: <String>['${o.keywords[0]}'])`)
+  .join(', ')}]`
+const filterExpectations = ['', '陈', 'lin', 'xu', '不存在'].map((q) =>
+  `    expect(filterMentions(options, '${q}').map((o) => o.value).toList(),
+        <String>[${filterMentions(mentionOptions, q).map((o) => `'${o.value}'`).join(', ')}]);`)
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -1152,6 +1272,8 @@ import 'package:i_design/src/logic/image.dart';
 import 'package:i_design/src/logic/splitter.dart';
 import 'package:i_design/src/logic/virtual.dart';
 import 'package:i_design/src/logic/color.dart';
+import 'package:i_design/src/logic/calendar.dart';
+import 'package:i_design/src/logic/mention.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
@@ -1500,6 +1622,20 @@ ${virtualizeExpectations.join('\n')}
 ${parseExpectationsC.join('\n')}
 ${roundTripExpectations.join('\n')}
 ${readoutExpectations.join('\n')}
+  });
+
+  test('日历格子、范围选择与键盘导航与 Web 端一致', () {
+${calExpectations.join('\n')}
+${rangeExpectationsCal.join('\n')}
+${inRangeExpectations.join('\n')}
+${focusExpectations.join('\n')}
+  });
+
+  test('提及的触发、插入与过滤与 Web 端一致', () {
+    final options = ${dartOptions};
+${mentionExpectations.join('\n')}
+${applyExpectations.join('\n')}
+${filterExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

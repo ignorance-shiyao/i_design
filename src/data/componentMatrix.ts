@@ -129,6 +129,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ICalendar",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ICard",
     "ends": {
       "vue-next": true,
@@ -569,6 +579,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IMentions",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IMenu",
     "ends": {
       "vue-next": true,
@@ -800,6 +820,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "ISteps",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ISticky",
     "ends": {
       "vue-next": true,
       "vue": true,

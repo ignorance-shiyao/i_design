@@ -1,0 +1,51 @@
+/*
+ * IMentions —— 提及。
+ *
+ * 候选面板贴在输入框下方，而不是跟着光标走。跟随光标要量出插入点的像素位置——
+ * textarea 没有这个 API，得靠一个隐藏的镜像元素反推，
+ * 而中文输入法的组合态会让镜像与实际错位。
+ */
+.i-mentions { position: relative; }
+.i-mentions__input {
+  display: block;
+  width: 100%;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  line-height: var(--i-line-height-base);
+  resize: vertical;
+}
+.i-mentions__input:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -1px; }
+
+.i-mentions__list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: var(--i-z-dropdown);
+  max-height: 220px;
+  margin: 0;
+  padding: var(--i-spacing-1);
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-md);
+}
+.i-mentions__option {
+  display: flex;
+  align-items: baseline;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-sm);
+  cursor: pointer;
+}
+/* 高亮项用淡底色块，不用一条重边线 */
+.i-mentions__option.is-active { background: var(--i-color-brand-subtle); }
+.i-mentions__label { font-size: var(--i-font-size-md); }
+.i-mentions__desc { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-xs); }

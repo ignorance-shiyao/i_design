@@ -80,6 +80,9 @@ import IImage from './IImage.vue'
 import ISplitter from './ISplitter.vue'
 import IVirtualList from './IVirtualList.vue'
 import IColorPicker from './IColorPicker.vue'
+import ICalendar from './ICalendar.vue'
+import IMentions from './IMentions.vue'
+import ISticky from './ISticky.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -151,6 +154,9 @@ export {
   ISplitter,
   IVirtualList,
   IColorPicker,
+  ICalendar,
+  IMentions,
+  ISticky,
   IForm,
   IFormItem,
   ITag,

@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import ICalendar from '@/components/ICalendar.vue'
+import IMentions from '@/components/IMentions.vue'
+import ISticky from '@/components/ISticky.vue'
+import type { CalendarMark, DateRange } from '@i-design/common'
 import ISegmented from '@/components/ISegmented.vue'
 import IProgress from '@/components/IProgress.vue'
 import IStatistic from '@/components/IStatistic.vue'
@@ -30,6 +34,35 @@ const events = [
   { title: '需求评审通过', time: '2026-09-02 10:20', type: 'success' as const, description: '范围与验收标准已确认。' },
   { title: '开发中', time: '2026-09-04 09:00', current: true, description: '预计 9 月 12 日提测。' },
   { title: '待提测', time: '预计 09-12', type: 'muted' as const }
+]
+
+const today = new Date()
+const iso = (d: number) => {
+  const t = new Date(today.getFullYear(), today.getMonth(), d)
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`
+}
+const schedule: CalendarMark[] = [
+  { date: iso(3), label: '需求评审', type: 'brand' },
+  { date: iso(8), label: '版本封板', type: 'warning' },
+  { date: iso(8), label: '回归测试', type: 'brand' },
+  { date: iso(8), label: '例会', type: 'brand' },
+  { date: iso(12), label: '发布', type: 'success' },
+  { date: iso(19), label: '故障复盘', type: 'danger' }
+]
+const picked = ref<DateRange>({ start: iso(8), end: iso(12) })
+
+const note = ref('把这条同步给 ')
+const members = [
+  { value: 'lin', label: '林岚', desc: '前端', keywords: ['linlan'] },
+  { value: 'chen', label: '陈序', desc: '后端', keywords: ['chenxu'] },
+  { value: 'su', label: '苏禾', desc: '设计', keywords: ['suhe'] },
+  { value: 'zhou', label: '周迟', desc: '测试', keywords: ['zhouchi'] }
+]
+
+const groups = [
+  { title: 'A', rows: ['阿里巴巴', '安居客', '爱奇艺'] },
+  { title: 'B', rows: ['百度', '哔哩哔哩', '贝壳'] },
+  { title: 'C', rows: ['菜鸟', '春秋航空'] }
 ]
 </script>
 
@@ -149,10 +182,94 @@ const events = [
         </ICarousel>
       </div>
     </DemoBlock>
+    <h2>Calendar 日历</h2>
+    <p>
+      标记用「淡底色块 + 文字」，不给整格换底色：换底色会和「选中」「今天」
+      抢同一个视觉通道，三者叠在一起时读者分不出哪个是哪个。文字必须在——
+      只靠色点的话，色觉障碍用户与灰度打印都读不出这是什么类型的日程。
+    </p>
+    <p>
+      整块日历只占一个 Tab 停靠点，进来之后用方向键走，上下键按周跳。
+      42 个格子各占一个 Tab 位的话，用键盘的人要按四十几下才能穿过这个月。
+      选完一段再点是「重新开始选」而不是「延长这一段」——延长的语义在只有点击、
+      没有拖拽的界面里说不清：用户点第三下时，没有任何线索告诉他这一下会改起点还是改终点。
+    </p>
+    <DemoBlock
+      title="月视图、日程标记与范围选择"
+      description="点两下选一段。从右往左点会自动对调，而不是拒绝——用户从后往前选是常事，拒绝的话他得先想明白「原来要从左边开始点」，而这条规则界面上没写。"
+      code='<ICalendar v-model="range" mode="range" :marks="schedule" />'
+    >
+      <div class="cal-demo">
+        <ICalendar v-model="picked" mode="range" :marks="schedule" />
+        <p class="hint">
+          已选：{{ picked.start || '（未选）' }}{{ picked.end ? ` 至 ${picked.end}` : '' }}
+        </p>
+      </div>
+    </DemoBlock>
+
+    <h2>Mentions 提及</h2>
+    <p>
+      三条判定缺一条都会让候选在不该弹的时候弹出来：触发符前面必须是行首或空白
+      （<code>user@example.com</code> 里的 @ 不该弹，弹出来会把回车键抢走）；
+      触发符与光标之间不能有空白（打完 <code>@张三 </code> 就该收起，
+      否则往下写正文时回车会被候选吃掉）；查询串有长度上限
+      （没有上限的话，一个没选中任何人的 @ 会让整段话都被当成查询）。
+    </p>
+    <DemoBlock
+      title="输入 @ 唤起成员"
+      description="方向键选、回车或 Tab 确认、Esc 收起。选中后自动补一个空格——不补的话，光标紧贴着刚插入的名字，接着打字会立刻又触发一次候选。"
+      code='<IMentions v-model="text" :options="members" />'
+    >
+      <div class="mention-demo">
+        <IMentions v-model="note" :options="members" placeholder="输入 @ 提及成员" />
+        <p class="hint">当前内容：{{ note }}</p>
+      </div>
+    </DemoBlock>
+
+    <h2>Sticky 吸顶</h2>
+    <p>
+      与 Affix 同一条判定，区别只在参照物：Affix 参照视口，Sticky 参照它所在的
+      滚动容器——列表分组头要吸在列表顶部，而不是吸在整个页面顶部，
+      后者会让它在页面别处也钉着。不传容器时组件自己往上找最近的可滚动祖先。
+    </p>
+    <DemoBlock
+      title="分组头吸在列表顶部"
+      description="吸住后必须有底色：透明的话，滚过它下面的内容会从字缝里透出来。"
+      code='<ISticky><h4>分组标题</h4></ISticky>'
+    >
+      <div class="sticky-demo">
+        <div v-for="group in groups" :key="group.title">
+          <ISticky>
+            <div class="sticky-head">{{ group.title }}</div>
+          </ISticky>
+          <div v-for="row in group.rows" :key="row" class="sticky-row">{{ row }}</div>
+        </div>
+      </div>
+    </DemoBlock>
   </article>
 </template>
 
 <style scoped>
+.cal-demo { max-width: 620px; }
+.mention-demo { max-width: 520px; }
+.hint { margin: var(--i-spacing-3) 0 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+.sticky-demo {
+  height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-lg);
+}
+.sticky-head {
+  padding: var(--i-spacing-2) var(--i-spacing-4);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.sticky-row {
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
 .stack { display: flex; flex-direction: column; gap: var(--i-spacing-4); width: 100%; }
 .row { display: flex; gap: var(--i-spacing-6); align-items: center; }
 .metrics { width: 100%; }

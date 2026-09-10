@@ -23,6 +23,8 @@ import 'package:i_design/src/logic/image.dart';
 import 'package:i_design/src/logic/splitter.dart';
 import 'package:i_design/src/logic/virtual.dart';
 import 'package:i_design/src/logic/color.dart';
+import 'package:i_design/src/logic/calendar.dart';
+import 'package:i_design/src/logic/mention.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '$label 点位不一致');
@@ -1281,6 +1283,79 @@ void main() {
     expect(colorReadout('#ffffff').ratio, closeTo(16.13, 0.02));
     expect(colorReadout('#ffffff').passesUi, true);
     expect(colorReadout('#ffffff').passesText, true);
+  });
+
+  test('日历格子、范围选择与键盘导航与 Web 端一致', () {
+    final cells = buildCalendar(DateTime(2026, 9, 15), weekStart: 1);
+    expect(cells.length, 42);
+    expect(cells.first.iso, '2026-08-31');
+    expect(cells.last.iso, '2026-10-11');
+    expect(cells.where((c) => !c.outside).length, 30);
+    expect(weekdayLabels(weekStart: 1), <String>['一', '二', '三', '四', '五', '六', '日']);
+    expect(weekdayLabels(weekStart: 0), <String>['日', '一', '二', '三', '四', '五', '六']);
+    expect(selectRange(const IDateRange(start: null, end: null), '2026-09-10'), const IDateRange(start: '2026-09-10', end: null));
+    expect(selectRange(const IDateRange(start: '2026-09-10', end: null), '2026-09-15'), const IDateRange(start: '2026-09-10', end: '2026-09-15'));
+    expect(selectRange(const IDateRange(start: '2026-09-10', end: null), '2026-09-05'), const IDateRange(start: '2026-09-05', end: '2026-09-10'));
+    expect(selectRange(const IDateRange(start: '2026-09-10', end: '2026-09-15'), '2026-09-20'), const IDateRange(start: '2026-09-20', end: null));
+    expect(selectRange(const IDateRange(start: '2026-09-10', end: null), '2026-09-10'), const IDateRange(start: '2026-09-10', end: '2026-09-10'));
+    expect(isInRange('2026-09-12', const IDateRange(start: '2026-09-10', end: '2026-09-15')), true);
+    expect(isInRange('2026-09-10', const IDateRange(start: '2026-09-10', end: '2026-09-15')), true);
+    expect(isInRange('2026-09-16', const IDateRange(start: '2026-09-10', end: '2026-09-15')), false);
+    expect(isInRange('2026-09-12', const IDateRange(start: '2026-09-10', end: null)), false);
+    expect(isRangeEdge('2026-09-10', const IDateRange(start: '2026-09-10', end: '2026-09-15')), 'start');
+    expect(isRangeEdge('2026-09-15', const IDateRange(start: '2026-09-10', end: '2026-09-15')), 'end');
+    expect(isRangeEdge('2026-09-12', const IDateRange(start: '2026-09-10', end: '2026-09-15')), isNull);
+    expect(moveFocus('2026-09-15', 'ArrowLeft'), '2026-09-14');
+    expect(moveFocus('2026-09-15', 'ArrowRight'), '2026-09-16');
+    expect(moveFocus('2026-09-15', 'ArrowUp'), '2026-09-08');
+    expect(moveFocus('2026-09-15', 'ArrowDown'), '2026-09-22');
+    expect(moveFocus('2026-09-01', 'ArrowLeft'), '2026-08-31');
+    expect(moveFocus('2026-09-30', 'ArrowDown'), '2026-10-07');
+    expect(moveFocus('2026-09-15', 'Enter'), isNull);
+  });
+
+  test('提及的触发、插入与过滤与 Web 端一致', () {
+    final options = <IMentionOption>[const IMentionOption(value: 'lin', label: '林岚', keywords: <String>['linlan']), const IMentionOption(value: 'chen', label: '陈序', keywords: <String>['chenxu']), const IMentionOption(value: 'su', label: '苏禾', keywords: <String>['suhe'])];
+    expect(findMention("@", 1),
+        const IMentionTrigger(at: 0, symbol: '@', query: ""));
+    expect(findMention("@zh", 3),
+        const IMentionTrigger(at: 0, symbol: '@', query: "zh"));
+    expect(findMention("把这条同步给 @陈", 10),
+        const IMentionTrigger(at: 7, symbol: '@', query: "陈"));
+    expect(findMention("user@exam", 9), isNull);
+    expect(findMention("@张三 然后", 6), isNull);
+    expect(findMention("", 0), isNull);
+    expect(findMention("a@b", 3), isNull);
+    expect(findMention("\n@x", 3),
+        const IMentionTrigger(at: 1, symbol: '@', query: "x"));
+    expect(applyMention("@陈",
+        const IMentionTrigger(at: 0, symbol: '@', query: "陈"),
+        '陈序', 2).text, "@陈序 ");
+    expect(applyMention("@陈",
+        const IMentionTrigger(at: 0, symbol: '@', query: "陈"),
+        '陈序', 2).caret, 4);
+    expect(applyMention("把这条同步给 @陈",
+        const IMentionTrigger(at: 7, symbol: '@', query: "陈"),
+        '陈序', 10).text, "把这条同步给 @陈序 ");
+    expect(applyMention("把这条同步给 @陈",
+        const IMentionTrigger(at: 7, symbol: '@', query: "陈"),
+        '陈序', 10).caret, 11);
+    expect(applyMention("@a 尾巴",
+        const IMentionTrigger(at: 0, symbol: '@', query: "a"),
+        '林岚', 2).text, "@林岚  尾巴");
+    expect(applyMention("@a 尾巴",
+        const IMentionTrigger(at: 0, symbol: '@', query: "a"),
+        '林岚', 2).caret, 4);
+    expect(filterMentions(options, '').map((o) => o.value).toList(),
+        <String>['lin', 'chen', 'su']);
+    expect(filterMentions(options, '陈').map((o) => o.value).toList(),
+        <String>['chen']);
+    expect(filterMentions(options, 'lin').map((o) => o.value).toList(),
+        <String>['lin']);
+    expect(filterMentions(options, 'xu').map((o) => o.value).toList(),
+        <String>['chen']);
+    expect(filterMentions(options, '不存在').map((o) => o.value).toList(),
+        <String>[]);
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

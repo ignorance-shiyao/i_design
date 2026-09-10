@@ -1,0 +1,108 @@
+/*
+ * ICalendar —— 日历。
+ *
+ * 整块日历只占一个 Tab 停靠点，进来之后用方向键走。
+ * 42 个格子各占一个 Tab 位的话，用键盘的人要按四十几下才能穿过这个月。
+ */
+.i-calendar {
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  overflow: hidden;
+}
+.i-calendar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-calendar__title {
+  font-size: var(--i-font-size-md);
+  font-weight: var(--i-font-weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+.i-calendar__nav {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  color: var(--i-color-text-secondary);
+  cursor: pointer;
+}
+.i-calendar__nav:hover { background: var(--i-color-bg-subtle); color: var(--i-color-text); }
+
+.i-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  padding: var(--i-spacing-2);
+}
+.i-calendar__grid:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+.i-calendar__weekday {
+  padding: var(--i-spacing-2) 0;
+  text-align: center;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+
+.i-calendar__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  min-height: 64px;
+  padding: var(--i-spacing-1);
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  color: var(--i-color-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.i-calendar__cell:hover:not(:disabled) { background: var(--i-color-bg-subtle); }
+.i-calendar__day {
+  align-self: flex-start;
+  min-width: 22px;
+  padding: 2px 4px;
+  border-radius: var(--i-radius-sm);
+  font-size: var(--i-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+/* 不属于本月的日子淡下去，但仍可点：跨月选日期是常事 */
+.i-calendar__cell.is-outside { color: var(--i-color-text-tertiary); }
+/* 今天用一圈描边，选中用实心：两者可以同时成立，得能分得开 */
+.i-calendar__cell.is-today .i-calendar__day { box-shadow: inset 0 0 0 1px var(--i-color-brand); }
+.i-calendar__cell.is-selected .i-calendar__day {
+  background: var(--i-color-brand);
+  color: var(--i-color-text-on-brand, #fff);
+}
+.i-calendar__cell.is-in-range { background: var(--i-color-brand-subtle); border-radius: 0; }
+.i-calendar__cell.is-start { border-radius: var(--i-radius-sm) 0 0 var(--i-radius-sm); }
+.i-calendar__cell.is-end { border-radius: 0 var(--i-radius-sm) var(--i-radius-sm) 0; }
+.i-calendar__cell:disabled { color: var(--i-color-text-tertiary); opacity: 0.4; cursor: not-allowed; }
+
+/*
+ * 标记用「淡底色块 + 文字」，不给整格换底色：
+ * 换底色会和「选中」「今天」抢同一个视觉通道，三者叠在一起时分不出哪个是哪个。
+ * 文字必须在——只靠色点的话，色觉障碍用户与灰度打印都读不出类型。
+ */
+.i-calendar__marks { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.i-calendar__mark {
+  overflow: hidden;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: var(--i-font-size-xs);
+  line-height: 1.6;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.i-calendar__mark.is-brand { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
+.i-calendar__mark.is-success { background: var(--i-color-success-subtle); color: var(--i-color-success); }
+.i-calendar__mark.is-warning { background: var(--i-color-warning-subtle); color: var(--i-color-warning); }
+.i-calendar__mark.is-danger { background: var(--i-color-danger-subtle); color: var(--i-color-danger); }
+.i-calendar__more { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-xs); }

@@ -1,0 +1,29 @@
+<view class="i-mentions">
+  <textarea
+    class="i-mentions__input"
+    value="{{value}}"
+    placeholder="{{placeholder}}"
+    auto-height="{{false}}"
+    style="height:{{rows * 24 + 16}}px"
+    bindinput="onInput"
+    bindblur="onBlur"
+  />
+
+  <!--
+    候选面板贴在输入框下方，而不是跟着光标走。
+    小程序的 textarea 是原生组件，既取不到插入点的像素位置，
+    也会盖住普通视图——跟随光标这条路在这一端根本走不通。
+  -->
+  <view wx:if="{{open}}" class="i-mentions__list">
+    <view
+      wx:for="{{matches}}"
+      wx:key="value"
+      class="i-mentions__option {{index === active ? 'is-active' : ''}}"
+      data-index="{{index}}"
+      bindtap="onChoose"
+    >
+      <text class="i-mentions__label">{{item.label}}</text>
+      <text wx:if="{{item.desc}}" class="i-mentions__desc">{{item.desc}}</text>
+    </view>
+  </view>
+</view>

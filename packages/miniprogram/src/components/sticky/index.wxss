@@ -1,0 +1,2 @@
+@import '../../../dist/styles/sticky.wxss';
+@import '../../../dist/styles/icons.wxss';

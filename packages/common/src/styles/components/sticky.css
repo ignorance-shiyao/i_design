@@ -1,0 +1,30 @@
+/*
+ * ISticky —— 吸顶。
+ *
+ * 吸附交给浏览器原生的 position: sticky——它自己占位、自己在容器边界内停住，
+ * 没有一帧延迟，也不会在快速滚动时抖。自己用 fixed 加占位去模拟只会更差。
+ * JS 那边只负责算出「此刻是不是吸住了」，因为 CSS 至今给不出这个答案。
+ *
+ * 外层必须 display: contents，不能是一个普通的 div。
+ *
+ * sticky 只能在它父元素的盒子里移动。包一层普通 div 的话，那层的高度就是
+ * 表头自己的高度，于是它一格都挪不动——滚动时直接被卷走，看起来像没生效。
+ * display: contents 让包裹层不生成盒子，sticky 的参照就回到了外面那一整组，
+ * 表头才能在整组范围内吸住。
+ */
+.i-sticky { display: contents; }
+.i-sticky__inner {
+  position: sticky;
+  z-index: var(--i-z-sticky);
+}
+.i-sticky__inner.is-stuck {
+  /* 吸住后要有底色：透明的话，滚过它下面的内容会从字缝里透出来 */
+  background: var(--i-color-bg-elevated);
+}
+
+/*
+ * 哨兵：零高、不吸附，紧挨在吸顶元素前面。
+ * 吸顶元素自己吸住之后永远停在阈值那条线上，量它是量不出「有没有吸住」的；
+ * 哨兵会跟着内容滚走，它越过阈值那一刻就是吸住那一刻。
+ */
+.i-sticky__sentinel { display: block; height: 0; }

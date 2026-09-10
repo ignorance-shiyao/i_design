@@ -1,0 +1,35 @@
+<view class="i-calendar">
+  <view class="i-calendar__head">
+    <view class="i-calendar__nav" aria-label="上个月" data-delta="-1" bindtap="shift">
+      <view class="i-icon i-icon--chevron-left" style="width:16px;height:16px" />
+    </view>
+    <text class="i-calendar__title">{{title}}</text>
+    <view class="i-calendar__nav" aria-label="下个月" data-delta="1" bindtap="shift">
+      <view class="i-icon i-icon--chevron-right" style="width:16px;height:16px" />
+    </view>
+  </view>
+
+  <view class="i-calendar__grid">
+    <text wx:for="{{labels}}" wx:key="*this" class="i-calendar__weekday">{{item}}</text>
+
+    <view
+      wx:for="{{cells}}"
+      wx:key="iso"
+      class="i-calendar__cell {{item.cls}}"
+      data-iso="{{item.iso}}"
+      bindtap="onPick"
+    >
+      <text class="i-calendar__day">{{item.day}}</text>
+      <!-- 标记带文字：只靠色点的话，色觉障碍用户与灰度打印都读不出类型 -->
+      <view wx:if="{{item.marks.length}}" class="i-calendar__marks">
+        <text
+          wx:for="{{item.marks}}"
+          wx:for-item="mark"
+          wx:key="label"
+          class="i-calendar__mark is-{{mark.type || 'brand'}}"
+        >{{mark.label}}</text>
+        <text wx:if="{{item.more}}" class="i-calendar__more">+{{item.more}}</text>
+      </view>
+    </view>
+  </view>
+</view>
