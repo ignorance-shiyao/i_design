@@ -19,6 +19,8 @@ export interface ThemeConfig {
   fontSize: ScaleLevel
   /** 关掉后所有过渡与动画立即停止，等同于系统的「减少动态效果」 */
   motion: boolean
+  /** 明暗切换的动效：圆形揭幕 / 渐暗渐亮 / 直接切换 */
+  themeTransition: 'reveal' | 'dim' | 'none'
 }
 
 const STORAGE_KEY = 'i-design-theme-config'
@@ -46,7 +48,8 @@ const DEFAULTS: ThemeConfig = {
   brand: '#5e7ce0',
   radius: 'default',
   fontSize: 'default',
-  motion: true
+  motion: true,
+  themeTransition: 'reveal'
 }
 
 function load(): ThemeConfig {

@@ -123,9 +123,31 @@ const contrastLevel = computed(() => {
         </div>
       </section>
 
+      <section class="tp__section">
+        <p class="tp__label">明暗切换动效</p>
+        <ISegmented
+          v-model="themeConfig.themeTransition"
+          :options="[
+            { value: 'reveal', label: '揭幕' },
+            { value: 'dim', label: '渐暗' },
+            { value: 'none', label: '直接' }
+          ]"
+          block
+        />
+        <p class="tp__hint" style="margin-top: 8px">
+          {{
+            themeConfig.themeTransition === 'reveal'
+              ? '从开关处圆形扩散，看得出是哪个键触发的'
+              : themeConfig.themeTransition === 'dim'
+                ? '整屏压黑再亮起，像拉动调光开关'
+                : '不加动效，立即切换'
+          }}
+        </p>
+      </section>
+
       <section class="tp__section tp__section--row">
         <div>
-          <p class="tp__label">动效</p>
+          <p class="tp__label">组件动效</p>
           <p class="tp__hint">关闭后所有过渡立即停止</p>
         </div>
         <ISwitch v-model="themeConfig.motion" />

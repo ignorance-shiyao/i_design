@@ -6,6 +6,7 @@ import MobileNav from './MobileNav.vue'
 import { mobileNavOpen } from '@/composables/useMobileNav'
 
 import ThemePanel from '@/site/ThemePanel.vue'
+import { themeConfig } from '@/composables/useThemeConfig'
 const { theme, toggleTheme } = useTheme()
 const themePanelOpen = ref(false)
 
@@ -13,7 +14,7 @@ const themePanelOpen = ref(false)
 function onToggleTheme(event: MouseEvent) {
   const el = event.currentTarget as HTMLElement
   const box = el.getBoundingClientRect()
-  toggleTheme({ x: box.x + box.width / 2, y: box.y + box.height / 2 })
+  toggleTheme({ x: box.x + box.width / 2, y: box.y + box.height / 2 }, themeConfig.themeTransition)
 }
 
 const links = [

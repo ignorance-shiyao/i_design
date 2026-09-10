@@ -91,3 +91,16 @@
   -webkit-mask-image: radial-gradient(70% 60% at 50% 0%, #000 30%, transparent 100%);
   mask-image: radial-gradient(70% 60% at 50% 0%, #000 30%, transparent 100%);
 }
+
+/*
+ * 明暗切换的调光遮罩。
+ * 固定在最上层且不接收指针事件——它只是视觉掩护，不该挡住这期间的点击。
+ */
+.i-theme-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #05070d;
+  opacity: 0;
+  pointer-events: none;
+}

@@ -289,6 +289,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IContextCards",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": false,
+      "miniprogram": false,
+      "flutter": false
+    }
+  },
+  {
     "name": "IDatePicker",
     "ends": {
       "vue-next": true,
@@ -306,6 +316,16 @@ export const componentMatrix: ComponentRow[] = [
       "react": true,
       "miniprogram": true,
       "flutter": true
+    }
+  },
+  {
+    "name": "IDiffTable",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": false,
+      "miniprogram": false,
+      "flutter": false
     }
   },
   {
