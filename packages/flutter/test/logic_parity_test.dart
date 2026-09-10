@@ -13,10 +13,38 @@ import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
+import 'package:i_design/src/logic/scroll.dart';
+import 'package:i_design/src/logic/keypad.dart';
+import 'package:i_design/src/logic/taginput.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '$label 点位不一致');
   expect(actual.active, active, reason: '$label 当前项不一致');
+}
+
+void _expectDraft(TagDraftSplit actual, List<String> ready, String rest, String label) {
+  expect(actual.ready, ready, reason: '$label 成词部分不一致');
+  expect(actual.rest, rest, reason: '$label 留存部分不一致');
+}
+
+void _expectAdd(TagAddResult actual, List<String> tags, TagRejectReason? rejected, String label) {
+  expect(actual.tags, tags, reason: '$label 结果不一致');
+  expect(actual.rejected, rejected, reason: '$label 拒绝原因不一致');
+}
+
+void _expectParts(List<IMatchPart> actual, List<IMatchPart> expected, String label) {
+  expect(actual.length, expected.length, reason: '$label 段数不一致');
+  for (var i = 0; i < expected.length; i++) {
+    expect(actual[i].text, expected[i].text, reason: '$label 第 $i 段文字不一致');
+    expect(actual[i].hit, expected[i].hit, reason: '$label 第 $i 段命中标记不一致');
+  }
+}
+
+void _expectHole(ITourHole actual, double x, double y, double w, double h, String label) {
+  expect(actual.x, closeTo(x, 1e-9), reason: '$label x 不一致');
+  expect(actual.y, closeTo(y, 1e-9), reason: '$label y 不一致');
+  expect(actual.width, closeTo(w, 1e-9), reason: '$label 宽不一致');
+  expect(actual.height, closeTo(h, 1e-9), reason: '$label 高不一致');
 }
 
 void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
@@ -760,6 +788,181 @@ void main() {
     expect(rubberBand(5.5, 5, loop: false), closeTo(4.45, 1e-9));
     expect(rubberBand(2.0, 5, loop: false), closeTo(2, 1e-9));
     expect(rubberBand(-0.5, 5, loop: true), closeTo(-0.5, 1e-9));
+  });
+
+  test('无限滚动触发判定与 Web 端一致（含没撑满容器的情形）', () {
+    expect(
+        shouldLoadMore(scrollTop: 0.0, clientHeight: 600.0,
+            scrollHeight: 300.0, status: LoadStatus.idle),
+        true);
+    expect(
+        shouldLoadMore(scrollTop: 0.0, clientHeight: 600.0,
+            scrollHeight: 300.0, status: LoadStatus.loading),
+        false);
+    expect(
+        shouldLoadMore(scrollTop: 0.0, clientHeight: 600.0,
+            scrollHeight: 300.0, status: LoadStatus.finished),
+        false);
+    expect(
+        shouldLoadMore(scrollTop: 900.0, clientHeight: 600.0,
+            scrollHeight: 1600.0, status: LoadStatus.idle),
+        true);
+    expect(
+        shouldLoadMore(scrollTop: 400.0, clientHeight: 600.0,
+            scrollHeight: 1600.0, status: LoadStatus.idle),
+        false);
+    expect(
+        shouldLoadMore(scrollTop: 900.0, clientHeight: 600.0,
+            scrollHeight: 1600.0, status: LoadStatus.error),
+        false);
+    expect(loadHint(LoadStatus.loading, empty: false), '加载中…');
+    expect(loadHint(LoadStatus.error, empty: false), '加载失败，点击重试');
+    expect(loadHint(LoadStatus.finished, empty: false), '没有更多了');
+    expect(loadHint(LoadStatus.finished, empty: true), '暂无内容');
+    expect(loadHint(LoadStatus.idle, empty: false), '');
+  });
+
+  test('数字键盘按键规则与 Web 端一致', () {
+    expect(pressKey('', '1'), '1');
+    expect(pressKey('1', '2'), '12');
+    expect(pressKey('12', '.'), '12.');
+    expect(pressKey('12.', '3'), '12.3');
+    expect(pressKey('12.3', '4'), '12.34');
+    expect(pressKey('12.34', '5'), '12.34');
+    expect(pressKey('12.34', 'backspace'), '12.3');
+    expect(pressKey('12.3', '.'), '12.3');
+    expect(pressKey('12.3', '9'), '12.39');
+    expect(pressKey('', '.', decimals: 2, maxLength: 12, negative: false),
+        '0.');
+    expect(pressKey('0', '5', decimals: 2, maxLength: 12, negative: false),
+        '5');
+    expect(pressKey('-0', '5', decimals: 2, maxLength: 12, negative: true),
+        '-5');
+    expect(pressKey('12', '.', decimals: 0, maxLength: 12, negative: false),
+        '12');
+    expect(pressKey('', 'sign', decimals: 2, maxLength: 12, negative: true),
+        '-');
+    expect(pressKey('-3', 'sign', decimals: 2, maxLength: 12, negative: true),
+        '3');
+    expect(pressKey('', 'sign', decimals: 2, maxLength: 12, negative: false),
+        '');
+    expect(pressKey('123456789012', '3', decimals: 2, maxLength: 12, negative: false),
+        '123456789012');
+    expect(pressKey('', 'backspace', decimals: 2, maxLength: 12, negative: false),
+        '');
+    expect(keypadRows(decimals: 2, negative: false),
+        <List<String>>[<String>['1', '2', '3'], <String>['4', '5', '6'], <String>['7', '8', '9'], <String>['.', '0', 'backspace']]);
+    expect(keypadRows(decimals: 0, negative: false),
+        <List<String>>[<String>['1', '2', '3'], <String>['4', '5', '6'], <String>['7', '8', '9'], <String>['', '0', 'backspace']]);
+    expect(keypadRows(decimals: 2, negative: true),
+        <List<String>>[<String>['1', '2', '3'], <String>['4', '5', '6'], <String>['7', '8', '9'], <String>['sign', '0', 'backspace']]);
+    expect(isComplete(''), false);
+    expect(isComplete('-'), false);
+    expect(isComplete('.'), false);
+    expect(isComplete('12'), true);
+    expect(isComplete('12.'), false);
+    expect(isComplete('12.5'), true);
+    expect(isComplete('-3.25'), true);
+    expect(isComplete('1.2.3'), false);
+  });
+
+  test('新手引导的高亮框、步进与滚动判定与 Web 端一致', () {
+    _expectHole(tourHole(const Rect.fromLTWH(10.0, 20.0, 100.0, 40.0), padding: 6.0),
+        4.0, 14.0, 112.0, 52.0, 'hole(10,20)');
+    _expectHole(tourHole(const Rect.fromLTWH(0.0, 0.0, 8.0, 8.0), padding: 0.0),
+        0.0, 0.0, 8.0, 8.0, 'hole(0,0)');
+    _expectHole(tourHole(const Rect.fromLTWH(-5.0, -5.0, 50.0, 50.0), padding: 12.0),
+        -17.0, -17.0, 74.0, 74.0, 'hole(-5,-5)');
+    expect(tourNext(0, 3), 1);
+    expect(tourPrev(0), 0);
+    expect(tourNext(1, 3), 2);
+    expect(tourPrev(1), 0);
+    expect(tourNext(2, 3), -1);
+    expect(tourPrev(2), 1);
+    expect(tourNext(0, 1), -1);
+    expect(tourPrev(0), 0);
+    expect(tourNext(5, 3), -1);
+    expect(tourPrev(5), 4);
+    expect(tourScrollTo(const Rect.fromLTWH(0.0, 1000.0, 0.0, 40.0), 800.0, 0.0),
+        closeTo(620, 1e-9));
+    expect(tourScrollTo(const Rect.fromLTWH(0.0, -200.0, 0.0, 40.0), 800.0, 500.0),
+        closeTo(0, 1e-9));
+    expect(tourScrollTo(const Rect.fromLTWH(0.0, 10.0, 0.0, 40.0), 800.0, 0.0),
+        closeTo(0, 1e-9));
+    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, 10.0, 0.0, 40.0), 800.0),
+        true);
+    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, 400.0, 0.0, 40.0), 800.0),
+        false);
+    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, 780.0, 0.0, 40.0), 800.0),
+        true);
+    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, -1.0, 0.0, 40.0), 800.0),
+        true);
+  });
+
+  test('输入标签的拆分、去重与退格与 Web 端一致', () {
+    expect(splitTags('a,b,c'),
+        <String>['a', 'b', 'c']);
+    expect(splitTags('a，b；c'),
+        <String>['a', 'b', 'c']);
+    expect(splitTags(' x1 , x2 \n x3 '),
+        <String>['x1', 'x2', 'x3']);
+    expect(splitTags('onlyone'),
+        <String>['onlyone']);
+    expect(splitTags(''),
+        <String>[]);
+    expect(splitTags(',,,'),
+        <String>[]);
+    expect(splitTags('a\tb'),
+        <String>['a', 'b']);
+    _expectDraft(splitDraft('a,b,c'), <String>['a', 'b'], 'c', 'draft(a,b,c)');
+    _expectDraft(splitDraft('abc'), <String>[], 'abc', 'draft(abc)');
+    _expectDraft(splitDraft('a,'), <String>['a'], '', 'draft(a,)');
+    _expectDraft(splitDraft(',a'), <String>[], 'a', 'draft(,a)');
+    _expectAdd(addTags(<String>['a'], <String>['b', 'c'], allowDuplicate: false, max: 0),
+        <String>['a', 'b', 'c'], null, 'add(b|c)');
+    _expectAdd(addTags(<String>['a'], <String>['a'], allowDuplicate: false, max: 0),
+        <String>['a'], TagRejectReason.duplicate, 'add(a)');
+    _expectAdd(addTags(<String>['a'], <String>['a'], allowDuplicate: true, max: 0),
+        <String>['a', 'a'], null, 'add(a)');
+    _expectAdd(addTags(<String>['a', 'b'], <String>['c'], allowDuplicate: false, max: 2),
+        <String>['a', 'b'], TagRejectReason.max, 'add(c)');
+    _expectAdd(addTags(<String>['a'], <String>['  '], allowDuplicate: false, max: 0),
+        <String>['a'], TagRejectReason.empty, 'add(  )');
+    _expectAdd(addTags(<String>[], <String>['x', 'x', 'y'], allowDuplicate: false, max: 0),
+        <String>['x', 'y'], TagRejectReason.duplicate, 'add(x|x|y)');
+    expect(backspace(<String>['a', 'b'], '').consumed, true);
+    expect(backspace(<String>['a', 'b'], '').tags, <String>['a']);
+    expect(backspace(<String>['a', 'b'], 'x').consumed, false);
+    expect(backspace(<String>['a', 'b'], 'x').tags, <String>['a', 'b']);
+    expect(backspace(<String>[], '').consumed, false);
+    expect(backspace(<String>[], '').tags, <String>[]);
+    expect(removeTag(<String>['a', 'b', 'c'], 1), <String>['a', 'c']);
+    expect(removeTag(<String>['a'], 0), <String>[]);
+    expect(removeTag(<String>['a'], 5), <String>['a']);
+  });
+
+  test('自动完成的命中切段与候选排序与 Web 端一致', () {
+    _expectParts(matchParts('北京', '北'), <IMatchPart>[IMatchPart(text: '北', hit: true), IMatchPart(text: '京', hit: false)], 'match(北京,北)');
+    _expectParts(matchParts('湖北', '北'), <IMatchPart>[IMatchPart(text: '湖', hit: false), IMatchPart(text: '北', hit: true)], 'match(湖北,北)');
+    _expectParts(matchParts('Beijing', 'ji'), <IMatchPart>[IMatchPart(text: 'Bei', hit: false), IMatchPart(text: 'ji', hit: true), IMatchPart(text: 'ng', hit: false)], 'match(Beijing,ji)');
+    _expectParts(matchParts('abcabc', 'bc'), <IMatchPart>[IMatchPart(text: 'a', hit: false), IMatchPart(text: 'bc', hit: true), IMatchPart(text: 'a', hit: false), IMatchPart(text: 'bc', hit: true)], 'match(abcabc,bc)');
+    _expectParts(matchParts('abc', ''), <IMatchPart>[IMatchPart(text: 'abc', hit: false)], 'match(abc,)');
+    _expectParts(matchParts('abc', 'z'), <IMatchPart>[IMatchPart(text: 'abc', hit: false)], 'match(abc,z)');
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], '北', limit: 20).map((s) => s.value).toList(),
+        <String>['北京', '北海', '湖北', '河北']);
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], '海', limit: 20).map((s) => s.value).toList(),
+        <String>['北海', '上海', '珠海']);
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], '北', limit: 2).map((s) => s.value).toList(),
+        <String>['北京', '北海']);
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], '', limit: 3).map((s) => s.value).toList(),
+        <String>['北京', '北海', '湖北']);
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], 'zz', limit: 20).map((s) => s.value).toList(),
+        <String>[]);
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

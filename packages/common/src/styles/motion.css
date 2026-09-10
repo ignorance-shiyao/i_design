@@ -9,25 +9,47 @@
  */
 
 /* ---------- 进场：由 IntersectionObserver 添加 is-in ---------- */
-.i-reveal {
-  opacity: 0;
-  transform: translate3d(0, 16px, 0);
-  transition:
-    opacity 620ms var(--i-motion-easing),
-    transform 620ms var(--i-motion-easing);
-  transition-delay: var(--i-reveal-delay, 0ms);
-  will-change: transform, opacity;
-}
+/*
+ * 用 animation 而不是 transition。
+ *
+ * 进场会加在卡片、面板这些本来就有自己 transition 的元素上，页面里还常带
+ * scoped 样式（选择器上多一个属性，特异性天然高过工具类）。用 transition 的话，
+ * 谁写在后面、谁特异性高谁说了算——实测拿到的是组件的时长与曲线，
+ * 逐项延迟直接归零：动效「生效了但不对」，比彻底不生效更难查。
+ * animation 与 transition 是两条独立通道，不存在这个问题。
+ *
+ * fill-mode 取 backwards 而不是 both：both 会把结束状态钉住，
+ * 之后元素的 hover 位移会被这条动画压着不动。backwards 只在延迟期间
+ * 保持起始状态，动画一结束就把控制权交还给常规样式。
+ *
+ * 时长走 --i-motion-slow（320ms），与「动效时长不超过 320ms」这条价值观一致。
+ * 曲线用 easing-out：进场是「到达」，应当快进慢停，让人看清它停在哪里。
+ */
+.i-reveal { opacity: 0; }
 .i-reveal.is-in {
   opacity: 1;
-  transform: none;
+  animation: i-reveal-up var(--i-motion-slow) var(--i-motion-easing-out) backwards;
+  animation-delay: var(--i-reveal-delay, 0ms);
+}
+/* 位移只有 10px：大位移看着像元素被甩进来，小位移才像它本来就在那儿 */
+@keyframes i-reveal-up {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
 }
 
 /* 侧向进场，用于左右分栏 */
-.i-reveal--left { transform: translate3d(-24px, 0, 0); }
-.i-reveal--right { transform: translate3d(24px, 0, 0); }
+.i-reveal--left.is-in { animation-name: i-reveal-left; }
+.i-reveal--right.is-in { animation-name: i-reveal-right; }
 /* 纵深进场：从远处推近，比单纯位移更能表达「浮出」 */
-.i-reveal--depth { transform: translate3d(0, 24px, -60px) scale(0.96); }
+.i-reveal--depth.is-in { animation-name: i-reveal-depth; }
+@keyframes i-reveal-left {
+  from { opacity: 0; transform: translate3d(-14px, 0, 0); }
+}
+@keyframes i-reveal-right {
+  from { opacity: 0; transform: translate3d(14px, 0, 0); }
+}
+@keyframes i-reveal-depth {
+  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.985); }
+}
 
 /* ---------- 3D 悬浮：卡片随指针倾斜 ---------- */
 .i-tilt {
@@ -49,14 +71,27 @@
   transition: transform var(--i-motion-base) var(--i-motion-easing);
 }
 
-/* ---------- 3D 抬升：卡片悬停 ---------- */
+/* ---------- 抬升：卡片悬停 ---------- */
+/*
+ * 只上移加投影，不做倾斜。
+ *
+ * 原先带 rotateX(1.5deg)：鼠标扫过一排卡片时，每张都轻轻歪一下，
+ * 像一排会晃的贴纸。倾斜要成立得有一个稳定的视点，而列表里每张卡的
+ * 视点都不一样——于是它只剩下「在动」，不再说明任何空间关系。
+ * 位移与投影同时加大才是「离页面更近」的正确表达。
+ */
 .i-lift {
   transition:
-    transform var(--i-motion-base) var(--i-motion-easing),
-    box-shadow var(--i-motion-base) var(--i-motion-easing);
+    transform var(--i-motion-base) var(--i-motion-easing-out),
+    box-shadow var(--i-motion-base) var(--i-motion-easing-out);
 }
 .i-lift:hover {
-  transform: perspective(800px) translate3d(0, -4px, 8px) rotateX(1.5deg);
+  transform: translate3d(0, -3px, 0);
+  box-shadow: var(--i-shadow-lg);
+}
+/* 键盘同样能看到抬升：只做 hover 的话，用 Tab 浏览的人完全看不到这层反馈 */
+.i-lift:focus-visible {
+  transform: translate3d(0, -3px, 0);
   box-shadow: var(--i-shadow-lg);
 }
 
@@ -68,8 +103,19 @@
 }
 .i-cube {
   position: relative;
+  /* 压在落影之上：两者是兄弟，不靠 Z 值分前后 */
+  z-index: 1;
   transform-style: preserve-3d;
   animation: i-cube-spin 18s linear infinite;
+}
+/*
+ * 由读者的注意力驱动的立方体：不自转，转到当前指向的那一面。
+ * 时长比常规交互长一档——它要转过 90 度，走得太快看不清是「转过去」
+ * 还是「换了一张图」，而这个转身正是它要说明的事。
+ */
+.i-cube--steered {
+  animation: none;
+  transition: transform 420ms var(--i-motion-easing-out);
 }
 .i-cube__face {
   position: absolute;
@@ -92,6 +138,15 @@
     inset 0 1px 0 color-mix(in srgb, #fff 60%, transparent),
     0 0 24px -8px color-mix(in srgb, var(--i-color-brand) 40%, transparent);
   /*
+   * 面必须不透光。
+   *
+   * 之前的面是半透明的，本意是让体积感出来，代价是对面那一面的字
+   * 会反着透过来——屏幕上同时出现「至简」和镜像的「简至」，看着像渲染坏了。
+   * backface-visibility 挡不住这种情况：它挡的是背对镜头的那一面自己，
+   * 挡不住透过前面这层玻璃看见的后面那一面。
+   */
+  background-color: var(--i-color-bg-elevated);
+  /*
    * 隐藏背面。半透明面板会把对面的字反着透出来，六面同时可读只会糊成一团；
    * backface-visibility 必须作用在被旋转的面本身——加在子元素上无效，
    * 因为子元素已被压平进面所在的平面。
@@ -100,23 +155,32 @@
   -webkit-backface-visibility: hidden;
 }
 
-/* 落影：没有影子的立方体像贴纸，有了才像浮在页面上 */
+/*
+ * 落影：没有影子的立方体像贴纸，有了才像浮在页面上。
+ *
+ * 两条都是踩出来的：
+ *
+ * 一、虚化用径向渐变而不是 filter: blur()。filter 会把元素从三维场景里拍平，
+ *     拍平之后按 DOM 顺序画在立方体之上。
+ * 二、影子不参与三维排序，就画在舞台平面上，靠 z-index 压在立方体之下。
+ *     给它 translateZ 往后推看似更「正确」，实际上透视会把它同时缩小并上移，
+ *     正好挪进立方体正面的范围里——而立方体是被拍平的子树，
+ *     两者之间的前后关系并不按 Z 值判定，于是影子照样盖在正面上。
+ *     屏幕上就是正面中间浮着一团蓝雾，看着像那一面透光。
+ */
 .i-cube-stage::after {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -6%;
-  width: 62%;
-  height: 14px;
+  bottom: -10%;
+  width: 66%;
+  height: 26px;
   transform: translateX(-50%);
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--i-color-brand) 26%, transparent);
-  filter: blur(12px);
-  animation: i-cube-shadow 18s linear infinite;
-}
-@keyframes i-cube-shadow {
-  0%, 100% { width: 62%; opacity: 0.9; }
-  50% { width: 48%; opacity: 0.6; }
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--i-color-brand) 30%, transparent),
+    transparent
+  );
 }
 @keyframes i-cube-spin {
   from { transform: rotateX(-18deg) rotateY(0deg); }
@@ -154,32 +218,64 @@
 }
 
 /* ---------- 路由过渡 ---------- */
-.i-page-enter-active { transition: opacity 260ms var(--i-motion-easing), transform 260ms var(--i-motion-easing); }
-.i-page-leave-active { transition: opacity 140ms var(--i-motion-easing); }
-.i-page-enter-from { opacity: 0; transform: translate3d(0, 10px, 0); }
+/*
+ * 进场比离场慢：离场只是「这一页不要了」，没有信息量，拖长只是拖慢；
+ * 进场要让人看清新页面从哪儿开始，值得多给一点时间。
+ */
+.i-page-enter-active {
+  transition:
+    opacity var(--i-motion-slow) var(--i-motion-easing-out),
+    transform var(--i-motion-slow) var(--i-motion-easing-out);
+}
+.i-page-leave-active { transition: opacity var(--i-motion-fast) var(--i-motion-easing-in); }
+.i-page-enter-from { opacity: 0; transform: translate3d(0, 8px, 0); }
 .i-page-leave-to { opacity: 0; }
+
+/* ---------- 成组进场：交给 CSS 排延迟，而不是在模板里手写 index * 90 ---------- */
+/*
+ * 手写延迟的问题不在麻烦，而在于它散落各处：改一次节奏要翻遍所有页面，
+ * 于是同一个站里会同时存在 60ms、70ms、90ms 三种间隔，读者说不出哪里不对，
+ * 但就是觉得不整齐。
+ *
+ * 间隔 50ms、最多累计到第 8 个：再往后加延迟，末尾那几项会明显掉队，
+ * 长列表尤其明显——用户已经滚过去了，它才慢悠悠地淡进来。
+ */
+.i-stagger > * { --i-reveal-delay: 0ms; }
+.i-stagger > *:nth-child(2) { --i-reveal-delay: 50ms; }
+.i-stagger > *:nth-child(3) { --i-reveal-delay: 100ms; }
+.i-stagger > *:nth-child(4) { --i-reveal-delay: 150ms; }
+.i-stagger > *:nth-child(5) { --i-reveal-delay: 200ms; }
+.i-stagger > *:nth-child(6) { --i-reveal-delay: 250ms; }
+.i-stagger > *:nth-child(7) { --i-reveal-delay: 300ms; }
+.i-stagger > *:nth-child(n + 8) { --i-reveal-delay: 350ms; }
 
 /* ---------- 减少动效 ---------- */
 @media (prefers-reduced-motion: reduce) {
   .i-reveal,
-  .i-reveal--left,
-  .i-reveal--right,
-  .i-reveal--depth {
+  .i-reveal.is-in,
+  .i-reveal--left.is-in,
+  .i-reveal--right.is-in,
+  .i-reveal--depth.is-in {
     opacity: 1;
     transform: none;
-    transition: none;
+    animation: none;
   }
   .i-tilt,
   .i-tilt.is-active,
   .i-tilt__layer,
   .i-lift:hover,
+  .i-lift:focus-visible,
   .i-press:active:not(:disabled) {
     transform: none;
   }
+  .i-stagger > * { --i-reveal-delay: 0ms; }
   .i-cube { animation: none; transform: rotateX(-18deg) rotateY(-24deg); }
-  .i-cube-stage::after { animation: none; }
+  .i-cube--steered { transition: none; }
   .i-pop,
   .i-shine.is-shining::after { animation: none; }
   .i-page-enter-active,
   .i-page-leave-active { transition: none; }
 }
+
+/* 顶面与底面：只负责封住盒子，不承载内容，因此比侧面更淡 */
+.i-cube__face--cap { background-image: none; }

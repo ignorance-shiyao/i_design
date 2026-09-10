@@ -2,9 +2,34 @@
 import IPopover from '@/components/IPopover.vue'
 import IDropdown from '@/components/IDropdown.vue'
 import IButton from '@/components/IButton.vue'
+import ITour from '@/components/ITour.vue'
+import { ref } from 'vue'
+import type { TourStep } from '@i-design/common'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
 import type { DropdownItem } from '@/components/IDropdown.vue'
+
+const tourStep = ref(-1)
+const tourSteps: TourStep[] = [
+  {
+    target: '#tour-a',
+    title: '从这里开始',
+    description: '第一步指向的是页面上真实存在的元素——引导要贴着界面走，脱离界面的图文说明读者看完还是找不到入口。',
+    placement: 'bottom'
+  },
+  {
+    target: '#tour-b',
+    title: '换个方向',
+    description: '气泡的落位复用 Tooltip 那套定位规则：放不下就翻到对面，再夹回视口，不会有半个气泡露在屏幕外。',
+    placement: 'right'
+  },
+  {
+    target: '#tour-c',
+    title: '最后一步',
+    description: '末步的按钮写「我知道了」而不是「下一步」——按下去引导就结束了，按钮上得说清楚。',
+    placement: 'top'
+  }
+]
 
 const items: DropdownItem[] = [
   { key: 'edit', label: '编辑', icon: 'edit', hint: 'E' },
@@ -80,5 +105,33 @@ const grouped: DropdownItem[] = [
         </IDropdown>
       </div>
     </DemoBlock>
+    <h2>Tour 新手引导</h2>
+    <p>
+      遮罩用一个带「洞」的 SVG，而不是四条挡板拼出来的：四条挡板对不上圆角，
+      目标是圆角按钮时四个角会漏出暗色的直角，很显眼。高亮框向外扩一圈再描边——
+      贴着元素边缘挖出来的洞看起来像元素被裁掉了一块，而且元素自身的外阴影、
+      focus 环会落在洞外的暗区里，显得断开。
+    </p>
+    <p>
+      气泡落位直接复用 <code>logic/overlay</code>：与 Tooltip、Dropdown 同一套翻转与夹取规则，
+      不会有半个气泡露在屏幕外。目标不在视口里时先把它滚到正中，而不是滚到刚好露出来——
+      刚好露出来时气泡多半就没地方放了，会被挤到另一侧，读者得先找一遍气泡在哪。
+    </p>
+    <DemoBlock
+      title="分步指向界面上的关键位置"
+      description="Esc 跳过，方向键前后走。目标元素不存在时（页面还没渲染到那一块）不画洞、气泡居中，引导仍然能走完，而不是卡在半路。"
+      code='<ITour v-model="step" :steps="steps" />'
+    >
+      <div class="tour-demo">
+        <IButton id="tour-a" @click="tourStep = 0">开始引导</IButton>
+        <IButton id="tour-b" variant="secondary">第二个目标</IButton>
+        <IButton id="tour-c" variant="secondary">第三个目标</IButton>
+      </div>
+      <ITour v-model="tourStep" :steps="tourSteps" />
+    </DemoBlock>
   </article>
 </template>
+
+<style scoped>
+.tour-demo { display: flex; gap: var(--i-spacing-3); flex-wrap: wrap; }
+</style>

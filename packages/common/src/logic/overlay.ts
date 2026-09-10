@@ -165,3 +165,83 @@ export function moveMenuActive<T extends MenuItemLike>(items: T[], current: numb
 export function firstMenuActive<T extends MenuItemLike>(items: T[]): number {
   return items.findIndex((item) => !item.disabled && !item.divider)
 }
+
+/* ---------- 新手引导 ---------- */
+
+export interface TourStep {
+  /** 要高亮的元素，各端自行解析（Web 是 CSS 选择器） */
+  target: string
+  title: string
+  description: string
+  placement?: Placement
+}
+
+export interface TourHole {
+  x: number
+  y: number
+  width: number
+  height: number
+  radius: number
+}
+
+/**
+ * 高亮框：目标元素向外扩一圈。
+ *
+ * 不贴着元素边缘挖：贴边挖出来的洞看起来像元素被裁掉了一块，
+ * 而且元素自身的外阴影、focus 环会落在洞外的暗区里，显得断开。
+ * 扩出来的这一圈同时给了「这是被指出来的那个」的余量。
+ */
+export function tourHole(
+  rect: { x: number; y: number; width: number; height: number },
+  { padding = 6, radius = 8 } = {}
+): TourHole {
+  return {
+    x: rect.x - padding,
+    y: rect.y - padding,
+    width: rect.width + padding * 2,
+    height: rect.height + padding * 2,
+    radius
+  }
+}
+
+/**
+ * 下一步的下标。到末步返回 -1，表示引导结束。
+ *
+ * 结束用 -1 而不是停在末步：停在末步时，「下一步」按钮点下去没有任何变化，
+ * 用户不知道是走完了还是卡住了——调用方拿到 -1 才知道该关掉浮层。
+ */
+export function tourNext(current: number, total: number): number {
+  if (current + 1 >= total) return -1
+  return current + 1
+}
+
+/** 上一步。首步不再后退，返回 0 */
+export function tourPrev(current: number): number {
+  return Math.max(0, current - 1)
+}
+
+/**
+ * 目标不在视口里时，要把它滚到哪个位置。
+ *
+ * 滚到正中而不是滚到刚好露出来：刚好露出来时，说明气泡多半就没地方放了，
+ * 会被挤到目标另一侧，读者得先找一遍气泡在哪。
+ */
+export function tourScrollTo(
+  rect: { y: number; height: number },
+  viewport: { height: number },
+  scrollTop: number
+): number {
+  const center = rect.y + scrollTop + rect.height / 2
+  return Math.max(0, center - viewport.height / 2)
+}
+
+/**
+ * 目标此刻是否已经完整可见。可见就不滚，省掉一次没必要的跳动。
+ */
+export function tourNeedsScroll(
+  rect: { y: number; height: number },
+  viewport: { height: number },
+  padding = 24
+): boolean {
+  return rect.y < padding || rect.y + rect.height > viewport.height - padding
+}

@@ -14,6 +14,7 @@
 @import './components/agent.css';
 @import './components/alert.css';
 @import './components/anchor.css';
+@import './components/autocomplete.css';
 @import './components/avatar-group.css';
 @import './components/avatar.css';
 @import './components/badge.css';
@@ -45,8 +46,10 @@
 @import './components/form.css';
 @import './components/grid.css';
 @import './components/icon.css';
+@import './components/infinite.css';
 @import './components/input-number.css';
 @import './components/input.css';
+@import './components/keypad.css';
 @import './components/list.css';
 @import './components/loading.css';
 @import './components/menu.css';
@@ -81,11 +84,16 @@
 @import './components/table.css';
 @import './components/tabs.css';
 @import './components/tag.css';
+@import './components/taginput.css';
 @import './components/textarea.css';
 @import './components/timeline.css';
 @import './components/toast.css';
 @import './components/tooltip.css';
+@import './components/tour.css';
 @import './components/tree-select.css';
 @import './components/tree.css';
 @import './components/typography.css';
 @import './components/upload.css';
+
+/* 工具层排在最后：它要能盖过组件自己的 transition，见 build-styles-index.mjs */
+@import './motion.css';

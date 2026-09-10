@@ -1,0 +1,34 @@
+<view wx:if="{{step}}" class="i-tour" role="dialog">
+  <!--
+    小程序没有 SVG mask，遮罩改用一个「反向阴影」：
+    高亮框本身透明，靠一圈极大的外阴影把四周压暗。这样洞跟着圆角走，
+    不会像四条挡板那样在圆角处漏出暗色的直角。
+  -->
+  <view class="i-tour__mask" bindtap="skip" />
+  <view
+    wx:if="{{hole}}"
+    class="i-tour__ring i-tour__ring--punch"
+    style="left:{{hole.x}}px;top:{{hole.y}}px;width:{{hole.width}}px;height:{{hole.height}}px;border-radius:{{hole.radius}}px"
+  />
+
+  <view
+    class="i-tour__pop {{hole ? '' : 'is-center'}}"
+    style="{{hole ? 'left:' + pop.x + 'px;top:' + pop.y + 'px' : ''}}"
+  >
+    <view class="i-tour__head">
+      <text class="i-tour__title">{{step.title}}</text>
+      <view class="i-tour__close" aria-label="跳过引导" bindtap="skip">
+        <view class="i-icon i-icon--close" style="width:14px;height:14px" />
+      </view>
+    </view>
+    <text class="i-tour__desc">{{step.description}}</text>
+    <view class="i-tour__foot">
+      <!-- 进度写成「2 / 5」而不是画一排点：引导通常不长，数字比点更省认知 -->
+      <text class="i-tour__count">{{current + 1}} / {{steps.length}}</text>
+      <view class="i-tour__actions">
+        <view wx:if="{{current > 0}}" class="i-button i-button--text i-button--sm" bindtap="prev">上一步</view>
+        <view class="i-button i-button--primary i-button--sm" bindtap="next">{{isLast ? '我知道了' : '下一步'}}</view>
+      </view>
+    </view>
+  </view>
+</view>

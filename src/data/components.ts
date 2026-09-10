@@ -48,9 +48,15 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Form', cn: '表单', to: '/components/form', desc: '布局、校验与提交', status: 'ready' },
       { name: 'DatePicker', cn: '日期选择器', to: '/components/date-picker', desc: '选择日期', status: 'ready' },
       { name: 'Upload', cn: '上传', to: '/components/upload', desc: '上传文件与进度反馈', status: 'ready' },
-      { name: 'Cascader', cn: '级联选择', to: '', desc: '多级联动选择', status: 'planned' },
+      { name: 'Cascader', cn: '级联选择', to: '/components/cascader', desc: '多级联动选择', status: 'ready' },
+      { name: 'TreeSelect', cn: '树选择', to: '/components/tree', desc: '在层级里选一项或多项', status: 'ready' },
+      { name: 'Slider', cn: '滑块', to: '/components/data-entry', desc: '在连续区间内取值', status: 'ready' },
+      { name: 'InputNumber', cn: '数字输入', to: '/components/data-entry', desc: '带步进与范围约束的数值', status: 'ready' },
+      { name: 'Rate', cn: '评分', to: '/components/data-entry', desc: '打分与半星', status: 'ready' },
+      { name: 'TagInput', cn: '输入标签', to: '/components/data-entry', desc: '回车成标签、粘贴批量拆分', status: 'ready' },
+      { name: 'AutoComplete', cn: '自动完成', to: '/components/data-entry', desc: '边输入边给候选', status: 'ready' },
+      { name: 'NumberKeypad', cn: '数字键盘', to: '/components/mobile', desc: '金额与验证码的触摸输入', status: 'ready' },
       { name: 'TimePicker', cn: '时间选择器', to: '', desc: '选择时刻或区间', status: 'planned' },
-      { name: 'Slider', cn: '滑块', to: '', desc: '在连续区间内取值', status: 'planned' },
       { name: 'Transfer', cn: '穿梭框', to: '', desc: '在两栏之间移动条目', status: 'planned' }
     ]
   },
@@ -65,7 +71,9 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Avatar', cn: '头像', to: '/components/avatar', desc: '展示用户或实体', status: 'ready' },
       { name: 'Badge', cn: '徽标', to: '/components/badge', desc: '标记数量或状态点', status: 'ready' },
       { name: 'Collapse', cn: '折叠面板', to: '/components/collapse', desc: '折叠次要内容', status: 'ready' },
-      { name: 'Tree', cn: '树', to: '', desc: '展示层级结构', status: 'planned' },
+      { name: 'Tree', cn: '树', to: '/components/tree', desc: '展示层级结构', status: 'ready' },
+      { name: 'Carousel', cn: '走马灯', to: '/components/data-display', desc: '一组内容轮播，移动端即 Swiper', status: 'ready' },
+      { name: 'InfiniteScroll', cn: '无限滚动', to: '/components/mobile', desc: '翻到底自动续下一页', status: 'ready' },
       { name: 'Descriptions', cn: '描述列表', to: '/components/descriptions', desc: '成组展示只读字段', status: 'ready' },
       { name: 'Skeleton', cn: '骨架屏', to: '/components/skeleton', desc: '加载中的内容占位', status: 'ready' }
     ]
@@ -75,25 +83,76 @@ export const componentCategories: ComponentCategory[] = [
     desc: '把系统状态告诉用户，按打断成本从低到高选择。',
     items: [
       { name: 'Alert', cn: '警告提示', to: '/components/alert', desc: '页面内的持续提示', status: 'ready' },
-      { name: 'Modal', cn: '对话框', to: '/components/modal', desc: '打断流程要求处理', status: 'ready' },
       { name: 'Message', cn: '全局提示', to: '/components/message', desc: '操作结果的轻量反馈', status: 'ready' },
+      { name: 'Notification', cn: '通知', to: '/components/navigation', desc: '角落通知，可常驻并带操作', status: 'ready' },
+      { name: 'Popconfirm', cn: '气泡确认', to: '/components/popconfirm', desc: '就地确认轻量操作', status: 'ready' },
+      { name: 'Modal', cn: '对话框', to: '/components/modal', desc: '打断流程要求处理', status: 'ready' },
       { name: 'Drawer', cn: '抽屉', to: '/components/drawer', desc: '从边缘滑出的面板', status: 'ready' },
       { name: 'Loading', cn: '加载中', to: '/components/loading', desc: '标识区域正在加载', status: 'ready' },
-      { name: 'Popconfirm', cn: '气泡确认', to: '/components/popconfirm', desc: '就地确认轻量操作', status: 'ready' },
-      { name: 'Popover', cn: '气泡卡片', to: '/components/overlay', desc: '承载比文字提示更复杂的内容', status: 'ready' },
-      { name: 'Dropdown', cn: '下拉菜单', to: '/components/overlay', desc: '收纳次级操作，自动避让视口边缘', status: 'ready' },
-      { name: 'Tree', cn: '树形控件', to: '/components/tree', desc: '层级数据的展开、勾选与搜索', status: 'ready' },
-      { name: 'Cascader', cn: '级联选择', to: '/components/cascader', desc: '逐级选择层级数据', status: 'ready' },
-      { name: 'TreeSelect', cn: '树选择', to: '/components/tree', desc: '把树收进下拉面板里选', status: 'ready' },
-      { name: 'Menu', cn: '导航菜单', to: '/components/navigation', desc: '侧栏多级入口，可收起为图标栏', status: 'ready' },
-      { name: 'Anchor', cn: '页内锚点', to: '/components/navigation', desc: '章节跳转与跟随高亮', status: 'ready' },
-      { name: 'Notification', cn: '通知', to: '/components/navigation', desc: '角落通知，可常驻并带操作', status: 'ready' },
-      { name: 'ApprovalCard', cn: '征求确认', to: '/components/chat', desc: '智能体行动前的人类介入', status: 'ready' },
-      { name: 'AgentTasks', cn: '任务行', to: '/components/chat', desc: '智能体任务的实时状态', status: 'ready' },
+      { name: 'Result', cn: '结果页', to: '/components/result', desc: '操作结果的整页反馈', status: 'ready' }
+    ]
+  },
+  {
+    title: '图表',
+    desc: '让数据自己说话。颜色按「它在表达什么」分工，而不是按好看程度挑。',
+    items: [
+      { name: 'Chart', cn: '折线 / 柱状 / 面积', to: '/components/chart', desc: '趋势与对比', status: 'ready' },
+      { name: 'ChartPie', cn: '饼图 / 环图', to: '/components/chart', desc: '构成占比', status: 'ready' },
+      { name: 'ChartScatter', cn: '散点 / 气泡', to: '/components/chart', desc: '相关性与离群点', status: 'ready' },
+      { name: 'ChartHeatmap', cn: '热力图', to: '/components/chart', desc: '二维密度', status: 'ready' },
+      { name: 'ChartRadar', cn: '雷达图', to: '/components/chart', desc: '多维度对比', status: 'ready' },
+      { name: 'ChartFunnel', cn: '漏斗图', to: '/components/chart', desc: '转化流失', status: 'ready' },
+      { name: 'ChartGauge', cn: '仪表盘', to: '/components/chart', desc: '单值与阈值', status: 'ready' },
+      { name: 'ChartBox', cn: '箱线图', to: '/components/chart', desc: '分布与离群点', status: 'ready' },
+      { name: 'ChartWaterfall', cn: '瀑布图', to: '/components/chart', desc: '增减归因', status: 'ready' },
+      { name: 'ChartSankey', cn: '桑基图', to: '/components/chart', desc: '流向与分流', status: 'ready' },
+      { name: 'ChartTreemap', cn: '矩形树图', to: '/components/chart', desc: '层级占比', status: 'ready' },
+      { name: 'ChartZoom', cn: '区间缩放', to: '/components/chart', desc: '长序列里挑一段看', status: 'ready' },
+      { name: 'Sparkline', cn: '迷你图', to: '/components/data-display', desc: '嵌在文字里的趋势', status: 'ready' }
+    ]
+  },
+  {
+    title: '流程图',
+    desc: '审批链、状态机、数据流向——写成文字要读三遍，画成图一眼就懂。',
+    items: [
+      { name: 'Flow', cn: '流程画布', to: '/components/flow', desc: '拖拽、缩放、自动布局与撤销', status: 'ready' },
+      { name: 'Marquee', cn: '框选与批量移动', to: '/components/flow', desc: '整组一起走，撤销也算一次', status: 'ready' },
+      { name: 'Minimap', cn: '缩略图', to: '/components/flow', desc: '大图里点哪跳哪', status: 'ready' },
+      { name: 'Snapshot', cn: '快照导出', to: '/components/flow', desc: '导出整张图而不是当前视口', status: 'ready' }
+    ]
+  },
+  {
+    title: 'AI 会话',
+    desc: '智能体替你做事时，人在哪一步介入、看到什么、能否反悔。',
+    items: [
+      { name: 'ChatMessage', cn: '消息气泡', to: '/components/chat', desc: '流式输出与来源标注', status: 'ready' },
+      { name: 'PromptInput', cn: '输入台', to: '/components/chat', desc: '多行输入、附件与发送', status: 'ready' },
+      { name: 'ChatThinking', cn: '思考过程', to: '/components/chat', desc: '可展开的推理步骤', status: 'ready' },
+      { name: 'ChatToolCall', cn: '工具调用', to: '/components/chat', desc: '调用了什么、拿到什么', status: 'ready' },
+      { name: 'ApprovalCard', cn: '征求确认', to: '/components/chat', desc: '行动前的人类介入', status: 'ready' },
+      { name: 'AgentTasks', cn: '任务行', to: '/components/chat', desc: '任务的实时状态', status: 'ready' },
       { name: 'RecommendCard', cn: '建议卡', to: '/components/chat', desc: '带置信度的主动建议', status: 'ready' },
       { name: 'ContextCards', cn: '上下文卡', to: '/components/chat', desc: '检索到的片段与出处', status: 'ready' },
-      { name: 'DiffTable', cn: '差异表', to: '/components/chat', desc: '成批改动逐行采纳', status: 'ready' },
-      { name: 'Result', cn: '结果页', to: '/components/result', desc: '操作结果的整页反馈', status: 'ready' }
+      { name: 'DiffTable', cn: '差异表', to: '/components/chat', desc: '成批改动逐行采纳', status: 'ready' }
+    ]
+  },
+  {
+    title: '移动端',
+    desc: '触摸场景的特有形态：拇指够得到、手势说得通。',
+    items: [
+      { name: 'NavBar', cn: '导航栏', to: '/components/mobile', desc: '让出状态栏的顶栏', status: 'ready' },
+      { name: 'Tabbar', cn: '标签栏', to: '/components/mobile', desc: '常驻底部的页面切换', status: 'ready' },
+      { name: 'Popup', cn: '浮层', to: '/components/mobile', desc: '从边缘弹出的裸容器', status: 'ready' },
+      { name: 'ActionSheet', cn: '动作面板', to: '/components/mobile', desc: '底部弹出的操作列表', status: 'ready' },
+      { name: 'Cell', cn: '单元格', to: '/components/mobile', desc: '列表行与设置项', status: 'ready' },
+      { name: 'SwipeCell', cn: '滑动操作', to: '/components/mobile', desc: '左滑露出次级操作', status: 'ready' },
+      { name: 'SearchBar', cn: '搜索栏', to: '/components/mobile', desc: '移动尺度的搜索入口', status: 'ready' },
+      { name: 'Picker', cn: '选择器', to: '/components/mobile', desc: '滚轮式多列选择', status: 'ready' },
+      { name: 'NoticeBar', cn: '通告栏', to: '/components/mobile', desc: '与操作无关的广播', status: 'ready' },
+      { name: 'CountDown', cn: '倒计时', to: '/components/mobile', desc: '秒杀与验证码计时', status: 'ready' },
+      { name: 'NumberKeypad', cn: '数字键盘', to: '/components/mobile', desc: '金额与验证码输入', status: 'ready' },
+      { name: 'InfiniteScroll', cn: '无限滚动', to: '/components/mobile', desc: '翻到底自动续下一页', status: 'ready' },
+      { name: 'Tour', cn: '新手引导', to: '/components/overlay', desc: '分步指向界面上的关键位置', status: 'ready' }
     ]
   }
 ]

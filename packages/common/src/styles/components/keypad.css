@@ -1,0 +1,61 @@
+/*
+ * INumberKeypad —— 数字键盘。
+ *
+ * 用手机拨号盘的顺序（1 在左上）而不是计算器的顺序（7 在左上）：
+ * 输入金额和验证码时，用户的肌肉记忆来自拨号盘。
+ */
+.i-keypad {
+  display: flex;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2);
+  background: var(--i-color-bg-subtle);
+  border-radius: var(--i-radius-lg);
+}
+.i-keypad__pad {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--i-spacing-2);
+}
+.i-keypad__key {
+  height: 48px;
+  border: none;
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-xl);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  box-shadow: var(--i-shadow-sm);
+  /* 按下要有位移：键盘是连续操作，只靠变色很难确认「这一下按到了」 */
+  transition: transform var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-keypad__key:active { transform: scale(0.96); background: var(--i-color-bg-subtle); }
+/* 功能键用淡底色区分，而不是加重边框 */
+.i-keypad__key--fn {
+  display: grid;
+  place-items: center;
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-lg);
+  box-shadow: none;
+}
+/* 占位格：不渲染成空按钮，否则读屏会念出一个没有名字的按钮 */
+.i-keypad__key.is-empty {
+  background: none;
+  box-shadow: none;
+  cursor: default;
+  visibility: hidden;
+}
+.i-keypad__confirm {
+  width: 76px;
+  border: none;
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-brand);
+  /* 与按钮同一条规则：主题色换成浅色时写死白字会看不清 */
+  color: var(--i-color-text-on-brand, #fff);
+  font-size: var(--i-font-size-md);
+  cursor: pointer;
+}
+.i-keypad__confirm:active { background: var(--i-color-brand-active); }

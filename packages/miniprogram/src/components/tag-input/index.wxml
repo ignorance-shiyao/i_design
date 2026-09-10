@@ -1,0 +1,30 @@
+<view class="i-taginput {{focused ? 'is-focused' : ''}} {{disabled ? 'is-disabled' : ''}} {{full ? 'is-full' : ''}}">
+  <view wx:for="{{value}}" wx:key="index" class="i-taginput__tag">
+    <text>{{item}}</text>
+    <view
+      wx:if="{{!disabled}}"
+      class="i-taginput__remove"
+      aria-label="移除 {{item}}"
+      data-index="{{index}}"
+      catchtap="onRemove"
+    >
+      <view class="i-icon i-icon--close" style="width:11px;height:11px" />
+    </view>
+  </view>
+
+  <input
+    class="i-taginput__input"
+    value="{{draft}}"
+    placeholder="{{value.length ? '' : placeholder}}"
+    disabled="{{disabled || full}}"
+    confirm-type="done"
+    bindinput="onInput"
+    bindconfirm="onConfirm"
+    bindkeyboardheightchange="noop"
+    bindfocus="onFocus"
+    bindblur="onBlur"
+  />
+
+  <!-- 上限就摆在框里，而不是等超了再弹提示：先说清楚比事后纠正省事 -->
+  <text wx:if="{{max > 0}}" class="i-taginput__count">{{value.length}} / {{max}}</text>
+</view>

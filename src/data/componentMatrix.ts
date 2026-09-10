@@ -49,6 +49,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IAutoComplete",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IAvatar",
     "ends": {
       "vue-next": true,
@@ -469,6 +479,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IInfiniteScroll",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IInput",
     "ends": {
       "vue-next": true,
@@ -530,6 +550,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "INotificationLayer",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "INumberKeypad",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -769,6 +799,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ITagInput",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ITextarea",
     "ends": {
       "vue-next": true,
@@ -790,6 +830,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "ITooltip",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ITour",
     "ends": {
       "vue-next": true,
       "vue": true,

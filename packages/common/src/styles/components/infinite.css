@@ -1,0 +1,26 @@
+/*
+ * IInfiniteScroll —— 无限滚动。
+ *
+ * 底部状态区一直占位，而不是加载时才插进来：插进来会把列表往上顶一下，
+ * 用户正在读的那一行会跳走。
+ */
+.i-infinite { position: relative; }
+.i-infinite.is-scroller { overflow-y: auto; }
+.i-infinite__foot {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: var(--i-spacing-3) 0;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}
+.i-infinite__retry {
+  border: none;
+  background: none;
+  color: var(--i-color-text-link);
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.i-infinite__done { color: var(--i-color-text-tertiary); }

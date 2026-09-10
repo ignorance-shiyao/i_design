@@ -23,15 +23,21 @@ const bundle = (entry, name) => {
 
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
-const { moveActive, moveActiveLoop } = await bundle('packages/common/src/logic/select.ts', 'select')
+const {
+  splitTags, addTags, backspace: tagBackspace, splitDraft, removeTag: tagRemove
+} = await bundle('packages/common/src/logic/taginput.ts', 'taginput')
+const { moveActive, moveActiveLoop, matchParts, filterSuggestions } = await bundle(
+  'packages/common/src/logic/select.ts',
+  'select'
+)
 const { clampNumber, roundTo, stepValue, ratioOf, valueFromRatio } = await bundle(
   'packages/common/src/logic/number.ts',
   'number'
 )
-const { resolveOverlay, moveMenuActive, firstMenuActive } = await bundle(
-  'packages/common/src/logic/overlay.ts',
-  'overlay'
-)
+const {
+  resolveOverlay, moveMenuActive, firstMenuActive,
+  tourHole, tourNext, tourPrev, tourScrollTo, tourNeedsScroll
+} = await bundle('packages/common/src/logic/overlay.ts', 'overlay')
 const {
   flattenTree, resolveCheckState, toggleChecked, searchTree, leafKeys,
   cascaderColumns, cascaderActivate, nodePath
@@ -395,6 +401,16 @@ const { resolveSwipe, nextIndex: carouselNext, dotRange, rubberBand } = await bu
   'carousel'
 )
 
+/* ---------- 无限滚动与数字键盘 ----------
+ * 「内容没撑满容器时也要触发」与「小数位满了再按数字应当无效」这两条，
+ * 漏掉都不会报错：前者表现为列表永远停在第一页，后者表现为末位被悄悄替换。
+ */
+const { shouldLoadMore, loadHint } = await bundle('packages/common/src/logic/scroll.ts', 'scroll')
+const { pressKey, keypadRows, isComplete } = await bundle(
+  'packages/common/src/logic/keypad.ts',
+  'keypad'
+)
+
 const bubbleCases = [[0, 0, 100], [50, 0, 100], [100, 0, 100], [7, 5, 5], [-3, 0, 10]]
 const bubbleExpectations = bubbleCases.map(
   ([v, lo, hi]) =>
@@ -664,6 +680,151 @@ const bandCases = [[-0.5, 5, false], [5.5, 5, false], [2.0, 5, false], [-0.5, 5,
 const bandExpectations = bandCases.map(([o, n, loop]) =>
   `    expect(rubberBand(${o.toFixed(1)}, ${n}, loop: ${loop}), closeTo(${rubberBand(o, n, loop)}, 1e-9));`)
 
+const scrollCases = [
+  // 内容没撑满容器：没有滚动条，用户永远划不到底
+  [{ scrollTop: 0, clientHeight: 600, scrollHeight: 300 }, 'idle'],
+  [{ scrollTop: 0, clientHeight: 600, scrollHeight: 300 }, 'loading'],
+  [{ scrollTop: 0, clientHeight: 600, scrollHeight: 300 }, 'finished'],
+  [{ scrollTop: 900, clientHeight: 600, scrollHeight: 1600 }, 'idle'],
+  [{ scrollTop: 400, clientHeight: 600, scrollHeight: 1600 }, 'idle'],
+  [{ scrollTop: 900, clientHeight: 600, scrollHeight: 1600 }, 'error'],
+]
+const scrollExpectations = scrollCases.map(([m, status]) =>
+  `    expect(
+        shouldLoadMore(scrollTop: ${m.scrollTop.toFixed(1)}, clientHeight: ${m.clientHeight.toFixed(1)},
+            scrollHeight: ${m.scrollHeight.toFixed(1)}, status: LoadStatus.${status}),
+        ${shouldLoadMore(m, status)});`)
+
+const hintExpectations = [['loading', false], ['error', false], ['finished', false], ['finished', true], ['idle', false]]
+  .map(([status, empty]) =>
+    `    expect(loadHint(LoadStatus.${status}, empty: ${empty}), '${loadHint(status, empty)}');`)
+
+// 一串连贯的按键：每一步的期望值都由 TS 实现算出
+const keySequence = ['1', '2', '.', '3', '4', '5', 'backspace', '.', '9']
+let keyAcc = ''
+const keyExpectations = keySequence.map((k) => {
+  const before = keyAcc
+  keyAcc = pressKey(keyAcc, k)
+  return `    expect(pressKey('${before}', '${k}'), '${keyAcc}');`
+})
+
+const keyEdgeCases = [
+  ['', '.', 2, 12, false], ['0', '5', 2, 12, false], ['-0', '5', 2, 12, true],
+  ['12', '.', 0, 12, false], ['', 'sign', 2, 12, true], ['-3', 'sign', 2, 12, true],
+  ['', 'sign', 2, 12, false], ['123456789012', '3', 2, 12, false], ['', 'backspace', 2, 12, false],
+]
+const keyEdgeExpectations = keyEdgeCases.map(([v, k, d, m, n]) =>
+  `    expect(pressKey('${v}', '${k}', decimals: ${d}, maxLength: ${m}, negative: ${n}),
+        '${pressKey(v, k, { decimals: d, maxLength: m, negative: n })}');`)
+
+const rowsExpectations = [[2, false], [0, false], [2, true]].map(([d, n]) => {
+  const rows = keypadRows({ decimals: d, negative: n })
+  return `    expect(keypadRows(decimals: ${d}, negative: ${n}),
+        <List<String>>[${rows.map((r) => `<String>[${r.map((k) => `'${k}'`).join(', ')}]`).join(', ')}]);`
+})
+
+const completeExpectations = ['', '-', '.', '12', '12.', '12.5', '-3.25', '1.2.3'].map((v) =>
+  `    expect(isComplete('${v}'), ${isComplete(v)});`)
+
+/* ---------- 新手引导 ----------
+ * 「到末步返回 -1」与「目标不在视口时滚到正中」这两条如果各端各写，
+ * 会得到两种都说得通但不一样的行为：一个卡在末步，一个滚到刚好露出来。
+ */
+const holeCases = [[10, 20, 100, 40, 6], [0, 0, 8, 8, 0], [-5, -5, 50, 50, 12]]
+const holeExpectations = holeCases.map(([x, y, w, h, pad]) => {
+  const r = tourHole({ x, y, width: w, height: h }, { padding: pad })
+  return `    _expectHole(tourHole(const Rect.fromLTWH(${x.toFixed(1)}, ${y.toFixed(1)}, ${w.toFixed(1)}, ${h.toFixed(1)}), padding: ${pad.toFixed(1)}),
+        ${r.x.toFixed(1)}, ${r.y.toFixed(1)}, ${r.width.toFixed(1)}, ${r.height.toFixed(1)}, 'hole(${x},${y})');`
+})
+
+const tourStepCases = [[0, 3], [1, 3], [2, 3], [0, 1], [5, 3]]
+const tourStepExpectations = tourStepCases.flatMap(([i, n]) => [
+  `    expect(tourNext(${i}, ${n}), ${tourNext(i, n)});`,
+  `    expect(tourPrev(${i}), ${tourPrev(i)});`,
+])
+
+const scrollToCases = [
+  [{ y: 1000, height: 40 }, 800, 0],
+  [{ y: -200, height: 40 }, 800, 500],
+  [{ y: 10, height: 40 }, 800, 0],
+]
+const scrollToExpectations = scrollToCases.map(([r, vh, top]) =>
+  `    expect(tourScrollTo(const Rect.fromLTWH(0.0, ${r.y.toFixed(1)}, 0.0, ${r.height.toFixed(1)}), ${vh.toFixed(1)}, ${top.toFixed(1)}),
+        closeTo(${tourScrollTo(r, { height: vh }, top)}, 1e-9));`)
+
+const needsScrollCases = [
+  [{ y: 10, height: 40 }, 800],
+  [{ y: 400, height: 40 }, 800],
+  [{ y: 780, height: 40 }, 800],
+  [{ y: -1, height: 40 }, 800],
+]
+const needsScrollExpectations = needsScrollCases.map(([r, vh]) =>
+  `    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, ${r.y.toFixed(1)}, 0.0, ${r.height.toFixed(1)}), ${vh.toFixed(1)}),
+        ${tourNeedsScroll(r, { height: vh })});`)
+
+/* ---------- 输入标签与自动完成 ----------
+ * 粘贴同一段文本在两端上拆出不同数量的标签、命中高亮错半个字，
+ * 都是不会报错但一眼能看出不对的分叉。
+ */
+const dartStrings = (arr) => `<String>[${arr.map((s) => `'${s.replace(/'/g, "\\'")}'`).join(', ')}]`
+
+const splitCases = [
+  'a,b,c', 'a，b；c', ' x1 , x2 \n x3 ', 'onlyone', '', ',,,', 'a\tb',
+]
+const splitExpectations = splitCases.map((text) =>
+  `    expect(splitTags('${text.replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\t/g, '\\t')}'),
+        ${dartStrings(splitTags(text))});`)
+
+const draftCases = ['a,b,c', 'abc', 'a,', ',a']
+const draftExpectations = draftCases.map((d) => {
+  const r = splitDraft(d)
+  return `    _expectDraft(splitDraft('${d}'), ${dartStrings(r.ready)}, '${r.rest}', 'draft(${d})');`
+})
+
+const addCases = [
+  [['a'], ['b', 'c'], false, 0],
+  [['a'], ['a'], false, 0],
+  [['a'], ['a'], true, 0],
+  [['a', 'b'], ['c'], false, 2],
+  [['a'], ['  '], false, 0],
+  [[], ['x', 'x', 'y'], false, 0],
+]
+const addExpectations = addCases.map(([cur, inc, dup, max]) => {
+  const r = addTags(cur, inc, { allowDuplicate: dup, max })
+  const reason = r.rejected ? `TagRejectReason.${r.rejected}` : 'null'
+  return `    _expectAdd(addTags(${dartStrings(cur)}, ${dartStrings(inc)}, allowDuplicate: ${dup}, max: ${max}),
+        ${dartStrings(r.tags)}, ${reason}, 'add(${inc.join('|')})');`
+})
+
+const backspaceCases = [[['a', 'b'], ''], [['a', 'b'], 'x'], [[], '']]
+const backspaceExpectations = backspaceCases.flatMap(([tags, draft]) => {
+  const r = tagBackspace(tags, draft)
+  return [
+    `    expect(backspace(${dartStrings(tags)}, '${draft}').consumed, ${r.consumed});`,
+    `    expect(backspace(${dartStrings(tags)}, '${draft}').tags, ${dartStrings(r.tags)});`,
+  ]
+})
+
+const removeExpectations = [[['a', 'b', 'c'], 1], [['a'], 0], [['a'], 5]].map(([tags, i]) =>
+  `    expect(removeTag(${dartStrings(tags)}, ${i}), ${dartStrings(tagRemove(tags, i))});`)
+
+const matchCases = [['北京', '北'], ['湖北', '北'], ['Beijing', 'ji'], ['abcabc', 'bc'], ['abc', ''], ['abc', 'z']]
+const matchExpectations = matchCases.map(([label, kw]) => {
+  const parts = matchParts(label, kw)
+  const literal = parts.map((p) => `IMatchPart(text: '${p.text}', hit: ${p.hit})`).join(', ')
+  return `    _expectParts(matchParts('${label}', '${kw}'), <IMatchPart>[${literal}], 'match(${label},${kw})');`
+})
+
+// 前缀命中必须整体排在中段命中之前，同档内保持数据源原顺序
+const suggestOptions = ['北京', '北海', '湖北', '河北', '上海', '珠海']
+const dartSuggestions = `<ISuggestion>[${suggestOptions.map((v) => `const ISuggestion(value: '${v}')`).join(', ')}]`
+const suggestExpectations = [['北', 20], ['海', 20], ['北', 2], ['', 3], ['zz', 20]].map(([kw, limit]) => {
+  const got = filterSuggestions(suggestOptions.map((v) => ({ value: v })), kw, limit)
+  return `    expect(
+        filterSuggestions(${dartSuggestions}, '${kw}', limit: ${limit}).map((s) => s.value).toList(),
+        ${dartStrings(got.map((g) => g.value))});`
+})
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -679,10 +840,38 @@ import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
+import 'package:i_design/src/logic/scroll.dart';
+import 'package:i_design/src/logic/keypad.dart';
+import 'package:i_design/src/logic/taginput.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
   expect(actual.active, active, reason: '\$label 当前项不一致');
+}
+
+void _expectDraft(TagDraftSplit actual, List<String> ready, String rest, String label) {
+  expect(actual.ready, ready, reason: '\$label 成词部分不一致');
+  expect(actual.rest, rest, reason: '\$label 留存部分不一致');
+}
+
+void _expectAdd(TagAddResult actual, List<String> tags, TagRejectReason? rejected, String label) {
+  expect(actual.tags, tags, reason: '\$label 结果不一致');
+  expect(actual.rejected, rejected, reason: '\$label 拒绝原因不一致');
+}
+
+void _expectParts(List<IMatchPart> actual, List<IMatchPart> expected, String label) {
+  expect(actual.length, expected.length, reason: '\$label 段数不一致');
+  for (var i = 0; i < expected.length; i++) {
+    expect(actual[i].text, expected[i].text, reason: '\$label 第 \$i 段文字不一致');
+    expect(actual[i].hit, expected[i].hit, reason: '\$label 第 \$i 段命中标记不一致');
+  }
+}
+
+void _expectHole(ITourHole actual, double x, double y, double w, double h, String label) {
+  expect(actual.x, closeTo(x, 1e-9), reason: '\$label x 不一致');
+  expect(actual.y, closeTo(y, 1e-9), reason: '\$label y 不一致');
+  expect(actual.width, closeTo(w, 1e-9), reason: '\$label 宽不一致');
+  expect(actual.height, closeTo(h, 1e-9), reason: '\$label 高不一致');
 }
 
 void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
@@ -919,6 +1108,38 @@ ${carouselNextExpectations.join('\n')}
   test('指示点收窗与两端阻尼与 Web 端一致', () {
 ${dotExpectations.join('\n')}
 ${bandExpectations.join('\n')}
+  });
+
+  test('无限滚动触发判定与 Web 端一致（含没撑满容器的情形）', () {
+${scrollExpectations.join('\n')}
+${hintExpectations.join('\n')}
+  });
+
+  test('数字键盘按键规则与 Web 端一致', () {
+${keyExpectations.join('\n')}
+${keyEdgeExpectations.join('\n')}
+${rowsExpectations.join('\n')}
+${completeExpectations.join('\n')}
+  });
+
+  test('新手引导的高亮框、步进与滚动判定与 Web 端一致', () {
+${holeExpectations.join('\n')}
+${tourStepExpectations.join('\n')}
+${scrollToExpectations.join('\n')}
+${needsScrollExpectations.join('\n')}
+  });
+
+  test('输入标签的拆分、去重与退格与 Web 端一致', () {
+${splitExpectations.join('\n')}
+${draftExpectations.join('\n')}
+${addExpectations.join('\n')}
+${backspaceExpectations.join('\n')}
+${removeExpectations.join('\n')}
+  });
+
+  test('自动完成的命中切段与候选排序与 Web 端一致', () {
+${matchExpectations.join('\n')}
+${suggestExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {
