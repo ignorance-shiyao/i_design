@@ -395,6 +395,16 @@ const { resolveSwipe, nextIndex: carouselNext, dotRange, rubberBand } = await bu
   'carousel'
 )
 
+/* ---------- 无限滚动与数字键盘 ----------
+ * 「内容没撑满容器时也要触发」与「小数位满了再按数字应当无效」这两条，
+ * 漏掉都不会报错：前者表现为列表永远停在第一页，后者表现为末位被悄悄替换。
+ */
+const { shouldLoadMore, loadHint } = await bundle('packages/common/src/logic/scroll.ts', 'scroll')
+const { pressKey, keypadRows, isComplete } = await bundle(
+  'packages/common/src/logic/keypad.ts',
+  'keypad'
+)
+
 const bubbleCases = [[0, 0, 100], [50, 0, 100], [100, 0, 100], [7, 5, 5], [-3, 0, 10]]
 const bubbleExpectations = bubbleCases.map(
   ([v, lo, hi]) =>
@@ -664,6 +674,52 @@ const bandCases = [[-0.5, 5, false], [5.5, 5, false], [2.0, 5, false], [-0.5, 5,
 const bandExpectations = bandCases.map(([o, n, loop]) =>
   `    expect(rubberBand(${o.toFixed(1)}, ${n}, loop: ${loop}), closeTo(${rubberBand(o, n, loop)}, 1e-9));`)
 
+const scrollCases = [
+  // 内容没撑满容器：没有滚动条，用户永远划不到底
+  [{ scrollTop: 0, clientHeight: 600, scrollHeight: 300 }, 'idle'],
+  [{ scrollTop: 0, clientHeight: 600, scrollHeight: 300 }, 'loading'],
+  [{ scrollTop: 0, clientHeight: 600, scrollHeight: 300 }, 'finished'],
+  [{ scrollTop: 900, clientHeight: 600, scrollHeight: 1600 }, 'idle'],
+  [{ scrollTop: 400, clientHeight: 600, scrollHeight: 1600 }, 'idle'],
+  [{ scrollTop: 900, clientHeight: 600, scrollHeight: 1600 }, 'error'],
+]
+const scrollExpectations = scrollCases.map(([m, status]) =>
+  `    expect(
+        shouldLoadMore(scrollTop: ${m.scrollTop.toFixed(1)}, clientHeight: ${m.clientHeight.toFixed(1)},
+            scrollHeight: ${m.scrollHeight.toFixed(1)}, status: LoadStatus.${status}),
+        ${shouldLoadMore(m, status)});`)
+
+const hintExpectations = [['loading', false], ['error', false], ['finished', false], ['finished', true], ['idle', false]]
+  .map(([status, empty]) =>
+    `    expect(loadHint(LoadStatus.${status}, empty: ${empty}), '${loadHint(status, empty)}');`)
+
+// 一串连贯的按键：每一步的期望值都由 TS 实现算出
+const keySequence = ['1', '2', '.', '3', '4', '5', 'backspace', '.', '9']
+let keyAcc = ''
+const keyExpectations = keySequence.map((k) => {
+  const before = keyAcc
+  keyAcc = pressKey(keyAcc, k)
+  return `    expect(pressKey('${before}', '${k}'), '${keyAcc}');`
+})
+
+const keyEdgeCases = [
+  ['', '.', 2, 12, false], ['0', '5', 2, 12, false], ['-0', '5', 2, 12, true],
+  ['12', '.', 0, 12, false], ['', 'sign', 2, 12, true], ['-3', 'sign', 2, 12, true],
+  ['', 'sign', 2, 12, false], ['123456789012', '3', 2, 12, false], ['', 'backspace', 2, 12, false],
+]
+const keyEdgeExpectations = keyEdgeCases.map(([v, k, d, m, n]) =>
+  `    expect(pressKey('${v}', '${k}', decimals: ${d}, maxLength: ${m}, negative: ${n}),
+        '${pressKey(v, k, { decimals: d, maxLength: m, negative: n })}');`)
+
+const rowsExpectations = [[2, false], [0, false], [2, true]].map(([d, n]) => {
+  const rows = keypadRows({ decimals: d, negative: n })
+  return `    expect(keypadRows(decimals: ${d}, negative: ${n}),
+        <List<String>>[${rows.map((r) => `<String>[${r.map((k) => `'${k}'`).join(', ')}]`).join(', ')}]);`
+})
+
+const completeExpectations = ['', '-', '.', '12', '12.', '12.5', '-3.25', '1.2.3'].map((v) =>
+  `    expect(isComplete('${v}'), ${isComplete(v)});`)
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -679,6 +735,8 @@ import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
+import 'package:i_design/src/logic/scroll.dart';
+import 'package:i_design/src/logic/keypad.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
@@ -919,6 +977,18 @@ ${carouselNextExpectations.join('\n')}
   test('指示点收窗与两端阻尼与 Web 端一致', () {
 ${dotExpectations.join('\n')}
 ${bandExpectations.join('\n')}
+  });
+
+  test('无限滚动触发判定与 Web 端一致（含没撑满容器的情形）', () {
+${scrollExpectations.join('\n')}
+${hintExpectations.join('\n')}
+  });
+
+  test('数字键盘按键规则与 Web 端一致', () {
+${keyExpectations.join('\n')}
+${keyEdgeExpectations.join('\n')}
+${rowsExpectations.join('\n')}
+${completeExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

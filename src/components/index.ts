@@ -66,6 +66,8 @@ import IChartZoom from './IChartZoom.vue'
 import IChartSankey from './IChartSankey.vue'
 import IChartTreemap from './IChartTreemap.vue'
 import ICarousel from './ICarousel.vue'
+import IInfiniteScroll from './IInfiniteScroll.vue'
+import INumberKeypad from './INumberKeypad.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -123,6 +125,8 @@ export {
   IChartSankey,
   IChartTreemap,
   ICarousel,
+  IInfiniteScroll,
+  INumberKeypad,
   IForm,
   IFormItem,
   ITag,

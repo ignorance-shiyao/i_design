@@ -1,0 +1,21 @@
+<view class="i-keypad" role="group" aria-label="数字键盘">
+  <view class="i-keypad__pad">
+    <block wx:for="{{keys}}" wx:key="id">
+      <view
+        class="i-keypad__key {{item.fn ? 'i-keypad__key--fn' : ''}} {{item.key === '' ? 'is-empty' : ''}}"
+        aria-label="{{item.label}}"
+        data-key="{{item.key}}"
+        bindtap="onKey"
+        bindtouchstart="onHoldStart"
+        bindtouchend="onHoldEnd"
+        bindtouchcancel="onHoldEnd"
+      >
+        <view wx:if="{{item.key === 'backspace'}}" class="i-icon i-icon--close" style="width:18px;height:18px" />
+        <text wx:else>{{item.text}}</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 确认键竖跨整列：它是这块键盘上唯一一个「结束输入」的键，得比数字键显眼 -->
+  <view wx:if="{{confirmText}}" class="i-keypad__confirm" bindtap="onConfirm">{{confirmText}}</view>
+</view>

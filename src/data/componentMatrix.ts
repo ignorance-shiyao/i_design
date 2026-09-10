@@ -469,6 +469,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IInfiniteScroll",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IInput",
     "ends": {
       "vue-next": true,
@@ -530,6 +540,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "INotificationLayer",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "INumberKeypad",
     "ends": {
       "vue-next": true,
       "vue": true,

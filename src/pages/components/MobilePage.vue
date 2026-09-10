@@ -11,6 +11,9 @@ import ISearchBar from '@i-design/mobile-vue/src/components/ISearchBar.vue'
 import ICountDown from '@i-design/mobile-vue/src/components/ICountDown.vue'
 import IPicker from '@i-design/mobile-vue/src/components/IPicker.vue'
 import IButton from '@/components/IButton.vue'
+import IInfiniteScroll from '@/components/IInfiniteScroll.vue'
+import INumberKeypad from '@/components/INumberKeypad.vue'
+import type { LoadStatus } from '@i-design/common'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
 import type { IconName } from '@/components/icons'
@@ -68,6 +71,24 @@ const regions = [
 const region = ref<(string | number)[]>(['gd', 'sz'])
 const pickerOpen = ref(false)
 const noticeVisible = ref(true)
+
+/* 无限滚动：故意让第一页只有 3 条——不撑满容器时没有滚动条，
+   用户永远划不到底，这正是要验证的那个死局 */
+const feed = ref<string[]>([])
+const feedStatus = ref<LoadStatus>('idle')
+const feedRounds = ref(0)
+function loadFeed() {
+  feedStatus.value = 'loading'
+  setTimeout(() => {
+    feedRounds.value += 1
+    const size = feedRounds.value === 1 ? 3 : 8
+    const from = feed.value.length
+    feed.value = [...feed.value, ...Array.from({ length: size }, (_, i) => `动态 ${from + i + 1}`)]
+    feedStatus.value = feed.value.length >= 27 ? 'finished' : 'idle'
+  }, 600)
+}
+
+const amount = ref('')
 
 const rows = ref([
   { title: 'WI-1024 登录页表单校验缺失', description: '林岚 · 2 小时前' },
@@ -167,6 +188,48 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
       </div>
     </DemoBlock>
 
+    <h2>无限滚动</h2>
+    <p>
+      触发规则里最容易漏的一条是「内容还没撑满容器时直接加载」。第一页太短就没有滚动条，
+      用户再怎么划也到不了底，列表会永远停在第一页——而它只在窗口很高或每页很少时才暴露，
+      本地开发时几乎撞不上。下面这个示例第一页故意只给 3 条。
+    </p>
+    <p>
+      另一条是加载中、已加载完、出错时一律不再触发。少了它，滚动事件每帧一次，
+      同一页会连发几十个请求；接口够快的话，重复的响应互相覆盖，页面看着还是对的。
+    </p>
+    <DemoBlock
+      title="翻到底自动续上"
+      description="底部状态区一直占位，不是加载时才插进来——插进来会把列表往上顶一下，用户正在读的那一行会跳走。"
+      code='<IInfiniteScroll :status="status" :height="260" @load="loadMore" />'
+    >
+      <div class="phone">
+        <IInfiniteScroll :status="feedStatus" :height="260" :empty="!feed.length" @load="loadFeed">
+          <ICell v-for="row in feed" :key="row" :title="row" />
+        </IInfiniteScroll>
+      </div>
+    </DemoBlock>
+
+    <h2>数字键盘</h2>
+    <p>
+      用手机拨号盘的顺序（1 在左上）而不是计算器的顺序（7 在左上）：
+      输入金额和验证码时，用户的肌肉记忆来自拨号盘。约束（几位小数、能不能有负号、
+      最长多少位）全在公共层判定，各端不会一个能输 12.345 一个不能。
+    </p>
+    <DemoBlock
+      title="金额输入"
+      description="小数位满了再按数字应当无效，而不是悄悄替换掉最后一位；0 后面直接接数字会替换掉那个 0，否则会得到 0123。长按删除键连续退格。"
+      code='<INumberKeypad v-model="amount" :decimals="2" confirm-text="确认" />'
+    >
+      <div class="phone">
+        <div class="amount">
+          <span class="amount__currency">¥</span>
+          <span class="amount__value">{{ amount || '0.00' }}</span>
+        </div>
+        <INumberKeypad v-model="amount" :decimals="2" :max-length="10" confirm-text="确认" />
+      </div>
+    </DemoBlock>
+
     <h2>与桌面端的分工</h2>
     <ul class="rules">
       <li><strong>标签栏不是标签页</strong>：Tabs 切换的是页面内的一块区域，标签栏切换的是整个页面，且常驻在拇指够得到的位置。</li>
@@ -229,6 +292,15 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
   color: var(--i-color-text-secondary);
   font-size: var(--i-font-size-sm);
 }
+.amount {
+  display: flex;
+  align-items: baseline;
+  gap: var(--i-spacing-1);
+  padding: var(--i-spacing-4) var(--i-spacing-5);
+  font-variant-numeric: tabular-nums;
+}
+.amount__currency { color: var(--i-color-text-secondary); }
+.amount__value { font-size: var(--i-font-size-3xl); color: var(--i-color-text); }
 .rules { line-height: 1.9; }
 .rules li { margin-bottom: var(--i-spacing-2); }
 </style>

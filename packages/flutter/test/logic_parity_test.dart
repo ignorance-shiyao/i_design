@@ -13,6 +13,8 @@ import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
+import 'package:i_design/src/logic/scroll.dart';
+import 'package:i_design/src/logic/keypad.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '$label 点位不一致');
@@ -760,6 +762,82 @@ void main() {
     expect(rubberBand(5.5, 5, loop: false), closeTo(4.45, 1e-9));
     expect(rubberBand(2.0, 5, loop: false), closeTo(2, 1e-9));
     expect(rubberBand(-0.5, 5, loop: true), closeTo(-0.5, 1e-9));
+  });
+
+  test('无限滚动触发判定与 Web 端一致（含没撑满容器的情形）', () {
+    expect(
+        shouldLoadMore(scrollTop: 0.0, clientHeight: 600.0,
+            scrollHeight: 300.0, status: LoadStatus.idle),
+        true);
+    expect(
+        shouldLoadMore(scrollTop: 0.0, clientHeight: 600.0,
+            scrollHeight: 300.0, status: LoadStatus.loading),
+        false);
+    expect(
+        shouldLoadMore(scrollTop: 0.0, clientHeight: 600.0,
+            scrollHeight: 300.0, status: LoadStatus.finished),
+        false);
+    expect(
+        shouldLoadMore(scrollTop: 900.0, clientHeight: 600.0,
+            scrollHeight: 1600.0, status: LoadStatus.idle),
+        true);
+    expect(
+        shouldLoadMore(scrollTop: 400.0, clientHeight: 600.0,
+            scrollHeight: 1600.0, status: LoadStatus.idle),
+        false);
+    expect(
+        shouldLoadMore(scrollTop: 900.0, clientHeight: 600.0,
+            scrollHeight: 1600.0, status: LoadStatus.error),
+        false);
+    expect(loadHint(LoadStatus.loading, empty: false), '加载中…');
+    expect(loadHint(LoadStatus.error, empty: false), '加载失败，点击重试');
+    expect(loadHint(LoadStatus.finished, empty: false), '没有更多了');
+    expect(loadHint(LoadStatus.finished, empty: true), '暂无内容');
+    expect(loadHint(LoadStatus.idle, empty: false), '');
+  });
+
+  test('数字键盘按键规则与 Web 端一致', () {
+    expect(pressKey('', '1'), '1');
+    expect(pressKey('1', '2'), '12');
+    expect(pressKey('12', '.'), '12.');
+    expect(pressKey('12.', '3'), '12.3');
+    expect(pressKey('12.3', '4'), '12.34');
+    expect(pressKey('12.34', '5'), '12.34');
+    expect(pressKey('12.34', 'backspace'), '12.3');
+    expect(pressKey('12.3', '.'), '12.3');
+    expect(pressKey('12.3', '9'), '12.39');
+    expect(pressKey('', '.', decimals: 2, maxLength: 12, negative: false),
+        '0.');
+    expect(pressKey('0', '5', decimals: 2, maxLength: 12, negative: false),
+        '5');
+    expect(pressKey('-0', '5', decimals: 2, maxLength: 12, negative: true),
+        '-5');
+    expect(pressKey('12', '.', decimals: 0, maxLength: 12, negative: false),
+        '12');
+    expect(pressKey('', 'sign', decimals: 2, maxLength: 12, negative: true),
+        '-');
+    expect(pressKey('-3', 'sign', decimals: 2, maxLength: 12, negative: true),
+        '3');
+    expect(pressKey('', 'sign', decimals: 2, maxLength: 12, negative: false),
+        '');
+    expect(pressKey('123456789012', '3', decimals: 2, maxLength: 12, negative: false),
+        '123456789012');
+    expect(pressKey('', 'backspace', decimals: 2, maxLength: 12, negative: false),
+        '');
+    expect(keypadRows(decimals: 2, negative: false),
+        <List<String>>[<String>['1', '2', '3'], <String>['4', '5', '6'], <String>['7', '8', '9'], <String>['.', '0', 'backspace']]);
+    expect(keypadRows(decimals: 0, negative: false),
+        <List<String>>[<String>['1', '2', '3'], <String>['4', '5', '6'], <String>['7', '8', '9'], <String>['', '0', 'backspace']]);
+    expect(keypadRows(decimals: 2, negative: true),
+        <List<String>>[<String>['1', '2', '3'], <String>['4', '5', '6'], <String>['7', '8', '9'], <String>['sign', '0', 'backspace']]);
+    expect(isComplete(''), false);
+    expect(isComplete('-'), false);
+    expect(isComplete('.'), false);
+    expect(isComplete('12'), true);
+    expect(isComplete('12.'), false);
+    expect(isComplete('12.5'), true);
+    expect(isComplete('-3.25'), true);
+    expect(isComplete('1.2.3'), false);
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

@@ -45,8 +45,10 @@
 @import './components/form.css';
 @import './components/grid.css';
 @import './components/icon.css';
+@import './components/infinite.css';
 @import './components/input-number.css';
 @import './components/input.css';
+@import './components/keypad.css';
 @import './components/list.css';
 @import './components/loading.css';
 @import './components/menu.css';

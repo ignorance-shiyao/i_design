@@ -1,0 +1,20 @@
+<scroll-view
+  class="i-infinite is-scroller"
+  scroll-y="{{true}}"
+  style="height:{{height}}px"
+  bindscroll="onScroll"
+  bindscrolltolower="onLower"
+  lower-threshold="{{threshold}}"
+>
+  <slot />
+
+  <!-- 状态区一直占位：加载时才插进来会把列表往上顶一下，正在读的那一行会跳走 -->
+  <view class="i-infinite__foot" aria-live="polite">
+    <view wx:if="{{status === 'loading'}}" class="i-loading i-loading--sm">
+      <view class="i-loading__spinner" />
+      <text class="i-loading__text">{{hint}}</text>
+    </view>
+    <view wx:elif="{{status === 'error'}}" class="i-infinite__retry" bindtap="onRetry">{{hint}}</view>
+    <text wx:elif="{{status === 'finished'}}" class="i-infinite__done">{{hint}}</text>
+  </view>
+</scroll-view>
