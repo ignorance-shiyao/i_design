@@ -3,14 +3,14 @@
  * 手填的覆盖数字必然会和代码对不上。
  */
 export const frameworkStats: Record<string, number> = {
-  "vue-next": 80,
-  "vue": 80,
-  "react": 80,
-  "miniprogram": 81,
-  "mobile-vue": 92,
-  "mobile-react": 92,
-  "flutter": 72
+  "vue-next": 83,
+  "vue": 83,
+  "react": 83,
+  "miniprogram": 84,
+  "mobile-vue": 95,
+  "mobile-react": 95,
+  "flutter": 75
 }
 
 /** 以 vue-next 为基准的组件总数 */
-export const totalComponents = 80
+export const totalComponents = 83

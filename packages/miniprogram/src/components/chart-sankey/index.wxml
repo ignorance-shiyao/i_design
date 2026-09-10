@@ -1,0 +1,17 @@
+<view class="i-chart i-chart--sankey">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <canvas class="i-chart__sankey-canvas" type="2d" style="width:100%;height:{{height}}px" />
+
+  <view class="i-chart__table i-chart__table--flat">
+    <view class="i-chart__table-row i-chart__table-head">
+      <text class="i-chart__table-cell">从</text>
+      <text class="i-chart__table-cell">到</text>
+      <text class="i-chart__table-cell">流量</text>
+    </view>
+    <view wx:for="{{rows}}" wx:key="key" class="i-chart__table-row">
+      <text class="i-chart__table-cell">{{item.from}}</text>
+      <text class="i-chart__table-cell">{{item.to}}</text>
+      <text class="i-chart__table-cell">{{item.value}}</text>
+    </view>
+  </view>
+</view>

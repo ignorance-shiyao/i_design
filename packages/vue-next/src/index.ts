@@ -63,6 +63,9 @@ import IDiffTable from './IDiffTable.vue'
 import IChartBox from './IChartBox.vue'
 import IChartWaterfall from './IChartWaterfall.vue'
 import IChartZoom from './IChartZoom.vue'
+import IChartSankey from './IChartSankey.vue'
+import IChartTreemap from './IChartTreemap.vue'
+import ICarousel from './ICarousel.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -117,6 +120,9 @@ export {
   IChartBox,
   IChartWaterfall,
   IChartZoom,
+  IChartSankey,
+  IChartTreemap,
+  ICarousel,
   IForm,
   IFormItem,
   ITag,

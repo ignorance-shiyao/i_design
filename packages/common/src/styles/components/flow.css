@@ -94,3 +94,56 @@
   place-items: center;
   font-variant-numeric: tabular-nums;
 }
+
+/* 工具条上的开关型按钮：按下态用淡底色块，而不是给按钮加一条重边线 */
+.i-flow__tool.is-on {
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand);
+}
+
+/*
+ * 框选框。虚线描边加极淡的填充：
+ * 只描边的话，拖过一片空白时看不出框到底盖住了哪些节点。
+ */
+.i-flow__marquee {
+  fill: color-mix(in srgb, var(--i-color-brand) 8%, transparent);
+  stroke: var(--i-color-brand);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+/* 框选模式下光标改成十字：不改的话它还是「抓手」，用户以为拖出去是平移 */
+.i-flow.is-marquee .i-flow__canvas { cursor: crosshair; }
+
+/* 缩放手柄：小方块压在节点角上。命中区靠 stroke 撑大，视觉尺寸不跟着变 */
+.i-flow__handle {
+  fill: var(--i-color-bg-elevated);
+  stroke: var(--i-color-brand);
+  stroke-width: 1.5;
+}
+.i-flow__handle:hover { fill: var(--i-color-brand-subtle); }
+
+/*
+ * 缩略图放左上：左下是撤销组、右下是缩放组，再挤进去就要互相压。
+ * 它是导航件而不是内容，因此底色半透明——完全不透明会让人以为图上真有这么一块。
+ */
+.i-flow__minimap {
+  position: absolute;
+  top: var(--i-spacing-3);
+  left: var(--i-spacing-3);
+  padding: 2px;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: color-mix(in srgb, var(--i-color-bg-elevated) 88%, transparent);
+  box-shadow: var(--i-shadow-sm);
+  cursor: pointer;
+}
+.i-flow__minimap svg { display: block; }
+.i-flow__minimap-node { fill: var(--i-color-border-strong); }
+.i-flow__minimap-node.is-selected { fill: var(--i-color-brand); }
+/* 取景框只描边不填充：填了就看不见它盖住的是哪几个节点 */
+.i-flow__minimap-viewport {
+  fill: none;
+  stroke: var(--i-color-brand);
+  stroke-width: 1.5;
+}

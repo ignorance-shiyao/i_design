@@ -87,6 +87,10 @@ const Map<String, String> kIDesignIconPaths = <String, String>{
       'M12 21a9 9 0 1 1 0-18c4.5 0 8 3 8 6.5 0 2.2-1.8 3.5-4 3.5h-1.5a1.8 1.8 0 0 0-1.2 3.1c.4.5.2 1.4-.9 1.4zM8 9.5h.01M12 7.5h.01M16 10h.01',
   'code':
       'M9 7l-5 5 5 5M15 7l5 5-5 5',
+  'marquee':
+      'M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M11 4h2M11 20h2M4 11v2M20 11v2',
+  'minimap':
+      'M4 5h16v14H4zM12 11h6v6h-6z',
   'sparkle':
       'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z',
   'menu':
@@ -153,6 +157,8 @@ const List<String> kIDesignIconNames = <String>[
   'grid',
   'palette',
   'code',
+  'marquee',
+  'minimap',
   'sparkle',
   'menu',
   'sun',

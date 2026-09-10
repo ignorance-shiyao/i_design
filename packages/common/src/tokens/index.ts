@@ -11,6 +11,8 @@
  *   3. 组件层：由各框架的组件消费语义层，不出现硬编码值。
  */
 
+import { contrastText } from '../logic/palette'
+
 export type Palette = Record<string, string>
 
 /** 基础调色板：每色 9 阶，10 最浅、90 最深 */
@@ -204,6 +206,12 @@ export const lightTheme: Record<string, string> = {
   'color-text-secondary': palette.gray[70],
   'color-text-tertiary': palette.gray[60],
   'color-text-inverse': palette.gray[10],
+  /*
+   * 压在图片、视频上的前景色。明暗两个主题都是白——
+   * 它面对的不是主题底色而是任意媒体内容，跟着主题翻会在暗色主题下变成
+   * 深色的点压在深色照片上，直接消失。
+   */
+  'color-on-media': '#ffffff',
   'color-text-link': palette.brand[50],
 
   'color-border': palette.gray[40],
@@ -244,6 +252,7 @@ export const darkTheme: Record<string, string> = {
   'color-text-secondary': '#b3b8c6',
   'color-text-tertiary': palette.gray[60],
   'color-text-inverse': palette.gray[90],
+  'color-on-media': '#ffffff',
   'color-text-link': palette.brand[30],
 
   'color-border': '#333a4d',
@@ -364,6 +373,8 @@ export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, strin
   Object.entries(controlHeight).forEach(([k, v]) => (out[`control-height-${k}`] = v))
   chartCategorical.forEach((v, i) => (out[`chart-${i + 1}`] = v))
   chartSequential.forEach((v, i) => (out[`chart-seq-${i + 1}`] = v))
+  // 深色档上的文字必须翻成浅色，否则最深的两档（#5e7ce0 / #3a4da3）上的深字读不出来
+  chartSequential.forEach((v, i) => (out[`chart-seq-${i + 1}-ink`] = contrastText(v)))
   const diverging = theme === 'dark' ? chartDivergingDark : chartDiverging
   diverging.forEach((v, i) => (out[`chart-div-${i + 1}`] = v))
   return out

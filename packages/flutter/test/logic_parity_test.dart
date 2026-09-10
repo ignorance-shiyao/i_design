@@ -11,6 +11,20 @@ import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
+import 'package:i_design/src/logic/flow.dart';
+import 'package:i_design/src/logic/carousel.dart';
+
+void _expectDots(DotRange actual, List<int> items, int active, String label) {
+  expect(actual.items, items, reason: '$label 点位不一致');
+  expect(actual.active, active, reason: '$label 当前项不一致');
+}
+
+void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
+  expect(actual.left, closeTo(x, 1e-9), reason: '$label x 不一致');
+  expect(actual.top, closeTo(y, 1e-9), reason: '$label y 不一致');
+  expect(actual.width, closeTo(w, 1e-9), reason: '$label 宽不一致');
+  expect(actual.height, closeTo(h, 1e-9), reason: '$label 高不一致');
+}
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
   expect(actual.length, expected.length, reason: '$label 长度不一致');
@@ -584,5 +598,208 @@ void main() {
     expect(showLabelAt(8, 90, 8), true);
     expect(showLabelAt(88, 90, 8), false);
     expect(showLabelAt(89, 90, 8), true);
+  });
+
+  test('桑基图分层、节点高度与缎带几何与 Web 端一致', () {
+    final layout = sankeyLayout(<ISankeyLink>[const ISankeyLink(from: 'visit', to: 'leave', value: 600.0), const ISankeyLink(from: 'visit', to: 'signup', value: 400.0), const ISankeyLink(from: 'signup', to: 'idle', value: 280.0), const ISankeyLink(from: 'signup', to: 'pay', value: 120.0)], 520.0, 260.0);
+    expect(layout.nodes.length, 5);
+    expect(layout.ribbons.length, 4);
+    expect(layout.nodes[0].key, 'visit');
+    expect(layout.nodes[0].depth, 0);
+    expect(layout.nodes[0].value, closeTo(1000, 1e-9));
+    expect(layout.nodes[0].x, closeTo(0, 1e-9));
+    expect(layout.nodes[0].y, closeTo(0, 1e-9));
+    expect(layout.nodes[0].height, closeTo(260, 1e-9));
+    expect(layout.nodes[1].key, 'leave');
+    expect(layout.nodes[1].depth, 1);
+    expect(layout.nodes[1].value, closeTo(600, 1e-9));
+    expect(layout.nodes[1].x, closeTo(254, 1e-9));
+    expect(layout.nodes[1].y, closeTo(0, 1e-9));
+    expect(layout.nodes[1].height, closeTo(148.79999999999998, 1e-9));
+    expect(layout.nodes[2].key, 'signup');
+    expect(layout.nodes[2].depth, 1);
+    expect(layout.nodes[2].value, closeTo(400, 1e-9));
+    expect(layout.nodes[2].x, closeTo(254, 1e-9));
+    expect(layout.nodes[2].y, closeTo(160.79999999999998, 1e-9));
+    expect(layout.nodes[2].height, closeTo(99.2, 1e-9));
+    expect(layout.nodes[3].key, 'idle');
+    expect(layout.nodes[3].depth, 2);
+    expect(layout.nodes[3].value, closeTo(280, 1e-9));
+    expect(layout.nodes[3].x, closeTo(508, 1e-9));
+    expect(layout.nodes[3].y, closeTo(0, 1e-9));
+    expect(layout.nodes[3].height, closeTo(173.6, 1e-9));
+    expect(layout.nodes[4].key, 'pay');
+    expect(layout.nodes[4].depth, 2);
+    expect(layout.nodes[4].value, closeTo(120, 1e-9));
+    expect(layout.nodes[4].x, closeTo(508, 1e-9));
+    expect(layout.nodes[4].y, closeTo(185.6, 1e-9));
+    expect(layout.nodes[4].height, closeTo(74.39999999999999, 1e-9));
+    expect(layout.ribbons[0].from, 'visit');
+    expect(layout.ribbons[0].to, 'leave');
+    expect(layout.ribbons[0].source.top, closeTo(0, 1e-9));
+    expect(layout.ribbons[0].source.bottom, closeTo(156, 1e-9));
+    expect(layout.ribbons[0].target.top, closeTo(0, 1e-9));
+    expect(layout.ribbons[0].target.bottom, closeTo(148.79999999999998, 1e-9));
+    expect(layout.ribbons[0].controlX, closeTo(133, 1e-9));
+    expect(layout.ribbons[1].from, 'visit');
+    expect(layout.ribbons[1].to, 'signup');
+    expect(layout.ribbons[1].source.top, closeTo(156, 1e-9));
+    expect(layout.ribbons[1].source.bottom, closeTo(260, 1e-9));
+    expect(layout.ribbons[1].target.top, closeTo(160.79999999999998, 1e-9));
+    expect(layout.ribbons[1].target.bottom, closeTo(260, 1e-9));
+    expect(layout.ribbons[1].controlX, closeTo(133, 1e-9));
+    expect(layout.ribbons[2].from, 'signup');
+    expect(layout.ribbons[2].to, 'idle');
+    expect(layout.ribbons[2].source.top, closeTo(160.79999999999998, 1e-9));
+    expect(layout.ribbons[2].source.bottom, closeTo(230.23999999999998, 1e-9));
+    expect(layout.ribbons[2].target.top, closeTo(0, 1e-9));
+    expect(layout.ribbons[2].target.bottom, closeTo(173.6, 1e-9));
+    expect(layout.ribbons[2].controlX, closeTo(387, 1e-9));
+    expect(layout.ribbons[3].from, 'signup');
+    expect(layout.ribbons[3].to, 'pay');
+    expect(layout.ribbons[3].source.top, closeTo(230.23999999999998, 1e-9));
+    expect(layout.ribbons[3].source.bottom, closeTo(260, 1e-9));
+    expect(layout.ribbons[3].target.top, closeTo(185.6, 1e-9));
+    expect(layout.ribbons[3].target.bottom, closeTo(260, 1e-9));
+    expect(layout.ribbons[3].controlX, closeTo(387, 1e-9));
+  });
+
+  test('框选矩形归一化与命中判定与 Web 端一致', () {
+    final nodes = <FlowNodeData>[const FlowNodeData(id: 'a', label: 'A', x: 0.0, y: 0.0), const FlowNodeData(id: 'b', label: 'B', x: 200.0, y: 0.0), const FlowNodeData(id: 'c', label: 'C', x: 100.0, y: 120.0, width: 80.0, height: 40.0)];
+    _expectRect(marqueeRect(const Offset(10.0, 10.0), const Offset(300.0, 200.0)),
+        10.0, 10.0, 290.0, 190.0, 'marquee(10,10)');
+    _expectRect(marqueeRect(const Offset(300.0, 200.0), const Offset(10.0, 10.0)),
+        10.0, 10.0, 290.0, 190.0, 'marquee(300,200)');
+    _expectRect(marqueeRect(const Offset(50.0, 50.0), const Offset(50.0, 50.0)),
+        50.0, 50.0, 0.0, 0.0, 'marquee(50,50)');
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(-10.0, -10.0, 400.0, 300.0), intersect: false),
+        <String>['a', 'b', 'c']);
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(-10.0, -10.0, 100.0, 60.0), intersect: false),
+        <String>[]);
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(-10.0, -10.0, 100.0, 60.0), intersect: true),
+        <String>['a']);
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(500.0, 500.0, 10.0, 10.0), intersect: true),
+        <String>[]);
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(0.0, 0.0, 132.0, 48.0), intersect: false),
+        <String>['a']);
+  });
+
+  test('批量移动整组一个位移，与 Web 端一致', () {
+    final nodes = <FlowNodeData>[const FlowNodeData(id: 'a', label: 'A', x: 0.0, y: 0.0), const FlowNodeData(id: 'b', label: 'B', x: 200.0, y: 0.0), const FlowNodeData(id: 'c', label: 'C', x: 100.0, y: 120.0, width: 80.0, height: 40.0)];
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(10.0, 10.0))[0].x, closeTo(8, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(10.0, 10.0))[0].y, closeTo(8, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(10.0, 10.0))[1].x, closeTo(108, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(10.0, 10.0))[1].y, closeTo(128, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(3.0, -3.0))[0].x, closeTo(0, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(3.0, -3.0))[0].y, closeTo(0, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(3.0, -3.0))[1].x, closeTo(100, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(3.0, -3.0))[1].y, closeTo(120, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(-20.0, 44.0))[0].x, closeTo(-16, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(-20.0, 44.0))[0].y, closeTo(48, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(-20.0, 44.0))[1].x, closeTo(84, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(-20.0, 44.0))[1].y, closeTo(168, 1e-9));
+  });
+
+  test('节点缩放固定对角并夹到下限，与 Web 端一致', () {
+    final nodes = <FlowNodeData>[const FlowNodeData(id: 'a', label: 'A', x: 0.0, y: 0.0), const FlowNodeData(id: 'b', label: 'B', x: 200.0, y: 0.0), const FlowNodeData(id: 'c', label: 'C', x: 100.0, y: 120.0, width: 80.0, height: 40.0)];
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.se, const Offset(400.0, 300.0)),
+        0.0, 0.0, 400.0, 304.0, 'resize se');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.nw, const Offset(-40.0, -40.0)),
+        -40.0, -40.0, 172.0, 88.0, 'resize nw');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.se, const Offset(-999.0, -999.0)),
+        0.0, 0.0, 72.0, 32.0, 'resize se');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.nw, const Offset(999.0, 999.0)),
+        60.0, 16.0, 72.0, 32.0, 'resize nw');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.ne, const Offset(300.0, -30.0)),
+        0.0, -32.0, 304.0, 80.0, 'resize ne');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.sw, const Offset(-30.0, 300.0)),
+        -32.0, 0.0, 164.0, 304.0, 'resize sw');
+  });
+
+  test('缩略图布局与它的逆运算与 Web 端一致', () {
+    final nodes = <FlowNodeData>[const FlowNodeData(id: 'a', label: 'A', x: 0.0, y: 0.0), const FlowNodeData(id: 'b', label: 'B', x: 200.0, y: 0.0), const FlowNodeData(id: 'c', label: 'C', x: 100.0, y: 120.0, width: 80.0, height: 40.0)];
+    final mm = minimapLayout(nodes, const FlowView(x: -100.0, y: -50.0, scale: 1.5),
+        const Size(640.0, 380.0), const Size(168.0, 112.0));
+    expect(mm.scale, closeTo(0.4077669902912621, 1e-9));
+    expect(mm.offset.dx, closeTo(16.310679611650485, 1e-9));
+    expect(mm.offset.dy, closeTo(23.37864077669903, 1e-9));
+    _expectRect(mm.viewport, 43.49514563106796, 36.970873786407765, 173.98058252427185, 103.30097087378641, 'viewport');
+    final back = viewFromMinimap(const Offset(84.0, 56.0), mm,
+        const FlowView(x: -100.0, y: -50.0, scale: 1.5), const Size(640.0, 380.0));
+    expect(back.x, closeTo(71, 1e-9));
+    expect(back.y, closeTo(70, 1e-9));
+  });
+
+  test('走马灯翻页判定与 Web 端一致（位移或速度任一达标）', () {
+    expect(resolveSwipe(-200.0, 600.0, 400.0), 1);
+    expect(resolveSwipe(-40.0, 600.0, 80.0), 1);
+    expect(resolveSwipe(-40.0, 600.0, 600.0), 0);
+    expect(resolveSwipe(200.0, 600.0, 400.0), -1);
+    expect(resolveSwipe(0.0, 600.0, 100.0), 0);
+    expect(resolveSwipe(-100.0, 0.0, 100.0), 0);
+    expect(nextIndex(0, 5, -1, loop: true), 4);
+    expect(nextIndex(4, 5, 1, loop: true), 0);
+    expect(nextIndex(0, 5, -1, loop: false), 0);
+    expect(nextIndex(4, 5, 1, loop: false), 4);
+    expect(nextIndex(2, 5, 2, loop: false), 4);
+    expect(nextIndex(0, 0, 1, loop: true), 0);
+  });
+
+  test('指示点收窗与两端阻尼与 Web 端一致', () {
+    _expectDots(dotRange(0, 3, max: 7), <int>[0, 1, 2], 0, 'dots(0/3)');
+    _expectDots(dotRange(0, 20, max: 7), <int>[0, 1, 2, 3, 4, 5, 6], 0, 'dots(0/20)');
+    _expectDots(dotRange(10, 20, max: 7), <int>[7, 8, 9, 10, 11, 12, 13], 10, 'dots(10/20)');
+    _expectDots(dotRange(19, 20, max: 7), <int>[13, 14, 15, 16, 17, 18, 19], 19, 'dots(19/20)');
+    _expectDots(dotRange(2, 20, max: 5), <int>[0, 1, 2, 3, 4], 2, 'dots(2/20)');
+    expect(rubberBand(-0.5, 5, loop: false), closeTo(-0.15, 1e-9));
+    expect(rubberBand(5.5, 5, loop: false), closeTo(4.45, 1e-9));
+    expect(rubberBand(2.0, 5, loop: false), closeTo(2, 1e-9));
+    expect(rubberBand(-0.5, 5, loop: true), closeTo(-0.5, 1e-9));
+  });
+
+  test('矩形树图 squarify 切块与 Web 端一致', () {
+    final tiles = treemapLayout(<ITreemapItem>[const ITreemapItem(label: 'a', value: 4200.0), const ITreemapItem(label: 'b', value: 2600.0), const ITreemapItem(label: 'c', value: 1500.0), const ITreemapItem(label: 'd', value: 620.0), const ITreemapItem(label: 'e', value: 380.0), const ITreemapItem(label: 'f', value: 210.0)], 640.0, 300.0);
+    expect(tiles.length, 6);
+    expect(tiles[0].label, 'a');
+    expect(tiles[0].percent, closeTo(0.4416403785488959, 1e-9));
+    expect(tiles[0].x, closeTo(0, 1e-9));
+    expect(tiles[0].y, closeTo(0, 1e-9));
+    expect(tiles[0].width, closeTo(282.6498422712934, 1e-9));
+    expect(tiles[0].height, closeTo(300, 1e-9));
+    expect(tiles[1].label, 'b');
+    expect(tiles[1].percent, closeTo(0.2733964248159832, 1e-9));
+    expect(tiles[1].x, closeTo(282.6498422712934, 1e-9));
+    expect(tiles[1].y, closeTo(0, 1e-9));
+    expect(tiles[1].width, closeTo(174.97371188222925, 1e-9));
+    expect(tiles[1].height, closeTo(300, 1e-9));
+    expect(tiles[2].label, 'c');
+    expect(tiles[2].percent, closeTo(0.15772870662460567, 1e-9));
+    expect(tiles[2].x, closeTo(457.6235541535226, 1e-9));
+    expect(tiles[2].y, closeTo(0, 1e-9));
+    expect(tiles[2].width, closeTo(182.37644584647737, 1e-9));
+    expect(tiles[2].height, closeTo(166.05166051660518, 1e-9));
+    expect(tiles[3].label, 'd');
+    expect(tiles[3].percent, closeTo(0.06519453207150368, 1e-9));
+    expect(tiles[3].x, closeTo(457.6235541535226, 1e-9));
+    expect(tiles[3].y, closeTo(166.05166051660518, 1e-9));
+    expect(tiles[3].width, closeTo(93.44908795439338, 1e-9));
+    expect(tiles[3].height, closeTo(133.94833948339482, 1e-9));
+    expect(tiles[4].label, 'e');
+    expect(tiles[4].percent, closeTo(0.03995793901156677, 1e-9));
+    expect(tiles[4].x, closeTo(551.072642107916, 1e-9));
+    expect(tiles[4].y, closeTo(166.05166051660518, 1e-9));
+    expect(tiles[4].width, closeTo(88.92735789208399, 1e-9));
+    expect(tiles[4].height, closeTo(86.27181187066111, 1e-9));
+    expect(tiles[5].label, 'f');
+    expect(tiles[5].percent, closeTo(0.022082018927444796, 1e-9));
+    expect(tiles[5].x, closeTo(551.072642107916, 1e-9));
+    expect(tiles[5].y, closeTo(252.3234723872663, 1e-9));
+    expect(tiles[5].width, closeTo(88.92735789208412, 1e-9));
+    expect(tiles[5].height, closeTo(47.67652761273371, 1e-9));
   });
 }

@@ -109,6 +109,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ICarousel",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ICascader",
     "ends": {
       "vue-next": true,
@@ -189,7 +199,27 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IChartSankey",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IChartScatter",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IChartTreemap",
     "ends": {
       "vue-next": true,
       "vue": true,

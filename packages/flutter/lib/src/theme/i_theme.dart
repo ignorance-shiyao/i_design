@@ -14,6 +14,7 @@ class IColors {
     required this.bg,
     required this.bgElevated,
     required this.bgSubtle,
+    required this.onMedia,
     required this.bgMuted,
     required this.text,
     required this.textSecondary,
@@ -39,6 +40,10 @@ class IColors {
   final Color bg;
   final Color bgElevated;
   final Color bgSubtle;
+
+  /// 压在图片、视频上的前景色。明暗两个主题都是白——
+  /// 它面对的不是主题底色而是任意媒体内容，跟着主题翻就会消失在深色照片里
+  final Color onMedia;
   final Color bgMuted;
   final Color text;
   final Color textSecondary;
@@ -70,6 +75,7 @@ class IColors {
     bg: IDesignTokensLight.colorBg,
     bgElevated: IDesignTokensLight.colorBgElevated,
     bgSubtle: IDesignTokensLight.colorBgSubtle,
+    onMedia: IDesignTokensLight.colorOnMedia,
     bgMuted: IDesignTokensLight.colorBgMuted,
     text: IDesignTokensLight.colorText,
     textSecondary: IDesignTokensLight.colorTextSecondary,
@@ -96,6 +102,7 @@ class IColors {
     bg: IDesignTokensDark.colorBg,
     bgElevated: IDesignTokensDark.colorBgElevated,
     bgSubtle: IDesignTokensDark.colorBgSubtle,
+    onMedia: IDesignTokensDark.colorOnMedia,
     bgMuted: IDesignTokensDark.colorBgMuted,
     text: IDesignTokensDark.colorText,
     textSecondary: IDesignTokensDark.colorTextSecondary,

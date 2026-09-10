@@ -374,8 +374,26 @@ const numberExpectations = [
  */
 const {
   bubbleRadius, trendLine, quantile, boxStats, waterfallBars, waterfallDomain,
-  clampWindow, windowFromRatio, panWindow, labelStep, showLabelAt
+  clampWindow, windowFromRatio, panWindow, labelStep, showLabelAt,
+  sankeyLayout, treemapLayout
 } = await bundle('packages/common/src/logic/chart.ts', 'chart')
+
+/* ---------- 流程图：框选、批量移动与节点缩放 ----------
+ * 三条都是「抄错也不会报错」的规则：命中判定改成相交、位移逐个吸附、
+ * 缩放时对角没固定住——每一条都只表现为手感不对，构建全绿。
+ */
+const {
+  marqueeRect, nodesInRect, moveNodes, resizeNode, minimapLayout, viewFromMinimap
+} = await bundle('packages/common/src/logic/flow.ts', 'flow')
+
+/* ---------- 走马灯：翻页判定与指示点收窗 ----------
+ * 「轻轻一划算不算翻页」抄错不会报错，只会让某一端手感迟钝，
+ * 而两端各自试都觉得「大概是这样」。
+ */
+const { resolveSwipe, nextIndex: carouselNext, dotRange, rubberBand } = await bundle(
+  'packages/common/src/logic/carousel.ts',
+  'carousel'
+)
 
 const bubbleCases = [[0, 0, 100], [50, 0, 100], [100, 0, 100], [7, 5, 5], [-3, 0, 10]]
 const bubbleExpectations = bubbleCases.map(
@@ -501,6 +519,151 @@ const step90 = labelStep(90, 576)
 const showExpectations = [0, 1, step90, 88, 89].map((i) =>
   `    expect(showLabelAt(${i}, 90, ${step90}), ${showLabelAt(i, 90, step90)});`)
 
+
+/* ---------- 桑基图与矩形树图 ----------
+ * 分层用的是最长路径、层内按流量排序、缎带两端各按占比取一段——
+ * 这三条里任何一条移植时走样，两端画出来的就是两张不同的图，
+ * 而且都「看起来像桑基图」，肉眼对不出来。
+ */
+const sankeyCases = [
+  { from: 'visit', to: 'leave', value: 600 },
+  { from: 'visit', to: 'signup', value: 400 },
+  { from: 'signup', to: 'idle', value: 280 },
+  { from: 'signup', to: 'pay', value: 120 },
+]
+const dartSankey = `<ISankeyLink>[${sankeyCases
+  .map((l) => `const ISankeyLink(from: '${l.from}', to: '${l.to}', value: ${l.value.toFixed(1)})`)
+  .join(', ')}]`
+const sankeyResult = sankeyLayout(sankeyCases, 520, 260)
+const sankeyNodeExpectations = sankeyResult.nodes.flatMap((n, i) => [
+  `    expect(layout.nodes[${i}].key, '${n.key}');`,
+  `    expect(layout.nodes[${i}].depth, ${n.depth});`,
+  `    expect(layout.nodes[${i}].value, closeTo(${n.value}, 1e-9));`,
+  `    expect(layout.nodes[${i}].x, closeTo(${n.x}, 1e-9));`,
+  `    expect(layout.nodes[${i}].y, closeTo(${n.y}, 1e-9));`,
+  `    expect(layout.nodes[${i}].height, closeTo(${n.height}, 1e-9));`,
+])
+const sankeyRibbonExpectations = sankeyResult.ribbons.flatMap((r, i) => [
+  `    expect(layout.ribbons[${i}].from, '${r.from}');`,
+  `    expect(layout.ribbons[${i}].to, '${r.to}');`,
+  `    expect(layout.ribbons[${i}].source.top, closeTo(${r.source.top}, 1e-9));`,
+  `    expect(layout.ribbons[${i}].source.bottom, closeTo(${r.source.bottom}, 1e-9));`,
+  `    expect(layout.ribbons[${i}].target.top, closeTo(${r.target.top}, 1e-9));`,
+  `    expect(layout.ribbons[${i}].target.bottom, closeTo(${r.target.bottom}, 1e-9));`,
+  `    expect(layout.ribbons[${i}].controlX, closeTo(${r.controlX}, 1e-9));`,
+])
+
+const treemapCases = [
+  { label: 'a', value: 4200 }, { label: 'b', value: 2600 }, { label: 'c', value: 1500 },
+  { label: 'd', value: 620 }, { label: 'e', value: 380 }, { label: 'f', value: 210 },
+]
+const dartTreemap = `<ITreemapItem>[${treemapCases
+  .map((i) => `const ITreemapItem(label: '${i.label}', value: ${i.value.toFixed(1)})`)
+  .join(', ')}]`
+const treemapResult = treemapLayout(treemapCases, 640, 300)
+const treemapExpectations = treemapResult.flatMap((t, i) => [
+  `    expect(tiles[${i}].label, '${t.label}');`,
+  `    expect(tiles[${i}].percent, closeTo(${t.percent}, 1e-9));`,
+  `    expect(tiles[${i}].x, closeTo(${t.x}, 1e-9));`,
+  `    expect(tiles[${i}].y, closeTo(${t.y}, 1e-9));`,
+  `    expect(tiles[${i}].width, closeTo(${t.width}, 1e-9));`,
+  `    expect(tiles[${i}].height, closeTo(${t.height}, 1e-9));`,
+])
+
+const flowNodes = [
+  { id: 'a', label: 'A', x: 0, y: 0 },
+  { id: 'b', label: 'B', x: 200, y: 0 },
+  { id: 'c', label: 'C', x: 100, y: 120, width: 80, height: 40 },
+]
+const dartFlowNodes = `<FlowNodeData>[${flowNodes
+  .map((n) => `const FlowNodeData(id: '${n.id}', label: '${n.label}', x: ${n.x.toFixed(1)}, y: ${n.y.toFixed(1)}${
+    n.width ? `, width: ${n.width.toFixed(1)}, height: ${n.height.toFixed(1)}` : ''})`)
+  .join(', ')}]`
+
+// 往左上拖也是合法的框选，宽高不归一化就会变成负数
+const marqueeCases = [[10, 10, 300, 200], [300, 200, 10, 10], [50, 50, 50, 50]]
+const marqueeExpectations = marqueeCases.map(([ax, ay, bx, by]) => {
+  const r = marqueeRect({ x: ax, y: ay }, { x: bx, y: by })
+  return `    _expectRect(marqueeRect(const Offset(${ax.toFixed(1)}, ${ay.toFixed(1)}), const Offset(${bx.toFixed(1)}, ${by.toFixed(1)})),
+        ${r.x.toFixed(1)}, ${r.y.toFixed(1)}, ${r.width.toFixed(1)}, ${r.height.toFixed(1)}, 'marquee(${ax},${ay})');`
+})
+
+// contain 与 intersect 必须给出不同答案，否则说明判定退化成了同一种
+const flow_hitCases = [
+  [{ x: -10, y: -10, width: 400, height: 300 }, 'contain'],
+  [{ x: -10, y: -10, width: 100, height: 60 }, 'contain'],
+  [{ x: -10, y: -10, width: 100, height: 60 }, 'intersect'],
+  [{ x: 500, y: 500, width: 10, height: 10 }, 'intersect'],
+  // 正好贴边：Rect.contains 对右／下边是开区间，照抄就会与 Web 端差一个节点
+  [{ x: 0, y: 0, width: 132, height: 48 }, 'contain'],
+]
+const flow_hitExpectations = flow_hitCases.map(([rect, mode]) => {
+  const ids = nodesInRect(flowNodes, rect, mode)
+  return `    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(${rect.x.toFixed(1)}, ${rect.y.toFixed(1)}, ${rect.width.toFixed(1)}, ${rect.height.toFixed(1)}), intersect: ${mode === 'intersect'}),
+        <String>[${ids.map((i) => `'${i}'`).join(', ')}]);`
+})
+
+// 整组一个位移：逐个吸附会把组内原本的相对间距抹平
+const flow_moveCases = [[10, 10], [3, -3], [-20, 44]]
+const flow_moveExpectations = flow_moveCases.flatMap(([dx, dy]) => {
+  const moved = moveNodes(flowNodes, ['a', 'c'], { x: dx, y: dy })
+  return moved.map((m, i) =>
+    `    expect(moveNodes(nodes, {'a', 'c'}, const Offset(${dx.toFixed(1)}, ${dy.toFixed(1)}))[${i}].x, closeTo(${m.x}, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(${dx.toFixed(1)}, ${dy.toFixed(1)}))[${i}].y, closeTo(${m.y}, 1e-9));`)
+})
+
+// 对角固定、尺寸夹到下限后位置也要停住
+const resizeCases = [
+  ['se', 400, 300], ['nw', -40, -40], ['se', -999, -999], ['nw', 999, 999], ['ne', 300, -30], ['sw', -30, 300],
+]
+const resizeExpectations = resizeCases.map(([handle, px, py]) => {
+  const box = resizeNode(flowNodes[0], handle, { x: px, y: py })
+  return `    _expectRect(resizeNode(nodes[0], FlowResizeHandle.${handle}, const Offset(${px.toFixed(1)}, ${py.toFixed(1)})),
+        ${box.x.toFixed(1)}, ${box.y.toFixed(1)}, ${box.width.toFixed(1)}, ${box.height.toFixed(1)}, 'resize ${handle}');`
+})
+
+// 缩略图与它的逆运算：点一下就跳过去，两边算不到一处就会跳偏
+const mmView = { x: -100, y: -50, scale: 1.5 }
+const mmCanvas = { width: 640, height: 380 }
+const mmSize = { width: 168, height: 112 }
+const mm = minimapLayout(flowNodes, mmView, mmCanvas, mmSize)
+const mmBack = viewFromMinimap({ x: 84, y: 56 }, mm, mmView, mmCanvas)
+const minimapExpectations = [
+  `    expect(mm.scale, closeTo(${mm.scale}, 1e-9));`,
+  `    expect(mm.offset.dx, closeTo(${mm.offsetX}, 1e-9));`,
+  `    expect(mm.offset.dy, closeTo(${mm.offsetY}, 1e-9));`,
+  `    _expectRect(mm.viewport, ${mm.viewport.x}, ${mm.viewport.y}, ${mm.viewport.width}, ${mm.viewport.height}, 'viewport');`,
+  `    final back = viewFromMinimap(const Offset(84.0, 56.0), mm,
+        const FlowView(x: -100.0, y: -50.0, scale: 1.5), const Size(640.0, 380.0));`,
+  `    expect(back.x, closeTo(${mmBack.x}, 1e-9));`,
+  `    expect(back.y, closeTo(${mmBack.y}, 1e-9));`,
+]
+
+// 慢而远、快而近、又慢又近：中间那一格是只看位移就会漏判的那一类
+const swipeCases = [
+  [-200, 600, 400], [-40, 600, 80], [-40, 600, 600], [200, 600, 400], [0, 600, 100], [-100, 0, 100],
+]
+const swipeExpectations = swipeCases.map(([dx, w, ms]) =>
+  `    expect(resolveSwipe(${dx.toFixed(1)}, ${w.toFixed(1)}, ${ms.toFixed(1)}), ${resolveSwipe(dx, w, ms)});`)
+
+const carouselNextCases = [
+  [0, 5, -1, true], [4, 5, 1, true], [0, 5, -1, false], [4, 5, 1, false], [2, 5, 2, false], [0, 0, 1, true],
+]
+const carouselNextExpectations = carouselNextCases.map(([i, n, d, loop]) =>
+  `    expect(nextIndex(${i}, ${n}, ${d}, loop: ${loop}), ${carouselNext(i, n, d, loop)});`)
+
+// 窗口要贴住两端，越过边界后留空位就会出现「点比图少」的错觉
+const dotCases = [[0, 3, 7], [0, 20, 7], [10, 20, 7], [19, 20, 7], [2, 20, 5]]
+const dotExpectations = dotCases.map(([i, n, max]) => {
+  const r = dotRange(i, n, max)
+  return `    _expectDots(dotRange(${i}, ${n}, max: ${max}), <int>[${r.items.join(', ')}], ${r.active}, 'dots(${i}/${n})');`
+})
+
+const bandCases = [[-0.5, 5, false], [5.5, 5, false], [2.0, 5, false], [-0.5, 5, true]]
+const bandExpectations = bandCases.map(([o, n, loop]) =>
+  `    expect(rubberBand(${o.toFixed(1)}, ${n}, loop: ${loop}), closeTo(${rubberBand(o, n, loop)}, 1e-9));`)
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -514,6 +677,20 @@ import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
+import 'package:i_design/src/logic/flow.dart';
+import 'package:i_design/src/logic/carousel.dart';
+
+void _expectDots(DotRange actual, List<int> items, int active, String label) {
+  expect(actual.items, items, reason: '\$label 点位不一致');
+  expect(actual.active, active, reason: '\$label 当前项不一致');
+}
+
+void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
+  expect(actual.left, closeTo(x, 1e-9), reason: '\$label x 不一致');
+  expect(actual.top, closeTo(y, 1e-9), reason: '\$label y 不一致');
+  expect(actual.width, closeTo(w, 1e-9), reason: '\$label 宽不一致');
+  expect(actual.height, closeTo(h, 1e-9), reason: '\$label 高不一致');
+}
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
   expect(actual.length, expected.length, reason: '\$label 长度不一致');
@@ -701,6 +878,53 @@ ${ratioExpectations.join('\n')}
   test('轴标签抽稀与 Web 端一致', () {
 ${stepExpectations.join('\n')}
 ${showExpectations.join('\n')}
+  });
+
+  test('桑基图分层、节点高度与缎带几何与 Web 端一致', () {
+    final layout = sankeyLayout(${dartSankey}, 520.0, 260.0);
+    expect(layout.nodes.length, ${sankeyResult.nodes.length});
+    expect(layout.ribbons.length, ${sankeyResult.ribbons.length});
+${sankeyNodeExpectations.join('\n')}
+${sankeyRibbonExpectations.join('\n')}
+  });
+
+  test('框选矩形归一化与命中判定与 Web 端一致', () {
+    final nodes = ${dartFlowNodes};
+${marqueeExpectations.join('\n')}
+${flow_hitExpectations.join('\n')}
+  });
+
+  test('批量移动整组一个位移，与 Web 端一致', () {
+    final nodes = ${dartFlowNodes};
+${flow_moveExpectations.join('\n')}
+  });
+
+  test('节点缩放固定对角并夹到下限，与 Web 端一致', () {
+    final nodes = ${dartFlowNodes};
+${resizeExpectations.join('\n')}
+  });
+
+  test('缩略图布局与它的逆运算与 Web 端一致', () {
+    final nodes = ${dartFlowNodes};
+    final mm = minimapLayout(nodes, const FlowView(x: -100.0, y: -50.0, scale: 1.5),
+        const Size(640.0, 380.0), const Size(168.0, 112.0));
+${minimapExpectations.join('\n')}
+  });
+
+  test('走马灯翻页判定与 Web 端一致（位移或速度任一达标）', () {
+${swipeExpectations.join('\n')}
+${carouselNextExpectations.join('\n')}
+  });
+
+  test('指示点收窗与两端阻尼与 Web 端一致', () {
+${dotExpectations.join('\n')}
+${bandExpectations.join('\n')}
+  });
+
+  test('矩形树图 squarify 切块与 Web 端一致', () {
+    final tiles = treemapLayout(${dartTreemap}, 640.0, 300.0);
+    expect(tiles.length, ${treemapResult.length});
+${treemapExpectations.join('\n')}
   });
 }
 `

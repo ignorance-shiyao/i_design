@@ -564,3 +564,36 @@
   cursor: pointer;
 }
 .i-zoom__reset:hover { color: var(--i-color-brand); }
+
+/*
+ * 桑基图：节点是「身份」，用分类色；缎带继承来源节点的颜色，
+ * 读者才能顺着颜色追一条流从哪儿来。
+ */
+.i-sankey__ribbon {
+  opacity: 0.34;
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-sankey__ribbon:hover { opacity: 0.62; }
+/* 悬停某个节点时压暗无关的流，一条路径才追得下去 */
+.i-sankey__ribbon.is-dim { opacity: 0.1; }
+.i-sankey__node rect { transition: opacity var(--i-motion-fast) var(--i-motion-easing); }
+.i-sankey__label { fill: var(--i-color-text-secondary); font-variant-numeric: tabular-nums; }
+
+/*
+ * 矩形树图：块表达的是「多少」而不是「谁」，因此用单色顺序色阶。
+ * 分类色会让人以为颜色另有含义，而面积已经在表达量级了。
+ */
+.i-treemap__tile rect { transition: opacity var(--i-motion-fast) var(--i-motion-easing); }
+.i-chart__svg:hover .i-treemap__tile:not(.is-active) rect { opacity: 0.7; }
+/* 文字压在色块上，所以颜色跟随该档色阶的对比色，而不是页面文字色 */
+.i-treemap__label {
+  fill: var(--i-treemap-ink, var(--i-color-text));
+  font-size: var(--i-font-size-sm);
+  font-weight: 500;
+}
+.i-treemap__value {
+  fill: var(--i-treemap-ink, var(--i-color-text));
+  opacity: 0.72;
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}

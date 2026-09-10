@@ -6,6 +6,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show Offset, Rect, Size;
 
 const double kFlowNodeWidth = 132;
 const double kFlowNodeHeight = 48;
@@ -32,13 +33,14 @@ class FlowNodeData {
   /// start / process / decision / end：形状承担语义
   final String type;
 
-  FlowNodeData copyWith({double? x, double? y}) => FlowNodeData(
+  FlowNodeData copyWith({double? x, double? y, double? width, double? height}) =>
+      FlowNodeData(
         id: id,
         label: label,
         x: x ?? this.x,
         y: y ?? this.y,
-        width: width,
-        height: height,
+        width: width ?? this.width,
+        height: height ?? this.height,
         type: type,
       );
 }
@@ -153,4 +155,192 @@ List<FlowNodeData> autoLayout(
   final right = nodes.map((n) => n.x + n.width).reduce(math.max) + padding;
   final bottom = nodes.map((n) => n.y + n.height).reduce(math.max) + padding;
   return (x: x, y: y, width: right - x, height: bottom - y);
+}
+
+/* ---------- 框选 ---------- */
+
+/// 由按下点与当前点算出框选矩形。
+///
+/// 两点顺序不做要求：往左上拖也是合法的框选，
+/// 不归一化的话宽高会变成负数，命中判定与描边都会失效。
+Rect marqueeRect(Offset a, Offset b) => Rect.fromLTRB(
+      math.min(a.dx, b.dx),
+      math.min(a.dy, b.dy),
+      math.max(a.dx, b.dx),
+      math.max(a.dy, b.dy),
+    );
+
+/// 框选命中的节点。
+///
+/// 默认 contain（整个节点都在框内才算中）而不是 intersect：
+/// 相交判定下，框边缘扫过的节点会被顺手选中，
+/// 用户拖框经过一个节点却没打算选它，是最常见的误操作。
+List<String> nodesInRect(
+  List<FlowNodeData> nodes,
+  Rect rect, {
+  bool intersect = false,
+}) =>
+    nodes
+        .where((node) {
+          final box = Rect.fromLTWH(node.x, node.y, node.width, node.height);
+          if (intersect) return box.overlaps(rect);
+          // 不用 Rect.contains：它对右边与下边是开区间，
+          // 一个正好贴着框边的节点在 Web 端算选中、在这里算没选中
+          return box.left >= rect.left &&
+              box.top >= rect.top &&
+              box.right <= rect.right &&
+              box.bottom <= rect.bottom;
+        })
+        .map((node) => node.id)
+        .toList();
+
+/// 批量移动：整组一起吸附，而不是各自吸附。
+///
+/// 逐个吸附会把组里原本的相对间距抹平——两个相距 12px 的节点，
+/// 各自对齐到 8 格后可能变成 8px 或 16px，一次批量移动就把手工排好的版毁了。
+/// 因此位移量本身吸附一次，组内所有节点用同一个位移。
+List<FlowNodeData> moveNodes(
+  List<FlowNodeData> nodes,
+  Set<String> ids,
+  Offset delta, {
+  double grid = 8,
+}) {
+  final dx = grid > 0 ? (delta.dx / grid).round() * grid : delta.dx;
+  final dy = grid > 0 ? (delta.dy / grid).round() * grid : delta.dy;
+  return nodes
+      .where((node) => ids.contains(node.id))
+      .map((node) => node.copyWith(x: node.x + dx, y: node.y + dy))
+      .toList();
+}
+
+/* ---------- 节点缩放 ---------- */
+
+/// 缩放手柄的位置。只放四个角：边中点手柄在小节点上会和角手柄挤在一起
+enum FlowResizeHandle { nw, ne, se, sw }
+
+const double kFlowMinNodeWidth = 72;
+const double kFlowMinNodeHeight = 32;
+
+/// 拖动某个角把节点缩放到指针位置。
+///
+/// 对角固定不动：拖右下角时左上角不该跟着跑，否则节点会一边变大一边平移，
+/// 手感像在拖整个节点而不是在改尺寸。
+/// 尺寸下限之外还要夹住位置——只夹尺寸的话，拖过头时节点会继续往反方向滑。
+Rect resizeNode(
+  FlowNodeData node,
+  FlowResizeHandle handle,
+  Offset point, {
+  double grid = 8,
+  double minWidth = kFlowMinNodeWidth,
+  double minHeight = kFlowMinNodeHeight,
+}) {
+  double snap(double v) => grid > 0 ? (v / grid).round() * grid : v;
+  final west = handle == FlowResizeHandle.nw || handle == FlowResizeHandle.sw;
+  final north = handle == FlowResizeHandle.nw || handle == FlowResizeHandle.ne;
+
+  // 固定对角，另一角跟指针走
+  final anchorX = west ? node.x + node.width : node.x;
+  final anchorY = north ? node.y + node.height : node.y;
+  var movingX = snap(point.dx);
+  var movingY = snap(point.dy);
+
+  movingX = west ? math.min(movingX, anchorX - minWidth) : math.max(movingX, anchorX + minWidth);
+  movingY = north ? math.min(movingY, anchorY - minHeight) : math.max(movingY, anchorY + minHeight);
+
+  return Rect.fromLTWH(
+    math.min(anchorX, movingX),
+    math.min(anchorY, movingY),
+    (anchorX - movingX).abs(),
+    (anchorY - movingY).abs(),
+  );
+}
+
+/* ---------- 缩略图 ---------- */
+
+@immutable
+class FlowView {
+  const FlowView({this.x = 0, this.y = 0, this.scale = 1});
+  final double x;
+  final double y;
+  final double scale;
+
+  FlowView copyWith({double? x, double? y, double? scale}) =>
+      FlowView(x: x ?? this.x, y: y ?? this.y, scale: scale ?? this.scale);
+}
+
+@immutable
+class MinimapLayout {
+  const MinimapLayout({
+    required this.scale,
+    required this.offset,
+    required this.viewport,
+  });
+
+  /// 画布坐标 → 缩略图坐标的缩放比
+  final double scale;
+
+  /// 缩略图内的居中偏移
+  final Offset offset;
+
+  /// 当前视口对应到缩略图上的取景框
+  final Rect viewport;
+}
+
+/// 缩略图布局。
+///
+/// 横纵取较小的比例并居中，而不是各自拉伸：分别缩放会让缩略图里的节点
+/// 与主画布长宽比不同，那样缩略图就不再是同一张图的缩小版，指路作用也就没了。
+MinimapLayout minimapLayout(
+  List<FlowNodeData> nodes,
+  FlowView view,
+  Size canvas,
+  Size minimap, {
+  double padding = 40,
+}) {
+  final bounds = boundsOf(nodes, padding: padding);
+  final scale = math.min(minimap.width / bounds.width, minimap.height / bounds.height);
+  final offsetX = (minimap.width - bounds.width * scale) / 2 - bounds.x * scale;
+  final offsetY = (minimap.height - bounds.height * scale) / 2 - bounds.y * scale;
+
+  // 视口在画布坐标里的位置：屏幕原点反算回去，再按缩略图比例投影
+  final viewX = -view.x / view.scale;
+  final viewY = -view.y / view.scale;
+  return MinimapLayout(
+    scale: scale,
+    offset: Offset(offsetX, offsetY),
+    viewport: Rect.fromLTWH(
+      viewX * scale + offsetX,
+      viewY * scale + offsetY,
+      (canvas.width / view.scale) * scale,
+      (canvas.height / view.scale) * scale,
+    ),
+  );
+}
+
+/// 点击缩略图某处，算出让该点居中所需的主画布视图。
+///
+/// 这是 minimapLayout 的逆运算——缩略图上点一下就跳过去，
+/// 是大图导航里唯一比反复拖画布快的操作。
+FlowView viewFromMinimap(
+  Offset point,
+  MinimapLayout layout,
+  FlowView view,
+  Size canvas,
+) {
+  final canvasX = (point.dx - layout.offset.dx) / layout.scale;
+  final canvasY = (point.dy - layout.offset.dy) / layout.scale;
+  return FlowView(
+    scale: view.scale,
+    x: canvas.width / 2 - canvasX * view.scale,
+    y: canvas.height / 2 - canvasY * view.scale,
+  );
+}
+
+/// 导出用的包围盒：包住全部节点，与当前视口无关。
+///
+/// 导出的是「这张图」，不是「我现在看到的这一块」——
+/// 按当前视口导出，用户拿到的图会缺掉他没滚动到的部分，而他并不会察觉。
+Rect snapshotViewBox(List<FlowNodeData> nodes, {double padding = 24}) {
+  final b = boundsOf(nodes, padding: padding);
+  return Rect.fromLTWH(b.x, b.y, b.width, b.height);
 }

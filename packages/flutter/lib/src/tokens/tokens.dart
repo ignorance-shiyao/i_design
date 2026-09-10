@@ -18,6 +18,7 @@ class IDesignTokensLight {
   static const colorTextSecondary = Color(0xFF575D6C);
   static const colorTextTertiary = Color(0xFF8A8E99);
   static const colorTextInverse = Color(0xFFFFFFFF);
+  static const colorOnMedia = Color(0xFFFFFFFF);
   static const colorTextLink = Color(0xFF5E7CE0);
   static const colorBorder = Color(0xFFDFE1E6);
   static const colorBorderStrong = Color(0xFFC3C6CD);
@@ -61,6 +62,11 @@ class IDesignTokensLight {
   static const chartSeq3 = Color(0xFF7EA1FF);
   static const chartSeq4 = Color(0xFF5E7CE0);
   static const chartSeq5 = Color(0xFF3A4DA3);
+  static const chartSeq1Ink = Color(0xFF1D2129);
+  static const chartSeq2Ink = Color(0xFF1D2129);
+  static const chartSeq3Ink = Color(0xFF1D2129);
+  static const chartSeq4Ink = Color(0xFFFFFFFF);
+  static const chartSeq5Ink = Color(0xFFFFFFFF);
   static const chartDiv1 = Color(0xFFC2413D);
   static const chartDiv2 = Color(0xFFE8A09E);
   static const chartDiv3 = Color(0xFFDFE1E6);
@@ -121,6 +127,7 @@ class IDesignTokensDark {
   static const colorTextSecondary = Color(0xFFB3B8C6);
   static const colorTextTertiary = Color(0xFF8A8E99);
   static const colorTextInverse = Color(0xFF141822);
+  static const colorOnMedia = Color(0xFFFFFFFF);
   static const colorTextLink = Color(0xFFADC4FF);
   static const colorBorder = Color(0xFF333A4D);
   static const colorBorderStrong = Color(0xFF454D63);
@@ -164,6 +171,11 @@ class IDesignTokensDark {
   static const chartSeq3 = Color(0xFF7EA1FF);
   static const chartSeq4 = Color(0xFF5E7CE0);
   static const chartSeq5 = Color(0xFF3A4DA3);
+  static const chartSeq1Ink = Color(0xFF1D2129);
+  static const chartSeq2Ink = Color(0xFF1D2129);
+  static const chartSeq3Ink = Color(0xFF1D2129);
+  static const chartSeq4Ink = Color(0xFFFFFFFF);
+  static const chartSeq5Ink = Color(0xFFFFFFFF);
   static const chartDiv1 = Color(0xFFDE3C3B);
   static const chartDiv2 = Color(0xFF8F4A48);
   static const chartDiv3 = Color(0xFF3A3F4D);

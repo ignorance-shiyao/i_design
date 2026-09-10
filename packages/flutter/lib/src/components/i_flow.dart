@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../logic/flow.dart';
 import '../theme/i_theme.dart';
 import '../tokens/tokens.dart';
@@ -15,37 +19,59 @@ class IFlow extends StatefulWidget {
     required this.edges,
     this.height = 360,
     this.readOnly = false,
-    this.selected,
-    this.onSelect,
+    this.selection = const <String>[],
+    this.onSelectionChanged,
     this.onMove,
     this.edgeType = FlowEdgeType.polyline,
+    this.onExport,
   });
 
   final List<FlowNodeData> nodes;
   final List<FlowEdgeData> edges;
   final double height;
 
-  /// 只读：仍可平移缩放与选中，但不能拖动节点
+  /// 只读：仍可平移缩放与选中，但不能拖动、缩放节点
   final bool readOnly;
-  final String? selected;
-  final ValueChanged<String?>? onSelect;
 
-  /// 拖动结束抛出新坐标；组件不改传入的数据
-  final void Function(String id, double x, double y)? onMove;
+  /// 选中的节点 id。单选也是长度为 1 的列表——两套选中状态迟早会对不上
+  final List<String> selection;
+  final ValueChanged<List<String>>? onSelectionChanged;
+
+  /// 拖动或缩放结束抛出一组新几何；组件不改传入的数据
+  final void Function(List<FlowNodeData> changes)? onMove;
 
   /// 整图默认连线走向；单条连线可用 FlowEdgeData.type 覆盖
   final FlowEdgeType edgeType;
+
+  /// 导出快照后拿到 PNG 字节；存盘还是分享由调用方决定
+  final ValueChanged<Uint8List>? onExport;
 
   @override
   State<IFlow> createState() => _IFlowState();
 }
 
+const Size _kMinimap = Size(120, 80);
+/// 手柄在屏幕上的半径。触摸的命中区要比画出来的大，手指没有指针那么准
+const double _kHandleRadius = 5;
+const double _kHandleTouchRadius = 14;
+
 class _IFlowState extends State<IFlow> {
+  final GlobalKey _boundary = GlobalKey();
   Offset _pan = Offset.zero;
   double _scale = 1;
-  String? _dragId;
-  Offset _dragDelta = Offset.zero;
   Size _canvas = Size.zero;
+
+  /// 一次拖动涉及的整组节点与它们按下时的几何
+  List<String> _dragIds = const <String>[];
+  List<FlowNodeData> _dragBase = const <FlowNodeData>[];
+  Offset _dragFrom = Offset.zero;
+  ({String id, FlowResizeHandle handle})? _resizing;
+  ({Offset from, Offset to})? _marquee;
+
+  /// 触摸端没有 Shift 键，框选只能做成一个显式开关。
+  /// 长按进入框选也是一种选择，但那样「想平移却按久了」就会莫名画出选框。
+  bool _marqueeMode = false;
+  bool _showMinimap = true;
 
   @override
   void initState() {
@@ -72,6 +98,71 @@ class _IFlowState extends State<IFlow> {
   }
 
   Offset _toCanvas(Offset local) => (local - _pan) / _scale;
+
+  Set<String> get _selected => widget.selection.toSet();
+
+  /// 恰好选中一个节点时四角才有手柄：多选时拖角改的是哪一个并不清楚
+  FlowNodeData? get _resizeTarget {
+    if (widget.readOnly || widget.selection.length != 1) return null;
+    for (final node in widget.nodes) {
+      if (node.id == widget.selection.first) return node;
+    }
+    return null;
+  }
+
+  List<({FlowResizeHandle handle, Offset at})> _handlePoints(FlowNodeData n) => [
+        (handle: FlowResizeHandle.nw, at: Offset(n.x, n.y)),
+        (handle: FlowResizeHandle.ne, at: Offset(n.x + n.width, n.y)),
+        (handle: FlowResizeHandle.se, at: Offset(n.x + n.width, n.y + n.height)),
+        (handle: FlowResizeHandle.sw, at: Offset(n.x, n.y + n.height)),
+      ];
+
+  ({String id, FlowResizeHandle handle})? _hitHandle(Offset point) {
+    final node = _resizeTarget;
+    if (node == null) return null;
+    // 命中半径按屏幕像素折算回画布：缩小后手柄看起来更小，手指却没变细
+    final r = _kHandleTouchRadius / _scale;
+    for (final h in _handlePoints(node)) {
+      if ((point.dx - h.at.dx).abs() <= r && (point.dy - h.at.dy).abs() <= r) {
+        return (id: node.id, handle: h.handle);
+      }
+    }
+    return null;
+  }
+
+  MinimapLayout? get _minimap {
+    if (_canvas == Size.zero || widget.nodes.isEmpty) return null;
+    return minimapLayout(
+      widget.nodes,
+      FlowView(x: _pan.dx, y: _pan.dy, scale: _scale),
+      _canvas,
+      _kMinimap,
+    );
+  }
+
+  /// 导出快照。
+  ///
+  /// 走 RepaintBoundary 而不是自己再画一遍：再画一遍就有了第二份绘制代码，
+  /// 改了画布却忘了改导出，两边迟早对不上，而且没有任何检查会发现。
+  /// 导出前先把选框、手柄、缩略图这些编辑器界面件收起来——
+  /// 它们不是图的一部分，留在图里等于把工具条一起交给用户。
+  Future<void> _export() async {
+    final callback = widget.onExport;
+    if (callback == null) return;
+    setState(() {
+      _marquee = null;
+      _showMinimap = false;
+    });
+    // 等一帧，让上面的收起真正画出去，否则截到的还是带界面件的旧帧
+    await WidgetsBinding.instance.endOfFrame;
+    final object = _boundary.currentContext?.findRenderObject();
+    if (object is RenderRepaintBoundary) {
+      final image = await object.toImage(pixelRatio: 2);
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data != null) callback(data.buffer.asUint8List());
+    }
+    if (mounted) setState(() => _showMinimap = true);
+  }
 
   FlowNodeData? _hitTest(Offset point) {
     // 从后往前找：后画的节点在上面，点击应当命中它
@@ -102,43 +193,115 @@ class _IFlowState extends State<IFlow> {
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (d) {
+                  // 缩略图压在画布上，点它是导航而不是选节点，要先判定
+                  final layout = _minimap;
+                  if (_showMinimap && layout != null) {
+                    final local = d.localPosition -
+                        const Offset(IDesignTokensLight.spacing3, IDesignTokensLight.spacing3);
+                    if (local.dx >= 0 &&
+                        local.dy >= 0 &&
+                        local.dx <= _kMinimap.width &&
+                        local.dy <= _kMinimap.height) {
+                      final next = viewFromMinimap(
+                        local,
+                        layout,
+                        FlowView(x: _pan.dx, y: _pan.dy, scale: _scale),
+                        _canvas,
+                      );
+                      setState(() => _pan = Offset(next.x, next.y));
+                      return;
+                    }
+                  }
                   final node = _hitTest(_toCanvas(d.localPosition));
-                  widget.onSelect?.call(node?.id);
+                  widget.onSelectionChanged?.call(node == null ? const [] : [node.id]);
                 },
                 onPanStart: (d) {
-                  final node = _hitTest(_toCanvas(d.localPosition));
-                  if (node == null || widget.readOnly) {
-                    _dragId = null;
+                  final point = _toCanvas(d.localPosition);
+
+                  // 手柄压在节点角上，必须先于节点判定，否则永远抓不到
+                  final handle = _hitHandle(point);
+                  if (handle != null) {
+                    _resizing = handle;
                     return;
                   }
-                  _dragId = node.id;
-                  _dragDelta = _toCanvas(d.localPosition) - Offset(node.x, node.y);
-                  widget.onSelect?.call(node.id);
+
+                  final node = _hitTest(point);
+                  if (_marqueeMode && node == null) {
+                    setState(() => _marquee = (from: point, to: point));
+                    return;
+                  }
+                  if (node == null || widget.readOnly) {
+                    _dragIds = const [];
+                    return;
+                  }
+                  // 点已在选中集合里的节点不清空选择，否则批量拖动第一下就把组拆了
+                  final ids = _selected.contains(node.id) ? widget.selection : [node.id];
+                  widget.onSelectionChanged?.call(ids);
+                  _dragIds = ids;
+                  _dragFrom = point;
+                  _dragBase = widget.nodes.where((n) => ids.contains(n.id)).toList();
                 },
                 onPanUpdate: (d) {
-                  if (_dragId == null) {
+                  final point = _toCanvas(d.localPosition);
+
+                  if (_marquee != null) {
+                    setState(() => _marquee = (from: _marquee!.from, to: point));
+                    return;
+                  }
+
+                  if (_resizing != null) {
+                    final node = widget.nodes.firstWhere((n) => n.id == _resizing!.id);
+                    final box = resizeNode(node, _resizing!.handle, point);
+                    widget.onMove?.call([
+                      node.copyWith(x: box.left, y: box.top, width: box.width, height: box.height),
+                    ]);
+                    return;
+                  }
+
+                  if (_dragIds.isEmpty) {
                     setState(() => _pan += d.delta);
                     return;
                   }
-                  final point = _toCanvas(d.localPosition) - _dragDelta;
-                  // 吸附到 8 的倍数：手绘位置总差几像素，对齐后整张图才整齐
+                  // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
                   widget.onMove?.call(
-                    _dragId!,
-                    (point.dx / 8).round() * 8,
-                    (point.dy / 8).round() * 8,
+                    moveNodes(_dragBase, _dragIds.toSet(), point - _dragFrom),
                   );
                 },
-                onPanEnd: (_) => _dragId = null,
-                child: CustomPaint(
-                  size: Size.infinite,
-                  painter: _FlowPainter(
-                    nodes: widget.nodes,
-                    edges: widget.edges,
-                    selected: widget.selected,
-                    edgeType: widget.edgeType,
-                    pan: _pan,
-                    scale: _scale,
-                    colors: c,
+                onPanEnd: (_) {
+                  if (_marquee != null) {
+                    final rect = marqueeRect(_marquee!.from, _marquee!.to);
+                    // 只有拖出了实际面积才当作框选：原地一点应当理解为「取消选中」
+                    widget.onSelectionChanged?.call(
+                      rect.width > 4 && rect.height > 4 ? nodesInRect(widget.nodes, rect) : const [],
+                    );
+                    setState(() => _marquee = null);
+                  }
+                  _dragIds = const [];
+                  _resizing = null;
+                },
+                child: RepaintBoundary(
+                  key: _boundary,
+                  child: CustomPaint(
+                    size: Size.infinite,
+                    painter: _FlowPainter(
+                      nodes: widget.nodes,
+                      edges: widget.edges,
+                      selected: _selected,
+                      edgeType: widget.edgeType,
+                      pan: _pan,
+                      scale: _scale,
+                      colors: c,
+                      marquee: _marquee == null ? null : marqueeRect(_marquee!.from, _marquee!.to),
+                      handles: _resizeTarget == null
+                          ? const []
+                          : _handlePoints(_resizeTarget!).map((h) => h.at).toList(),
+                      minimap: _showMinimap ? _minimap : null,
+                      minimapSize: _kMinimap,
+                      minimapOrigin: const Offset(
+                        IDesignTokensLight.spacing3,
+                        IDesignTokensLight.spacing3,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -155,6 +318,12 @@ class _IFlowState extends State<IFlow> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (!widget.readOnly)
+                        _tool('marquee', '框选', () => setState(() => _marqueeMode = !_marqueeMode),
+                            on: _marqueeMode, colors: c),
+                      _tool('minimap', '缩略图', () => setState(() => _showMinimap = !_showMinimap),
+                          on: _showMinimap, colors: c),
+                      if (widget.onExport != null) _tool('download', '导出快照', _export),
                       _tool('minus', '缩小', () => setState(() => _scale = (_scale - 0.2).clamp(0.4, 2.0))),
                       SizedBox(
                         width: 46,
@@ -180,12 +349,27 @@ class _IFlowState extends State<IFlow> {
     );
   }
 
-  Widget _tool(String icon, String label, VoidCallback onTap) => InkWell(
+  /// 开关型按钮的按下态用淡底色块，而不是给按钮加一条重边线
+  Widget _tool(String icon, String label, VoidCallback onTap, {bool on = false, IColors? colors}) =>
+      InkWell(
         onTap: onTap,
-        child: SizedBox(
+        child: Container(
           width: 30,
           height: 30,
-          child: Center(child: IIcon(icon, size: 14, semanticLabel: label)),
+          decoration: on && colors != null
+              ? BoxDecoration(
+                  color: colors.brandSubtle,
+                  borderRadius: BorderRadius.circular(IDesignTokensLight.radiusSm),
+                )
+              : null,
+          child: Center(
+            child: IIcon(
+              icon,
+              size: 14,
+              semanticLabel: label,
+              color: on && colors != null ? colors.brand : null,
+            ),
+          ),
         ),
       );
 }
@@ -199,15 +383,27 @@ class _FlowPainter extends CustomPainter {
     required this.pan,
     required this.scale,
     required this.colors,
+    required this.marquee,
+    required this.handles,
+    required this.minimap,
+    required this.minimapSize,
+    required this.minimapOrigin,
   });
 
   final List<FlowNodeData> nodes;
   final List<FlowEdgeData> edges;
-  final String? selected;
+  final Set<String> selected;
   final FlowEdgeType edgeType;
   final Offset pan;
   final double scale;
   final IColors colors;
+
+  /// 编辑器界面件。导出快照时它们为 null / 空，图里就不会混进工具
+  final Rect? marquee;
+  final List<Offset> handles;
+  final MinimapLayout? minimap;
+  final Size minimapSize;
+  final Offset minimapOrigin;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -221,7 +417,7 @@ class _FlowPainter extends CustomPainter {
       final from = byId[edge.from];
       final to = byId[edge.to];
       if (from == null || to == null) continue;
-      final active = selected != null && (edge.from == selected || edge.to == selected);
+      final active = selected.contains(edge.from) || selected.contains(edge.to);
       final paint = Paint()
         ..color = active ? colors.brand : colors.borderStrong
         ..style = PaintingStyle.stroke
@@ -270,7 +466,7 @@ class _FlowPainter extends CustomPainter {
     }
 
     for (final node in nodes) {
-      final isSelected = node.id == selected;
+      final isSelected = selected.contains(node.id);
       final rect = Rect.fromLTWH(node.x, node.y, node.width, node.height);
       final fill = switch (node.type) {
         'start' => colors.brandSubtle,
@@ -309,7 +505,90 @@ class _FlowPainter extends CustomPainter {
       _text(canvas, node.label, rect.center, colors.text, 13, bold: false);
     }
 
+    // 手柄画在所有节点之上：压在下面会被相邻节点盖住，抓不到
+    for (final at in handles) {
+      final r = _kHandleRadius / scale;
+      final box = Rect.fromCenter(center: at, width: r * 2, height: r * 2);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(box, Radius.circular(2 / scale)),
+        Paint()..color = colors.bgElevated,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(box, Radius.circular(2 / scale)),
+        Paint()
+          ..color = colors.brand
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5 / scale,
+      );
+    }
+
+    if (marquee != null) {
+      // 淡填充加虚线描边：只描边的话看不出框盖住了哪些节点
+      canvas.drawRect(marquee!, Paint()..color = colors.brand.withValues(alpha: 0.08));
+      _dashedRect(canvas, marquee!, colors.brand, 1 / scale, 4 / scale, 3 / scale);
+    }
+
     canvas.restore();
+
+    if (minimap != null) _paintMinimap(canvas);
+  }
+
+  /// 缩略图画在同一块画布上：只为几个小方块再挂一层 CustomPaint 并不划算
+  void _paintMinimap(Canvas canvas) {
+    final layout = minimap!;
+    canvas.save();
+    canvas.translate(minimapOrigin.dx, minimapOrigin.dy);
+    final frame = Rect.fromLTWH(0, 0, minimapSize.width, minimapSize.height);
+    // 裁掉溢出：视口比整图大时取景框会伸到缩略图外面，看起来像画歪了
+    canvas.clipRect(frame);
+    canvas.drawRect(frame, Paint()..color = colors.bgElevated.withValues(alpha: 0.88));
+
+    for (final node in nodes) {
+      canvas.drawRect(
+        Rect.fromLTWH(
+          node.x * layout.scale + layout.offset.dx,
+          node.y * layout.scale + layout.offset.dy,
+          node.width * layout.scale,
+          node.height * layout.scale,
+        ),
+        Paint()..color = selected.contains(node.id) ? colors.brand : colors.borderStrong,
+      );
+    }
+
+    // 取景框只描边不填充：填了就看不见它盖住的是哪几个节点
+    canvas.drawRect(
+      layout.viewport,
+      Paint()
+        ..color = colors.brand
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+    canvas.restore();
+
+    canvas.drawRect(
+      frame.shift(minimapOrigin),
+      Paint()
+        ..color = colors.border
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+  }
+
+  /// Flutter 没有 strokeDasharray，虚线只能自己按段画
+  void _dashedRect(Canvas canvas, Rect rect, Color color, double width, double dash, double gap) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width;
+    final metrics = (Path()..addRect(rect)).computeMetrics();
+    for (final metric in metrics) {
+      var start = 0.0;
+      while (start < metric.length) {
+        final end = start + dash < metric.length ? start + dash : metric.length;
+        canvas.drawPath(metric.extractPath(start, end), paint);
+        start = end + gap;
+      }
+    }
   }
 
   void _arrow(Canvas canvas, Offset tip, String side, Color color) {
@@ -368,6 +647,9 @@ class _FlowPainter extends CustomPainter {
   bool shouldRepaint(_FlowPainter old) =>
       old.nodes != nodes ||
       old.selected != selected ||
+      old.marquee != marquee ||
+      old.handles != handles ||
+      old.minimap != minimap ||
       old.edgeType != edgeType ||
       old.pan != pan ||
       old.scale != scale ||

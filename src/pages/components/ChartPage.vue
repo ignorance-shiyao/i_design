@@ -16,6 +16,8 @@ import IChartScatter from '@/components/IChartScatter.vue'
 import IChartBox from '@/components/IChartBox.vue'
 import IChartWaterfall from '@/components/IChartWaterfall.vue'
 import IChartZoom from '@/components/IChartZoom.vue'
+import IChartSankey from '@/components/IChartSankey.vue'
+import IChartTreemap from '@/components/IChartTreemap.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { sliceByWindow } from '@i-design/common'
 
@@ -100,6 +102,28 @@ const sparks = [
   { title: '今日活跃', value: 12840, trend: 8.2, data: [12, 18, 15, 22, 19, 26, 31, 29, 34] },
   { title: '平均响应', value: '248 ms', trend: -12.4, data: [42, 38, 40, 33, 31, 28, 26, 25, 24] },
   { title: '错误率', value: '0.42%', trend: 3.1, data: [3, 2, 4, 3, 5, 4, 6, 5, 7] }
+]
+
+/* 流向：一次投放的用户去了哪里 */
+const sankeyLinks = [
+  { from: 'visit', to: 'signup', value: 400 },
+  { from: 'visit', to: 'bounce', value: 600 },
+  { from: 'signup', to: 'paid', value: 120 },
+  { from: 'signup', to: 'idle', value: 280 }
+]
+const sankeyLabels = {
+  visit: '访问', signup: '注册', bounce: '未注册离开',
+  paid: '付费', idle: '注册未活跃'
+}
+
+/* 层级占比：各品类的销售额 */
+const treemapItems = [
+  { label: '冰淇淋', value: 4200 },
+  { label: '咖啡', value: 2600 },
+  { label: '烘焙', value: 1500 },
+  { label: '周边', value: 620 },
+  { label: '礼盒', value: 380 },
+  { label: '其他', value: 210 }
 ]
 
 /* 区间缩放：90 天的日活，足够长才看得出「缩放」的必要 */
@@ -292,6 +316,35 @@ const waterfallItems = [
       <div class="chart-demo">
         <IChartHeatmap :matrix="heat" :rows="weekdays" :columns="hours" title="工作项创建时段" unit=" 条" />
       </div>
+    </DemoBlock>
+
+    <h2>流向</h2>
+    <p>
+      桑基图回答的是「量从哪儿来、到哪儿去、中途漏掉多少」。节点高度按流量占比分配，
+      而不是等分——等分会让一条极小的支流和主干看起来一样粗，那正是它要避免的误读。
+    </p>
+    <DemoBlock
+      title="桑基图"
+      description="节点是身份，用分类色；缎带继承来源节点的颜色，读者才能顺着颜色追一条流从哪儿来。悬停某个节点会压暗无关的流，一条路径才追得下去。"
+      lang="vue"
+      code='<IChartSankey :links="sankeyLinks" :labels="sankeyLabels" title="投放去向" unit=" 人" />'
+    >
+      <IChartSankey :links="sankeyLinks" :labels="sankeyLabels" title="一次投放的用户去向" unit=" 人" />
+    </DemoBlock>
+
+    <h2>层级占比</h2>
+    <p>
+      矩形树图用面积表达占比，适合项数多到饼图已经切不动的场景。
+      布局用 squarify 而不是简单切条——切条会产出又长又细的矩形，
+      而人眼比较细长条的面积极不准。
+    </p>
+    <DemoBlock
+      title="矩形树图"
+      description="块表达的是「多少」而不是「谁」，因此用单色顺序色阶：分类色会让人以为颜色另有含义，而面积已经在表达量级了。放不下文字的小块只在悬停时给出数值——硬塞会溢出到相邻块上，看起来像标错了。"
+      lang="vue"
+      code='<IChartTreemap :items="treemapItems" title="品类销售额" unit=" 元" />'
+    >
+      <IChartTreemap :items="treemapItems" title="各品类销售额" unit=" 元" />
     </DemoBlock>
 
     <h2>区间缩放</h2>
