@@ -169,8 +169,8 @@
 - [x] **VirtualList 虚拟滚动**（Semi / TDesign）：万行表格的前提。
       overscan 默认 3 行，少了边缘闪白、多了等于没虚拟化；
       少于 60 条不虚拟化，那时它只是徒增复杂度还会丢掉浏览器自带的查找
-- [ ] **Gantt 甘特图**（AntV）：排期是中后台的高频场景
-- [ ] **WordCloud 词云**（AntV）
+- [x] **Gantt 甘特图**（AntV）：排期是中后台的高频场景
+- [x] **WordCloud 词云**（AntV）
 
 ## 已知的跨端 API 差异
 

@@ -31,6 +31,13 @@ const { selectRange, isInRange, isRangeEdge, moveFocus, groupMarks } = await bun
   'packages/common/src/logic/calendar.ts',
   'calendar'
 )
+const {
+  ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
+} = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
+const { wordFontSize, wordLayout, wordOverflow, wordTone } = await bundle(
+  'packages/common/src/logic/wordcloud.ts',
+  'wordcloud'
+)
 const { pullDistance, pullStatus, shouldRefresh, pullHint, refreshingOffset } = await bundle(
   'packages/common/src/logic/pullrefresh.ts',
   'pullrefresh'
@@ -1304,6 +1311,93 @@ const activeExpectations = activeCases.map((top) =>
   `    expect(activeIndex(<double>[${activeOffsets.map((o) => o.toFixed(1)).join(', ')}], ${top.toFixed(1)}),
         ${activeIndex(activeOffsets, top)});`)
 
+
+/*
+ * 甘特图：时间域扩到整周、工期含首尾、逾期只看结束日，这三条最容易移植错。
+ * 「今天」写死，否则这份测试每天的期望值都不一样。
+ */
+const gToday = '2026-03-25'
+const gTasks = [
+  { id: 'a', name: '调研', start: '2026-03-04', end: '2026-03-12', progress: 1 },
+  { id: 'b', name: '定稿', start: '2026-03-11', end: '2026-03-20', progress: 0.6, deps: ['a'] },
+  { id: 'c', name: '开发', start: '2026-03-18', end: '2026-04-08', progress: 0.25, deps: ['b'] },
+  { id: 'm', name: '发布', start: '2026-04-17', end: '2026-04-17', milestone: true, deps: ['c'] },
+]
+const dartGTasks = `<IGanttTask>[${gTasks
+  .map((t) => `const IGanttTask(id: '${t.id}', name: '${t.name}', start: '${t.start}', end: '${t.end}'` +
+    (t.progress !== undefined ? `, progress: ${t.progress}` : '') +
+    (t.deps ? `, deps: <String>[${t.deps.map((d) => `'${d}'`).join(', ')}]` : '') +
+    (t.milestone ? ', milestone: true' : '') + ')')
+  .join(', ')}]`
+const gDomain = ganttDomain(gTasks)
+const gBars = ganttBars(gTasks, gDomain, { dayWidth: 18, rowHeight: 34, barHeight: 18, today: gToday })
+const gTicks = ganttTicks(gDomain, 18, gToday)
+const gLinks = ganttLinks(gBars)
+const ganttExpectations = [
+  `    expect(domain.from, '${gDomain.from}');`,
+  `    expect(domain.to, '${gDomain.to}');`,
+  `    expect(domain.days, ${gDomain.days});`,
+  ...gBars.flatMap((b, i) => [
+    `    expect(bars[${i}].x, closeTo(${b.x}, 1e-9));`,
+    `    expect(bars[${i}].width, closeTo(${b.width}, 1e-9));`,
+    `    expect(bars[${i}].y, closeTo(${b.y}, 1e-9));`,
+    `    expect(bars[${i}].progressWidth, closeTo(${b.progressWidth}, 1e-9));`,
+    `    expect(bars[${i}].overdue, ${b.overdue});`
+  ]),
+  `    expect(ticks.map((t) => t.label).toList(),
+        <String>[${gTicks.map((t) => `'${t.label}'`).join(', ')}]);`,
+  `    expect(ticks.map((t) => t.current).toList(),
+        <bool>[${gTicks.map((t) => t.current).join(', ')}]);`,
+  `    expect(ganttTodayX(domain, dayWidth: 18.0, today: '${gToday}'),
+        closeTo(${ganttTodayX(gDomain, 18, gToday)}, 1e-9));`,
+  // 时间域之外返回 -1，调用方据此不画这条线
+  `    expect(ganttTodayX(domain, dayWidth: 18.0, today: '2027-01-01'), closeTo(-1, 1e-9));`,
+  `    expect(links.map((l) => l.id).toList(),
+        <String>[${gLinks.map((l) => `'${l.id}'`).join(', ')}]);`,
+  ...gLinks.map((l, i) =>
+    `    expect(links[${i}].points, <double>[${l.points.map((v) => v.toFixed(1)).join(', ')}]);`),
+  // 含首尾：3/4 到 3/12 是 9 天，不是 8 天
+  `    expect(daysBetween('2026-03-04', '2026-03-12') + 1, ${daysBetween('2026-03-04', '2026-03-12') + 1});`,
+]
+const cycleTasks = [
+  { id: 'x', name: 'x', start: '2026-01-01', end: '2026-01-02', deps: ['y'] },
+  { id: 'y', name: 'y', start: '2026-01-01', end: '2026-01-02', deps: ['x'] },
+]
+const cycleExpectation = `    expect(ganttCycle(<IGanttTask>[
+      const IGanttTask(id: 'x', name: 'x', start: '2026-01-01', end: '2026-01-02', deps: <String>['y']),
+      const IGanttTask(id: 'y', name: 'y', start: '2026-01-01', end: '2026-01-02', deps: <String>['x']),
+    ]), <String>[${ganttCycle(cycleTasks).map((id) => `'${id}'`).join(', ')}]);
+    expect(ganttCycle(${dartGTasks}), isEmpty);`
+
+/*
+ * 词云：字号按面积开平方、最大的词落在正中、放不下的丢掉而不是叠字。
+ * 宽高在这里按「字数 × 基准字号」构造，两端拿到同一份输入才比得了坐标。
+ */
+const wRaw = [['设计令牌', 96], ['多端一致', 84], ['无障碍', 71], ['主题定制', 65],
+  ['暗色模式', 58], ['组件库', 54], ['覆盖矩阵', 47], ['小程序', 43], ['图表', 39], ['动效', 28]]
+const wWords = wRaw.map(([text, value]) => ({ text, value, width: text.length * 48, height: 54 }))
+const dartWWords = `<IWordMeasured>[${wWords
+  .map((w) => `const IWordMeasured(text: '${w.text}', value: ${w.value}.0, width: ${w.width}.0, height: ${w.height}.0)`)
+  .join(', ')}]`
+const wPlaced = wordLayout(wWords, 640, 320)
+const dartTone = (t) => `IWordTone.${t}`
+const wordExpectations = [
+  `    expect(placed.length, ${wPlaced.length});`,
+  ...wPlaced.flatMap((w, i) => [
+    `    expect(placed[${i}].text, '${w.text}');`,
+    `    expect(placed[${i}].x, closeTo(${w.x}, 1e-9));`,
+    `    expect(placed[${i}].y, closeTo(${w.y}, 1e-9));`,
+    `    expect(placed[${i}].fontSize, closeTo(${w.fontSize}, 1e-9));`,
+    `    expect(placed[${i}].rotated, ${w.rotated});`
+  ]),
+  `    expect(wordOverflow(<IWordItem>[${wWords.map((w) => `const IWordItem(text: '${w.text}', value: ${w.value}.0)`).join(', ')}], placed), ${wordOverflow(wWords, wPlaced)});`
+]
+// 全部同值时统一给中间字号——线性映射在这种情况下要除以 0
+const sizeExpectations = [[96, 12, 96], [12, 12, 96], [54, 12, 96], [5, 5, 5]].map(([v, lo, hi]) =>
+  `    expect(wordFontSize(${v}.0, ${lo}.0, ${hi}.0), closeTo(${wordFontSize(v, lo, hi)}, 1e-9));`)
+const toneExpectations = [[0, 10], [1, 10], [2, 10], [5, 10], [6, 10], [9, 10], [0, 0]].map(([r, t]) =>
+  `    expect(wordTone(${r}, ${t}), ${dartTone(wordTone(r, t))});`)
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -1333,6 +1427,8 @@ import 'package:i_design/src/logic/calendar.dart';
 import 'package:i_design/src/logic/mention.dart';
 import 'package:i_design/src/logic/pullrefresh.dart';
 import 'package:i_design/src/logic/indexbar.dart';
+import 'package:i_design/src/logic/gantt.dart';
+import 'package:i_design/src/logic/wordcloud.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
@@ -1707,6 +1803,23 @@ ${hintExpectations.join('\n')}
 ${groupExpectations.join('\n')}
 ${indexAtExpectations.join('\n')}
 ${activeExpectations.join('\n')}
+  });
+
+  test('甘特图的时间域、条形与依赖折线与 Web 端一致', () {
+    final domain = ganttDomain(${dartGTasks});
+    final bars = ganttBars(${dartGTasks}, domain,
+        dayWidth: 18.0, rowHeight: 34.0, barHeight: 18.0, today: '${gToday}');
+    final ticks = ganttTicks(domain, dayWidth: 18.0, today: '${gToday}');
+    final links = ganttLinks(bars);
+${ganttExpectations.join('\n')}
+${cycleExpectation}
+  });
+
+  test('词云的字号映射、螺线落点与档位与 Web 端一致', () {
+    final placed = wordLayout(${dartWWords}, 640.0, 320.0);
+${wordExpectations.join('\n')}
+${sizeExpectations.join('\n')}
+${toneExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

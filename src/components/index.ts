@@ -62,6 +62,8 @@ import IContextCards from './IContextCards.vue'
 import IDiffTable from './IDiffTable.vue'
 import IChartBox from './IChartBox.vue'
 import IChartWaterfall from './IChartWaterfall.vue'
+import IChartGantt from './IChartGantt.vue'
+import IChartWordCloud from './IChartWordCloud.vue'
 import IChartZoom from './IChartZoom.vue'
 import IChartSankey from './IChartSankey.vue'
 import IChartTreemap from './IChartTreemap.vue'
@@ -138,6 +140,8 @@ export {
   IDiffTable,
   IChartBox,
   IChartWaterfall,
+  IChartGantt,
+  IChartWordCloud,
   IChartZoom,
   IChartSankey,
   IChartTreemap,

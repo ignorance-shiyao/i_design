@@ -14,7 +14,7 @@
   min-width: 0;
   height: var(--i-control-height-md);
   padding: 0 var(--i-spacing-3);
-  background: var(--i-color-fill);
+  background: var(--i-color-bg-muted);
   color: var(--i-color-text-tertiary);
 }
 .i-search-bar__field--round { border-radius: 999px; }

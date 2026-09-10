@@ -14,7 +14,7 @@
   min-width: 26px;
   padding: 2px 4px;
   border-radius: var(--i-radius-sm);
-  background: var(--i-color-fill);
+  background: var(--i-color-bg-muted);
   text-align: center;
   font-size: var(--i-font-size-md);
   font-weight: 600;
