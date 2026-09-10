@@ -35,7 +35,8 @@ const manual = new Set([
   'IDropdown.vue',
   'INotificationLayer.vue',
   'ITour.vue',
-  'IAutoComplete.vue'
+  'IAutoComplete.vue',
+  'ITimePicker.vue'
 ])
 
 /**

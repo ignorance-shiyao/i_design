@@ -1,0 +1,73 @@
+<view class="i-transfer" style="--i-transfer-height:{{height}}px">
+  <block wx:for="{{panes}}" wx:key="side">
+    <view class="i-transfer__pane">
+      <view class="i-transfer__head">
+        <!--
+          表头的全选只管当前可见的条目：搜索状态下用户的意思是「这些」，
+          把看不见的一起选中，再点搬运就会搬走一批他从没见过的条目。
+        -->
+        <view
+          class="i-checkbox {{item.allChecked ? 'is-checked' : ''}} {{item.someChecked ? 'is-indeterminate' : ''}} {{item.selectable === 0 ? 'is-disabled' : ''}}"
+          data-side="{{item.side}}"
+          bindtap="onToggleAll"
+        >
+          <view class="i-checkbox__mark" />
+        </view>
+        <text class="i-transfer__title">{{item.title}}</text>
+        <text class="i-transfer__count">{{item.checked}} / {{item.visible.length}}</text>
+      </view>
+
+      <view wx:if="{{searchable}}" class="i-transfer__search">
+        <input
+          class="i-input i-input--sm"
+          placeholder="搜索"
+          value="{{item.keyword}}"
+          data-side="{{item.side}}"
+          bindinput="onSearch"
+        />
+      </view>
+
+      <scroll-view class="i-transfer__list" scroll-y="{{true}}">
+        <view
+          wx:for="{{item.visible}}"
+          wx:for-item="row"
+          wx:key="key"
+          class="i-transfer__item {{row.disabled ? 'is-disabled' : ''}}"
+        >
+          <view
+            class="i-checkbox {{row.checked ? 'is-checked' : ''}} {{row.disabled ? 'is-disabled' : ''}}"
+            data-side="{{item.side}}"
+            data-key="{{row.key}}"
+            bindtap="onToggle"
+          >
+            <view class="i-checkbox__mark" />
+            <text class="i-checkbox__label">{{row.label}}</text>
+          </view>
+        </view>
+        <view wx:if="{{!item.visible.length}}" class="i-transfer__empty">
+          {{item.keyword ? '没有匹配的条目' : '空'}}
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 按钮列是两栏之间真正的一格，不做绝对定位 -->
+    <view wx:if="{{index === 0}}" class="i-transfer__actions">
+      <view
+        class="i-transfer__move {{!sourceChecked ? 'is-disabled' : ''}}"
+        aria-label="移到右栏"
+        data-to="target"
+        bindtap="onMove"
+      >
+        <view class="i-icon i-icon--chevron-right" style="width:16px;height:16px" />
+      </view>
+      <view
+        class="i-transfer__move {{!targetChecked ? 'is-disabled' : ''}}"
+        aria-label="移到左栏"
+        data-to="source"
+        bindtap="onMove"
+      >
+        <view class="i-icon i-icon--chevron-left" style="width:16px;height:16px" />
+      </view>
+    </view>
+  </block>
+</view>

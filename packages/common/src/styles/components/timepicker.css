@@ -1,0 +1,109 @@
+/*
+ * ITimePicker —— 时间选择。
+ *
+ * 三列并排而不是一个长下拉：24 × 60 × 60 拉成一条列表有八万多项，
+ * 滚到想要的那一刻比手打还慢。
+ */
+.i-timepicker { position: relative; display: inline-block; }
+.i-timepicker__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  min-width: 140px;
+  height: var(--i-control-height-md);
+  padding: 0 var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.i-timepicker__trigger:hover:not(:disabled) { border-color: var(--i-color-brand); }
+.i-timepicker__trigger:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 1px; }
+.i-timepicker__trigger:disabled { background: var(--i-color-bg-subtle); cursor: not-allowed; }
+.i-timepicker__trigger svg { color: var(--i-color-text-tertiary); flex: none; }
+.i-timepicker__trigger .is-placeholder { color: var(--i-color-text-tertiary); }
+.i-timepicker__clear {
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-tertiary);
+}
+.i-timepicker__clear:hover { background: var(--i-color-bg-muted); color: var(--i-color-text); }
+
+.i-timepicker__panel {
+  position: fixed;
+  z-index: var(--i-z-dropdown);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-md);
+}
+.i-timepicker__cols { display: flex; }
+.i-timepicker__col {
+  width: 56px;
+  height: 200px;
+  margin: 0;
+  padding: 0 0 172px;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: none;
+}
+/*
+ * 底部留一屏的内边距：不留的话最后几项永远滚不到列中间，
+ * 而「当前值居中」正是这种滚轮式选择器的读法。
+ */
+.i-timepicker__col::-webkit-scrollbar { display: none; }
+.i-timepicker__col + .i-timepicker__col { border-left: 1px solid var(--i-color-hairline); }
+.i-timepicker__cell {
+  padding: var(--i-spacing-2) 0;
+  text-align: center;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.i-timepicker__cell:hover:not(.is-disabled) { background: var(--i-color-bg-subtle); }
+/* 当前项用淡底色块加字重，不用一条重边线 */
+.i-timepicker__cell.is-active {
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand);
+  font-weight: var(--i-font-weight-medium);
+}
+.i-timepicker__cell.is-disabled { color: var(--i-color-text-tertiary); opacity: 0.45; cursor: not-allowed; }
+
+.i-timepicker__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-top: 1px solid var(--i-color-hairline);
+}
+.i-timepicker__now,
+.i-timepicker__done {
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
+}
+.i-timepicker__now { color: var(--i-color-text-secondary); }
+.i-timepicker__now:hover { color: var(--i-color-brand); }
+.i-timepicker__done { color: var(--i-color-brand); font-weight: var(--i-font-weight-medium); }
+
+/*
+ * 小程序没有 Teleport，面板只能就地绝对定位。
+ * 因此父级不能有 overflow: hidden，否则面板会被裁掉——
+ * 这条约束写进文档，比在组件里硬去改父级的样式安全。
+ */
+.i-timepicker__panel.is-inline {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 4px);
+}

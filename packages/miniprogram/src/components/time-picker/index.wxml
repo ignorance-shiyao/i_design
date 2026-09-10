@@ -1,0 +1,46 @@
+<view class="i-timepicker {{disabled ? 'is-disabled' : ''}}">
+  <view class="i-timepicker__trigger" bindtap="toggle">
+    <view class="i-icon i-icon--clock" style="width:15px;height:15px" />
+    <text class="{{value ? '' : 'is-placeholder'}}">{{value || placeholder}}</text>
+    <view
+      wx:if="{{clearable && value && !disabled}}"
+      class="i-timepicker__clear"
+      aria-label="清除"
+      catchtap="clear"
+    >
+      <view class="i-icon i-icon--close" style="width:12px;height:12px" />
+    </view>
+  </view>
+
+  <!--
+    小程序没有 Teleport，面板就地绝对定位。父级不能有 overflow:hidden，
+    否则面板会被裁掉——这条写在文档里，比在组件里硬改父级安全。
+  -->
+  <view wx:if="{{open}}" class="i-timepicker__panel is-inline">
+    <view class="i-timepicker__cols">
+      <scroll-view
+        wx:for="{{columns}}"
+        wx:key="unit"
+        wx:for-item="col"
+        class="i-timepicker__col"
+        scroll-y="{{true}}"
+        scroll-into-view="{{col.activeId}}"
+      >
+        <view
+          wx:for="{{col.cells}}"
+          wx:key="value"
+          id="{{item.id}}"
+          class="i-timepicker__cell {{item.active ? 'is-active' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+          data-unit="{{col.unit}}"
+          data-value="{{item.value}}"
+          bindtap="onPick"
+        >{{item.text}}</view>
+      </scroll-view>
+    </view>
+    <view class="i-timepicker__foot">
+      <!-- 「此刻」不是装饰：绝大多数时间输入填的就是现在，让人少滚三列 -->
+      <view class="i-timepicker__now" bindtap="onNow">此刻</view>
+      <view class="i-timepicker__done" bindtap="close">确定</view>
+    </view>
+  </view>
+</view>

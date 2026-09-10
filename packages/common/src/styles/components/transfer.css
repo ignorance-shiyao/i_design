@@ -1,0 +1,91 @@
+/*
+ * ITransfer —— 穿梭框。
+ *
+ * 两栏等宽、中间一列按钮。中间按钮竖排而不是横排：
+ * 它们表达的是「往左」「往右」，竖排时两个箭头正好对着两栏之间的那条缝。
+ */
+.i-transfer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: var(--i-spacing-4);
+}
+.i-transfer__pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  overflow: hidden;
+}
+/*
+ * 按钮列就是中间那一格的正常内容，不做绝对定位。
+ *
+ * 绝对定位的网格子项，包含块是它自己那一格；而那一格没有正常内容时宽度是 0，
+ * left: 50% 于是量的是 0 宽度——按钮会落到隔壁栏里去，看着像浮在右栏上面。
+ * DOM 顺序本来就是「左栏 → 按钮 → 右栏」，按顺序摆就对了。
+ */
+.i-transfer__actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--i-spacing-2);
+}
+
+.i-transfer__head {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-bottom: 1px solid var(--i-color-hairline);
+  background: var(--i-color-bg-subtle);
+}
+.i-transfer__title { font-size: var(--i-font-size-sm); color: var(--i-color-text); }
+.i-transfer__count {
+  margin-left: auto;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.i-transfer__search { padding: var(--i-spacing-2) var(--i-spacing-3) 0; }
+
+.i-transfer__list {
+  flex: 1;
+  height: var(--i-transfer-height, 260px);
+  margin: 0;
+  padding: var(--i-spacing-2);
+  overflow-y: auto;
+  list-style: none;
+}
+.i-transfer__item {
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border-radius: var(--i-radius-sm);
+}
+.i-transfer__item:hover:not(.is-disabled) { background: var(--i-color-bg-subtle); }
+.i-transfer__item.is-disabled { opacity: 0.5; }
+.i-transfer__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}
+
+.i-transfer__move {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text-secondary);
+  cursor: pointer;
+}
+.i-transfer__move:hover:not(:disabled) {
+  border-color: var(--i-color-brand);
+  color: var(--i-color-brand);
+}
+/* 没勾选任何东西时按钮不可点：能点但点了没反应，比灰着更让人困惑 */
+.i-transfer__move:disabled { opacity: 0.4; cursor: not-allowed; }

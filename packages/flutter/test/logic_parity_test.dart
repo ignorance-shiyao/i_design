@@ -16,6 +16,8 @@ import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
 import 'package:i_design/src/logic/keypad.dart';
 import 'package:i_design/src/logic/taginput.dart';
+import 'package:i_design/src/logic/time.dart';
+import 'package:i_design/src/logic/transfer.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '$label 点位不一致');
@@ -963,6 +965,117 @@ void main() {
     expect(
         filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], 'zz', limit: 20).map((s) => s.value).toList(),
         <String>[]);
+  });
+
+  test('时间的格式化、解析、列与范围判定与 Web 端一致', () {
+    expect(formatTime(const ITimeValue(hour: 9, minute: 5, second: 0), showSecond: true), '09:05:00');
+    expect(formatTime(const ITimeValue(hour: 9, minute: 5, second: 0), showSecond: false), '09:05');
+    expect(formatTime(const ITimeValue(hour: 23, minute: 59, second: 59), showSecond: true), '23:59:59');
+    expect(parseTime('09:00'), const ITimeValue(hour: 9, minute: 0, second: 0));
+    expect(parseTime('9:5'), const ITimeValue(hour: 9, minute: 5, second: 0));
+    expect(parseTime('09:00:30'), const ITimeValue(hour: 9, minute: 0, second: 30));
+    expect(parseTime('24:00'), isNull);
+    expect(parseTime('09:60'), isNull);
+    expect(parseTime('abc'), isNull);
+    expect(parseTime(''), isNull);
+    expect(timeColumn('hour', step: 1), <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]);
+    expect(timeColumn('hour', step: 6), <int>[0, 6, 12, 18]);
+    expect(timeColumn('minute', step: 15), <int>[0, 15, 30, 45]);
+    expect(timeColumn('minute', step: 1), <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]);
+    expect(timeColumn('second', step: 30), <int>[0, 30]);
+    expect(timeColumn('minute', step: 0), <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]);
+    expect(
+        isUnitEnabled('hour', 7, const ITimeValue(hour: 9, minute: 0, second: 0),
+            min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0)),
+        false);
+    expect(
+        isUnitEnabled('hour', 9, const ITimeValue(hour: 9, minute: 0, second: 0),
+            min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0)),
+        true);
+    expect(
+        isUnitEnabled('hour', 21, const ITimeValue(hour: 9, minute: 0, second: 0),
+            min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0)),
+        false);
+    expect(
+        isUnitEnabled('minute', 10, const ITimeValue(hour: 8, minute: 0, second: 0),
+            min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0)),
+        false);
+    expect(
+        isUnitEnabled('minute', 10, const ITimeValue(hour: 12, minute: 0, second: 0),
+            min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0)),
+        true);
+    expect(
+        isUnitEnabled('minute', 10, const ITimeValue(hour: 20, minute: 0, second: 0),
+            min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0)),
+        false);
+    expect(
+        isUnitEnabled('second', 10, const ITimeValue(hour: 8, minute: 30, second: 0),
+            min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0)),
+        false);
+    expect(
+        clampTime(const ITimeValue(hour: 7, minute: 3, second: 0), min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0),
+            minuteStep: 15, showSecond: false),
+        const ITimeValue(hour: 8, minute: 30, second: 0));
+    expect(
+        clampTime(const ITimeValue(hour: 22, minute: 40, second: 0), min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0),
+            minuteStep: 15, showSecond: false),
+        const ITimeValue(hour: 20, minute: 0, second: 0));
+    expect(
+        clampTime(const ITimeValue(hour: 12, minute: 37, second: 0), min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0),
+            minuteStep: 15, showSecond: false),
+        const ITimeValue(hour: 12, minute: 30, second: 0));
+    expect(
+        clampTime(const ITimeValue(hour: 12, minute: 37, second: 0), min: const ITimeValue(hour: 8, minute: 30, second: 15), max: const ITimeValue(hour: 20, minute: 0, second: 0),
+            minuteStep: 1, showSecond: false),
+        const ITimeValue(hour: 12, minute: 37, second: 0));
+    expect(isValidRange(const ITimeValue(hour: 9, minute: 0, second: 0), const ITimeValue(hour: 18, minute: 0, second: 0)), true);
+    expect(isValidRange(const ITimeValue(hour: 9, minute: 0, second: 0), const ITimeValue(hour: 9, minute: 0, second: 0)), true);
+    expect(isValidRange(const ITimeValue(hour: 18, minute: 0, second: 0), const ITimeValue(hour: 9, minute: 0, second: 0)), false);
+  });
+
+  test('穿梭框的搬运、勾选与全选与 Web 端一致', () {
+    final items = <ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')];
+    expect(splitSides(items, <String>['secret', 'read']).source.map((i) => i.key).toList(),
+        <String>['write', 'owner']);
+    expect(splitSides(items, <String>['secret', 'read']).target.map((i) => i.key).toList(),
+        <String>['secret', 'read']);
+    expect(moveKeys(items, <String>['read'], <String>['write'], ITransferSide.target),
+        <String>['read', 'write']);
+    expect(moveKeys(items, <String>['read'], <String>['owner'], ITransferSide.target),
+        <String>['read']);
+    expect(moveKeys(items, <String>['read'], <String>['write', 'read'], ITransferSide.target),
+        <String>['read', 'write']);
+    expect(moveKeys(items, <String>['read', 'write'], <String>['read'], ITransferSide.source),
+        <String>['write']);
+    expect(moveKeys(items, <String>['read'], <String>['owner'], ITransferSide.source),
+        <String>['read']);
+    expect(checkedAfterMove(<String>['a', 'b', 'c'], <String>['b']),
+        <String>['a', 'c']);
+    expect(checkedAfterMove(<String>['a'], <String>['a']),
+        <String>[]);
+    expect(checkedAfterMove(<String>['a'], <String>['z']),
+        <String>['a']);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')], <String>[]).selectable, 3);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')], <String>[]).allChecked, false);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')], <String>[]).someChecked, false);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')], <String>['read', 'write', 'secret']).selectable, 3);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')], <String>['read', 'write', 'secret']).allChecked, true);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')], <String>['read', 'write', 'secret']).someChecked, false);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')], <String>['read']).selectable, 3);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')], <String>['read']).allChecked, false);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'read', label: '查看'), const ITransferItem(key: 'write', label: '编辑'), const ITransferItem(key: 'owner', label: '所有者', disabled: true), const ITransferItem(key: 'secret', label: '密钥管理')], <String>['read']).someChecked, true);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'secret', label: '密钥管理')], <String>['secret']).selectable, 1);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'secret', label: '密钥管理')], <String>['secret']).allChecked, true);
+    expect(headerState(<ITransferItem>[const ITransferItem(key: 'secret', label: '密钥管理')], <String>['secret']).someChecked, false);
+    expect(toggleAll(items, <String>[]), <String>['read', 'write', 'secret']);
+    expect(toggleAll(items, <String>['read']), <String>['read', 'write', 'secret']);
+    expect(toggleAll(items, <String>['read', 'write', 'secret']), <String>[]);
+    expect(filterItems(items, '密钥').map((i) => i.key).toList(),
+        <String>['secret']);
+    expect(filterItems(items, '').map((i) => i.key).toList(),
+        <String>['read', 'write', 'owner', 'secret']);
+    expect(filterItems(items, '查').map((i) => i.key).toList(),
+        <String>['read']);
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

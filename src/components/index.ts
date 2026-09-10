@@ -71,6 +71,8 @@ import INumberKeypad from './INumberKeypad.vue'
 import ITour from './ITour.vue'
 import ITagInput from './ITagInput.vue'
 import IAutoComplete from './IAutoComplete.vue'
+import ITimePicker from './ITimePicker.vue'
+import ITransfer from './ITransfer.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -133,6 +135,8 @@ export {
   ITour,
   ITagInput,
   IAutoComplete,
+  ITimePicker,
+  ITransfer,
   IForm,
   IFormItem,
   ITag,

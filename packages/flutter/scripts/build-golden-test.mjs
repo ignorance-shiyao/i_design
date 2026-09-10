@@ -24,6 +24,12 @@ const bundle = (entry, name) => {
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
 const {
+  formatTime, parseTime, timeColumn, isUnitEnabled, clampTime, isValidRange
+} = await bundle('packages/common/src/logic/time.ts', 'time')
+const {
+  splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
+} = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
+const {
   splitTags, addTags, backspace: tagBackspace, splitDraft, removeTag: tagRemove
 } = await bundle('packages/common/src/logic/taginput.ts', 'taginput')
 const { moveActive, moveActiveLoop, matchParts, filterSuggestions } = await bundle(
@@ -825,6 +831,137 @@ const suggestExpectations = [['北', 20], ['海', 20], ['北', 2], ['', 3], ['zz
         ${dartStrings(got.map((g) => g.value))});`
 })
 
+/* ---------- 时间选择与穿梭框 ----------
+ * 「按位判定范围」与「搬走之后勾选怎么办」这两条，抄错都不会报错：
+ * 前者表现为某个本来合法的小时点不动，后者表现为「已选 3 项」而屏幕上一个勾都没有。
+ */
+const dartTime = (t) => `const ITimeValue(hour: ${t.hour}, minute: ${t.minute}, second: ${t.second})`
+
+const fmtCases = [
+  [{ hour: 9, minute: 5, second: 0 }, true],
+  [{ hour: 9, minute: 5, second: 0 }, false],
+  [{ hour: 23, minute: 59, second: 59 }, true],
+]
+const fmtExpectations = fmtCases.map(([t, s]) =>
+  `    expect(formatTime(${dartTime(t)}, showSecond: ${s}), '${formatTime(t, s)}');`)
+
+const parseCases = ['09:00', '9:5', '09:00:30', '24:00', '09:60', 'abc', '']
+const parseExpectations = parseCases.map((text) => {
+  const got = parseTime(text)
+  return got
+    ? `    expect(parseTime('${text}'), ${dartTime(got)});`
+    : `    expect(parseTime('${text}'), isNull);`
+})
+
+const tt_columnCases = [['hour', 1], ['hour', 6], ['minute', 15], ['minute', 1], ['second', 30], ['minute', 0]]
+const tt_columnExpectations = tt_columnCases.map(([unit, step]) =>
+  `    expect(timeColumn('${unit}', step: ${step}), <int>[${timeColumn(unit, step).join(', ')}]);`)
+
+// 按位判定：09 点合法而 07 点不合法，且分钟只在边界那一小时上受限
+const enabledCases = [
+  ['hour', 7, { hour: 9, minute: 0, second: 0 }],
+  ['hour', 9, { hour: 9, minute: 0, second: 0 }],
+  ['hour', 21, { hour: 9, minute: 0, second: 0 }],
+  ['minute', 10, { hour: 8, minute: 0, second: 0 }],
+  ['minute', 10, { hour: 12, minute: 0, second: 0 }],
+  ['minute', 10, { hour: 20, minute: 0, second: 0 }],
+  ['second', 10, { hour: 8, minute: 30, second: 0 }],
+]
+const timeMin = { hour: 8, minute: 30, second: 15 }
+const timeMax = { hour: 20, minute: 0, second: 0 }
+const enabledExpectations = enabledCases.map(([unit, value, current]) =>
+  `    expect(
+        isUnitEnabled('${unit}', ${value}, ${dartTime(current)},
+            min: ${dartTime(timeMin)}, max: ${dartTime(timeMax)}),
+        ${isUnitEnabled(unit, value, current, { min: timeMin, max: timeMax })});`)
+
+// 先夹范围再对齐步长：反过来会得到一个既不在范围里也不在步长上的值
+const tt_clampCases = [
+  [{ hour: 7, minute: 3, second: 0 }, 15],
+  [{ hour: 22, minute: 40, second: 0 }, 15],
+  [{ hour: 12, minute: 37, second: 0 }, 15],
+  [{ hour: 12, minute: 37, second: 0 }, 1],
+]
+const tt_clampExpectations = tt_clampCases.map(([t, step]) => {
+  const got = clampTime(t, { min: timeMin, max: timeMax, step: { minute: step }, showSecond: false })
+  return `    expect(
+        clampTime(${dartTime(t)}, min: ${dartTime(timeMin)}, max: ${dartTime(timeMax)},
+            minuteStep: ${step}, showSecond: false),
+        ${dartTime(got)});`
+})
+
+const rangeExpectations = [
+  [{ hour: 9, minute: 0, second: 0 }, { hour: 18, minute: 0, second: 0 }],
+  [{ hour: 9, minute: 0, second: 0 }, { hour: 9, minute: 0, second: 0 }],
+  [{ hour: 18, minute: 0, second: 0 }, { hour: 9, minute: 0, second: 0 }],
+].map(([a, z]) =>
+  `    expect(isValidRange(${dartTime(a)}, ${dartTime(z)}), ${isValidRange(a, z)});`)
+
+const transferItems = [
+  { key: 'read', label: '查看' },
+  { key: 'write', label: '编辑' },
+  { key: 'owner', label: '所有者', disabled: true },
+  { key: 'secret', label: '密钥管理' },
+]
+const dartTransfer = `<ITransferItem>[${transferItems
+  .map((i) => `const ITransferItem(key: '${i.key}', label: '${i.label}'${i.disabled ? ', disabled: true' : ''})`)
+  .join(', ')}]`
+const dartKeys = (arr) => `<String>[${arr.map((k) => `'${k}'`).join(', ')}]`
+
+const splitCase = splitSides(transferItems, ['secret', 'read'])
+const tt_splitExpectations = [
+  `    expect(splitSides(items, ${dartKeys(['secret', 'read'])}).source.map((i) => i.key).toList(),
+        ${dartKeys(splitCase.source.map((i) => i.key))});`,
+  // 用户搬过去的顺序是有意义的，不能按原数组重排
+  `    expect(splitSides(items, ${dartKeys(['secret', 'read'])}).target.map((i) => i.key).toList(),
+        ${dartKeys(splitCase.target.map((i) => i.key))});`,
+]
+
+const moveCasesT = [
+  [['read'], ['write'], 'target'],
+  [['read'], ['owner'], 'target'],
+  [['read'], ['write', 'read'], 'target'],
+  [['read', 'write'], ['read'], 'source'],
+  [['read'], ['owner'], 'source'],
+]
+const moveExpectationsT = moveCasesT.map(([target, moving, to]) =>
+  `    expect(moveKeys(items, ${dartKeys(target)}, ${dartKeys(moving)}, ITransferSide.${to}),
+        ${dartKeys(moveKeys(transferItems, target, moving, to))});`)
+
+const afterMoveExpectations = [
+  [['a', 'b', 'c'], ['b']],
+  [['a'], ['a']],
+  [['a'], ['z']],
+].map(([checked, moved]) =>
+  `    expect(checkedAfterMove(${dartKeys(checked)}, ${dartKeys(moved)}),
+        ${dartKeys(checkedAfterMove(checked, moved))});`)
+
+// 全选只管可见的，且禁用项不计入
+const tt_headerCases = [
+  [transferItems, []],
+  [transferItems, ['read', 'write', 'secret']],
+  [transferItems, ['read']],
+  [transferItems.filter((i) => i.key === 'secret'), ['secret']],
+]
+const tt_headerExpectations = tt_headerCases.flatMap(([visible, checked], i) => {
+  const state = headerState(visible, checked)
+  const literal = `<ITransferItem>[${visible
+    .map((v) => `const ITransferItem(key: '${v.key}', label: '${v.label}'${v.disabled ? ', disabled: true' : ''})`)
+    .join(', ')}]`
+  return [
+    `    expect(headerState(${literal}, ${dartKeys(checked)}).selectable, ${state.selectable});`,
+    `    expect(headerState(${literal}, ${dartKeys(checked)}).allChecked, ${state.allChecked});`,
+    `    expect(headerState(${literal}, ${dartKeys(checked)}).someChecked, ${state.someChecked});`,
+  ]
+})
+
+const toggleAllExpectations = [[], ['read'], ['read', 'write', 'secret']].map((checked) =>
+  `    expect(toggleAll(items, ${dartKeys(checked)}), ${dartKeys(toggleAll(transferItems, checked))});`)
+
+const filterTransferExpectations = ['密钥', '', '查'].map((kw) =>
+  `    expect(filterItems(items, '${kw}').map((i) => i.key).toList(),
+        ${dartKeys(filterTransfer(transferItems, kw).map((i) => i.key))});`)
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -843,6 +980,8 @@ import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
 import 'package:i_design/src/logic/keypad.dart';
 import 'package:i_design/src/logic/taginput.dart';
+import 'package:i_design/src/logic/time.dart';
+import 'package:i_design/src/logic/transfer.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
@@ -1140,6 +1279,25 @@ ${removeExpectations.join('\n')}
   test('自动完成的命中切段与候选排序与 Web 端一致', () {
 ${matchExpectations.join('\n')}
 ${suggestExpectations.join('\n')}
+  });
+
+  test('时间的格式化、解析、列与范围判定与 Web 端一致', () {
+${fmtExpectations.join('\n')}
+${parseExpectations.join('\n')}
+${tt_columnExpectations.join('\n')}
+${enabledExpectations.join('\n')}
+${tt_clampExpectations.join('\n')}
+${rangeExpectations.join('\n')}
+  });
+
+  test('穿梭框的搬运、勾选与全选与 Web 端一致', () {
+    final items = ${dartTransfer};
+${tt_splitExpectations.join('\n')}
+${moveExpectationsT.join('\n')}
+${afterMoveExpectations.join('\n')}
+${tt_headerExpectations.join('\n')}
+${toggleAllExpectations.join('\n')}
+${filterTransferExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

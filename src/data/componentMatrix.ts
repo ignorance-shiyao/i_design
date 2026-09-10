@@ -819,6 +819,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ITimePicker",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ITimeline",
     "ends": {
       "vue-next": true,
@@ -840,6 +850,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "ITour",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ITransfer",
     "ends": {
       "vue-next": true,
       "vue": true,
