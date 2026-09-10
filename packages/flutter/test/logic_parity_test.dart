@@ -77,6 +77,16 @@ void _expectDiff(IDiffSummary actual, int added, int removed, int changed,
   expect(diffActionLabel(actual), label, reason: '$reason 按钮文案不一致');
 }
 
+void _expectBox(IBoxStats actual, double q1, double median, double q3,
+    double lower, double upper, int outliers, String reason) {
+  expect(actual.q1, closeTo(q1, 1e-9), reason: '$reason q1 不一致');
+  expect(actual.median, closeTo(median, 1e-9), reason: '$reason 中位数不一致');
+  expect(actual.q3, closeTo(q3, 1e-9), reason: '$reason q3 不一致');
+  expect(actual.lower, closeTo(lower, 1e-9), reason: '$reason 下须不一致');
+  expect(actual.upper, closeTo(upper, 1e-9), reason: '$reason 上须不一致');
+  expect(actual.outliers.length, outliers, reason: '$reason 离群点数不一致');
+}
+
 void main() {
   test('buildPages 与 Web 端逐项一致', () {
     _expectPages(buildPages(1, 100, 5), <IPageItem>[const IPageItem.page(1), const IPageItem.page(2), const IPageItem.page(3), const IPageItem.page(4), const IPageItem.page(5), const IPageItem.page(6), const IPageItem.gap('right'), const IPageItem.page(100)],
@@ -472,5 +482,50 @@ void main() {
         1, 2, 1, 0, 4,
         "未选择改动", 'summarizeDiff(0 选中)');
     expect(diffActionLabel(summarizeDiff(<IDiffRow>[], <String>[])), "没有需要应用的改动");
+  });
+
+  test('分位数与箱线图五数概括与 Web 端一致', () {
+    expect(quantile(<double>[1.0, 2.0, 3.0], 0.50), closeTo(2, 1e-9));
+    expect(quantile(<double>[1.0, 2.0, 3.0, 4.0], 0.50), closeTo(2.5, 1e-9));
+    expect(quantile(<double>[1.0, 2.0, 3.0, 4.0], 0.25), closeTo(1.75, 1e-9));
+    expect(quantile(<double>[1.0, 2.0, 3.0, 4.0], 0.75), closeTo(3.25, 1e-9));
+    expect(quantile(<double>[5.0], 0.25), closeTo(5, 1e-9));
+    expect(quantile(<double>[1.0, 2.0, 3.0], 2.00), closeTo(3, 1e-9));
+    expect(quantile(<double>[1.0, 2.0, 3.0], -1.00), closeTo(1, 1e-9));
+    _expectBox(boxStats(<double>[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]),
+        3, 5, 7, 1, 9, 0,
+        'boxStats(9 个值)');
+    _expectBox(boxStats(<double>[1.0, 2.0, 3.0, 4.0, 5.0, 100.0]),
+        2.25, 3.5, 4.75, 1, 5, 1,
+        'boxStats(6 个值)');
+    _expectBox(boxStats(<double>[5.0, 5.0, 5.0]),
+        5, 5, 5, 5, 5, 0,
+        'boxStats(3 个值)');
+    _expectBox(boxStats(<double>[10.0]),
+        10, 10, 10, 10, 10, 0,
+        'boxStats(1 个值)');
+  });
+
+  test('瀑布图柱子起止与值域与 Web 端一致', () {
+    final bars = waterfallBars(<IWaterfallItem>[IWaterfallItem(label: '期初', value: 100.0), IWaterfallItem(label: '增', value: 40.0), IWaterfallItem(label: '减', value: -25.0), IWaterfallItem(label: '合计', value: 0.0, total: true)]);
+    expect(bars[0].start, closeTo(0, 1e-9));
+    expect(bars[0].end, closeTo(100, 1e-9));
+    expect(bars[0].kind, IWaterfallKind.increase);
+    expect(bars[1].start, closeTo(100, 1e-9));
+    expect(bars[1].end, closeTo(140, 1e-9));
+    expect(bars[1].kind, IWaterfallKind.increase);
+    expect(bars[2].start, closeTo(140, 1e-9));
+    expect(bars[2].end, closeTo(115, 1e-9));
+    expect(bars[2].kind, IWaterfallKind.decrease);
+    expect(bars[3].start, closeTo(0, 1e-9));
+    expect(bars[3].end, closeTo(115, 1e-9));
+    expect(bars[3].kind, IWaterfallKind.total);
+    expect(
+        waterfallDomain(waterfallBars(<IWaterfallItem>[
+          const IWaterfallItem(label: 'a', value: 50.0),
+          const IWaterfallItem(label: 'b', value: -80.0),
+          const IWaterfallItem(label: 'c', value: 60.0),
+        ])),
+        <double>[-30.0, 50.0]);
   });
 }

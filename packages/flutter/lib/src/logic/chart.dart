@@ -213,3 +213,157 @@ double bubbleRadius(double value, double min, double max,
       pts.fold<double>(0, (a, p) => a + math.pow(p.y - (slope * p.x + intercept), 2));
   return (slope: slope, intercept: intercept, r2: ssTot == 0 ? 1 : 1 - ssRes / ssTot);
 }
+
+/* ---------- 箱线图 ---------- */
+
+class IBoxStats {
+  const IBoxStats({
+    required this.min,
+    required this.q1,
+    required this.median,
+    required this.q3,
+    required this.max,
+    required this.iqr,
+    required this.lower,
+    required this.upper,
+    required this.outliers,
+  });
+
+  final double min;
+  final double q1;
+  final double median;
+  final double q3;
+  final double max;
+  final double iqr;
+
+  /// 下须端点：1.5×IQR 内的最小实测值
+  final double lower;
+
+  /// 上须端点：1.5×IQR 内的最大实测值
+  final double upper;
+  final List<double> outliers;
+}
+
+/// 分位数，线性插值（与 numpy 默认、Excel 的 QUARTILE.INC 一致）。
+/// 分位数有七八种定义，各端各挑一种就会得到不同的箱子——
+/// 同一批数据在 Web 上中位线在这里、Flutter 上在那里。定义写死，不留选项。
+double quantile(List<double> sorted, double p) {
+  if (sorted.isEmpty) return double.nan;
+  if (sorted.length == 1) return sorted[0];
+  final pos = (sorted.length - 1) * p.clamp(0.0, 1.0);
+  final low = pos.floor();
+  final high = pos.ceil();
+  if (low == high) return sorted[low];
+  return sorted[low] + (sorted[high] - sorted[low]) * (pos - low);
+}
+
+/// 箱线图的五数概括与离群点。
+/// 须延伸到 1.5×IQR 内的**实测值**，而不是画到围栏位置——
+/// 后者会让须端出现一个数据里根本不存在的数。
+IBoxStats boxStats(List<double> values) {
+  final sorted = values.where((v) => v.isFinite).toList()..sort();
+  if (sorted.isEmpty) {
+    return const IBoxStats(
+      min: double.nan, q1: double.nan, median: double.nan, q3: double.nan,
+      max: double.nan, iqr: double.nan, lower: double.nan, upper: double.nan,
+      outliers: [],
+    );
+  }
+  final q1 = quantile(sorted, 0.25);
+  final median = quantile(sorted, 0.5);
+  final q3 = quantile(sorted, 0.75);
+  final iqr = q3 - q1;
+  final lowFence = q1 - 1.5 * iqr;
+  final highFence = q3 + 1.5 * iqr;
+  final inside = sorted.where((v) => v >= lowFence && v <= highFence).toList();
+  return IBoxStats(
+    min: sorted.first,
+    q1: q1,
+    median: median,
+    q3: q3,
+    max: sorted.last,
+    iqr: iqr,
+    lower: inside.isNotEmpty ? inside.first : sorted.first,
+    upper: inside.isNotEmpty ? inside.last : sorted.last,
+    outliers:
+        sorted.where((v) => v < lowFence || v > highFence).toList(),
+  );
+}
+
+/* ---------- 瀑布图 ---------- */
+
+class IWaterfallItem {
+  const IWaterfallItem({required this.label, this.value = 0, this.total = false});
+  final String label;
+
+  /// 增减量；total 项忽略此值
+  final double value;
+
+  /// 小计/总计：从 0 画到累计值，而不是接着上一根
+  final bool total;
+}
+
+enum IWaterfallKind { increase, decrease, total }
+
+class IWaterfallBar {
+  const IWaterfallBar({
+    required this.label,
+    required this.start,
+    required this.end,
+    required this.delta,
+    required this.kind,
+  });
+
+  final String label;
+  final double start;
+  final double end;
+  final double delta;
+  final IWaterfallKind kind;
+}
+
+/// 把增减序列摊成柱子的起止值。
+/// 涨跌用极性配色（发散色两端）而不是状态色的绿/红：
+/// 收入增加是好事、成本增加是坏事，「增加」本身并没有好坏。
+List<IWaterfallBar> waterfallBars(List<IWaterfallItem> items) {
+  var cumulative = 0.0;
+  final out = <IWaterfallBar>[];
+  for (final item in items) {
+    if (item.total) {
+      // 总计柱从 0 起画：它表示的是绝对量，不是又一次增减
+      out.add(IWaterfallBar(
+        label: item.label,
+        start: 0,
+        end: cumulative,
+        delta: cumulative,
+        kind: IWaterfallKind.total,
+      ));
+      continue;
+    }
+    final start = cumulative;
+    cumulative += item.value;
+    out.add(IWaterfallBar(
+      label: item.label,
+      start: start,
+      end: cumulative,
+      delta: item.value,
+      kind: item.value >= 0 ? IWaterfallKind.increase : IWaterfallKind.decrease,
+    ));
+  }
+  return out;
+}
+
+/// 瀑布图的值域：要把所有柱子的起止都包进去，否则中间某根会被截断
+List<double> waterfallDomain(List<IWaterfallBar> bars) {
+  if (bars.isEmpty) return [0, 1];
+  final all = <double>[];
+  for (final b in bars) {
+    all..add(b.start)..add(b.end);
+  }
+  var min = 0.0;
+  var max = 0.0;
+  for (final v in all) {
+    if (v < min) min = v;
+    if (v > max) max = v;
+  }
+  return min == max ? [min, min + 1] : [min, max];
+}

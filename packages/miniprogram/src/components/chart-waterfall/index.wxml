@@ -1,0 +1,24 @@
+<view class="i-chart i-chart--waterfall">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <canvas class="i-chart__wf-canvas" type="2d" style="width:100%;height:{{height}}px" />
+
+  <!-- 图例：颜色不是唯一线索，三种柱子同时给出文字 -->
+  <view class="i-chart__legend i-wf__legend">
+    <view class="i-chart__legend-item"><view class="i-chart__swatch is-increase" /><text>增加</text></view>
+    <view class="i-chart__legend-item"><view class="i-chart__swatch is-decrease" /><text>减少</text></view>
+    <view class="i-chart__legend-item"><view class="i-chart__swatch is-total" /><text>小计</text></view>
+  </view>
+
+  <view class="i-chart__table i-chart__table--flat">
+    <view class="i-chart__table-row i-chart__table-head">
+      <text class="i-chart__table-cell">项目</text>
+      <text class="i-chart__table-cell">增减</text>
+      <text class="i-chart__table-cell">累计</text>
+    </view>
+    <view wx:for="{{rows}}" wx:key="label" class="i-chart__table-row">
+      <text class="i-chart__table-cell">{{item.label}}</text>
+      <text class="i-chart__table-cell">{{item.delta}}</text>
+      <text class="i-chart__table-cell">{{item.end}}</text>
+    </view>
+  </view>
+</view>

@@ -104,8 +104,8 @@
 已从 Highcharts 的 `SeriesOptionsType` 枚举出真实类型，与 ECharts 取交集后仍缺：
 
 - [ ] **dataZoom**：图表下方的区间缩放条 + 框选放大。逻辑放 `logic/chart`
-- [ ] **boxplot 箱线图**：统计分布，两家都有
-- [ ] **waterfall 瀑布图**：增减归因
+- [x] **boxplot 箱线图**：统计分布，两家都有
+- [x] **waterfall 瀑布图**：增减归因
 - [ ] **sankey 桑基图** 与 **treemap 矩形树图**：流量与层级占比，
       可复用 `logic/tree` 的索引
 

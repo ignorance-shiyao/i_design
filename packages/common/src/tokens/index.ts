@@ -76,6 +76,16 @@ export const chartSequential = ['#eef3ff', '#adc4ff', '#7ea1ff', '#5e7ce0', '#3a
  */
 export const chartDiverging = ['#c2413d', '#e8a09e', '#dfe1e6', '#8fb0e8', '#3a4da3'] as const
 
+/**
+ * 双向色阶的暗色步进。
+ *
+ * 不是把亮色那套直接搬过来——亮色的冷极 #3a4da3 在深色背景上明度只有 0.45，
+ * 对比度 2.3:1，柱子几乎看不见。这里按同样的色相重新取步进，
+ * 落在暗色的明度带（0.48–0.67）内，并保住彩度下限；
+ * 中点也一并压暗，否则浅灰中点会比两极还亮，「零」反而成了最抢眼的位置。
+ */
+export const chartDivergingDark = ['#de3c3b', '#8f4a48', '#3a3f4d', '#3f5599', '#5671f5'] as const
+
 /** 字号刻度：以 14px 正文为基准 */
 export const fontSize = {
   xs: '12px',
@@ -354,7 +364,8 @@ export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, strin
   Object.entries(controlHeight).forEach(([k, v]) => (out[`control-height-${k}`] = v))
   chartCategorical.forEach((v, i) => (out[`chart-${i + 1}`] = v))
   chartSequential.forEach((v, i) => (out[`chart-seq-${i + 1}`] = v))
-  chartDiverging.forEach((v, i) => (out[`chart-div-${i + 1}`] = v))
+  const diverging = theme === 'dark' ? chartDivergingDark : chartDiverging
+  diverging.forEach((v, i) => (out[`chart-div-${i + 1}`] = v))
   return out
 }
 

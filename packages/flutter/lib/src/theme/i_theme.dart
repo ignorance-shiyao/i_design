@@ -20,6 +20,8 @@ class IColors {
     required this.textTertiary,
     required this.border,
     required this.borderStrong,
+    required this.chartDiv1,
+    required this.chartDiv5,
     required this.hairline,
     required this.success,
     required this.successSubtle,
@@ -43,6 +45,14 @@ class IColors {
   final Color textTertiary;
   final Color border;
   final Color borderStrong;
+
+  /*
+   * 双向色阶的两端。放进主题而不是直接引 IDesignTokensLight——
+   * 亮色的冷极在深色背景上对比度只有 2.3:1，柱子几乎看不见，
+   * 因此明暗两套是分别选的步进，必须跟着主题切换。
+   */
+  final Color chartDiv1;
+  final Color chartDiv5;
   final Color hairline;
   final Color success;
   final Color successSubtle;
@@ -66,6 +76,8 @@ class IColors {
     textTertiary: IDesignTokensLight.colorTextTertiary,
     border: IDesignTokensLight.colorBorder,
     borderStrong: IDesignTokensLight.colorBorderStrong,
+    chartDiv1: IDesignTokensLight.chartDiv1,
+    chartDiv5: IDesignTokensLight.chartDiv5,
     hairline: IDesignTokensLight.colorHairline,
     success: IDesignTokensLight.colorSuccess,
     successSubtle: IDesignTokensLight.colorSuccessSubtle,
@@ -90,6 +102,8 @@ class IColors {
     textTertiary: IDesignTokensDark.colorTextTertiary,
     border: IDesignTokensDark.colorBorder,
     borderStrong: IDesignTokensDark.colorBorderStrong,
+    chartDiv1: IDesignTokensDark.chartDiv1,
+    chartDiv5: IDesignTokensDark.chartDiv5,
     hairline: IDesignTokensDark.colorHairline,
     success: IDesignTokensDark.colorSuccess,
     successSubtle: IDesignTokensDark.colorSuccessSubtle,

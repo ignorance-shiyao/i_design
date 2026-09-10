@@ -1,0 +1,20 @@
+<view class="i-chart i-chart--box">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <canvas class="i-chart__box-canvas" type="2d" style="width:100%;height:{{height}}px" />
+
+  <!-- 数据表：读屏与灰度打印的兜底通道 -->
+  <view class="i-chart__table i-chart__table--flat">
+    <view class="i-chart__table-row i-chart__table-head">
+      <text class="i-chart__table-cell">分组</text>
+      <text class="i-chart__table-cell">中位数</text>
+      <text class="i-chart__table-cell">Q1–Q3</text>
+      <text class="i-chart__table-cell">离群点</text>
+    </view>
+    <view wx:for="{{rows}}" wx:key="label" class="i-chart__table-row">
+      <text class="i-chart__table-cell">{{item.label}}</text>
+      <text class="i-chart__table-cell">{{item.median}}</text>
+      <text class="i-chart__table-cell">{{item.q1}}–{{item.q3}}</text>
+      <text class="i-chart__table-cell">{{item.outliers}}</text>
+    </view>
+  </view>
+</view>

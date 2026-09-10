@@ -13,6 +13,8 @@ import IChartGauge from '@/components/IChartGauge.vue'
 import IChartRadar from '@/components/IChartRadar.vue'
 import IChartHeatmap from '@/components/IChartHeatmap.vue'
 import IChartScatter from '@/components/IChartScatter.vue'
+import IChartBox from '@/components/IChartBox.vue'
+import IChartWaterfall from '@/components/IChartWaterfall.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 
 const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月']
@@ -96,6 +98,23 @@ const sparks = [
   { title: '今日活跃', value: 12840, trend: 8.2, data: [12, 18, 15, 22, 19, 26, 31, 29, 34] },
   { title: '平均响应', value: '248 ms', trend: -12.4, data: [42, 38, 40, 33, 31, 28, 26, 25, 24] },
   { title: '错误率', value: '0.42%', trend: 3.1, data: [3, 2, 4, 3, 5, 4, 6, 5, 7] }
+]
+
+/* 分布：三个门店的单日出杯量，第三组刻意含离群点 */
+const boxGroups = [
+  { label: '城东店', values: [82, 88, 91, 95, 97, 99, 103, 106, 110, 118] },
+  { label: '城西店', values: [64, 70, 73, 75, 78, 80, 83, 86, 90, 96] },
+  { label: '机场店', values: [88, 92, 95, 98, 101, 104, 108, 112, 186, 204] }
+]
+
+/* 增减归因：期初到期末之间发生了什么 */
+const waterfallItems = [
+  { label: '期初库存', value: 1200 },
+  { label: '到货', value: 480 },
+  { label: '门店消耗', value: -620 },
+  { label: '损耗', value: -85 },
+  { label: '退货入库', value: 140 },
+  { label: '期末库存', value: 0, total: true }
 ]
 </script>
 
@@ -255,6 +274,34 @@ const sparks = [
       <div class="chart-demo">
         <IChartHeatmap :matrix="heat" :rows="weekdays" :columns="hours" title="工作项创建时段" unit=" 条" />
       </div>
+    </DemoBlock>
+
+    <h2>分布</h2>
+    <p>
+      箱线图回答的是「这批数据散得开不开、有没有异常」。它用单一色相而不是分类色——
+      每个箱子都是同一件事（一个分布），给它们各上一个颜色会让人以为颜色本身有含义。
+    </p>
+    <DemoBlock
+      title="箱线图"
+      description="须延伸到 1.5 倍四分位距内的实测值，而不是画到围栏位置——后者会让须端出现一个数据里根本不存在的数，读者却会把它当成实际的最小值。机场店那两个高值因此被单独标为离群点。"
+      lang="vue"
+      code='<IChartBox :groups="boxGroups" title="单日出杯量分布" unit=" 杯" />'
+    >
+      <IChartBox :groups="boxGroups" title="各店单日出杯量分布" unit=" 杯" />
+    </DemoBlock>
+
+    <h2>增减归因</h2>
+    <p>
+      瀑布图回答的是「从期初到期末，中间都发生了什么」。连接线把上一根的终点引到下一根的起点，
+      这正是它区别于普通柱状图的地方。
+    </p>
+    <DemoBlock
+      title="瀑布图"
+      description="涨跌用双向色阶的两端，而不是状态色的绿与红：收入增加是好事、成本增加是坏事，「增加」这个方向本身并没有好坏，用状态色会把一个中性的方向读成评价。小计柱用中性灰，因为它是绝对量而不是又一次增减。"
+      lang="vue"
+      code='<IChartWaterfall :items="waterfallItems" title="库存变动" unit=" 件" />'
+    >
+      <IChartWaterfall :items="waterfallItems" title="本月库存变动" unit=" 件" />
     </DemoBlock>
 
     <h2>色彩规则</h2>

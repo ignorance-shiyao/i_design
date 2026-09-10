@@ -40,6 +40,7 @@ export 'src/components/i_chart.dart';
 export 'src/components/i_chart_extras.dart';
 export 'src/components/i_chart_pie.dart';
 export 'src/components/i_chart_scatter.dart';
+export 'src/components/i_chart_stats.dart';
 export 'src/components/i_chat_message.dart';
 export 'src/components/i_chat_sources.dart';
 export 'src/components/i_chat_suggestions.dart';

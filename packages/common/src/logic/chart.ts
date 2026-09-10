@@ -345,3 +345,123 @@ export function trendLine(points: ScatterPoint[]) {
   const ssRes = pts.reduce((a, p) => a + (p.y - (slope * p.x + intercept)) ** 2, 0)
   return { slope, intercept, r2: ssTot === 0 ? 1 : 1 - ssRes / ssTot }
 }
+
+/* ---------- 箱线图 ---------- */
+
+export interface BoxStats {
+  min: number
+  q1: number
+  median: number
+  q3: number
+  max: number
+  /** 四分位距 */
+  iqr: number
+  /** 下须端点：1.5×IQR 内的最小实测值 */
+  lower: number
+  /** 上须端点：1.5×IQR 内的最大实测值 */
+  upper: number
+  /** 落在须之外的实测值 */
+  outliers: number[]
+}
+
+/**
+ * 分位数，线性插值（与 numpy 默认、Excel 的 QUARTILE.INC 一致）。
+ *
+ * 分位数有七八种定义，各端各挑一种就会得到不同的箱子——同一批数据在
+ * Web 上中位线在这里、Flutter 上在那里。因此定义写死在这里，不留选项。
+ */
+export function quantile(sorted: number[], p: number): number {
+  if (!sorted.length) return NaN
+  if (sorted.length === 1) return sorted[0]
+  const pos = (sorted.length - 1) * Math.min(1, Math.max(0, p))
+  const low = Math.floor(pos)
+  const high = Math.ceil(pos)
+  if (low === high) return sorted[low]
+  return sorted[low] + (sorted[high] - sorted[low]) * (pos - low)
+}
+
+/**
+ * 箱线图的五数概括与离群点。
+ *
+ * 须延伸到 1.5×IQR 范围内的**实测值**，而不是直接画到 q1−1.5×IQR 的位置——
+ * 后者会让须端出现一个数据里根本不存在的数，读者却会把它当成实际的最小值。
+ */
+export function boxStats(values: number[]): BoxStats {
+  const sorted = values.filter((v) => Number.isFinite(v)).sort((a, b) => a - b)
+  if (!sorted.length) {
+    return { min: NaN, q1: NaN, median: NaN, q3: NaN, max: NaN, iqr: NaN, lower: NaN, upper: NaN, outliers: [] }
+  }
+  const q1 = quantile(sorted, 0.25)
+  const median = quantile(sorted, 0.5)
+  const q3 = quantile(sorted, 0.75)
+  const iqr = q3 - q1
+  const lowFence = q1 - 1.5 * iqr
+  const highFence = q3 + 1.5 * iqr
+  const inside = sorted.filter((v) => v >= lowFence && v <= highFence)
+  return {
+    min: sorted[0],
+    q1,
+    median,
+    q3,
+    max: sorted[sorted.length - 1],
+    iqr,
+    lower: inside.length ? inside[0] : sorted[0],
+    upper: inside.length ? inside[inside.length - 1] : sorted[sorted.length - 1],
+    outliers: sorted.filter((v) => v < lowFence || v > highFence)
+  }
+}
+
+/* ---------- 瀑布图 ---------- */
+
+export interface WaterfallItem {
+  label: string
+  /** 增减量；total 项忽略此值 */
+  value: number
+  /** 小计/总计：从 0 画到累计值，而不是接着上一根 */
+  total?: boolean
+}
+
+export interface WaterfallBar {
+  label: string
+  /** 柱子的起止值（数据坐标，非像素） */
+  start: number
+  end: number
+  /** 该项本身的增减量 */
+  delta: number
+  kind: 'increase' | 'decrease' | 'total'
+}
+
+/**
+ * 把增减序列摊成柱子的起止值。
+ *
+ * 涨跌用极性配色（发散色两端）而不是状态色的绿/红：
+ * 收入增加是好事、成本增加是坏事，「增加」本身并没有好坏，
+ * 用状态色会把一个中性的方向读成评价。
+ */
+export function waterfallBars(items: WaterfallItem[]): WaterfallBar[] {
+  let cumulative = 0
+  return items.map((item) => {
+    if (item.total) {
+      // 总计柱从 0 起画：它表示的是绝对量，不是又一次增减
+      return { label: item.label, start: 0, end: cumulative, delta: cumulative, kind: 'total' as const }
+    }
+    const start = cumulative
+    cumulative += item.value
+    return {
+      label: item.label,
+      start,
+      end: cumulative,
+      delta: item.value,
+      kind: item.value >= 0 ? ('increase' as const) : ('decrease' as const)
+    }
+  })
+}
+
+/** 瀑布图的值域：要把所有柱子的起止都包进去，否则中间某根会被截断 */
+export function waterfallDomain(bars: WaterfallBar[]): [number, number] {
+  if (!bars.length) return [0, 1]
+  const all = bars.flatMap((b) => [b.start, b.end])
+  const min = Math.min(0, ...all)
+  const max = Math.max(0, ...all)
+  return min === max ? [min, min + 1] : [min, max]
+}

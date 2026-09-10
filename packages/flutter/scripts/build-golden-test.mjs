@@ -372,7 +372,9 @@ const numberExpectations = [
 /* ---------- 散点：气泡半径与最小二乘拟合 ----------
  * 拟合最容易在移植时抄错分母，一旦抄错，两端的趋势线会指向不同方向。
  */
-const { bubbleRadius, trendLine } = await bundle('packages/common/src/logic/chart.ts', 'chart')
+const {
+  bubbleRadius, trendLine, quantile, boxStats, waterfallBars, waterfallDomain
+} = await bundle('packages/common/src/logic/chart.ts', 'chart')
 
 const bubbleCases = [[0, 0, 100], [50, 0, 100], [100, 0, 100], [7, 5, 5], [-3, 0, 10]]
 const bubbleExpectations = bubbleCases.map(
@@ -397,6 +399,58 @@ const trendExpectations = trendCases.map((pts, i) => {
     expect(fit${i}.intercept, closeTo(${fit.intercept}, 1e-9));
     expect(fit${i}.r2, closeTo(${fit.r2}, 1e-9));`
 })
+
+/* ---------- 箱线图与瀑布图 ----------
+ * 分位数有七八种定义，各端各挑一种就会得到不同的箱子；
+ * 须端必须落在实测值上而不是围栏位置，否则会显示一个数据里不存在的数。
+ */
+const dartNums = (arr) => `<double>[${arr.map((v) => v.toFixed(1)).join(', ')}]`
+
+const quantileCases = [
+  [[1, 2, 3], 0.5], [[1, 2, 3, 4], 0.5], [[1, 2, 3, 4], 0.25], [[1, 2, 3, 4], 0.75],
+  [[5], 0.25], [[1, 2, 3], 2], [[1, 2, 3], -1],
+]
+const quantileExpectations = quantileCases.map(([arr, p]) =>
+  `    expect(quantile(${dartNums(arr)}, ${p.toFixed(2)}), closeTo(${quantile([...arr].sort((a,b)=>a-b), p)}, 1e-9));`)
+
+const boxCases = [
+  [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  [1, 2, 3, 4, 5, 100],
+  [5, 5, 5],
+  [10],
+]
+const boxExpectations = boxCases.map((values) => {
+  const s = boxStats(values)
+  return `    _expectBox(boxStats(${dartNums(values)}),
+        ${s.q1}, ${s.median}, ${s.q3}, ${s.lower}, ${s.upper}, ${s.outliers.length},
+        'boxStats(${values.length} 个值)');`
+})
+
+const wfItems = [
+  { label: '期初', value: 100 }, { label: '增', value: 40 },
+  { label: '减', value: -25 }, { label: '合计', value: 0, total: true },
+]
+const dartWf = `<IWaterfallItem>[${wfItems
+  .map((i) => `IWaterfallItem(label: '${i.label}', value: ${i.value.toFixed(1)}${i.total ? ', total: true' : ''})`)
+  .join(', ')}]`
+const wfBars = waterfallBars(wfItems)
+const dartWfKind = (k) => `IWaterfallKind.${k}`
+const wfExpectations = wfBars.flatMap((b, i) => [
+  `    expect(bars[${i}].start, closeTo(${b.start}, 1e-9));`,
+  `    expect(bars[${i}].end, closeTo(${b.end}, 1e-9));`,
+  `    expect(bars[${i}].kind, ${dartWfKind(b.kind)});`,
+])
+const dipBars = waterfallBars([
+  { label: 'a', value: 50 }, { label: 'b', value: -80 }, { label: 'c', value: 60 },
+])
+const dipDomain = waterfallDomain(dipBars)
+const wfDomainExpectation = `    expect(
+        waterfallDomain(waterfallBars(<IWaterfallItem>[
+          const IWaterfallItem(label: 'a', value: 50.0),
+          const IWaterfallItem(label: 'b', value: -80.0),
+          const IWaterfallItem(label: 'c', value: 60.0),
+        ])),
+        <double>[${dipDomain[0].toFixed(1)}, ${dipDomain[1].toFixed(1)}]);`
 
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
@@ -475,6 +529,16 @@ void _expectDiff(IDiffSummary actual, int added, int removed, int changed,
   expect(actual.selected, selected, reason: '\$reason selected 不一致');
   expect(actual.total, total, reason: '\$reason total 不一致');
   expect(diffActionLabel(actual), label, reason: '\$reason 按钮文案不一致');
+}
+
+void _expectBox(IBoxStats actual, double q1, double median, double q3,
+    double lower, double upper, int outliers, String reason) {
+  expect(actual.q1, closeTo(q1, 1e-9), reason: '\$reason q1 不一致');
+  expect(actual.median, closeTo(median, 1e-9), reason: '\$reason 中位数不一致');
+  expect(actual.q3, closeTo(q3, 1e-9), reason: '\$reason q3 不一致');
+  expect(actual.lower, closeTo(lower, 1e-9), reason: '\$reason 下须不一致');
+  expect(actual.upper, closeTo(upper, 1e-9), reason: '\$reason 上须不一致');
+  expect(actual.outliers.length, outliers, reason: '\$reason 离群点数不一致');
 }
 
 void main() {
@@ -561,6 +625,17 @@ ${chunkExpectations.join('\n')}
   test('差异统计、默认全选与按钮文案与 Web 端一致', () {
     final rows = ${dartDiffRows};
 ${diffExpectations.join('\n')}
+  });
+
+  test('分位数与箱线图五数概括与 Web 端一致', () {
+${quantileExpectations.join('\n')}
+${boxExpectations.join('\n')}
+  });
+
+  test('瀑布图柱子起止与值域与 Web 端一致', () {
+    final bars = waterfallBars(${dartWf});
+${wfExpectations.join('\n')}
+${wfDomainExpectation}
   });
 }
 `

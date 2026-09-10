@@ -164,11 +164,11 @@ class IDesignTokensDark {
   static const chartSeq3 = Color(0xFF7EA1FF);
   static const chartSeq4 = Color(0xFF5E7CE0);
   static const chartSeq5 = Color(0xFF3A4DA3);
-  static const chartDiv1 = Color(0xFFC2413D);
-  static const chartDiv2 = Color(0xFFE8A09E);
-  static const chartDiv3 = Color(0xFFDFE1E6);
-  static const chartDiv4 = Color(0xFF8FB0E8);
-  static const chartDiv5 = Color(0xFF3A4DA3);
+  static const chartDiv1 = Color(0xFFDE3C3B);
+  static const chartDiv2 = Color(0xFF8F4A48);
+  static const chartDiv3 = Color(0xFF3A3F4D);
+  static const chartDiv4 = Color(0xFF3F5599);
+  static const chartDiv5 = Color(0xFF5671F5);
 
   static const double fontSizeXs = 12.0;
   static const double fontSizeSm = 13.0;

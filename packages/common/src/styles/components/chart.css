@@ -279,7 +279,9 @@
  */
 .i-chart__gauge-canvas,
 .i-chart__radar-canvas,
-.i-chart__funnel-canvas { display: block; }
+.i-chart__funnel-canvas,
+.i-chart__box-canvas,
+.i-chart__wf-canvas { display: block; }
 .i-chart__gauge-value {
   display: block;
   font-size: var(--i-font-size-2xl);
@@ -407,3 +409,82 @@
 }
 .i-chart__row--head { color: var(--i-color-text-tertiary); }
 .i-chart__cell { flex: 1; font-variant-numeric: tabular-nums; }
+
+/*
+ * 箱线图：形状本身是信息，因此用单一色相而不是分类色。
+ * 分类色是用来分辨「谁是谁」的；这里每个箱子都是同一件事（一个分布），
+ * 给它们各上一个颜色会让人以为颜色有含义。
+ */
+.i-box__body {
+  fill: var(--i-color-brand-subtle);
+  stroke: var(--i-color-brand);
+  stroke-width: 1.5;
+}
+.i-box__whisker,
+.i-box__cap { stroke: var(--i-color-brand); stroke-width: 1.5; }
+/* 中位线加粗：它是箱子里唯一需要一眼读出的位置 */
+.i-box__median { stroke: var(--i-color-brand); stroke-width: 3; stroke-linecap: round; }
+/* 离群点空心：实心点会和箱体抢注意力，而它们本就是「例外」 */
+.i-box__outlier {
+  fill: var(--i-color-bg);
+  stroke: var(--i-color-brand);
+  stroke-width: 1.5;
+}
+.i-box { transition: opacity var(--i-motion-fast) var(--i-motion-easing); }
+.i-chart__svg:hover .i-box:not(.is-active) { opacity: 0.55; }
+.i-box__readout {
+  margin-top: var(--i-spacing-2);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.i-box__readout strong { color: var(--i-color-text); margin-right: var(--i-spacing-2); }
+
+/*
+ * 瀑布图：增减是「极性」而不是「状态」，因此用发散色的两端，
+ * 不用状态色的绿/红——收入增加是好事、成本增加是坏事，
+ * 「增加」这个方向本身没有好坏，用状态色会把中性的方向读成评价。
+ * 小计柱用中性灰：它不是一次增减，而是一个绝对量。
+ */
+.i-wf__bar.is-increase rect { fill: var(--i-chart-div-5); }
+.i-wf__bar.is-decrease rect { fill: var(--i-chart-div-1); }
+.i-wf__bar.is-total rect { fill: var(--i-color-text-tertiary); }
+.i-wf__bar { transition: opacity var(--i-motion-fast) var(--i-motion-easing); }
+.i-chart__svg:hover .i-wf__bar:not(.is-active) { opacity: 0.55; }
+
+.i-wf__value {
+  font-size: var(--i-font-size-xs);
+  fill: var(--i-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+/* 连接线把上一根的终点引到下一根的起点，这正是瀑布图区别于柱状图之处 */
+.i-wf__connector { stroke: var(--i-color-border); stroke-width: 1; stroke-dasharray: 3 3; }
+/* 零线加重：回到零在瀑布图里是有意义的位置 */
+.i-wf__zero { stroke: var(--i-color-border-strong); stroke-width: 1; }
+
+.i-wf__legend .i-chart__swatch.is-increase { background: var(--i-chart-div-5); }
+.i-wf__legend .i-chart__swatch.is-decrease { background: var(--i-chart-div-1); }
+.i-wf__legend .i-chart__swatch.is-total { background: var(--i-color-text-tertiary); }
+
+/*
+ * 小程序端的数据表：没有 <table>，用 flex 排行列。
+ * 限定在 --flat 之下，避免与 Web 端的 .i-chart__table 撞样式
+ * （同名类打在 <table> 上会把表格布局拆掉）。
+ */
+.i-chart__table--flat { display: block; margin-top: var(--i-spacing-3); }
+.i-chart__table--flat .i-chart__table-row {
+  display: flex;
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-chart__table--flat .i-chart__table-cell {
+  flex: 1;
+  min-width: 0;
+  padding: var(--i-spacing-2);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.i-chart__table--flat .i-chart__table-head .i-chart__table-cell { color: var(--i-color-text-tertiary); }
