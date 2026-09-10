@@ -14,6 +14,7 @@
 @import './components/agent.css';
 @import './components/alert.css';
 @import './components/anchor.css';
+@import './components/autocomplete.css';
 @import './components/avatar-group.css';
 @import './components/avatar.css';
 @import './components/badge.css';
@@ -83,6 +84,7 @@
 @import './components/table.css';
 @import './components/tabs.css';
 @import './components/tag.css';
+@import './components/taginput.css';
 @import './components/textarea.css';
 @import './components/timeline.css';
 @import './components/toast.css';

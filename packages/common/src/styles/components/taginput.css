@@ -1,0 +1,72 @@
+/*
+ * ITagInput —— 输入标签。
+ *
+ * 整个框可点、焦点转给里面的 input：只有 input 可点的话，
+ * 标签之间那几像素的空隙点下去毫无反应，用户会以为框是死的。
+ */
+.i-taginput {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  min-height: var(--i-control-height-md);
+  padding: var(--i-spacing-1) var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  cursor: text;
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-taginput.is-focused {
+  border-color: var(--i-color-brand);
+  box-shadow: 0 0 0 2px var(--i-color-brand-subtle);
+}
+.i-taginput.is-disabled {
+  background: var(--i-color-bg-subtle);
+  cursor: not-allowed;
+}
+
+.i-taginput__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  padding: 2px var(--i-spacing-2);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-sm);
+  /* 标签本身不该被选中：拖选文字时把标签一起选进去没有任何意义 */
+  user-select: none;
+}
+.i-taginput__remove {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: var(--i-radius-full);
+  background: none;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+}
+.i-taginput__remove:hover { background: var(--i-color-bg-muted); color: var(--i-color-text); }
+
+.i-taginput__input {
+  flex: 1;
+  min-width: 80px;
+  border: none;
+  outline: none;
+  background: none;
+  color: var(--i-color-text);
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  padding: var(--i-spacing-1) 0;
+}
+.i-taginput__input:disabled { cursor: not-allowed; }
+/* 上限就摆在框里，而不是等超了再弹提示：先说清楚比事后纠正省事 */
+.i-taginput__count {
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.i-taginput.is-full .i-taginput__count { color: var(--i-color-warning); }

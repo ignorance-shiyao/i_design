@@ -15,10 +15,29 @@ import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
 import 'package:i_design/src/logic/keypad.dart';
+import 'package:i_design/src/logic/taginput.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '$label 点位不一致');
   expect(actual.active, active, reason: '$label 当前项不一致');
+}
+
+void _expectDraft(TagDraftSplit actual, List<String> ready, String rest, String label) {
+  expect(actual.ready, ready, reason: '$label 成词部分不一致');
+  expect(actual.rest, rest, reason: '$label 留存部分不一致');
+}
+
+void _expectAdd(TagAddResult actual, List<String> tags, TagRejectReason? rejected, String label) {
+  expect(actual.tags, tags, reason: '$label 结果不一致');
+  expect(actual.rejected, rejected, reason: '$label 拒绝原因不一致');
+}
+
+void _expectParts(List<IMatchPart> actual, List<IMatchPart> expected, String label) {
+  expect(actual.length, expected.length, reason: '$label 段数不一致');
+  for (var i = 0; i < expected.length; i++) {
+    expect(actual[i].text, expected[i].text, reason: '$label 第 $i 段文字不一致');
+    expect(actual[i].hit, expected[i].hit, reason: '$label 第 $i 段命中标记不一致');
+  }
 }
 
 void _expectHole(ITourHole actual, double x, double y, double w, double h, String label) {
@@ -878,6 +897,72 @@ void main() {
         true);
     expect(tourNeedsScroll(const Rect.fromLTWH(0.0, -1.0, 0.0, 40.0), 800.0),
         true);
+  });
+
+  test('输入标签的拆分、去重与退格与 Web 端一致', () {
+    expect(splitTags('a,b,c'),
+        <String>['a', 'b', 'c']);
+    expect(splitTags('a，b；c'),
+        <String>['a', 'b', 'c']);
+    expect(splitTags(' x1 , x2 \n x3 '),
+        <String>['x1', 'x2', 'x3']);
+    expect(splitTags('onlyone'),
+        <String>['onlyone']);
+    expect(splitTags(''),
+        <String>[]);
+    expect(splitTags(',,,'),
+        <String>[]);
+    expect(splitTags('a\tb'),
+        <String>['a', 'b']);
+    _expectDraft(splitDraft('a,b,c'), <String>['a', 'b'], 'c', 'draft(a,b,c)');
+    _expectDraft(splitDraft('abc'), <String>[], 'abc', 'draft(abc)');
+    _expectDraft(splitDraft('a,'), <String>['a'], '', 'draft(a,)');
+    _expectDraft(splitDraft(',a'), <String>[], 'a', 'draft(,a)');
+    _expectAdd(addTags(<String>['a'], <String>['b', 'c'], allowDuplicate: false, max: 0),
+        <String>['a', 'b', 'c'], null, 'add(b|c)');
+    _expectAdd(addTags(<String>['a'], <String>['a'], allowDuplicate: false, max: 0),
+        <String>['a'], TagRejectReason.duplicate, 'add(a)');
+    _expectAdd(addTags(<String>['a'], <String>['a'], allowDuplicate: true, max: 0),
+        <String>['a', 'a'], null, 'add(a)');
+    _expectAdd(addTags(<String>['a', 'b'], <String>['c'], allowDuplicate: false, max: 2),
+        <String>['a', 'b'], TagRejectReason.max, 'add(c)');
+    _expectAdd(addTags(<String>['a'], <String>['  '], allowDuplicate: false, max: 0),
+        <String>['a'], TagRejectReason.empty, 'add(  )');
+    _expectAdd(addTags(<String>[], <String>['x', 'x', 'y'], allowDuplicate: false, max: 0),
+        <String>['x', 'y'], TagRejectReason.duplicate, 'add(x|x|y)');
+    expect(backspace(<String>['a', 'b'], '').consumed, true);
+    expect(backspace(<String>['a', 'b'], '').tags, <String>['a']);
+    expect(backspace(<String>['a', 'b'], 'x').consumed, false);
+    expect(backspace(<String>['a', 'b'], 'x').tags, <String>['a', 'b']);
+    expect(backspace(<String>[], '').consumed, false);
+    expect(backspace(<String>[], '').tags, <String>[]);
+    expect(removeTag(<String>['a', 'b', 'c'], 1), <String>['a', 'c']);
+    expect(removeTag(<String>['a'], 0), <String>[]);
+    expect(removeTag(<String>['a'], 5), <String>['a']);
+  });
+
+  test('自动完成的命中切段与候选排序与 Web 端一致', () {
+    _expectParts(matchParts('北京', '北'), <IMatchPart>[IMatchPart(text: '北', hit: true), IMatchPart(text: '京', hit: false)], 'match(北京,北)');
+    _expectParts(matchParts('湖北', '北'), <IMatchPart>[IMatchPart(text: '湖', hit: false), IMatchPart(text: '北', hit: true)], 'match(湖北,北)');
+    _expectParts(matchParts('Beijing', 'ji'), <IMatchPart>[IMatchPart(text: 'Bei', hit: false), IMatchPart(text: 'ji', hit: true), IMatchPart(text: 'ng', hit: false)], 'match(Beijing,ji)');
+    _expectParts(matchParts('abcabc', 'bc'), <IMatchPart>[IMatchPart(text: 'a', hit: false), IMatchPart(text: 'bc', hit: true), IMatchPart(text: 'a', hit: false), IMatchPart(text: 'bc', hit: true)], 'match(abcabc,bc)');
+    _expectParts(matchParts('abc', ''), <IMatchPart>[IMatchPart(text: 'abc', hit: false)], 'match(abc,)');
+    _expectParts(matchParts('abc', 'z'), <IMatchPart>[IMatchPart(text: 'abc', hit: false)], 'match(abc,z)');
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], '北', limit: 20).map((s) => s.value).toList(),
+        <String>['北京', '北海', '湖北', '河北']);
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], '海', limit: 20).map((s) => s.value).toList(),
+        <String>['北海', '上海', '珠海']);
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], '北', limit: 2).map((s) => s.value).toList(),
+        <String>['北京', '北海']);
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], '', limit: 3).map((s) => s.value).toList(),
+        <String>['北京', '北海', '湖北']);
+    expect(
+        filterSuggestions(<ISuggestion>[const ISuggestion(value: '北京'), const ISuggestion(value: '北海'), const ISuggestion(value: '湖北'), const ISuggestion(value: '河北'), const ISuggestion(value: '上海'), const ISuggestion(value: '珠海')], 'zz', limit: 20).map((s) => s.value).toList(),
+        <String>[]);
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

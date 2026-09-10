@@ -49,6 +49,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IAutoComplete",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IAvatar",
     "ends": {
       "vue-next": true,
@@ -780,6 +790,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "ITag",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ITagInput",
     "ends": {
       "vue-next": true,
       "vue": true,

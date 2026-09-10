@@ -69,6 +69,8 @@ import ICarousel from './ICarousel.vue'
 import IInfiniteScroll from './IInfiniteScroll.vue'
 import INumberKeypad from './INumberKeypad.vue'
 import ITour from './ITour.vue'
+import ITagInput from './ITagInput.vue'
+import IAutoComplete from './IAutoComplete.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -129,6 +131,8 @@ export {
   IInfiniteScroll,
   INumberKeypad,
   ITour,
+  ITagInput,
+  IAutoComplete,
   IForm,
   IFormItem,
   ITag,

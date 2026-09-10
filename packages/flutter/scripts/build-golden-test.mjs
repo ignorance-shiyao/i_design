@@ -23,7 +23,13 @@ const bundle = (entry, name) => {
 
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
-const { moveActive, moveActiveLoop } = await bundle('packages/common/src/logic/select.ts', 'select')
+const {
+  splitTags, addTags, backspace: tagBackspace, splitDraft, removeTag: tagRemove
+} = await bundle('packages/common/src/logic/taginput.ts', 'taginput')
+const { moveActive, moveActiveLoop, matchParts, filterSuggestions } = await bundle(
+  'packages/common/src/logic/select.ts',
+  'select'
+)
 const { clampNumber, roundTo, stepValue, ratioOf, valueFromRatio } = await bundle(
   'packages/common/src/logic/number.ts',
   'number'
@@ -756,6 +762,69 @@ const needsScrollExpectations = needsScrollCases.map(([r, vh]) =>
   `    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, ${r.y.toFixed(1)}, 0.0, ${r.height.toFixed(1)}), ${vh.toFixed(1)}),
         ${tourNeedsScroll(r, { height: vh })});`)
 
+/* ---------- 输入标签与自动完成 ----------
+ * 粘贴同一段文本在两端上拆出不同数量的标签、命中高亮错半个字，
+ * 都是不会报错但一眼能看出不对的分叉。
+ */
+const dartStrings = (arr) => `<String>[${arr.map((s) => `'${s.replace(/'/g, "\\'")}'`).join(', ')}]`
+
+const splitCases = [
+  'a,b,c', 'a，b；c', ' x1 , x2 \n x3 ', 'onlyone', '', ',,,', 'a\tb',
+]
+const splitExpectations = splitCases.map((text) =>
+  `    expect(splitTags('${text.replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\t/g, '\\t')}'),
+        ${dartStrings(splitTags(text))});`)
+
+const draftCases = ['a,b,c', 'abc', 'a,', ',a']
+const draftExpectations = draftCases.map((d) => {
+  const r = splitDraft(d)
+  return `    _expectDraft(splitDraft('${d}'), ${dartStrings(r.ready)}, '${r.rest}', 'draft(${d})');`
+})
+
+const addCases = [
+  [['a'], ['b', 'c'], false, 0],
+  [['a'], ['a'], false, 0],
+  [['a'], ['a'], true, 0],
+  [['a', 'b'], ['c'], false, 2],
+  [['a'], ['  '], false, 0],
+  [[], ['x', 'x', 'y'], false, 0],
+]
+const addExpectations = addCases.map(([cur, inc, dup, max]) => {
+  const r = addTags(cur, inc, { allowDuplicate: dup, max })
+  const reason = r.rejected ? `TagRejectReason.${r.rejected}` : 'null'
+  return `    _expectAdd(addTags(${dartStrings(cur)}, ${dartStrings(inc)}, allowDuplicate: ${dup}, max: ${max}),
+        ${dartStrings(r.tags)}, ${reason}, 'add(${inc.join('|')})');`
+})
+
+const backspaceCases = [[['a', 'b'], ''], [['a', 'b'], 'x'], [[], '']]
+const backspaceExpectations = backspaceCases.flatMap(([tags, draft]) => {
+  const r = tagBackspace(tags, draft)
+  return [
+    `    expect(backspace(${dartStrings(tags)}, '${draft}').consumed, ${r.consumed});`,
+    `    expect(backspace(${dartStrings(tags)}, '${draft}').tags, ${dartStrings(r.tags)});`,
+  ]
+})
+
+const removeExpectations = [[['a', 'b', 'c'], 1], [['a'], 0], [['a'], 5]].map(([tags, i]) =>
+  `    expect(removeTag(${dartStrings(tags)}, ${i}), ${dartStrings(tagRemove(tags, i))});`)
+
+const matchCases = [['北京', '北'], ['湖北', '北'], ['Beijing', 'ji'], ['abcabc', 'bc'], ['abc', ''], ['abc', 'z']]
+const matchExpectations = matchCases.map(([label, kw]) => {
+  const parts = matchParts(label, kw)
+  const literal = parts.map((p) => `IMatchPart(text: '${p.text}', hit: ${p.hit})`).join(', ')
+  return `    _expectParts(matchParts('${label}', '${kw}'), <IMatchPart>[${literal}], 'match(${label},${kw})');`
+})
+
+// 前缀命中必须整体排在中段命中之前，同档内保持数据源原顺序
+const suggestOptions = ['北京', '北海', '湖北', '河北', '上海', '珠海']
+const dartSuggestions = `<ISuggestion>[${suggestOptions.map((v) => `const ISuggestion(value: '${v}')`).join(', ')}]`
+const suggestExpectations = [['北', 20], ['海', 20], ['北', 2], ['', 3], ['zz', 20]].map(([kw, limit]) => {
+  const got = filterSuggestions(suggestOptions.map((v) => ({ value: v })), kw, limit)
+  return `    expect(
+        filterSuggestions(${dartSuggestions}, '${kw}', limit: ${limit}).map((s) => s.value).toList(),
+        ${dartStrings(got.map((g) => g.value))});`
+})
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -773,10 +842,29 @@ import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
 import 'package:i_design/src/logic/keypad.dart';
+import 'package:i_design/src/logic/taginput.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
   expect(actual.active, active, reason: '\$label 当前项不一致');
+}
+
+void _expectDraft(TagDraftSplit actual, List<String> ready, String rest, String label) {
+  expect(actual.ready, ready, reason: '\$label 成词部分不一致');
+  expect(actual.rest, rest, reason: '\$label 留存部分不一致');
+}
+
+void _expectAdd(TagAddResult actual, List<String> tags, TagRejectReason? rejected, String label) {
+  expect(actual.tags, tags, reason: '\$label 结果不一致');
+  expect(actual.rejected, rejected, reason: '\$label 拒绝原因不一致');
+}
+
+void _expectParts(List<IMatchPart> actual, List<IMatchPart> expected, String label) {
+  expect(actual.length, expected.length, reason: '\$label 段数不一致');
+  for (var i = 0; i < expected.length; i++) {
+    expect(actual[i].text, expected[i].text, reason: '\$label 第 \$i 段文字不一致');
+    expect(actual[i].hit, expected[i].hit, reason: '\$label 第 \$i 段命中标记不一致');
+  }
 }
 
 void _expectHole(ITourHole actual, double x, double y, double w, double h, String label) {
@@ -1039,6 +1127,19 @@ ${holeExpectations.join('\n')}
 ${tourStepExpectations.join('\n')}
 ${scrollToExpectations.join('\n')}
 ${needsScrollExpectations.join('\n')}
+  });
+
+  test('输入标签的拆分、去重与退格与 Web 端一致', () {
+${splitExpectations.join('\n')}
+${draftExpectations.join('\n')}
+${addExpectations.join('\n')}
+${backspaceExpectations.join('\n')}
+${removeExpectations.join('\n')}
+  });
+
+  test('自动完成的命中切段与候选排序与 Web 端一致', () {
+${matchExpectations.join('\n')}
+${suggestExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

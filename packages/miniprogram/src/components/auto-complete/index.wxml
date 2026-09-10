@@ -1,0 +1,29 @@
+<view class="i-autocomplete">
+  <input
+    class="i-input i-autocomplete__input"
+    value="{{value}}"
+    placeholder="{{placeholder}}"
+    disabled="{{disabled}}"
+    bindinput="onInput"
+    bindfocus="onFocus"
+    bindblur="onBlur"
+  />
+
+  <!--
+    小程序没有 Teleport，面板就地绝对定位。父级不能有 overflow:hidden，
+    否则面板会被裁掉——这一条写在文档里，比在组件里硬改父级安全。
+  -->
+  <view wx:if="{{open && matches.length}}" class="i-autocomplete__panel is-inline" role="listbox">
+    <view
+      wx:for="{{matches}}"
+      wx:key="value"
+      class="i-autocomplete__option {{index === active ? 'is-active' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+      role="option"
+      data-index="{{index}}"
+      catchtouchstart="onChoose"
+    >
+      <!-- 命中段落由公共层切好：各端自己拼字符串既会错位也要处理转义 -->
+      <text wx:for="{{item.parts}}" wx:for-item="part" wx:key="index" class="{{part.hit ? 'is-hit' : ''}}">{{part.text}}</text>
+    </view>
+  </view>
+</view>
