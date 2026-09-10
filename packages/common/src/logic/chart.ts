@@ -564,3 +564,302 @@ export function showLabelAt(index: number, count: number, step: number): boolean
   if (count - 1 - index < step / 2) return false
   return index % step === 0
 }
+
+/* ---------- 桑基图 ---------- */
+
+export interface SankeyLink {
+  from: string
+  to: string
+  value: number
+}
+
+export interface SankeyNode {
+  key: string
+  label: string
+  /** 所在层级，由拓扑决定而不是由调用方指定 */
+  depth: number
+  value: number
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/** 缎带的四个角。canvas 端（小程序 / Flutter）画不了 SVG path，直接用这些坐标 */
+export interface SankeyRibbonAnchor {
+  x: number
+  top: number
+  bottom: number
+}
+
+export interface SankeyRibbon {
+  from: string
+  to: string
+  value: number
+  source: SankeyRibbonAnchor
+  target: SankeyRibbonAnchor
+  /** 控制点的横坐标，两端共用——canvas 的 bezierCurveTo 与 SVG 的 C 指令是同一条曲线 */
+  controlX: number
+  path: string
+}
+
+export interface SankeyLayout {
+  nodes: SankeyNode[]
+  ribbons: SankeyRibbon[]
+}
+
+/**
+ * 节点分层：从没有入边的节点开始，逐层向后推。
+ *
+ * 用最长路径而不是最短：一个节点只要还有上游没排完，就不能定层，
+ * 否则它会被排到上游前面，流向看起来是倒着的。
+ * 存在环时以已访问集合截断——环在流量图里本就无法分层，
+ * 与其抛错不如把回边忽略掉，剩下的部分仍然能画。
+ */
+function sankeyDepths(links: SankeyLink[]): Map<string, number> {
+  const outgoing = new Map<string, string[]>()
+  const indegree = new Map<string, number>()
+  const keys = new Set<string>()
+
+  for (const link of links) {
+    keys.add(link.from)
+    keys.add(link.to)
+    if (!outgoing.has(link.from)) outgoing.set(link.from, [])
+    outgoing.get(link.from)!.push(link.to)
+    indegree.set(link.to, (indegree.get(link.to) ?? 0) + 1)
+    if (!indegree.has(link.from)) indegree.set(link.from, 0)
+  }
+
+  const depth = new Map<string, number>()
+  for (const key of keys) depth.set(key, 0)
+
+  const queue = [...keys].filter((k) => (indegree.get(k) ?? 0) === 0)
+  const visited = new Set<string>(queue)
+  // 上限兜底：数据里有环时不至于转不出来
+  let guard = keys.size * keys.size + 16
+
+  while (queue.length && guard-- > 0) {
+    const current = queue.shift()!
+    for (const next of outgoing.get(current) ?? []) {
+      const candidate = (depth.get(current) ?? 0) + 1
+      if (candidate > (depth.get(next) ?? 0)) depth.set(next, candidate)
+      if (!visited.has(next)) {
+        visited.add(next)
+        queue.push(next)
+      } else {
+        // 已访问过的重新入队，让更长的路径能把它推到更后面
+        queue.push(next)
+      }
+    }
+  }
+  return depth
+}
+
+/**
+ * 桑基图布局。
+ *
+ * 节点高度按流量占比分配，而不是等分：等分会让一条极小的支流
+ * 和主干看起来一样粗，那正是桑基图要避免的误读。
+ */
+export function sankeyLayout(
+  links: SankeyLink[],
+  width: number,
+  height: number,
+  { nodeWidth = 12, nodePadding = 12, labels = {} as Record<string, string> } = {}
+): SankeyLayout {
+  if (!links.length) return { nodes: [], ribbons: [] }
+
+  const depth = sankeyDepths(links)
+  const maxDepth = Math.max(0, ...depth.values())
+
+  // 每个节点的流量取「进出两侧的较大值」：只算一侧会让末端节点厚度为零
+  const inflow = new Map<string, number>()
+  const outflow = new Map<string, number>()
+  for (const link of links) {
+    outflow.set(link.from, (outflow.get(link.from) ?? 0) + link.value)
+    inflow.set(link.to, (inflow.get(link.to) ?? 0) + link.value)
+  }
+  const valueOf = (key: string) => Math.max(inflow.get(key) ?? 0, outflow.get(key) ?? 0)
+
+  const byDepth = new Map<number, string[]>()
+  for (const [key, d] of depth) {
+    if (!byDepth.has(d)) byDepth.set(d, [])
+    byDepth.get(d)!.push(key)
+  }
+
+  // 层内按流量从大到小排，主干在上，读者的视线不必来回跳
+  for (const list of byDepth.values()) list.sort((a, b) => valueOf(b) - valueOf(a))
+
+  const columnGap = maxDepth > 0 ? (width - nodeWidth) / maxDepth : 0
+  const nodes: SankeyNode[] = []
+  const box = new Map<string, SankeyNode>()
+
+  for (const [d, list] of byDepth) {
+    const total = list.reduce((sum, k) => sum + valueOf(k), 0) || 1
+    const available = height - nodePadding * Math.max(0, list.length - 1)
+    let y = 0
+    for (const key of list) {
+      const h = Math.max(2, (valueOf(key) / total) * available)
+      const node: SankeyNode = {
+        key,
+        label: labels[key] ?? key,
+        depth: d,
+        value: valueOf(key),
+        x: d * columnGap,
+        y,
+        width: nodeWidth,
+        height: h
+      }
+      nodes.push(node)
+      box.set(key, node)
+      y += h + nodePadding
+    }
+  }
+
+  /*
+   * 缎带：两端各自按流量占比在节点上取一段，用三次贝塞尔连起来。
+   * 控制点放在两端的水平中点，曲线才会平顺地进出节点，
+   * 而不是斜插进去——斜插会让人误以为它连的是相邻的另一个节点。
+   */
+  const usedFrom = new Map<string, number>()
+  const usedTo = new Map<string, number>()
+  const ribbons: SankeyRibbon[] = []
+
+  for (const link of links) {
+    const a = box.get(link.from)
+    const b = box.get(link.to)
+    if (!a || !b) continue
+
+    const aShare = (link.value / Math.max(1, outflow.get(link.from) ?? 1)) * a.height
+    const bShare = (link.value / Math.max(1, inflow.get(link.to) ?? 1)) * b.height
+    const ay = a.y + (usedFrom.get(link.from) ?? 0)
+    const by = b.y + (usedTo.get(link.to) ?? 0)
+    usedFrom.set(link.from, (usedFrom.get(link.from) ?? 0) + aShare)
+    usedTo.set(link.to, (usedTo.get(link.to) ?? 0) + bShare)
+
+    const x0 = a.x + a.width
+    const x1 = b.x
+    const cx = (x0 + x1) / 2
+    const path = [
+      `M${x0.toFixed(2)} ${ay.toFixed(2)}`,
+      `C${cx.toFixed(2)} ${ay.toFixed(2)} ${cx.toFixed(2)} ${by.toFixed(2)} ${x1.toFixed(2)} ${by.toFixed(2)}`,
+      `L${x1.toFixed(2)} ${(by + bShare).toFixed(2)}`,
+      `C${cx.toFixed(2)} ${(by + bShare).toFixed(2)} ${cx.toFixed(2)} ${(ay + aShare).toFixed(2)} ${x0.toFixed(2)} ${(ay + aShare).toFixed(2)}`,
+      'Z'
+    ].join(' ')
+
+    ribbons.push({
+      from: link.from,
+      to: link.to,
+      value: link.value,
+      source: { x: x0, top: ay, bottom: ay + aShare },
+      target: { x: x1, top: by, bottom: by + bShare },
+      controlX: cx,
+      path
+    })
+  }
+
+  return { nodes, ribbons }
+}
+
+/* ---------- 矩形树图 ---------- */
+
+export interface TreemapItem {
+  label: string
+  value: number
+}
+
+export interface TreemapTile {
+  label: string
+  value: number
+  percent: number
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/**
+ * 矩形树图布局，squarify 算法。
+ *
+ * 不用简单的「切条」布局：那会产出又长又细的矩形，
+ * 而人眼比较细长条的面积极不准——那正是矩形树图要表达的东西。
+ * squarify 每次都挑让长宽比最接近 1 的切法。
+ */
+export function treemapLayout(
+  items: TreemapItem[],
+  width: number,
+  height: number
+): TreemapTile[] {
+  const valid = items.filter((i) => i.value > 0)
+  if (!valid.length || width <= 0 || height <= 0) return []
+
+  const total = valid.reduce((sum, i) => sum + i.value, 0)
+  // 面积按比例缩放到画布，之后所有计算都在面积域里做
+  const scaled = [...valid]
+    .sort((a, b) => b.value - a.value)
+    .map((i) => ({ ...i, area: (i.value / total) * width * height }))
+
+  const tiles: TreemapTile[] = []
+  let x = 0
+  let y = 0
+  let w = width
+  let h = height
+  let row: typeof scaled = []
+  let index = 0
+
+  /** 一行的最差长宽比：越接近 1 越好 */
+  const worst = (items: typeof scaled, side: number) => {
+    if (!items.length) return Infinity
+    const sum = items.reduce((s, i) => s + i.area, 0)
+    const max = Math.max(...items.map((i) => i.area))
+    const min = Math.min(...items.map((i) => i.area))
+    const side2 = side * side
+    const sum2 = sum * sum
+    return Math.max((side2 * max) / sum2, sum2 / (side2 * min))
+  }
+
+  const flush = () => {
+    if (!row.length) return
+    const sum = row.reduce((s, i) => s + i.area, 0)
+    const horizontal = w >= h
+    // 沿短边排一行，这样每块才不至于被拉成长条
+    const thickness = horizontal ? sum / h : sum / w
+    let offset = 0
+    for (const item of row) {
+      const length = horizontal ? item.area / thickness : item.area / thickness
+      tiles.push({
+        label: item.label,
+        value: item.value,
+        percent: item.value / total,
+        x: horizontal ? x : x + offset,
+        y: horizontal ? y + offset : y,
+        width: horizontal ? thickness : length,
+        height: horizontal ? length : thickness
+      })
+      offset += length
+    }
+    if (horizontal) {
+      x += thickness
+      w -= thickness
+    } else {
+      y += thickness
+      h -= thickness
+    }
+    row = []
+  }
+
+  while (index < scaled.length) {
+    const side = Math.min(w, h)
+    const next = scaled[index]
+    if (!row.length || worst([...row, next], side) <= worst(row, side)) {
+      row.push(next)
+      index += 1
+    } else {
+      flush()
+    }
+  }
+  flush()
+
+  return tiles
+}

@@ -11,6 +11,8 @@
  *   3. 组件层：由各框架的组件消费语义层，不出现硬编码值。
  */
 
+import { contrastText } from '../logic/palette'
+
 export type Palette = Record<string, string>
 
 /** 基础调色板：每色 9 阶，10 最浅、90 最深 */
@@ -364,6 +366,8 @@ export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, strin
   Object.entries(controlHeight).forEach(([k, v]) => (out[`control-height-${k}`] = v))
   chartCategorical.forEach((v, i) => (out[`chart-${i + 1}`] = v))
   chartSequential.forEach((v, i) => (out[`chart-seq-${i + 1}`] = v))
+  // 深色档上的文字必须翻成浅色，否则最深的两档（#5e7ce0 / #3a4da3）上的深字读不出来
+  chartSequential.forEach((v, i) => (out[`chart-seq-${i + 1}-ink`] = contrastText(v)))
   const diverging = theme === 'dark' ? chartDivergingDark : chartDiverging
   diverging.forEach((v, i) => (out[`chart-div-${i + 1}`] = v))
   return out

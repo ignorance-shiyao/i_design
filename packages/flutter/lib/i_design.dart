@@ -38,6 +38,7 @@ export 'src/components/i_cascader.dart';
 export 'src/components/i_cell.dart';
 export 'src/components/i_chart.dart';
 export 'src/components/i_chart_extras.dart';
+export 'src/components/i_chart_flow.dart';
 export 'src/components/i_chart_pie.dart';
 export 'src/components/i_chart_scatter.dart';
 export 'src/components/i_chart_stats.dart';

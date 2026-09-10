@@ -463,3 +463,336 @@ bool showLabelAt(int index, int count, int step) {
   if (count - 1 - index < step / 2) return false;
   return index % step == 0;
 }
+
+/* ---------- 桑基图 ---------- */
+
+class ISankeyLink {
+  const ISankeyLink({required this.from, required this.to, required this.value});
+  final String from;
+  final String to;
+  final double value;
+}
+
+class ISankeyNode {
+  const ISankeyNode({
+    required this.key,
+    required this.label,
+    required this.depth,
+    required this.value,
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+  });
+  final String key;
+  final String label;
+
+  /// 所在层级，由拓扑决定而不是由调用方指定
+  final int depth;
+  final double value;
+  final double x;
+  final double y;
+  final double width;
+  final double height;
+}
+
+/// 缎带的一端：一段竖直区间加上它所在的横坐标
+class ISankeyRibbonAnchor {
+  const ISankeyRibbonAnchor({required this.x, required this.top, required this.bottom});
+  final double x;
+  final double top;
+  final double bottom;
+}
+
+class ISankeyRibbon {
+  const ISankeyRibbon({
+    required this.from,
+    required this.to,
+    required this.value,
+    required this.source,
+    required this.target,
+    required this.controlX,
+  });
+  final String from;
+  final String to;
+  final double value;
+  final ISankeyRibbonAnchor source;
+  final ISankeyRibbonAnchor target;
+
+  /// 控制点的横坐标，两端共用——与 Web 端 SVG 的 C 指令是同一条曲线
+  final double controlX;
+}
+
+class ISankeyLayout {
+  const ISankeyLayout({required this.nodes, required this.ribbons});
+  final List<ISankeyNode> nodes;
+  final List<ISankeyRibbon> ribbons;
+}
+
+/// 节点分层：从没有入边的节点开始，逐层向后推。
+///
+/// 用最长路径而不是最短：一个节点只要还有上游没排完，就不能定层，
+/// 否则它会被排到上游前面，流向看起来是倒着的。
+/// 存在环时以上限兜底截断——环在流量图里本就无法分层，
+/// 与其抛错不如把回边忽略掉，剩下的部分仍然能画。
+Map<String, int> _sankeyDepths(List<ISankeyLink> links) {
+  final outgoing = <String, List<String>>{};
+  final indegree = <String, int>{};
+  final keys = <String>{};
+
+  for (final link in links) {
+    keys.add(link.from);
+    keys.add(link.to);
+    outgoing.putIfAbsent(link.from, () => <String>[]).add(link.to);
+    indegree[link.to] = (indegree[link.to] ?? 0) + 1;
+    indegree.putIfAbsent(link.from, () => 0);
+  }
+
+  final depth = <String, int>{};
+  for (final key in keys) {
+    depth[key] = 0;
+  }
+
+  final queue = keys.where((k) => (indegree[k] ?? 0) == 0).toList();
+  final visited = queue.toSet();
+  var guard = keys.length * keys.length + 16;
+
+  while (queue.isNotEmpty && guard-- > 0) {
+    final current = queue.removeAt(0);
+    for (final next in outgoing[current] ?? const <String>[]) {
+      final candidate = (depth[current] ?? 0) + 1;
+      if (candidate > (depth[next] ?? 0)) depth[next] = candidate;
+      // 已访问过的也重新入队，让更长的路径能把它推到更后面
+      visited.add(next);
+      queue.add(next);
+    }
+  }
+  return depth;
+}
+
+/// 桑基图布局。
+///
+/// 节点高度按流量占比分配，而不是等分：等分会让一条极小的支流
+/// 和主干看起来一样粗，那正是桑基图要避免的误读。
+ISankeyLayout sankeyLayout(
+  List<ISankeyLink> links,
+  double width,
+  double height, {
+  double nodeWidth = 12,
+  double nodePadding = 12,
+  Map<String, String> labels = const <String, String>{},
+}) {
+  if (links.isEmpty) {
+    return const ISankeyLayout(nodes: <ISankeyNode>[], ribbons: <ISankeyRibbon>[]);
+  }
+
+  final depth = _sankeyDepths(links);
+  var maxDepth = 0;
+  for (final d in depth.values) {
+    if (d > maxDepth) maxDepth = d;
+  }
+
+  // 每个节点的流量取「进出两侧的较大值」：只算一侧会让末端节点厚度为零
+  final inflow = <String, double>{};
+  final outflow = <String, double>{};
+  for (final link in links) {
+    outflow[link.from] = (outflow[link.from] ?? 0) + link.value;
+    inflow[link.to] = (inflow[link.to] ?? 0) + link.value;
+  }
+  double valueOf(String key) => math.max(inflow[key] ?? 0, outflow[key] ?? 0);
+
+  final byDepth = <int, List<String>>{};
+  depth.forEach((key, d) => byDepth.putIfAbsent(d, () => <String>[]).add(key));
+
+  // 层内按流量从大到小排，主干在上，读者的视线不必来回跳
+  for (final list in byDepth.values) {
+    list.sort((a, b) => valueOf(b).compareTo(valueOf(a)));
+  }
+
+  final columnGap = maxDepth > 0 ? (width - nodeWidth) / maxDepth : 0.0;
+  final nodes = <ISankeyNode>[];
+  final box = <String, ISankeyNode>{};
+
+  byDepth.forEach((d, list) {
+    var total = 0.0;
+    for (final k in list) {
+      total += valueOf(k);
+    }
+    if (total == 0) total = 1;
+    final available = height - nodePadding * math.max(0, list.length - 1);
+    var y = 0.0;
+    for (final key in list) {
+      final h = math.max(2.0, (valueOf(key) / total) * available);
+      final node = ISankeyNode(
+        key: key,
+        label: labels[key] ?? key,
+        depth: d,
+        value: valueOf(key),
+        x: d * columnGap,
+        y: y,
+        width: nodeWidth,
+        height: h,
+      );
+      nodes.add(node);
+      box[key] = node;
+      y += h + nodePadding;
+    }
+  });
+
+  // 缎带：两端各自按流量占比在节点上取一段，控制点放在两端的水平中点，
+  // 曲线才会平顺地进出节点，而不是斜插进去。
+  final usedFrom = <String, double>{};
+  final usedTo = <String, double>{};
+  final ribbons = <ISankeyRibbon>[];
+
+  for (final link in links) {
+    final a = box[link.from];
+    final b = box[link.to];
+    if (a == null || b == null) continue;
+
+    final aShare = (link.value / math.max(1.0, outflow[link.from] ?? 1)) * a.height;
+    final bShare = (link.value / math.max(1.0, inflow[link.to] ?? 1)) * b.height;
+    final ay = a.y + (usedFrom[link.from] ?? 0);
+    final by = b.y + (usedTo[link.to] ?? 0);
+    usedFrom[link.from] = (usedFrom[link.from] ?? 0) + aShare;
+    usedTo[link.to] = (usedTo[link.to] ?? 0) + bShare;
+
+    final x0 = a.x + a.width;
+    final x1 = b.x;
+    ribbons.add(ISankeyRibbon(
+      from: link.from,
+      to: link.to,
+      value: link.value,
+      source: ISankeyRibbonAnchor(x: x0, top: ay, bottom: ay + aShare),
+      target: ISankeyRibbonAnchor(x: x1, top: by, bottom: by + bShare),
+      controlX: (x0 + x1) / 2,
+    ));
+  }
+
+  return ISankeyLayout(nodes: nodes, ribbons: ribbons);
+}
+
+/* ---------- 矩形树图 ---------- */
+
+class ITreemapItem {
+  const ITreemapItem({required this.label, required this.value});
+  final String label;
+  final double value;
+}
+
+class ITreemapTile {
+  const ITreemapTile({
+    required this.label,
+    required this.value,
+    required this.percent,
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+  });
+  final String label;
+  final double value;
+  final double percent;
+  final double x;
+  final double y;
+  final double width;
+  final double height;
+}
+
+class _Squarified {
+  _Squarified(this.label, this.value, this.area);
+  final String label;
+  final double value;
+  final double area;
+}
+
+/// 一行的最差长宽比：越接近 1 越好
+double _worst(List<_Squarified> items, double side) {
+  if (items.isEmpty) return double.infinity;
+  var sum = 0.0;
+  var maxArea = double.negativeInfinity;
+  var minArea = double.infinity;
+  for (final i in items) {
+    sum += i.area;
+    if (i.area > maxArea) maxArea = i.area;
+    if (i.area < minArea) minArea = i.area;
+  }
+  final side2 = side * side;
+  final sum2 = sum * sum;
+  return math.max((side2 * maxArea) / sum2, sum2 / (side2 * minArea));
+}
+
+/// 矩形树图布局，squarify 算法。
+///
+/// 不用简单的「切条」布局：那会产出又长又细的矩形，
+/// 而人眼比较细长条的面积极不准——那正是矩形树图要表达的东西。
+List<ITreemapTile> treemapLayout(List<ITreemapItem> items, double width, double height) {
+  final valid = items.where((i) => i.value > 0).toList();
+  if (valid.isEmpty || width <= 0 || height <= 0) return <ITreemapTile>[];
+
+  var total = 0.0;
+  for (final i in valid) {
+    total += i.value;
+  }
+
+  // 面积按比例缩放到画布，之后所有计算都在面积域里做
+  final sorted = [...valid]..sort((a, b) => b.value.compareTo(a.value));
+  final scaled = sorted
+      .map((i) => _Squarified(i.label, i.value, (i.value / total) * width * height))
+      .toList();
+
+  final tiles = <ITreemapTile>[];
+  var x = 0.0;
+  var y = 0.0;
+  var w = width;
+  var h = height;
+  var row = <_Squarified>[];
+  var index = 0;
+
+  void flush() {
+    if (row.isEmpty) return;
+    var sum = 0.0;
+    for (final i in row) {
+      sum += i.area;
+    }
+    final horizontal = w >= h;
+    // 沿短边排一行，这样每块才不至于被拉成长条
+    final thickness = horizontal ? sum / h : sum / w;
+    var offset = 0.0;
+    for (final item in row) {
+      final length = item.area / thickness;
+      tiles.add(ITreemapTile(
+        label: item.label,
+        value: item.value,
+        percent: item.value / total,
+        x: horizontal ? x : x + offset,
+        y: horizontal ? y + offset : y,
+        width: horizontal ? thickness : length,
+        height: horizontal ? length : thickness,
+      ));
+      offset += length;
+    }
+    if (horizontal) {
+      x += thickness;
+      w -= thickness;
+    } else {
+      y += thickness;
+      h -= thickness;
+    }
+    row = <_Squarified>[];
+  }
+
+  while (index < scaled.length) {
+    final side = math.min(w, h);
+    final next = scaled[index];
+    if (row.isEmpty || _worst([...row, next], side) <= _worst(row, side)) {
+      row.add(next);
+      index += 1;
+    } else {
+      flush();
+    }
+  }
+  flush();
+
+  return tiles;
+}

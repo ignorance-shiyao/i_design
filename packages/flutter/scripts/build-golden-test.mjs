@@ -374,7 +374,8 @@ const numberExpectations = [
  */
 const {
   bubbleRadius, trendLine, quantile, boxStats, waterfallBars, waterfallDomain,
-  clampWindow, windowFromRatio, panWindow, labelStep, showLabelAt
+  clampWindow, windowFromRatio, panWindow, labelStep, showLabelAt,
+  sankeyLayout, treemapLayout
 } = await bundle('packages/common/src/logic/chart.ts', 'chart')
 
 const bubbleCases = [[0, 0, 100], [50, 0, 100], [100, 0, 100], [7, 5, 5], [-3, 0, 10]]
@@ -500,6 +501,57 @@ const stepExpectations = stepCases.map(([count, width]) =>
 const step90 = labelStep(90, 576)
 const showExpectations = [0, 1, step90, 88, 89].map((i) =>
   `    expect(showLabelAt(${i}, 90, ${step90}), ${showLabelAt(i, 90, step90)});`)
+
+
+/* ---------- 桑基图与矩形树图 ----------
+ * 分层用的是最长路径、层内按流量排序、缎带两端各按占比取一段——
+ * 这三条里任何一条移植时走样，两端画出来的就是两张不同的图，
+ * 而且都「看起来像桑基图」，肉眼对不出来。
+ */
+const sankeyCases = [
+  { from: 'visit', to: 'leave', value: 600 },
+  { from: 'visit', to: 'signup', value: 400 },
+  { from: 'signup', to: 'idle', value: 280 },
+  { from: 'signup', to: 'pay', value: 120 },
+]
+const dartSankey = `<ISankeyLink>[${sankeyCases
+  .map((l) => `const ISankeyLink(from: '${l.from}', to: '${l.to}', value: ${l.value.toFixed(1)})`)
+  .join(', ')}]`
+const sankeyResult = sankeyLayout(sankeyCases, 520, 260)
+const sankeyNodeExpectations = sankeyResult.nodes.flatMap((n, i) => [
+  `    expect(layout.nodes[${i}].key, '${n.key}');`,
+  `    expect(layout.nodes[${i}].depth, ${n.depth});`,
+  `    expect(layout.nodes[${i}].value, closeTo(${n.value}, 1e-9));`,
+  `    expect(layout.nodes[${i}].x, closeTo(${n.x}, 1e-9));`,
+  `    expect(layout.nodes[${i}].y, closeTo(${n.y}, 1e-9));`,
+  `    expect(layout.nodes[${i}].height, closeTo(${n.height}, 1e-9));`,
+])
+const sankeyRibbonExpectations = sankeyResult.ribbons.flatMap((r, i) => [
+  `    expect(layout.ribbons[${i}].from, '${r.from}');`,
+  `    expect(layout.ribbons[${i}].to, '${r.to}');`,
+  `    expect(layout.ribbons[${i}].source.top, closeTo(${r.source.top}, 1e-9));`,
+  `    expect(layout.ribbons[${i}].source.bottom, closeTo(${r.source.bottom}, 1e-9));`,
+  `    expect(layout.ribbons[${i}].target.top, closeTo(${r.target.top}, 1e-9));`,
+  `    expect(layout.ribbons[${i}].target.bottom, closeTo(${r.target.bottom}, 1e-9));`,
+  `    expect(layout.ribbons[${i}].controlX, closeTo(${r.controlX}, 1e-9));`,
+])
+
+const treemapCases = [
+  { label: 'a', value: 4200 }, { label: 'b', value: 2600 }, { label: 'c', value: 1500 },
+  { label: 'd', value: 620 }, { label: 'e', value: 380 }, { label: 'f', value: 210 },
+]
+const dartTreemap = `<ITreemapItem>[${treemapCases
+  .map((i) => `const ITreemapItem(label: '${i.label}', value: ${i.value.toFixed(1)})`)
+  .join(', ')}]`
+const treemapResult = treemapLayout(treemapCases, 640, 300)
+const treemapExpectations = treemapResult.flatMap((t, i) => [
+  `    expect(tiles[${i}].label, '${t.label}');`,
+  `    expect(tiles[${i}].percent, closeTo(${t.percent}, 1e-9));`,
+  `    expect(tiles[${i}].x, closeTo(${t.x}, 1e-9));`,
+  `    expect(tiles[${i}].y, closeTo(${t.y}, 1e-9));`,
+  `    expect(tiles[${i}].width, closeTo(${t.width}, 1e-9));`,
+  `    expect(tiles[${i}].height, closeTo(${t.height}, 1e-9));`,
+])
 
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
@@ -701,6 +753,20 @@ ${ratioExpectations.join('\n')}
   test('轴标签抽稀与 Web 端一致', () {
 ${stepExpectations.join('\n')}
 ${showExpectations.join('\n')}
+  });
+
+  test('桑基图分层、节点高度与缎带几何与 Web 端一致', () {
+    final layout = sankeyLayout(${dartSankey}, 520.0, 260.0);
+    expect(layout.nodes.length, ${sankeyResult.nodes.length});
+    expect(layout.ribbons.length, ${sankeyResult.ribbons.length});
+${sankeyNodeExpectations.join('\n')}
+${sankeyRibbonExpectations.join('\n')}
+  });
+
+  test('矩形树图 squarify 切块与 Web 端一致', () {
+    final tiles = treemapLayout(${dartTreemap}, 640.0, 300.0);
+    expect(tiles.length, ${treemapResult.length});
+${treemapExpectations.join('\n')}
   });
 }
 `

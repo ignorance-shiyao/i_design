@@ -7,3 +7,4 @@ dist-demo
 packages/*/dist
 packages/*/.tokens.build.mjs
 packages/vue/node_modules
+*.tmp.mjs
