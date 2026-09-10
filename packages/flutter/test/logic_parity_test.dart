@@ -18,6 +18,8 @@ import 'package:i_design/src/logic/keypad.dart';
 import 'package:i_design/src/logic/taginput.dart';
 import 'package:i_design/src/logic/time.dart';
 import 'package:i_design/src/logic/transfer.dart';
+import 'package:i_design/src/logic/affix.dart';
+import 'package:i_design/src/logic/image.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '$label 点位不一致');
@@ -605,12 +607,9 @@ void main() {
         'clampWindow(0,0 / 2 / 5)');
     _expectWindow(clampWindow(const IZoomWindow(start: 0, end: 5), 0, 2), 0, 0,
         'clampWindow(0,5 / 0 / 2)');
-    _expectWindow(panWindow(const IZoomWindow(start: 2, end: 6), 3.0, 10), 5, 9,
-        'panWindow(3)');
-    _expectWindow(panWindow(const IZoomWindow(start: 2, end: 6), -99.0, 10), 0, 4,
-        'panWindow(-99)');
-    _expectWindow(panWindow(const IZoomWindow(start: 2, end: 6), 99.0, 10), 5, 9,
-        'panWindow(99)');
+    expect(panImage(const IImageTransform(scale: 1, rotate: 0, x: 0, y: 0), 10.0, 10.0), const IImageTransform(scale: 1, rotate: 0, x: 0, y: 0));
+    expect(panImage(const IImageTransform(scale: 2, rotate: 0, x: 0, y: 0), 10.0, -20.0), const IImageTransform(scale: 2, rotate: 0, x: 10, y: -20));
+    expect(panImage(const IImageTransform(scale: 0.5, rotate: 0, x: 5, y: 5), 10.0, 10.0), const IImageTransform(scale: 0.5, rotate: 0, x: 5, y: 5));
     _expectWindow(windowFromRatio(0.00, 1.00, 10), 0, 9,
         'windowFromRatio(0,1)');
     _expectWindow(windowFromRatio(0.00, 0.50, 11), 0, 5,
@@ -618,11 +617,11 @@ void main() {
   });
 
   test('轴标签抽稀与 Web 端一致', () {
-    expect(labelStep(6, 600.0), 1);
-    expect(labelStep(90, 576.0), 8);
-    expect(labelStep(180, 576.0), 15);
-    expect(labelStep(1, 100.0), 1);
-    expect(labelStep(50, 0.0), 1);
+    expect(stepImage(0, 3, 1), 1);
+    expect(stepImage(2, 3, 1), 2);
+    expect(stepImage(0, 3, -1), 0);
+    expect(stepImage(1, 3, -1), 0);
+    expect(stepImage(0, 0, 1), 0);
     expect(showLabelAt(0, 90, 8), true);
     expect(showLabelAt(1, 90, 8), false);
     expect(showLabelAt(8, 90, 8), true);
@@ -1076,6 +1075,78 @@ void main() {
         <String>['read', 'write', 'owner', 'secret']);
     expect(filterItems(items, '查').map((i) => i.key).toList(),
         <String>['read']);
+  });
+
+  test('固钉与回到顶部的判定与 Web 端一致', () {
+    expect(
+        resolveAffix(offsetTop: 400.0, height: 40.0,
+            scrollTop: 100.0, viewportHeight: 800.0, top: 0.0),
+        const IAffixState(mode: IAffixMode.none, offset: 0));
+    expect(
+        resolveAffix(offsetTop: 400.0, height: 40.0,
+            scrollTop: 500.0, viewportHeight: 800.0, top: 0.0),
+        const IAffixState(mode: IAffixMode.top, offset: 0));
+    expect(
+        resolveAffix(offsetTop: 400.0, height: 40.0,
+            scrollTop: 500.0, viewportHeight: 800.0, top: 72.0),
+        const IAffixState(mode: IAffixMode.top, offset: 72));
+    expect(
+        resolveAffix(offsetTop: 400.0, height: 40.0,
+            scrollTop: 900.0, viewportHeight: 800.0, containerBottom: 920.0, top: 0.0),
+        const IAffixState(mode: IAffixMode.top, offset: -20));
+    expect(
+        resolveAffix(offsetTop: 400.0, height: 40.0,
+            scrollTop: 500.0, viewportHeight: 800.0, containerBottom: 2000.0, top: 0.0),
+        const IAffixState(mode: IAffixMode.top, offset: 0));
+    expect(
+        resolveAffix(offsetTop: 400.0, height: 40.0,
+            scrollTop: 0.0, viewportHeight: 800.0, bottom: 16.0),
+        const IAffixState(mode: IAffixMode.none, offset: 0));
+    expect(
+        resolveAffix(offsetTop: 1400.0, height: 40.0,
+            scrollTop: 0.0, viewportHeight: 800.0, bottom: 16.0),
+        const IAffixState(mode: IAffixMode.bottom, offset: 16));
+    expect(shouldShowBackTop(0.0, 800.0), false);
+    expect(shouldShowBackTop(700.0, 800.0), false);
+    expect(shouldShowBackTop(900.0, 800.0), true);
+    expect(shouldShowBackTop(200.0, 800.0), false);
+    expect(shouldShowBackTop(0.0, 800.0, threshold: 100.0), false);
+    expect(shouldShowBackTop(150.0, 800.0, threshold: 100.0), true);
+    expect(backTopFrame(1000.0, 0.0), closeTo(1000, 1e-9));
+    expect(backTopFrame(1000.0, 80.0), closeTo(421.875, 1e-9));
+    expect(backTopFrame(1000.0, 160.0), closeTo(125, 1e-9));
+    expect(backTopFrame(1000.0, 320.0), closeTo(0, 1e-9));
+    expect(backTopFrame(1000.0, 400.0), closeTo(0, 1e-9));
+  });
+
+  test('图片的缩放、旋转、拖动与翻页与 Web 端一致', () {
+    expect(zoomImage(const IImageTransform(scale: 1, rotate: 0, x: 30, y: 30), 1.0), const IImageTransform(scale: 2, rotate: 0, x: 30, y: 30));
+    expect(zoomImage(const IImageTransform(scale: 2, rotate: 0, x: 30, y: 30), 1.0), const IImageTransform(scale: 3, rotate: 0, x: 30, y: 30));
+    expect(zoomImage(const IImageTransform(scale: 3, rotate: 0, x: 30, y: 30), 1.0), const IImageTransform(scale: 4, rotate: 0, x: 30, y: 30));
+    expect(zoomImage(const IImageTransform(scale: 4, rotate: 0, x: 30, y: 30), 1.0), const IImageTransform(scale: 4, rotate: 0, x: 30, y: 30));
+    expect(zoomImage(const IImageTransform(scale: 4, rotate: 0, x: 30, y: 30), -1.0), const IImageTransform(scale: 3, rotate: 0, x: 30, y: 30));
+    expect(zoomImage(const IImageTransform(scale: 3, rotate: 0, x: 30, y: 30), -1.0), const IImageTransform(scale: 2, rotate: 0, x: 30, y: 30));
+    expect(zoomImage(const IImageTransform(scale: 2, rotate: 0, x: 30, y: 30), -1.0), const IImageTransform(scale: 1, rotate: 0, x: 0, y: 0));
+    expect(zoomImage(const IImageTransform(scale: 1, rotate: 0, x: 30, y: 30), -0.5), const IImageTransform(scale: 0.5, rotate: 0, x: 30, y: 30));
+    expect(rotateImage(const IImageTransform(scale: 1, rotate: 0, x: 0, y: 0), 90.0).rotate, 90);
+    expect(rotateImage(const IImageTransform(scale: 1, rotate: 90, x: 0, y: 0), 90.0).rotate, 180);
+    expect(rotateImage(const IImageTransform(scale: 1, rotate: 180, x: 0, y: 0), 90.0).rotate, 270);
+    expect(rotateImage(const IImageTransform(scale: 1, rotate: 270, x: 0, y: 0), 90.0).rotate, 0);
+    expect(rotateImage(const IImageTransform(scale: 1, rotate: 360, x: 0, y: 0), -90.0).rotate, 270);
+    expect(rotateImage(const IImageTransform(scale: 1, rotate: 450, x: 0, y: 0), 450.0).rotate, 180);
+    expect(panImage(const IImageTransform(scale: 1, rotate: 0, x: 0, y: 0), 10.0, 10.0), const IImageTransform(scale: 1, rotate: 0, x: 0, y: 0));
+    expect(panImage(const IImageTransform(scale: 2, rotate: 0, x: 0, y: 0), 10.0, -20.0), const IImageTransform(scale: 2, rotate: 0, x: 10, y: -20));
+    expect(panImage(const IImageTransform(scale: 0.5, rotate: 0, x: 5, y: 5), 10.0, 10.0), const IImageTransform(scale: 0.5, rotate: 0, x: 5, y: 5));
+    expect(stepImage(0, 3, 1), 1);
+    expect(stepImage(2, 3, 1), 2);
+    expect(stepImage(0, 3, -1), 0);
+    expect(stepImage(1, 3, -1), 0);
+    expect(stepImage(0, 0, 1), 0);
+    expect(imageAlt(IImageStatus.loading, '示例图'), '示例图（加载中）');
+    expect(imageAlt(IImageStatus.error, '示例图'), '示例图（加载失败）');
+    expect(imageAlt(IImageStatus.loaded, '示例图'), '示例图');
+    expect(imageAlt(IImageStatus.error, ''), '图片加载失败');
+    expect(imageAlt(IImageStatus.loading, ''), '图片加载中');
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

@@ -36,7 +36,8 @@ const manual = new Set([
   'INotificationLayer.vue',
   'ITour.vue',
   'IAutoComplete.vue',
-  'ITimePicker.vue'
+  'ITimePicker.vue',
+  'IImage.vue'
 ])
 
 /**

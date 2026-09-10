@@ -9,6 +9,16 @@ export interface ComponentRow {
 
 export const componentMatrix: ComponentRow[] = [
   {
+    "name": "IAffix",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IAgentTasks",
     "ends": {
       "vue-next": true,
@@ -70,6 +80,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IAvatarGroup",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IBackTop",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -470,6 +490,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IIcon",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IImage",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -900,6 +930,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IUpload",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IWatermark",
     "ends": {
       "vue-next": true,
       "vue": true,

@@ -6,6 +6,14 @@ import ICol from '@/components/ICol.vue'
 import IButton from '@/components/IButton.vue'
 import ITag from '@/components/ITag.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import IAffix from '@/components/IAffix.vue'
+import IBackTop from '@/components/IBackTop.vue'
+import IWatermark from '@/components/IWatermark.vue'
+import IImage from '@/components/IImage.vue'
+import { heroIllustrations } from '@i-design/common'
+
+/* 预览用的图组：故意混一个坏地址进去，好让「加载失败」这一态在文档里看得见 */
+const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
 </script>
 
 <template>
@@ -99,10 +107,88 @@ import DemoBlock from '@/site/DemoBlock.vue'
         <ITypography mono copyable>sk-live-8f21c0d4e75b</ITypography>
       </div>
     </DemoBlock>
+    <h2>Affix 固钉</h2>
+    <p>
+      吸住时元素脱离文档流，因此外层要撑出一块等高的占位。不占位的话，
+      下面的内容会整块往上跳一次——而那一跳正好发生在用户滚动时，看起来像页面抖了一下。
+    </p>
+    <p>
+      容器底部先于元素滚出视口时，元素跟着一起走，而不是继续钉在顶上：
+      一个已经和内容无关的浮块钉在屏幕顶端，读者会以为它属于下一节。
+    </p>
+    <DemoBlock
+      title="滚动时吸在顶部"
+      description="滚动这一页试试。滚动事件合并到 requestAnimationFrame，每帧最多量一次布局——不合并的话长页面上滚动会明显发涩。"
+      code='<IAffix :top="72"><IButton>我会吸住</IButton></IAffix>'
+    >
+      <IAffix :top="72">
+        <IButton variant="secondary">我会吸在离顶部 72px 处</IButton>
+      </IAffix>
+    </DemoBlock>
+
+    <h2>BackTop 回到顶部</h2>
+    <p>
+      默认滚过一屏才出现：不足一屏时用户自己往回划两下就到顶了，这时冒出一个按钮属于帮倒忙——
+      它遮住的内容比它省下的力气多。回顶动画自己按帧算，而不是
+      <code>scrollTo({ behavior: 'smooth' })</code>——后者的时长由浏览器按距离决定，
+      长页面上会滚十几秒，用户以为卡住了。这一页右下角就有一个。
+    </p>
+
+    <h2>Watermark 水印</h2>
+    <p>
+      水印拦不住有心人，但能让随手截图的人留下痕迹。它的价值全在细节：太密挡内容，
+      太疏截一小块就没有。用 SVG 平铺而不是 canvas 生成位图——高分屏上不会糊，
+      而且首屏就能带上，不存在「先看到没水印的内容」那一小段窗口，而那正是要防的场景。
+    </p>
+    <DemoBlock
+      title="盖在内容上，但不吃事件"
+      description="水印层 aria-hidden：读屏把满屏重复的用户名念一遍，内容就没法听了。颜色跟随文字色，写死黑色的话深色主题上等于没有。"
+      code='<IWatermark text="仅供内部评审"><YourContent /></IWatermark>'
+    >
+      <IWatermark :text="['仅供内部评审', 'zhang.wei@example.com']">
+        <div class="wm-demo">
+          <h4>季度经营简报</h4>
+          <p>本季度新签客户 128 家，续约率 91%。下一步聚焦华东区的交付节奏。</p>
+          <IButton size="sm">按钮仍然可以点</IButton>
+        </div>
+      </IWatermark>
+    </DemoBlock>
+
+    <h2>Image 图片</h2>
+    <p>
+      加载中给骨架、失败给明文，都不留空白：空白会被当成「这里本来就没图」，
+      而那和「加载失败」的处理完全不同——前者不必管，后者该刷新或报障。
+    </p>
+    <p>
+      预览里翻页到头不循环。循环会让「这是最后一张」这个信息消失，
+      用户点着点着又回到第一张，分不清是翻完了还是自己看漏了。翻页后缩放旋转归零——
+      带着上一张的三倍放大翻过去，看到的是一块局部。
+    </p>
+    <DemoBlock
+      title="预览、缩放、旋转与翻页"
+      description="点图放大。滚轮缩放，放大后可拖动，方向键翻页，Esc 关闭。缩回 1 倍时位移一并归零，否则图缩小了却还偏在角落。"
+      code='<IImage :src="src" :group="shots" :width="200" :height="130" />'
+    >
+      <div class="row">
+        <IImage v-for="s in shots" :key="s" :src="s" :group="shots" :width="200" :height="130" fit="contain" />
+        <IImage src="/does-not-exist.png" :width="200" :height="130" alt="示例图" />
+      </div>
+    </DemoBlock>
+
+    <IBackTop />
   </article>
 </template>
 
 <style scoped>
+.wm-demo {
+  padding: var(--i-spacing-6);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+}
+.wm-demo h4 { margin: 0 0 var(--i-spacing-2); }
+.wm-demo p { margin: 0 0 var(--i-spacing-4); color: var(--i-color-text-secondary); }
+.row { display: flex; gap: var(--i-spacing-4); flex-wrap: wrap; align-items: flex-start; }
 .stack { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; }
 .grid-demo { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; }
 .cell {

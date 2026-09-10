@@ -73,6 +73,10 @@ import ITagInput from './ITagInput.vue'
 import IAutoComplete from './IAutoComplete.vue'
 import ITimePicker from './ITimePicker.vue'
 import ITransfer from './ITransfer.vue'
+import IAffix from './IAffix.vue'
+import IBackTop from './IBackTop.vue'
+import IWatermark from './IWatermark.vue'
+import IImage from './IImage.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -137,6 +141,10 @@ export {
   IAutoComplete,
   ITimePicker,
   ITransfer,
+  IAffix,
+  IBackTop,
+  IWatermark,
+  IImage,
   IForm,
   IFormItem,
   ITag,

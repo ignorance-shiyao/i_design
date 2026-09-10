@@ -1,0 +1,8 @@
+<view class="i-affix" style="height:{{placeholder ? placeholder + 'px' : ''}}">
+  <view
+    class="i-affix__inner {{mode !== 'none' ? 'is-affixed' : ''}}"
+    style="{{mode === 'top' ? 'position:fixed;top:' + offset + 'px;z-index:1100' : (mode === 'bottom' ? 'position:fixed;bottom:' + offset + 'px;z-index:1100' : '')}}"
+  >
+    <slot />
+  </view>
+</view>

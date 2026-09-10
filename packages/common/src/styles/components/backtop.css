@@ -1,0 +1,38 @@
+/*
+ * IBackTop —— 回到顶部。
+ *
+ * 固定在右下角，与浮层工具条同一区域。默认滚过一屏才出现——
+ * 不足一屏时用户自己往回划两下就到顶了，这时冒出一个按钮属于帮倒忙。
+ */
+.i-backtop {
+  position: fixed;
+  right: var(--i-spacing-6);
+  bottom: var(--i-spacing-6);
+  z-index: var(--i-z-sticky);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text-secondary);
+  box-shadow: var(--i-shadow-md);
+  cursor: pointer;
+}
+.i-backtop:hover { color: var(--i-color-brand); border-color: var(--i-color-brand); }
+.i-backtop:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+
+/* 淡入淡出加一点位移：直接闪现会让人怀疑自己点到了什么 */
+.i-backtop-enter-active,
+.i-backtop-leave-active {
+  transition: opacity var(--i-motion-base) var(--i-motion-easing-out),
+    transform var(--i-motion-base) var(--i-motion-easing-out);
+}
+.i-backtop-enter-from,
+.i-backtop-leave-to { opacity: 0; transform: translateY(8px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .i-backtop-enter-active,
+  .i-backtop-leave-active { transition: none; }
+}

@@ -1,0 +1,16 @@
+/*
+ * IWatermark —— 水印。
+ *
+ * 水印层盖在内容上但不吃事件：它是标记，不是遮罩。
+ * 用 SVG 平铺而不是 canvas 生成的位图——高分屏上不会糊，
+ * 而且首屏就能带上，不存在「先看到没水印的内容」那一小段窗口。
+ */
+.i-watermark { position: relative; }
+.i-watermark__layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  /* 跟随文字色：写死黑色的话，深色主题上等于没有水印 */
+  color: var(--i-color-text);
+}

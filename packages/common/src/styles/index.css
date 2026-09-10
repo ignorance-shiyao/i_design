@@ -11,12 +11,14 @@
 @import './base.css';
 
 @import './components/action-sheet.css';
+@import './components/affix.css';
 @import './components/agent.css';
 @import './components/alert.css';
 @import './components/anchor.css';
 @import './components/autocomplete.css';
 @import './components/avatar-group.css';
 @import './components/avatar.css';
+@import './components/backtop.css';
 @import './components/badge.css';
 @import './components/base.css';
 @import './components/breadcrumb.css';
@@ -46,6 +48,7 @@
 @import './components/form.css';
 @import './components/grid.css';
 @import './components/icon.css';
+@import './components/image.css';
 @import './components/infinite.css';
 @import './components/input-number.css';
 @import './components/input.css';
@@ -96,6 +99,7 @@
 @import './components/tree.css';
 @import './components/typography.css';
 @import './components/upload.css';
+@import './components/watermark.css';
 
 /* 工具层排在最后：它要能盖过组件自己的 transition，见 build-styles-index.mjs */
 @import './motion.css';

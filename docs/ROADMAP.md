@@ -143,6 +143,25 @@
       遮罩用带「洞」的 SVG（四条挡板对不上圆角，圆角按钮四角会漏出暗色直角）；
       到末步返回 -1 而不是停住，否则「下一步」点下去没反应，用户分不清是走完了还是卡住
 
+## 第 9 批 · 对照 AntV / Element / TDesign / Semi / NutUI / WeChat UI 补齐
+
+那几家有、这里没有的，按「中后台真的会用到」排序：
+
+- [x] **Image 图片**：预览、缩放旋转、多图翻页、懒加载与失败态
+- [x] **Affix 固钉**：容器滚出视口时跟着走
+- [x] **BackTop 回到顶部**
+- [x] **Watermark 水印**：SVG 平铺，深浅主题都可见
+- [ ] **Splitter 分割面板**：拖动改变两栏比例，带最小宽度
+- [ ] **Calendar 日历**：月视图与日期标记
+- [ ] **ColorPicker 取色器**：直接复用 `logic/palette` 的 OKLCH，不引第二套色彩换算
+- [ ] **Mentions 提及**：`@` 唤起候选，可复用 PromptInput 的触发思路
+- [ ] **IndexBar 索引栏**（NutUI / WeChat UI）：右侧字母条与吸顶分组
+- [ ] **PullRefresh 下拉刷新**（NutUI / WeChat UI）
+- [ ] **Sticky 吸顶**：与 Affix 同源，容器内吸附
+- [ ] **VirtualList 虚拟滚动**（Semi / TDesign）：万行表格的前提
+- [ ] **Gantt 甘特图**（AntV）：排期是中后台的高频场景
+- [ ] **WordCloud 词云**（AntV）
+
 ## 已知的跨端 API 差异
 
 `check:parity` 只比对「组件在不在」，比不到「属性一不一样」。以下是已经发现的：

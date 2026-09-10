@@ -1,0 +1,3 @@
+<view wx:if="{{visible}}" class="i-backtop" aria-label="回到顶部" bindtap="toTop">
+  <view class="i-icon i-icon--chevron-up" style="width:18px;height:18px" />
+</view>

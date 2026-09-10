@@ -23,6 +23,13 @@ const bundle = (entry, name) => {
 
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
+const { resolveAffix, shouldShowBackTop, backTopFrame } = await bundle(
+  'packages/common/src/logic/affix.ts',
+  'affix'
+)
+const {
+  zoomImage, rotateImage, panImage, stepImage, imageAlt
+} = await bundle('packages/common/src/logic/image.ts', 'image')
 const {
   formatTime, parseTime, timeColumn, isUnitEnabled, clampTime, isValidRange
 } = await bundle('packages/common/src/logic/time.ts', 'time')
@@ -962,6 +969,78 @@ const filterTransferExpectations = ['密钥', '', '查'].map((kw) =>
   `    expect(filterItems(items, '${kw}').map((i) => i.key).toList(),
         ${dartKeys(filterTransfer(transferItems, kw).map((i) => i.key))});`)
 
+/* ---------- 固钉、回顶与图片变换 ----------
+ * 这三处抄错的表现都很轻微：吸早了半屏、按钮闪一下就没、缩到 10 倍还能继续缩。
+ * 没人会当成缺陷报上来，但两端用起来就是不一样。
+ */
+const affixCases = [
+  // 还没滚到：不吸
+  [{ offsetTop: 400, height: 40, scrollTop: 100, viewportHeight: 800 }, { top: 0 }],
+  // 滚过了：吸在阈值处
+  [{ offsetTop: 400, height: 40, scrollTop: 500, viewportHeight: 800 }, { top: 0 }],
+  [{ offsetTop: 400, height: 40, scrollTop: 500, viewportHeight: 800 }, { top: 72 }],
+  // 容器要走了：跟着往上顶，而不是继续钉在顶上
+  [{ offsetTop: 400, height: 40, scrollTop: 900, viewportHeight: 800, containerBottom: 920 }, { top: 0 }],
+  [{ offsetTop: 400, height: 40, scrollTop: 500, viewportHeight: 800, containerBottom: 2000 }, { top: 0 }],
+  // 吸底
+  [{ offsetTop: 400, height: 40, scrollTop: 0, viewportHeight: 800 }, { bottom: 16 }],
+  [{ offsetTop: 1400, height: 40, scrollTop: 0, viewportHeight: 800 }, { bottom: 16 }],
+]
+const affixExpectations = affixCases.map(([m, opts]) => {
+  const got = resolveAffix(m, opts)
+  const named = opts.bottom !== undefined ? `bottom: ${opts.bottom.toFixed(1)}` : `top: ${opts.top.toFixed(1)}`
+  const container = m.containerBottom !== undefined ? `, containerBottom: ${m.containerBottom.toFixed(1)}` : ''
+  return `    expect(
+        resolveAffix(offsetTop: ${m.offsetTop.toFixed(1)}, height: ${m.height.toFixed(1)},
+            scrollTop: ${m.scrollTop.toFixed(1)}, viewportHeight: ${m.viewportHeight.toFixed(1)}${container}, ${named}),
+        const IAffixState(mode: IAffixMode.${got.mode}, offset: ${got.offset}));`
+})
+
+const backTopCases = [[0, 800], [700, 800], [900, 800], [200, 800]]
+const backTopExpectations = backTopCases.map(([y, vh]) =>
+  `    expect(shouldShowBackTop(${y.toFixed(1)}, ${vh.toFixed(1)}), ${shouldShowBackTop(y, vh)});`)
+  .concat(
+    [[0, 800, 100], [150, 800, 100]].map(([y, vh, th]) =>
+      `    expect(shouldShowBackTop(${y.toFixed(1)}, ${vh.toFixed(1)}, threshold: ${th.toFixed(1)}), ${shouldShowBackTop(y, vh, th)});`)
+  )
+
+const frameExpectations = [0, 80, 160, 320, 400].map((t) =>
+  `    expect(backTopFrame(1000.0, ${t.toFixed(1)}), closeTo(${backTopFrame(1000, t)}, 1e-9));`)
+
+const dartTransform = (t) =>
+  `const IImageTransform(scale: ${t.scale}, rotate: ${t.rotate}, x: ${t.x}, y: ${t.y})`
+
+// 缩回 1 倍时位移要一并归零，否则图缩小了却还偏在角落
+let zoomAcc = { scale: 1, rotate: 0, x: 0, y: 0 }
+const zoomSteps = [1, 1, 1, 1, -1, -1, -1, -0.5]
+const zoomExpectations = zoomSteps.map((d) => {
+  const before = zoomAcc
+  zoomAcc = zoomImage({ ...zoomAcc, x: 30, y: 30 }, d)
+  return `    expect(zoomImage(${dartTransform({ ...before, x: 30, y: 30 })}, ${d.toFixed(1)}), ${dartTransform(zoomAcc)});`
+})
+
+const rotateExpectations = [90, 90, 90, 90, -90, 450].map((d, i) => {
+  const base = { scale: 1, rotate: i * 90, x: 0, y: 0 }
+  return `    expect(rotateImage(${dartTransform(base)}, ${d.toFixed(1)}).rotate, ${rotateImage(base, d).rotate});`
+})
+
+// 原尺寸时不许拖：拖动会让图莫名其妙地跑出框
+const ai_panExpectations = [
+  [{ scale: 1, rotate: 0, x: 0, y: 0 }, 10, 10],
+  [{ scale: 2, rotate: 0, x: 0, y: 0 }, 10, -20],
+  [{ scale: 0.5, rotate: 0, x: 5, y: 5 }, 10, 10],
+].map(([t, dx, dy]) =>
+  `    expect(panImage(${dartTransform(t)}, ${dx.toFixed(1)}, ${dy.toFixed(1)}), ${dartTransform(panImage(t, dx, dy))});`)
+
+const ai_stepExpectations = [[0, 3, 1], [2, 3, 1], [0, 3, -1], [1, 3, -1], [0, 0, 1]].map(([c, n, d]) =>
+  `    expect(stepImage(${c}, ${n}, ${d}), ${stepImage(c, n, d)});`)
+
+const altExpectations = [
+  ['loading', '示例图'], ['error', '示例图'], ['loaded', '示例图'],
+  ['error', ''], ['loading', ''],
+].map(([status, alt]) =>
+  `    expect(imageAlt(IImageStatus.${status}, '${alt}'), '${imageAlt(status, alt)}');`)
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -982,6 +1061,8 @@ import 'package:i_design/src/logic/keypad.dart';
 import 'package:i_design/src/logic/taginput.dart';
 import 'package:i_design/src/logic/time.dart';
 import 'package:i_design/src/logic/transfer.dart';
+import 'package:i_design/src/logic/affix.dart';
+import 'package:i_design/src/logic/image.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
@@ -1199,12 +1280,12 @@ ${wfDomainExpectation}
 
   test('区间缩放的夹取、交叉与平移与 Web 端一致', () {
 ${zoomClampExpectations.join('\n')}
-${panExpectations.join('\n')}
+${ai_panExpectations.join('\n')}
 ${ratioExpectations.join('\n')}
   });
 
   test('轴标签抽稀与 Web 端一致', () {
-${stepExpectations.join('\n')}
+${ai_stepExpectations.join('\n')}
 ${showExpectations.join('\n')}
   });
 
@@ -1298,6 +1379,20 @@ ${afterMoveExpectations.join('\n')}
 ${tt_headerExpectations.join('\n')}
 ${toggleAllExpectations.join('\n')}
 ${filterTransferExpectations.join('\n')}
+  });
+
+  test('固钉与回到顶部的判定与 Web 端一致', () {
+${affixExpectations.join('\n')}
+${backTopExpectations.join('\n')}
+${frameExpectations.join('\n')}
+  });
+
+  test('图片的缩放、旋转、拖动与翻页与 Web 端一致', () {
+${zoomExpectations.join('\n')}
+${rotateExpectations.join('\n')}
+${ai_panExpectations.join('\n')}
+${ai_stepExpectations.join('\n')}
+${altExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

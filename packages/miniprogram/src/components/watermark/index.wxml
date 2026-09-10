@@ -1,0 +1,12 @@
+<view class="i-watermark">
+  <slot />
+  <!--
+    水印层盖在内容上但不吃事件——它是标记，不是遮罩。
+    aria-hidden：读屏把满屏重复的用户名念一遍，内容就没法听了。
+  -->
+  <view
+    class="i-watermark__layer"
+    aria-hidden="true"
+    style="background-image:{{image}};background-size:{{tileWidth}}px {{tileHeight}}px"
+  />
+</view>

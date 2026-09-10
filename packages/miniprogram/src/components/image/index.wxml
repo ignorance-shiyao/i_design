@@ -1,0 +1,26 @@
+<view class="i-image" style="{{boxStyle}}">
+  <!--
+    图片一直渲染，只用透明度控制可见性。
+    用 display:none 隐藏的话，懒加载的图不会开始加载——load 永不触发，
+    状态就永远停在 loading，图片再也不会出现。
+  -->
+  <image
+    class="i-image__img {{status !== 'loaded' ? 'is-pending' : ''}}"
+    src="{{src}}"
+    mode="{{fit === 'contain' ? 'aspectFit' : (fit === 'fill' ? 'scaleToFill' : 'aspectFill')}}"
+    lazy-load="{{true}}"
+    bindload="onLoad"
+    binderror="onError"
+    bindtap="openPreview"
+  />
+
+  <view wx:if="{{status === 'loading'}}" class="i-skeleton is-animated i-image__placeholder">
+    <view class="i-skeleton__block i-image__placeholder-bar" />
+  </view>
+
+  <!-- 失败要显式说出来：留一块空白会被当成「这里本来就没图」 -->
+  <view wx:if="{{status === 'error'}}" class="i-image__error">
+    <view class="i-icon i-icon--file-image" style="width:20px;height:20px" />
+    <text>加载失败</text>
+  </view>
+</view>

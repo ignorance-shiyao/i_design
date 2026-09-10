@@ -8,6 +8,7 @@
  * 本文件由 scripts/build-react-index.mjs 按目录生成——手写导出清单会漏，
  * 之前就漏掉了 17 个已实现但从未导出的组件。
  */
+export { Affix, type AffixProps } from './components/Affix'
 export { AgentTasks, type AgentTasksProps } from './components/AgentTasks'
 export { Alert, type AlertProps } from './components/Alert'
 export { Anchor, type AnchorItem, type AnchorProps } from './components/Anchor'
@@ -15,6 +16,7 @@ export { ApprovalCard, type ApprovalCardProps } from './components/ApprovalCard'
 export { AutoComplete, type AutoCompleteProps } from './components/AutoComplete'
 export { Avatar, type AvatarProps } from './components/Avatar'
 export { AvatarGroup, type AvatarGroupProps } from './components/AvatarGroup'
+export { BackTop, type BackTopProps } from './components/BackTop'
 export { Badge, type BadgeProps } from './components/Badge'
 export { Breadcrumb, type BreadcrumbItem, type BreadcrumbProps } from './components/Breadcrumb'
 export { Button, type ButtonProps } from './components/Button'
@@ -54,6 +56,7 @@ export { Form, FormContext, useForm, type FormItemHandle, type FormContextValue,
 export { FormItem, type FormItemRenderProps, type FormItemProps } from './components/FormItem'
 export { Row, Col, type RowProps, type ColProps } from './components/Grid'
 export { Icon, type IconProps } from './components/Icon'
+export { Image, type ImageProps } from './components/Image'
 export { InfiniteScroll, type InfiniteScrollProps } from './components/InfiniteScroll'
 export { Input, type InputProps } from './components/Input'
 export { InputNumber, type InputNumberProps } from './components/InputNumber'
@@ -96,3 +99,4 @@ export { Tree, type TreeProps } from './components/Tree'
 export { TreeSelect, type TreeSelectProps } from './components/TreeSelect'
 export { Typography, type TypographyProps } from './components/Typography'
 export { Upload, type UploadProps } from './components/Upload'
+export { Watermark, type WatermarkProps } from './components/Watermark'
