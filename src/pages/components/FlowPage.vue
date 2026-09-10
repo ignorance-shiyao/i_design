@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import IFlow from '@/components/IFlow.vue'
 import IButton from '@/components/IButton.vue'
 import ISpace from '@/components/ISpace.vue'
@@ -26,11 +26,23 @@ const initial: Omit<FlowNode, 'x' | 'y'>[] = [
 ]
 
 const nodes = ref<FlowNode[]>(autoLayout(initial, edges, { gapY: 92, gapX: 190 }))
-const selected = ref<string | null>(null)
+const selection = ref<string[]>([])
 
-function onMove({ id, x, y }: { id: string; x: number; y: number }) {
-  nodes.value = nodes.value.map((n) => (n.id === id ? { ...n, x, y } : n))
+/*
+ * 一次操作可能动到多个节点（框选后批量拖动），因此收到的是一组几何而不是一个。
+ * 用一次 map 全部应用，而不是逐条 emit——逐条会让画面在中间态闪一下。
+ */
+function onMove(changes: { id: string; x: number; y: number; width?: number; height?: number }[]) {
+  const byId = new Map(changes.map((c) => [c.id, c]))
+  nodes.value = nodes.value.map((n) => {
+    const next = byId.get(n.id)
+    return next ? { ...n, ...next } : n
+  })
 }
+
+const selectedLabels = computed(() =>
+  selection.value.map((id) => nodes.value.find((n) => n.id === id)?.label).filter(Boolean).join('、')
+)
 
 function relayout() {
   nodes.value = autoLayout(initial, edges, { gapY: 92, gapX: 190 })
@@ -57,7 +69,7 @@ const edgeTypes = [
 
     <DemoBlock
       title="可拖拽的流程画布"
-      description="拖动节点调整位置（自动吸附到网格），拖动空白处平移，右下角缩放或适应画布。点中节点会加重与它相连的线。"
+      description="拖动节点调整位置（自动吸附到网格），拖动空白处平移。开启框选或按住 Shift 拖出选框可多选，选中一个节点时四角出现手柄可改尺寸。左下角缩略图点哪跳哪，工具条可导出 SVG。"
     >
       <div class="flow-demo">
         <ISpace>
@@ -66,10 +78,10 @@ const edgeTypes = [
             {{ readonly ? '只读中' : '可编辑' }}
           </IButton>
           <ISegmented v-model="edgeType" :options="edgeTypes" />
-          <span class="hint">{{ selected ? `已选中：${nodes.find((n) => n.id === selected)?.label}` : '未选中节点' }}</span>
+          <span class="hint">{{ selection.length ? `已选中：${selectedLabels}` : '未选中节点' }}</span>
         </ISpace>
         <IFlow
-          v-model:selected="selected"
+          v-model:selection="selection"
           :nodes="nodes"
           :edges="edges"
           :edge-type="edgeType"
@@ -85,6 +97,42 @@ const edgeTypes = [
       回边会被跳过——审批流里「驳回 → 重新填写」是一条回边，顺着它继续推深度，
       整张图会一层层往下漂，层数变得和节点数一样多。手工调整过的节点保留坐标，
       自动布局只填未定位的那些。
+    </p>
+
+    <h2>多选与批量移动</h2>
+    <p>
+      按住 Shift 拖出选框，或点开工具条上的框选再拖——触摸端没有修饰键，
+      所以框选也做成了一个显式开关。判定用「整个节点都在框内」而不是「相交」：
+      相交判定下，框边缘扫过的节点会被顺手选中，而拖框经过一个节点却没打算选它，
+      是这里最常见的误操作。
+    </p>
+    <p>
+      拖动组里任意一个节点，整组一起走。位移量整体吸附一次网格，而不是各自吸附——
+      逐个吸附会把组内原本的相对间距抹平：两个相距 12px 的节点各自对齐到 8 格后
+      会变成 8px 或 16px，一次批量移动就把手工排好的版毁了。撤销也按「一次操作」记：
+      批量拖动的十个节点撤销一次全退回去，按十次才回到原处的撤销和没有撤销差不多。
+    </p>
+
+    <h2>改尺寸</h2>
+    <p>
+      恰好选中一个节点时四角出现手柄。多选时不给手柄——拖角改的是哪一个并不清楚。
+      拖动时对角固定不动：右下角往外拉，左上角不该跟着跑，否则节点会一边变大一边平移，
+      手感像在拖整个节点而不是在改尺寸。尺寸到下限后位置也跟着停住，
+      只夹尺寸的话，拖过头时节点会继续往反方向滑。
+    </p>
+
+    <h2>缩略图与导出</h2>
+    <p>
+      左上角是整张图的缩小版加一个取景框，点哪里就跳到哪里。横纵取同一个缩放比并居中，
+      而不是各自拉伸：分别缩放会让缩略图里的节点与主画布长宽比不同，
+      那样它就不再是同一张图的缩小版，指路作用也就没了。
+    </p>
+    <p>
+      导出的是整张图，不是当前视口——按视口导出，用户拿到的文件会缺掉他没滚动到的部分，
+      而他并不会察觉。工具条、选框、手柄这些编辑器界面件会先摘掉。Web 端序列化 SVG
+      并把令牌与样式内联进文件：SVG 一旦脱离页面就拿不到 CSS 变量，不内联的话打开是一堆黑框。
+      Flutter 走 <code>RepaintBoundary</code>，小程序走 <code>canvasToTempFilePath</code>——
+      三端机制不同，但导出的都是同一张图。
     </p>
 
     <h2>连线</h2>
@@ -108,9 +156,16 @@ const edgeTypes = [
             单条连线可用 <code>edge.type</code> 覆盖。
           </td>
         </tr>
-        <tr><td><code>selected</code></td><td>当前选中节点，支持 v-model</td></tr>
-        <tr><td><code>readonly</code></td><td>只读：仍可平移缩放与选中，但不能拖动节点</td></tr>
-        <tr><td><code>@move</code></td><td>拖动结束抛出新坐标；组件不改传入的数据，是否落库由调用方决定</td></tr>
+        <tr>
+          <td><code>selection</code></td>
+          <td>选中的节点 id 数组，支持 v-model。单选也是长度为 1 的数组——两套选中状态迟早会对不上</td>
+        </tr>
+        <tr><td><code>readonly</code></td><td>只读：仍可平移缩放与选中，但不能拖动或缩放节点</td></tr>
+        <tr><td><code>export-name</code></td><td>导出 SVG 的文件名（不含扩展名）</td></tr>
+        <tr>
+          <td><code>@move</code></td>
+          <td>拖动或缩放结束抛出一组新几何；组件不改传入的数据，是否落库由调用方决定</td>
+        </tr>
       </tbody>
     </table>
   </article>

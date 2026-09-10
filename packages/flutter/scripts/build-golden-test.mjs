@@ -378,6 +378,14 @@ const {
   sankeyLayout, treemapLayout
 } = await bundle('packages/common/src/logic/chart.ts', 'chart')
 
+/* ---------- 流程图：框选、批量移动与节点缩放 ----------
+ * 三条都是「抄错也不会报错」的规则：命中判定改成相交、位移逐个吸附、
+ * 缩放时对角没固定住——每一条都只表现为手感不对，构建全绿。
+ */
+const {
+  marqueeRect, nodesInRect, moveNodes, resizeNode, minimapLayout, viewFromMinimap
+} = await bundle('packages/common/src/logic/flow.ts', 'flow')
+
 const bubbleCases = [[0, 0, 100], [50, 0, 100], [100, 0, 100], [7, 5, 5], [-3, 0, 10]]
 const bubbleExpectations = bubbleCases.map(
   ([v, lo, hi]) =>
@@ -553,6 +561,76 @@ const treemapExpectations = treemapResult.flatMap((t, i) => [
   `    expect(tiles[${i}].height, closeTo(${t.height}, 1e-9));`,
 ])
 
+const flowNodes = [
+  { id: 'a', label: 'A', x: 0, y: 0 },
+  { id: 'b', label: 'B', x: 200, y: 0 },
+  { id: 'c', label: 'C', x: 100, y: 120, width: 80, height: 40 },
+]
+const dartFlowNodes = `<FlowNodeData>[${flowNodes
+  .map((n) => `const FlowNodeData(id: '${n.id}', label: '${n.label}', x: ${n.x.toFixed(1)}, y: ${n.y.toFixed(1)}${
+    n.width ? `, width: ${n.width.toFixed(1)}, height: ${n.height.toFixed(1)}` : ''})`)
+  .join(', ')}]`
+
+// 往左上拖也是合法的框选，宽高不归一化就会变成负数
+const marqueeCases = [[10, 10, 300, 200], [300, 200, 10, 10], [50, 50, 50, 50]]
+const marqueeExpectations = marqueeCases.map(([ax, ay, bx, by]) => {
+  const r = marqueeRect({ x: ax, y: ay }, { x: bx, y: by })
+  return `    _expectRect(marqueeRect(const Offset(${ax.toFixed(1)}, ${ay.toFixed(1)}), const Offset(${bx.toFixed(1)}, ${by.toFixed(1)})),
+        ${r.x.toFixed(1)}, ${r.y.toFixed(1)}, ${r.width.toFixed(1)}, ${r.height.toFixed(1)}, 'marquee(${ax},${ay})');`
+})
+
+// contain 与 intersect 必须给出不同答案，否则说明判定退化成了同一种
+const flow_hitCases = [
+  [{ x: -10, y: -10, width: 400, height: 300 }, 'contain'],
+  [{ x: -10, y: -10, width: 100, height: 60 }, 'contain'],
+  [{ x: -10, y: -10, width: 100, height: 60 }, 'intersect'],
+  [{ x: 500, y: 500, width: 10, height: 10 }, 'intersect'],
+  // 正好贴边：Rect.contains 对右／下边是开区间，照抄就会与 Web 端差一个节点
+  [{ x: 0, y: 0, width: 132, height: 48 }, 'contain'],
+]
+const flow_hitExpectations = flow_hitCases.map(([rect, mode]) => {
+  const ids = nodesInRect(flowNodes, rect, mode)
+  return `    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(${rect.x.toFixed(1)}, ${rect.y.toFixed(1)}, ${rect.width.toFixed(1)}, ${rect.height.toFixed(1)}), intersect: ${mode === 'intersect'}),
+        <String>[${ids.map((i) => `'${i}'`).join(', ')}]);`
+})
+
+// 整组一个位移：逐个吸附会把组内原本的相对间距抹平
+const flow_moveCases = [[10, 10], [3, -3], [-20, 44]]
+const flow_moveExpectations = flow_moveCases.flatMap(([dx, dy]) => {
+  const moved = moveNodes(flowNodes, ['a', 'c'], { x: dx, y: dy })
+  return moved.map((m, i) =>
+    `    expect(moveNodes(nodes, {'a', 'c'}, const Offset(${dx.toFixed(1)}, ${dy.toFixed(1)}))[${i}].x, closeTo(${m.x}, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(${dx.toFixed(1)}, ${dy.toFixed(1)}))[${i}].y, closeTo(${m.y}, 1e-9));`)
+})
+
+// 对角固定、尺寸夹到下限后位置也要停住
+const resizeCases = [
+  ['se', 400, 300], ['nw', -40, -40], ['se', -999, -999], ['nw', 999, 999], ['ne', 300, -30], ['sw', -30, 300],
+]
+const resizeExpectations = resizeCases.map(([handle, px, py]) => {
+  const box = resizeNode(flowNodes[0], handle, { x: px, y: py })
+  return `    _expectRect(resizeNode(nodes[0], FlowResizeHandle.${handle}, const Offset(${px.toFixed(1)}, ${py.toFixed(1)})),
+        ${box.x.toFixed(1)}, ${box.y.toFixed(1)}, ${box.width.toFixed(1)}, ${box.height.toFixed(1)}, 'resize ${handle}');`
+})
+
+// 缩略图与它的逆运算：点一下就跳过去，两边算不到一处就会跳偏
+const mmView = { x: -100, y: -50, scale: 1.5 }
+const mmCanvas = { width: 640, height: 380 }
+const mmSize = { width: 168, height: 112 }
+const mm = minimapLayout(flowNodes, mmView, mmCanvas, mmSize)
+const mmBack = viewFromMinimap({ x: 84, y: 56 }, mm, mmView, mmCanvas)
+const minimapExpectations = [
+  `    expect(mm.scale, closeTo(${mm.scale}, 1e-9));`,
+  `    expect(mm.offset.dx, closeTo(${mm.offsetX}, 1e-9));`,
+  `    expect(mm.offset.dy, closeTo(${mm.offsetY}, 1e-9));`,
+  `    _expectRect(mm.viewport, ${mm.viewport.x}, ${mm.viewport.y}, ${mm.viewport.width}, ${mm.viewport.height}, 'viewport');`,
+  `    final back = viewFromMinimap(const Offset(84.0, 56.0), mm,
+        const FlowView(x: -100.0, y: -50.0, scale: 1.5), const Size(640.0, 380.0));`,
+  `    expect(back.x, closeTo(${mmBack.x}, 1e-9));`,
+  `    expect(back.y, closeTo(${mmBack.y}, 1e-9));`,
+]
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -566,6 +644,14 @@ import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
+import 'package:i_design/src/logic/flow.dart';
+
+void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
+  expect(actual.left, closeTo(x, 1e-9), reason: '\$label x 不一致');
+  expect(actual.top, closeTo(y, 1e-9), reason: '\$label y 不一致');
+  expect(actual.width, closeTo(w, 1e-9), reason: '\$label 宽不一致');
+  expect(actual.height, closeTo(h, 1e-9), reason: '\$label 高不一致');
+}
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
   expect(actual.length, expected.length, reason: '\$label 长度不一致');
@@ -761,6 +847,29 @@ ${showExpectations.join('\n')}
     expect(layout.ribbons.length, ${sankeyResult.ribbons.length});
 ${sankeyNodeExpectations.join('\n')}
 ${sankeyRibbonExpectations.join('\n')}
+  });
+
+  test('框选矩形归一化与命中判定与 Web 端一致', () {
+    final nodes = ${dartFlowNodes};
+${marqueeExpectations.join('\n')}
+${flow_hitExpectations.join('\n')}
+  });
+
+  test('批量移动整组一个位移，与 Web 端一致', () {
+    final nodes = ${dartFlowNodes};
+${flow_moveExpectations.join('\n')}
+  });
+
+  test('节点缩放固定对角并夹到下限，与 Web 端一致', () {
+    final nodes = ${dartFlowNodes};
+${resizeExpectations.join('\n')}
+  });
+
+  test('缩略图布局与它的逆运算与 Web 端一致', () {
+    final nodes = ${dartFlowNodes};
+    final mm = minimapLayout(nodes, const FlowView(x: -100.0, y: -50.0, scale: 1.5),
+        const Size(640.0, 380.0), const Size(168.0, 112.0));
+${minimapExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

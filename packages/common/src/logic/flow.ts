@@ -218,3 +218,226 @@ export function autoLayout(
       : { ...node, x: 40 + d * gapX, y: 200 + offset }
   })
 }
+
+/* ---------- 框选 ---------- */
+
+export interface FlowRect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/**
+ * 由按下点与当前点算出框选矩形。
+ *
+ * 两点顺序不做要求：往左上拖也是合法的框选，
+ * 不归一化的话宽高会变成负数，命中判定与描边都会失效。
+ */
+export function marqueeRect(a: { x: number; y: number }, b: { x: number; y: number }): FlowRect {
+  return {
+    x: Math.min(a.x, b.x),
+    y: Math.min(a.y, b.y),
+    width: Math.abs(b.x - a.x),
+    height: Math.abs(b.y - a.y)
+  }
+}
+
+/**
+ * 框选命中的节点。
+ *
+ * 默认 contain（整个节点都在框内才算中）而不是 intersect：
+ * 相交判定下，框边缘扫过的节点会被顺手选中，
+ * 用户拖框经过一个节点却没打算选它，是最常见的误操作。
+ */
+export function nodesInRect(
+  nodes: FlowNode[],
+  rect: FlowRect,
+  mode: 'contain' | 'intersect' = 'contain'
+): string[] {
+  const right = rect.x + rect.width
+  const bottom = rect.y + rect.height
+  return nodes
+    .filter((node) => {
+      const { w, h } = sizeOf(node)
+      if (mode === 'intersect') {
+        return node.x < right && node.x + w > rect.x && node.y < bottom && node.y + h > rect.y
+      }
+      return node.x >= rect.x && node.y >= rect.y && node.x + w <= right && node.y + h <= bottom
+    })
+    .map((node) => node.id)
+}
+
+/**
+ * 批量移动：整组一起吸附，而不是各自吸附。
+ *
+ * 逐个吸附会把组里原本的相对间距抹平——两个相距 12px 的节点，
+ * 各自对齐到 8 格后可能变成 8px 或 16px，一次批量移动就把手工排好的版毁了。
+ * 因此位移量本身吸附一次，组内所有节点用同一个位移。
+ */
+export function moveNodes(
+  nodes: FlowNode[],
+  ids: string[],
+  delta: { x: number; y: number },
+  grid = 8
+): { id: string; x: number; y: number }[] {
+  const picked = new Set(ids)
+  const dx = grid > 0 ? Math.round(delta.x / grid) * grid : delta.x
+  const dy = grid > 0 ? Math.round(delta.y / grid) * grid : delta.y
+  return nodes
+    .filter((node) => picked.has(node.id))
+    .map((node) => ({ id: node.id, x: node.x + dx, y: node.y + dy }))
+}
+
+/* ---------- 节点缩放 ---------- */
+
+/** 缩放手柄的位置。只放四个角：边中点手柄在小节点上会和角手柄挤在一起 */
+export type FlowResizeHandle = 'nw' | 'ne' | 'se' | 'sw'
+
+export const MIN_NODE_W = 72
+export const MIN_NODE_H = 32
+
+/**
+ * 拖动某个角把节点缩放到指针位置。
+ *
+ * 对角固定不动：拖右下角时左上角不该跟着跑，否则节点会一边变大一边平移，
+ * 手感像在拖整个节点而不是在改尺寸。
+ * 尺寸下限之外还要夹住位置——只夹尺寸的话，拖过头时节点会继续往反方向滑。
+ */
+export function resizeNode(
+  node: FlowNode,
+  handle: FlowResizeHandle,
+  point: { x: number; y: number },
+  { grid = 8, minWidth = MIN_NODE_W, minHeight = MIN_NODE_H } = {}
+): { x: number; y: number; width: number; height: number } {
+  const { w, h } = sizeOf(node)
+  const snap = (v: number) => (grid > 0 ? Math.round(v / grid) * grid : v)
+  const left = node.x
+  const top = node.y
+  const right = node.x + w
+  const bottom = node.y + h
+
+  const west = handle === 'nw' || handle === 'sw'
+  const north = handle === 'nw' || handle === 'ne'
+
+  // 固定对角，另一角跟指针走
+  const anchorX = west ? right : left
+  const anchorY = north ? bottom : top
+  let movingX = snap(point.x)
+  let movingY = snap(point.y)
+
+  if (west) movingX = Math.min(movingX, anchorX - minWidth)
+  else movingX = Math.max(movingX, anchorX + minWidth)
+  if (north) movingY = Math.min(movingY, anchorY - minHeight)
+  else movingY = Math.max(movingY, anchorY + minHeight)
+
+  return {
+    x: Math.min(anchorX, movingX),
+    y: Math.min(anchorY, movingY),
+    width: Math.abs(anchorX - movingX),
+    height: Math.abs(anchorY - movingY)
+  }
+}
+
+/* ---------- 缩略图 ---------- */
+
+export interface FlowView {
+  x: number
+  y: number
+  scale: number
+}
+
+export interface MinimapLayout {
+  /** 画布坐标 → 缩略图坐标的缩放比 */
+  scale: number
+  /** 缩略图内的居中偏移 */
+  offsetX: number
+  offsetY: number
+  /** 当前视口对应到缩略图上的取景框 */
+  viewport: FlowRect
+}
+
+/**
+ * 缩略图布局。
+ *
+ * 横纵取较小的比例并居中，而不是各自拉伸：分别缩放会让缩略图里的节点
+ * 与主画布长宽比不同，那样缩略图就不再是同一张图的缩小版，指路作用也就没了。
+ */
+export function minimapLayout(
+  nodes: FlowNode[],
+  view: FlowView,
+  canvas: { width: number; height: number },
+  minimap: { width: number; height: number },
+  padding = 40
+): MinimapLayout {
+  const bounds = boundsOf(nodes, padding)
+  const scale = Math.min(minimap.width / bounds.width, minimap.height / bounds.height)
+  const offsetX = (minimap.width - bounds.width * scale) / 2 - bounds.x * scale
+  const offsetY = (minimap.height - bounds.height * scale) / 2 - bounds.y * scale
+
+  // 视口在画布坐标里的位置：屏幕原点反算回去，再按缩略图比例投影
+  const viewX = -view.x / view.scale
+  const viewY = -view.y / view.scale
+  return {
+    scale,
+    offsetX,
+    offsetY,
+    viewport: {
+      x: viewX * scale + offsetX,
+      y: viewY * scale + offsetY,
+      width: (canvas.width / view.scale) * scale,
+      height: (canvas.height / view.scale) * scale
+    }
+  }
+}
+
+/**
+ * 点击缩略图某处，算出让该点居中所需的主画布视图。
+ *
+ * 这是 minimapLayout 的逆运算——缩略图上点一下就跳过去，
+ * 是大图导航里唯一比拖滚动条快的操作。
+ */
+export function viewFromMinimap(
+  point: { x: number; y: number },
+  layout: MinimapLayout,
+  view: FlowView,
+  canvas: { width: number; height: number }
+): FlowView {
+  const canvasX = (point.x - layout.offsetX) / layout.scale
+  const canvasY = (point.y - layout.offsetY) / layout.scale
+  return {
+    scale: view.scale,
+    x: canvas.width / 2 - canvasX * view.scale,
+    y: canvas.height / 2 - canvasY * view.scale
+  }
+}
+
+/* ---------- 快照导出 ---------- */
+
+/**
+ * 导出用的 viewBox：包住全部节点，与当前视口无关。
+ *
+ * 导出的是「这张图」，不是「我现在看到的这一块」——
+ * 按当前视口导出，用户拿到的图会缺掉他没滚动到的部分，而他并不会察觉。
+ */
+export function snapshotViewBox(nodes: FlowNode[], padding = 24): FlowRect {
+  return boundsOf(nodes, padding)
+}
+
+/**
+ * 给导出的 SVG 拼一份内联样式表。
+ *
+ * SVG 一旦脱离页面就拿不到 CSS 变量了：直接序列化 DOM 得到的文件，
+ * 所有 var(--i-color-*) 全部落空，节点变成黑色无填充的框。
+ * 因此把令牌以字面值写进 <style>，导出的文件在任何地方打开都一样。
+ *
+ * 整表写入而不是挑几个用得上的：白名单会随组件改动悄悄失配——
+ * 组件里换用一个没列进来的令牌，导出的图就少一块颜色，而构建照样是绿的。
+ * 整表也不过几 KB，远不值得为省这点体积换一个不会报错的缺陷。
+ */
+export function snapshotStyle(tokens: Record<string, string>, prefix = 'i'): string {
+  const declarations = Object.entries(tokens)
+    .map(([key, value]) => `  --${prefix}-${key}: ${value};`)
+    .join('\n')
+  return `:root {\n${declarations}\n}`
+}

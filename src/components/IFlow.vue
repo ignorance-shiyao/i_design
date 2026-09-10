@@ -2,14 +2,26 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import IIcon from './IIcon.vue'
 import {
+  MIN_NODE_H,
+  MIN_NODE_W,
   NODE_H,
   NODE_W,
   boundsOf,
   edgeMidpoint,
   edgePath,
+  flatten,
+  marqueeRect,
+  minimapLayout,
+  moveNodes,
+  nodesInRect,
+  resizeNode,
+  snapshotStyle,
+  snapshotViewBox,
+  viewFromMinimap,
   type FlowEdge,
   type FlowEdgeType,
-  type FlowNode
+  type FlowNode,
+  type FlowResizeHandle
 } from '@i-design/common'
 
 const props = withDefaults(
@@ -17,27 +29,44 @@ const props = withDefaults(
     nodes: FlowNode[]
     edges: FlowEdge[]
     height?: number
-    /** 只读：仍可平移缩放与选中，但不能拖动节点 */
+    /** 只读：仍可平移缩放与选中，但不能拖动、缩放节点 */
     readonly?: boolean
-    selected?: string | null
+    /** 选中的节点。单选也是长度为 1 的数组——两套选中状态迟早会对不上 */
+    selection?: string[]
     /** 整图默认连线走向；单条连线可用 edge.type 覆盖 */
     edgeType?: FlowEdgeType
+    /** 导出文件名，不含扩展名 */
+    exportName?: string
   }>(),
-  { height: 380, readonly: false, selected: null, edgeType: 'polyline' }
+  {
+    height: 380,
+    readonly: false,
+    selection: () => [],
+    edgeType: 'polyline',
+    exportName: 'flow'
+  }
 )
 
 const emit = defineEmits<{
-  'update:selected': [string | null]
-  /** 拖动结束时抛出新坐标；组件不改传入的数据，由调用方决定是否落库 */
-  move: [{ id: string; x: number; y: number }]
+  'update:selection': [string[]]
+  /** 拖动/缩放结束时抛出新几何；组件不改传入的数据，由调用方决定是否落库 */
+  move: [{ id: string; x: number; y: number; width?: number; height?: number }[]]
 }>()
+
+const MINIMAP = { width: 168, height: 112 }
 
 const view = ref({ x: 0, y: 0, scale: 1 })
 const panning = ref(false)
-const dragging = ref<{ id: string; dx: number; dy: number } | null>(null)
+const dragging = ref<{ ids: string[]; from: { x: number; y: number } } | null>(null)
+const resizing = ref<{ id: string; handle: FlowResizeHandle } | null>(null)
+const marquee = ref<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null)
+const marqueeMode = ref(false)
+const showMinimap = ref(true)
 const root = ref<HTMLElement | null>(null)
+const svg = ref<SVGSVGElement | null>(null)
 
 const nodeById = computed(() => new Map(props.nodes.map((n) => [n.id, n])))
+const selectedSet = computed(() => new Set(props.selection))
 
 /** 屏幕坐标 → 画布坐标 */
 function toCanvas(event: PointerEvent) {
@@ -52,38 +81,60 @@ function toCanvas(event: PointerEvent) {
 /*
  * 撤销 / 重做。
  *
- * 节点数据归调用方所有，组件不改它——所以这里记的不是「快照」，而是每次拖动的
- * 起止坐标；撤销就是反着 emit 一次 move。这样与「组件不持有数据」的约定不冲突，
- * 调用方也不必为了支持撤销改数据结构。
+ * 节点数据归调用方所有，组件不改它——所以这里记的不是「快照」，而是每次操作的
+ * 起止几何；撤销就是反着 emit 一次 move。这样与「组件不持有数据」的约定不冲突。
  *
- * 只记完整的一次拖动（按下到抬起），不记拖动过程中的每一帧——
- * 否则撤销一次只退回一个像素，按上一百次才回到原处。
+ * 一条记录装的是「一次操作涉及的全部节点」而不是单个节点：
+ * 框选后批量拖动的十个节点是一次操作，撤销就该一次退回去，
+ * 按十次才回到原处的撤销和没有撤销差不多。
  */
-interface MoveRecord {
-  id: string
-  from: { x: number; y: number }
-  to: { x: number; y: number }
+type Geometry = { id: string; x: number; y: number; width?: number; height?: number }
+interface EditRecord {
+  before: Geometry[]
+  after: Geometry[]
 }
-const undoStack = ref<MoveRecord[]>([])
-const redoStack = ref<MoveRecord[]>([])
-let dragStart: { x: number; y: number } | null = null
-let dragLatest: { x: number; y: number } | null = null
+const undoStack = ref<EditRecord[]>([])
+const redoStack = ref<EditRecord[]>([])
+let editBefore: Geometry[] | null = null
+let editAfter: Geometry[] | null = null
 
 const canUndo = computed(() => undoStack.value.length > 0)
 const canRedo = computed(() => redoStack.value.length > 0)
+
+const geometryOf = (ids: string[]): Geometry[] =>
+  ids
+    .map((id) => nodeById.value.get(id))
+    .filter((n): n is FlowNode => !!n)
+    .map((n) => ({ id: n.id, x: n.x, y: n.y, width: n.width, height: n.height }))
 
 function undo() {
   const record = undoStack.value.pop()
   if (!record) return
   redoStack.value.push(record)
-  emit('move', { id: record.id, x: record.from.x, y: record.from.y })
+  emit('move', record.before)
 }
 
 function redo() {
   const record = redoStack.value.pop()
   if (!record) return
   undoStack.value.push(record)
-  emit('move', { id: record.id, x: record.to.x, y: record.to.y })
+  emit('move', record.after)
+}
+
+function commitEdit() {
+  if (!editBefore || !editAfter) return
+  const changed = editAfter.some((a, i) => {
+    const b = editBefore![i]
+    return !b || a.x !== b.x || a.y !== b.y || a.width !== b.width || a.height !== b.height
+  })
+  // 没真的动过就不入栈，否则「撤销」会在原地空点几次
+  if (changed) {
+    undoStack.value.push({ before: editBefore, after: editAfter })
+    // 新动作让重做栈作废：分支历史会让「重做」跳到一条读者没走过的路径上
+    redoStack.value = []
+  }
+  editBefore = null
+  editAfter = null
 }
 
 /*
@@ -91,9 +142,16 @@ function redo() {
  * 绑到全局会把别处的撤销一起劫走。画布需要 tabindex 才能接到键盘事件。
  */
 function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    emit('update:selection', [])
+    return
+  }
   if (!(event.metaKey || event.ctrlKey)) return
   const key = event.key.toLowerCase()
-  if (key === 'z' && !event.shiftKey) {
+  if (key === 'a') {
+    event.preventDefault()
+    emit('update:selection', props.nodes.map((n) => n.id))
+  } else if (key === 'z' && !event.shiftKey) {
     event.preventDefault()
     undo()
   } else if ((key === 'z' && event.shiftKey) || key === 'y') {
@@ -104,35 +162,78 @@ function onKeydown(event: KeyboardEvent) {
 
 function onNodeDown(event: PointerEvent, node: FlowNode) {
   event.stopPropagation()
-  emit('update:selected', node.id)
+  // 加选：Shift / Cmd 点击往选中集合里增删，不加修饰键则重置为这一个
+  const additive = event.shiftKey || event.metaKey || event.ctrlKey
+  let ids: string[]
+  if (additive) {
+    ids = selectedSet.value.has(node.id)
+      ? props.selection.filter((id) => id !== node.id)
+      : [...props.selection, node.id]
+  } else {
+    // 点已在选中集合里的节点不清空选择，否则批量拖动第一下就把组拆了
+    ids = selectedSet.value.has(node.id) ? props.selection : [node.id]
+  }
+  emit('update:selection', ids)
+  if (props.readonly || (additive && !ids.includes(node.id))) return
+
+  dragging.value = { ids, from: toCanvas(event) }
+  editBefore = geometryOf(ids)
+  editAfter = null
+  ;(event.target as Element).setPointerCapture?.(event.pointerId)
+}
+
+function onHandleDown(event: PointerEvent, node: FlowNode, handle: FlowResizeHandle) {
+  event.stopPropagation()
   if (props.readonly) return
-  const point = toCanvas(event)
-  dragging.value = { id: node.id, dx: point.x - node.x, dy: point.y - node.y }
-  dragStart = { x: node.x, y: node.y }
-  dragLatest = null
+  resizing.value = { id: node.id, handle }
+  editBefore = geometryOf([node.id])
+  editAfter = null
   ;(event.target as Element).setPointerCapture?.(event.pointerId)
 }
 
 function onDown(event: PointerEvent) {
-  // 点空白处：取消选中并开始平移
-  emit('update:selected', null)
-  panning.value = true
   ;(event.currentTarget as Element).setPointerCapture(event.pointerId)
+  // 框选模式或按住 Shift：拖出选框；否则点空白处取消选中并平移
+  if (marqueeMode.value || event.shiftKey) {
+    const point = toCanvas(event)
+    marquee.value = { from: point, to: point }
+    return
+  }
+  emit('update:selection', [])
+  panning.value = true
   last = { x: event.clientX, y: event.clientY }
 }
 
 let last = { x: 0, y: 0 }
 
 function onMove(event: PointerEvent) {
+  if (marquee.value) {
+    marquee.value = { ...marquee.value, to: toCanvas(event) }
+    return
+  }
+  if (resizing.value) {
+    const node = nodeById.value.get(resizing.value.id)
+    if (!node) return
+    const box = resizeNode(node, resizing.value.handle, toCanvas(event))
+    editAfter = [{ id: node.id, ...box }]
+    emit('move', editAfter)
+    return
+  }
   if (dragging.value) {
     const point = toCanvas(event)
-    // 吸附到 8px 网格：手绘位置总是差几像素，对齐后整张图才显得整齐
-    const next = {
-      x: Math.round((point.x - dragging.value.dx) / 8) * 8,
-      y: Math.round((point.y - dragging.value.dy) / 8) * 8
-    }
-    dragLatest = next
-    emit('move', { id: dragging.value.id, ...next })
+    const delta = { x: point.x - dragging.value.from.x, y: point.y - dragging.value.from.y }
+    // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
+    const base = editBefore ?? []
+    const moved = moveNodes(
+      base.map((g) => ({ ...g, label: '' })) as FlowNode[],
+      dragging.value.ids,
+      delta
+    )
+    editAfter = moved.map((m) => {
+      const before = base.find((g) => g.id === m.id)
+      return { ...m, width: before?.width, height: before?.height }
+    })
+    emit('move', editAfter)
     return
   }
   if (!panning.value) return
@@ -145,16 +246,18 @@ function onMove(event: PointerEvent) {
 }
 
 function onUp() {
-  panning.value = false
-  // 一次拖动记一条：没真的移动过就不入栈，否则「撤销」会在原地空点几次
-  if (dragging.value && dragStart && dragLatest && (dragLatest.x !== dragStart.x || dragLatest.y !== dragStart.y)) {
-    undoStack.value.push({ id: dragging.value.id, from: dragStart, to: dragLatest })
-    // 新动作让重做栈作废：分支历史会让「重做」跳到一条读者没走过的路径上
-    redoStack.value = []
+  if (marquee.value) {
+    const rect = marqueeRect(marquee.value.from, marquee.value.to)
+    // 只有拖出了实际面积才当作框选：原地一点应当理解为「取消选中」
+    if (rect.width > 4 && rect.height > 4) emit('update:selection', nodesInRect(props.nodes, rect))
+    else emit('update:selection', [])
+    marquee.value = null
+    return
   }
-  dragStart = null
-  dragLatest = null
+  panning.value = false
+  commitEdit()
   dragging.value = null
+  resizing.value = null
 }
 
 function zoom(delta: number) {
@@ -174,6 +277,96 @@ function fit() {
   }
 }
 
+/* ---------- 缩略图 ---------- */
+
+const canvasSize = computed(() => ({
+  width: root.value?.getBoundingClientRect().width ?? 640,
+  height: props.height
+}))
+
+// 视图或节点一动缩略图就要跟着动，因此依赖 view 与 nodes 两者
+const minimap = computed(() => minimapLayout(props.nodes, view.value, canvasSize.value, MINIMAP))
+
+function onMinimapDown(event: PointerEvent) {
+  const rect = (event.currentTarget as Element).getBoundingClientRect()
+  view.value = viewFromMinimap(
+    { x: event.clientX - rect.left, y: event.clientY - rect.top },
+    minimap.value,
+    view.value,
+    canvasSize.value
+  )
+}
+
+const minimapNode = (node: FlowNode) => ({
+  x: node.x * minimap.value.scale + minimap.value.offsetX,
+  y: node.y * minimap.value.scale + minimap.value.offsetY,
+  width: (node.width ?? NODE_W) * minimap.value.scale,
+  height: (node.height ?? NODE_H) * minimap.value.scale
+})
+
+/* ---------- 快照导出 ---------- */
+
+/**
+ * 导出当前图为 SVG 文件。
+ *
+ * 导出的是整张图而不是当前视口：按视口导出，用户拿到的文件会缺掉他没滚动到的
+ * 部分，而他并不会察觉。工具条、选框、缩略图这些界面件也要摘掉——
+ * 它们是编辑器的一部分，不是图的一部分。
+ */
+function exportSvg() {
+  const source = svg.value
+  if (!source) return
+  const box = snapshotViewBox(props.nodes)
+  const clone = source.cloneNode(true) as SVGSVGElement
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  clone.setAttribute('viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`)
+  clone.setAttribute('width', String(Math.round(box.width)))
+  clone.setAttribute('height', String(Math.round(box.height)))
+  // 画布的平移缩放属于「我现在怎么看」，导出时要还原成图自身的坐标
+  clone.querySelector('.i-flow__scene')?.removeAttribute('transform')
+  clone.querySelector('.i-flow__marquee')?.remove()
+  clone.querySelectorAll('.i-flow__handle').forEach((el) => el.remove())
+
+  const style = document.createElementNS('http://www.w3.org/2000/svg', 'style')
+  style.textContent = `${snapshotStyle(flatten())}\n${flowCss()}`
+  clone.insertBefore(style, clone.firstChild)
+
+  const blob = new Blob([new XMLSerializer().serializeToString(clone)], {
+    type: 'image/svg+xml;charset=utf-8'
+  })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${props.exportName}.svg`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * 把页面里 .i-flow 相关的规则抄进导出文件。
+ *
+ * 不这样做就得在这里再写一份样式，两份迟早分叉：页面上改了描边粗细，
+ * 导出的文件还是旧的，而且没有任何检查会发现。
+ */
+function flowCss() {
+  const out: string[] = []
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules: CSSRuleList
+    try {
+      rules = sheet.cssRules
+    } catch {
+      // 跨域样式表读不到 cssRules，跳过即可——图的样式都在本地表里
+      continue
+    }
+    for (const rule of Array.from(rules)) {
+      if (rule instanceof CSSStyleRule && rule.selectorText.includes('.i-flow__')) {
+        out.push(rule.cssText)
+      }
+    }
+  }
+  return out.join('\n')
+}
+
 /*
  * 挂载时先适应画布：自动布局出来的图往往比画布高，
  * 不做这一步用户打开看到的就只有第一个节点，还以为图坏了。
@@ -189,7 +382,7 @@ watch(() => props.nodes.length, async () => {
   fit()
 })
 
-defineExpose({ fit, zoom, undo, redo })
+defineExpose({ fit, zoom, undo, redo, exportSvg })
 
 const transform = computed(
   () => `translate(${view.value.x} ${view.value.y}) scale(${view.value.scale})`
@@ -203,6 +396,25 @@ function diamondPoints(node: FlowNode) {
   const { w, h } = sizeOf(node)
   return `${node.x + w / 2},${node.y} ${node.x + w},${node.y + h / 2} ${node.x + w / 2},${node.y + h} ${node.x},${node.y + h / 2}`
 }
+
+/** 缩放手柄只在「恰好选中一个节点」时出现：多选时拖角改的是哪一个并不清楚 */
+const resizeTarget = computed(() =>
+  !props.readonly && props.selection.length === 1
+    ? nodeById.value.get(props.selection[0]) ?? null
+    : null
+)
+
+const handlesOf = (node: FlowNode) => {
+  const { w, h } = sizeOf(node)
+  return [
+    { handle: 'nw' as const, x: node.x, y: node.y, cursor: 'nwse-resize' },
+    { handle: 'ne' as const, x: node.x + w, y: node.y, cursor: 'nesw-resize' },
+    { handle: 'se' as const, x: node.x + w, y: node.y + h, cursor: 'nwse-resize' },
+    { handle: 'sw' as const, x: node.x, y: node.y + h, cursor: 'nesw-resize' }
+  ]
+}
+
+const marqueeBox = computed(() => (marquee.value ? marqueeRect(marquee.value.from, marquee.value.to) : null))
 
 const pathOf = (edge: FlowEdge) => {
   const from = nodeById.value.get(edge.from)
@@ -218,7 +430,7 @@ const midOf = (edge: FlowEdge) => {
 
 /** 与选中节点相连的线加重：看清「它从哪来、到哪去」是选中节点后的第一个问题 */
 const isActive = (edge: FlowEdge) =>
-  props.selected !== null && (edge.from === props.selected || edge.to === props.selected)
+  selectedSet.value.has(edge.from) || selectedSet.value.has(edge.to)
 </script>
 
 <template>
@@ -226,12 +438,13 @@ const isActive = (edge: FlowEdge) =>
   <div
     ref="root"
     class="i-flow"
-    :class="{ 'is-panning': panning }"
+    :class="{ 'is-panning': panning, 'is-marquee': marqueeMode }"
     :style="{ height: `${height}px` }"
     tabindex="0"
     @keydown="onKeydown"
   >
     <svg
+      ref="svg"
       class="i-flow__canvas"
       :height="height"
       @pointerdown="onDown"
@@ -248,7 +461,7 @@ const isActive = (edge: FlowEdge) =>
         </marker>
       </defs>
 
-      <g :transform="transform">
+      <g class="i-flow__scene" :transform="transform">
         <g v-for="edge in edges" :key="`${edge.from}-${edge.to}`">
           <path
             class="i-flow__edge"
@@ -276,7 +489,7 @@ const isActive = (edge: FlowEdge) =>
           v-for="node in nodes"
           :key="node.id"
           class="i-flow__node"
-          :class="[`i-flow__node--${shapeOf(node)}`, { 'is-selected': selected === node.id }]"
+          :class="[`i-flow__node--${shapeOf(node)}`, { 'is-selected': selectedSet.has(node.id) }]"
           @pointerdown="onNodeDown($event, node)"
         >
           <polygon v-if="shapeOf(node) === 'decision'" class="i-flow__shape" :points="diamondPoints(node)" />
@@ -298,8 +511,55 @@ const isActive = (edge: FlowEdge) =>
             {{ node.label }}
           </text>
         </g>
+
+        <!-- 缩放手柄画在所有节点之上：压在下面会被相邻节点盖住，抓不到 -->
+        <rect
+          v-for="h in resizeTarget ? handlesOf(resizeTarget) : []"
+          :key="h.handle"
+          class="i-flow__handle"
+          :x="h.x - 4"
+          :y="h.y - 4"
+          width="8"
+          height="8"
+          rx="2"
+          :style="{ cursor: h.cursor }"
+          @pointerdown="onHandleDown($event, resizeTarget!, h.handle)"
+        />
+
+        <rect
+          v-if="marqueeBox"
+          class="i-flow__marquee"
+          :x="marqueeBox.x"
+          :y="marqueeBox.y"
+          :width="marqueeBox.width"
+          :height="marqueeBox.height"
+        />
       </g>
     </svg>
+
+    <!--
+      缩略图：整张图的缩小版加一个取景框。点哪里就跳到哪里——
+      大图里这是唯一比拖滚动条快的导航方式。
+    -->
+    <div v-if="showMinimap" class="i-flow__minimap" @pointerdown="onMinimapDown">
+      <svg :width="MINIMAP.width" :height="MINIMAP.height" aria-hidden="true">
+        <rect
+          v-for="node in nodes"
+          :key="node.id"
+          class="i-flow__minimap-node"
+          :class="{ 'is-selected': selectedSet.has(node.id) }"
+          v-bind="minimapNode(node)"
+          rx="1"
+        />
+        <rect
+          class="i-flow__minimap-viewport"
+          :x="minimap.viewport.x"
+          :y="minimap.viewport.y"
+          :width="minimap.viewport.width"
+          :height="minimap.viewport.height"
+        />
+      </svg>
+    </div>
 
     <div v-if="!readonly" class="i-flow__toolbar i-flow__toolbar--history">
       <button class="i-flow__tool" aria-label="撤销" :disabled="!canUndo" @click="undo">
@@ -311,6 +571,28 @@ const isActive = (edge: FlowEdge) =>
     </div>
 
     <div class="i-flow__toolbar">
+      <button
+        v-if="!readonly"
+        class="i-flow__tool"
+        :class="{ 'is-on': marqueeMode }"
+        :aria-pressed="marqueeMode"
+        aria-label="框选（或按住 Shift 拖动）"
+        @click="marqueeMode = !marqueeMode"
+      >
+        <IIcon name="marquee" :size="14" />
+      </button>
+      <button
+        class="i-flow__tool"
+        :class="{ 'is-on': showMinimap }"
+        :aria-pressed="showMinimap"
+        aria-label="缩略图"
+        @click="showMinimap = !showMinimap"
+      >
+        <IIcon name="minimap" :size="14" />
+      </button>
+      <button class="i-flow__tool" aria-label="导出 SVG" @click="exportSvg">
+        <IIcon name="download" :size="14" />
+      </button>
       <button class="i-flow__tool" aria-label="缩小" @click="zoom(-0.2)"><IIcon name="minus" :size="14" /></button>
       <span class="i-flow__zoom">{{ Math.round(view.scale * 100) }}%</span>
       <button class="i-flow__tool" aria-label="放大" @click="zoom(0.2)"><IIcon name="plus" :size="14" /></button>

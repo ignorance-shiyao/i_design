@@ -11,6 +11,14 @@ import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
+import 'package:i_design/src/logic/flow.dart';
+
+void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
+  expect(actual.left, closeTo(x, 1e-9), reason: '$label x 不一致');
+  expect(actual.top, closeTo(y, 1e-9), reason: '$label y 不一致');
+  expect(actual.width, closeTo(w, 1e-9), reason: '$label 宽不一致');
+  expect(actual.height, closeTo(h, 1e-9), reason: '$label 高不一致');
+}
 
 void _expectPages(List<IPageItem> actual, List<IPageItem> expected, String label) {
   expect(actual.length, expected.length, reason: '$label 长度不一致');
@@ -648,6 +656,77 @@ void main() {
     expect(layout.ribbons[3].target.top, closeTo(185.6, 1e-9));
     expect(layout.ribbons[3].target.bottom, closeTo(260, 1e-9));
     expect(layout.ribbons[3].controlX, closeTo(387, 1e-9));
+  });
+
+  test('框选矩形归一化与命中判定与 Web 端一致', () {
+    final nodes = <FlowNodeData>[const FlowNodeData(id: 'a', label: 'A', x: 0.0, y: 0.0), const FlowNodeData(id: 'b', label: 'B', x: 200.0, y: 0.0), const FlowNodeData(id: 'c', label: 'C', x: 100.0, y: 120.0, width: 80.0, height: 40.0)];
+    _expectRect(marqueeRect(const Offset(10.0, 10.0), const Offset(300.0, 200.0)),
+        10.0, 10.0, 290.0, 190.0, 'marquee(10,10)');
+    _expectRect(marqueeRect(const Offset(300.0, 200.0), const Offset(10.0, 10.0)),
+        10.0, 10.0, 290.0, 190.0, 'marquee(300,200)');
+    _expectRect(marqueeRect(const Offset(50.0, 50.0), const Offset(50.0, 50.0)),
+        50.0, 50.0, 0.0, 0.0, 'marquee(50,50)');
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(-10.0, -10.0, 400.0, 300.0), intersect: false),
+        <String>['a', 'b', 'c']);
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(-10.0, -10.0, 100.0, 60.0), intersect: false),
+        <String>[]);
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(-10.0, -10.0, 100.0, 60.0), intersect: true),
+        <String>['a']);
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(500.0, 500.0, 10.0, 10.0), intersect: true),
+        <String>[]);
+    expect(
+        nodesInRect(nodes, const Rect.fromLTWH(0.0, 0.0, 132.0, 48.0), intersect: false),
+        <String>['a']);
+  });
+
+  test('批量移动整组一个位移，与 Web 端一致', () {
+    final nodes = <FlowNodeData>[const FlowNodeData(id: 'a', label: 'A', x: 0.0, y: 0.0), const FlowNodeData(id: 'b', label: 'B', x: 200.0, y: 0.0), const FlowNodeData(id: 'c', label: 'C', x: 100.0, y: 120.0, width: 80.0, height: 40.0)];
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(10.0, 10.0))[0].x, closeTo(8, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(10.0, 10.0))[0].y, closeTo(8, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(10.0, 10.0))[1].x, closeTo(108, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(10.0, 10.0))[1].y, closeTo(128, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(3.0, -3.0))[0].x, closeTo(0, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(3.0, -3.0))[0].y, closeTo(0, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(3.0, -3.0))[1].x, closeTo(100, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(3.0, -3.0))[1].y, closeTo(120, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(-20.0, 44.0))[0].x, closeTo(-16, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(-20.0, 44.0))[0].y, closeTo(48, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(-20.0, 44.0))[1].x, closeTo(84, 1e-9));
+    expect(moveNodes(nodes, {'a', 'c'}, const Offset(-20.0, 44.0))[1].y, closeTo(168, 1e-9));
+  });
+
+  test('节点缩放固定对角并夹到下限，与 Web 端一致', () {
+    final nodes = <FlowNodeData>[const FlowNodeData(id: 'a', label: 'A', x: 0.0, y: 0.0), const FlowNodeData(id: 'b', label: 'B', x: 200.0, y: 0.0), const FlowNodeData(id: 'c', label: 'C', x: 100.0, y: 120.0, width: 80.0, height: 40.0)];
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.se, const Offset(400.0, 300.0)),
+        0.0, 0.0, 400.0, 304.0, 'resize se');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.nw, const Offset(-40.0, -40.0)),
+        -40.0, -40.0, 172.0, 88.0, 'resize nw');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.se, const Offset(-999.0, -999.0)),
+        0.0, 0.0, 72.0, 32.0, 'resize se');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.nw, const Offset(999.0, 999.0)),
+        60.0, 16.0, 72.0, 32.0, 'resize nw');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.ne, const Offset(300.0, -30.0)),
+        0.0, -32.0, 304.0, 80.0, 'resize ne');
+    _expectRect(resizeNode(nodes[0], FlowResizeHandle.sw, const Offset(-30.0, 300.0)),
+        -32.0, 0.0, 164.0, 304.0, 'resize sw');
+  });
+
+  test('缩略图布局与它的逆运算与 Web 端一致', () {
+    final nodes = <FlowNodeData>[const FlowNodeData(id: 'a', label: 'A', x: 0.0, y: 0.0), const FlowNodeData(id: 'b', label: 'B', x: 200.0, y: 0.0), const FlowNodeData(id: 'c', label: 'C', x: 100.0, y: 120.0, width: 80.0, height: 40.0)];
+    final mm = minimapLayout(nodes, const FlowView(x: -100.0, y: -50.0, scale: 1.5),
+        const Size(640.0, 380.0), const Size(168.0, 112.0));
+    expect(mm.scale, closeTo(0.4077669902912621, 1e-9));
+    expect(mm.offset.dx, closeTo(16.310679611650485, 1e-9));
+    expect(mm.offset.dy, closeTo(23.37864077669903, 1e-9));
+    _expectRect(mm.viewport, 43.49514563106796, 36.970873786407765, 173.98058252427185, 103.30097087378641, 'viewport');
+    final back = viewFromMinimap(const Offset(84.0, 56.0), mm,
+        const FlowView(x: -100.0, y: -50.0, scale: 1.5), const Size(640.0, 380.0));
+    expect(back.x, closeTo(71, 1e-9));
+    expect(back.y, closeTo(70, 1e-9));
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {
