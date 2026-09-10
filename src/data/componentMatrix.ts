@@ -109,6 +109,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ICarousel",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ICascader",
     "ends": {
       "vue-next": true,

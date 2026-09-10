@@ -18,6 +18,7 @@ class IDesignTokensLight {
   static const colorTextSecondary = Color(0xFF575D6C);
   static const colorTextTertiary = Color(0xFF8A8E99);
   static const colorTextInverse = Color(0xFFFFFFFF);
+  static const colorOnMedia = Color(0xFFFFFFFF);
   static const colorTextLink = Color(0xFF5E7CE0);
   static const colorBorder = Color(0xFFDFE1E6);
   static const colorBorderStrong = Color(0xFFC3C6CD);
@@ -126,6 +127,7 @@ class IDesignTokensDark {
   static const colorTextSecondary = Color(0xFFB3B8C6);
   static const colorTextTertiary = Color(0xFF8A8E99);
   static const colorTextInverse = Color(0xFF141822);
+  static const colorOnMedia = Color(0xFFFFFFFF);
   static const colorTextLink = Color(0xFFADC4FF);
   static const colorBorder = Color(0xFF333A4D);
   static const colorBorderStrong = Color(0xFF454D63);

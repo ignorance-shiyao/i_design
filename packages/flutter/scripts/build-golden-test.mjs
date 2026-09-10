@@ -386,6 +386,15 @@ const {
   marqueeRect, nodesInRect, moveNodes, resizeNode, minimapLayout, viewFromMinimap
 } = await bundle('packages/common/src/logic/flow.ts', 'flow')
 
+/* ---------- 走马灯：翻页判定与指示点收窗 ----------
+ * 「轻轻一划算不算翻页」抄错不会报错，只会让某一端手感迟钝，
+ * 而两端各自试都觉得「大概是这样」。
+ */
+const { resolveSwipe, nextIndex: carouselNext, dotRange, rubberBand } = await bundle(
+  'packages/common/src/logic/carousel.ts',
+  'carousel'
+)
+
 const bubbleCases = [[0, 0, 100], [50, 0, 100], [100, 0, 100], [7, 5, 5], [-3, 0, 10]]
 const bubbleExpectations = bubbleCases.map(
   ([v, lo, hi]) =>
@@ -631,6 +640,30 @@ const minimapExpectations = [
   `    expect(back.y, closeTo(${mmBack.y}, 1e-9));`,
 ]
 
+// 慢而远、快而近、又慢又近：中间那一格是只看位移就会漏判的那一类
+const swipeCases = [
+  [-200, 600, 400], [-40, 600, 80], [-40, 600, 600], [200, 600, 400], [0, 600, 100], [-100, 0, 100],
+]
+const swipeExpectations = swipeCases.map(([dx, w, ms]) =>
+  `    expect(resolveSwipe(${dx.toFixed(1)}, ${w.toFixed(1)}, ${ms.toFixed(1)}), ${resolveSwipe(dx, w, ms)});`)
+
+const carouselNextCases = [
+  [0, 5, -1, true], [4, 5, 1, true], [0, 5, -1, false], [4, 5, 1, false], [2, 5, 2, false], [0, 0, 1, true],
+]
+const carouselNextExpectations = carouselNextCases.map(([i, n, d, loop]) =>
+  `    expect(nextIndex(${i}, ${n}, ${d}, loop: ${loop}), ${carouselNext(i, n, d, loop)});`)
+
+// 窗口要贴住两端，越过边界后留空位就会出现「点比图少」的错觉
+const dotCases = [[0, 3, 7], [0, 20, 7], [10, 20, 7], [19, 20, 7], [2, 20, 5]]
+const dotExpectations = dotCases.map(([i, n, max]) => {
+  const r = dotRange(i, n, max)
+  return `    _expectDots(dotRange(${i}, ${n}, max: ${max}), <int>[${r.items.join(', ')}], ${r.active}, 'dots(${i}/${n})');`
+})
+
+const bandCases = [[-0.5, 5, false], [5.5, 5, false], [2.0, 5, false], [-0.5, 5, true]]
+const bandExpectations = bandCases.map(([o, n, loop]) =>
+  `    expect(rubberBand(${o.toFixed(1)}, ${n}, loop: ${loop}), closeTo(${rubberBand(o, n, loop)}, 1e-9));`)
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -645,6 +678,12 @@ import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/flow.dart';
+import 'package:i_design/src/logic/carousel.dart';
+
+void _expectDots(DotRange actual, List<int> items, int active, String label) {
+  expect(actual.items, items, reason: '\$label 点位不一致');
+  expect(actual.active, active, reason: '\$label 当前项不一致');
+}
 
 void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
   expect(actual.left, closeTo(x, 1e-9), reason: '\$label x 不一致');
@@ -870,6 +909,16 @@ ${resizeExpectations.join('\n')}
     final mm = minimapLayout(nodes, const FlowView(x: -100.0, y: -50.0, scale: 1.5),
         const Size(640.0, 380.0), const Size(168.0, 112.0));
 ${minimapExpectations.join('\n')}
+  });
+
+  test('走马灯翻页判定与 Web 端一致（位移或速度任一达标）', () {
+${swipeExpectations.join('\n')}
+${carouselNextExpectations.join('\n')}
+  });
+
+  test('指示点收窗与两端阻尼与 Web 端一致', () {
+${dotExpectations.join('\n')}
+${bandExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

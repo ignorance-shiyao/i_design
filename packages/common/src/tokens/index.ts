@@ -206,6 +206,12 @@ export const lightTheme: Record<string, string> = {
   'color-text-secondary': palette.gray[70],
   'color-text-tertiary': palette.gray[60],
   'color-text-inverse': palette.gray[10],
+  /*
+   * 压在图片、视频上的前景色。明暗两个主题都是白——
+   * 它面对的不是主题底色而是任意媒体内容，跟着主题翻会在暗色主题下变成
+   * 深色的点压在深色照片上，直接消失。
+   */
+  'color-on-media': '#ffffff',
   'color-text-link': palette.brand[50],
 
   'color-border': palette.gray[40],
@@ -246,6 +252,7 @@ export const darkTheme: Record<string, string> = {
   'color-text-secondary': '#b3b8c6',
   'color-text-tertiary': palette.gray[60],
   'color-text-inverse': palette.gray[90],
+  'color-on-media': '#ffffff',
   'color-text-link': palette.brand[30],
 
   'color-border': '#333a4d',

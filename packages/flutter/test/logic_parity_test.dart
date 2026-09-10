@@ -12,6 +12,12 @@ import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/flow.dart';
+import 'package:i_design/src/logic/carousel.dart';
+
+void _expectDots(DotRange actual, List<int> items, int active, String label) {
+  expect(actual.items, items, reason: '$label 点位不一致');
+  expect(actual.active, active, reason: '$label 当前项不一致');
+}
 
 void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
   expect(actual.left, closeTo(x, 1e-9), reason: '$label x 不一致');
@@ -727,6 +733,33 @@ void main() {
         const FlowView(x: -100.0, y: -50.0, scale: 1.5), const Size(640.0, 380.0));
     expect(back.x, closeTo(71, 1e-9));
     expect(back.y, closeTo(70, 1e-9));
+  });
+
+  test('走马灯翻页判定与 Web 端一致（位移或速度任一达标）', () {
+    expect(resolveSwipe(-200.0, 600.0, 400.0), 1);
+    expect(resolveSwipe(-40.0, 600.0, 80.0), 1);
+    expect(resolveSwipe(-40.0, 600.0, 600.0), 0);
+    expect(resolveSwipe(200.0, 600.0, 400.0), -1);
+    expect(resolveSwipe(0.0, 600.0, 100.0), 0);
+    expect(resolveSwipe(-100.0, 0.0, 100.0), 0);
+    expect(nextIndex(0, 5, -1, loop: true), 4);
+    expect(nextIndex(4, 5, 1, loop: true), 0);
+    expect(nextIndex(0, 5, -1, loop: false), 0);
+    expect(nextIndex(4, 5, 1, loop: false), 4);
+    expect(nextIndex(2, 5, 2, loop: false), 4);
+    expect(nextIndex(0, 0, 1, loop: true), 0);
+  });
+
+  test('指示点收窗与两端阻尼与 Web 端一致', () {
+    _expectDots(dotRange(0, 3, max: 7), <int>[0, 1, 2], 0, 'dots(0/3)');
+    _expectDots(dotRange(0, 20, max: 7), <int>[0, 1, 2, 3, 4, 5, 6], 0, 'dots(0/20)');
+    _expectDots(dotRange(10, 20, max: 7), <int>[7, 8, 9, 10, 11, 12, 13], 10, 'dots(10/20)');
+    _expectDots(dotRange(19, 20, max: 7), <int>[13, 14, 15, 16, 17, 18, 19], 19, 'dots(19/20)');
+    _expectDots(dotRange(2, 20, max: 5), <int>[0, 1, 2, 3, 4], 2, 'dots(2/20)');
+    expect(rubberBand(-0.5, 5, loop: false), closeTo(-0.15, 1e-9));
+    expect(rubberBand(5.5, 5, loop: false), closeTo(4.45, 1e-9));
+    expect(rubberBand(2.0, 5, loop: false), closeTo(2, 1e-9));
+    expect(rubberBand(-0.5, 5, loop: true), closeTo(-0.5, 1e-9));
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

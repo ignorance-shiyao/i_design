@@ -1,0 +1,95 @@
+/*
+ * ICarousel —— 走马灯。
+ *
+ * 轨道整条平移，而不是逐张淡入淡出：平移能让人看出「下一张从右边来」，
+ * 方向感是这个组件唯一比一排卡片多出来的信息。
+ */
+.i-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-subtle);
+  touch-action: pan-y;
+}
+.i-carousel:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+
+.i-carousel__track {
+  display: flex;
+  height: 100%;
+  transition: transform var(--i-motion-slow) var(--i-motion-easing-out);
+  cursor: grab;
+}
+/* 拖动中撤掉过渡：留着过渡的话每一帧都在追赶手指，看起来像有延迟 */
+.i-carousel__track.is-dragging { transition: none; cursor: grabbing; }
+
+.i-carousel__slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  /* 图片和文字不该被手势选中：拖动时选中一片文字比翻页失败更烦人 */
+  user-select: none;
+}
+.i-carousel__slide > * { width: 100%; height: 100%; object-fit: cover; }
+.i-carousel__placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-md);
+}
+
+.i-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--i-radius-full);
+  /* 半透明底而不是实心：压在图片上时实心块会挖掉一角内容 */
+  background: color-mix(in srgb, var(--i-color-bg-elevated) 82%, transparent);
+  color: var(--i-color-text);
+  box-shadow: var(--i-shadow-sm);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing);
+}
+/* 箭头平时隐藏，指针进来或键盘聚焦时出现——常驻会一直挡住图片两侧 */
+.i-carousel:hover .i-carousel__arrow,
+.i-carousel:focus-within .i-carousel__arrow { opacity: 1; }
+.i-carousel__arrow:focus-visible { opacity: 1; outline: 2px solid var(--i-color-brand); }
+.i-carousel__arrow--prev { left: var(--i-spacing-3); }
+.i-carousel__arrow--next { right: var(--i-spacing-3); }
+.i-carousel__arrow:disabled { opacity: 0; cursor: default; }
+
+.i-carousel__dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--i-spacing-3);
+  display: flex;
+  justify-content: center;
+  gap: var(--i-spacing-2);
+}
+.i-carousel__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: var(--i-radius-full);
+  background: color-mix(in srgb, var(--i-color-on-media) 55%, transparent);
+  cursor: pointer;
+  transition: width var(--i-motion-fast) var(--i-motion-easing), background var(--i-motion-fast) var(--i-motion-easing);
+}
+/* 当前页拉长而不是只变色：色觉障碍或灰度打印下，形状差异仍然读得出来 */
+.i-carousel__dot.is-active {
+  width: 18px;
+  background: var(--i-color-on-media);
+}
+.i-carousel__dot:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .i-carousel__track { transition: none; }
+}

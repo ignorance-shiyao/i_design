@@ -1,0 +1,32 @@
+<view class="i-carousel" style="height:{{height}}px">
+  <view
+    class="i-carousel__track {{dragging ? 'is-dragging' : ''}}"
+    style="transform:translate3d({{-offset * 100}}%,0,0)"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+    bindtouchcancel="onTouchEnd"
+  >
+    <view
+      wx:for="{{items}}"
+      wx:key="key"
+      class="i-carousel__slide"
+      aria-hidden="{{index !== current}}"
+    >
+      <slot name="{{item.key}}" />
+      <view wx:if="{{!item.hasSlot}}" class="i-carousel__placeholder">{{item.label}}</view>
+    </view>
+  </view>
+
+  <!-- 指示点当前项拉长而不是只变色：色觉障碍或灰度打印下形状差异仍读得出来 -->
+  <view wx:if="{{items.length > 1}}" class="i-carousel__dots">
+    <view
+      wx:for="{{dots}}"
+      wx:key="*this"
+      class="i-carousel__dot {{item === current ? 'is-active' : ''}}"
+      aria-label="第 {{item + 1}} 张，共 {{items.length}} 张"
+      data-index="{{item}}"
+      bindtap="onDotTap"
+    />
+  </view>
+</view>
