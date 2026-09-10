@@ -87,7 +87,6 @@ export const docNav: NavGroup[] = [
       { to: '/components/tree', label: 'Tree 树形控件' },
       { to: '/components/cascader', label: 'Cascader 级联选择' },
       { to: '/components/navigation', label: 'Menu / Anchor / Notification' },
-      { to: '/components/agent', label: '智能体交互' },
       { to: '/components/result', label: 'Result 结果页' }
     ]
   },
@@ -97,6 +96,6 @@ export const docNav: NavGroup[] = [
   },
   {
     title: 'AI 会话',
-    items: [{ to: '/components/chat', label: 'Chat AI 会话' }]
+    items: [{ to: '/components/chat', label: 'AI 会话与智能体' }]
   }
 ]
