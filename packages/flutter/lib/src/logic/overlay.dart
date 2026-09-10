@@ -5,6 +5,8 @@
 /// 任何一条只改一端，就会出现「同一个设计在两端表现不同」。
 library;
 
+import 'package:flutter/painting.dart' show Rect;
+
 enum IPlacement { top, bottom, left, right }
 
 /// 主轴对齐方式。
@@ -148,3 +150,78 @@ int moveMenuActive(List<bool> selectable, int current, int step) {
 /// 首个可选项
 int firstMenuActive(List<bool> selectable) =>
     selectable.indexWhere((ok) => ok);
+
+/* ---------- 新手引导 ---------- */
+
+class ITourStep {
+  const ITourStep({
+    required this.target,
+    required this.title,
+    required this.description,
+    this.placement = IPlacement.bottom,
+  });
+
+  /// 要高亮的元素。Flutter 端传的是目标 Widget 的 GlobalKey 名，由调用方解析
+  final String target;
+  final String title;
+  final String description;
+  final IPlacement placement;
+}
+
+class ITourHole {
+  const ITourHole({
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+    required this.radius,
+  });
+  final double x;
+  final double y;
+  final double width;
+  final double height;
+  final double radius;
+}
+
+/// 高亮框：目标元素向外扩一圈。
+///
+/// 不贴着元素边缘挖：贴边挖出来的洞看起来像元素被裁掉了一块，
+/// 而且元素自身的外阴影、focus 环会落在洞外的暗区里，显得断开。
+ITourHole tourHole(
+  Rect rect, {
+  double padding = 6,
+  double radius = 8,
+}) =>
+    ITourHole(
+      x: rect.left - padding,
+      y: rect.top - padding,
+      width: rect.width + padding * 2,
+      height: rect.height + padding * 2,
+      radius: radius,
+    );
+
+/// 下一步的下标。到末步返回 -1，表示引导结束。
+///
+/// 结束用 -1 而不是停在末步：停在末步时，「下一步」按钮点下去没有任何变化，
+/// 用户不知道是走完了还是卡住了——调用方拿到 -1 才知道该关掉浮层。
+int tourNext(int current, int total) {
+  if (current + 1 >= total) return -1;
+  return current + 1;
+}
+
+/// 上一步。首步不再后退，返回 0
+int tourPrev(int current) => current - 1 < 0 ? 0 : current - 1;
+
+/// 目标不在视口里时，要把它滚到哪个位置。
+///
+/// 滚到正中而不是滚到刚好露出来：刚好露出来时，说明气泡多半就没地方放了，
+/// 会被挤到目标另一侧，读者得先找一遍气泡在哪。
+double tourScrollTo(Rect rect, double viewportHeight, double scrollTop) {
+  final center = rect.top + scrollTop + rect.height / 2;
+  final target = center - viewportHeight / 2;
+  return target < 0 ? 0 : target;
+}
+
+/// 目标此刻是否已经完整可见。可见就不滚，省掉一次没必要的跳动。
+bool tourNeedsScroll(Rect rect, double viewportHeight, {double padding = 24}) =>
+    rect.top < padding || rect.top + rect.height > viewportHeight - padding;

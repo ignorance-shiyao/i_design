@@ -21,6 +21,13 @@ void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.active, active, reason: '$label 当前项不一致');
 }
 
+void _expectHole(ITourHole actual, double x, double y, double w, double h, String label) {
+  expect(actual.x, closeTo(x, 1e-9), reason: '$label x 不一致');
+  expect(actual.y, closeTo(y, 1e-9), reason: '$label y 不一致');
+  expect(actual.width, closeTo(w, 1e-9), reason: '$label 宽不一致');
+  expect(actual.height, closeTo(h, 1e-9), reason: '$label 高不一致');
+}
+
 void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
   expect(actual.left, closeTo(x, 1e-9), reason: '$label x 不一致');
   expect(actual.top, closeTo(y, 1e-9), reason: '$label y 不一致');
@@ -838,6 +845,39 @@ void main() {
     expect(isComplete('12.5'), true);
     expect(isComplete('-3.25'), true);
     expect(isComplete('1.2.3'), false);
+  });
+
+  test('新手引导的高亮框、步进与滚动判定与 Web 端一致', () {
+    _expectHole(tourHole(const Rect.fromLTWH(10.0, 20.0, 100.0, 40.0), padding: 6.0),
+        4.0, 14.0, 112.0, 52.0, 'hole(10,20)');
+    _expectHole(tourHole(const Rect.fromLTWH(0.0, 0.0, 8.0, 8.0), padding: 0.0),
+        0.0, 0.0, 8.0, 8.0, 'hole(0,0)');
+    _expectHole(tourHole(const Rect.fromLTWH(-5.0, -5.0, 50.0, 50.0), padding: 12.0),
+        -17.0, -17.0, 74.0, 74.0, 'hole(-5,-5)');
+    expect(tourNext(0, 3), 1);
+    expect(tourPrev(0), 0);
+    expect(tourNext(1, 3), 2);
+    expect(tourPrev(1), 0);
+    expect(tourNext(2, 3), -1);
+    expect(tourPrev(2), 1);
+    expect(tourNext(0, 1), -1);
+    expect(tourPrev(0), 0);
+    expect(tourNext(5, 3), -1);
+    expect(tourPrev(5), 4);
+    expect(tourScrollTo(const Rect.fromLTWH(0.0, 1000.0, 0.0, 40.0), 800.0, 0.0),
+        closeTo(620, 1e-9));
+    expect(tourScrollTo(const Rect.fromLTWH(0.0, -200.0, 0.0, 40.0), 800.0, 500.0),
+        closeTo(0, 1e-9));
+    expect(tourScrollTo(const Rect.fromLTWH(0.0, 10.0, 0.0, 40.0), 800.0, 0.0),
+        closeTo(0, 1e-9));
+    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, 10.0, 0.0, 40.0), 800.0),
+        true);
+    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, 400.0, 0.0, 40.0), 800.0),
+        false);
+    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, 780.0, 0.0, 40.0), 800.0),
+        true);
+    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, -1.0, 0.0, 40.0), 800.0),
+        true);
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

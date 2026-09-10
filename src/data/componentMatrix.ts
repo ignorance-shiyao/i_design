@@ -819,6 +819,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ITour",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ITree",
     "ends": {
       "vue-next": true,

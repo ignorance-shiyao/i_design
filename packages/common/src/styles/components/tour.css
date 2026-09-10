@@ -1,0 +1,107 @@
+/*
+ * ITour —— 新手引导。
+ *
+ * 遮罩用一个带「洞」的 SVG，而不是四条挡板拼出来的：
+ * 四条挡板对不上圆角，目标是圆角按钮时四个角会漏出暗色的直角，很显眼。
+ */
+.i-tour {
+  position: fixed;
+  inset: 0;
+  z-index: var(--i-z-modal);
+}
+.i-tour__mask {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.i-tour__mask rect[mask] { fill: rgb(0 0 0 / 0.55); }
+
+/* 高亮框再描一圈：只挖洞的话，浅色背景上洞与页面几乎看不出边界 */
+.i-tour__ring {
+  position: absolute;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px var(--i-color-brand);
+  transition: all var(--i-motion-base) var(--i-motion-easing-out);
+}
+
+.i-tour__pop {
+  position: absolute;
+  width: 300px;
+  max-width: calc(100vw - var(--i-spacing-8));
+  padding: var(--i-spacing-4);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-lg);
+  animation: i-tour-in var(--i-motion-base) var(--i-motion-easing-out);
+}
+/* 目标不存在时（页面还没渲染到那一块）气泡居中，引导仍然能走完 */
+.i-tour__pop.is-center {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+@keyframes i-tour-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.i-tour__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--i-spacing-2);
+}
+.i-tour__title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--i-font-size-md);
+  font-weight: var(--i-font-weight-medium);
+  color: var(--i-color-text);
+}
+.i-tour__close {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+}
+.i-tour__close:hover { background: var(--i-color-bg-subtle); color: var(--i-color-text); }
+
+.i-tour__desc {
+  margin: var(--i-spacing-2) 0 var(--i-spacing-4);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  line-height: var(--i-line-height-loose);
+}
+.i-tour__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-3);
+}
+/* 进度写成「2 / 5」而不是画一排点：引导通常不长，数字比点更省认知 */
+.i-tour__count {
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.i-tour__actions { display: flex; gap: var(--i-spacing-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .i-tour__pop { animation: none; }
+  .i-tour__ring { transition: none; }
+}
+
+/*
+ * 小程序没有 SVG mask，遮罩改用「反向阴影」：高亮框本身透明，
+ * 靠一圈极大的外阴影把四周压暗。洞因此跟着圆角走，
+ * 不会像四条挡板那样在圆角处漏出暗色的直角。
+ * Web 端不用这条——它挡不住滚动区域之外的部分。
+ */
+.i-tour__ring--punch {
+  box-shadow: 0 0 0 2px var(--i-color-brand), 0 0 0 9999px rgb(0 0 0 / 0.55);
+}

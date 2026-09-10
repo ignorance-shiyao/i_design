@@ -99,6 +99,7 @@ export 'src/components/i_textarea.dart';
 export 'src/components/i_timeline.dart';
 export 'src/components/i_toast.dart';
 export 'src/components/i_tooltip.dart';
+export 'src/components/i_tour.dart';
 export 'src/components/i_tree.dart';
 export 'src/components/i_tree_select.dart';
 export 'src/components/i_typography.dart';

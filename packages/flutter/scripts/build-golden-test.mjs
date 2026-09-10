@@ -28,10 +28,10 @@ const { clampNumber, roundTo, stepValue, ratioOf, valueFromRatio } = await bundl
   'packages/common/src/logic/number.ts',
   'number'
 )
-const { resolveOverlay, moveMenuActive, firstMenuActive } = await bundle(
-  'packages/common/src/logic/overlay.ts',
-  'overlay'
-)
+const {
+  resolveOverlay, moveMenuActive, firstMenuActive,
+  tourHole, tourNext, tourPrev, tourScrollTo, tourNeedsScroll
+} = await bundle('packages/common/src/logic/overlay.ts', 'overlay')
 const {
   flattenTree, resolveCheckState, toggleChecked, searchTree, leafKeys,
   cascaderColumns, cascaderActivate, nodePath
@@ -720,6 +720,42 @@ const rowsExpectations = [[2, false], [0, false], [2, true]].map(([d, n]) => {
 const completeExpectations = ['', '-', '.', '12', '12.', '12.5', '-3.25', '1.2.3'].map((v) =>
   `    expect(isComplete('${v}'), ${isComplete(v)});`)
 
+/* ---------- 新手引导 ----------
+ * 「到末步返回 -1」与「目标不在视口时滚到正中」这两条如果各端各写，
+ * 会得到两种都说得通但不一样的行为：一个卡在末步，一个滚到刚好露出来。
+ */
+const holeCases = [[10, 20, 100, 40, 6], [0, 0, 8, 8, 0], [-5, -5, 50, 50, 12]]
+const holeExpectations = holeCases.map(([x, y, w, h, pad]) => {
+  const r = tourHole({ x, y, width: w, height: h }, { padding: pad })
+  return `    _expectHole(tourHole(const Rect.fromLTWH(${x.toFixed(1)}, ${y.toFixed(1)}, ${w.toFixed(1)}, ${h.toFixed(1)}), padding: ${pad.toFixed(1)}),
+        ${r.x.toFixed(1)}, ${r.y.toFixed(1)}, ${r.width.toFixed(1)}, ${r.height.toFixed(1)}, 'hole(${x},${y})');`
+})
+
+const tourStepCases = [[0, 3], [1, 3], [2, 3], [0, 1], [5, 3]]
+const tourStepExpectations = tourStepCases.flatMap(([i, n]) => [
+  `    expect(tourNext(${i}, ${n}), ${tourNext(i, n)});`,
+  `    expect(tourPrev(${i}), ${tourPrev(i)});`,
+])
+
+const scrollToCases = [
+  [{ y: 1000, height: 40 }, 800, 0],
+  [{ y: -200, height: 40 }, 800, 500],
+  [{ y: 10, height: 40 }, 800, 0],
+]
+const scrollToExpectations = scrollToCases.map(([r, vh, top]) =>
+  `    expect(tourScrollTo(const Rect.fromLTWH(0.0, ${r.y.toFixed(1)}, 0.0, ${r.height.toFixed(1)}), ${vh.toFixed(1)}, ${top.toFixed(1)}),
+        closeTo(${tourScrollTo(r, { height: vh }, top)}, 1e-9));`)
+
+const needsScrollCases = [
+  [{ y: 10, height: 40 }, 800],
+  [{ y: 400, height: 40 }, 800],
+  [{ y: 780, height: 40 }, 800],
+  [{ y: -1, height: 40 }, 800],
+]
+const needsScrollExpectations = needsScrollCases.map(([r, vh]) =>
+  `    expect(tourNeedsScroll(const Rect.fromLTWH(0.0, ${r.y.toFixed(1)}, 0.0, ${r.height.toFixed(1)}), ${vh.toFixed(1)}),
+        ${tourNeedsScroll(r, { height: vh })});`)
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -741,6 +777,13 @@ import 'package:i_design/src/logic/keypad.dart';
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
   expect(actual.active, active, reason: '\$label 当前项不一致');
+}
+
+void _expectHole(ITourHole actual, double x, double y, double w, double h, String label) {
+  expect(actual.x, closeTo(x, 1e-9), reason: '\$label x 不一致');
+  expect(actual.y, closeTo(y, 1e-9), reason: '\$label y 不一致');
+  expect(actual.width, closeTo(w, 1e-9), reason: '\$label 宽不一致');
+  expect(actual.height, closeTo(h, 1e-9), reason: '\$label 高不一致');
 }
 
 void _expectRect(Rect actual, double x, double y, double w, double h, String label) {
@@ -989,6 +1032,13 @@ ${keyExpectations.join('\n')}
 ${keyEdgeExpectations.join('\n')}
 ${rowsExpectations.join('\n')}
 ${completeExpectations.join('\n')}
+  });
+
+  test('新手引导的高亮框、步进与滚动判定与 Web 端一致', () {
+${holeExpectations.join('\n')}
+${tourStepExpectations.join('\n')}
+${scrollToExpectations.join('\n')}
+${needsScrollExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {
