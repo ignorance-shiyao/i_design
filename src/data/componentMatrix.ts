@@ -529,6 +529,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IIndexBar",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IInfiniteScroll",
     "ends": {
       "vue-next": true,
@@ -670,6 +680,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IPromptInput",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IPullRefresh",
     "ends": {
       "vue-next": true,
       "vue": true,

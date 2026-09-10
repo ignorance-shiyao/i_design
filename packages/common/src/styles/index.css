@@ -51,6 +51,7 @@
 @import './components/grid.css';
 @import './components/icon.css';
 @import './components/image.css';
+@import './components/indexbar.css';
 @import './components/infinite.css';
 @import './components/input-number.css';
 @import './components/input.css';
@@ -71,6 +72,7 @@
 @import './components/popup.css';
 @import './components/progress.css';
 @import './components/prompt-input.css';
+@import './components/pullrefresh.css';
 @import './components/radio-group.css';
 @import './components/radio.css';
 @import './components/rate.css';

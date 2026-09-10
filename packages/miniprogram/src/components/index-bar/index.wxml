@@ -1,0 +1,41 @@
+<view class="i-indexbar" style="height:{{height}}px">
+  <scroll-view
+    class="i-indexbar__scroll"
+    scroll-y
+    scroll-into-view="{{scrollTo}}"
+    scroll-with-animation
+    bindscroll="onScroll"
+  >
+    <block wx:for="{{groups}}" wx:key="key" wx:for-item="group">
+      <view class="i-indexbar__title" id="i-idx-{{group.key}}" data-index="{{group.key}}">{{group.key}}</view>
+      <view wx:for="{{group.items}}" wx:key="index" wx:for-item="item" class="i-indexbar__item">
+        {{item[labelKey]}}
+      </view>
+    </block>
+  </scroll-view>
+
+  <!--
+    字母条对读屏隐藏：它是给手指用的快捷入口，读屏使用者靠分组标题本身就能导航，
+    把字母再念一遍只会把列表淹掉。
+  -->
+  <view
+    class="i-indexbar__bar"
+    aria-hidden="true"
+    catchtouchstart="onBarTouch"
+    catchtouchmove="onBarTouch"
+    bindtouchend="clearHint"
+    bindtouchcancel="clearHint"
+  >
+    <text
+      wx:for="{{groups}}"
+      wx:key="key"
+      wx:for-item="group"
+      class="i-indexbar__letter {{index === active ? 'is-active' : ''}}"
+      data-index="{{index}}"
+      bindtap="onLetterTap"
+    >{{group.key}}</text>
+  </view>
+
+  <!-- 手指按住时的大字提示：字母条本身太窄，手指正好盖住自己点的那个字母 -->
+  <view wx:if="{{hint}}" class="i-indexbar__hint">{{hint}}</view>
+</view>

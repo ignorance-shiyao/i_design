@@ -13,6 +13,8 @@ import IPicker from '@i-design/mobile-vue/src/components/IPicker.vue'
 import IButton from '@/components/IButton.vue'
 import IInfiniteScroll from '@/components/IInfiniteScroll.vue'
 import INumberKeypad from '@/components/INumberKeypad.vue'
+import IPullRefresh from '@/components/IPullRefresh.vue'
+import IIndexBar from '@/components/IIndexBar.vue'
 import type { LoadStatus } from '@i-design/common'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
@@ -89,6 +91,26 @@ function loadFeed() {
 }
 
 const amount = ref('')
+
+/* 下拉刷新：组件不猜什么时候算刷新完了，由调用方拿到数据后调 finish() */
+const pull = ref<InstanceType<typeof IPullRefresh> | null>(null)
+const feedRows = ref(['刚刚更新 · 1', '刚刚更新 · 2', '刚刚更新 · 3', '刚刚更新 · 4', '刚刚更新 · 5'])
+let pullCount = 0
+function onRefresh() {
+  setTimeout(() => {
+    pullCount += 1
+    feedRows.value = Array.from({ length: 5 }, (_, i) => `第 ${pullCount} 次刷新 · ${i + 1}`)
+    pull.value?.finish()
+  }, 900)
+}
+
+const contacts = [
+  ['安可', 'A'], ['白露', 'B'], ['蔡诚', 'C'], ['丁宁', 'D'], ['方晴', 'F'],
+  ['高远', 'G'], ['何舟', 'H'], ['季澜', 'J'], ['柯宇', 'K'], ['李牧', 'L'],
+  ['马迟', 'M'], ['南星', 'N'], ['彭川', 'P'], ['钱屿', 'Q'], ['任遥', 'R'],
+  ['苏禾', 'S'], ['谭木', 'T'], ['王砚', 'W'], ['夏澄', 'X'], ['杨帆', 'Y'],
+  ['周迟', 'Z'], ['1 号客服', '#']
+].map(([label, index]) => ({ label, index }))
 
 const rows = ref([
   { title: 'WI-1024 登录页表单校验缺失', description: '林岚 · 2 小时前' },
@@ -227,6 +249,51 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
           <span class="amount__value">{{ amount || '0.00' }}</span>
         </div>
         <INumberKeypad v-model="amount" :decimals="2" :max-length="10" confirm-text="确认" />
+      </div>
+    </DemoBlock>
+
+    <h2>PullRefresh 下拉刷新</h2>
+    <p>
+      位移带阻尼，不是一比一跟手：越拉越沉才符合物理直觉，也才让人知道「快到头了」。
+      线性跟手时用户不松手就一直拉，最后整个列表被拽出屏幕，
+      而他并不知道自己已经远远超过了触发线。
+    </p>
+    <p>
+      只在列表已经滚到顶部时才接管手势。不判断的话，用户在列表中间往下滑，
+      滑动会被下拉刷新吃掉——列表不动，顶上却冒出个「下拉可以刷新」，看起来像卡住了。
+      「松开立即刷新」这一句是唯一告诉用户「已经拉够了」的线索，
+      不改文案的话他只能靠猜，通常会继续往下拉。
+    </p>
+    <DemoBlock
+      title="下拉、松手、刷新"
+      description="刷新中头部停在阈值处而不是收回零——收回零的话指示器立刻消失，用户不知道刷新还在进行，会再拉一次。组件不猜什么时候算刷新完了，由调用方拿到数据后调 finish()。"
+      code='<IPullRefresh ref="pull" @refresh="load" />'
+    >
+      <div class="phone">
+        <IPullRefresh ref="pull" :height="220" @refresh="onRefresh">
+          <ICell v-for="row in feedRows" :key="row" :title="row" />
+        </IPullRefresh>
+      </div>
+    </DemoBlock>
+
+    <h2>IndexBar 索引栏</h2>
+    <p>
+      「#」排在最后而不是开头。排在开头是常见做法，但那会让用户第一眼看到的是
+      一堆杂项——而他打开通讯录是来找人的，不是来看「未分类」的。
+    </p>
+    <p>
+      手指位置用「落在哪一格」判定，而不是「离哪个字母最近」：最近判定在两格
+      交界处会来回跳，手指几乎没动、列表却在两个分组之间反复横跳。
+      高亮取「最后一个已经滚过顶部的分组」而不是「第一个还在视野里的」——
+      后者在分组很长时会一直高亮下一个分组，用户明明还在 A 里面，字母条已经跳到 B。
+    </p>
+    <DemoBlock
+      title="字母条与吸顶分组"
+      description="字母条整块 aria-hidden：它是给手指用的快捷入口，读屏使用者靠分组标题本身就能导航，把 26 个单字母再念一遍只会把列表淹掉。手指按住时给一块大字提示——字母条只有 18px 宽，手指正好盖住自己点的那个字母。"
+      code='<IIndexBar :items="contacts" />'
+    >
+      <div class="phone">
+        <IIndexBar :items="contacts" :height="280" />
       </div>
     </DemoBlock>
 

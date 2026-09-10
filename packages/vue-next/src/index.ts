@@ -83,6 +83,8 @@ import IColorPicker from './IColorPicker.vue'
 import ICalendar from './ICalendar.vue'
 import IMentions from './IMentions.vue'
 import ISticky from './ISticky.vue'
+import IPullRefresh from './IPullRefresh.vue'
+import IIndexBar from './IIndexBar.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -157,6 +159,8 @@ export {
   ICalendar,
   IMentions,
   ISticky,
+  IPullRefresh,
+  IIndexBar,
   IForm,
   IFormItem,
   ITag,

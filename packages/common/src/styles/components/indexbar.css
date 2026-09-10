@@ -1,0 +1,73 @@
+/*
+ * IIndexBar —— 索引栏。
+ *
+ * 右侧字母条是给手指用的快捷入口，读屏使用者靠分组标题本身就能导航，
+ * 因此它整块 aria-hidden——把 26 个单字母再念一遍只会把列表淹掉。
+ */
+.i-indexbar { position: relative; display: flex; }
+.i-indexbar__scroll {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* 分组标题吸顶：滚到分组中间时，用户仍要知道自己在哪一组 */
+.i-indexbar__title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--i-spacing-1) var(--i-spacing-4);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+}
+.i-indexbar__item {
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+  font-size: var(--i-font-size-md);
+}
+
+.i-indexbar__bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--i-spacing-2) var(--i-spacing-2);
+  touch-action: none;
+  user-select: none;
+}
+.i-indexbar__letter {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 16px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  cursor: pointer;
+}
+/* 当前分组用淡底色块，不用一条重边线 */
+.i-indexbar__letter.is-active {
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand);
+}
+
+/*
+ * 手指按住时的大字提示。字母条只有 18px 宽，手指正好盖住自己点的那个字母——
+ * 没有这块提示，用户看不到自己滑到了哪里。
+ */
+.i-indexbar__hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--i-radius-lg);
+  background: rgb(0 0 0 / 0.62);
+  color: #fff;
+  font-size: var(--i-font-size-2xl);
+  pointer-events: none;
+}

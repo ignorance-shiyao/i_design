@@ -1,0 +1,19 @@
+<view class="i-pull" bindtouchstart="onStart" catchtouchmove="onMove" bindtouchend="onEnd" bindtouchcancel="onEnd">
+  <view
+    class="i-pull__body"
+    style="transform:translateY({{distance}}px);transition:{{animating ? 'transform var(--i-motion-base) var(--i-motion-easing-out)' : 'none'}}"
+  >
+    <!--
+      提示区挂在内容上方、靠位移露出来，而不是插进文档流。
+      插进来的话，刷新开始那一刻列表会整块往下跳一次。
+    -->
+    <view class="i-pull__head" style="height:{{threshold}}px;margin-top:-{{threshold}}px" aria-live="polite">
+      <i-loading wx:if="{{status === 'refreshing'}}" size="sm" text="{{hint}}" />
+      <view wx:elif="{{hint}}" class="i-pull__hint">
+        <i-icon name="arrow-right" size="{{14}}" class="{{status === 'ready' ? 'is-flipped' : ''}}" />
+        <text>{{hint}}</text>
+      </view>
+    </view>
+    <slot />
+  </view>
+</view>

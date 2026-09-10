@@ -1,0 +1,25 @@
+/*
+ * IPullRefresh —— 下拉刷新。
+ *
+ * 提示区挂在内容上方、靠位移露出来，而不是插进文档流：
+ * 插进来的话，刷新开始那一刻列表会整块往下跳一次。
+ */
+.i-pull { overflow-y: auto; overscroll-behavior-y: contain; }
+.i-pull__body { will-change: transform; }
+.i-pull__head {
+  display: grid;
+  place-items: center;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}
+.i-pull__hint { display: inline-flex; align-items: center; gap: var(--i-spacing-2); }
+/* 箭头转向就是「已经拉够了」的第二个线索，和文案一起给 */
+.i-pull__hint svg {
+  transform: rotate(90deg);
+  transition: transform var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-pull__hint svg.is-flipped { transform: rotate(-90deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .i-pull__hint svg { transition: none; }
+}

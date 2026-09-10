@@ -25,6 +25,8 @@ import 'package:i_design/src/logic/virtual.dart';
 import 'package:i_design/src/logic/color.dart';
 import 'package:i_design/src/logic/calendar.dart';
 import 'package:i_design/src/logic/mention.dart';
+import 'package:i_design/src/logic/pullrefresh.dart';
+import 'package:i_design/src/logic/indexbar.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '$label 点位不一致');
@@ -1356,6 +1358,81 @@ void main() {
         <String>['chen']);
     expect(filterMentions(options, '不存在').map((o) => o.value).toList(),
         <String>[]);
+  });
+
+  test('下拉刷新的阻尼、阈值与文案与 Web 端一致', () {
+    expect(pullDistance(-20.0), closeTo(0, 1e-9));
+    expect(pullStatus(0), IPullStatus.idle);
+    expect(shouldRefresh(0), false);
+    expect(pullDistance(0.0), closeTo(0, 1e-9));
+    expect(pullStatus(0), IPullStatus.idle);
+    expect(shouldRefresh(0), false);
+    expect(pullDistance(1.0), closeTo(0.9917355371900827, 1e-9));
+    expect(pullStatus(0.9917355371900827), IPullStatus.pulling);
+    expect(shouldRefresh(0.9917355371900827), false);
+    expect(pullDistance(10.0), closeTo(9.23076923076923, 1e-9));
+    expect(pullStatus(9.23076923076923), IPullStatus.pulling);
+    expect(shouldRefresh(9.23076923076923), false);
+    expect(pullDistance(30.0), closeTo(24, 1e-9));
+    expect(pullStatus(24), IPullStatus.pulling);
+    expect(shouldRefresh(24), false);
+    expect(pullDistance(60.0), closeTo(40, 1e-9));
+    expect(pullStatus(40), IPullStatus.pulling);
+    expect(shouldRefresh(40), false);
+    expect(pullDistance(120.0), closeTo(60, 1e-9));
+    expect(pullStatus(60), IPullStatus.ready);
+    expect(shouldRefresh(60), true);
+    expect(pullDistance(200.0), closeTo(75, 1e-9));
+    expect(pullStatus(75), IPullStatus.ready);
+    expect(shouldRefresh(75), true);
+    expect(pullDistance(2000.0), closeTo(113.20754716981132, 1e-9));
+    expect(pullStatus(113.20754716981132), IPullStatus.ready);
+    expect(shouldRefresh(113.20754716981132), true);
+    expect(refreshingOffset(), closeTo(60, 1e-9));
+    expect(pullDistance(2000) < 120, isTrue);
+    expect(loadHint(LoadStatus.loading, empty: false), '加载中…');
+    expect(loadHint(LoadStatus.error, empty: false), '加载失败，点击重试');
+    expect(loadHint(LoadStatus.finished, empty: false), '没有更多了');
+    expect(loadHint(LoadStatus.finished, empty: true), '暂无内容');
+    expect(loadHint(LoadStatus.idle, empty: false), '');
+  });
+
+  test('索引栏的分组、命中与高亮与 Web 端一致', () {
+    final groups = groupByIndex<String>(<String>["anqi", "Bao", "chen", "lin", "3M", "#hao", "apple", "Zhu", "su"], (String n) => n);
+    expect(groups.map((g) => g.key).toList(),
+        <String>['A', 'B', 'C', 'L', 'S', 'Z', '#']);
+    expect(groups[0].items, <String>["anqi", "apple"]);
+    expect(groups[1].items, <String>["Bao"]);
+    expect(groups[2].items, <String>["chen"]);
+    expect(groups[3].items, <String>["lin"]);
+    expect(groups[4].items, <String>["su"]);
+    expect(groups[5].items, <String>["Zhu"]);
+    expect(groups[6].items, <String>["3M", "#hao"]);
+    expect(indexAt(-5.0, 120.0, 6), 0);
+    expect(indexAt(0.0, 120.0, 6), 0);
+    expect(indexAt(19.9, 120.0, 6), 0);
+    expect(indexAt(20.0, 120.0, 6), 1);
+    expect(indexAt(119.0, 120.0, 6), 5);
+    expect(indexAt(120.0, 120.0, 6), 5);
+    expect(indexAt(500.0, 120.0, 6), 5);
+    expect(indexAt(10.0, 0.0, 6), -1);
+    expect(indexAt(10.0, 120.0, 0), -1);
+    expect(activeIndex(<double>[0.0, 120.0, 260.0, 400.0], 0.0),
+        0);
+    expect(activeIndex(<double>[0.0, 120.0, 260.0, 400.0], 1.0),
+        0);
+    expect(activeIndex(<double>[0.0, 120.0, 260.0, 400.0], 119.0),
+        1);
+    expect(activeIndex(<double>[0.0, 120.0, 260.0, 400.0], 120.0),
+        1);
+    expect(activeIndex(<double>[0.0, 120.0, 260.0, 400.0], 121.0),
+        1);
+    expect(activeIndex(<double>[0.0, 120.0, 260.0, 400.0], 399.0),
+        3);
+    expect(activeIndex(<double>[0.0, 120.0, 260.0, 400.0], 400.0),
+        3);
+    expect(activeIndex(<double>[0.0, 120.0, 260.0, 400.0], 9999.0),
+        3);
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

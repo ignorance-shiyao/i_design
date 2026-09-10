@@ -31,6 +31,14 @@ const { selectRange, isInRange, isRangeEdge, moveFocus, groupMarks } = await bun
   'packages/common/src/logic/calendar.ts',
   'calendar'
 )
+const { pullDistance, pullStatus, shouldRefresh, pullHint, refreshingOffset } = await bundle(
+  'packages/common/src/logic/pullrefresh.ts',
+  'pullrefresh'
+)
+const { groupByIndex, indexAt, activeIndex } = await bundle(
+  'packages/common/src/logic/indexbar.ts',
+  'indexbar'
+)
 const { findMention, applyMention, filterMentions } = await bundle(
   'packages/common/src/logic/mention.ts',
   'mention'
@@ -1247,6 +1255,55 @@ const filterExpectations = ['', '陈', 'lin', 'xu', '不存在'].map((q) =>
   `    expect(filterMentions(options, '${q}').map((o) => o.value).toList(),
         <String>[${filterMentions(mentionOptions, q).map((o) => `'${o.value}'`).join(', ')}]);`)
 
+
+/*
+ * 下拉刷新：阻尼曲线上取几个点，外加两处最容易移植错的边界——
+ * delta 为 0 / 负数（不该有位移），以及远超 max 时仍然小于 max（渐近而非硬截）。
+ */
+const pullCases = [-20, 0, 1, 10, 30, 60, 120, 200, 2000]
+const dartPullStatus = (s) => `IPullStatus.${s}`
+const pullExpectations = pullCases.flatMap((delta) => {
+  const d = pullDistance(delta)
+  const status = pullStatus(d)
+  return [
+    `    expect(pullDistance(${delta.toFixed(1)}), closeTo(${d}, 1e-9));`,
+    `    expect(pullStatus(${d}), ${dartPullStatus(status)});`,
+    `    expect(shouldRefresh(${d}), ${shouldRefresh(d)});`
+  ]
+})
+const pullHintExpectations = ['idle', 'pulling', 'ready', 'refreshing', 'done'].map(
+  (s) => `    expect(pullHint(${dartPullStatus(s)}), ${JSON.stringify(pullHint(s))});`
+)
+pullExpectations.push(`    expect(refreshingOffset(), closeTo(${refreshingOffset()}, 1e-9));`)
+// 渐近而非硬截：拉到 max 的十几倍也只是逼近，永远不该等于 max
+pullExpectations.push(`    expect(pullDistance(2000) < 120, isTrue);`)
+
+/*
+ * 索引栏：分组顺序（「#」在最后）、按格命中、以及「最后一个已滚过顶部的分组」。
+ */
+// 调用方传进来的是拼音首字母（真实用法），取不到字母的落到「#」
+const indexNames = ['anqi', 'Bao', 'chen', 'lin', '3M', '#hao', 'apple', 'Zhu', 'su']
+const indexGroups = groupByIndex(indexNames, (n) => n)
+const dartNames = `<String>[${indexNames.map((n) => JSON.stringify(n)).join(', ')}]`
+const groupExpectations = [
+  `    expect(groups.map((g) => g.key).toList(),
+        <String>[${indexGroups.map((g) => `'${g.key}'`).join(', ')}]);`,
+  ...indexGroups.map((g, i) =>
+    `    expect(groups[${i}].items, <String>[${g.items.map((n) => JSON.stringify(n)).join(', ')}]);`)
+]
+// 一格 20px。交界处各取一次：19.9 与 20.0 必须落在不同格，
+// 否则就是「按最近」而不是「按格」——按最近时手指在交界处会让列表反复横跳
+const indexAtCases = [[-5, 120, 6], [0, 120, 6], [19.9, 120, 6], [20, 120, 6],
+  [119, 120, 6], [120, 120, 6], [500, 120, 6], [10, 0, 6], [10, 120, 0]]
+const indexAtExpectations = indexAtCases.map(([y, h, c]) =>
+  `    expect(indexAt(${y.toFixed(1)}, ${h.toFixed(1)}, ${c}), ${indexAt(y, h, c)});`)
+
+const activeOffsets = [0, 120, 260, 400]
+const activeCases = [0, 1, 119, 120, 121, 399, 400, 9999]
+const activeExpectations = activeCases.map((top) =>
+  `    expect(activeIndex(<double>[${activeOffsets.map((o) => o.toFixed(1)).join(', ')}], ${top.toFixed(1)}),
+        ${activeIndex(activeOffsets, top)});`)
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -1274,6 +1331,8 @@ import 'package:i_design/src/logic/virtual.dart';
 import 'package:i_design/src/logic/color.dart';
 import 'package:i_design/src/logic/calendar.dart';
 import 'package:i_design/src/logic/mention.dart';
+import 'package:i_design/src/logic/pullrefresh.dart';
+import 'package:i_design/src/logic/indexbar.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
@@ -1636,6 +1695,18 @@ ${focusExpectations.join('\n')}
 ${mentionExpectations.join('\n')}
 ${applyExpectations.join('\n')}
 ${filterExpectations.join('\n')}
+  });
+
+  test('下拉刷新的阻尼、阈值与文案与 Web 端一致', () {
+${pullExpectations.join('\n')}
+${hintExpectations.join('\n')}
+  });
+
+  test('索引栏的分组、命中与高亮与 Web 端一致', () {
+    final groups = groupByIndex<String>(${dartNames}, (String n) => n);
+${groupExpectations.join('\n')}
+${indexAtExpectations.join('\n')}
+${activeExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

@@ -161,8 +161,8 @@
 - [x] **Mentions 提及**：`@` 唤起候选。三条判定缺一条都会让它在不该弹的时候弹出来：
       触发符前必须是行首或空白（邮箱里的 @ 不弹）、触发符与光标之间不能有空白、
       查询串有长度上限
-- [ ] **IndexBar 索引栏**（NutUI / WeChat UI）：右侧字母条与吸顶分组
-- [ ] **PullRefresh 下拉刷新**（NutUI / WeChat UI）
+- [x] **IndexBar 索引栏**（NutUI / WeChat UI）：右侧字母条与吸顶分组
+- [x] **PullRefresh 下拉刷新**（NutUI / WeChat UI）
 - [x] **Sticky 吸顶**：吸附交给各端原生能力（Web 的 position: sticky、
       Flutter 的 SliverPersistentHeader），共享判定只负责回答「此刻是不是吸住了」——
       这件事 CSS 至今给不出答案，而它需要一个不吸附的哨兵元素才量得出来
