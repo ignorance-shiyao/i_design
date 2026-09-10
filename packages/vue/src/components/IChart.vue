@@ -14,7 +14,9 @@ import {
   scaleX,
   scaleY,
   type ChartSeries,
-  type ChartThreshold
+  type ChartThreshold,
+  labelStep,
+  showLabelAt
 } from '@i-design/common'
 
 const props = withDefaults(
@@ -67,6 +69,12 @@ const plotW = computed(() => W - PAD.value.left - PAD.value.right)
 const plotH = computed(() => props.height - PAD.value.top - PAD.value.bottom)
 
 /** 被图例关掉的系列：只影响显示，不改传入的数据 */
+/*
+ * 轴标签抽稀：标签一多就会互相压住，糊成一条黑边——那既读不出内容，
+ * 也让人误以为轴上有一根粗线。按可用宽度算出每隔几个画一个。
+ */
+const tickStep = computed(() => labelStep(props.labels.length, plotW.value))
+
 const hidden = ref<Set<string>>(new Set())
 
 function toggle(name: string) {
@@ -287,6 +295,7 @@ function exportCsv() {
       <g>
         <text
           v-for="(label, i) in labels"
+          v-show="showLabelAt(i, labels.length, tickStep)"
           :key="label + i"
           class="i-chart__tick"
           :x="isBar ? PAD.left + bandWidth * (i + 0.5) : x(i)"

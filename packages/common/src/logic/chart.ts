@@ -465,3 +465,102 @@ export function waterfallDomain(bars: WaterfallBar[]): [number, number] {
   const max = Math.max(0, ...all)
   return min === max ? [min, min + 1] : [min, max]
 }
+
+/* ---------- 区间缩放（dataZoom） ---------- */
+
+export interface ZoomWindow {
+  /** 起止下标，闭区间 */
+  start: number
+  end: number
+}
+
+/**
+ * 把窗口夹回合法范围。
+ *
+ * 三件事必须一起处理，分开写就会漏：
+ *   1. 起止越界要夹回 [0, count-1]
+ *   2. 起 > 止 时交换——拖动左手柄越过右手柄是很自然的操作，
+ *      不交换的话窗口会变成负宽度，图表直接空掉
+ *   3. 宽度不得小于 minSpan：缩到零宽等于把图表擦掉，而用户无法再拖回来
+ */
+export function clampWindow(win: ZoomWindow, count: number, minSpan = 2): ZoomWindow {
+  if (count <= 0) return { start: 0, end: 0 }
+  const max = count - 1
+  const span = Math.max(1, Math.min(minSpan, count) - 1)
+
+  let start = Math.round(Math.min(Math.max(win.start, 0), max))
+  let end = Math.round(Math.min(Math.max(win.end, 0), max))
+  if (start > end) [start, end] = [end, start]
+
+  if (end - start < span) {
+    // 优先向右补足；右边不够了再向左补，保证贴边时仍能满足最小宽度
+    end = start + span
+    if (end > max) {
+      end = max
+      start = Math.max(0, end - span)
+    }
+  }
+  return { start, end }
+}
+
+/** 由 0–1 的比例得到窗口，用于把拖拽像素换成下标 */
+export function windowFromRatio(from: number, to: number, count: number, minSpan = 2): ZoomWindow {
+  const max = Math.max(0, count - 1)
+  return clampWindow({ start: from * max, end: to * max }, count, minSpan)
+}
+
+/**
+ * 整体平移窗口，宽度保持不变。
+ *
+ * 到边界时只停住、不压缩——压缩会让用户在拖到头之后继续拖时，
+ * 窗口悄悄变窄，松手才发现范围变了。
+ */
+export function panWindow(win: ZoomWindow, delta: number, count: number): ZoomWindow {
+  const width = win.end - win.start
+  const max = Math.max(0, count - 1)
+  let start = Math.round(win.start + delta)
+  if (start < 0) start = 0
+  if (start + width > max) start = max - width
+  return { start: Math.max(0, start), end: Math.max(0, start + width) }
+}
+
+/** 按窗口切数据；越界由 clampWindow 兜住，这里只做切片 */
+export function sliceByWindow<T>(items: T[], win: ZoomWindow): T[] {
+  return items.slice(win.start, win.end + 1)
+}
+
+/** 窗口占全量的比例，用于渲染缩略条上的选框位置 */
+export function windowRatio(win: ZoomWindow, count: number): { from: number; to: number } {
+  const max = Math.max(1, count - 1)
+  return { from: win.start / max, to: win.end / max }
+}
+
+/**
+ * 轴标签的抽稀步长。
+ *
+ * 标签一多就会互相压住，糊成一条黑边——那既读不出内容，
+ * 也让人误以为轴上有一根粗线。按可用宽度算出每隔几个画一个：
+ * 只保证相邻两个标签之间至少留出 minGap 的距离。
+ *
+ * 返回 1 表示全部都画得下。
+ */
+export function labelStep(count: number, width: number, minGap = 48): number {
+  if (count <= 1 || width <= 0) return 1
+  const per = width / count
+  if (per >= minGap) return 1
+  return Math.ceil(minGap / per)
+}
+
+/**
+ * 该下标的标签要不要画。
+ *
+ * 末尾那个总是画：读者要知道序列到哪儿为止，
+ * 而按步长抽稀时它常常正好被跳过。
+ */
+export function showLabelAt(index: number, count: number, step: number): boolean {
+  if (step <= 1) return true
+  if (index === count - 1) return true
+  // 末尾附近若与最后一个挨得太近就让位，避免两个标签叠在一起
+  if (count - 1 - index < step / 2) return false
+  return index % step === 0
+}

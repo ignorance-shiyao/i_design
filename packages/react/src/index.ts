@@ -28,6 +28,7 @@ export { ChartPie, type PieItem, type ChartPieProps } from './components/ChartPi
 export { ChartRadar, type RadarSeries, type ChartRadarProps } from './components/ChartRadar'
 export { ChartScatter, type ChartScatterProps } from './components/ChartScatter'
 export { ChartWaterfall, type ChartWaterfallProps } from './components/ChartWaterfall'
+export { ChartZoom, type ChartZoomProps } from './components/ChartZoom'
 export { ChatMessage, type ChatMessageProps } from './components/ChatMessage'
 export { ChatSources, type ChatSource, type ChatSourcesProps } from './components/ChatSources'
 export { ChatSuggestions, type ChatSuggestionsProps } from './components/ChatSuggestions'

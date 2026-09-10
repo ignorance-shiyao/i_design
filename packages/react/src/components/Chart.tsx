@@ -9,7 +9,9 @@ import {
   scaleX,
   scaleY,
   type ChartSeries,
-  type ChartThreshold
+  type ChartThreshold,
+  labelStep,
+  showLabelAt
 } from '@i-design/common'
 
 export interface ChartProps {
@@ -65,6 +67,11 @@ export function Chart({
     left: 48
   }
   const plotW = W - pad.left - pad.right
+  /*
+   * 轴标签抽稀：标签一多就会互相压住，糊成一条黑边——那既读不出内容，
+   * 也让人误以为轴上有一根粗线。
+   */
+  const tickStep = labelStep(labels.length, plotW)
   const plotH = height - pad.top - pad.bottom
 
   const domain = domainOf(visible.length ? visible : series, {
@@ -215,7 +222,11 @@ export function Chart({
             x={isBar ? pad.left + bandWidth * (i + 0.5) : x(i)}
             y={height - 8}
             textAnchor="middle"
-            opacity={labels.length > 12 && i % 2 === 1 ? 0 : 1}
+            /*
+              抽稀走共享的 labelStep：原本是「超过 12 个就隔一个隐藏」，
+              90 个标签时仍会糊成一条黑边，而且与 Vue 端的规则对不上。
+            */
+            opacity={showLabelAt(i, labels.length, tickStep) ? 1 : 0}
           >
             {label}
           </text>

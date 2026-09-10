@@ -373,7 +373,8 @@ const numberExpectations = [
  * 拟合最容易在移植时抄错分母，一旦抄错，两端的趋势线会指向不同方向。
  */
 const {
-  bubbleRadius, trendLine, quantile, boxStats, waterfallBars, waterfallDomain
+  bubbleRadius, trendLine, quantile, boxStats, waterfallBars, waterfallDomain,
+  clampWindow, windowFromRatio, panWindow, labelStep, showLabelAt
 } = await bundle('packages/common/src/logic/chart.ts', 'chart')
 
 const bubbleCases = [[0, 0, 100], [50, 0, 100], [100, 0, 100], [7, 5, 5], [-3, 0, 10]]
@@ -451,6 +452,54 @@ const wfDomainExpectation = `    expect(
           const IWaterfallItem(label: 'c', value: 60.0),
         ])),
         <double>[${dipDomain[0].toFixed(1)}, ${dipDomain[1].toFixed(1)}]);`
+
+
+/* ---------- 区间缩放与标签抽稀 ----------
+ * 手柄拖过头要交换、到边界只停住不压缩——这两条抄错都不会报错，
+ * 只会让窗口在某些拖法下悄悄变窄或直接空掉。
+ */
+const dartWin = (w) => `const IZoomWindow(start: ${w.start}, end: ${w.end})`
+const zoomClampCases = [
+  [{ start: 2, end: 6 }, 10, 2],
+  [{ start: -5, end: 6 }, 10, 2],
+  [{ start: 2, end: 99 }, 10, 2],
+  [{ start: 7, end: 3 }, 10, 2],     // 手柄交叉
+  [{ start: 5, end: 5 }, 10, 3],     // 过窄
+  [{ start: 9, end: 9 }, 10, 3],     // 贴右边向左补
+  [{ start: 0, end: 0 }, 2, 5],      // 数据比最小宽度还短
+  [{ start: 0, end: 5 }, 0, 2],      // 空数据
+]
+const zoomClampExpectations = zoomClampCases.map(([w, count, span]) => {
+  const r = clampWindow(w, count, span)
+  return `    _expectWindow(clampWindow(${dartWin(w)}, ${count}, ${span}), ${r.start}, ${r.end},
+        'clampWindow(${w.start},${w.end} / ${count} / ${span})');`
+})
+
+const panCases = [
+  [{ start: 2, end: 6 }, 3, 10],
+  [{ start: 2, end: 6 }, -99, 10],
+  [{ start: 2, end: 6 }, 99, 10],
+]
+const panExpectations = panCases.map(([w, d, count]) => {
+  const r = panWindow(w, d, count)
+  return `    _expectWindow(panWindow(${dartWin(w)}, ${d.toFixed(1)}, ${count}), ${r.start}, ${r.end},
+        'panWindow(${d})');`
+})
+
+const ratioCases = [[0, 1, 10], [0, 0.5, 11]]
+const ratioExpectations = ratioCases.map(([f, t, count]) => {
+  const r = windowFromRatio(f, t, count)
+  return `    _expectWindow(windowFromRatio(${f.toFixed(2)}, ${t.toFixed(2)}, ${count}), ${r.start}, ${r.end},
+        'windowFromRatio(${f},${t})');`
+})
+
+const stepCases = [[6, 600], [90, 576], [180, 576], [1, 100], [50, 0]]
+const stepExpectations = stepCases.map(([count, width]) =>
+  `    expect(labelStep(${count}, ${width.toFixed(1)}), ${labelStep(count, width)});`)
+
+const step90 = labelStep(90, 576)
+const showExpectations = [0, 1, step90, 88, 89].map((i) =>
+  `    expect(showLabelAt(${i}, 90, ${step90}), ${showLabelAt(i, 90, step90)});`)
 
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
@@ -541,6 +590,11 @@ void _expectBox(IBoxStats actual, double q1, double median, double q3,
   expect(actual.outliers.length, outliers, reason: '\$reason 离群点数不一致');
 }
 
+void _expectWindow(IZoomWindow actual, int start, int end, String reason) {
+  expect(actual.start, start, reason: '\$reason start 不一致');
+  expect(actual.end, end, reason: '\$reason end 不一致');
+}
+
 void main() {
   test('buildPages 与 Web 端逐项一致', () {
 ${pageExpectations.join('\n')}
@@ -551,7 +605,7 @@ ${countExpectations.join('\n')}
   });
 
   test('clampPage 与 Web 端一致', () {
-${clampExpectations.join('\n')}
+${zoomClampExpectations.join('\n')}
   });
 
   test('nextSortOrder 三态循环与 Web 端一致', () {
@@ -636,6 +690,17 @@ ${boxExpectations.join('\n')}
     final bars = waterfallBars(${dartWf});
 ${wfExpectations.join('\n')}
 ${wfDomainExpectation}
+  });
+
+  test('区间缩放的夹取、交叉与平移与 Web 端一致', () {
+${zoomClampExpectations.join('\n')}
+${panExpectations.join('\n')}
+${ratioExpectations.join('\n')}
+  });
+
+  test('轴标签抽稀与 Web 端一致', () {
+${stepExpectations.join('\n')}
+${showExpectations.join('\n')}
   });
 }
 `

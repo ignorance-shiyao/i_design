@@ -367,3 +367,99 @@ List<double> waterfallDomain(List<IWaterfallBar> bars) {
   }
   return min == max ? [min, min + 1] : [min, max];
 }
+
+/* ---------- 区间缩放（dataZoom） ---------- */
+
+class IZoomWindow {
+  const IZoomWindow({required this.start, required this.end});
+
+  /// 起止下标，闭区间
+  final int start;
+  final int end;
+}
+
+/// 把窗口夹回合法范围。
+///
+/// 三件事必须一起处理，分开写就会漏：
+///   1. 起止越界要夹回 [0, count-1]
+///   2. 起 > 止 时交换——拖动左手柄越过右手柄是很自然的操作，
+///      不交换的话窗口会变成负宽度，图表直接空掉
+///   3. 宽度不得小于 minSpan：缩到零宽等于把图表擦掉，用户无法再拖回来
+IZoomWindow clampWindow(IZoomWindow win, int count, [int minSpan = 2]) {
+  if (count <= 0) return const IZoomWindow(start: 0, end: 0);
+  final max = count - 1;
+  final span = (minSpan > count ? count : minSpan) - 1 < 1
+      ? 1
+      : (minSpan > count ? count : minSpan) - 1;
+
+  var start = win.start.clamp(0, max);
+  var end = win.end.clamp(0, max);
+  if (start > end) {
+    final t = start;
+    start = end;
+    end = t;
+  }
+
+  if (end - start < span) {
+    // 优先向右补足；右边不够了再向左补，保证贴边时仍能满足最小宽度
+    end = start + span;
+    if (end > max) {
+      end = max;
+      start = end - span < 0 ? 0 : end - span;
+    }
+  }
+  return IZoomWindow(start: start, end: end);
+}
+
+/// 由 0–1 的比例得到窗口，用于把拖拽像素换成下标
+IZoomWindow windowFromRatio(double from, double to, int count,
+    [int minSpan = 2]) {
+  final max = count - 1 < 0 ? 0 : count - 1;
+  return clampWindow(
+    IZoomWindow(start: (from * max).round(), end: (to * max).round()),
+    count,
+    minSpan,
+  );
+}
+
+/// 整体平移窗口，宽度保持不变。
+/// 到边界时只停住、不压缩——压缩会让用户拖到头之后继续拖时窗口悄悄变窄。
+IZoomWindow panWindow(IZoomWindow win, double delta, int count) {
+  final width = win.end - win.start;
+  final max = count - 1 < 0 ? 0 : count - 1;
+  var start = (win.start + delta).round();
+  if (start < 0) start = 0;
+  if (start + width > max) start = max - width;
+  if (start < 0) start = 0;
+  return IZoomWindow(start: start, end: start + width);
+}
+
+/// 按窗口切数据
+List<T> sliceByWindow<T>(List<T> items, IZoomWindow win) {
+  if (items.isEmpty) return items;
+  final end = win.end + 1 > items.length ? items.length : win.end + 1;
+  final start = win.start < 0 ? 0 : win.start;
+  return start >= end ? <T>[] : items.sublist(start, end);
+}
+
+/// 窗口占全量的比例，用于渲染缩略条上的选框位置
+({double from, double to}) windowRatio(IZoomWindow win, int count) {
+  final max = count - 1 < 1 ? 1 : count - 1;
+  return (from: win.start / max, to: win.end / max);
+}
+
+/// 轴标签的抽稀步长。返回 1 表示全部都画得下。
+int labelStep(int count, double width, [double minGap = 48]) {
+  if (count <= 1 || width <= 0) return 1;
+  final per = width / count;
+  if (per >= minGap) return 1;
+  return (minGap / per).ceil();
+}
+
+/// 该下标的标签要不要画。末尾那个总是画：读者要知道序列到哪儿为止。
+bool showLabelAt(int index, int count, int step) {
+  if (step <= 1) return true;
+  if (index == count - 1) return true;
+  if (count - 1 - index < step / 2) return false;
+  return index % step == 0;
+}

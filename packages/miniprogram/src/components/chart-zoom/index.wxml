@@ -1,0 +1,21 @@
+<view class="i-zoom">
+  <view
+    class="i-zoom__track"
+    style="height:{{height}}px"
+    bindtouchstart="onTrack"
+    bindtouchmove="onTrack"
+  >
+    <canvas class="i-zoom__canvas" type="2d" style="width:100%;height:{{height}}px" />
+    <!-- 窗口之外压暗：被排除的区间仍然可见，用户才知道自己漏看了什么 -->
+    <view class="i-zoom__mask" style="left:0;width:{{left}}" />
+    <view class="i-zoom__mask" style="left:calc({{left}} + {{width}});right:0" />
+    <view class="i-zoom__window" style="left:{{left}};width:{{width}}">
+      <view class="i-zoom__handle is-left" />
+      <view class="i-zoom__handle is-right" />
+    </view>
+  </view>
+  <view class="i-zoom__foot">
+    <text class="i-zoom__range">{{rangeText}}</text>
+    <view class="i-zoom__reset" bindtap="onReset">重置</view>
+  </view>
+</view>

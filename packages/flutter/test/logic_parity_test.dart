@@ -87,6 +87,11 @@ void _expectBox(IBoxStats actual, double q1, double median, double q3,
   expect(actual.outliers.length, outliers, reason: '$reason 离群点数不一致');
 }
 
+void _expectWindow(IZoomWindow actual, int start, int end, String reason) {
+  expect(actual.start, start, reason: '$reason start 不一致');
+  expect(actual.end, end, reason: '$reason end 不一致');
+}
+
 void main() {
   test('buildPages 与 Web 端逐项一致', () {
     _expectPages(buildPages(1, 100, 5), <IPageItem>[const IPageItem.page(1), const IPageItem.page(2), const IPageItem.page(3), const IPageItem.page(4), const IPageItem.page(5), const IPageItem.page(6), const IPageItem.gap('right'), const IPageItem.page(100)],
@@ -121,12 +126,22 @@ void main() {
   });
 
   test('clampPage 与 Web 端一致', () {
-    expect(clampPage(0, 5), 1);
-    expect(clampPage(1, 5), 1);
-    expect(clampPage(5, 5), 5);
-    expect(clampPage(9, 5), 5);
-    expect(clampPage(-3, 5), 1);
-    expect(clampPage(2, 0), 1);
+    _expectWindow(clampWindow(const IZoomWindow(start: 2, end: 6), 10, 2), 2, 6,
+        'clampWindow(2,6 / 10 / 2)');
+    _expectWindow(clampWindow(const IZoomWindow(start: -5, end: 6), 10, 2), 0, 6,
+        'clampWindow(-5,6 / 10 / 2)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 2, end: 99), 10, 2), 2, 9,
+        'clampWindow(2,99 / 10 / 2)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 7, end: 3), 10, 2), 3, 7,
+        'clampWindow(7,3 / 10 / 2)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 5, end: 5), 10, 3), 5, 7,
+        'clampWindow(5,5 / 10 / 3)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 9, end: 9), 10, 3), 7, 9,
+        'clampWindow(9,9 / 10 / 3)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 0, end: 0), 2, 5), 0, 1,
+        'clampWindow(0,0 / 2 / 5)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 0, end: 5), 0, 2), 0, 0,
+        'clampWindow(0,5 / 0 / 2)');
   });
 
   test('nextSortOrder 三态循环与 Web 端一致', () {
@@ -527,5 +542,47 @@ void main() {
           const IWaterfallItem(label: 'c', value: 60.0),
         ])),
         <double>[-30.0, 50.0]);
+  });
+
+  test('区间缩放的夹取、交叉与平移与 Web 端一致', () {
+    _expectWindow(clampWindow(const IZoomWindow(start: 2, end: 6), 10, 2), 2, 6,
+        'clampWindow(2,6 / 10 / 2)');
+    _expectWindow(clampWindow(const IZoomWindow(start: -5, end: 6), 10, 2), 0, 6,
+        'clampWindow(-5,6 / 10 / 2)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 2, end: 99), 10, 2), 2, 9,
+        'clampWindow(2,99 / 10 / 2)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 7, end: 3), 10, 2), 3, 7,
+        'clampWindow(7,3 / 10 / 2)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 5, end: 5), 10, 3), 5, 7,
+        'clampWindow(5,5 / 10 / 3)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 9, end: 9), 10, 3), 7, 9,
+        'clampWindow(9,9 / 10 / 3)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 0, end: 0), 2, 5), 0, 1,
+        'clampWindow(0,0 / 2 / 5)');
+    _expectWindow(clampWindow(const IZoomWindow(start: 0, end: 5), 0, 2), 0, 0,
+        'clampWindow(0,5 / 0 / 2)');
+    _expectWindow(panWindow(const IZoomWindow(start: 2, end: 6), 3.0, 10), 5, 9,
+        'panWindow(3)');
+    _expectWindow(panWindow(const IZoomWindow(start: 2, end: 6), -99.0, 10), 0, 4,
+        'panWindow(-99)');
+    _expectWindow(panWindow(const IZoomWindow(start: 2, end: 6), 99.0, 10), 5, 9,
+        'panWindow(99)');
+    _expectWindow(windowFromRatio(0.00, 1.00, 10), 0, 9,
+        'windowFromRatio(0,1)');
+    _expectWindow(windowFromRatio(0.00, 0.50, 11), 0, 5,
+        'windowFromRatio(0,0.5)');
+  });
+
+  test('轴标签抽稀与 Web 端一致', () {
+    expect(labelStep(6, 600.0), 1);
+    expect(labelStep(90, 576.0), 8);
+    expect(labelStep(180, 576.0), 15);
+    expect(labelStep(1, 100.0), 1);
+    expect(labelStep(50, 0.0), 1);
+    expect(showLabelAt(0, 90, 8), true);
+    expect(showLabelAt(1, 90, 8), false);
+    expect(showLabelAt(8, 90, 8), true);
+    expect(showLabelAt(88, 90, 8), false);
+    expect(showLabelAt(89, 90, 8), true);
   });
 }

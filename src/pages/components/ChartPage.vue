@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import IChart from '@/components/IChart.vue'
 import IChartPie from '@/components/IChartPie.vue'
 import ISparkline from '@/components/ISparkline.vue'
@@ -15,7 +15,9 @@ import IChartHeatmap from '@/components/IChartHeatmap.vue'
 import IChartScatter from '@/components/IChartScatter.vue'
 import IChartBox from '@/components/IChartBox.vue'
 import IChartWaterfall from '@/components/IChartWaterfall.vue'
+import IChartZoom from '@/components/IChartZoom.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import { sliceByWindow } from '@i-design/common'
 
 const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月']
 
@@ -99,6 +101,22 @@ const sparks = [
   { title: '平均响应', value: '248 ms', trend: -12.4, data: [42, 38, 40, 33, 31, 28, 26, 25, 24] },
   { title: '错误率', value: '0.42%', trend: 3.1, data: [3, 2, 4, 3, 5, 4, 6, 5, 7] }
 ]
+
+/* 区间缩放：90 天的日活，足够长才看得出「缩放」的必要 */
+const zoomLabels = Array.from({ length: 90 }, (_, i) => `第 ${i + 1} 天`)
+const zoomValues = Array.from({ length: 90 }, (_, i) => {
+  const trend = 1200 + i * 14
+  const weekly = Math.sin((i / 7) * Math.PI * 2) * 180
+  const noise = Math.sin(i * 2.7) * 60
+  return Math.round(trend + weekly + noise)
+})
+const zoomWindow = ref({ start: 0, end: 89 })
+const zoomCode = `<IChart :labels="zoomed.labels" :series="[{ name: '日活', data: zoomed.values }]" />
+<IChartZoom v-model:window="zoomWindow" :values="zoomValues" :labels="zoomLabels" />`
+const zoomed = computed(() => ({
+  labels: sliceByWindow(zoomLabels, zoomWindow.value),
+  values: sliceByWindow(zoomValues, zoomWindow.value)
+}))
 
 /* 分布：三个门店的单日出杯量，第三组刻意含离群点 */
 const boxGroups = [
@@ -273,6 +291,28 @@ const waterfallItems = [
     <DemoBlock title="时段分布">
       <div class="chart-demo">
         <IChartHeatmap :matrix="heat" :rows="weekdays" :columns="hours" title="工作项创建时段" unit=" 条" />
+      </div>
+    </DemoBlock>
+
+    <h2>区间缩放</h2>
+    <p>
+      序列一长，整屏画出来就是一团噪声。缩放条给出全量的缩略走势，
+      拖动窗口即可放大其中一段——窗口之外压暗而不是隐藏，
+      用户才知道自己漏看了什么。
+    </p>
+    <DemoBlock
+      title="拖动缩放"
+      description="拖两端的手柄改变范围，拖中间整体平移。手柄可聚焦，方向键微调、Shift 加速、Home/End 归位。窗口最少保留三个点——缩到零宽等于把图表擦掉，而用户无法再拖回来。"
+      lang="vue"
+      :code="zoomCode"
+    >
+      <div style="width: 100%">
+        <IChart
+          :labels="zoomed.labels"
+          :series="[{ name: '日活', data: zoomed.values }]"
+          :height="220"
+        />
+        <IChartZoom v-model:window="zoomWindow" :values="zoomValues" :labels="zoomLabels" />
       </div>
     </DemoBlock>
 
