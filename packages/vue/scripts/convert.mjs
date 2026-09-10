@@ -37,7 +37,8 @@ const manual = new Set([
   'ITour.vue',
   'IAutoComplete.vue',
   'ITimePicker.vue',
-  'IImage.vue'
+  'IImage.vue',
+  'IColorPicker.vue'
 ])
 
 /**

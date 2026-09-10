@@ -379,6 +379,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IColorPicker",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IContextCards",
     "ends": {
       "vue-next": true,
@@ -769,6 +779,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ISplitter",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IStatistic",
     "ends": {
       "vue-next": true,
@@ -930,6 +950,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IUpload",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IVirtualList",
     "ends": {
       "vue-next": true,
       "vue": true,

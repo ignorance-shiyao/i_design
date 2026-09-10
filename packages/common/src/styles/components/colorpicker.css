@@ -1,0 +1,156 @@
+/*
+ * IColorPicker —— 取色器。
+ *
+ * 饱和度-明度方块加色相条：这两个轴正好对应方块的两条边。
+ * 感知上 OKLCH 更准，但它的轴不是矩形的，拿来画方块会有一大片取不到的颜色。
+ */
+.i-colorpicker { display: inline-block; }
+.i-colorpicker__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  height: var(--i-control-height-md);
+  padding: 0 var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  font-family: inherit;
+  font-size: var(--i-font-size-md);
+  cursor: pointer;
+}
+.i-colorpicker__trigger:hover:not(:disabled) { border-color: var(--i-color-brand); }
+.i-colorpicker__trigger:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 1px; }
+.i-colorpicker__trigger:disabled { background: var(--i-color-bg-subtle); cursor: not-allowed; }
+.i-colorpicker__trigger svg { color: var(--i-color-text-tertiary); }
+.i-colorpicker__swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--i-radius-sm);
+  /* 描一圈发丝线：纯白色块在白底上没有边界 */
+  box-shadow: inset 0 0 0 1px var(--i-color-hairline);
+}
+.i-colorpicker__value {
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-sm);
+  text-transform: lowercase;
+}
+
+.i-colorpicker__panel {
+  position: fixed;
+  z-index: var(--i-z-dropdown);
+  width: 232px;
+  padding: var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-md);
+}
+
+.i-colorpicker__area {
+  position: relative;
+  height: 132px;
+  border-radius: var(--i-radius-sm);
+  /* 白到透明横向、透明到黑纵向，叠在纯色相上就得到 HSV 方块 */
+  background-image:
+    linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, transparent);
+  cursor: crosshair;
+  touch-action: none;
+}
+.i-colorpicker__thumb {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 2px solid #fff;
+  border-radius: var(--i-radius-full);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.3);
+  pointer-events: none;
+}
+
+.i-colorpicker__hue {
+  width: 100%;
+  height: 12px;
+  margin: var(--i-spacing-3) 0 var(--i-spacing-2);
+  appearance: none;
+  border-radius: var(--i-radius-full);
+  background: linear-gradient(
+    to right,
+    #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%
+  );
+  cursor: pointer;
+}
+.i-colorpicker__hue::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: var(--i-radius-full);
+  background: transparent;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.3);
+}
+.i-colorpicker__hue::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: var(--i-radius-full);
+  background: transparent;
+}
+
+.i-colorpicker__row { display: flex; gap: var(--i-spacing-2); align-items: center; }
+.i-colorpicker__text {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 var(--i-spacing-2);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg);
+  color: var(--i-color-text);
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-sm);
+}
+.i-colorpicker__text:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -1px; }
+/* 对比度读数就画在这个颜色上，直接看得出字读不读得清 */
+.i-colorpicker__contrast {
+  display: grid;
+  place-items: center;
+  min-width: 56px;
+  height: 28px;
+  border-radius: var(--i-radius-sm);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 0 0 1px var(--i-color-hairline);
+}
+.i-colorpicker__hint {
+  margin: var(--i-spacing-2) 0 0;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+
+.i-colorpicker__presets {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: var(--i-spacing-1);
+  margin-top: var(--i-spacing-3);
+}
+.i-colorpicker__preset {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: none;
+  border-radius: var(--i-radius-sm);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--i-color-hairline);
+}
+.i-colorpicker__preset:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+
+/* 小程序没有 Teleport，面板就地绝对定位——父级不能带 overflow: hidden */
+.i-colorpicker__panel.is-inline {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+}
+.i-colorpicker { position: relative; }

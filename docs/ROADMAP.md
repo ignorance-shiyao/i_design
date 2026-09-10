@@ -151,14 +151,18 @@
 - [x] **Affix 固钉**：容器滚出视口时跟着走
 - [x] **BackTop 回到顶部**
 - [x] **Watermark 水印**：SVG 平铺，深浅主题都可见
-- [ ] **Splitter 分割面板**：拖动改变两栏比例，带最小宽度
+- [x] **Splitter 分割面板**：两栏的下限一起夹，只夹被拖的那一栏的话，
+      另一栏会被挤到零宽；分隔条可聚焦、可用方向键拖，带 aria-valuenow
 - [ ] **Calendar 日历**：月视图与日期标记
-- [ ] **ColorPicker 取色器**：直接复用 `logic/palette` 的 OKLCH，不引第二套色彩换算
+- [x] **ColorPicker 取色器**：色彩换算复用 `logic/palette`，界面本身用 HSV
+      （它的两个轴正好对应方块的两条边）；当场给出对比度读数
 - [ ] **Mentions 提及**：`@` 唤起候选，可复用 PromptInput 的触发思路
 - [ ] **IndexBar 索引栏**（NutUI / WeChat UI）：右侧字母条与吸顶分组
 - [ ] **PullRefresh 下拉刷新**（NutUI / WeChat UI）
 - [ ] **Sticky 吸顶**：与 Affix 同源，容器内吸附
-- [ ] **VirtualList 虚拟滚动**（Semi / TDesign）：万行表格的前提
+- [x] **VirtualList 虚拟滚动**（Semi / TDesign）：万行表格的前提。
+      overscan 默认 3 行，少了边缘闪白、多了等于没虚拟化；
+      少于 60 条不虚拟化，那时它只是徒增复杂度还会丢掉浏览器自带的查找
 - [ ] **Gantt 甘特图**（AntV）：排期是中后台的高频场景
 - [ ] **WordCloud 词云**（AntV）
 

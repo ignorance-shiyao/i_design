@@ -1,0 +1,15 @@
+/*
+ * IVirtualList —— 虚拟滚动。
+ *
+ * 上下用两块空白撑开，而不是给容器固定高度再绝对定位每一行：
+ * 撑开的写法让滚动条长度天然正确，也不必为每一行算 top。
+ */
+.i-virtual {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.i-virtual__row {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}

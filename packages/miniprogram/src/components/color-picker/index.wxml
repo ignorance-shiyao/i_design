@@ -1,0 +1,60 @@
+<view class="i-colorpicker {{disabled ? 'is-disabled' : ''}}">
+  <view class="i-colorpicker__trigger" bindtap="toggle">
+    <view class="i-colorpicker__swatch" style="background:{{value}}" />
+    <text class="i-colorpicker__value">{{value}}</text>
+    <view class="i-icon i-icon--chevron-down" style="width:14px;height:14px" />
+  </view>
+
+  <!-- 面板就地绝对定位：小程序没有 Teleport，父级不能带 overflow:hidden -->
+  <view wx:if="{{open}}" class="i-colorpicker__panel is-inline">
+    <view
+      class="i-colorpicker__area"
+      style="background:hsl({{hue}} 100% 50%)"
+      bindtouchstart="onArea"
+      bindtouchmove="onArea"
+    >
+      <view class="i-colorpicker__thumb" style="left:{{thumbX}}%;top:{{thumbY}}%" />
+    </view>
+
+    <slider
+      class="i-colorpicker__hue"
+      min="0"
+      max="359"
+      value="{{hue}}"
+      block-size="14"
+      bindchanging="onHue"
+      bindchange="onHue"
+    />
+
+    <view class="i-colorpicker__row">
+      <input
+        class="i-colorpicker__text"
+        value="{{text}}"
+        bindinput="onInput"
+        bindblur="onTextCommit"
+        bindconfirm="onTextCommit"
+      />
+      <!-- 对比度当场说出来：好不好看和上面的字能不能读是两件事 -->
+      <view
+        wx:if="{{showContrast}}"
+        class="i-colorpicker__contrast"
+        style="background:{{value}};color:{{ink}}"
+      >{{ratio}}:1</view>
+    </view>
+    <view wx:if="{{showContrast}}" class="i-colorpicker__hint">{{hint}}</view>
+
+    <view class="i-colorpicker__presets">
+      <view
+        wx:for="{{presets}}"
+        wx:key="*this"
+        class="i-colorpicker__preset"
+        style="background:{{item}}"
+        aria-label="{{item}}"
+        data-color="{{item}}"
+        bindtap="onPreset"
+      >
+        <view wx:if="{{item === value}}" class="i-icon i-icon--check" style="width:12px;height:12px" />
+      </view>
+    </view>
+  </view>
+</view>

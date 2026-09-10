@@ -1,0 +1,55 @@
+/*
+ * ISplitter —— 分割面板。
+ *
+ * 分隔条是个真正的控件，不是一条装饰线：它可聚焦、可用方向键拖，
+ * 并且带 role="separator" 与 aria-valuenow——只能鼠标拖的话，
+ * 用键盘操作的人永远改不了这个布局。
+ */
+.i-splitter { display: flex; width: 100%; min-height: 0; }
+.i-splitter--vertical { flex-direction: column; }
+.i-splitter__pane { flex: 1 1 0; min-width: 0; min-height: 0; overflow: auto; }
+
+.i-splitter__gutter {
+  flex: none;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: var(--i-color-hairline);
+  cursor: col-resize;
+  touch-action: none;
+}
+.i-splitter--vertical .i-splitter__gutter { cursor: row-resize; }
+.i-splitter__gutter:hover,
+.i-splitter.is-dragging .i-splitter__gutter { background: var(--i-color-brand); }
+.i-splitter__gutter:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+
+/*
+ * 抓手是一小段更粗的短线，落在分隔条中间。
+ * 没有它的话，一条 4px 的细线看不出可以拖——用户要靠鼠标划过时的光标变化才发现，
+ * 而那需要先猜到该往哪儿划。
+ */
+.i-splitter__grip {
+  position: absolute;
+  width: 2px;
+  height: 24px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
+  opacity: 0;
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-splitter--vertical .i-splitter__grip { width: 24px; height: 2px; }
+.i-splitter__gutter:hover .i-splitter__grip,
+.i-splitter__gutter:focus-visible .i-splitter__grip,
+.i-splitter.is-dragging .i-splitter__grip { opacity: 1; }
+
+/* 拖动中禁掉整页的文字选中：不禁的话拖两下就选中一片文字 */
+.i-splitter.is-dragging { user-select: none; }
+
+/*
+ * 触摸端没有光标，也没有 hover：抓手常显。
+ * Web 端可以靠光标变成 col-resize 提示「这里能拖」，
+ * 这一端只能靠一个看得见的抓手，否则用户根本不知道那条线可以拖。
+ */
+@media (hover: none) {
+  .i-splitter__grip { opacity: 1; }
+}

@@ -10,6 +10,19 @@ import IAffix from '@/components/IAffix.vue'
 import IBackTop from '@/components/IBackTop.vue'
 import IWatermark from '@/components/IWatermark.vue'
 import IImage from '@/components/IImage.vue'
+import ISplitter from '@/components/ISplitter.vue'
+import IVirtualList from '@/components/IVirtualList.vue'
+import IColorPicker from '@/components/IColorPicker.vue'
+import { ref } from 'vue'
+
+const split = ref(0.38)
+const brandColor = ref('#5e7ce0')
+/* 两万行：不虚拟化就是两万个 DOM 节点，滚动直接卡死 */
+const bigList = Array.from({ length: 20000 }, (_, i) => ({
+  id: i + 1,
+  name: `工单 ${String(i + 1).padStart(5, '0')}`,
+  owner: ['林岚', '陈序', '苏禾', '周迟'][i % 4]
+}))
 import { heroIllustrations } from '@i-design/common'
 
 /* 预览用的图组：故意混一个坏地址进去，好让「加载失败」这一态在文档里看得见 */
@@ -175,6 +188,91 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
       </div>
     </DemoBlock>
 
+    <h2>Splitter 分割面板</h2>
+    <p>
+      两栏的下限一起夹，而不是只夹被拖的那一栏：只夹一栏的话，把它拖到很大时
+      另一栏会被挤到零宽，里面的内容全部换行成一列单字——那时用户已经看不出
+      该往回拖多少了。
+    </p>
+    <p>
+      分隔条可聚焦、可用方向键拖，按住 Shift 走大步。它是个真正的控件，不是装饰线：
+      只能鼠标拖的话，用键盘操作的人永远改不了这个布局。<code>aria-valuenow</code>
+      也不是形式——读屏使用者靠它知道现在是几几开，以及自己按方向键改到了多少。
+    </p>
+    <DemoBlock
+      title="拖动分隔条，或用方向键"
+      description="Tab 到分隔条上试试方向键。两栏最小 120px，拖到底就停住。"
+      code='<ISplitter v-model="ratio" :min-first="120" :min-second="120" />'
+    >
+      <ISplitter v-model="split" :min-first="120" :min-second="160" class="split-demo">
+        <template #first>
+          <div class="split-pane">
+            <strong>目录</strong>
+            <p>当前 {{ Math.round(split * 100) }}%</p>
+          </div>
+        </template>
+        <template #second>
+          <div class="split-pane">
+            <strong>内容</strong>
+            <p>拖动中间那条线，或聚焦它后按左右方向键。</p>
+          </div>
+        </template>
+      </ISplitter>
+    </DemoBlock>
+
+    <h2>VirtualList 虚拟滚动</h2>
+    <p>
+      万行表格不虚拟化就是万个 DOM 节点，滚动直接卡死。而虚拟化最容易写错的是
+      「上下各多渲染几行」：不多渲染，快速拖动滚动条时上下边缘会闪出空白；
+      多渲染太多，又等于没虚拟化——那些行永远来不及被看见。默认 3 行。
+    </p>
+    <p>
+      条目少于 60 条时不虚拟化。那时它只是徒增复杂度与一次布局计算，
+      而且会平白丢掉浏览器自带的查找——Ctrl+F 找不到没渲染出来的行。
+    </p>
+    <DemoBlock
+      title="两万行，只渲染看得见的那些"
+      description="上下用两块空白撑开，而不是绝对定位每一行：撑开的写法让滚动条长度天然正确，也不必为每一行算 top，少一处会算错的地方。"
+      code='<IVirtualList :items="rows" :item-height="40" :height="280" v-slot="{ item }">
+  {{ item.name }}
+</IVirtualList>'
+    >
+      <IVirtualList :items="bigList" :item-height="40" :height="280" class="vl-demo">
+        <template #default="{ item, index }">
+          <span class="vl-row">
+            <span class="vl-no">{{ index + 1 }}</span>
+            <span>{{ (item as any).name }}</span>
+            <span class="vl-owner">{{ (item as any).owner }}</span>
+          </span>
+        </template>
+      </IVirtualList>
+    </DemoBlock>
+
+    <h2>ColorPicker 取色器</h2>
+    <p>
+      色彩换算直接用 <code>logic/palette</code> 已有的 OKLCH，不引第二套——
+      同一个仓库里出现两份「什么叫更亮一点」，迟早会在某个组件上对不上。
+      取色器界面本身用 HSV：饱和度与明度这两个轴正好对应方块的两条边，
+      而 OKLCH 的轴不是矩形的，拿来画方块会有一大片取不到的颜色。
+    </p>
+    <p>
+      对比度当场说出来。用户挑的是「好看的颜色」，而好不好看和上面的字能不能读
+      是两件事——不提示的话，一个明黄的主色会一路走到线上，
+      然后才发现按钮上的白字看不见。
+    </p>
+    <DemoBlock
+      title="取色、输入与常用色"
+      description="输入框失焦时才解析——边打边解析的话，用户删到只剩 #5 时颜色就已经跳了几次，他没法安心把值改完。接受 #abc、#aabbcc、abc 与 rgb(1,2,3)：用户会从各种地方复制色值过来。"
+      code='<IColorPicker v-model="color" />'
+    >
+      <div class="row">
+        <IColorPicker v-model="brandColor" />
+        <IButton :style="{ background: brandColor, color: '#fff', borderColor: brandColor }">
+          用这个色的按钮
+        </IButton>
+      </div>
+    </DemoBlock>
+
     <IBackTop />
   </article>
 </template>
@@ -188,7 +286,31 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
 }
 .wm-demo h4 { margin: 0 0 var(--i-spacing-2); }
 .wm-demo p { margin: 0 0 var(--i-spacing-4); color: var(--i-color-text-secondary); }
-.row { display: flex; gap: var(--i-spacing-4); flex-wrap: wrap; align-items: flex-start; }
+.row { display: flex; gap: var(--i-spacing-4); flex-wrap: wrap; align-items: center; }
+.split-demo {
+  height: 180px;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-lg);
+  overflow: hidden;
+}
+.split-pane { padding: var(--i-spacing-4); }
+.split-pane p { margin: var(--i-spacing-2) 0 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+.vl-demo {
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-lg);
+}
+.vl-row {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-4);
+  width: 100%;
+  padding: 0 var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+  height: 100%;
+  box-sizing: border-box;
+}
+.vl-no { width: 56px; color: var(--i-color-text-tertiary); font-variant-numeric: tabular-nums; }
+.vl-owner { margin-left: auto; color: var(--i-color-text-secondary); }
 .stack { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; }
 .grid-demo { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; }
 .cell {

@@ -77,6 +77,9 @@ import IAffix from './IAffix.vue'
 import IBackTop from './IBackTop.vue'
 import IWatermark from './IWatermark.vue'
 import IImage from './IImage.vue'
+import ISplitter from './ISplitter.vue'
+import IVirtualList from './IVirtualList.vue'
+import IColorPicker from './IColorPicker.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -145,6 +148,9 @@ export {
   IBackTop,
   IWatermark,
   IImage,
+  ISplitter,
+  IVirtualList,
+  IColorPicker,
   IForm,
   IFormItem,
   ITag,

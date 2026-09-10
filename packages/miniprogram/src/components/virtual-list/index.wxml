@@ -1,0 +1,19 @@
+<scroll-view
+  class="i-virtual"
+  scroll-y="{{true}}"
+  style="height:{{height}}px"
+  bindscroll="onScroll"
+>
+  <!-- 上下用两块空白撑开，滚动条长度天然正确，也不必为每一行算 top -->
+  <view wx:if="{{virtual}}" style="height:{{paddingTop}}px" aria-hidden="true" />
+  <view
+    wx:for="{{visible}}"
+    wx:key="index"
+    class="i-virtual__row"
+    style="height:{{itemHeight}}px"
+  >
+    <slot name="row" />
+    <text wx:if="{{!useSlot}}" class="i-virtual__text">{{item.label}}</text>
+  </view>
+  <view wx:if="{{virtual}}" style="height:{{paddingBottom}}px" aria-hidden="true" />
+</scroll-view>

@@ -23,6 +23,16 @@ const bundle = (entry, name) => {
 
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
+const {
+  resizePane, paneRatio, paneSize, keyboardStep
+} = await bundle('packages/common/src/logic/splitter.ts', 'splitter')
+const {
+  virtualWindow, scrollToRow, shouldVirtualize
+} = await bundle('packages/common/src/logic/virtual.ts', 'virtual')
+const { hexToHsv, hsvToHex, parseColor, colorReadout } = await bundle(
+  'packages/common/src/logic/color.ts',
+  'color'
+)
 const { resolveAffix, shouldShowBackTop, backTopFrame } = await bundle(
   'packages/common/src/logic/affix.ts',
   'affix'
@@ -1041,6 +1051,82 @@ const altExpectations = [
 ].map(([status, alt]) =>
   `    expect(imageAlt(IImageStatus.${status}, '${alt}'), '${imageAlt(status, alt)}');`)
 
+/* ---------- 分栏、虚拟滚动与取色 ----------
+ * 三处都是「两种答案都说得通」的地方：拖到底会怎样、上下多渲染几行、
+ * rgb() 用不用换算。各端各写一遍必然分叉，而且都不报错。
+ */
+const paneCases = [
+  [1000, 500], [1000, 0], [1000, 2000], [1000, 100], [1000, 900],
+  [300, 200], [100, 50],
+]
+const paneExpectations = paneCases.map(([total, next]) =>
+  `    expect(
+        resizePane(${total.toFixed(1)}, ${next.toFixed(1)},
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(${resizePane(total, next, { min: 120 }, { min: 160 }, 4)}, 1e-9));`)
+
+const ratioExpectationsSp = [[500, 1000], [0, 1000], [1200, 1000]].map(([size, total]) =>
+  `    expect(paneRatio(${size.toFixed(1)}, ${total.toFixed(1)}, gutter: 4.0),
+        closeTo(${paneRatio(size, total, 4)}, 1e-9));`)
+  .concat([[0.5, 1000], [1.5, 1000], [-0.2, 1000]].map(([ratio, total]) =>
+    `    expect(paneSize(${ratio.toFixed(2)}, ${total.toFixed(1)}, gutter: 4.0),
+        closeTo(${paneSize(ratio, total, 4)}, 1e-9));`))
+
+const b2_keyExpectations = [
+  ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
+  ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
+].map(([key, shift]) =>
+  `    expect(keyboardStep('${key}', ${shift}), ${keyboardStep(key, shift)});`)
+
+const winCases = [
+  [0, 320, 40, 20000], [400000, 320, 40, 20000], [799680, 320, 40, 20000],
+  [0, 320, 40, 5], [0, 320, 40, 0], [100, 320, 40, 20000],
+]
+const winExpectations = winCases.flatMap(([top, vh, ih, n]) => {
+  const w = virtualWindow(top, vh, ih, n)
+  return [
+    `    expect(virtualWindow(${top.toFixed(1)}, ${vh.toFixed(1)}, ${ih.toFixed(1)}, ${n}).start, ${w.start});`,
+    `    expect(virtualWindow(${top.toFixed(1)}, ${vh.toFixed(1)}, ${ih.toFixed(1)}, ${n}).end, ${w.end});`,
+    `    expect(virtualWindow(${top.toFixed(1)}, ${vh.toFixed(1)}, ${ih.toFixed(1)}, ${n}).paddingTop,
+        closeTo(${w.paddingTop}, 1e-9));`,
+    `    expect(virtualWindow(${top.toFixed(1)}, ${vh.toFixed(1)}, ${ih.toFixed(1)}, ${n}).paddingBottom,
+        closeTo(${w.paddingBottom}, 1e-9));`,
+  ]
+})
+
+// 已经完整可见就不动：每次都滚到顶部的话，用户会觉得列表在自己乱跳
+const scrollRowExpectations = [
+  [0, 40, 0, 320], [3, 40, 0, 320], [20, 40, 0, 320], [2, 40, 200, 320],
+].map(([i, ih, top, vh]) =>
+  `    expect(scrollToRow(${i}, ${ih.toFixed(1)}, ${top.toFixed(1)}, ${vh.toFixed(1)}),
+        closeTo(${scrollToRow(i, ih, top, vh)}, 1e-9));`)
+
+const virtualizeExpectations = [10, 60, 61, 20000].map((n) =>
+  `    expect(shouldVirtualize(${n}), ${shouldVirtualize(n)});`)
+
+// 通道是 0–1 归一化的：第一版按 0–255 写，rgb(30,60,90) 解析出来是纯白
+const parseCasesC = ['rgb(30, 60, 90)', '#0a0', '#1E3C5A', 'aabbcc', 'rgb(300,0,0)', '不是颜色', '']
+const parseExpectationsC = parseCasesC.map((t) => {
+  const got = parseColor(t)
+  return got
+    ? `    expect(parseColor('${t}'), '${got}');`
+    : `    expect(parseColor('${t}'), isNull);`
+})
+
+const roundTripExpectations = ['#5e7ce0', '#c2413d', '#ffffff', '#000000', '#00aa00', '#1e3c5a'].map(
+  (hex) => `    expect(hsvToHex(hexToHsv('${hex}')), '${hsvToHex(hexToHsv(hex))}');`
+)
+
+const readoutExpectations = ['#5e7ce0', '#ffe066', '#1d2129', '#ffffff'].flatMap((hex) => {
+  const r = colorReadout(hex)
+  return [
+    `    expect(colorReadout('${hex}').ink, '${r.ink}');`,
+    `    expect(colorReadout('${hex}').ratio, closeTo(${r.ratio}, 0.02));`,
+    `    expect(colorReadout('${hex}').passesUi, ${r.passesUi});`,
+    `    expect(colorReadout('${hex}').passesText, ${r.passesText});`,
+  ]
+})
+
 const file = `// 由 packages/flutter/scripts/build-golden-test.mjs 生成，请勿手改。
 //
 // 期望值全部由 packages/common 的 TypeScript 实现算出，因此这份测试校验的是
@@ -1063,6 +1149,9 @@ import 'package:i_design/src/logic/time.dart';
 import 'package:i_design/src/logic/transfer.dart';
 import 'package:i_design/src/logic/affix.dart';
 import 'package:i_design/src/logic/image.dart';
+import 'package:i_design/src/logic/splitter.dart';
+import 'package:i_design/src/logic/virtual.dart';
+import 'package:i_design/src/logic/color.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
@@ -1336,7 +1425,7 @@ ${hintExpectations.join('\n')}
   });
 
   test('数字键盘按键规则与 Web 端一致', () {
-${keyExpectations.join('\n')}
+${b2_keyExpectations.join('\n')}
 ${keyEdgeExpectations.join('\n')}
 ${rowsExpectations.join('\n')}
 ${completeExpectations.join('\n')}
@@ -1393,6 +1482,24 @@ ${rotateExpectations.join('\n')}
 ${ai_panExpectations.join('\n')}
 ${ai_stepExpectations.join('\n')}
 ${altExpectations.join('\n')}
+  });
+
+  test('分栏夹取与键盘步长与 Web 端一致', () {
+${paneExpectations.join('\n')}
+${ratioExpectationsSp.join('\n')}
+${b2_keyExpectations.join('\n')}
+  });
+
+  test('虚拟滚动的窗口与定位与 Web 端一致', () {
+${winExpectations.join('\n')}
+${scrollRowExpectations.join('\n')}
+${virtualizeExpectations.join('\n')}
+  });
+
+  test('取色器的解析、往返与对比度读数与 Web 端一致', () {
+${parseExpectationsC.join('\n')}
+${roundTripExpectations.join('\n')}
+${readoutExpectations.join('\n')}
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {

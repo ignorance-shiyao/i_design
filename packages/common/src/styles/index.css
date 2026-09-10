@@ -37,6 +37,7 @@
 @import './components/checkbox-group.css';
 @import './components/checkbox.css';
 @import './components/collapse.css';
+@import './components/colorpicker.css';
 @import './components/countdown.css';
 @import './components/date-picker.css';
 @import './components/descriptions.css';
@@ -78,6 +79,7 @@
 @import './components/skeleton.css';
 @import './components/slider.css';
 @import './components/space.css';
+@import './components/splitter.css';
 @import './components/statistic.css';
 @import './components/steps.css';
 @import './components/swipe-cell.css';
@@ -99,6 +101,7 @@
 @import './components/tree.css';
 @import './components/typography.css';
 @import './components/upload.css';
+@import './components/virtual.css';
 @import './components/watermark.css';
 
 /* 工具层排在最后：它要能盖过组件自己的 transition，见 build-styles-index.mjs */

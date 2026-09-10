@@ -1,0 +1,20 @@
+<view class="i-splitter i-splitter--{{direction}} {{dragging ? 'is-dragging' : ''}}" style="{{rootStyle}}">
+  <view class="i-splitter__pane" style="flex:0 0 calc((100% - {{gutter}}px) * {{value}})">
+    <slot name="first" />
+  </view>
+
+  <view
+    class="i-splitter__gutter"
+    style="flex-basis:{{gutter}}px"
+    aria-role="separator"
+    aria-label="调整分栏比例，当前 {{percent}}%"
+    bindtouchstart="onDown"
+    bindtouchmove="onMove"
+    bindtouchend="onUp"
+    bindtouchcancel="onUp"
+  >
+    <view class="i-splitter__grip" />
+  </view>
+
+  <view class="i-splitter__pane"><slot name="second" /></view>
+</view>

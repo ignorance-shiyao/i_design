@@ -20,6 +20,9 @@ import 'package:i_design/src/logic/time.dart';
 import 'package:i_design/src/logic/transfer.dart';
 import 'package:i_design/src/logic/affix.dart';
 import 'package:i_design/src/logic/image.dart';
+import 'package:i_design/src/logic/splitter.dart';
+import 'package:i_design/src/logic/virtual.dart';
+import 'package:i_design/src/logic/color.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '$label 点位不一致');
@@ -824,15 +827,13 @@ void main() {
   });
 
   test('数字键盘按键规则与 Web 端一致', () {
-    expect(pressKey('', '1'), '1');
-    expect(pressKey('1', '2'), '12');
-    expect(pressKey('12', '.'), '12.');
-    expect(pressKey('12.', '3'), '12.3');
-    expect(pressKey('12.3', '4'), '12.34');
-    expect(pressKey('12.34', '5'), '12.34');
-    expect(pressKey('12.34', 'backspace'), '12.3');
-    expect(pressKey('12.3', '.'), '12.3');
-    expect(pressKey('12.3', '9'), '12.39');
+    expect(keyboardStep('ArrowLeft', false), -8);
+    expect(keyboardStep('ArrowLeft', true), -48);
+    expect(keyboardStep('ArrowRight', false), 8);
+    expect(keyboardStep('ArrowRight', true), 48);
+    expect(keyboardStep('ArrowUp', false), -8);
+    expect(keyboardStep('ArrowDown', true), 48);
+    expect(keyboardStep('Enter', false), 0);
     expect(pressKey('', '.', decimals: 2, maxLength: 12, negative: false),
         '0.');
     expect(pressKey('0', '5', decimals: 2, maxLength: 12, negative: false),
@@ -1147,6 +1148,139 @@ void main() {
     expect(imageAlt(IImageStatus.loaded, '示例图'), '示例图');
     expect(imageAlt(IImageStatus.error, ''), '图片加载失败');
     expect(imageAlt(IImageStatus.loading, ''), '图片加载中');
+  });
+
+  test('分栏夹取与键盘步长与 Web 端一致', () {
+    expect(
+        resizePane(1000.0, 500.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(500, 1e-9));
+    expect(
+        resizePane(1000.0, 0.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(120, 1e-9));
+    expect(
+        resizePane(1000.0, 2000.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(836, 1e-9));
+    expect(
+        resizePane(1000.0, 100.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(120, 1e-9));
+    expect(
+        resizePane(1000.0, 900.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(836, 1e-9));
+    expect(
+        resizePane(300.0, 200.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(136, 1e-9));
+    expect(
+        resizePane(100.0, 50.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(120, 1e-9));
+    expect(paneRatio(500.0, 1000.0, gutter: 4.0),
+        closeTo(0.5020080321285141, 1e-9));
+    expect(paneRatio(0.0, 1000.0, gutter: 4.0),
+        closeTo(0, 1e-9));
+    expect(paneRatio(1200.0, 1000.0, gutter: 4.0),
+        closeTo(1, 1e-9));
+    expect(paneSize(0.50, 1000.0, gutter: 4.0),
+        closeTo(498, 1e-9));
+    expect(paneSize(1.50, 1000.0, gutter: 4.0),
+        closeTo(996, 1e-9));
+    expect(paneSize(-0.20, 1000.0, gutter: 4.0),
+        closeTo(0, 1e-9));
+    expect(keyboardStep('ArrowLeft', false), -8);
+    expect(keyboardStep('ArrowLeft', true), -48);
+    expect(keyboardStep('ArrowRight', false), 8);
+    expect(keyboardStep('ArrowRight', true), 48);
+    expect(keyboardStep('ArrowUp', false), -8);
+    expect(keyboardStep('ArrowDown', true), 48);
+    expect(keyboardStep('Enter', false), 0);
+  });
+
+  test('虚拟滚动的窗口与定位与 Web 端一致', () {
+    expect(virtualWindow(0.0, 320.0, 40.0, 20000).start, 0);
+    expect(virtualWindow(0.0, 320.0, 40.0, 20000).end, 11);
+    expect(virtualWindow(0.0, 320.0, 40.0, 20000).paddingTop,
+        closeTo(0, 1e-9));
+    expect(virtualWindow(0.0, 320.0, 40.0, 20000).paddingBottom,
+        closeTo(799520, 1e-9));
+    expect(virtualWindow(400000.0, 320.0, 40.0, 20000).start, 9997);
+    expect(virtualWindow(400000.0, 320.0, 40.0, 20000).end, 10011);
+    expect(virtualWindow(400000.0, 320.0, 40.0, 20000).paddingTop,
+        closeTo(399880, 1e-9));
+    expect(virtualWindow(400000.0, 320.0, 40.0, 20000).paddingBottom,
+        closeTo(399520, 1e-9));
+    expect(virtualWindow(799680.0, 320.0, 40.0, 20000).start, 19989);
+    expect(virtualWindow(799680.0, 320.0, 40.0, 20000).end, 19999);
+    expect(virtualWindow(799680.0, 320.0, 40.0, 20000).paddingTop,
+        closeTo(799560, 1e-9));
+    expect(virtualWindow(799680.0, 320.0, 40.0, 20000).paddingBottom,
+        closeTo(0, 1e-9));
+    expect(virtualWindow(0.0, 320.0, 40.0, 5).start, 0);
+    expect(virtualWindow(0.0, 320.0, 40.0, 5).end, 4);
+    expect(virtualWindow(0.0, 320.0, 40.0, 5).paddingTop,
+        closeTo(0, 1e-9));
+    expect(virtualWindow(0.0, 320.0, 40.0, 5).paddingBottom,
+        closeTo(0, 1e-9));
+    expect(virtualWindow(0.0, 320.0, 40.0, 0).start, 0);
+    expect(virtualWindow(0.0, 320.0, 40.0, 0).end, -1);
+    expect(virtualWindow(0.0, 320.0, 40.0, 0).paddingTop,
+        closeTo(0, 1e-9));
+    expect(virtualWindow(0.0, 320.0, 40.0, 0).paddingBottom,
+        closeTo(0, 1e-9));
+    expect(virtualWindow(100.0, 320.0, 40.0, 20000).start, 0);
+    expect(virtualWindow(100.0, 320.0, 40.0, 20000).end, 13);
+    expect(virtualWindow(100.0, 320.0, 40.0, 20000).paddingTop,
+        closeTo(0, 1e-9));
+    expect(virtualWindow(100.0, 320.0, 40.0, 20000).paddingBottom,
+        closeTo(799440, 1e-9));
+    expect(scrollToRow(0, 40.0, 0.0, 320.0),
+        closeTo(0, 1e-9));
+    expect(scrollToRow(3, 40.0, 0.0, 320.0),
+        closeTo(0, 1e-9));
+    expect(scrollToRow(20, 40.0, 0.0, 320.0),
+        closeTo(520, 1e-9));
+    expect(scrollToRow(2, 40.0, 200.0, 320.0),
+        closeTo(80, 1e-9));
+    expect(shouldVirtualize(10), false);
+    expect(shouldVirtualize(60), false);
+    expect(shouldVirtualize(61), true);
+    expect(shouldVirtualize(20000), true);
+  });
+
+  test('取色器的解析、往返与对比度读数与 Web 端一致', () {
+    expect(parseColor('rgb(30, 60, 90)'), '#1e3c5a');
+    expect(parseColor('#0a0'), '#00aa00');
+    expect(parseColor('#1E3C5A'), '#1e3c5a');
+    expect(parseColor('aabbcc'), '#aabbcc');
+    expect(parseColor('rgb(300,0,0)'), isNull);
+    expect(parseColor('不是颜色'), isNull);
+    expect(parseColor(''), isNull);
+    expect(hsvToHex(hexToHsv('#5e7ce0')), '#5e7ce0');
+    expect(hsvToHex(hexToHsv('#c2413d')), '#c2413d');
+    expect(hsvToHex(hexToHsv('#ffffff')), '#ffffff');
+    expect(hsvToHex(hexToHsv('#000000')), '#000000');
+    expect(hsvToHex(hexToHsv('#00aa00')), '#00aa00');
+    expect(hsvToHex(hexToHsv('#1e3c5a')), '#1e3c5a');
+    expect(colorReadout('#5e7ce0').ink, '#ffffff');
+    expect(colorReadout('#5e7ce0').ratio, closeTo(3.86, 0.02));
+    expect(colorReadout('#5e7ce0').passesUi, true);
+    expect(colorReadout('#5e7ce0').passesText, false);
+    expect(colorReadout('#ffe066').ink, '#1d2129');
+    expect(colorReadout('#ffe066').ratio, closeTo(12.37, 0.02));
+    expect(colorReadout('#ffe066').passesUi, true);
+    expect(colorReadout('#ffe066').passesText, true);
+    expect(colorReadout('#1d2129').ink, '#ffffff');
+    expect(colorReadout('#1d2129').ratio, closeTo(16.13, 0.02));
+    expect(colorReadout('#1d2129').passesUi, true);
+    expect(colorReadout('#1d2129').passesText, true);
+    expect(colorReadout('#ffffff').ink, '#1d2129');
+    expect(colorReadout('#ffffff').ratio, closeTo(16.13, 0.02));
+    expect(colorReadout('#ffffff').passesUi, true);
+    expect(colorReadout('#ffffff').passesText, true);
   });
 
   test('矩形树图 squarify 切块与 Web 端一致', () {
