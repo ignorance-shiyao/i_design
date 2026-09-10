@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import IIcon from '@/components/IIcon.vue'
 import ISegmented from '@/components/ISegmented.vue'
 import ISwitch from '@/components/ISwitch.vue'
@@ -7,7 +7,19 @@ import IButton from '@/components/IButton.vue'
 import { PRESET_BRANDS, useThemeConfig } from '@/composables/useThemeConfig'
 
 const { themeConfig, currentRamp, resetThemeConfig } = useThemeConfig()
-const open = ref(false)
+
+const open = defineModel<boolean>('open', { default: false })
+
+/* 点击面板外部关闭：面板挂在顶栏下方，不该挡住用户接下来的操作 */
+const root = ref<HTMLElement>()
+function onDocumentClick(event: MouseEvent) {
+  if (!open.value) return
+  const target = event.target as HTMLElement
+  if (root.value?.contains(target) || target.closest('[data-theme-trigger]')) return
+  open.value = false
+}
+onMounted(() => document.addEventListener('click', onDocumentClick))
+onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
 
 const scaleOptions = [
   { value: 'compact', label: '紧凑' },
@@ -29,19 +41,8 @@ const contrastLevel = computed(() => {
 </script>
 
 <template>
-  <button
-    class="tp__fab"
-    :class="{ 'is-open': open }"
-    :aria-expanded="open"
-    aria-label="主题配置"
-    title="主题配置"
-    @click="open = !open"
-  >
-    <IIcon :name="open ? 'close' : 'sparkle'" :size="18" />
-  </button>
-
   <Transition name="tp">
-    <aside v-if="open" class="tp" role="dialog" aria-label="主题配置">
+    <aside v-if="open" ref="root" class="tp" role="dialog" aria-label="主题配置">
       <header class="tp__head">
         <div>
           <p class="tp__title">主题配置</p>
@@ -139,34 +140,14 @@ const contrastLevel = computed(() => {
 </template>
 
 <style scoped>
-.tp__fab {
-  position: fixed;
-  right: var(--i-spacing-6);
-  bottom: var(--i-spacing-6);
-  z-index: 1200;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--i-color-hairline);
-  border-radius: var(--i-radius-full);
-  background: var(--i-color-bg-elevated);
-  color: var(--i-color-brand);
-  box-shadow: var(--i-shadow-lg);
-  cursor: pointer;
-  transition: transform var(--i-motion-base) var(--i-motion-easing),
-    color var(--i-motion-fast) var(--i-motion-easing);
-}
-.tp__fab:hover { transform: scale(1.06); }
-.tp__fab.is-open { color: var(--i-color-text-secondary); }
-
 .tp {
+  /* 挂在顶栏正下方：入口在顶栏，面板就该从那里落下来 */
   position: fixed;
   right: var(--i-spacing-6);
-  bottom: calc(var(--i-spacing-6) + 56px);
+  top: 60px;
   z-index: 1200;
   width: 320px;
-  max-height: calc(100vh - 140px);
+  max-height: calc(100vh - 96px);
   overflow-y: auto;
   padding: var(--i-spacing-5);
   border: 1px solid var(--i-color-border);
@@ -274,17 +255,16 @@ const contrastLevel = computed(() => {
 .tp-leave-active {
   transition: opacity var(--i-motion-base) var(--i-motion-easing),
     transform var(--i-motion-base) var(--i-motion-easing);
-  transform-origin: bottom right;
+  transform-origin: top right;
 }
 .tp-enter-from,
-.tp-leave-to { opacity: 0; transform: translateY(8px) scale(0.96); }
+.tp-leave-to { opacity: 0; transform: translateY(-8px) scale(0.96); }
 
 @media (max-width: 600px) {
   .tp { right: var(--i-spacing-4); left: var(--i-spacing-4); width: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
   .tp-enter-active,
-  .tp-leave-active,
-  .tp__fab { transition: none; }
+  .tp-leave-active { transition: none; }
 }
 </style>

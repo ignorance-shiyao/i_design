@@ -136,3 +136,103 @@ export function confidenceOf(score: number): Confidence {
   if (value >= 0.45) return { level: 'medium', bars: 2, label: '中等置信度' }
   return { level: 'low', bars: 1, label: '低置信度' }
 }
+
+/* ---------- 上下文卡（检索到的知识片段） ---------- */
+
+export interface ContextChunk {
+  id: string
+  title: string
+  content: string
+  /** 出处文件名，用于取类型图标 */
+  source?: string
+  /** 出处链接 */
+  href?: string
+  /** 检索相关度 0–1，可选 */
+  score?: number
+}
+
+/**
+ * 片段的字符数展示。
+ *
+ * 用字符数而不是 token 数：token 是模型的内部单位，同一段文字在不同模型下
+ * 数值不同，用户无从判断这个数字意味着什么；字符数至少和他看到的内容对得上。
+ */
+export function chunkLength(content: string): number {
+  return [...content].length
+}
+
+/** 超长片段折叠后的预览文本，按字符截断并补省略号 */
+export function chunkPreview(content: string, limit = 140): string {
+  const chars = [...content]
+  return chars.length <= limit ? content : `${chars.slice(0, limit).join('')}…`
+}
+
+/* ---------- 差异表（智能体提出的成批改动） ---------- */
+
+export type DiffRowKind = 'added' | 'removed' | 'changed' | 'unchanged'
+
+export interface DiffCell {
+  value: string
+  /** 变更前的值；有它才渲染删除线 */
+  before?: string
+}
+
+export interface DiffRow {
+  id: string
+  kind: DiffRowKind
+  cells: Record<string, DiffCell>
+}
+
+export interface DiffSummary {
+  added: number
+  removed: number
+  changed: number
+  /** 已勾选的改动数 —— 底部按钮上的 N */
+  selected: number
+  /** 有改动的行总数（不含未变行） */
+  total: number
+}
+
+/**
+ * 差异统计。
+ *
+ * 未变的行不计入总数——它们只是上下文，让用户看清改动落在哪里。
+ * 把它们算进「共 N 处改动」会让数字大得没有意义。
+ */
+export function summarizeDiff(rows: DiffRow[], selected: Iterable<string>): DiffSummary {
+  const picked = new Set(selected)
+  const changedRows = rows.filter((r) => r.kind !== 'unchanged')
+  return {
+    added: changedRows.filter((r) => r.kind === 'added').length,
+    removed: changedRows.filter((r) => r.kind === 'removed').length,
+    changed: changedRows.filter((r) => r.kind === 'changed').length,
+    selected: changedRows.filter((r) => picked.has(r.id)).length,
+    total: changedRows.length
+  }
+}
+
+/** 默认全选所有改动：智能体给的是一整套方案，逐个勾选反而是例外 */
+export function defaultDiffSelection(rows: DiffRow[]): string[] {
+  return rows.filter((r) => r.kind !== 'unchanged').map((r) => r.id)
+}
+
+/** 切换一行的采纳状态；未变行不可切换 */
+export function toggleDiffRow(
+  rows: DiffRow[],
+  selected: Iterable<string>,
+  id: string
+): string[] {
+  const row = rows.find((r) => r.id === id)
+  if (!row || row.kind === 'unchanged') return [...selected]
+  const next = new Set(selected)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  return [...next]
+}
+
+/** 底部按钮文案：没有勾选时说清楚为什么不能点 */
+export function diffActionLabel(summary: DiffSummary): string {
+  if (summary.total === 0) return '没有需要应用的改动'
+  if (summary.selected === 0) return '未选择改动'
+  return `应用 ${summary.selected} 处改动`
+}

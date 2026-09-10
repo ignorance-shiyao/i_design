@@ -168,3 +168,138 @@
 .i-confidence.is-high { color: var(--i-color-success); }
 .i-confidence.is-medium { color: var(--i-color-warning); }
 .i-confidence.is-low { color: var(--i-color-text-tertiary); }
+
+/* ---------- 上下文卡：检索到的知识片段 ---------- */
+.i-context { display: grid; gap: var(--i-spacing-3); }
+.i-context__head {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-context__count {
+  padding: 0 var(--i-spacing-2);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.i-chunk {
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+}
+.i-chunk__head { display: flex; align-items: baseline; gap: var(--i-spacing-2); }
+.i-chunk__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--i-font-size-md);
+  color: var(--i-color-text);
+}
+/* 字符数而不是 token 数：token 是模型的内部单位，用户无从判断它意味着什么 */
+.i-chunk__length {
+  flex: none;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.i-chunk__body {
+  margin-top: var(--i-spacing-2);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  line-height: var(--i-line-height-base);
+}
+.i-chunk__more {
+  margin-top: var(--i-spacing-1);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--i-color-text-link);
+  font: inherit;
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
+}
+/* 出处做成可点的芯片：读者最常问的下一个问题是「这句话哪儿来的」 */
+.i-chunk__source {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  margin-top: var(--i-spacing-3);
+  padding: 2px var(--i-spacing-2);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  text-decoration: none;
+}
+.i-chunk__source:hover { border-color: var(--i-color-brand); color: var(--i-color-brand); }
+.i-chunk__source-icon { color: var(--i-file-color, var(--i-color-brand)); }
+
+/* ---------- 差异表 ---------- */
+.i-difftable {
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  overflow: hidden;
+}
+.i-difftable__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-difftable__title { font-size: var(--i-font-size-md); font-weight: 500; color: var(--i-color-text); }
+.i-difftable__hint { margin-left: auto; color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); }
+
+.i-difftable__grid { width: 100%; border-collapse: collapse; font-size: var(--i-font-size-sm); }
+.i-difftable__grid th {
+  padding: var(--i-spacing-2) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+  color: var(--i-color-text-tertiary);
+  font-weight: 400;
+  text-align: left;
+}
+.i-difftable__grid td {
+  padding: var(--i-spacing-2) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+  color: var(--i-color-text);
+}
+.i-difftable__row { cursor: pointer; }
+.i-difftable__row.is-unchanged { cursor: default; }
+/*
+ * 改动类型用淡底 + 前缀符号（＋ / − / ~）双重表达。
+ * 只用红绿底色的话，色觉障碍用户看到的是两块一样的灰。
+ */
+.i-difftable__row.is-added td { background: var(--i-color-success-subtle); }
+.i-difftable__row.is-removed td { background: var(--i-color-danger-subtle); }
+.i-difftable__row.is-changed td { background: var(--i-color-warning-subtle); }
+.i-difftable__row.is-off td { background: none; opacity: 0.55; }
+
+.i-difftable__sign {
+  display: inline-block;
+  width: 1em;
+  color: var(--i-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.i-difftable__row.is-added .i-difftable__sign { color: var(--i-color-success); }
+.i-difftable__row.is-removed .i-difftable__sign { color: var(--i-color-danger); }
+.i-difftable__row.is-changed .i-difftable__sign { color: var(--i-color-warning); }
+/* 变更前的值加删除线，与新值并排，读者不必在两个表之间来回比 */
+.i-difftable__before { margin-right: var(--i-spacing-2); color: var(--i-color-text-tertiary); text-decoration: line-through; }
+
+.i-difftable__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+}
+.i-difftable__stat { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); }
+.i-difftable__foot .i-button { margin-left: auto; }

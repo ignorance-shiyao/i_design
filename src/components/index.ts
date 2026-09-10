@@ -58,6 +58,8 @@ import INotificationLayer from './INotificationLayer.vue'
 import IApprovalCard from './IApprovalCard.vue'
 import IAgentTasks from './IAgentTasks.vue'
 import IRecommendCard from './IRecommendCard.vue'
+import IContextCards from './IContextCards.vue'
+import IDiffTable from './IDiffTable.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -107,6 +109,8 @@ export {
   IApprovalCard,
   IAgentTasks,
   IRecommendCard,
+  IContextCards,
+  IDiffTable,
   IForm,
   IFormItem,
   ITag,

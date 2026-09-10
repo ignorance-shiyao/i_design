@@ -1,10 +1,20 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useTheme } from '@/composables/useTheme'
 import IIcon from '@/components/IIcon.vue'
 import MobileNav from './MobileNav.vue'
 import { mobileNavOpen } from '@/composables/useMobileNav'
 
+import ThemePanel from '@/site/ThemePanel.vue'
 const { theme, toggleTheme } = useTheme()
+const themePanelOpen = ref(false)
+
+/* 揭幕从被点的那个开关展开，动效才解释得清因果 */
+function onToggleTheme(event: MouseEvent) {
+  const el = event.currentTarget as HTMLElement
+  const box = el.getBoundingClientRect()
+  toggleTheme({ x: box.x + box.width / 2, y: box.y + box.height / 2 })
+}
 
 const links = [
   { to: '/design/values', label: '设计价值观' },
@@ -37,7 +47,22 @@ const links = [
         >
           <IIcon name="github" :size="16" />
         </a>
-        <button class="header__icon" :title="theme === 'dark' ? '切换到亮色' : '切换到暗色'" @click="toggleTheme">
+        <button
+          class="header__icon"
+          data-theme-trigger
+          :class="{ 'is-active': themePanelOpen }"
+          title="主题配置"
+          aria-label="主题配置"
+          :aria-expanded="themePanelOpen"
+          @click="themePanelOpen = !themePanelOpen"
+        >
+          <IIcon name="palette" :size="16" />
+        </button>
+        <button
+          class="header__icon"
+          :title="theme === 'dark' ? '切换到亮色' : '切换到暗色'"
+          @click="onToggleTheme"
+        >
           <IIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="16" />
         </button>
         <button
@@ -51,6 +76,7 @@ const links = [
       </div>
     </div>
     <MobileNav />
+    <ThemePanel v-model:open="themePanelOpen" />
   </header>
 </template>
 
