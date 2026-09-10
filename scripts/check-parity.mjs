@@ -97,6 +97,33 @@ for (const file of readdirSync(styleDir).filter((f) => f.endsWith('.css'))) {
 }
 check('共享样式无全局泄漏的通用选择器', leaks.length === 0, leaks.slice(0, 4).join('; '))
 
+/* ---------- 4b. 每个样式文件都要能从入口到达 ---------- */
+/*
+ * motion.css 曾经躺在 styles/ 下从没被任何入口 import 过：整个动效层是死代码，
+ * 页面上一个进场、一次抬升都不存在，而构建、类型检查、跨端比对全是绿的——
+ * 样式「写了但没接上」不会以任何形式报错，只能靠这一条盯着。
+ *
+ * 两个例外：mobile.css 由移动端在 index.css 之后单独引入；
+ * tokens.mobile.css 是它的令牌覆盖层，只从 mobile.css 进来。
+ */
+const styleRoot = 'packages/common/src/styles'
+const entry = readFileSync(`${styleRoot}/index.css`, 'utf8')
+const standalone = new Set(['index.css', 'mobile.css'])
+const mobileEntry = readFileSync(`${styleRoot}/mobile.css`, 'utf8')
+const unreachable = []
+for (const file of readdirSync(styleRoot).filter((f) => f.endsWith('.css'))) {
+  if (standalone.has(file)) continue
+  if (!entry.includes(`./${file}`) && !mobileEntry.includes(`./${file}`)) unreachable.push(file)
+}
+for (const file of readdirSync(`${styleRoot}/components`).filter((f) => f.endsWith('.css'))) {
+  if (!entry.includes(`./components/${file}`)) unreachable.push(`components/${file}`)
+}
+check(
+  '每个样式文件都能从 index.css 到达（漏接的样式不会报错，只会让界面是裸的）',
+  unreachable.length === 0,
+  unreachable.join(', ')
+)
+
 /* ---------- 5. Vue 2 端不得残留 Vue 3 专有语法 ---------- */
 /*
  * 转换器的产物必须真的能被 Vue 2.7 编译。这里静态拦下三类已经踩过的坑：

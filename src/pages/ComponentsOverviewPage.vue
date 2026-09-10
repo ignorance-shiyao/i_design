@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { componentCategories, readyCount } from '@/data/components'
+import { componentCategories } from '@/data/components'
 import ITag from '@/components/ITag.vue'
 </script>
 
@@ -7,8 +7,9 @@ import ITag from '@/components/ITag.vue'
   <article>
     <h1>组件总览</h1>
     <p class="i-lead">
-      按使用场景分类的全部组件。已实现 {{ readyCount }} 个，标灰项为规划中——
-      列出它们是为了说明体系的边界，避免使用者在文档里反复搜索一个还不存在的组件。
+      按使用场景分类，而不是按实现难度——你要找的东西通常是「用来干什么」，
+      不是「它属于哪一类控件」。标灰的是规划中：把边界写出来，
+      比让人在文档里反复搜一个还不存在的组件要好。
     </p>
 
     <section v-for="category in componentCategories" :key="category.title" class="cat">

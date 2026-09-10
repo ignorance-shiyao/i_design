@@ -36,11 +36,31 @@ const values = [
   }
 ]
 
-const features = [
-  { icon: 'palette', title: '一致的设计语言', desc: '从色彩、字号到间距与动效，统一到一套 4px 栅格与语义令牌之上。' },
-  { icon: 'code', title: 'Vue 3 + TypeScript', desc: '基于 Vite + Vue 3 组合式 API 与 TS 编写，完整类型提示，按需引入。' },
-  { icon: 'moon', title: '深色模式内建', desc: '语义令牌天然支持双主题，业务组件无需任何适配代码。' },
-  { icon: 'check-circle', title: '可访问性优先', desc: '语义化标签、键盘可达、可见的焦点样式与 ARIA 状态贯穿全部组件。' }
+/*
+ * 这一组讲的是「靠什么保证不跑偏」，而不是「我们有多好」。
+ * 每条都对应仓库里一个具体的机制，读者可以去代码里核对。
+ */
+const guards = [
+  {
+    icon: 'layers',
+    title: '令牌只有一份',
+    desc: 'CSS 变量、WXSS 变量与 Dart 常量都由同一份令牌编译产出。任何一端想改颜色，都得回到那份定义。'
+  },
+  {
+    icon: 'code',
+    title: '交互规则是纯函数',
+    desc: '翻页判定、浮层避让、树的半选推导写成不依赖框架的函数，各端只负责渲染，不重新解释一遍规则。'
+  },
+  {
+    icon: 'check-circle',
+    title: '一致性由测试兜底',
+    desc: '跨端期望值由同一份实现算出，逐值比对。「两端表现不同」会让构建失败，而不是等用户发现。'
+  },
+  {
+    icon: 'palette',
+    title: '换肤不改组件',
+    desc: '组件只引用语义令牌，不写死色值。深色模式与品牌换肤都只覆盖语义层，业务代码零改动。'
+  }
 ] as const
 
 const { theme } = useTheme()
@@ -51,9 +71,13 @@ const hero = computed(() =>
     : heroIllustrations.light
 )
 
-// Hero 预览卡随指针做 3D 倾斜，插画层浮在卡片之前形成纵深
+/*
+ * Hero 预览卡随指针轻微倾斜，插画层浮在卡片之前形成纵深。
+ * 角度压到 3 度：再大就从「有厚度」变成「在耍花样」，
+ * 而首屏承载的是「这套体系长什么样」，不是特效演示。
+ */
 const preview = ref<HTMLElement | null>(null)
-useTilt(preview, { max: 6 })
+useTilt(preview, { max: 3 })
 
 const usageSnippet = `<IButton variant="primary">
   提交
@@ -63,6 +87,24 @@ const previewSteps = [{ title: '基本信息' }, { title: '关联迭代' }, { ti
 
 const demoInput = ref('')
 const demoSwitch = ref(true)
+
+/*
+ * 立方体转到读者正在看的那一条价值观上。
+ * 键盘同样要能驱动它——只挂 hover 的话，用 Tab 浏览的人看到的是一个不动的方块。
+ */
+/*
+ * 首页每类只列前几项。
+ *
+ * 首页是「先看看这是什么」，不是查手册：一列 19 项、另一列 4 项，
+ * 高矮相差五倍，读者既数不完也对不齐。完整清单在组件总览里，那里才需要穷举。
+ */
+const COVERAGE_PREVIEW = 6
+
+const activeValue = ref(-1)
+const cubeFaces = [
+  ...values.map((v) => ({ key: v.key, en: v.en })),
+  { key: '一致', en: 'Consistent' }
+]
 </script>
 
 <template>
@@ -72,14 +114,22 @@ const demoSwitch = ref(true)
       <div class="i-container hero__inner">
         <div class="hero__text">
           <ITag type="brand" round>v0.1.0 · 开源设计体系</ITag>
-          <!-- 不写死换行：窄屏上「的」会被挤成单独一行，交给 text-wrap 平衡断行 -->
+          <!--
+            两行是写死的，不交给 text-wrap 平衡。
+            自动断行会把「一次决策落到每个端」从中间劈开，行尾留一个孤零零的「一」——
+            中文标题断错位置比断得不匀难看得多，而这句的语义分界本来就在这里。
+          -->
           <h1 class="hero__title">
-            为企业中后台而生的<span class="hero__title-accent">设计体系</span>
+            中后台设计体系
+            <span class="hero__title-accent">一次决策，落到每个端</span>
           </h1>
+          <!--
+            中文没有连字符，长句换行会从词中间断开（「渲染适配」被劈成两行）。
+            与其加断行控制，不如把句子写短——一句话说完的事不必写成三句。
+          -->
           <p class="hero__desc i-lead">
-            Ignorance Design 把设计价值观、设计令牌与组件实现收成一套语言，
-            让设计与研发不再各写各的；同一套决策落到 Web、小程序、移动端与 Flutter，
-            改一次颜色，处处生效。
+            令牌、图标与交互规则只写一份，Web、小程序、移动端与 Flutter 只做渲染适配。
+            换一个主色，各端同时生效。
           </p>
           <div class="hero__actions">
             <RouterLink to="/components">
@@ -88,10 +138,10 @@ const demoSwitch = ref(true)
             <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
           </div>
           <ul class="hero__facts">
-            <li><IIcon name="layers" :size="16" /><span>一套令牌驱动全部端</span></li>
-            <li><IIcon name="palette" :size="16" /><span>深浅色与品牌换肤内建</span></li>
-            <li><IIcon name="code" :size="16" /><span>组件行为跨端一致</span></li>
-            <li><IIcon name="check-circle" :size="16" /><span>无障碍与触控尺度默认到位</span></li>
+            <li><IIcon name="layers" :size="16" /><span>令牌是唯一数据源</span></li>
+            <li><IIcon name="palette" :size="16" /><span>换肤只改语义层</span></li>
+            <li><IIcon name="code" :size="16" /><span>跨端行为逐值比对</span></li>
+            <li><IIcon name="check-circle" :size="16" /><span>对比度与键盘可达经校验</span></li>
           </ul>
         </div>
 
@@ -99,14 +149,14 @@ const demoSwitch = ref(true)
         <div ref="preview" class="hero__preview" aria-label="组件预览">
           <img
             class="hero__art i-tilt__layer"
-            style="--i-layer-depth: 40"
+            style="--i-layer-depth: 24"
             :src="hero.src"
             :srcset="hero.srcset"
             width="600"
             alt=""
             fetchpriority="high"
           />
-          <ICard class="i-tilt__layer" style="--i-layer-depth: 18" title="创建工作项" hoverable>
+          <ICard class="i-tilt__layer" style="--i-layer-depth: 10" title="创建工作项" hoverable>
             <ISteps class="preview__steps" :items="previewSteps" :current="1" />
             <div class="preview__field">
               <label>标题</label>
@@ -139,13 +189,18 @@ const demoSwitch = ref(true)
       <h2 class="section__title">设计价值观</h2>
       <p class="section__desc i-lead">三条价值观贯穿每一次设计决策，也是评审组件是否合格的标尺。</p>
       <div class="values-3d">
-        <ValueCube :size="200" />
-        <div class="values">
+        <ValueCube :size="200" :active="activeValue" :faces="cubeFaces" />
+        <div class="values i-stagger">
           <article
             v-for="(value, index) in values"
             :key="value.key"
-            v-reveal:left="index * 90"
+            v-reveal:left
             class="value"
+            tabindex="0"
+            @mouseenter="activeValue = index"
+            @focusin="activeValue = index"
+            @mouseleave="activeValue = -1"
+            @focusout="activeValue = -1"
           >
           <span class="value__en">{{ value.en }}</span>
           <h3 class="value__title">{{ value.key }}</h3>
@@ -158,13 +213,17 @@ const demoSwitch = ref(true)
     <!-- 能力特性 -->
     <section class="section section--muted">
       <div class="i-container">
-        <span class="i-eyebrow">Why</span>
-        <h2 class="section__title">为什么选择 Ignorance Design</h2>
-        <div class="features">
+        <span class="i-eyebrow">How</span>
+        <h2 class="section__title">靠什么保证不跑偏</h2>
+        <p class="section__desc i-lead">
+          跨端体系最容易烂在「哪一端偷偷改了一点」。下面四条都是仓库里的具体机制，
+          可以直接去代码里核对。
+        </p>
+        <div class="features i-stagger">
           <ICard
-            v-for="(feature, index) in features"
+            v-for="(feature, index) in guards"
             :key="feature.title"
-            v-reveal:depth="index * 80"
+            v-reveal:depth
             hoverable
             class="feature i-lift"
           >
@@ -181,14 +240,14 @@ const demoSwitch = ref(true)
       <span class="i-eyebrow">Coverage</span>
       <h2 class="section__title">覆盖范围</h2>
       <p class="section__desc i-lead">
-        按中后台的真实使用场景分类，而不是按实现难度。标注为规划中的，
-        是我们认为该有、但还没做到可用的——把边界写出来，比让使用者去猜要诚实。
+        按中后台的真实使用场景分类，而不是按实现难度。标为规划中的是该有、但还没做到可用的——
+        把边界写出来，比让人在文档里反复搜一个不存在的组件要好。
       </p>
-      <div class="coverage">
+      <div class="coverage i-stagger">
         <div
           v-for="(category, index) in componentCategories"
           :key="category.title"
-          v-reveal="index * 70"
+          v-reveal
           class="coverage__col"
         >
           <div class="coverage__head">
@@ -199,12 +258,15 @@ const demoSwitch = ref(true)
           </div>
           <ul>
             <li
-              v-for="item in category.items"
+              v-for="item in category.items.slice(0, COVERAGE_PREVIEW)"
               :key="item.name"
               :class="{ 'is-planned': item.status === 'planned' }"
             >
               <RouterLink v-if="item.status === 'ready'" :to="item.to">{{ item.name }}</RouterLink>
               <span v-else>{{ item.name }}</span>
+            </li>
+            <li v-if="category.items.length > COVERAGE_PREVIEW" class="coverage__more">
+              <RouterLink to="/components">还有 {{ category.items.length - COVERAGE_PREVIEW }} 个</RouterLink>
             </li>
           </ul>
         </div>
@@ -219,16 +281,16 @@ const demoSwitch = ref(true)
     <section class="section section--muted">
       <div class="i-container">
         <span class="i-eyebrow">Cross-platform</span>
-        <h2 class="section__title">一套体系，七个技术栈</h2>
+        <h2 class="section__title">你的技术栈在里面</h2>
         <p class="section__desc i-lead">
-          令牌、图标与交互规则只存在一份，各端只写渲染适配。因此同一个组件在任意一端
-          的外观与行为都对得上，不需要为某个端单独维护一套设计稿。
+          各端不是「移植版」，而是同一份令牌与规则的不同渲染层。
+          因此不必为某一端单独维护一套设计稿，也不会出现「Web 上是这样，小程序上不是」。
         </p>
-        <div class="stacks">
+        <div class="stacks i-stagger">
           <RouterLink
             v-for="(f, index) in frameworks"
             :key="f.id"
-            v-reveal="index * 60"
+            v-reveal
             class="stack"
             to="/design/cross-platform"
           >
@@ -246,13 +308,26 @@ const demoSwitch = ref(true)
     <section class="i-container section">
       <span class="i-eyebrow">Get started</span>
       <h2 class="section__title">三步接入</h2>
-      <div class="steps">
-        <div v-reveal:depth="0" class="step i-lift">
+      <!--
+        第一步写清楚是 clone 而不是 npm install。
+        包还没发到 npm，只写「npm install」对外部使用者是一条执行不了的指令——
+        照着做失败一次，人就走了。没发布就直说没发布。
+      -->
+      <p class="section__desc i-lead">
+        还没有发到 npm，先克隆仓库使用；令牌与组件都在 <code>packages/</code> 下，可以整包引，也可以只取需要的那几个。
+      </p>
+      <div class="steps i-stagger">
+        <div v-reveal:depth class="step i-lift">
           <span class="step__no">1</span>
-          <h3>安装依赖</h3>
-          <CodeBlock code="npm install" lang="bash" :copyable="false" />
+          <h3>取得代码</h3>
+          <CodeBlock
+            lang="bash"
+            :copyable="false"
+            code="git clone https://github.com/ignorance-shiyao/i_design
+cd i_design && npm install"
+          />
         </div>
-        <div v-reveal:depth="100" class="step i-lift">
+        <div v-reveal:depth class="step i-lift">
           <span class="step__no">2</span>
           <h3>引入令牌与组件</h3>
           <CodeBlock
@@ -264,7 +339,7 @@ import IDesign from '@/components'
 app.use(IDesign)"
           />
         </div>
-        <div v-reveal:depth="200" class="step i-lift">
+        <div v-reveal:depth class="step i-lift">
           <span class="step__no">3</span>
           <h3>直接使用</h3>
           <CodeBlock
@@ -279,8 +354,8 @@ app.use(IDesign)"
     <section class="i-container">
       <div v-reveal:depth class="cta">
         <div>
-          <h2>把设计决策沉淀成系统</h2>
-          <p>浏览完整的令牌表与组件文档，或直接从组件示例开始。</p>
+          <h2>从令牌开始读</h2>
+          <p>令牌表是这套体系的地基，组件的每一个取值都能在那里找到出处。</p>
         </div>
         <RouterLink to="/design/tokens">
           <IButton variant="primary" size="lg">
@@ -294,9 +369,14 @@ app.use(IDesign)"
 
 <style scoped>
 /* Hero */
+/*
+ * 首屏收紧一点：原先上下各留 80/64px，加上插画与预览卡纵向叠起来，
+ * 1440×900 的屏上卡片会被折线切掉一截——首屏露出半张卡，
+ * 观感上就是「没做完」，而不是「下面还有」。
+ */
 .hero {
   position: relative;
-  padding: var(--i-spacing-20) 0 var(--i-spacing-16);
+  padding: var(--i-spacing-12) 0;
   overflow: hidden;
   background:
     radial-gradient(50% 60% at 12% -10%, var(--i-color-brand-subtle), transparent 70%),
@@ -319,23 +399,20 @@ app.use(IDesign)"
 .hero__inner { position: relative; }
 .hero__inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: var(--i-spacing-16);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--i-spacing-12);
   align-items: center;
 }
 .hero__title {
   margin: var(--i-spacing-5) 0 var(--i-spacing-4);
   font-size: var(--i-font-size-5xl);
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  /* 让浏览器平衡各行长度，避免末行只剩一两个字 */
-  text-wrap: balance;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
 }
+/* 副句独占一行：语义分界在这里，断行也该在这里 */
 .hero__title-accent {
-  background: var(--i-color-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  display: block;
+  color: var(--i-color-brand);
 }
 .hero__actions { display: flex; gap: var(--i-spacing-3); margin-top: var(--i-spacing-8); }
 .hero__facts {
@@ -343,7 +420,7 @@ app.use(IDesign)"
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
   gap: var(--i-spacing-3) var(--i-spacing-6);
-  margin: var(--i-spacing-10) 0 0;
+  margin: var(--i-spacing-8) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -356,19 +433,26 @@ app.use(IDesign)"
 }
 .hero__facts svg { color: var(--i-color-brand); flex: none; }
 
+/*
+ * 插画收小并右对齐，让它退成陪衬。
+ *
+ * 首屏真正该被看见的是右边那张用组件本身搭出来的卡片——它同时是展示与回归用例。
+ * 插画铺满一整列时，读者第一眼落在插画上，而插画说明不了这套体系能做什么。
+ */
 .hero__art {
   display: block;
   width: 100%;
-  max-width: 520px;
+  max-width: 340px;
   height: auto;
-  margin: 0 auto var(--i-spacing-5);
+  margin: 0 0 calc(var(--i-spacing-4) * -1) auto;
 }
 .hero__preview {
   filter: drop-shadow(var(--i-shadow-xl));
-  animation: hero-float 600ms var(--i-motion-easing) both;
+  /* 时长与「不超过 320ms」这条价值观对齐；曲线用 easing-out，进场要快进慢停 */
+  animation: hero-float var(--i-motion-slow) var(--i-motion-easing-out) both;
 }
 @keyframes hero-float {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(8px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero__preview { animation: none; }
@@ -407,9 +491,15 @@ app.use(IDesign)"
 .coverage {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--i-spacing-6);
+  gap: var(--i-spacing-8) var(--i-spacing-6);
   margin-top: var(--i-spacing-8);
+  align-items: start;
 }
+.coverage__more a {
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}
+.coverage__more a:hover { color: var(--i-color-brand); }
 .coverage__head {
   display: flex;
   align-items: baseline;
@@ -515,16 +605,6 @@ app.use(IDesign)"
   overflow: hidden;
   transition: box-shadow var(--i-motion-base) var(--i-motion-easing),
     transform var(--i-motion-base) var(--i-motion-easing);
-}
-.value::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: var(--i-spacing-6);
-  bottom: var(--i-spacing-6);
-  width: 2px;
-  border-radius: 0 2px 2px 0;
-  background: var(--i-color-brand);
 }
 .value:hover { transform: translateY(-2px); box-shadow: var(--i-shadow-md); }
 .value__en {
