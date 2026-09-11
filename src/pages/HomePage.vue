@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useTilt } from '@/composables/useTilt'
-import ValueCube from '@/site/ValueCube.vue'
-import TokenScene from '@/site/TokenScene.vue'
 import IButton from '@/components/IButton.vue'
 import IInput from '@/components/IInput.vue'
 import ICard from '@/components/ICard.vue'
@@ -10,8 +8,6 @@ import ITag from '@/components/ITag.vue'
 import IAlert from '@/components/IAlert.vue'
 import ISwitch from '@/components/ISwitch.vue'
 import { componentCategories } from '@/data/components'
-import { useTheme } from '@/composables/useTheme'
-import { heroIllustrations } from '@i-design/common'
 import CodeBlock from '@/site/CodeBlock.vue'
 import IIcon from '@/components/IIcon.vue'
 import ISteps from '@/components/ISteps.vue'
@@ -64,13 +60,6 @@ const guards = [
   }
 ] as const
 
-const { theme } = useTheme()
-// 插画有明暗两版，跟随主题切换而不是靠滤镜硬套
-const hero = computed(() =>
-  theme.value === 'dark'
-    ? heroIllustrations.dark
-    : heroIllustrations.light
-)
 
 /*
  * Hero 预览卡随指针轻微倾斜，插画层浮在卡片之前形成纵深。
@@ -101,11 +90,6 @@ const demoSwitch = ref(true)
  */
 const COVERAGE_PREVIEW = 6
 
-const activeValue = ref(-1)
-const cubeFaces = [
-  ...values.map((v) => ({ key: v.key, en: v.en })),
-  { key: '一致', en: 'Consistent' }
-]
 </script>
 
 <template>
@@ -146,7 +130,11 @@ const cubeFaces = [
           </ul>
         </div>
 
-        <!-- 用组件本身搭出预览面板，既是展示也是回归用例 -->
+        <!--
+          首屏右边只放这一张用组件本身搭出来的面板。
+          它既是展示也是回归用例——插画或者三维模型演示不了「这套东西长什么样」，
+          而这张卡片就是答案本身。
+        -->
         <div ref="preview" class="hero__preview" aria-label="组件预览">
           <!--
             首屏的三维物件：一块令牌基座，几片浮在上面的端面板。
@@ -154,18 +142,6 @@ const cubeFaces = [
             演的正是标题那句「换一个主色，各端同时生效」。
             WebGL 起不来或 chunk 拉不到时退回原来的插画，首屏不会留空。
           -->
-          <TokenScene class="hero__scene i-tilt__layer" style="--i-layer-depth: 24" :height="300">
-            <template #fallback>
-              <img
-                class="hero__art"
-                :src="hero.src"
-                :srcset="hero.srcset"
-                width="600"
-                alt=""
-                fetchpriority="high"
-              />
-            </template>
-          </TokenScene>
           <ICard class="i-tilt__layer" style="--i-layer-depth: 10" title="创建工作项" hoverable>
             <ISteps class="preview__steps" :items="previewSteps" :current="1" />
             <div class="preview__field">
@@ -198,25 +174,17 @@ const cubeFaces = [
       <span class="i-eyebrow">Principles</span>
       <h2 class="section__title">设计价值观</h2>
       <p class="section__desc i-lead">新组件要过这三关，过不了就不合进来。</p>
-      <div class="values-3d">
-        <ValueCube :size="200" :active="activeValue" :faces="cubeFaces" />
-        <div class="values i-stagger">
+      <div class="values i-stagger">
           <article
             v-for="(value, index) in values"
             :key="value.key"
             v-reveal:left
             class="value"
-            tabindex="0"
-            @mouseenter="activeValue = index"
-            @focusin="activeValue = index"
-            @mouseleave="activeValue = -1"
-            @focusout="activeValue = -1"
           >
           <span class="value__en">{{ value.en }}</span>
           <h3 class="value__title">{{ value.key }}</h3>
             <p>{{ value.desc }}</p>
           </article>
-        </div>
       </div>
     </section>
 
@@ -384,33 +352,24 @@ app.use(IDesign)"
  * 1440×900 的屏上卡片会被折线切掉一截——首屏露出半张卡，
  * 观感上就是「没做完」，而不是「下面还有」。
  */
+/*
+ * 首屏不铺网格、不打光晕。
+ *
+ * 那两样是模板感的主要来源：任何一个落地页都能套上，它们不说明这个产品是什么，
+ * 只是在填满空白。页面底色本身已经和浮起面分层了，留白干净反而更像有人设计过——
+ * 真正该被看见的是右边那张用组件搭出来的卡片。
+ */
 .hero {
   position: relative;
-  padding: var(--i-spacing-12) 0;
-  overflow: hidden;
-  background:
-    radial-gradient(50% 60% at 12% -10%, var(--i-color-brand-subtle), transparent 70%),
-    radial-gradient(40% 50% at 90% 0%, var(--i-color-ring), transparent 70%),
-    var(--i-color-bg);
-}
-/* 细网格只出现在顶部，越往下越淡，避免整块背景显脏 */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--i-color-hairline) 1px, transparent 1px),
-    linear-gradient(90deg, var(--i-color-hairline) 1px, transparent 1px);
-  background-size: 40px 40px;
-  -webkit-mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
-  mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
-  pointer-events: none;
+  padding: var(--i-spacing-16) 0 var(--i-spacing-12);
+  background: var(--i-color-bg);
 }
 .hero__inner { position: relative; }
 .hero__inner {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--i-spacing-12);
+  /* 文案一栏比面板窄：正文行长超过 40 个汉字就开始难读，而面板要占满它需要的宽度 */
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  gap: var(--i-spacing-16);
   align-items: center;
 }
 .hero__title {
@@ -443,27 +402,6 @@ app.use(IDesign)"
 }
 .hero__facts svg { color: var(--i-color-brand); flex: none; }
 
-/*
- * 插画收小并右对齐，让它退成陪衬。
- *
- * 首屏真正该被看见的是右边那张用组件本身搭出来的卡片——它同时是展示与回归用例。
- * 插画铺满一整列时，读者第一眼落在插画上，而插画说明不了这套体系能做什么。
- */
-.hero__art {
-  display: block;
-  width: 100%;
-  max-width: 340px;
-  height: auto;
-  margin: 0 0 calc(var(--i-spacing-4) * -1) auto;
-}
-/*
- * 三维画布与预览卡之间留一条实打实的间距。
- *
- * 原先用负边距把画布压在卡片上「叠出层次」，实际得到的是碰撞：
- * 基座被卡片切掉一截，看起来像图层顺序出了错。两个都想被看清的东西不该互相压，
- * 叠压只适合一方明确是背景的场合。
- */
-.hero__scene { margin-bottom: var(--i-spacing-4); }
 .hero__preview {
   filter: drop-shadow(var(--i-shadow-xl));
   /* 时长与「不超过 320ms」这条价值观对齐；曲线用 easing-out，进场要快进慢停 */
@@ -490,20 +428,6 @@ app.use(IDesign)"
 .preview__field--row label { margin-bottom: 0; }
 .preview__tags { display: flex; gap: var(--i-spacing-2); margin-bottom: var(--i-spacing-4); }
 .preview__footer { display: flex; justify-content: flex-end; gap: var(--i-spacing-2); }
-
-/* 价值观：立方体与文案并排 */
-.values-3d {
-  display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
-  gap: var(--i-spacing-12);
-  align-items: center;
-  margin-top: var(--i-spacing-8);
-}
-.values-3d .values { grid-template-columns: 1fr; gap: var(--i-spacing-4); }
-
-@media (max-width: 860px) {
-  .values-3d { grid-template-columns: 1fr; gap: var(--i-spacing-10); }
-}
 
 /* 覆盖范围 */
 .coverage {

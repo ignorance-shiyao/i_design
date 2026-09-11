@@ -95,98 +95,6 @@
   box-shadow: var(--i-shadow-lg);
 }
 
-/* ---------- 3D 立方体 ---------- */
-.i-cube-stage {
-  position: relative;
-  perspective: 640px;
-  perspective-origin: 50% 45%;
-}
-.i-cube {
-  position: relative;
-  /* 压在落影之上：两者是兄弟，不靠 Z 值分前后 */
-  z-index: 1;
-  transform-style: preserve-3d;
-  animation: i-cube-spin 18s linear infinite;
-}
-/*
- * 由读者的注意力驱动的立方体：不自转，转到当前指向的那一面。
- * 时长比常规交互长一档——它要转过 90 度，走得太快看不清是「转过去」
- * 还是「换了一张图」，而这个转身正是它要说明的事。
- */
-.i-cube--steered {
-  animation: none;
-  transition: transform 420ms var(--i-motion-easing-out);
-}
-.i-cube__face {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  gap: var(--i-spacing-2);
-  text-align: center;
-  /*
-   * 面要有实打实的颜色，不能只描一道淡边。
-   *
-   * 之前边框 35%、底色 12% 的品牌色叠在白底上，屏幕上几乎什么都看不见：
-   * 一个隐形的立方体等于没有这个立方体，还白占掉半幅版面。
-   * 现在底色加重、边加实，三个可见面各自读得出轮廓，
-   * 体积是靠面与面之间的明暗差出来的，而不是靠一圈描边暗示。
-   */
-  border: 1px solid color-mix(in srgb, var(--i-color-brand) 42%, transparent);
-  border-radius: var(--i-radius-lg);
-  background: color-mix(in srgb, var(--i-color-brand) 10%, var(--i-color-bg-elevated));
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #fff 70%, transparent),
-    0 0 32px -10px color-mix(in srgb, var(--i-color-brand) 55%, transparent);
-  /*
-   * 上面那个 background 必须算出一个不透明的颜色——color-mix 的另一头是
-   * 不透明的面色，所以它天然满足；改成带 alpha 的写法就会破掉这条。
-   *
-   * 半透明的面会把对面那一面的字反着透过来，屏幕上同时出现「至简」和镜像的
-   * 「简至」，看着像渲染坏了。backface-visibility 挡不住这种情况：
-   * 它挡的是背对镜头的那一面自己，挡不住透过前面这层玻璃看见的后面那一面。
-   */
-  /*
-   * 隐藏背面。半透明面板会把对面的字反着透出来，六面同时可读只会糊成一团；
-   * backface-visibility 必须作用在被旋转的面本身——加在子元素上无效，
-   * 因为子元素已被压平进面所在的平面。
-   */
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-/*
- * 落影：没有影子的立方体像贴纸，有了才像浮在页面上。
- *
- * 两条都是踩出来的：
- *
- * 一、虚化用径向渐变而不是 filter: blur()。filter 会把元素从三维场景里拍平，
- *     拍平之后按 DOM 顺序画在立方体之上。
- * 二、影子不参与三维排序，就画在舞台平面上，靠 z-index 压在立方体之下。
- *     给它 translateZ 往后推看似更「正确」，实际上透视会把它同时缩小并上移，
- *     正好挪进立方体正面的范围里——而立方体是被拍平的子树，
- *     两者之间的前后关系并不按 Z 值判定，于是影子照样盖在正面上。
- *     屏幕上就是正面中间浮着一团蓝雾，看着像那一面透光。
- */
-.i-cube-stage::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -10%;
-  width: 66%;
-  height: 26px;
-  transform: translateX(-50%);
-  background: radial-gradient(
-    closest-side,
-    color-mix(in srgb, var(--i-color-brand) 30%, transparent),
-    transparent
-  );
-}
-@keyframes i-cube-spin {
-  from { transform: rotateX(-18deg) rotateY(0deg); }
-  to { transform: rotateX(-18deg) rotateY(360deg); }
-}
-
 /* ---------- 微交互 ---------- */
 .i-pop { animation: i-pop 420ms var(--i-motion-easing) both; }
 @keyframes i-pop {
@@ -269,13 +177,9 @@
     transform: none;
   }
   .i-stagger > * { --i-reveal-delay: 0ms; }
-  .i-cube { animation: none; transform: rotateX(-18deg) rotateY(-24deg); }
-  .i-cube--steered { transition: none; }
   .i-pop,
   .i-shine.is-shining::after { animation: none; }
   .i-page-enter-active,
   .i-page-leave-active { transition: none; }
 }
 
-/* 顶面与底面：只负责封住盒子，不承载内容，因此比侧面更淡 */
-.i-cube__face--cap { background-image: none; }

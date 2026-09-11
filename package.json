@@ -25,7 +25,6 @@
     "check:flutter": "npm run build:flutter && node packages/flutter/scripts/validate.mjs"
   },
   "dependencies": {
-    "three": "^0.186.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
@@ -33,7 +32,6 @@
     "@types/node": "^26.4.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
-    "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^4.7.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitejs/plugin-vue2": "^2.3.4",
