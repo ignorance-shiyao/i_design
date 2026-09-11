@@ -47,7 +47,7 @@ scripts/                    跨端构建与校验脚本
 ```
 
 `packages/common/src/logic/` 现有:`avatar chart countdown date flow number pagination
-picker select table toast upload validate`。**任何"算法"都应该落在这里**,而不是写在某个端的组件里——
+picker select table theme toast upload validate`。**任何"算法"都应该落在这里**,而不是写在某个端的组件里——
 它是 Web / 小程序 / Flutter 三套渲染共用的同一份真值。
 
 ---
