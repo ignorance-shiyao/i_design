@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
     "build:tokens": "node packages/common/scripts/build-tokens.mjs",
-    "check:parity": "npm run build:tokens && npm run build:styles && npm run build:vue-next && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:stats && npm run build:matrix && npm run check:snippets",
+    "check:parity": "npm run build:tokens && npm run build:styles && npm run build:vue-next && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:stats && npm run build:matrix && npm run check:snippets && npm run check:scoped-css",
     "build:styles:mp": "node packages/miniprogram/scripts/build-styles.mjs",
     "build:react-demo": "vite build --config packages/react/vite.config.ts",
     "build:styles": "node scripts/build-styles-index.mjs",
@@ -22,7 +22,8 @@
     "build:mp": "node packages/miniprogram/scripts/build-styles.mjs && node packages/miniprogram/scripts/build-icons.mjs && node packages/miniprogram/scripts/scaffold.mjs",
     "check:mp": "npm run build:mp && node packages/miniprogram/scripts/validate.mjs",
     "build:flutter": "node packages/flutter/scripts/build-icons.mjs && node packages/flutter/scripts/build-barrel.mjs && node packages/flutter/scripts/build-golden-test.mjs",
-    "check:flutter": "npm run build:flutter && node packages/flutter/scripts/validate.mjs"
+    "check:flutter": "npm run build:flutter && node packages/flutter/scripts/validate.mjs",
+    "check:scoped-css": "node scripts/check-scoped-css.mjs"
   },
   "dependencies": {
     "three": "^0.186.0",

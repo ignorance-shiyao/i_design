@@ -416,10 +416,18 @@ h1 span {
     transparent 56%
   );
 }
-:global([data-theme="dark"]) .hero-art {
+/*
+ * 暗色下压低这张图的亮度，免得它比正文还抢眼。
+ *
+ * 不能写成 :global([data-theme="dark"]) .hero-art——作用域编译会把后代部分
+ * 整个丢掉，只留下 [data-theme=dark]{opacity:.16}，于是整个 <html> 在暗色下
+ * 都变成 16% 不透明度：全站文字与卡片一起发灰，而且不会有任何报错。
+ * 祖先选择器本来就不需要 :global，作用域只会把属性加在末尾的选择器上。
+ */
+[data-theme="dark"] .hero-art {
   opacity: 0.16;
 }
-:global([data-theme="dark"]) .hero-art::after {
+[data-theme="dark"] .hero-art::after {
   background: linear-gradient(
     90deg,
     var(--i-color-bg-subtle) 42%,

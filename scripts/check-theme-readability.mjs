@@ -25,7 +25,12 @@ let stored = JSON.stringify({
 globalThis.document = {
   documentElement: {
     dataset: { theme: "light" },
-    style: { setProperty: (k, v) => properties.set(k, v) },
+    // 空值的令牌会被 removeProperty 掉（回到编译出的默认值），
+    // 桩实现必须一并支持，否则测的就不是真实写入路径
+    style: {
+      setProperty: (k, v) => properties.set(k, v),
+      removeProperty: (k) => properties.delete(k),
+    },
   },
   createElement: () => ({}),
 };
@@ -128,7 +133,49 @@ assert.equal(JSON.parse(stored).motion, false);
 api.resetThemeConfig();
 applyThemeConfig();
 assert.equal(document.documentElement.dataset.motion, "on");
-assert.equal(properties.get("--i-motion-base"), "");
+assert.equal(
+  properties.has("--i-motion-base"),
+  false,
+  "默认时长应当移除覆盖，回到编译出的令牌"
+);
+
+/* 精细化配置：每一类令牌都要能单独调，且调完真的写进 :root */
+themeConfig.fontSize = "custom";
+themeConfig.fontSizeCustom.md = 17;
+themeConfig.radius = "custom";
+themeConfig.radiusCustom.lg = 18;
+themeConfig.density = "custom";
+themeConfig.spacingScale = 150;
+themeConfig.controlHeightCustom.md = 44;
+themeConfig.shadow = "custom";
+themeConfig.shadowIntensity = 0;
+themeConfig.success = "#0f8a68";
+themeConfig.neutralTint = 100;
+themeConfig.lineHeight = "loose";
+applyThemeConfig();
+assert.equal(properties.get("--i-font-size-md"), "17px");
+assert.equal(properties.get("--i-radius-lg"), "18px");
+assert.equal(properties.get("--i-spacing-4"), "24px");
+assert.equal(properties.get("--i-control-height-md"), "44px");
+assert.equal(properties.get("--i-shadow-lg"), "none");
+assert.equal(properties.get("--i-line-height-base"), "1.8");
+assert.equal(
+  properties.get("--i-color-success"),
+  brandRamp("#0f8a68", "dark").brand
+);
+// 中性色只掺色相，不动明度——掺完的正文对比度不得低于原来的
+const tinted = properties.get("--i-color-text");
+assert.ok(tinted && tinted !== dark["color-text"], "中性色偏移应当生效");
+assert.ok(
+  contrast(tinted, properties.get("--i-color-bg")) >= 4.5,
+  `中性色偏移后正文对比度 ${contrast(tinted, properties.get("--i-color-bg"))}`
+);
+// 导出的 CSS 必须是能直接用的声明，且不含空值
+const css = api.themeCss.value;
+assert.ok(css.includes("--i-font-size-md: 17px;"), "导出应包含自定义字号");
+assert.ok(!/--i-[a-z-]+:\s*;/.test(css), "导出不得出现空值声明");
+api.resetThemeConfig();
+applyThemeConfig();
 localStorage.setItem = () => {
   throw new Error("blocked storage");
 };
@@ -136,5 +183,5 @@ assert.doesNotThrow(() => applyThemeConfig());
 console.log(
   `PASS: dark text/surface minimum ${minimum.toFixed(
     2
-  )}:1; code palette, presets, reactive ramp, persistence, reset, scaling and motion.`
+  )}:1; code palette, presets, reactive ramp, persistence, reset, scaling, motion, 精细化令牌与导出。`
 );
