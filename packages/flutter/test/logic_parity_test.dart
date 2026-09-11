@@ -27,6 +27,8 @@ import 'package:i_design/src/logic/calendar.dart';
 import 'package:i_design/src/logic/mention.dart';
 import 'package:i_design/src/logic/range.dart';
 import 'package:i_design/src/logic/qrcode.dart';
+import 'package:i_design/src/logic/pull.dart';
+import 'package:i_design/src/logic/indexes.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1044,6 +1046,47 @@ void main() {
     expect(isValidRange(const ITimeValue(hour: 9, minute: 0, second: 0), const ITimeValue(hour: 18, minute: 0, second: 0)), true);
     expect(isValidRange(const ITimeValue(hour: 9, minute: 0, second: 0), const ITimeValue(hour: 9, minute: 0, second: 0)), true);
     expect(isValidRange(const ITimeValue(hour: 18, minute: 0, second: 0), const ITimeValue(hour: 9, minute: 0, second: 0)), false);
+  });
+
+  test('下拉刷新的阻尼与阈值与 Web 端一致', () {
+    expect(pullDistance(0), 0);
+    expect(pullRelease(0), 0);
+    expect(pullRotate(0), 0);
+    expect(pullDistance(10), 9);
+    expect(pullRelease(9), 0);
+    expect(pullRotate(9), 29);
+    expect(pullDistance(30), 24);
+    expect(pullRelease(24), 0);
+    expect(pullRotate(24), 77);
+    expect(pullDistance(56), 38);
+    expect(pullRelease(38), 0);
+    expect(pullRotate(38), 122);
+    expect(pullDistance(80), 48);
+    expect(pullRelease(48), 0);
+    expect(pullRotate(48), 154);
+    expect(pullDistance(120), 60);
+    expect(pullRelease(60), 48);
+    expect(pullRotate(60), 180);
+    expect(pullDistance(200), 75);
+    expect(pullRelease(75), 48);
+    expect(pullRotate(75), 180);
+    expect(pullDistance(480), 96);
+    expect(pullRelease(96), 48);
+    expect(pullRotate(96), 180);
+    expect(pullDistance(1000), 107);
+    expect(pullRelease(107), 48);
+    expect(pullRotate(107), 180);
+  });
+
+  test('索引列表的分组与定位与 Web 端一致', () {
+    final groups = groupByIndex<String>(["Anna","bob","3M","Zoe","apple","","中文","Bill"], (item) => item);
+    expect(groups.map((g) => g.index).toList(), ["A","B","Z","#"]);
+    expect(groups.map((g) => g.items.length).toList(), [2,2,1,3]);
+    expect(activeIndexAt([(index: 'A', top: 0.0), (index: 'B', top: 120.0), (index: '#', top: 260.0)], 0.0), 'A');
+    expect(activeIndexAt([(index: 'A', top: 0.0), (index: 'B', top: 120.0), (index: '#', top: 260.0)], 119.0), 'B');
+    expect(activeIndexAt([(index: 'A', top: 0.0), (index: 'B', top: 120.0), (index: '#', top: 260.0)], 120.0), 'B');
+    expect(activeIndexAt([(index: 'A', top: 0.0), (index: 'B', top: 120.0), (index: '#', top: 260.0)], 259.0), '#');
+    expect(activeIndexAt([(index: 'A', top: 0.0), (index: 'B', top: 120.0), (index: '#', top: 260.0)], 400.0), '#');
   });
 
   test('二维码矩阵与 Web 端逐格一致', () {

@@ -1,0 +1,81 @@
+/* IDropdownMenu —— 移动端筛选条（mobile-vue / mobile-react 共享） */
+
+/*
+ * 一排筛选项，点开从条下方展开面板。
+ * 与桌面的 Dropdown 不同：这里的面板通栏铺开、贴着条的下沿，
+ * 因为手机上「从哪儿弹出来的」比「弹在哪儿」更重要——
+ * 一个飘在半空的小面板，用户不知道它属于哪一项。
+ */
+.i-dropdown-menu {
+  position: relative;
+  z-index: var(--i-z-sticky);
+}
+.i-dropdown-menu__bar {
+  display: flex;
+  align-items: stretch;
+  height: 44px;
+  background: var(--i-color-bg-elevated);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-dropdown-menu__item {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: var(--i-spacing-1);
+  min-width: 0;
+  border: 0;
+  padding: 0 var(--i-spacing-2);
+  background: none;
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
+}
+.i-dropdown-menu__item.is-open,
+.i-dropdown-menu__item.is-filtered { color: var(--i-color-brand); }
+.i-dropdown-menu__label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.i-dropdown-menu__arrow {
+  flex: none;
+  transition: transform var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-dropdown-menu__item.is-open .i-dropdown-menu__arrow { transform: rotate(180deg); }
+
+.i-dropdown-menu__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-md);
+}
+.i-dropdown-menu__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--i-spacing-4);
+  border: 0;
+  background: none;
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-md);
+  text-align: left;
+  cursor: pointer;
+}
+.i-dropdown-menu__option.is-active { color: var(--i-color-brand); }
+
+/* 遮罩压住面板以外的内容：点它关闭，也提示「现在在选东西」 */
+.i-dropdown-menu__mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 100vh;
+  background: rgb(0 0 0 / 0.35);
+}

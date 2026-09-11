@@ -1,0 +1,81 @@
+/* IIndexes —— 移动端索引列表（mobile-vue / mobile-react 共享） */
+
+/*
+ * 外层不滚动，只作为索引条的定位基准；真正滚的是里面那层。
+ * 索引条放在滚动容器里的话，它会跟着内容一起滚走——滑到列表底部时，
+ * 右边那条字母已经在可视区之上，用户想跳转却找不到它。
+ */
+.i-indexes {
+  position: relative;
+  height: 100%;
+}
+.i-indexes__scroll {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/*
+ * 分组标题吸顶：滚动时当前组的字母一直留在顶部。
+ * 没有它的话，滑到中间就看不出「现在在哪一组」——而这正是索引列表的全部意义。
+ */
+.i-indexes__title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--i-spacing-1) var(--i-spacing-4);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+}
+
+/*
+ * 右侧索引条：命中区做宽，视觉做窄——手指点不准一列 10px 的字母。
+ *
+ * z-index 必须高于吸顶的分组标题：标题吸在顶部时会盖住索引条最上面那几个字母，
+ * 点上去毫无反应，而看上去它明明在那儿。
+ */
+.i-indexes__bar {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  transform: translateY(-50%);
+  user-select: none;
+  touch-action: none;
+}
+.i-indexes__letter {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-secondary);
+  font-size: 11px;
+  line-height: 1;
+}
+.i-indexes__letter.is-active {
+  background: var(--i-color-brand);
+  color: var(--i-color-text-on-brand);
+}
+
+/* 滑动时在屏幕中央提示当前字母：手指压住索引条，那个字母自己被挡住了 */
+.i-indexes__hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: var(--i-z-toast);
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  transform: translate(-50%, -50%);
+  border-radius: var(--i-radius-lg);
+  background: rgb(0 0 0 / 0.72);
+  color: #fff;
+  font-size: var(--i-font-size-3xl);
+}
