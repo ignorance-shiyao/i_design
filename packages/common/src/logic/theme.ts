@@ -44,6 +44,38 @@ export const RADIUS_KEYS = (Object.keys(radiusTokens) as (keyof typeof radiusTok
 )
 export const CONTROL_SIZE_KEYS = Object.keys(controlHeightTokens) as ControlSizeKey[]
 
+/**
+ * 每一级令牌各自的可调区间。
+ *
+ * 不给所有字号一个统一的 10–96：那样正文那档的滑块会挤在最左边一小段里，
+ * 手一抖就从 14px 跳到 50px——区间必须贴着这一级的用途，滑块才有分辨率。
+ * 区间同时也是护栏：正文再小不过 12px，超大展示再大不过 96px。
+ */
+export const FONT_SIZE_RANGE: Record<FontSizeKey, [number, number]> = {
+  xs: [10, 18],
+  sm: [11, 20],
+  md: [12, 24],
+  lg: [13, 28],
+  xl: [16, 36],
+  '2xl': [18, 44],
+  '3xl': [22, 60],
+  '4xl': [28, 80],
+  '5xl': [32, 96]
+}
+
+export const RADIUS_RANGE: Record<RadiusKey, [number, number]> = {
+  sm: [0, 8],
+  md: [0, 14],
+  lg: [0, 24],
+  xl: [0, 32]
+}
+
+export const CONTROL_HEIGHT_RANGE: Record<ControlSizeKey, [number, number]> = {
+  sm: [20, 44],
+  md: [26, 56],
+  lg: [32, 72]
+}
+
 export interface ThemeConfig {
   /** 主题色。其余三档（悬停/按下/衬底）由它推导，不单独配置 */
   brand: string
@@ -70,6 +102,11 @@ export interface ThemeConfig {
   /** 自定义档下的间距倍率，50–200（%） */
   spacingScale: number
   controlHeightCustom: Record<ControlSizeKey, number>
+
+  /** 浮层用液态玻璃。关掉即回到实心面 */
+  glass: boolean
+  /** 玻璃强度 0–100：同时决定模糊半径与透明度 */
+  glassIntensity: number
 
   motion: boolean
   motionSpeed: MotionSpeed
@@ -112,12 +149,14 @@ const numberMap = <K extends string>(
   keys: K[],
   base: Record<string, string>,
   raw: unknown,
-  min: number,
-  max: number
+  range: Record<K, [number, number]>
 ): Record<K, number> => {
   const source = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
   const out = {} as Record<K, number>
-  for (const key of keys) out[key] = num(source[key], parseFloat(base[key]), min, max)
+  for (const key of keys) {
+    const [min, max] = range[key]
+    out[key] = num(source[key], parseFloat(base[key]), min, max)
+  }
   return out
 }
 
@@ -130,18 +169,26 @@ export const DEFAULT_THEME_CONFIG: ThemeConfig = {
 
   fontFamily: 'system',
   fontSize: 'default',
-  fontSizeCustom: numberMap(FONT_SIZE_KEYS, fontSizeTokens, null, 10, 96),
+  fontSizeCustom: numberMap(FONT_SIZE_KEYS, fontSizeTokens, null, FONT_SIZE_RANGE),
   lineHeight: 'base',
 
   radius: 'default',
-  radiusCustom: numberMap(RADIUS_KEYS, radiusTokens, null, 0, 32),
+  radiusCustom: numberMap(RADIUS_KEYS, radiusTokens, null, RADIUS_RANGE),
 
   shadow: 'default',
   shadowIntensity: 100,
 
   density: 'default',
   spacingScale: 100,
-  controlHeightCustom: numberMap(CONTROL_SIZE_KEYS, controlHeightTokens, null, 20, 72),
+  controlHeightCustom: numberMap(
+    CONTROL_SIZE_KEYS,
+    controlHeightTokens,
+    null,
+    CONTROL_HEIGHT_RANGE
+  ),
+
+  glass: true,
+  glassIntensity: 60,
 
   motion: true,
   motionSpeed: 'default',
@@ -173,11 +220,16 @@ export function normalizeThemeConfig(value: unknown): ThemeConfig {
 
     fontFamily: oneOf(raw.fontFamily, ['system', 'serif', 'mono'] as const, 'system'),
     fontSize: level(raw.fontSize),
-    fontSizeCustom: numberMap(FONT_SIZE_KEYS, fontSizeTokens, raw.fontSizeCustom, 10, 96),
+    fontSizeCustom: numberMap(
+      FONT_SIZE_KEYS,
+      fontSizeTokens,
+      raw.fontSizeCustom,
+      FONT_SIZE_RANGE
+    ),
     lineHeight: oneOf(raw.lineHeight, ['tight', 'base', 'loose'] as const, 'base'),
 
     radius: level(raw.radius),
-    radiusCustom: numberMap(RADIUS_KEYS, radiusTokens, raw.radiusCustom, 0, 32),
+    radiusCustom: numberMap(RADIUS_KEYS, radiusTokens, raw.radiusCustom, RADIUS_RANGE),
 
     shadow: oneOf(raw.shadow, ['none', 'soft', 'default', 'strong', 'custom'] as const, 'default'),
     shadowIntensity: num(raw.shadowIntensity, 100, 0, 200),
@@ -188,9 +240,11 @@ export function normalizeThemeConfig(value: unknown): ThemeConfig {
       CONTROL_SIZE_KEYS,
       controlHeightTokens,
       raw.controlHeightCustom,
-      20,
-      72
+      CONTROL_HEIGHT_RANGE
     ),
+
+    glass: typeof raw.glass === 'boolean' ? raw.glass : true,
+    glassIntensity: num(raw.glassIntensity, 60, 0, 100),
 
     motion: typeof raw.motion === 'boolean' ? raw.motion : true,
     motionSpeed: oneOf(raw.motionSpeed, ['slow', 'default', 'fast'] as const, 'default'),
@@ -316,6 +370,37 @@ export function tintNeutrals(
   return out
 }
 
+/* ------------------------------------------------------------------ 玻璃 */
+
+/**
+ * 强度 → 模糊半径与表面透明度。
+ *
+ * 两者必须一起走：越透就越要糊。只调透明度会让背后的文字直接透上来，
+ * 只调模糊则看不出这是一块玻璃。透明度留了下限（亮色 0.55 / 暗色 0.6），
+ * 再透下去，面与背景的边界就没有了——尤其是暗色，深色叠深色本就缺明暗差。
+ */
+const GLASS_KEYS = ['glass-blur', 'glass-saturate', 'color-glass', 'color-glass-subtle'] as const
+
+export function resolveGlass(config: ThemeConfig, mode: ThemeMode): Record<string, string> {
+  // 关掉时要显式地把这几条覆盖清掉，而不是「不再写」——
+  // 不写的话上一次的值还留在 :root 上，再开玻璃时用的是旧强度。
+  if (!config.glass) return Object.fromEntries(GLASS_KEYS.map((k) => [k, '']))
+  const t = clamp(config.glassIntensity, 0, 100) / 100
+  const blur = Math.round(6 + t * 22)
+  const surface = mode === 'dark' ? darkTheme['color-bg-elevated'] : lightTheme['color-bg-elevated']
+  const { r, g, b } = hexToRgb(surface)
+  const rgb = `${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}`
+  const base = mode === 'dark' ? 0.94 : 0.92
+  const floor = mode === 'dark' ? 0.68 : 0.64
+  const alpha = Number((base - (base - floor) * t).toFixed(2))
+  return {
+    'glass-blur': `${blur}px`,
+    'glass-saturate': `${Math.round(120 + t * 60)}%`,
+    'color-glass': `rgba(${rgb}, ${alpha})`,
+    'color-glass-subtle': `rgba(${rgb}, ${Number((alpha + 0.06).toFixed(2))})`
+  }
+}
+
 /* ------------------------------------------------------------------ 汇总 */
 
 /** 面板上要显示的语义色，顺序即面板顺序 */
@@ -351,6 +436,7 @@ export function resolveThemeTokens(
   }
 
   Object.assign(out, tintNeutrals(config.brand, config.neutralTint, mode))
+  Object.assign(out, resolveGlass(config, mode))
 
   for (const [key, value] of Object.entries(resolveFontSizes(config))) {
     out[`font-size-${key}`] = px(value)

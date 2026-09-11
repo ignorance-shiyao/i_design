@@ -38,7 +38,15 @@
 
 .i-colorpicker__panel {
   position: fixed;
-  z-index: var(--i-z-dropdown);
+  /*
+   * 比对话框还高一层。
+   *
+   * 取色面板总是从别的面里打开的——对话框里的表单、抽屉里的设置、
+   * 站点的主题配置面板。用下拉那一档（1000）的话，它会落在这些面（1300）底下：
+   * 面板看得见一半，点下去的却是背后那层，现象就是「颜色怎么调都不生效」。
+   * 它是瞬时浮层，关掉就没了，压在最上面不会挡住任何长期存在的东西。
+   */
+  z-index: calc(var(--i-z-modal) + 1);
   width: 232px;
   padding: var(--i-spacing-3);
   border: 1px solid var(--i-color-border);

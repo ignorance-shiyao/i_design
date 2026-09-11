@@ -174,6 +174,21 @@ export const motion = {
   'easing-spring': 'cubic-bezier(0.34, 1.36, 0.64, 1)'
 } as const
 
+/*
+ * 液态玻璃。
+ *
+ * 玻璃不是「把背景调半透明」——半透明的面会把背后的文字直接透出来，
+ * 叠在上面的内容反而更难读。真正起作用的是背后的模糊与提饱和：
+ * 模糊把背景压成一团色，只留下明暗关系；提饱和补回模糊损失的色彩，
+ * 否则毛玻璃后面的彩色会发灰。再加一条内高光勾出边缘，面才有厚度。
+ *
+ * 不用渐变做高光：渐变会让同一块玻璃在不同尺寸的元件上呈现不同的观感。
+ */
+export const glass = {
+  blur: '18px',
+  saturate: '160%'
+} as const
+
 export const zIndex = {
   base: '0',
   dropdown: '1000',
@@ -228,6 +243,12 @@ export const lightTheme: Record<string, string> = {
   'color-info': palette.info[50],
   'color-info-subtle': palette.info[10],
 
+  /* 玻璃面：半透明的表面色 + 一条比表面更亮的内高光 */
+  'color-glass': 'rgba(255, 255, 255, 0.72)',
+  'color-glass-subtle': 'rgba(255, 255, 255, 0.55)',
+  'color-glass-border': 'rgba(20, 24, 34, 0.1)',
+  'color-glass-highlight': 'rgba(255, 255, 255, 0.75)',
+
   'color-code-bg': '#fbfbfd',
   'color-code-bar': '#f4f5f9',
   'color-code-border': '#e6e8f0',
@@ -268,6 +289,15 @@ export const darkTheme: Record<string, string> = {
   'color-danger-subtle': 'rgba(246, 111, 106, 0.16)',
   'color-info': palette.brand[30],
   'color-info-subtle': 'rgba(94, 124, 224, 0.16)',
+
+  /*
+   * 暗色的玻璃要比亮色更不透明。深色背景本来就缺少明暗差，
+   * 再透下去，面与背后的内容会糊成同一层，边界完全消失。
+   */
+  'color-glass': 'rgba(34, 40, 55, 0.72)',
+  'color-glass-subtle': 'rgba(27, 32, 44, 0.6)',
+  'color-glass-border': 'rgba(255, 255, 255, 0.14)',
+  'color-glass-highlight': 'rgba(255, 255, 255, 0.16)',
 
   'color-code-bg': '#12151e',
   'color-code-bar': '#151922',
@@ -367,6 +397,7 @@ export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, strin
   Object.entries(radius).forEach(([k, v]) => (out[`radius-${k}`] = v))
   Object.entries(shadows).forEach(([k, v]) => (out[`shadow-${k}`] = v))
   Object.entries(motion).forEach(([k, v]) => (out[`motion-${k}`] = v))
+  Object.entries(glass).forEach(([k, v]) => (out[`glass-${k}`] = v))
   Object.entries(zIndex).forEach(([k, v]) => (out[`z-${k}`] = v))
   Object.entries(fontFamily).forEach(([k, v]) => (out[`font-family${k === 'base' ? '' : `-${k}`}`] = v))
   Object.entries(gradients).forEach(([k, v]) => (out[`gradient-${k}`] = v))

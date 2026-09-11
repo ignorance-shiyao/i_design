@@ -127,9 +127,9 @@ watch(() => route.path, revealActive);
  * 那种「一条更粗更深的边线」的标记方式在本体系里是禁止的，见 CLAUDE.md。
  */
 .doc-layout__empty {
-  padding: 12px;
+  padding: var(--i-spacing-3);
   color: var(--i-color-text-secondary);
-  font-size: 13px;
+  font-size: var(--i-font-size-sm);
 }
 .doc-layout__main {
   min-width: 0;

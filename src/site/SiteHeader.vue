@@ -29,7 +29,7 @@ const links = [
 </script>
 
 <template>
-  <header class="header">
+  <header class="header i-glass">
     <div class="i-container header__inner">
       <RouterLink to="/" class="header__brand">
         <span class="header__logo" aria-hidden="true">i</span>
@@ -91,8 +91,11 @@ const links = [
   position: sticky;
   top: 0;
   z-index: var(--i-z-sticky);
+  /*
+   * 顶栏的底色写成不透明的：玻璃由 .i-glass 那一层接管（主题配置可关），
+   * 关掉之后这里就是实心面，不会留下一条半透明的条压在内容上。
+   */
   background: var(--i-color-bg);
-  backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--i-color-hairline);
 }
 .header__inner {
