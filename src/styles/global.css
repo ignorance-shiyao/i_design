@@ -10,7 +10,7 @@
 }
 
 .i-doc h1 {
-  font-size: 32px;
+  font-size: var(--i-font-size-3xl);
   font-weight: 500;
   margin-bottom: var(--i-spacing-3);
   letter-spacing: -0.025em;
@@ -126,4 +126,20 @@
   background: #05070d;
   opacity: 0;
   pointer-events: none;
+}
+
+/* 配置关闭动效时覆盖固定时长；保留结束事件，避免过渡组件滞留。 */
+:root[data-motion="off"] *,
+:root[data-motion="off"] *::before,
+:root[data-motion="off"] *::after {
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion="off"] .i-reveal {
+  opacity: 1;
+  transform: none;
 }

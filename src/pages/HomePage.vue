@@ -299,14 +299,18 @@ const resources = [
 }
 .hero-kicker,
 .section-label {
-  font-size: 12px;
+  font-size: var(--i-font-size-xs);
   letter-spacing: 0.08em;
   color: var(--i-color-text-secondary);
 }
 h1 {
   margin: 18px 0 20px;
   color: var(--i-color-brand);
-  font-size: clamp(64px, 7vw, 100px);
+  font-size: clamp(
+    var(--i-font-size-5xl),
+    7vw,
+    calc(var(--i-font-size-5xl) * 1.8)
+  );
   line-height: 1;
   letter-spacing: -0.055em;
   font-weight: 700;
@@ -315,7 +319,7 @@ h1 span {
   display: block;
   margin-top: 24px;
   color: var(--i-color-text);
-  font-size: clamp(24px, 2.7vw, 36px);
+  font-size: clamp(var(--i-font-size-2xl), 2.7vw, var(--i-font-size-3xl));
   line-height: 1.4;
   font-weight: 500;
   letter-spacing: -0.035em;
@@ -323,7 +327,7 @@ h1 span {
 .hero-content > p {
   max-width: 420px;
   color: var(--i-color-text-secondary);
-  font-size: 16px;
+  font-size: var(--i-font-size-lg);
   line-height: 1.9;
 }
 .hero-actions {
@@ -337,12 +341,12 @@ h1 span {
   display: inline-flex;
   gap: 16px;
   align-items: center;
-  font-size: 14px;
+  font-size: var(--i-font-size-md);
 }
 .primary-link {
   padding: 14px 24px;
   background: var(--i-color-brand);
-  color: var(--i-color-text-inverse);
+  color: var(--i-color-text-on-brand);
   border-radius: var(--i-radius-md);
 }
 .primary-link:hover {
@@ -382,12 +386,12 @@ h1 span {
   color: var(--i-color-text-secondary);
 }
 .resource-link h2 {
-  font-size: 17px;
+  font-size: var(--i-font-size-lg);
   font-weight: 500;
   margin-bottom: 8px;
 }
 .resource-link p {
-  font-size: 12px;
+  font-size: var(--i-font-size-xs);
   line-height: 1.7;
   color: var(--i-color-text-secondary);
 }
@@ -413,13 +417,13 @@ h1 span {
   );
 }
 :global([data-theme="dark"]) .hero-art {
-  opacity: 0.36;
+  opacity: 0.16;
 }
 :global([data-theme="dark"]) .hero-art::after {
   background: linear-gradient(
     90deg,
-    var(--i-color-bg-subtle) 10%,
-    transparent 90%
+    var(--i-color-bg-subtle) 42%,
+    transparent 100%
   );
 }
 .home-section {
@@ -435,7 +439,7 @@ h1 span {
 }
 .section-heading h2,
 .start-section h2 {
-  font-size: 30px;
+  font-size: var(--i-font-size-3xl);
   font-weight: 500;
   letter-spacing: -0.035em;
   margin-top: 12px;
@@ -447,7 +451,7 @@ h1 span {
   align-items: center;
   gap: 12px;
   color: var(--i-color-brand);
-  font-size: 14px;
+  font-size: var(--i-font-size-md);
 }
 .platforms {
   display: grid;
@@ -470,12 +474,12 @@ h1 span {
   padding: 28px;
 }
 .platform__body h3 {
-  font-size: 27px;
+  font-size: var(--i-font-size-2xl);
   margin: 10px 0;
   font-weight: 500;
 }
 .platform__body p {
-  font-size: 14px;
+  font-size: var(--i-font-size-md);
   color: var(--i-color-text-secondary);
   line-height: 1.8;
 }
@@ -486,7 +490,7 @@ h1 span {
   margin: 24px 0 28px;
 }
 .platform__tags span {
-  font-size: 12px;
+  font-size: var(--i-font-size-xs);
   background: var(--i-color-bg-subtle);
   padding: 4px 10px;
   border-radius: var(--i-radius-sm);
@@ -624,7 +628,7 @@ h1 span {
   align-items: center;
 }
 .showcase-copy h2 {
-  font-size: 36px;
+  font-size: var(--i-font-size-3xl);
   font-weight: 500;
   line-height: 1.5;
   letter-spacing: -0.035em;
@@ -633,7 +637,7 @@ h1 span {
 .showcase-copy p {
   color: var(--i-color-text-secondary);
   line-height: 1.9;
-  font-size: 15px;
+  font-size: var(--i-font-size-lg);
   max-width: 350px;
   margin-bottom: 26px;
 }
@@ -657,7 +661,7 @@ h1 span {
 }
 .sample-label {
   display: block;
-  font-size: 10px;
+  font-size: var(--i-font-size-xs);
   letter-spacing: 0.08em;
   color: var(--i-color-text-secondary);
   margin-bottom: 24px;
@@ -673,20 +677,20 @@ h1 span {
   margin-bottom: 28px;
 }
 .sample-text-link {
-  font-size: 12px;
+  font-size: var(--i-font-size-xs);
   color: var(--i-color-brand);
 }
 .sample-controls label {
   display: block;
   margin-bottom: 8px;
-  font-size: 13px;
+  font-size: var(--i-font-size-sm);
 }
 .sample-switch {
   display: flex;
   justify-content: space-between;
   gap: 8px;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--i-font-size-xs);
   margin-top: 24px;
 }
 .color-swatch {
@@ -711,7 +715,7 @@ h1 span {
   background: var(--i-color-brand-active);
 }
 .sample-colors strong {
-  font-size: 13px;
+  font-size: var(--i-font-size-sm);
   font-weight: 500;
 }
 .sample-note {
@@ -719,24 +723,24 @@ h1 span {
   align-items: center;
   gap: 12px;
   margin-top: 12px;
-  font-size: 11px;
+  font-size: var(--i-font-size-xs);
   color: var(--i-color-text-secondary);
 }
 .sample-type .sample-label {
   margin-bottom: 8px;
 }
 .type-display {
-  font-size: 50px;
+  font-size: var(--i-font-size-4xl);
   font-weight: 500;
   letter-spacing: -0.06em;
 }
 .type-display span {
-  font-size: 35px;
+  font-size: var(--i-font-size-3xl);
   margin-left: 20px;
   color: var(--i-color-brand);
 }
 .sample-type p {
-  font-size: 12px;
+  font-size: var(--i-font-size-xs);
   color: var(--i-color-text-secondary);
 }
 .sample-status {
@@ -751,11 +755,11 @@ h1 span {
   color: var(--i-color-success);
 }
 .status-line strong {
-  font-size: 14px;
+  font-size: var(--i-font-size-md);
   font-weight: 500;
 }
 .status-line p {
-  font-size: 12px;
+  font-size: var(--i-font-size-xs);
   color: var(--i-color-text-secondary);
   margin-top: 4px;
 }
@@ -773,7 +777,7 @@ h1 span {
 }
 .start-section p {
   color: var(--i-color-text-secondary);
-  font-size: 14px;
+  font-size: var(--i-font-size-md);
   line-height: 1.9;
   margin: 22px 0;
 }
@@ -789,7 +793,7 @@ h1 span {
   justify-content: space-between;
   padding: 16px 20px;
   background: var(--i-color-bg-subtle);
-  font-size: 12px;
+  font-size: var(--i-font-size-xs);
   color: var(--i-color-text-secondary);
 }
 .start-code__bar button {
@@ -868,7 +872,7 @@ h1 span {
   }
   .section-heading h2,
   .start-section h2 {
-    font-size: 26px;
+    font-size: var(--i-font-size-2xl);
   }
   .showcase,
   .start-section {
@@ -882,7 +886,7 @@ h1 span {
     display: none;
   }
   .showcase-copy h2 {
-    font-size: 30px;
+    font-size: var(--i-font-size-3xl);
   }
   .platform {
     display: grid;
@@ -898,7 +902,7 @@ h1 span {
 }
 @media (max-width: 480px) {
   h1 {
-    font-size: 64px;
+    font-size: var(--i-font-size-5xl);
   }
   .hero-actions {
     gap: 16px;
@@ -907,7 +911,7 @@ h1 span {
     padding: 12px 18px;
   }
   .hero-content > p {
-    font-size: 14px;
+    font-size: var(--i-font-size-md);
   }
   .platform {
     display: block;
