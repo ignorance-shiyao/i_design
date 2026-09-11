@@ -85,3 +85,73 @@
   color: var(--i-color-text-tertiary);
   font-size: var(--i-font-size-sm);
 }
+
+/* ------------------------------------------------------ 多选与虚拟滚动 */
+
+.i-select.is-multiple .i-select__trigger {
+  height: auto;
+  min-height: var(--i-control-height-md);
+  padding-top: var(--i-spacing-1);
+  padding-bottom: var(--i-spacing-1);
+}
+.i-select--sm.is-multiple .i-select__trigger { min-height: var(--i-control-height-sm); }
+.i-select--lg.is-multiple .i-select__trigger { min-height: var(--i-control-height-lg); }
+
+.i-select__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  flex: 1;
+  min-width: 0;
+}
+/*
+ * 标签用淡底色块，四边等宽的发丝线，而不是靠某一条加粗的边去区分——
+ * 一排标签里只要有一个边比别的重，看起来就像它出了什么问题。
+ */
+.i-select__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 12em;
+  padding: 0 var(--i-spacing-1);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-fill);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-sm);
+  line-height: 1.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.i-select__tag--rest { color: var(--i-color-text-secondary); }
+.i-select__tag-close {
+  display: inline-grid;
+  place-items: center;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+}
+.i-select__tag-close:hover { color: var(--i-color-text-secondary); }
+
+.i-select__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-2);
+}
+.i-select__option-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * 虚拟滚动撑开上下空白的两个占位。它们不是选项，不能被读屏当成列表项念出来，
+ * 也不该有内边距——有内边距的话，高度就不再等于计算出来的那个数，越滚偏得越多。
+ */
+.i-select__spacer {
+  padding: 0;
+  margin: 0;
+  pointer-events: none;
+}
