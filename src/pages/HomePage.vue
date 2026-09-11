@@ -2,668 +2,266 @@
 import { computed, ref } from 'vue'
 import { componentCategories } from '@/data/components'
 import { frameworks } from '@/data/frameworks'
-import IAlert from '@/components/IAlert.vue'
 import IButton from '@/components/IButton.vue'
-import ICard from '@/components/ICard.vue'
 import IIcon from '@/components/IIcon.vue'
 import IInput from '@/components/IInput.vue'
 import ISwitch from '@/components/ISwitch.vue'
 import ITag from '@/components/ITag.vue'
 import { message } from '@/components/message'
 
-const demoTitle = ref('设计系统升级')
-const demoAutoAssign = ref(true)
+const keyword = ref('')
+const autoAssign = ref(true)
+const copied = ref(false)
 
 const allComponents = computed(() => componentCategories.flatMap((category) => category.items))
 const readyCount = computed(() => allComponents.value.filter((item) => item.status === 'ready').length)
-const plannedCount = computed(() => allComponents.value.filter((item) => item.status === 'planned').length)
-
-const highlights = computed(() => [
-  { value: `${readyCount.value}`, label: '已实现组件' },
-  { value: `${frameworks.length}`, label: '运行时覆盖' },
-  { value: `${componentCategories.length}`, label: '场景分类' },
-  { value: `${plannedCount.value}`, label: '规划中' }
-])
-
-const architecture = [
-  {
-    icon: 'layers',
-    index: '01',
-    title: '一套语义令牌',
-    desc: '颜色、间距、圆角与动效从统一语义层生成，各端只消费结果，不各自维护设计常量。'
-  },
-  {
-    icon: 'code',
-    index: '02',
-    title: '一套交互规则',
-    desc: '把分页、浮层、树选择等行为收敛成可测试的规则，框架层只负责渲染与事件适配。'
-  },
-  {
-    icon: 'check-circle',
-    index: '03',
-    title: '一条一致性基线',
-    desc: '构建、类型检查与跨端 parity 校验进入同一条质量链，减少“同名组件、不同表现”。'
-  }
-] as const
 
 const featuredCategories = computed(() =>
-  componentCategories.map((category) => ({
+  componentCategories.slice(0, 8).map((category) => ({
     ...category,
     ready: category.items.filter((item) => item.status === 'ready').length,
-    preview: category.items.filter((item) => item.status === 'ready').slice(0, 4)
+    preview: category.items.filter((item) => item.status === 'ready').slice(0, 6)
   }))
 )
+
+const incidentRows = [
+  { id: 'INC-1048', title: '核心交换链路抖动', level: 'P1', owner: '网络组', status: '处理中' },
+  { id: 'INC-1047', title: 'API 网关错误率升高', level: 'P2', owner: '平台组', status: '观察中' },
+  { id: 'INC-1046', title: '批处理任务执行超时', level: 'P2', owner: '数据组', status: '已恢复' }
+]
+
+async function copyInstall() {
+  await navigator.clipboard?.writeText('npm i @i-design/vue-next')
+  copied.value = true
+  window.setTimeout(() => (copied.value = false), 1200)
+}
 </script>
 
 <template>
   <main class="home">
-    <section class="hero">
-      <div class="hero__grid" aria-hidden="true" />
-      <div class="i-container hero__inner">
-        <div class="hero__copy">
-          <div class="hero__meta">
-            <span class="hero__status"><i /> Open source</span>
-            <span class="hero__version">iDesign · v0.1.0</span>
-          </div>
+    <section class="hero i-container">
+      <div class="hero__eyebrow">
+        <span class="hero__dot" />
+        <span>OPEN SOURCE DESIGN SYSTEM</span>
+        <span>v0.1.0</span>
+      </div>
 
-          <h1>
-            为复杂产品，建立一套
-            <span>清晰、稳定、可复用</span>
-            的界面语言。
-          </h1>
+      <div class="hero__copy">
+        <h1>让复杂产品，<br><span>保持同一种秩序。</span></h1>
+        <p>
+          面向企业中后台与智能体产品的跨端设计系统。组件、设计令牌和交互规则统一维护，
+          让 Vue、React、小程序与 Flutter 共享同一套产品语言。
+        </p>
+      </div>
 
-          <p class="hero__lead">
-            面向企业中后台与智能体产品的跨端设计系统。组件、令牌和交互规则统一维护，
-            Vue、React、小程序与 Flutter 使用同一套设计语义。
-          </p>
+      <div class="hero__actions">
+        <RouterLink to="/components">
+          <IButton variant="primary" size="lg">浏览组件 <IIcon name="arrow-right" :size="16" /></IButton>
+        </RouterLink>
+        <RouterLink to="/design/tokens"><IButton size="lg">设计令牌</IButton></RouterLink>
+      </div>
 
-          <div class="hero__actions">
-            <RouterLink to="/components">
-              <IButton variant="primary" size="lg">
-                浏览组件
-                <IIcon name="arrow-right" :size="16" />
-              </IButton>
-            </RouterLink>
-            <RouterLink to="/design/tokens">
-              <IButton size="lg">查看设计令牌</IButton>
-            </RouterLink>
-          </div>
+      <button class="install" type="button" @click="copyInstall">
+        <span class="install__prompt">$</span>
+        <code>npm i @i-design/vue-next</code>
+        <span class="install__copy"><IIcon :name="copied ? 'check' : 'copy'" :size="14" />{{ copied ? '已复制' : '复制' }}</span>
+      </button>
 
-          <div class="hero__stats" aria-label="iDesign 概览">
-            <div v-for="item in highlights" :key="item.label" class="hero__stat">
-              <strong>{{ item.value }}</strong>
-              <span>{{ item.label }}</span>
-            </div>
-          </div>
+      <div class="runtime-row" aria-label="支持的技术栈">
+        <span v-for="framework in frameworks" :key="framework.id">{{ framework.label }}</span>
+      </div>
+    </section>
+
+    <section class="showcase-wrap">
+      <div class="i-container showcase-section">
+        <div class="showcase-section__meta">
+          <span>01 / PRODUCT CONTEXT</span>
+          <p>不做孤立 Demo。组件放回真实产品上下文里，才能看到层级、密度和状态是否成立。</p>
         </div>
 
-        <div class="lab" aria-label="组件实时预览">
-          <div class="lab__glow" aria-hidden="true" />
-          <div class="lab__window">
-            <div class="lab__bar">
-              <div class="lab__dots" aria-hidden="true"><i /><i /><i /></div>
-              <span>Live component</span>
-              <ITag type="success" round>Ready</ITag>
+        <div class="workspace">
+          <aside class="workspace__side">
+            <div class="workspace__brand"><span>i</span><strong>Ops Console</strong></div>
+            <nav>
+              <a class="is-active"><IIcon name="grid" :size="15" />概览</a>
+              <a><IIcon name="warning-triangle" :size="15" />事件</a>
+              <a><IIcon name="layers" :size="15" />资源</a>
+              <a><IIcon name="code" :size="15" />自动化</a>
+            </nav>
+            <div class="workspace__side-foot">
+              <span class="avatar">SY</span>
+              <div><strong>管理员</strong><small>在线</small></div>
             </div>
+          </aside>
 
-            <div class="lab__body">
-              <div class="lab__caption">
-                <span>FORM / DEFAULT</span>
-                <span>实时交互</span>
+          <div class="workspace__main">
+            <header class="workspace__topbar">
+              <div class="workspace__crumb"><span>工作台</span><i>/</i><strong>事件中心</strong></div>
+              <div class="workspace__tools">
+                <div class="workspace__search"><IIcon name="search" :size="14" /><IInput v-model="keyword" placeholder="搜索事件" /></div>
+                <IButton variant="primary" @click="message.success('已创建事件')"><IIcon name="plus" :size="14" />新建事件</IButton>
+              </div>
+            </header>
+
+            <div class="workspace__content">
+              <div class="workspace__title-row">
+                <div>
+                  <span class="workspace__label">INCIDENT MANAGEMENT</span>
+                  <h2>事件中心</h2>
+                  <p>统一查看、分派并跟踪需要处理的异常事件。</p>
+                </div>
+                <div class="workspace__stats">
+                  <div><strong>12</strong><span>处理中</span></div>
+                  <div><strong>4</strong><span>高优先级</span></div>
+                  <div><strong>96.2%</strong><span>SLA</span></div>
+                </div>
               </div>
 
-              <ICard title="创建工作项" class="lab__card">
-                <div class="lab__field">
-                  <label>标题</label>
-                  <IInput v-model="demoTitle" placeholder="请输入工作项标题" />
+              <div class="workspace__toolbar">
+                <div class="segmented"><button class="is-active">全部</button><button>处理中</button><button>已恢复</button></div>
+                <div class="workspace__auto"><span>自动分派</span><ISwitch v-model="autoAssign" /></div>
+              </div>
+
+              <div class="incident-table">
+                <div class="incident-table__head"><span>事件</span><span>级别</span><span>负责人</span><span>状态</span><span /></div>
+                <div v-for="row in incidentRows" :key="row.id" class="incident-table__row">
+                  <div><strong>{{ row.title }}</strong><small>{{ row.id }}</small></div>
+                  <span><ITag :type="row.level === 'P1' ? 'warning' : 'default'">{{ row.level }}</ITag></span>
+                  <span>{{ row.owner }}</span>
+                  <span class="status"><i :class="{ 'is-done': row.status === '已恢复' }" />{{ row.status }}</span>
+                  <button aria-label="更多操作"><IIcon name="more" :size="15" /></button>
                 </div>
-
-                <div class="lab__row">
-                  <div>
-                    <strong>自动分配负责人</strong>
-                    <p>根据当前迭代和工作负载自动选择。</p>
-                  </div>
-                  <ISwitch v-model="demoAutoAssign" />
-                </div>
-
-                <div class="lab__tags">
-                  <ITag type="brand">需求</ITag>
-                  <ITag type="success">已评审</ITag>
-                  <ITag type="warning">高优先级</ITag>
-                </div>
-
-                <IAlert type="info">提交后将同步到当前迭代。</IAlert>
-
-                <template #footer>
-                  <div class="lab__footer">
-                    <IButton variant="text">取消</IButton>
-                    <IButton variant="primary" @click="message.success('工作项已创建')">提交</IButton>
-                  </div>
-                </template>
-              </ICard>
+              </div>
             </div>
-          </div>
-
-          <div class="lab__chip lab__chip--top">
-            <IIcon name="palette" :size="15" />
-            Semantic tokens
-          </div>
-          <div class="lab__chip lab__chip--bottom">
-            <IIcon name="check-circle" :size="15" />
-            Cross-platform parity
           </div>
         </div>
       </div>
     </section>
 
-    <section class="i-container section section--components">
-      <div class="section__head">
+    <section class="i-container component-section">
+      <div class="section-heading">
+        <span>02 / COMPONENTS</span>
         <div>
-          <span class="i-eyebrow">Components</span>
-          <h2>从场景找到组件</h2>
-          <p>不按技术实现堆目录，按用户在产品里要完成的任务组织。</p>
+          <h2>{{ readyCount }} 个已实现组件，按任务组织。</h2>
+          <p>先回答“用户要完成什么”，再决定使用哪个控件。</p>
         </div>
-        <RouterLink class="section__link" to="/components">
-          查看全部组件 <IIcon name="arrow-right" :size="15" />
-        </RouterLink>
+        <RouterLink to="/components">查看全部 <IIcon name="arrow-right" :size="14" /></RouterLink>
       </div>
 
-      <div class="category-grid">
-        <article v-for="category in featuredCategories" :key="category.title" class="category-card">
-          <div class="category-card__head">
-            <div>
-              <h3>{{ category.title }}</h3>
-              <p>{{ category.desc }}</p>
-            </div>
-            <span>{{ category.ready }}/{{ category.items.length }}</span>
-          </div>
-          <div class="category-card__items">
-            <RouterLink v-for="item in category.preview" :key="item.name" :to="item.to">
-              <span>{{ item.name }}</span>
-              <small>{{ item.cn }}</small>
-            </RouterLink>
+      <div class="category-list">
+        <article v-for="category in featuredCategories" :key="category.title" class="category-row">
+          <div class="category-row__name"><strong>{{ category.title }}</strong><span>{{ category.ready }}/{{ category.items.length }}</span></div>
+          <p>{{ category.desc }}</p>
+          <div class="category-row__items">
+            <RouterLink v-for="item in category.preview" :key="item.name" :to="item.to">{{ item.name }}<small>{{ item.cn }}</small></RouterLink>
           </div>
         </article>
       </div>
     </section>
 
-    <section class="platform-section">
-      <div class="i-container platform">
-        <div class="platform__copy">
-          <span class="i-eyebrow">One system · Many runtimes</span>
-          <h2>设计决策只做一次，渲染适配交给各端。</h2>
-          <p>
-            组件 API 可以因框架语法而不同，但视觉令牌、交互语义和验收基线保持一致。
-            业务团队无需再维护多套“长得差不多”的组件规范。
-          </p>
-          <RouterLink class="section__link" to="/design/cross-platform">
-            查看跨端实现 <IIcon name="arrow-right" :size="15" />
-          </RouterLink>
+    <section class="foundation">
+      <div class="i-container foundation__inner">
+        <div class="foundation__intro">
+          <span>03 / FOUNDATION</span>
+          <h2>稳定感来自约束，<br>不是装饰。</h2>
+          <p>视觉只是结果。底层由同一份 Token、同一套交互规则和自动化校验共同约束。</p>
+          <RouterLink to="/design/values">查看设计原则 <IIcon name="arrow-right" :size="14" /></RouterLink>
         </div>
 
-        <div class="platform__stack">
-          <div v-for="(framework, index) in frameworks" :key="framework.id" class="runtime">
-            <span class="runtime__index">0{{ index + 1 }}</span>
-            <div>
-              <strong>{{ framework.label }}</strong>
-              <small>{{ framework.runtime }}</small>
-            </div>
-            <code>{{ framework.pkg }}</code>
+        <div class="foundation__detail">
+          <div class="foundation-row">
+            <span>01</span>
+            <div><strong>Semantic tokens</strong><p>组件不直接写业务色值，主题切换与品牌适配只覆盖语义层。</p></div>
+            <div class="swatches"><i /><i /><i /><i /><i /></div>
+          </div>
+          <div class="foundation-row">
+            <span>02</span>
+            <div><strong>Interaction rules</strong><p>复杂行为收敛成独立规则，框架层只负责渲染和事件适配。</p></div>
+            <code>logic → renderer</code>
+          </div>
+          <div class="foundation-row">
+            <span>03</span>
+            <div><strong>Cross-platform parity</strong><p>构建阶段逐值验证核心表现，差异进入 CI，而不是留给用户发现。</p></div>
+            <code>7 runtimes</code>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="i-container section">
-      <div class="section__head section__head--architecture">
-        <div>
-          <span class="i-eyebrow">Architecture</span>
-          <h2>组件库之外，还有一套可验证的约束。</h2>
-          <p>设计系统的稳定性来自单一数据源、明确契约和自动校验，而不是文档约定。</p>
-        </div>
-      </div>
-
-      <div class="architecture-grid">
-        <article v-for="item in architecture" :key="item.title" class="architecture-card">
-          <div class="architecture-card__top">
-            <span class="architecture-card__icon"><IIcon :name="item.icon" :size="19" /></span>
-            <span>{{ item.index }}</span>
-          </div>
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.desc }}</p>
-        </article>
-      </div>
-
-      <div class="token-strip">
-        <div class="token-strip__copy">
-          <span>DESIGN TOKENS</span>
-          <strong>换一个主色，各端一起变化。</strong>
-          <p>组件只消费语义令牌，不直接绑定业务色值。</p>
-        </div>
-        <div class="token-strip__swatches" aria-hidden="true">
-          <i /><i /><i /><i /><i />
-        </div>
-        <RouterLink to="/design/tokens">
-          <IButton>查看 Token 体系</IButton>
-        </RouterLink>
-      </div>
-    </section>
-
-    <section class="i-container final-cta">
-      <div>
-        <span>START BUILDING</span>
-        <h2>先从一个真实页面开始。</h2>
-        <p>浏览组件、复制示例，再按语义令牌完成业务主题适配。</p>
-      </div>
-      <div class="final-cta__actions">
-        <RouterLink to="/components"><IButton variant="primary" size="lg">进入组件库</IButton></RouterLink>
-        <a href="https://github.com/ignorance-shiyao/i_design" target="_blank" rel="noreferrer">
-          <IButton size="lg"><IIcon name="github" :size="16" /> GitHub</IButton>
-        </a>
-      </div>
+    <section class="i-container closing">
+      <span>iDESIGN</span>
+      <h2>从真实业务页面开始使用。</h2>
+      <p>组件、文档、Token 和跨端实现都在同一套体系里。</p>
+      <div><RouterLink to="/components"><IButton variant="primary" size="lg">进入组件库</IButton></RouterLink><a href="https://github.com/ignorance-shiyao/i_design" target="_blank" rel="noreferrer"><IButton size="lg"><IIcon name="github" :size="15" />GitHub</IButton></a></div>
     </section>
   </main>
 </template>
 
 <style scoped>
-.home { overflow: hidden; }
+.home { overflow: clip; }
+.hero { padding-top: 104px; padding-bottom: 76px; }
+.hero__eyebrow { display:flex; align-items:center; gap:12px; color:var(--i-color-text-tertiary); font:500 10px/1 var(--i-font-family-mono); letter-spacing:.12em; }
+.hero__dot { width:7px; height:7px; border-radius:50%; background:var(--i-color-brand); }
+.hero__eyebrow span:last-child { margin-left:auto; }
+.hero__copy { max-width:980px; margin-top:44px; }
+.hero h1 { margin:0; font-size:clamp(58px,8vw,112px); line-height:.98; letter-spacing:-.07em; font-weight:620; }
+.hero h1 span { color:var(--i-color-text-tertiary); }
+.hero__copy p { max-width:720px; margin:30px 0 0; color:var(--i-color-text-secondary); font-size:18px; line-height:1.8; }
+.hero__actions { display:flex; gap:10px; margin-top:32px; }
+.install { width:min(620px,100%); margin-top:46px; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:12px; min-height:50px; padding:0 14px; border:1px solid var(--i-color-hairline); border-radius:10px; background:var(--i-color-bg-elevated); color:var(--i-color-text-secondary); cursor:pointer; text-align:left; }
+.install:hover { border-color:var(--i-color-border); }
+.install__prompt { color:var(--i-color-brand); font-family:var(--i-font-family-mono); }
+.install code { font:500 12px/1 var(--i-font-family-mono); color:var(--i-color-text); }
+.install__copy { display:flex; align-items:center; gap:6px; color:var(--i-color-text-tertiary); font-size:11px; }
+.runtime-row { display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:18px; color:var(--i-color-text-tertiary); font:500 10px/1.5 var(--i-font-family-mono); }
+.runtime-row span + span::before { content:'·'; margin-right:18px; color:var(--i-color-border); }
 
-.hero {
-  position: relative;
-  min-height: 700px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--i-color-hairline);
-  background:
-    radial-gradient(circle at 74% 30%, color-mix(in srgb, var(--i-color-brand) 13%, transparent), transparent 28%),
-    linear-gradient(180deg, color-mix(in srgb, var(--i-color-bg-subtle) 48%, transparent), transparent 64%);
-}
-.hero__grid {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: .58;
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--i-color-hairline) 68%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--i-color-hairline) 68%, transparent) 1px, transparent 1px);
-  background-size: 44px 44px;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 88%);
-  mask-image: linear-gradient(to bottom, #000 0%, transparent 88%);
-}
-.hero__inner {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(0, .95fr) minmax(460px, .8fr);
-  gap: clamp(48px, 7vw, 112px);
-  align-items: center;
-  padding-top: 88px;
-  padding-bottom: 88px;
-}
-.hero__copy { min-width: 0; }
-.hero__meta {
-  display: flex;
-  align-items: center;
-  gap: var(--i-spacing-3);
-  margin-bottom: var(--i-spacing-6);
-  font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-xs);
-  color: var(--i-color-text-tertiary);
-}
-.hero__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--i-color-text-secondary);
-}
-.hero__status i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #27b36a;
-  box-shadow: 0 0 0 4px color-mix(in srgb, #27b36a 14%, transparent);
-}
-.hero__version {
-  padding-left: var(--i-spacing-3);
-  border-left: 1px solid var(--i-color-border);
-}
-.hero h1 {
-  max-width: 780px;
-  margin: 0;
-  font-size: clamp(46px, 5.4vw, 78px);
-  line-height: 1.06;
-  letter-spacing: -0.055em;
-  font-weight: 650;
-  text-wrap: balance;
-}
-.hero h1 span {
-  color: var(--i-color-brand);
-}
-.hero__lead {
-  max-width: 670px;
-  margin: var(--i-spacing-6) 0 0;
-  font-size: clamp(17px, 1.5vw, 20px);
-  line-height: 1.8;
-  color: var(--i-color-text-secondary);
-}
-.hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--i-spacing-3);
-  margin-top: var(--i-spacing-8);
-}
-.hero__actions :deep(.i-button) { min-height: 44px; }
-.hero__stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  margin-top: var(--i-spacing-10);
-  padding-top: var(--i-spacing-6);
-  border-top: 1px solid var(--i-color-hairline);
-}
-.hero__stat {
-  display: grid;
-  gap: 5px;
-  padding-right: var(--i-spacing-4);
-}
-.hero__stat + .hero__stat {
-  padding-left: var(--i-spacing-4);
-  border-left: 1px solid var(--i-color-hairline);
-}
-.hero__stat strong {
-  font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-xl);
-  letter-spacing: -.03em;
-}
-.hero__stat span { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
+.showcase-wrap { border-top:1px solid var(--i-color-hairline); border-bottom:1px solid var(--i-color-hairline); background:var(--i-color-bg-subtle); }
+.showcase-section { padding-top:72px; padding-bottom:88px; }
+.showcase-section__meta { display:grid; grid-template-columns:220px 1fr; gap:32px; margin-bottom:24px; color:var(--i-color-text-tertiary); }
+.showcase-section__meta > span, .section-heading > span, .foundation__intro > span, .closing > span { font:500 10px/1 var(--i-font-family-mono); letter-spacing:.12em; color:var(--i-color-text-tertiary); }
+.showcase-section__meta p { margin:0; max-width:650px; font-size:12px; line-height:1.65; }
+.workspace { display:grid; grid-template-columns:180px minmax(0,1fr); min-height:620px; overflow:hidden; border:1px solid var(--i-color-border); border-radius:12px; background:var(--i-color-bg-elevated); box-shadow:0 18px 50px color-mix(in srgb,#000 8%,transparent); }
+.workspace__side { display:flex; flex-direction:column; padding:18px 12px 14px; border-right:1px solid var(--i-color-hairline); background:var(--i-color-bg); }
+.workspace__brand { display:flex; align-items:center; gap:9px; padding:0 8px 18px; font-size:12px; }
+.workspace__brand > span { display:grid; place-items:center; width:22px; height:22px; border-radius:6px; background:var(--i-color-text); color:var(--i-color-bg); font:700 12px/1 var(--i-font-family-mono); }
+.workspace__side nav { display:grid; gap:3px; }
+.workspace__side nav a { display:flex; align-items:center; gap:9px; padding:9px 10px; border-radius:7px; color:var(--i-color-text-tertiary); font-size:11px; }
+.workspace__side nav a.is-active { background:var(--i-color-bg-subtle); color:var(--i-color-text); font-weight:550; }
+.workspace__side-foot { margin-top:auto; display:flex; align-items:center; gap:8px; padding:12px 8px 0; border-top:1px solid var(--i-color-hairline); }
+.avatar { display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:var(--i-color-brand-subtle); color:var(--i-color-brand); font:600 9px/1 var(--i-font-family-mono); }
+.workspace__side-foot div { display:grid; gap:2px; }
+.workspace__side-foot strong { font-size:10px; }.workspace__side-foot small { color:var(--i-color-text-tertiary); font-size:9px; }
+.workspace__main { min-width:0; }
+.workspace__topbar { display:flex; align-items:center; justify-content:space-between; gap:18px; min-height:58px; padding:0 20px; border-bottom:1px solid var(--i-color-hairline); }
+.workspace__crumb { display:flex; gap:8px; align-items:center; font-size:10px; color:var(--i-color-text-tertiary); }.workspace__crumb strong { color:var(--i-color-text-secondary); }.workspace__crumb i { font-style:normal; }
+.workspace__tools { display:flex; align-items:center; gap:8px; }.workspace__search { position:relative; width:190px; }.workspace__search > :deep(svg) { position:absolute; z-index:1; left:10px; top:50%; transform:translateY(-50%); color:var(--i-color-text-tertiary); }.workspace__search :deep(input) { padding-left:32px; }
+.workspace__content { padding:34px 34px 40px; }
+.workspace__title-row { display:flex; align-items:end; justify-content:space-between; gap:30px; }
+.workspace__label { color:var(--i-color-brand); font:500 9px/1 var(--i-font-family-mono); letter-spacing:.1em; }.workspace__title-row h2 { margin:8px 0 0; font-size:30px; letter-spacing:-.04em; }.workspace__title-row p { margin:7px 0 0; color:var(--i-color-text-tertiary); font-size:11px; }
+.workspace__stats { display:flex; border-left:1px solid var(--i-color-hairline); }.workspace__stats div { display:grid; gap:4px; min-width:82px; padding-left:18px; }.workspace__stats strong { font:600 17px/1 var(--i-font-family-mono); }.workspace__stats span { color:var(--i-color-text-tertiary); font-size:9px; }
+.workspace__toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:30px; padding:12px 0; border-top:1px solid var(--i-color-hairline); }
+.segmented { display:inline-flex; gap:2px; padding:3px; border-radius:8px; background:var(--i-color-bg-subtle); }.segmented button { padding:6px 10px; border:0; border-radius:6px; background:transparent; color:var(--i-color-text-tertiary); font-size:10px; cursor:pointer; }.segmented button.is-active { background:var(--i-color-bg-elevated); color:var(--i-color-text); box-shadow:var(--i-shadow-sm); }
+.workspace__auto { display:flex; align-items:center; gap:8px; color:var(--i-color-text-secondary); font-size:10px; }
+.incident-table { border-top:1px solid var(--i-color-hairline); }
+.incident-table__head,.incident-table__row { display:grid; grid-template-columns:minmax(240px,1.4fr) 80px 100px 100px 24px; gap:14px; align-items:center; min-height:48px; border-bottom:1px solid var(--i-color-hairline); }
+.incident-table__head { min-height:38px; color:var(--i-color-text-tertiary); font-size:9px; }.incident-table__row { color:var(--i-color-text-secondary); font-size:10px; }.incident-table__row > div:first-child { display:grid; gap:3px; }.incident-table__row strong { color:var(--i-color-text); font-size:10px; }.incident-table__row small { color:var(--i-color-text-tertiary); font:500 9px/1 var(--i-font-family-mono); }
+.status { display:flex; align-items:center; gap:7px; }.status i { width:6px; height:6px; border-radius:50%; background:#e29c32; }.status i.is-done { background:#28a86b; }.incident-table__row > button { display:grid; place-items:center; width:24px; height:24px; border:0; border-radius:6px; background:transparent; color:var(--i-color-text-tertiary); cursor:pointer; }.incident-table__row > button:hover { background:var(--i-color-bg-subtle); color:var(--i-color-text); }
 
-.lab { position: relative; padding: 44px 16px 36px 30px; }
-.lab__glow {
-  position: absolute;
-  inset: 16% 8% 12%;
-  border-radius: 50%;
-  background: var(--i-color-brand);
-  opacity: .12;
-  filter: blur(70px);
-}
-.lab__window {
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--i-color-border) 82%, transparent);
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--i-color-bg-elevated) 94%, transparent);
-  box-shadow: 0 34px 90px color-mix(in srgb, #000 13%, transparent), var(--i-shadow-md);
-  transform: perspective(1200px) rotateY(-3deg) rotateX(1deg);
-}
-.lab__bar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: var(--i-spacing-3);
-  min-height: 48px;
-  padding: 0 var(--i-spacing-4);
-  border-bottom: 1px solid var(--i-color-hairline);
-  color: var(--i-color-text-tertiary);
-  font: 500 var(--i-font-size-xs)/1 var(--i-font-family-mono);
-}
-.lab__bar > :last-child { justify-self: end; }
-.lab__dots { display: flex; gap: 6px; }
-.lab__dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--i-color-border); }
-.lab__body { padding: var(--i-spacing-5); background: color-mix(in srgb, var(--i-color-bg-subtle) 52%, transparent); }
-.lab__caption {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--i-spacing-3);
-  color: var(--i-color-text-tertiary);
-  font: 500 10px/1 var(--i-font-family-mono);
-  letter-spacing: .1em;
-}
-.lab__card { box-shadow: var(--i-shadow-sm); }
-.lab__field { display: grid; gap: var(--i-spacing-2); }
-.lab__field label, .lab__row strong { font-size: var(--i-font-size-sm); font-weight: 550; }
-.lab__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--i-spacing-6);
-  margin-top: var(--i-spacing-5);
-  padding: var(--i-spacing-4) 0;
-  border-top: 1px solid var(--i-color-hairline);
-  border-bottom: 1px solid var(--i-color-hairline);
-}
-.lab__row p { margin: 4px 0 0; font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
-.lab__tags { display: flex; flex-wrap: wrap; gap: var(--i-spacing-2); margin: var(--i-spacing-4) 0; }
-.lab__footer { display: flex; justify-content: flex-end; gap: var(--i-spacing-2); }
-.lab__chip {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 12px;
-  border: 1px solid var(--i-color-hairline);
-  border-radius: var(--i-radius-full);
-  background: color-mix(in srgb, var(--i-color-bg-elevated) 88%, transparent);
-  backdrop-filter: blur(16px);
-  box-shadow: var(--i-shadow-md);
-  color: var(--i-color-text-secondary);
-  font-size: 11px;
-}
-.lab__chip :deep(svg) { color: var(--i-color-brand); }
-.lab__chip--top { top: 13px; right: -7px; }
-.lab__chip--bottom { left: 0; bottom: 4px; }
+.component-section { padding-top:112px; padding-bottom:112px; }
+.section-heading { display:grid; grid-template-columns:180px minmax(0,1fr) auto; gap:36px; align-items:end; margin-bottom:42px; }.section-heading h2 { margin:0; font-size:clamp(34px,4vw,52px); line-height:1.08; letter-spacing:-.05em; }.section-heading p { margin:12px 0 0; color:var(--i-color-text-secondary); }.section-heading > a,.foundation__intro > a { display:inline-flex; align-items:center; gap:6px; color:var(--i-color-brand); font-size:12px; }
+.category-list { border-top:1px solid var(--i-color-border); }
+.category-row { display:grid; grid-template-columns:180px 230px minmax(0,1fr); gap:36px; align-items:start; padding:26px 0; border-bottom:1px solid var(--i-color-hairline); }.category-row__name { display:flex; align-items:center; justify-content:space-between; gap:10px; }.category-row__name strong { font-size:14px; }.category-row__name span { color:var(--i-color-text-tertiary); font:500 9px/1 var(--i-font-family-mono); }.category-row > p { margin:0; color:var(--i-color-text-tertiary); font-size:11px; line-height:1.6; }.category-row__items { display:flex; flex-wrap:wrap; gap:7px; }.category-row__items a { display:inline-flex; align-items:center; gap:6px; padding:7px 9px; border-radius:7px; background:var(--i-color-bg-subtle); color:var(--i-color-text-secondary); font-size:10px; }.category-row__items a:hover { background:var(--i-color-brand-subtle); color:var(--i-color-brand); }.category-row__items small { color:var(--i-color-text-tertiary); }
 
-.section { padding-top: 112px; padding-bottom: 112px; }
-.section__head {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: var(--i-spacing-8);
-  margin-bottom: var(--i-spacing-8);
-}
-.section__head h2, .platform h2, .final-cta h2 {
-  margin: var(--i-spacing-3) 0 0;
-  max-width: 760px;
-  font-size: clamp(32px, 3.4vw, 48px);
-  line-height: 1.15;
-  letter-spacing: -.04em;
-}
-.section__head p, .platform__copy > p, .final-cta p {
-  max-width: 680px;
-  margin: var(--i-spacing-3) 0 0;
-  color: var(--i-color-text-secondary);
-  font-size: var(--i-font-size-md);
-  line-height: 1.75;
-}
-.section__link {
-  display: inline-flex;
-  align-items: center;
-  flex: none;
-  gap: 7px;
-  color: var(--i-color-brand);
-  font-size: var(--i-font-size-sm);
-  font-weight: 550;
-}
-.section__link:hover { gap: 10px; }
+.foundation { border-top:1px solid var(--i-color-hairline); border-bottom:1px solid var(--i-color-hairline); background:var(--i-color-bg-subtle); }.foundation__inner { display:grid; grid-template-columns:minmax(300px,.72fr) minmax(0,1fr); gap:100px; padding-top:112px; padding-bottom:112px; }.foundation__intro h2 { margin:24px 0 0; font-size:clamp(42px,5vw,68px); line-height:1.02; letter-spacing:-.055em; }.foundation__intro p { max-width:470px; margin:20px 0 0; color:var(--i-color-text-secondary); line-height:1.75; }.foundation__intro > a { margin-top:26px; }
+.foundation__detail { border-top:1px solid var(--i-color-border); }.foundation-row { display:grid; grid-template-columns:34px 1fr auto; gap:18px; align-items:center; min-height:146px; border-bottom:1px solid var(--i-color-hairline); }.foundation-row > span { align-self:start; padding-top:31px; color:var(--i-color-text-tertiary); font:500 9px/1 var(--i-font-family-mono); }.foundation-row strong { font-size:15px; }.foundation-row p { max-width:500px; margin:8px 0 0; color:var(--i-color-text-secondary); font-size:11px; line-height:1.65; }.foundation-row code { color:var(--i-color-text-tertiary); font:500 10px/1 var(--i-font-family-mono); }.swatches { display:flex; }.swatches i { width:28px; height:28px; margin-left:-5px; border:3px solid var(--i-color-bg-subtle); border-radius:50%; background:var(--i-color-brand); }.swatches i:nth-child(2){opacity:.78}.swatches i:nth-child(3){opacity:.56}.swatches i:nth-child(4){opacity:.34}.swatches i:nth-child(5){opacity:.16}
 
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--i-spacing-4);
-}
-.category-card {
-  min-height: 250px;
-  padding: var(--i-spacing-5);
-  border: 1px solid var(--i-color-hairline);
-  border-radius: 18px;
-  background: var(--i-color-bg-elevated);
-  transition: transform var(--i-motion-base) var(--i-motion-easing), border-color var(--i-motion-base) var(--i-motion-easing), box-shadow var(--i-motion-base) var(--i-motion-easing);
-}
-.category-card:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--i-color-brand) 28%, var(--i-color-border));
-  box-shadow: var(--i-shadow-md);
-}
-.category-card__head { display: flex; justify-content: space-between; gap: var(--i-spacing-4); min-height: 82px; }
-.category-card__head h3 { margin: 0; font-size: var(--i-font-size-lg); letter-spacing: -.02em; }
-.category-card__head p { margin: 7px 0 0; color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); line-height: 1.55; }
-.category-card__head > span {
-  flex: none;
-  font: 500 var(--i-font-size-xs)/1 var(--i-font-family-mono);
-  color: var(--i-color-text-tertiary);
-}
-.category-card__items { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: var(--i-spacing-5); }
-.category-card__items a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--i-spacing-2);
-  padding: 10px 11px;
-  border-radius: var(--i-radius-md);
-  background: var(--i-color-bg-subtle);
-  color: var(--i-color-text-secondary);
-  font-size: var(--i-font-size-xs);
-}
-.category-card__items a:hover { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
-.category-card__items small { color: var(--i-color-text-tertiary); }
+.closing { padding-top:104px; padding-bottom:112px; text-align:center; }.closing h2 { margin:18px 0 0; font-size:clamp(38px,5vw,64px); letter-spacing:-.055em; }.closing p { margin:14px 0 0; color:var(--i-color-text-secondary); }.closing > div { display:flex; justify-content:center; gap:10px; margin-top:28px; }
 
-.platform-section {
-  border-top: 1px solid var(--i-color-hairline);
-  border-bottom: 1px solid var(--i-color-hairline);
-  background: var(--i-color-bg-subtle);
+@media (max-width:980px) {
+  .hero { padding-top:82px; }.workspace { grid-template-columns:1fr; }.workspace__side { display:none; }.workspace__content { padding:28px 24px 32px; }.section-heading { grid-template-columns:1fr; gap:14px; }.category-row { grid-template-columns:160px 1fr; }.category-row__items { grid-column:2; }.foundation__inner { grid-template-columns:1fr; gap:52px; }.showcase-section__meta { grid-template-columns:1fr; gap:10px; }
 }
-.platform {
-  display: grid;
-  grid-template-columns: minmax(0, .82fr) minmax(520px, 1fr);
-  gap: clamp(56px, 9vw, 140px);
-  align-items: center;
-  padding-top: 112px;
-  padding-bottom: 112px;
-}
-.platform__copy .section__link { margin-top: var(--i-spacing-6); }
-.platform__stack {
-  overflow: hidden;
-  border: 1px solid var(--i-color-hairline);
-  border-radius: 18px;
-  background: var(--i-color-bg-elevated);
-  box-shadow: var(--i-shadow-sm);
-}
-.runtime {
-  display: grid;
-  grid-template-columns: 38px 1fr auto;
-  gap: var(--i-spacing-4);
-  align-items: center;
-  min-height: 66px;
-  padding: 0 var(--i-spacing-5);
-  border-bottom: 1px solid var(--i-color-hairline);
-}
-.runtime:last-child { border-bottom: 0; }
-.runtime:hover { background: var(--i-color-bg-subtle); }
-.runtime__index { font: 500 10px/1 var(--i-font-family-mono); color: var(--i-color-text-tertiary); }
-.runtime div { display: grid; gap: 3px; }
-.runtime strong { font-size: var(--i-font-size-sm); }
-.runtime small { color: var(--i-color-text-tertiary); font-size: 11px; }
-.runtime code {
-  padding: 6px 8px;
-  border-radius: 7px;
-  background: var(--i-color-bg-subtle);
-  color: var(--i-color-text-secondary);
-  font: 500 10px/1 var(--i-font-family-mono);
-}
-
-.architecture-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--i-spacing-4); }
-.architecture-card {
-  padding: var(--i-spacing-6);
-  border: 1px solid var(--i-color-hairline);
-  border-radius: 18px;
-  background: var(--i-color-bg-elevated);
-}
-.architecture-card__top { display: flex; align-items: center; justify-content: space-between; color: var(--i-color-text-tertiary); font: 500 10px/1 var(--i-font-family-mono); }
-.architecture-card__icon {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
-}
-.architecture-card h3 { margin: var(--i-spacing-8) 0 0; font-size: var(--i-font-size-xl); letter-spacing: -.025em; }
-.architecture-card p { margin: var(--i-spacing-3) 0 0; color: var(--i-color-text-secondary); line-height: 1.7; font-size: var(--i-font-size-sm); }
-.token-strip {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: var(--i-spacing-8);
-  margin-top: var(--i-spacing-4);
-  padding: var(--i-spacing-6);
-  border: 1px solid color-mix(in srgb, var(--i-color-brand) 24%, var(--i-color-hairline));
-  border-radius: 18px;
-  background: linear-gradient(110deg, var(--i-color-brand-subtle), var(--i-color-bg-elevated) 46%);
-}
-.token-strip__copy { display: grid; gap: 6px; }
-.token-strip__copy > span { font: 500 10px/1 var(--i-font-family-mono); letter-spacing: .12em; color: var(--i-color-brand); }
-.token-strip__copy strong { font-size: var(--i-font-size-lg); }
-.token-strip__copy p { margin: 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
-.token-strip__swatches { display: flex; align-items: center; }
-.token-strip__swatches i { width: 36px; height: 36px; margin-left: -7px; border: 3px solid var(--i-color-bg-elevated); border-radius: 50%; background: var(--i-color-brand); }
-.token-strip__swatches i:nth-child(2) { opacity: .78; }
-.token-strip__swatches i:nth-child(3) { opacity: .56; }
-.token-strip__swatches i:nth-child(4) { opacity: .34; }
-.token-strip__swatches i:nth-child(5) { opacity: .16; }
-
-.final-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--i-spacing-8);
-  margin-bottom: 96px;
-  padding-top: var(--i-spacing-10);
-  padding-bottom: var(--i-spacing-10);
-  border-top: 1px solid var(--i-color-hairline);
-}
-.final-cta > div:first-child > span { font: 500 10px/1 var(--i-font-family-mono); letter-spacing: .13em; color: var(--i-color-brand); }
-.final-cta h2 { margin-top: var(--i-spacing-3); font-size: clamp(30px, 3vw, 42px); }
-.final-cta__actions { display: flex; flex: none; gap: var(--i-spacing-3); }
-
-@media (max-width: 1080px) {
-  .hero { min-height: auto; }
-  .hero__inner { grid-template-columns: 1fr; gap: var(--i-spacing-8); padding-top: 84px; padding-bottom: 84px; }
-  .hero__copy { max-width: 820px; }
-  .lab { width: min(720px, 100%); padding-right: 30px; }
-  .category-grid { grid-template-columns: repeat(2, 1fr); }
-  .platform { grid-template-columns: 1fr; }
-  .platform__copy { max-width: 720px; }
-}
-
-@media (max-width: 760px) {
-  .hero__inner { padding-top: 64px; padding-bottom: 64px; }
-  .hero h1 { font-size: clamp(40px, 11vw, 58px); }
-  .hero__stats { grid-template-columns: repeat(2, 1fr); row-gap: var(--i-spacing-5); }
-  .hero__stat:nth-child(3) { padding-left: 0; border-left: 0; }
-  .hero__stat:nth-child(3), .hero__stat:nth-child(4) { padding-top: var(--i-spacing-4); border-top: 1px solid var(--i-color-hairline); }
-  .lab { padding: 30px 0 28px; }
-  .lab__window { transform: none; border-radius: 16px; }
-  .lab__chip { display: none; }
-  .lab__body { padding: var(--i-spacing-3); }
-  .section { padding-top: 78px; padding-bottom: 78px; }
-  .section__head { align-items: start; flex-direction: column; }
-  .category-grid, .architecture-grid { grid-template-columns: 1fr; }
-  .platform { padding-top: 78px; padding-bottom: 78px; gap: var(--i-spacing-8); }
-  .platform__stack { border-radius: 14px; }
-  .runtime { grid-template-columns: 28px 1fr; padding: var(--i-spacing-3) var(--i-spacing-4); }
-  .runtime code { grid-column: 2; justify-self: start; }
-  .token-strip { grid-template-columns: 1fr; gap: var(--i-spacing-5); }
-  .token-strip__swatches { display: none; }
-  .final-cta { align-items: flex-start; flex-direction: column; margin-bottom: 56px; }
-}
-
-@media (max-width: 480px) {
-  .hero__actions, .final-cta__actions { display: grid; width: 100%; }
-  .hero__actions a, .final-cta__actions a { display: block; }
-  .hero__actions :deep(.i-button), .final-cta__actions :deep(.i-button) { width: 100%; }
-  .category-card__items { grid-template-columns: 1fr; }
-  .hero__stats { font-size: 90%; }
+@media (max-width:720px) {
+  .hero { padding-top:64px; padding-bottom:58px; }.hero h1 { font-size:clamp(52px,15vw,78px); }.hero__copy p { font-size:16px; }.hero__actions { flex-wrap:wrap; }.runtime-row { display:none; }.workspace { min-height:0; border-radius:10px; }.workspace__topbar { align-items:flex-start; flex-direction:column; padding:14px; }.workspace__tools { width:100%; }.workspace__search { flex:1; width:auto; }.workspace__content { padding:24px 16px; }.workspace__title-row { align-items:flex-start; flex-direction:column; }.workspace__stats { width:100%; border-left:0; border-top:1px solid var(--i-color-hairline); padding-top:14px; }.workspace__stats div { flex:1; min-width:0; padding-left:0; }.workspace__toolbar { align-items:flex-start; flex-direction:column; }.incident-table__head { display:none; }.incident-table__row { grid-template-columns:1fr auto; gap:10px; padding:12px 0; }.incident-table__row > span:nth-of-type(2),.incident-table__row > span:nth-of-type(3),.incident-table__row > button { display:none; }.component-section,.foundation__inner { padding-top:78px; padding-bottom:78px; }.category-row { grid-template-columns:1fr; gap:12px; }.category-row__items { grid-column:auto; }.foundation-row { grid-template-columns:28px 1fr; }.foundation-row > :last-child { grid-column:2; justify-self:start; }.closing { padding-top:78px; padding-bottom:86px; }
 }
 </style>
