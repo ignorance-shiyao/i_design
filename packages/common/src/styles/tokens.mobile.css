@@ -27,6 +27,10 @@
   --i-color-danger-subtle: #fdecee;
   --i-color-info: #5e7ce0;
   --i-color-info-subtle: #eef3ff;
+  --i-color-glass: rgba(255, 255, 255, 0.72);
+  --i-color-glass-subtle: rgba(255, 255, 255, 0.55);
+  --i-color-glass-border: rgba(20, 24, 34, 0.1);
+  --i-color-glass-highlight: rgba(255, 255, 255, 0.75);
   --i-color-code-bg: #fbfbfd;
   --i-color-code-bar: #f4f5f9;
   --i-color-code-border: #e6e8f0;
@@ -92,6 +96,8 @@
   --i-motion-easing-out: cubic-bezier(0, 0, 0.2, 1);
   --i-motion-easing-in: cubic-bezier(0.4, 0, 1, 1);
   --i-motion-easing-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --i-glass-blur: 18px;
+  --i-glass-saturate: 160%;
   --i-z-base: 0;
   --i-z-dropdown: 1000;
   --i-z-sticky: 1100;
@@ -160,6 +166,10 @@
   --i-color-danger-subtle: rgba(246, 111, 106, 0.16);
   --i-color-info: #adc4ff;
   --i-color-info-subtle: rgba(94, 124, 224, 0.16);
+  --i-color-glass: rgba(34, 40, 55, 0.72);
+  --i-color-glass-subtle: rgba(27, 32, 44, 0.6);
+  --i-color-glass-border: rgba(255, 255, 255, 0.14);
+  --i-color-glass-highlight: rgba(255, 255, 255, 0.16);
   --i-color-code-bg: #12151e;
   --i-color-code-bar: #151922;
   --i-color-code-border: #424d61;
@@ -225,6 +235,8 @@
   --i-motion-easing-out: cubic-bezier(0, 0, 0.2, 1);
   --i-motion-easing-in: cubic-bezier(0.4, 0, 1, 1);
   --i-motion-easing-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --i-glass-blur: 18px;
+  --i-glass-saturate: 160%;
   --i-z-base: 0;
   --i-z-dropdown: 1000;
   --i-z-sticky: 1100;

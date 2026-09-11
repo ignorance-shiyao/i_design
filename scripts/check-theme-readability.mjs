@@ -3,7 +3,7 @@ import { build } from "esbuild";
 
 const compiled = await build({
   stdin: {
-    contents: `export { darkTheme, syntaxDark } from './packages/common/src/tokens/index.ts'; export { contrastRatio, brandRamp } from './packages/common/src/logic/palette.ts'; export * from './src/composables/useThemeConfig.ts';`,
+    contents: `export { darkTheme, syntaxDark } from './packages/common/src/tokens/index.ts'; export { contrastRatio, brandRamp } from './packages/common/src/logic/palette.ts'; export { normalizeThemeConfig } from './packages/common/src/logic/theme.ts'; export * from './src/composables/useThemeConfig.ts';`,
     resolveDir: process.cwd(),
     loader: "ts",
   },
@@ -174,6 +174,32 @@ assert.ok(
 const css = api.themeCss.value;
 assert.ok(css.includes("--i-font-size-md: 17px;"), "导出应包含自定义字号");
 assert.ok(!/--i-[a-z-]+:\s*;/.test(css), "导出不得出现空值声明");
+/* 液态玻璃：开着才有玻璃令牌，关掉必须干净地退回实心面 */
+themeConfig.glass = true;
+themeConfig.glassIntensity = 100;
+applyThemeConfig();
+assert.equal(document.documentElement.dataset.glass, "on");
+const glassSurface = properties.get("--i-color-glass");
+assert.ok(/^rgba\(/.test(glassSurface), "玻璃面应当是半透明的");
+const alpha = Number(glassSurface.replace(/^rgba\(|\)$/g, "").split(",")[3]);
+assert.ok(alpha >= 0.6, `玻璃最透也要留下边界，当前 ${alpha}`);
+assert.ok(parseFloat(properties.get("--i-glass-blur")) >= 20, "强度拉满时模糊要跟上");
+themeConfig.glass = false;
+applyThemeConfig();
+assert.equal(document.documentElement.dataset.glass, "off");
+assert.equal(properties.has("--i-color-glass"), false, "关掉玻璃要移除覆盖");
+
+/* 每一级的自定义值按各自区间夹取，越界的存档不该把版式带跑 */
+const clamped = api.normalizeThemeConfig({
+  fontSizeCustom: { md: 999, xs: 1 },
+  radiusCustom: { sm: 99 },
+  controlHeightCustom: { md: 5 },
+});
+assert.equal(clamped.fontSizeCustom.md, 24);
+assert.equal(clamped.fontSizeCustom.xs, 10);
+assert.equal(clamped.radiusCustom.sm, 8);
+assert.equal(clamped.controlHeightCustom.md, 26);
+
 api.resetThemeConfig();
 applyThemeConfig();
 localStorage.setItem = () => {
@@ -183,5 +209,5 @@ assert.doesNotThrow(() => applyThemeConfig());
 console.log(
   `PASS: dark text/surface minimum ${minimum.toFixed(
     2
-  )}:1; code palette, presets, reactive ramp, persistence, reset, scaling, motion, 精细化令牌与导出。`
+  )}:1; code palette, presets, reactive ramp, persistence, reset, scaling, motion, 精细化令牌、玻璃与导出。`
 );

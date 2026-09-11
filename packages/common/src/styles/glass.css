@@ -1,0 +1,70 @@
+/*
+ * 液态玻璃层。
+ *
+ * 只作用于「浮在内容之上」的面：浮层、弹窗、抽屉、下拉、吸顶条。
+ * 不给普通卡片上玻璃——卡片背后是纯色底，模糊出来跟实心面看不出区别，
+ * 却要多付一层合成的代价；而且满屏都是玻璃时，玻璃就不再表示「浮起来」了。
+ *
+ * 开关挂在 :root[data-glass="on"]，由主题配置写入。关掉即回到实心面，
+ * 组件样式本身不需要任何改动——这也是这套体系「只覆盖令牌」的一贯做法。
+ *
+ * 排在组件样式之后引入（由 build-styles-index.mjs 保证），否则覆不掉组件的背景色。
+ */
+
+/*
+ * 浏览器不支持 backdrop-filter 时整段不生效：
+ * 只把背景调透明而背后不模糊，等于让内容压在没处理过的画面上，比实心面更难读。
+ */
+@supports (backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px)) {
+  :root[data-glass="on"] .i-modal__panel,
+  :root[data-glass="on"] .i-drawer__panel,
+  :root[data-glass="on"] .i-popup__panel,
+  :root[data-glass="on"] .i-action-sheet__panel,
+  :root[data-glass="on"] .i-select__panel,
+  :root[data-glass="on"] .i-dropdown__panel,
+  :root[data-glass="on"] .i-autocomplete__panel,
+  :root[data-glass="on"] .i-cascader__panel,
+  :root[data-glass="on"] .i-date__panel,
+  :root[data-glass="on"] .i-picker__panel,
+  :root[data-glass="on"] .i-timepicker__panel,
+  :root[data-glass="on"] .i-tree-select__panel,
+  :root[data-glass="on"] .i-mentions__panel,
+  :root[data-glass="on"] .i-colorpicker__panel,
+  :root[data-glass="on"] .i-popconfirm__panel,
+  :root[data-glass="on"] .i-popover__body,
+  :root[data-glass="on"] .i-menu--popup,
+  :root[data-glass="on"] .i-notification,
+  :root[data-glass="on"] .i-toast,
+  :root[data-glass="on"] .i-tooltip__body,
+  :root[data-glass="on"] .i-tour__panel,
+  :root[data-glass="on"] .i-nav-bar,
+  :root[data-glass="on"] .i-tabbar,
+  :root[data-glass="on"] .i-glass {
+    background: var(--i-color-glass);
+    -webkit-backdrop-filter: blur(var(--i-glass-blur)) saturate(var(--i-glass-saturate));
+    backdrop-filter: blur(var(--i-glass-blur)) saturate(var(--i-glass-saturate));
+    /*
+     * 内高光勾出上沿，面才有厚度。
+     * 用 inset 阴影而不是渐变底：渐变会让同一块玻璃在不同尺寸的元件上观感不一。
+     */
+    box-shadow: inset 0 1px 0 var(--i-color-glass-highlight), var(--i-shadow-lg);
+    border-color: var(--i-color-glass-border);
+  }
+
+  /* 提示气泡是反色的小面，透过去会认不出边界，因此只取模糊不取透明 */
+  :root[data-glass="on"] .i-tooltip__body {
+    background: var(--i-color-glass-subtle);
+  }
+}
+
+/*
+ * 「减少动态效果」下退回实心面。
+ * 合成模糊是一笔持续开销，且透出来的背景会随滚动而变——
+ * 对前庭敏感的人来说，那是一整面一直在动的画面。
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-glass="on"] [class*="i-"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}

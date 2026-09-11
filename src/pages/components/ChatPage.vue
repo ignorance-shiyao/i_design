@@ -407,7 +407,12 @@ const diffRows: DiffRow[] = [
           向 <ITag>锥王食品</ITag> 补货蛋卷筒，预计到货周期
           <ITag type="warning">7 天</ITag>。
         </IRecommendCard>
-        <label style="font-size: 13px; color: var(--i-color-text-secondary)">
+        <label
+          style="
+            font-size: var(--i-font-size-sm);
+            color: var(--i-color-text-secondary);
+          "
+        >
           置信度 {{ confidence.toFixed(2) }}
           <input v-model.number="confidence" type="range" min="0" max="1" step="0.05" style="width: 100%" />
         </label>

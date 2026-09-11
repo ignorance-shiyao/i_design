@@ -32,6 +32,10 @@ class IDesignTokensLight {
   static const colorDangerSubtle = Color(0xFFFDECEE);
   static const colorInfo = Color(0xFF5E7CE0);
   static const colorInfoSubtle = Color(0xFFEEF3FF);
+  static const colorGlass = Color(0xB8FFFFFF);
+  static const colorGlassSubtle = Color(0x8CFFFFFF);
+  static const colorGlassBorder = Color(0x1A141822);
+  static const colorGlassHighlight = Color(0xBFFFFFFF);
   static const colorCodeBg = Color(0xFFFBFBFD);
   static const colorCodeBar = Color(0xFFF4F5F9);
   static const colorCodeBorder = Color(0xFFE6E8F0);
@@ -102,6 +106,7 @@ class IDesignTokensLight {
   static const double radiusLg = 8.0;
   static const double radiusXl = 16.0;
   static const double radiusFull = 999.0;
+  static const double glassBlur = 18.0;
   static const double controlHeightSm = 28.0;
   static const double controlHeightMd = 34.0;
   static const double controlHeightLg = 42.0;
@@ -142,6 +147,10 @@ class IDesignTokensDark {
   static const colorDangerSubtle = Color(0x29F66F6A);
   static const colorInfo = Color(0xFFADC4FF);
   static const colorInfoSubtle = Color(0x295E7CE0);
+  static const colorGlass = Color(0xB8222837);
+  static const colorGlassSubtle = Color(0x991B202C);
+  static const colorGlassBorder = Color(0x24FFFFFF);
+  static const colorGlassHighlight = Color(0x29FFFFFF);
   static const colorCodeBg = Color(0xFF12151E);
   static const colorCodeBar = Color(0xFF151922);
   static const colorCodeBorder = Color(0xFF424D61);
@@ -212,6 +221,7 @@ class IDesignTokensDark {
   static const double radiusLg = 8.0;
   static const double radiusXl = 16.0;
   static const double radiusFull = 999.0;
+  static const double glassBlur = 18.0;
   static const double controlHeightSm = 28.0;
   static const double controlHeightMd = 34.0;
   static const double controlHeightLg = 42.0;

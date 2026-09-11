@@ -54,10 +54,11 @@ function load(): ThemeConfig {
 
 export const themeConfig = reactive<ThemeConfig>(load());
 
-const mode = ref(currentMode());
+/** 当前明暗，面板里推导预览色阶时要用：暗色下的衬底是深色而不是浅色 */
+export const themeMode = ref(currentMode());
 /** 当前主题色推导出的完整色阶，面板上要显示对比度告警 */
 export const currentRamp = computed(() =>
-  brandRamp(themeConfig.brand, mode.value)
+  brandRamp(themeConfig.brand, themeMode.value)
 );
 /** 面板「导出」页要展示的 CSS，亮暗两份一起给 */
 export const themeCss = computed(
@@ -84,15 +85,16 @@ function currentMode(): "light" | "dark" {
  */
 export function applyThemeConfig() {
   const root = document.documentElement;
-  mode.value = currentMode();
+  themeMode.value = currentMode();
 
   for (const [key, value] of Object.entries(
-    resolveThemeTokens(themeConfig, mode.value)
+    resolveThemeTokens(themeConfig, themeMode.value)
   )) {
     if (value === "") root.style.removeProperty(`--i-${key}`);
     else root.style.setProperty(`--i-${key}`, value);
   }
   root.dataset.motion = themeConfig.motion ? "on" : "off";
+  root.dataset.glass = themeConfig.glass ? "on" : "off";
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(themeConfig));
@@ -117,5 +119,5 @@ export function useThemeConfig() {
       attributeFilter: ["data-theme"],
     });
   }
-  return { themeConfig, currentRamp, themeCss, resetThemeConfig };
+  return { themeConfig, themeMode, currentRamp, themeCss, resetThemeConfig };
 }

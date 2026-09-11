@@ -165,6 +165,6 @@ ol { color: var(--i-color-text-secondary); padding-left: var(--i-spacing-5); }
   font-size: var(--i-font-size-xs);
   color: var(--i-color-text-tertiary);
 }
-.gallery code { font-size: 11px; }
+.gallery code { font-size: var(--i-font-size-xs); }
 ol li { margin-bottom: var(--i-spacing-2); }
 </style>
