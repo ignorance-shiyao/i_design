@@ -106,7 +106,7 @@ export interface BrandRamp {
    * 中等明度的品牌色上，白字与深字都到不了正文要求的 4.5:1
    * （#5e7ce0 最好也只有 4.18）——这是那个颜色的固有限制，不是可以调好的参数。
    * 因此这里把数值一并给出，让配置界面据实告警，而不是悄悄放过：
-   * 3:1 是大字与控件的下限，低于它连按钮文字都不该用。
+   * 3:1 仅适用于大字；普通按钮文字仍按 4.5:1 检查。
    */
   onBrandContrast: number
   shadow: string
@@ -126,7 +126,9 @@ const DARK = { hover: 0.1, active: -0.12, subtle: 0.3 }
  * 那会得到一块比背景还亮的色块，所以改为压暗并降彩度。
  */
 export function brandRamp(base: string, mode: 'light' | 'dark' = 'light'): BrandRamp {
-  const { l, c, h } = rgbToOklch(hexToRgb(base))
+  const { l: baseLightness, c, h } = rgbToOklch(hexToRgb(base))
+  // 保留自定义色相；暗色下抬升基色，避免深蓝、黑色主题在深色表面消失。
+  const l = mode === 'dark' ? Math.max(baseLightness, 0.74) : baseLightness
   const step = mode === 'light' ? LIGHT : DARK
 
   const brand = rgbToHex(oklchToRgb({ l, c, h }))
@@ -175,7 +177,7 @@ export function contrastRatio(a: string, b: string): number {
  * 品牌蓝 #5e7ce0 上白字 3.86、深字 4.18，取最大值得到深字，
  * 数值上略高，视觉上完全不对，饱和色底上的深字看起来像没渲染完。
  *
- * 实际做法是优先白字，只有白字连控件文字的 3:1 下限都达不到
+ * 实际做法是优先白字，只有白字连大字的 3:1 下限都达不到
  * （明黄 1.30、亮青 2.37 这类本身就浅的底色）才换深字。
  */
 export function contrastText(background: string): string {

@@ -1,16 +1,17 @@
-@import '@i-design/common/styles/index.css';
+@import "@i-design/common/styles/index.css";
 
 /* 以下是文档站自身的排版，不属于组件库 */
 /* 文档站通用排版 */
 .i-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 var(--i-spacing-6);
 }
 
 .i-doc h1 {
   font-size: var(--i-font-size-3xl);
+  font-weight: 500;
   margin-bottom: var(--i-spacing-3);
   letter-spacing: -0.025em;
 }
@@ -20,8 +21,14 @@
   padding-bottom: var(--i-spacing-3);
   border-bottom: 1px solid var(--i-color-hairline);
 }
-.i-doc h3 { font-size: var(--i-font-size-lg); margin: var(--i-spacing-6) 0 var(--i-spacing-3); }
-.i-doc p { color: var(--i-color-text-secondary); margin-bottom: var(--i-spacing-4); }
+.i-doc h3 {
+  font-size: var(--i-font-size-lg);
+  margin: var(--i-spacing-6) 0 var(--i-spacing-3);
+}
+.i-doc p {
+  color: var(--i-color-text-secondary);
+  margin-bottom: var(--i-spacing-4);
+}
 
 .i-lead {
   font-size: var(--i-font-size-lg);
@@ -48,7 +55,9 @@
   padding: var(--i-spacing-3) var(--i-spacing-4);
   border-bottom: 1px solid var(--i-color-hairline);
 }
-.i-table tr:last-child td { border-bottom: none; }
+.i-table tr:last-child td {
+  border-bottom: none;
+}
 .i-table th {
   background: var(--i-color-bg-subtle);
   font-weight: 600;
@@ -56,12 +65,20 @@
   letter-spacing: 0.02em;
   color: var(--i-color-text-secondary);
 }
-.i-table tbody tr { transition: background var(--i-motion-fast) var(--i-motion-easing); }
-.i-table tbody tr:hover { background: var(--i-color-bg-subtle); }
-.i-table td { color: var(--i-color-text-secondary); }
+.i-table tbody tr {
+  transition: background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-table tbody tr:hover {
+  background: var(--i-color-bg-subtle);
+}
+.i-table td {
+  color: var(--i-color-text-secondary);
+}
 
 @media (max-width: 720px) {
-  .i-doc h1 { font-size: var(--i-font-size-2xl); }
+  .i-doc h1 {
+    font-size: var(--i-font-size-2xl);
+  }
 }
 
 /* 区块小标题（eyebrow）：给长页面提供节奏与层次 */
@@ -76,7 +93,7 @@
   color: var(--i-color-brand);
 }
 .i-eyebrow::before {
-  content: '';
+  content: "";
   width: 18px;
   height: 1px;
   background: currentColor;
@@ -84,11 +101,17 @@
 
 /* 细网格底纹，给大面积留白一点质感 */
 .i-grid-bg {
-  background-image:
-    linear-gradient(var(--i-color-hairline) 1px, transparent 1px),
+  background-image: linear-gradient(
+      var(--i-color-hairline) 1px,
+      transparent 1px
+    ),
     linear-gradient(90deg, var(--i-color-hairline) 1px, transparent 1px);
   background-size: 32px 32px;
-  -webkit-mask-image: radial-gradient(70% 60% at 50% 0%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(
+    70% 60% at 50% 0%,
+    #000 30%,
+    transparent 100%
+  );
   mask-image: radial-gradient(70% 60% at 50% 0%, #000 30%, transparent 100%);
 }
 
@@ -103,4 +126,20 @@
   background: #05070d;
   opacity: 0;
   pointer-events: none;
+}
+
+/* 配置关闭动效时覆盖固定时长；保留结束事件，避免过渡组件滞留。 */
+:root[data-motion="off"] *,
+:root[data-motion="off"] *::before,
+:root[data-motion="off"] *::after {
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion="off"] .i-reveal {
+  opacity: 1;
+  transform: none;
 }

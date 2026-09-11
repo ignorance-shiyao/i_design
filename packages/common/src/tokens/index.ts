@@ -242,22 +242,22 @@ export const darkTheme: Record<string, string> = {
   'color-brand-active': palette.brand[50],
   'color-brand-subtle': 'rgba(94, 124, 224, 0.16)',
 
-  'color-bg': '#171b26',
-  'color-bg-elevated': '#1f2431',
-  'color-bg-subtle': '#1e2330',
-  'color-bg-muted': '#272d3d',
+  'color-bg': '#151922',
+  'color-bg-elevated': '#222837',
+  'color-bg-subtle': '#1b202c',
+  'color-bg-muted': '#2b3343',
   'color-bg-inverse': palette.gray[20],
 
-  'color-text': '#e6e8ef',
-  'color-text-secondary': '#b3b8c6',
-  'color-text-tertiary': palette.gray[60],
+  'color-text': '#f2f4f8',
+  'color-text-secondary': '#c6ccda',
+  'color-text-tertiary': '#a6afc1',
   'color-text-inverse': palette.gray[90],
   'color-on-media': '#ffffff',
   'color-text-link': palette.brand[30],
 
-  'color-border': '#333a4d',
-  'color-border-strong': '#454d63',
-  'color-hairline': 'rgba(255, 255, 255, 0.08)',
+  'color-border': '#424d61',
+  'color-border-strong': '#74819a',
+  'color-hairline': 'rgba(255, 255, 255, 0.12)',
   'color-ring': 'rgba(126, 161, 255, 0.24)',
 
   'color-success': palette.success[50],
@@ -266,14 +266,14 @@ export const darkTheme: Record<string, string> = {
   'color-warning-subtle': 'rgba(250, 152, 65, 0.16)',
   'color-danger': palette.danger[50],
   'color-danger-subtle': 'rgba(246, 111, 106, 0.16)',
-  'color-info': palette.info[50],
+  'color-info': palette.brand[30],
   'color-info-subtle': 'rgba(94, 124, 224, 0.16)',
 
   'color-code-bg': '#12151e',
-  'color-code-bar': '#171b26',
-  'color-code-border': '#262c3a',
-  'color-code-text': '#d6dae6',
-  'color-code-muted': '#6b7385'
+  'color-code-bar': '#151922',
+  'color-code-border': '#424d61',
+  'color-code-text': '#e2e7f0',
+  'color-code-muted': '#a6afc1'
 }
 
 /** 语法高亮 token 色，亮暗各一套 */
@@ -293,7 +293,7 @@ export const syntaxLight: Record<string, string> = {
 }
 
 export const syntaxDark: Record<string, string> = {
-  'tok-comment': '#6b7385',
+  'tok-comment': '#a6afc1',
   'tok-keyword': '#b197fc',
   'tok-string': '#5fd3b5',
   'tok-number': '#ffb86b',
@@ -304,7 +304,7 @@ export const syntaxDark: Record<string, string> = {
   'tok-tag': '#ff86b3',
   'tok-attr': '#ffb86b',
   'tok-directive': '#b197fc',
-  'tok-punct': '#8a93a8'
+  'tok-punct': '#b2bdd1'
 }
 
 export const gradient = {
@@ -359,7 +359,7 @@ export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, strin
   const shadows = theme === 'dark' ? shadowDark : shadow
   const gradients = theme === 'dark' ? gradientDark : gradient
 
-  const out: Record<string, string> = { ...semantic, ...syntax }
+  const out: Record<string, string> = { ...semantic, ...syntax, 'color-text-on-brand': contrastText(semantic['color-brand']) }
   Object.entries(fontSize).forEach(([k, v]) => (out[`font-size-${k}`] = v))
   Object.entries(fontWeight).forEach(([k, v]) => (out[`font-weight-${k}`] = v))
   Object.entries(lineHeight).forEach(([k, v]) => (out[`line-height-${k}`] = v))

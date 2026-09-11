@@ -1,24 +1,33 @@
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect } from "vue";
 
-export type ThemeName = 'light' | 'dark'
+export type ThemeName = "light" | "dark";
 
-const STORAGE_KEY = 'i-design-theme'
+const STORAGE_KEY = "i-design-theme";
 
 function readInitialTheme(): ThemeName {
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved === 'light' || saved === 'dark') return saved
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  let saved: string | null = null;
+  try {
+    saved = localStorage.getItem(STORAGE_KEY);
+  } catch {
+    /* 私密模式仍可切换 */
+  }
+  if (saved === "light" || saved === "dark") return saved;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 /** 全局单例，保证多处调用共享同一主题状态 */
-const theme = ref<ThemeName>(typeof window === 'undefined' ? 'light' : readInitialTheme())
+const theme = ref<ThemeName>(
+  typeof window === "undefined" ? "light" : readInitialTheme()
+);
 
-type Point = { x: number; y: number }
+type Point = { x: number; y: number };
 
 /** 切换动效：圆形揭幕 / 渐暗渐亮 / 不要动效 */
-export type ThemeTransition = 'reveal' | 'dim' | 'none'
+export type ThemeTransition = "reveal" | "dim" | "none";
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * 明暗切换的揭幕动画。
@@ -37,91 +46,101 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
  * 变暗比变亮快：现实里关灯是瞬间的，亮起来才需要预热。
  */
 async function runDim(mutate: () => void) {
-  const veil = document.createElement('div')
-  veil.className = 'i-theme-veil'
-  veil.setAttribute('aria-hidden', 'true')
-  document.body.appendChild(veil)
+  const veil = document.createElement("div");
+  veil.className = "i-theme-veil";
+  veil.setAttribute("aria-hidden", "true");
+  document.body.appendChild(veil);
 
   try {
     await veil.animate([{ opacity: 0 }, { opacity: 1 }], {
       duration: 200,
-      easing: 'cubic-bezier(0.4, 0, 1, 1)',
-      fill: 'forwards'
-    }).finished
-    mutate()
+      easing: "cubic-bezier(0.4, 0, 1, 1)",
+      fill: "forwards",
+    }).finished;
+    mutate();
     // 全黑处停一下，眼睛才来得及读出「灭了」这个状态
-    await sleep(90)
+    await sleep(90);
     await veil.animate([{ opacity: 1 }, { opacity: 0 }], {
       duration: 420,
-      easing: 'cubic-bezier(0, 0, 0.2, 1)'
-    }).finished
+      easing: "cubic-bezier(0, 0, 0.2, 1)",
+    }).finished;
   } finally {
     // 动画被打断（快速连点）也要收掉遮罩，否则整页留一层黑
-    veil.remove()
+    veil.remove();
   }
 }
 
 function runWithTransition(origin: Point | undefined, mutate: () => void) {
   const doc = document as Document & {
-    startViewTransition?: (cb: () => void) => { ready: Promise<void> }
-  }
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    startViewTransition?: (cb: () => void) => { ready: Promise<void> };
+  };
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (!doc.startViewTransition || reduced || !origin) {
-    mutate()
-    return
+    mutate();
+    return;
   }
 
-  const transition = doc.startViewTransition(mutate)
+  const transition = doc.startViewTransition(mutate);
   transition.ready.then(() => {
     // 半径取到最远的那个角，否则页面角落会留下没被覆盖的一块
     const radius = Math.hypot(
       Math.max(origin.x, window.innerWidth - origin.x),
       Math.max(origin.y, window.innerHeight - origin.y)
-    )
+    );
     document.documentElement.animate(
       {
         clipPath: [
           `circle(0px at ${origin.x}px ${origin.y}px)`,
-          `circle(${radius}px at ${origin.x}px ${origin.y}px)`
-        ]
+          `circle(${radius}px at ${origin.x}px ${origin.y}px)`,
+        ],
       },
       {
         duration: 480,
-        easing: 'cubic-bezier(0, 0, 0.2, 1)',
+        easing: "cubic-bezier(0, 0, 0.2, 1)",
         // 只动新页面那一层：旧层留在原地当底衬，新层像幕布一样拉开
-        pseudoElement: '::view-transition-new(root)'
+        pseudoElement: "::view-transition-new(root)",
       }
-    )
-  })
+    );
+  });
 }
 
 export function useTheme() {
   watchEffect(() => {
-    document.documentElement.dataset.theme = theme.value
-    localStorage.setItem(STORAGE_KEY, theme.value)
-  })
+    document.documentElement.dataset.theme = theme.value;
+    try {
+      localStorage.setItem(STORAGE_KEY, theme.value);
+    } catch {
+      /* 会话内仍然生效 */
+    }
+  });
 
   /**
    * 切换主题。
    * origin 是触发元素的坐标，圆形揭幕从那里展开；
    * style 决定用哪种动效，由主题配置面板给出。
    */
-  const toggleTheme = (origin?: Point, style: ThemeTransition = 'reveal') => {
+  const toggleTheme = (origin?: Point, style: ThemeTransition = "reveal") => {
     const mutate = () => {
-      theme.value = theme.value === 'light' ? 'dark' : 'light'
+      theme.value = theme.value === "light" ? "dark" : "light";
+    };
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (
+      style === "none" ||
+      reduced ||
+      document.documentElement.dataset.motion === "off"
+    ) {
+      mutate();
+      return;
     }
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (style === 'none' || reduced) {
-      mutate()
-      return
+    if (style === "dim") {
+      runDim(mutate);
+      return;
     }
-    if (style === 'dim') {
-      runDim(mutate)
-      return
-    }
-    runWithTransition(origin, mutate)
-  }
+    runWithTransition(origin, mutate);
+  };
 
-  return { theme, toggleTheme }
+  return { theme, toggleTheme };
 }
