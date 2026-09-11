@@ -81,6 +81,10 @@ const { formatCountdown, countdownParts, countdownRemaining, countdownInterval }
   'packages/common/src/logic/countdown.ts',
   'countdown'
 )
+const { toggleValue, collapseTags } = await bundle(
+  'packages/common/src/logic/multiselect.ts',
+  'multiselect'
+)
 const {
   splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
 } = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
@@ -1205,6 +1209,32 @@ const countdownMiscExpectations = [
   `    expect(countdownInterval(1400, true), ${countdownInterval(1400, true)});`
 ]
 
+/*
+ * 多选：追加在末尾（按点击先后）与「折叠时至少留一个」这两条，
+ * 各端一旦写歪，同一份选择在两端读出来就不一样。
+ */
+const toggleCases = [
+  [['a', 'b'], 'c'], [['a', 'b'], 'a'], [['a', 'b'], 'b'], [[], 'a'], [['a'], 'a'],
+]
+const toggleExpectations = toggleCases.map(([vals, v]) => {
+  const src = `[${vals.map((x) => `'${x}'`).join(', ')}]`
+  const out = toggleValue(vals, v)
+  return `    expect(toggleValue<String>(${src}, '${v}'), [${out.map((x) => `'${x}'`).join(', ')}]);`
+})
+
+const collapseCases = [
+  [['a', 'b', 'c', 'd'], 0], [['a', 'b', 'c', 'd'], 2], [['a', 'b'], 2],
+  [['a', 'b', 'c'], 1], [['a', 'b', 'c'], 9], [[], 2],
+]
+const collapseExpectations = collapseCases.flatMap(([items, max]) => {
+  const src = `[${items.map((x) => `'${x}'`).join(', ')}]`
+  const r = collapseTags(items, max)
+  return [
+    `    expect(collapseTags<String>(${src}, ${max}).shown, [${r.shown.map((x) => `'${x}'`).join(', ')}]);`,
+    `    expect(collapseTags<String>(${src}, ${max}).rest, ${r.rest});`
+  ]
+})
+
 const otpPasteCases = ['123456', '123 456', '12-34-56', '12ab34', '1234567890', '']
 const otpPasteExpectations = otpPasteCases.flatMap((text) => {
   const cells = otpFromText(text, 6)
@@ -1509,6 +1539,7 @@ import 'package:i_design/src/logic/otp.dart';
 import 'package:i_design/src/logic/time_select.dart';
 import 'package:i_design/src/logic/scrollbar.dart';
 import 'package:i_design/src/logic/countdown.dart';
+import 'package:i_design/src/logic/multiselect.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1830,6 +1861,11 @@ ${rangeExpectations.join('\n')}
 ${timeSelectExpectations.join('\n')}
 ${clockExpectations.join('\n')}
 ${clockBackExpectations.join('\n')}
+  });
+
+  test('多选的追加顺序与标签折叠与 Web 端一致', () {
+${toggleExpectations.join('\n')}
+${collapseExpectations.join('\n')}
   });
 
   test('倒计时的取整、并位与刷新间隔与 Web 端一致', () {

@@ -33,6 +33,7 @@ import 'package:i_design/src/logic/otp.dart';
 import 'package:i_design/src/logic/time_select.dart';
 import 'package:i_design/src/logic/scrollbar.dart';
 import 'package:i_design/src/logic/countdown.dart';
+import 'package:i_design/src/logic/multiselect.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1073,6 +1074,26 @@ void main() {
     expect(clockOfMinutes(545), '09:05');
     expect(clockOfMinutes(1439), '23:59');
     expect(clockOfMinutes(1440), '00:00');
+  });
+
+  test('多选的追加顺序与标签折叠与 Web 端一致', () {
+    expect(toggleValue<String>(['a', 'b'], 'c'), ['a', 'b', 'c']);
+    expect(toggleValue<String>(['a', 'b'], 'a'), ['b']);
+    expect(toggleValue<String>(['a', 'b'], 'b'), ['a']);
+    expect(toggleValue<String>([], 'a'), ['a']);
+    expect(toggleValue<String>(['a'], 'a'), []);
+    expect(collapseTags<String>(['a', 'b', 'c', 'd'], 0).shown, ['a', 'b', 'c', 'd']);
+    expect(collapseTags<String>(['a', 'b', 'c', 'd'], 0).rest, 0);
+    expect(collapseTags<String>(['a', 'b', 'c', 'd'], 2).shown, ['a', 'b']);
+    expect(collapseTags<String>(['a', 'b', 'c', 'd'], 2).rest, 2);
+    expect(collapseTags<String>(['a', 'b'], 2).shown, ['a', 'b']);
+    expect(collapseTags<String>(['a', 'b'], 2).rest, 0);
+    expect(collapseTags<String>(['a', 'b', 'c'], 1).shown, ['a']);
+    expect(collapseTags<String>(['a', 'b', 'c'], 1).rest, 2);
+    expect(collapseTags<String>(['a', 'b', 'c'], 9).shown, ['a', 'b', 'c']);
+    expect(collapseTags<String>(['a', 'b', 'c'], 9).rest, 0);
+    expect(collapseTags<String>([], 2).shown, []);
+    expect(collapseTags<String>([], 2).rest, 0);
   });
 
   test('倒计时的取整、并位与刷新间隔与 Web 端一致', () {

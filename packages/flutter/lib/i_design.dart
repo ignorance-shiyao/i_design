@@ -25,6 +25,7 @@ export 'src/logic/indexes.dart';
 export 'src/logic/keypad.dart';
 export 'src/logic/mention.dart';
 export 'src/logic/menu.dart';
+export 'src/logic/multiselect.dart';
 export 'src/logic/number.dart';
 export 'src/logic/otp.dart';
 export 'src/logic/overlay.dart';

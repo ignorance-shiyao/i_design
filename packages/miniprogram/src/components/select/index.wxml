@@ -1,6 +1,16 @@
-<view class="i-select i-select--{{size}} {{open ? 'is-open' : ''}} {{disabled ? 'is-disabled' : ''}}">
+<view class="i-select i-select--{{size}} {{open ? 'is-open' : ''}} {{disabled ? 'is-disabled' : ''}} {{multiple ? 'is-multiple' : ''}}">
   <view class="i-select__trigger" bindtap="onToggle">
-    <text class="i-select__label {{hasValue ? '' : 'is-placeholder'}}">{{hasValue ? label : placeholder}}</text>
+    <view wx:if="{{multiple && hasValue}}" class="i-select__tags">
+      <view wx:for="{{tags}}" wx:key="value" class="i-select__tag">
+        <text>{{item.label}}</text>
+        <view class="i-select__tag-close" catchtap="onRemoveTag" data-value="{{item.value}}">
+          <view class="i-icon i-icon--close" style="width:12px;height:12px" />
+        </view>
+      </view>
+      <view wx:if="{{restCount}}" class="i-select__tag i-select__tag--rest">+{{restCount}}</view>
+    </view>
+    <text wx:else class="i-select__label {{hasValue ? '' : 'is-placeholder'}}">{{hasValue ? label : placeholder}}</text>
+
     <view
       wx:if="{{clearable && hasValue && !disabled}}"
       class="i-select__clear"
@@ -13,18 +23,30 @@
     </view>
   </view>
 
-  <view wx:if="{{open}}" class="i-select__menu">
+  <scroll-view
+    wx:if="{{open}}"
+    class="i-select__menu"
+    scroll-y
+    bindscroll="onScroll"
+  >
+    <!-- 上下两块撑开的空白替代没渲染的那些行，滚动条长度才和真实条数相称 -->
+    <view wx:if="{{virtual}}" class="i-select__spacer" style="height:{{paddingTop}}px" />
     <view
-      wx:for="{{options}}"
-      wx:key="value"
-      class="i-select__option {{item.value === value ? 'is-selected' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+      wx:for="{{visible}}"
+      wx:key="index"
+      class="i-select__option {{item.selected ? 'is-selected' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
       bindtap="onPick"
       data-value="{{item.value}}"
       data-disabled="{{item.disabled}}"
     >
-      <text>{{item.label}}</text>
-      <view wx:if="{{item.value === value}}" class="i-icon i-icon--check" style="width:14px;height:14px" />
+      <text class="i-select__option-label">{{item.label}}</text>
+      <view
+        wx:if="{{item.selected}}"
+        class="i-icon i-icon--check"
+        style="width:14px;height:14px"
+      />
     </view>
+    <view wx:if="{{virtual}}" class="i-select__spacer" style="height:{{paddingBottom}}px" />
     <view wx:if="{{options.length === 0}}" class="i-select__empty">{{emptyText}}</view>
-  </view>
+  </scroll-view>
 </view>
