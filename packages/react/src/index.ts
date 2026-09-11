@@ -88,6 +88,7 @@ export { RecommendCard, type RecommendCardProps } from './components/RecommendCa
 export { Result, type ResultProps } from './components/Result'
 export { Segmented, type SegmentedOption, type SegmentedProps } from './components/Segmented'
 export { Select, type SelectOption, type SelectProps } from './components/Select'
+export { SelectInput, type SelectInputProps } from './components/SelectInput'
 export { Skeleton, type SkeletonProps } from './components/Skeleton'
 export { Slider, type SliderMark, type SliderProps } from './components/Slider'
 export { Space, type SpaceProps } from './components/Space'

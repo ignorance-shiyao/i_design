@@ -1,0 +1,34 @@
+<view
+  class="i-select-input i-select-input--{{size}} {{open ? 'is-open' : ''}} {{disabled ? 'is-disabled' : ''}} {{invalid ? 'is-invalid' : ''}}"
+  bindtap="onTap"
+>
+  <view class="i-select-input__body">
+    <!-- 多选的标签由调用方渲染：标签长什么样、能不能删，是上层的事 -->
+    <slot name="tags" />
+
+    <input
+      wx:if="{{filterable}}"
+      class="i-select-input__input"
+      value="{{keyword}}"
+      placeholder="{{value || placeholder}}"
+      disabled="{{disabled}}"
+      bindinput="onInput"
+      catchtap="noop"
+    />
+    <text
+      wx:else
+      class="i-select-input__value {{value ? '' : 'i-select-input__placeholder'}}"
+    >{{value || placeholder}}</text>
+  </view>
+
+  <view class="i-select-input__suffix">
+    <view
+      wx:if="{{clearable && (value || keyword) && !disabled}}"
+      class="i-select-input__clear"
+      catchtap="onClear"
+    >
+      <i-icon name="close" size="14" />
+    </view>
+    <i-icon class="i-select-input__arrow" name="chevron-down" size="16" />
+  </view>
+</view>

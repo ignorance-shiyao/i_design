@@ -1,0 +1,102 @@
+/* ISelectInput —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 「长得像输入框的选择器外壳」。
+ *
+ * Select、Cascader、TreeSelect、日期范围这些控件，外面那一层是同一件东西：
+ * 一个可聚焦的框、里面是单行文本或一排标签、右侧一个箭头与清除键。
+ * 各自写一遍的结果是聚焦态、清除键位置、禁用色一个一个地对不齐——
+ * 这一层单独成件，就是为了让它们对齐。
+ *
+ * 它只负责「外壳」：下拉面板的内容由调用方给，选中值怎么来它不管。
+ */
+.i-select-input {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  min-height: var(--i-control-height-md);
+  padding: 0 var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  cursor: pointer;
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    box-shadow var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-select-input--sm { min-height: var(--i-control-height-sm); }
+.i-select-input--lg { min-height: var(--i-control-height-lg); }
+
+.i-select-input.is-focused,
+.i-select-input.is-open {
+  border-color: var(--i-color-brand);
+  box-shadow: 0 0 0 3px var(--i-color-ring);
+}
+.i-select-input.is-invalid { border-color: var(--i-color-danger); }
+.i-select-input.is-disabled {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+
+/* 多选时装一排标签，行数增加时外壳跟着长高，不让标签溢出到框外 */
+.i-select-input__body {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  min-width: 0;
+  padding: var(--i-spacing-1) 0;
+}
+.i-select-input__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--i-font-size-md);
+}
+.i-select-input__placeholder { color: var(--i-color-text-tertiary); }
+
+/* 可输入时，输入框与标签同处一行，宽度随内容伸缩 */
+.i-select-input__input {
+  flex: 1;
+  min-width: 48px;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--i-font-size-md);
+  outline: none;
+}
+.i-select-input__input::placeholder { color: var(--i-color-text-tertiary); }
+.i-select-input__input:disabled { cursor: not-allowed; }
+
+.i-select-input__suffix {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  color: var(--i-color-text-tertiary);
+}
+/* 清除键只在悬停或聚焦时出现：常驻会让人以为那是「关闭」 */
+.i-select-input__clear {
+  display: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.i-select-input:hover .i-select-input__clear,
+.i-select-input.is-focused .i-select-input__clear { display: inline-flex; }
+.i-select-input__clear:hover { color: var(--i-color-text-secondary); }
+
+.i-select-input__arrow {
+  transition: transform var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-select-input.is-open .i-select-input__arrow { transform: rotate(180deg); }

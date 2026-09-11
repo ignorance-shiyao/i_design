@@ -111,6 +111,7 @@ export 'src/components/i_rate.dart';
 export 'src/components/i_result.dart';
 export 'src/components/i_segmented.dart';
 export 'src/components/i_select.dart';
+export 'src/components/i_select_input.dart';
 export 'src/components/i_skeleton.dart';
 export 'src/components/i_slider.dart';
 export 'src/components/i_space.dart';
