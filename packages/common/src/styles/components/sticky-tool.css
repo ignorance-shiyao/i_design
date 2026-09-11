@@ -1,0 +1,62 @@
+/* IStickyTool —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 侧边悬浮工具条：客服、反馈、回到顶部这类跟着页面走的入口。
+ *
+ * 竖排而不是横排：横排会占掉正文的宽度，而这些入口的重要性远低于正文。
+ * 贴边但不贴到 0：留一段间距，免得在圆角屏与手势区上被吃掉。
+ */
+.i-sticky-tool {
+  position: fixed;
+  top: 50%;
+  z-index: var(--i-z-sticky);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(-50%);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-md);
+}
+.i-sticky-tool--right { right: var(--i-spacing-5); }
+.i-sticky-tool--left { left: var(--i-spacing-5); }
+
+.i-sticky-tool__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 56px;
+  padding: var(--i-spacing-3) var(--i-spacing-1);
+  border: 0;
+  /* 分隔用发丝线，四边等宽；不靠某一条加粗的边表达选中 */
+  border-top: 1px solid var(--i-color-hairline);
+  background: none;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background var(--i-motion-fast) var(--i-motion-easing),
+    color var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-sticky-tool__item:first-child { border-top: 0; }
+.i-sticky-tool__item:hover {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-brand);
+}
+.i-sticky-tool__item.is-active {
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand);
+}
+.i-sticky-tool__item:disabled {
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+.i-sticky-tool__label { text-align: center; }
+
+/* 窄屏上收成只剩图标：56px 一条竖栏在手机上会压住正文 */
+@media (max-width: 600px) {
+  .i-sticky-tool__item { width: 44px; }
+  .i-sticky-tool__label { display: none; }
+}

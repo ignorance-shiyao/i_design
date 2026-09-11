@@ -1,0 +1,15 @@
+<view
+  class="i-input-adornment {{prepend ? 'has-prepend' : ''}} {{append ? 'has-append' : ''}}"
+>
+  <view
+    wx:if="{{prepend}}"
+    class="i-input-adornment__part i-input-adornment__part--prepend"
+  >{{prepend}}</view>
+
+  <view class="i-input-adornment__body"><slot /></view>
+
+  <view
+    wx:if="{{append}}"
+    class="i-input-adornment__part i-input-adornment__part--append"
+  >{{append}}</view>
+</view>

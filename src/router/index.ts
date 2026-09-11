@@ -48,6 +48,25 @@ const routes: RouteRecordRaw[] = [
       { path: 'pagination', component: () => import('@/pages/components/PaginationPage.vue') },
       { path: 'modal', component: () => import('@/pages/components/ModalPage.vue') },
       { path: 'divider', component: () => import('@/pages/components/DividerPage.vue') },
+      { path: 'link', component: () => import('@/pages/components/LinkPage.vue') },
+      {
+        path: 'range-input',
+        component: () => import('@/pages/components/RangeInputPage.vue')
+      },
+      { path: 'qrcode', component: () => import('@/pages/components/QrcodePage.vue') },
+      {
+        path: 'sticky-tool',
+        component: () => import('@/pages/components/StickyToolPage.vue')
+      },
+      { path: 'comment', component: () => import('@/pages/components/CommentPage.vue') },
+      {
+        path: 'image-viewer',
+        component: () => import('@/pages/components/ImageViewerPage.vue')
+      },
+      {
+        path: 'input-adornment',
+        component: () => import('@/pages/components/InputAdornmentPage.vue')
+      },
       { path: 'breadcrumb', component: () => import('@/pages/components/BreadcrumbPage.vue') },
       { path: 'steps', component: () => import('@/pages/components/StepsPage.vue') },
       { path: 'tooltip', component: () => import('@/pages/components/TooltipPage.vue') },

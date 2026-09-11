@@ -399,6 +399,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IComment",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IContextCards",
     "ends": {
       "vue-next": true,
@@ -529,6 +539,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IImageViewer",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IInfiniteScroll",
     "ends": {
       "vue-next": true,
@@ -549,7 +569,37 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IInputAdornment",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IInputNumber",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ILayout",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ILink",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -679,6 +729,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IQrcode",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IRadio",
     "ends": {
       "vue-next": true,
@@ -690,6 +750,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IRadioGroup",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IRangeInput",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -830,6 +900,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "ISticky",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IStickyTool",
     "ends": {
       "vue-next": true,
       "vue": true,

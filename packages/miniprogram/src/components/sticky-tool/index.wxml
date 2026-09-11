@@ -1,0 +1,13 @@
+<view class="i-sticky-tool i-sticky-tool--{{placement}}">
+  <view
+    wx:for="{{items}}"
+    wx:key="value"
+    class="i-sticky-tool__item {{active === item.value ? 'is-active' : ''}}"
+    data-item="{{item}}"
+    bindtap="onTap"
+  >
+    <i-icon name="{{item.icon}}" size="18" />
+    <!-- 图标之外始终给文字：图标不是所有人都能一眼认出来 -->
+    <text class="i-sticky-tool__label">{{item.label}}</text>
+  </view>
+</view>

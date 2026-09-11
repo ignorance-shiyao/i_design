@@ -11,7 +11,11 @@ import IChartPie from './IChartPie.vue'
 import ISparkline from './ISparkline.vue'
 import IInputNumber from './IInputNumber.vue'
 import ISlider from './ISlider.vue'
+import IQrcode from './IQrcode.vue'
+import IRangeInput from './IRangeInput.vue'
 import IRate from './IRate.vue'
+import ILink from './ILink.vue'
+import ILayout from './ILayout.vue'
 import IList from './IList.vue'
 import ISpace from './ISpace.vue'
 import ITypography from './ITypography.vue'
@@ -30,6 +34,7 @@ import IChatSuggestions from './IChatSuggestions.vue'
 import IPromptInput from './IPromptInput.vue'
 import IButton from './IButton.vue'
 import IInput from './IInput.vue'
+import IInputAdornment from './IInputAdornment.vue'
 import ITextarea from './ITextarea.vue'
 import ISelect from './ISelect.vue'
 import IRadio from './IRadio.vue'
@@ -77,15 +82,18 @@ import IAffix from './IAffix.vue'
 import IBackTop from './IBackTop.vue'
 import IWatermark from './IWatermark.vue'
 import IImage from './IImage.vue'
+import IImageViewer from './IImageViewer.vue'
 import ISplitter from './ISplitter.vue'
 import IVirtualList from './IVirtualList.vue'
 import IColorPicker from './IColorPicker.vue'
 import ICalendar from './ICalendar.vue'
 import IMentions from './IMentions.vue'
 import ISticky from './ISticky.vue'
+import IStickyTool from './IStickyTool.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
+import IComment from './IComment.vue'
 import IDivider from './IDivider.vue'
 import ITabs from './ITabs.vue'
 import IBreadcrumb from './IBreadcrumb.vue'
@@ -151,15 +159,18 @@ export {
   IBackTop,
   IWatermark,
   IImage,
+  IImageViewer,
   ISplitter,
   IVirtualList,
   IColorPicker,
   ICalendar,
   IMentions,
   ISticky,
+  IStickyTool,
   IForm,
   IFormItem,
   ITag,
+  IComment,
   IDivider,
   ITabs,
   IBreadcrumb,
@@ -188,9 +199,14 @@ export {
   IProgress,
   IStatistic,
   ITimeline,
+  IInputAdornment,
   IInputNumber,
   ISlider,
+  IQrcode,
+  IRangeInput,
   IRate,
+  ILayout,
+  ILink,
   IList,
   IChart,
   IChartPie,
@@ -251,6 +267,7 @@ const components = {
   IForm,
   IFormItem,
   ITag,
+  IComment,
   IDivider,
   ITabs,
   IBreadcrumb,
@@ -279,9 +296,14 @@ const components = {
   IProgress,
   IStatistic,
   ITimeline,
+  IInputAdornment,
   IInputNumber,
   ISlider,
+  IQrcode,
+  IRangeInput,
   IRate,
+  ILayout,
+  ILink,
   IList,
   IChart,
   IChartPie,

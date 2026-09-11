@@ -1,0 +1,67 @@
+/* IComment —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 评论是一条「谁、什么时候、说了什么」的记录，外加可选的回复。
+ * 回复用左侧缩进表达从属，而不是用一条加粗的竖线——那会变成「这条评论是什么类型」的暗示。
+ */
+.i-comment {
+  display: flex;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-3) 0;
+}
+.i-comment__avatar { flex: none; }
+
+.i-comment__main {
+  flex: 1;
+  min-width: 0;
+}
+.i-comment__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+}
+.i-comment__author {
+  font-size: var(--i-font-size-sm);
+  font-weight: var(--i-font-weight-medium);
+  color: var(--i-color-text);
+}
+.i-comment__time {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-comment__content {
+  margin-top: var(--i-spacing-1);
+  font-size: var(--i-font-size-md);
+  line-height: var(--i-line-height-base);
+  color: var(--i-color-text);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * 引用：被回复的那段原文。
+ * 用淡底色块而不是左侧粗线——左侧粗线在这个体系里是被禁用的状态暗示。
+ */
+.i-comment__quote {
+  margin-top: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+
+.i-comment__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-4);
+  margin-top: var(--i-spacing-2);
+}
+
+/* 回复列表：缩进对齐到头像右侧，视线自然落在同一条竖轴上 */
+.i-comment__replies {
+  margin-top: var(--i-spacing-2);
+  padding-left: var(--i-spacing-6);
+}
+.i-comment--reply { padding-top: var(--i-spacing-2); padding-bottom: var(--i-spacing-2); }

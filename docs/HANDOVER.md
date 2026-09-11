@@ -24,7 +24,8 @@
 
 核心约定一句话:**令牌、图标、交互算法只存在一份(`packages/common`),各端只写渲染适配。**
 
-当前规模:117 个令牌 · 40 个图标 · 各端组件覆盖 64/64 · 移动专有组件 12 个。
+当前规模见生成物:`src/data/componentMatrix.ts`(各端覆盖)与 `src/data/frameworkStats.ts`。
+这两份都由脚本按目录生成,手写的数字会过期而且不会有人发现。
 
 ---
 
@@ -47,7 +48,7 @@ scripts/                    跨端构建与校验脚本
 ```
 
 `packages/common/src/logic/` 现有:`avatar chart countdown date flow number pagination
-picker select table theme toast upload validate`。**任何"算法"都应该落在这里**,而不是写在某个端的组件里——
+picker qrcode range select table theme toast upload validate`。**任何"算法"都应该落在这里**,而不是写在某个端的组件里——
 它是 Web / 小程序 / Flutter 三套渲染共用的同一份真值。
 
 ---

@@ -1,0 +1,59 @@
+/* ILink —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 链接不是「蓝色的文字」，是一个可以离开当前上下文的入口。
+ * 因此它必须能在正文里被认出来：只靠颜色不够——色觉障碍用户读不出，
+ * 灰度打印也读不出。默认给下划线，hover 档才允许把下划线留给悬停。
+ */
+.i-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--i-font-size-md);
+  color: var(--i-color-text-link);
+  cursor: pointer;
+  text-decoration: underline;
+  /* 下划线让开字母的下伸部，不然「g」「y」会被划掉 */
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+  transition: color var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-link--sm { font-size: var(--i-font-size-sm); }
+.i-link--lg { font-size: var(--i-font-size-lg); }
+
+.i-link--default { color: var(--i-color-text); }
+.i-link--brand { color: var(--i-color-text-link); }
+.i-link--success { color: var(--i-color-success); }
+.i-link--warning { color: var(--i-color-warning); }
+.i-link--danger { color: var(--i-color-danger); }
+
+/* 下划线时机：一直有 / 仅悬停 / 从不。「从不」只适用于本身已成区块的入口 */
+.i-link--underline-hover { text-decoration: none; }
+.i-link--underline-hover:hover { text-decoration: underline; }
+.i-link--underline-never { text-decoration: none; }
+
+.i-link:hover { color: var(--i-color-brand-hover); }
+.i-link--default:hover { color: var(--i-color-text-link); }
+.i-link--success:hover,
+.i-link--warning:hover,
+.i-link--danger:hover { filter: brightness(1.08); }
+.i-link:active { color: var(--i-color-brand-active); }
+
+.i-link:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+  border-radius: var(--i-radius-sm);
+}
+
+.i-link.is-disabled {
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+  text-decoration: none;
+  pointer-events: none;
+}
+
+.i-link__icon { flex: none; }

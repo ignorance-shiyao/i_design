@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ILayout from '@/components/ILayout.vue'
 import ISpace from '@/components/ISpace.vue'
 import ITypography from '@/components/ITypography.vue'
 import IRow from '@/components/IRow.vue'
@@ -15,6 +16,7 @@ import IVirtualList from '@/components/IVirtualList.vue'
 import IColorPicker from '@/components/IColorPicker.vue'
 import { ref } from 'vue'
 
+const collapsed = ref(false)
 const split = ref(0.38)
 const brandColor = ref('#5e7ce0')
 /* 两万行：不虚拟化就是两万个 DOM 节点，滚动直接卡死 */
@@ -36,6 +38,43 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
       三个用来「把东西摆正」的基础件。它们本身没有视觉主张，作用是让间距、栅格与字号
       只能取自令牌——一旦允许就地写数值，一个产品里很快会长出七种正文字号与十几种间距。
     </p>
+
+    <h2>Layout 页面骨架</h2>
+    <p>
+      顶栏、侧栏、正文、底栏。它只摆位置、不管内容——页面级的结构一旦被组件塞进具体内容，
+      换一个产品就只能重写。四块都用语义标签落地（<code>header</code> / <code>aside</code> /
+      <code>main</code> / <code>footer</code>）：读屏用户靠这几个地标在页面里跳转，
+      全是 <code>div</code> 的页面对他们来说是一整块。
+    </p>
+
+    <DemoBlock
+      title="带侧栏的页面"
+      description="侧栏可收起，收起后只留图标宽度而不是整个藏掉——入口消失比变窄更难找回来。窄屏下侧栏自动转为顶部一条。"
+      code='<ILayout>
+  <template #header>顶栏</template>
+  <template #aside>侧栏</template>
+  正文
+  <template #footer>底栏</template>
+</ILayout>'
+    >
+      <div class="layout-demo">
+        <ILayout :collapsed="collapsed" aside-width="180px" header-height="48px">
+          <template #header>
+            <strong>控制台</strong>
+            <IButton size="sm" @click="collapsed = !collapsed">
+              {{ collapsed ? '展开侧栏' : '收起侧栏' }}
+            </IButton>
+          </template>
+          <template #aside>
+            <p class="layout-demo__nav">概览</p>
+            <p class="layout-demo__nav">实例</p>
+            <p class="layout-demo__nav">告警</p>
+          </template>
+          <p>正文区域：页面的主要内容放在这里。</p>
+          <template #footer>© Ignorance Design</template>
+        </ILayout>
+      </div>
+    </DemoBlock>
 
     <h2>Space 间距</h2>
     <DemoBlock
@@ -322,4 +361,19 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
   text-align: center;
 }
 .clamp-demo { max-width: 460px; }
+
+.layout-demo {
+  height: 260px;
+  overflow: hidden;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+}
+.layout-demo__nav {
+  padding: var(--i-spacing-2) var(--i-spacing-4);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+}
+.layout-demo :deep(.i-layout__header) {
+  justify-content: space-between;
+}
 </style>

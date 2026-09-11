@@ -39,6 +39,7 @@
 @import './components/checkbox.css';
 @import './components/collapse.css';
 @import './components/colorpicker.css';
+@import './components/comment.css';
 @import './components/countdown.css';
 @import './components/date-picker.css';
 @import './components/descriptions.css';
@@ -50,11 +51,15 @@
 @import './components/form.css';
 @import './components/grid.css';
 @import './components/icon.css';
+@import './components/image-viewer.css';
 @import './components/image.css';
 @import './components/infinite.css';
+@import './components/input-adornment.css';
 @import './components/input-number.css';
 @import './components/input.css';
 @import './components/keypad.css';
+@import './components/layout.css';
+@import './components/link.css';
 @import './components/list.css';
 @import './components/loading.css';
 @import './components/mentions.css';
@@ -71,8 +76,10 @@
 @import './components/popup.css';
 @import './components/progress.css';
 @import './components/prompt-input.css';
+@import './components/qrcode.css';
 @import './components/radio-group.css';
 @import './components/radio.css';
+@import './components/range-input.css';
 @import './components/rate.css';
 @import './components/result.css';
 @import './components/search-bar.css';
@@ -84,6 +91,7 @@
 @import './components/splitter.css';
 @import './components/statistic.css';
 @import './components/steps.css';
+@import './components/sticky-tool.css';
 @import './components/sticky.css';
 @import './components/swipe-cell.css';
 @import './components/switch.css';

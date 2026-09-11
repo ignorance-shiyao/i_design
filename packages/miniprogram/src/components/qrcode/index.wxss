@@ -1,0 +1,2 @@
+@import '../../../dist/styles/qrcode.wxss';
+@import '../../../dist/styles/icons.wxss';

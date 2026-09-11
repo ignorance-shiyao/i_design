@@ -1,0 +1,5 @@
+<!--
+  预览由 wx.previewImage 接管，组件自身不渲染内容。
+  留一个具名插槽，方便调用方把触发元素放进来。
+-->
+<view class="i-image-viewer-trigger"><slot /></view>
