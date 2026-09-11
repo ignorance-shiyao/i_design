@@ -48,6 +48,12 @@ const routes: RouteRecordRaw[] = [
       { path: 'pagination', component: () => import('@/pages/components/PaginationPage.vue') },
       { path: 'modal', component: () => import('@/pages/components/ModalPage.vue') },
       { path: 'divider', component: () => import('@/pages/components/DividerPage.vue') },
+      { path: 'link', component: () => import('@/pages/components/LinkPage.vue') },
+      { path: 'comment', component: () => import('@/pages/components/CommentPage.vue') },
+      {
+        path: 'input-adornment',
+        component: () => import('@/pages/components/InputAdornmentPage.vue')
+      },
       { path: 'breadcrumb', component: () => import('@/pages/components/BreadcrumbPage.vue') },
       { path: 'steps', component: () => import('@/pages/components/StepsPage.vue') },
       { path: 'tooltip', component: () => import('@/pages/components/TooltipPage.vue') },

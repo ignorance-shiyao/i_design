@@ -1,0 +1,6 @@
+<view
+  class="i-link i-link--{{theme}} i-link--{{size}} i-link--underline-{{underline}} {{disabled ? 'is-disabled' : ''}}"
+  bindtap="onTap"
+>
+  <text>{{text}}</text>
+</view>

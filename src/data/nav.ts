@@ -30,7 +30,8 @@ export const docNav: NavGroup[] = [
       { to: '/components/layout', label: '布局与排版' },
       { to: '/components/icon', label: 'Icon 图标' },
       { to: '/components/tag', label: 'Tag 标签' },
-      { to: '/components/divider', label: 'Divider 分割线' }
+      { to: '/components/divider', label: 'Divider 分割线' },
+      { to: '/components/link', label: 'Link 链接' }
     ]
   },
   {
@@ -47,6 +48,7 @@ export const docNav: NavGroup[] = [
     items: [
       { to: '/components/form', label: 'Form 表单' },
       { to: '/components/input', label: 'Input 输入框' },
+      { to: '/components/input-adornment', label: 'InputAdornment 输入前后缀' },
       { to: '/components/textarea', label: 'Textarea 多行文本框' },
       { to: '/components/select', label: 'Select 下拉选择' },
       { to: '/components/date-picker', label: 'DatePicker 日期选择器' },
@@ -68,6 +70,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/badge', label: 'Badge 徽标' },
       { to: '/components/collapse', label: 'Collapse 折叠面板' },
       { to: '/components/descriptions', label: 'Descriptions 描述列表' },
+      { to: '/components/comment', label: 'Comment 评论' },
       { to: '/components/skeleton', label: 'Skeleton 骨架屏' },
       { to: '/components/data-display', label: '数据展示' },
       { to: '/components/chart', label: '图表' },

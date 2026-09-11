@@ -399,6 +399,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IComment",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IContextCards",
     "ends": {
       "vue-next": true,
@@ -549,7 +559,27 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IInputAdornment",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IInputNumber",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ILink",
     "ends": {
       "vue-next": true,
       "vue": true,

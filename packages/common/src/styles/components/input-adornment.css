@@ -1,0 +1,48 @@
+/* IInputAdornment —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 前后缀：把「https://」「.com」「元」这类固定不变的部分从输入框里挪出来。
+ * 它们不是用户要填的内容，留在框里既占位又会被一起提交。
+ *
+ * 前后缀与输入框拼成一个整体：相接的两边去掉圆角，边框只留一份，
+ * 否则中间会出现一条两像素的粗线。
+ */
+.i-input-adornment {
+  display: inline-flex;
+  align-items: stretch;
+  width: 100%;
+}
+.i-input-adornment__part {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  padding: 0 var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-md);
+  white-space: nowrap;
+}
+.i-input-adornment__part--prepend {
+  border-right: 0;
+  border-radius: var(--i-radius-md) 0 0 var(--i-radius-md);
+}
+.i-input-adornment__part--append {
+  border-left: 0;
+  border-radius: 0 var(--i-radius-md) var(--i-radius-md) 0;
+}
+
+.i-input-adornment__body {
+  flex: 1;
+  min-width: 0;
+}
+.i-input-adornment.has-prepend .i-input-adornment__body .i-input,
+.i-input-adornment.has-prepend .i-input-adornment__body .i-input-number {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.i-input-adornment.has-append .i-input-adornment__body .i-input,
+.i-input-adornment.has-append .i-input-adornment__body .i-input-number {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}

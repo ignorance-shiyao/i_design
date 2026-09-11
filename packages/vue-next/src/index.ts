@@ -12,6 +12,7 @@ import ISparkline from './ISparkline.vue'
 import IInputNumber from './IInputNumber.vue'
 import ISlider from './ISlider.vue'
 import IRate from './IRate.vue'
+import ILink from './ILink.vue'
 import IList from './IList.vue'
 import ISpace from './ISpace.vue'
 import ITypography from './ITypography.vue'
@@ -30,6 +31,7 @@ import IChatSuggestions from './IChatSuggestions.vue'
 import IPromptInput from './IPromptInput.vue'
 import IButton from './IButton.vue'
 import IInput from './IInput.vue'
+import IInputAdornment from './IInputAdornment.vue'
 import ITextarea from './ITextarea.vue'
 import ISelect from './ISelect.vue'
 import IRadio from './IRadio.vue'
@@ -86,6 +88,7 @@ import ISticky from './ISticky.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
+import IComment from './IComment.vue'
 import IDivider from './IDivider.vue'
 import ITabs from './ITabs.vue'
 import IBreadcrumb from './IBreadcrumb.vue'
@@ -160,6 +163,7 @@ export {
   IForm,
   IFormItem,
   ITag,
+  IComment,
   IDivider,
   ITabs,
   IBreadcrumb,
@@ -188,9 +192,11 @@ export {
   IProgress,
   IStatistic,
   ITimeline,
+  IInputAdornment,
   IInputNumber,
   ISlider,
   IRate,
+  ILink,
   IList,
   IChart,
   IChartPie,
@@ -251,6 +257,7 @@ const components = {
   IForm,
   IFormItem,
   ITag,
+  IComment,
   IDivider,
   ITabs,
   IBreadcrumb,
@@ -279,9 +286,11 @@ const components = {
   IProgress,
   IStatistic,
   ITimeline,
+  IInputAdornment,
   IInputNumber,
   ISlider,
   IRate,
+  ILink,
   IList,
   IChart,
   IChartPie,

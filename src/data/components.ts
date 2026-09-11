@@ -22,7 +22,8 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Button', cn: '按钮', to: '/components/button', desc: '触发一个即时操作', status: 'ready' },
       { name: 'Icon', cn: '图标', to: '/components/icon', desc: '38 个内联 SVG 图标', status: 'ready' },
       { name: 'Tag', cn: '标签', to: '/components/tag', desc: '标记分类或状态', status: 'ready' },
-      { name: 'Divider', cn: '分割线', to: '/components/divider', desc: '分隔内容区块', status: 'ready' }
+      { name: 'Divider', cn: '分割线', to: '/components/divider', desc: '分隔内容区块', status: 'ready' },
+      { name: 'Link', cn: '链接', to: '/components/link', desc: '跳转到另一个地址', status: 'ready' }
     ]
   },
   {
@@ -40,6 +41,7 @@ export const componentCategories: ComponentCategory[] = [
     desc: '采集用户输入，是中后台产品的主战场。',
     items: [
       { name: 'Input', cn: '输入框', to: '/components/input', desc: '单行文本输入', status: 'ready' },
+      { name: 'InputAdornment', cn: '输入前后缀', to: '/components/input-adornment', desc: '把固定的前后缀移出输入框', status: 'ready' },
       { name: 'Textarea', cn: '多行文本框', to: '/components/textarea', desc: '多行文本输入与字数统计', status: 'ready' },
       { name: 'Select', cn: '下拉选择', to: '/components/select', desc: '从预设项中选择', status: 'ready' },
       { name: 'Radio', cn: '单选框', to: '/components/radio', desc: '一组互斥选项中选一个', status: 'ready' },
@@ -75,6 +77,7 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Carousel', cn: '走马灯', to: '/components/data-display', desc: '一组内容轮播，移动端即 Swiper', status: 'ready' },
       { name: 'InfiniteScroll', cn: '无限滚动', to: '/components/mobile', desc: '翻到底自动续下一页', status: 'ready' },
       { name: 'Descriptions', cn: '描述列表', to: '/components/descriptions', desc: '成组展示只读字段', status: 'ready' },
+      { name: 'Comment', cn: '评论', to: '/components/comment', desc: '展示一条讨论记录', status: 'ready' },
       { name: 'Skeleton', cn: '骨架屏', to: '/components/skeleton', desc: '加载中的内容占位', status: 'ready' }
     ]
   },

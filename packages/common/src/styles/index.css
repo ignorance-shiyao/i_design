@@ -39,6 +39,7 @@
 @import './components/checkbox.css';
 @import './components/collapse.css';
 @import './components/colorpicker.css';
+@import './components/comment.css';
 @import './components/countdown.css';
 @import './components/date-picker.css';
 @import './components/descriptions.css';
@@ -52,9 +53,11 @@
 @import './components/icon.css';
 @import './components/image.css';
 @import './components/infinite.css';
+@import './components/input-adornment.css';
 @import './components/input-number.css';
 @import './components/input.css';
 @import './components/keypad.css';
+@import './components/link.css';
 @import './components/list.css';
 @import './components/loading.css';
 @import './components/mentions.css';

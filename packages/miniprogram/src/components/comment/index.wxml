@@ -1,0 +1,18 @@
+<view class="i-comment {{reply ? 'i-comment--reply' : ''}}">
+  <view class="i-comment__avatar">
+    <i-avatar src="{{avatar}}" name="{{author}}" size="{{reply ? 'sm' : 'md'}}" />
+  </view>
+
+  <view class="i-comment__main">
+    <view class="i-comment__head">
+      <text class="i-comment__author">{{author}}</text>
+      <text wx:if="{{datetime}}" class="i-comment__time">{{datetime}}</text>
+    </view>
+
+    <view wx:if="{{quote}}" class="i-comment__quote">{{quote}}</view>
+    <view class="i-comment__content">{{content}}</view>
+
+    <view class="i-comment__actions"><slot name="actions" /></view>
+    <view class="i-comment__replies"><slot name="replies" /></view>
+  </view>
+</view>
