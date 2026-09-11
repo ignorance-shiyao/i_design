@@ -1,4 +1,5 @@
 import type { Directive } from 'vue'
+import { rafThrottle } from '@i-design/common'
 
 /**
  * 滚动进场指令：v-reveal / v-reveal:left / v-reveal="120"（延迟毫秒）
@@ -21,7 +22,6 @@ const observers = new WeakMap<HTMLElement, IntersectionObserver>()
  */
 const pending = new Set<HTMLElement>()
 let sweeping = false
-let frame = 0
 
 function reveal(el: HTMLElement, instant: boolean) {
   // 已经滚过去的没必要再演一遍进场，直接给最终态
@@ -33,17 +33,14 @@ function reveal(el: HTMLElement, instant: boolean) {
 }
 
 function sweep() {
-  frame = 0
   for (const el of [...pending]) {
     const rect = el.getBoundingClientRect()
     if (rect.top < window.innerHeight * 0.92) reveal(el, rect.bottom < 0)
   }
 }
 
-function onScroll() {
-  if (frame) return
-  frame = requestAnimationFrame(sweep)
-}
+/* 整页共用一次扫描，且每帧最多一次：扫描要读每个待进场元素的位置 */
+const onScroll = rafThrottle(sweep)
 
 function startSweep() {
   if (sweeping) return
@@ -57,8 +54,7 @@ function stopSweep() {
   sweeping = false
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onScroll)
-  if (frame) cancelAnimationFrame(frame)
-  frame = 0
+  onScroll.cancel()
 }
 
 export const vReveal: Directive<HTMLElement, number | undefined> = {

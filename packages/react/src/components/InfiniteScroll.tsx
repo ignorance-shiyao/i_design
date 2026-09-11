@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, type ReactNode } from 'react'
-import { loadHint, shouldLoadMore, type LoadStatus } from '@i-design/common'
+import { rafThrottle, loadHint, shouldLoadMore, type LoadStatus } from '@i-design/common'
 import { Loading } from './Loading'
 
 export interface InfiniteScrollProps {
@@ -49,14 +49,17 @@ export function InfiniteScroll({
    */
   useEffect(() => {
     const target: HTMLElement | Window | null = height ? root.current : window
-    target?.addEventListener('scroll', check, { passive: true })
-    window.addEventListener('resize', check, { passive: true })
-    const observer = new ResizeObserver(check)
+    /* 合并到每帧一次：check 每次都要量 rect 与滚动尺寸 */
+    const onScroll = rafThrottle(check)
+    target?.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+    const observer = new ResizeObserver(onScroll)
     if (root.current) observer.observe(root.current)
     check()
     return () => {
-      target?.removeEventListener('scroll', check)
-      window.removeEventListener('resize', check)
+      target?.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      onScroll.cancel()
       observer.disconnect()
     }
   }, [check, height])

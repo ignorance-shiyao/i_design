@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
+  rafThrottle,
   resolveOverlay,
   tourHole,
   tourNeedsScroll,
@@ -109,9 +110,10 @@ export function Tour({
       else if (event.key === 'ArrowRight' || event.key === 'Enter') next()
       else if (event.key === 'ArrowLeft') prev()
     }
-    const onResize = () => locate()
+    // 引导开着时页面仍可能滚动，高亮框要跟着走；合并到每帧一次，别拖累滚动
+    const onResize = rafThrottle(() => locate())
     document.addEventListener('keydown', onKeyDown)
-    window.addEventListener('resize', onResize)
+    window.addEventListener('resize', onResize, { passive: true })
     window.addEventListener('scroll', onResize, { passive: true })
     // 焦点挪进浮层：读屏与 Tab 顺序都应当落在当前这一步上
     pop.current?.focus()
@@ -119,6 +121,7 @@ export function Tour({
       document.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('resize', onResize)
       window.removeEventListener('scroll', onResize)
+      onResize.cancel()
     }
   }, [index, skip, next, prev, locate])
 

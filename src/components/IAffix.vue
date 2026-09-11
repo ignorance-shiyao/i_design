@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { resolveAffix, type AffixState } from '@i-design/common'
+import { rafThrottle, resolveAffix, type AffixState } from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{
@@ -20,10 +20,8 @@ const root = ref<HTMLElement | null>(null)
 const state = ref<AffixState>({ mode: 'none', offset: 0 })
 /** 占位高度：吸住时元素脱离文档流，不占位的话下面的内容会往上跳一整块 */
 const placeholder = ref(0)
-let frame = 0
 
 function measure() {
-  frame = 0
   const el = root.value
   if (!el) return
   const holder = el.firstElementChild as HTMLElement | null
@@ -50,11 +48,9 @@ function measure() {
   placeholder.value = next.mode === 'none' ? 0 : height
 }
 
-/* 滚动事件合并到 rAF：每帧最多量一次布局，不然长页面上滚动会明显发涩 */
-function onScroll() {
-  if (frame) return
-  frame = requestAnimationFrame(measure)
-}
+/* 滚动事件合并到每帧一次：每帧最多量一次布局，不然长页面上滚动会明显发涩。
+   合并逻辑在公共层，各端与移动端共用同一份 */
+const onScroll = rafThrottle(measure)
 
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
@@ -65,7 +61,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onScroll)
-  if (frame) cancelAnimationFrame(frame)
+  onScroll.cancel()
 })
 
 const style = computed(() => {

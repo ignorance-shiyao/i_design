@@ -112,6 +112,10 @@ const links = [
   color: var(--i-color-text);
   font-weight: 600;
 }
+/* 绝不折行：折行会把顶栏撑成两行，吃掉手机上本就不多的一屏 */
+.header__name {
+  white-space: nowrap;
+}
 .header__logo {
   display: grid;
   place-items: center;
@@ -188,8 +192,9 @@ const links = [
     height: 40px;
   }
 }
-@media (max-width: 380px) {
-  /* 极窄屏才让位：产品名是身份，能留则留 */
+@media (max-width: 420px) {
+  /* 窄屏才让位：产品名是身份，能留则留。
+     但绝不让它折行——折行会把顶栏撑成两行，吃掉本就不多的一屏 */
   .header__name {
     display: none;
   }

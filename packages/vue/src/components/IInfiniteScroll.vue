@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ILoading from './ILoading.vue'
-import { loadHint, shouldLoadMore, type LoadStatus } from '@i-design/common'
+import { loadHint, rafThrottle, shouldLoadMore, type LoadStatus } from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{
@@ -23,6 +23,10 @@ const props = withDefaults(
 const emit = defineEmits<{ (e: 'load'): void; (e: 'retry'): void }>()
 
 const root = ref<HTMLElement | null>(null)
+
+/* 合并到每帧一次：check 每次都要量 rect 与滚动尺寸，
+   而一次滑动能打出上百个 scroll 事件 */
+const onScroll = rafThrottle(() => check())
 
 function check() {
   const el = root.value
@@ -47,17 +51,18 @@ let observer: ResizeObserver | null = null
 
 onMounted(() => {
   const target = props.height ? root.value : window
-  target?.addEventListener('scroll', check, { passive: true })
-  window.addEventListener('resize', check, { passive: true })
-  observer = new ResizeObserver(check)
+  target?.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onScroll, { passive: true })
+  observer = new ResizeObserver(onScroll)
   if (root.value) observer.observe(root.value)
   check()
 })
 
 onBeforeUnmount(() => {
   const target = props.height ? root.value : window
-  target?.removeEventListener('scroll', check)
-  window.removeEventListener('resize', check)
+  target?.removeEventListener('scroll', onScroll)
+  window.removeEventListener('resize', onScroll)
+  onScroll.cancel()
   observer?.disconnect()
 })
 

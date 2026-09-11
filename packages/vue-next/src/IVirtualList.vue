@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { scrollToRow, shouldVirtualize, virtualWindow } from '@i-design/common'
+import { rafThrottle, scrollToRow, shouldVirtualize, virtualWindow } from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{
@@ -16,17 +16,12 @@ const props = withDefaults(
 
 const scroller = ref<HTMLElement | null>(null)
 const scrollTop = ref(0)
-let frame = 0
+/* 每帧最多读一次滚动位置，合并逻辑走公共层 */
+const onScroll = rafThrottle(() => {
+  scrollTop.value = scroller.value?.scrollTop ?? 0
+})
 
-function onScroll() {
-  if (frame) return
-  frame = requestAnimationFrame(() => {
-    frame = 0
-    scrollTop.value = scroller.value?.scrollTop ?? 0
-  })
-}
-
-onBeforeUnmount(() => { if (frame) cancelAnimationFrame(frame) })
+onBeforeUnmount(() => onScroll.cancel())
 onMounted(() => { scrollTop.value = scroller.value?.scrollTop ?? 0 })
 
 /*

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import IIcon from './IIcon.vue'
-import { backTopFrame, shouldShowBackTop } from '@i-design/common'
+import { backTopFrame, rafThrottle, shouldShowBackTop } from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{
@@ -14,15 +14,11 @@ const props = withDefaults(
 )
 
 const visible = ref(false)
-let frame = 0
 
-function onScroll() {
-  if (frame) return
-  frame = requestAnimationFrame(() => {
-    frame = 0
-    visible.value = shouldShowBackTop(window.scrollY, window.innerHeight, props.threshold)
-  })
-}
+/* 每帧最多算一次，合并逻辑走公共层——这个仓库里曾有五份各自手写的版本 */
+const onScroll = rafThrottle(() => {
+  visible.value = shouldShowBackTop(window.scrollY, window.innerHeight, props.threshold)
+})
 
 /*
  * 自己算每一帧，而不是 scrollTo({ behavior: 'smooth' })。
@@ -50,7 +46,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll)
-  if (frame) cancelAnimationFrame(frame)
+  onScroll.cancel()
 })
 </script>
 

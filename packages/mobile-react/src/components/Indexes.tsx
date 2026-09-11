@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState, type TouchEvent } from 'react'
-import { activeIndexAt, groupByIndex } from '@i-design/common'
+import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent } from 'react'
+import { activeIndexAt, groupByIndex, rafThrottle } from '@i-design/common'
 import { Cell } from './Cell'
 
 export interface IndexesItem {
@@ -23,15 +23,44 @@ export function Indexes({ items, onSelect }: IndexesProps) {
   const [hint, setHint] = useState('')
   const root = useRef<HTMLDivElement>(null)
 
-  const onScroll = () => {
+  /*
+   * 分组的位置只在内容或尺寸变化时量一次，不在滚动里量。
+   * 每个滚动事件都 querySelectorAll 再读 offsetTop，等于每帧强制同步布局几十次——
+   * 手指划得动、列表跟不上。位置在滚动期间不会变，量一次就够。
+   */
+  const offsets = useRef<{ index: string; top: number }[]>([])
+
+  const measure = useCallback(() => {
     const el = root.current
     if (!el) return
-    const offsets = [...el.querySelectorAll<HTMLElement>('[data-index]')].map((node) => ({
+    offsets.current = [...el.querySelectorAll<HTMLElement>('[data-index]')].map((node) => ({
       index: node.dataset.index!,
       top: node.offsetTop
     }))
-    setActive(activeIndexAt(offsets, el.scrollTop))
-  }
+  }, [])
+
+  /* 列表变了、容器尺寸变了（旋屏、键盘弹出）都要重量 */
+  useEffect(() => {
+    measure()
+    const el = root.current
+    if (!el) return
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [measure, items])
+
+  /* 只读 scrollTop（不触发布局）并比对已量好的位置，因此可以每帧跑 */
+  const onScroll = useMemo(
+    () =>
+      rafThrottle(() => {
+        const el = root.current
+        if (!el) return
+        if (!offsets.current.length) measure()
+        setActive(activeIndexAt(offsets.current, el.scrollTop))
+      }),
+    [measure]
+  )
+  useEffect(() => () => onScroll.cancel(), [onScroll])
 
   const jump = (index: string) => {
     const el = root.current

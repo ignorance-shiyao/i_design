@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
-import { resolveOverlay, type Placement } from '@i-design/common'
+import { rafThrottle, resolveOverlay, type Placement } from '@i-design/common'
 
 export interface UseOverlayPositionOptions {
   placement: Placement
@@ -58,14 +58,20 @@ export function useOverlayPosition(
       if (triggerRef.current?.contains(target) || popupRef.current?.contains(target)) return
       outsideRef.current?.()
     }
-    // 滚动与缩放都会让算好的位置失效；passive 避免拖累滚动性能
-    window.addEventListener('scroll', place, { passive: true, capture: true })
-    window.addEventListener('resize', place)
+    /*
+     * 滚动与缩放都会让算好的位置失效。重算合并到每帧一次：
+     * capture 让页面上任何一个滚动容器的滚动都会打到这里，而 place() 要量三处尺寸——
+     * 不合并的话，浮层开着时整页滚动都会变涩。
+     */
+    const onReposition = rafThrottle(place)
+    window.addEventListener('scroll', onReposition, { passive: true, capture: true })
+    window.addEventListener('resize', onReposition, { passive: true })
     if (closeOnOutsideClick) document.addEventListener('click', onDocumentClick)
     return () => {
-      window.removeEventListener('scroll', place, true)
-      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', onReposition, true)
+      window.removeEventListener('resize', onReposition)
       document.removeEventListener('click', onDocumentClick)
+      onReposition.cancel()
     }
   }, [visible, place, closeOnOutsideClick, triggerRef, popupRef])
 

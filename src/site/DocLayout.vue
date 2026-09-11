@@ -28,8 +28,35 @@ async function revealActive() {
   active?.scrollIntoView({ block: "nearest" });
 }
 
-onMounted(revealActive);
-watch(() => route.path, revealActive);
+/*
+ * 窄屏上给表格套一层横向滚动容器。
+ *
+ * API 表有四列，手机宽度装不下时浏览器会把每个单元格压到一两个字一行，
+ * 「加载中，同时禁用点击」变成竖着排的七行——读不了，也看不出这是一张表。
+ * 正确做法是让表格保持原宽、由容器横向滚动。
+ *
+ * 文档页里的表格是各页面直接写的 <table>，没法逐个包起来，因此在这里统一处理；
+ * 路由切换后要重来一次，新页面的表格还没被包过。
+ */
+async function wrapTables() {
+  await nextTick();
+  for (const table of document.querySelectorAll<HTMLElement>(".i-doc .i-table")) {
+    if (table.parentElement?.classList.contains("doc-layout__scroller")) continue;
+    const scroller = document.createElement("div");
+    scroller.className = "doc-layout__scroller";
+    table.replaceWith(scroller);
+    scroller.append(table);
+  }
+}
+
+onMounted(() => {
+  revealActive();
+  wrapTables();
+});
+watch(() => route.path, () => {
+  revealActive();
+  wrapTables();
+});
 </script>
 
 <template>

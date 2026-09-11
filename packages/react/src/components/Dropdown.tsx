@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import {
   firstMenuActive,
   moveMenuActive,
+  rafThrottle,
   resolveOverlay,
   type IconName,
   type Placement
@@ -82,13 +83,16 @@ export function Dropdown({
       setVisible(false)
       setActive(-1)
     }
-    window.addEventListener('scroll', place, { passive: true, capture: true })
-    window.addEventListener('resize', place)
+    // 重算合并到每帧一次：capture 让任何一个滚动容器的滚动都会打到这里
+    const onReposition = rafThrottle(place)
+    window.addEventListener('scroll', onReposition, { passive: true, capture: true })
+    window.addEventListener('resize', onReposition, { passive: true })
     document.addEventListener('click', onDocumentClick)
     return () => {
-      window.removeEventListener('scroll', place, true)
-      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', onReposition, true)
+      window.removeEventListener('resize', onReposition)
       document.removeEventListener('click', onDocumentClick)
+      onReposition.cancel()
     }
   }, [visible, place])
 

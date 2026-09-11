@@ -36,6 +36,23 @@
   max-width: 68ch;
 }
 
+/*
+ * 表格的横向滚动容器（由 DocLayout 在运行时套上，因此这条规则不能是作用域样式）。
+ *
+ * API 表有四列，手机宽度装不下时浏览器会把每个单元格压到一两个字一行，
+ * 「加载中，同时禁用点击」变成竖排的七行——读不了，也看不出这是一张表。
+ * 让表格保持最小宽度、由容器横向滚动才读得下去。
+ */
+.doc-layout__scroller {
+  margin: var(--i-spacing-4) 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.doc-layout__scroller .i-table {
+  margin: 0;
+  min-width: 520px;
+}
+
 .i-table {
   width: 100%;
   border-collapse: collapse;
