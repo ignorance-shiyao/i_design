@@ -94,7 +94,7 @@ const links = [
   display: flex;
   align-items: center;
   gap: var(--i-spacing-8);
-  height: 60px;
+  height: 68px;
 }
 .header__brand {
   display: flex;
@@ -106,8 +106,8 @@ const links = [
 .header__logo {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--i-radius-md);
   background: var(--i-color-brand);
   color: #fff;

@@ -2,7 +2,6 @@
 import { computed, ref } from 'vue'
 import { useTilt } from '@/composables/useTilt'
 import ValueCube from '@/site/ValueCube.vue'
-import TokenScene from '@/site/TokenScene.vue'
 import IButton from '@/components/IButton.vue'
 import IInput from '@/components/IInput.vue'
 import ICard from '@/components/ICard.vue'
@@ -15,7 +14,6 @@ import { heroIllustrations } from '@i-design/common'
 import CodeBlock from '@/site/CodeBlock.vue'
 import IIcon from '@/components/IIcon.vue'
 import ISteps from '@/components/ISteps.vue'
-import ILoading from '@/components/ILoading.vue'
 import { message } from '@/components/message'
 import { frameworks } from '@/data/frameworks'
 
@@ -38,7 +36,7 @@ const values = [
 ]
 
 /*
- * 这一组讲的是「靠什么保证不跑偏」，而不是「我们有多好」。
+ * 这一组讲的是「一致体验，源于共同的基础」，而不是「我们有多好」。
  * 每条都对应仓库里一个具体的机制，读者可以去代码里核对。
  */
 const guards = [
@@ -88,6 +86,23 @@ const previewSteps = [{ title: '基本信息' }, { title: '关联迭代' }, { ti
 
 const demoInput = ref('')
 const demoSwitch = ref(true)
+const submittedTitle = ref('')
+function resetPreview() {
+  demoInput.value = ''
+  demoSwitch.value = true
+  submittedTitle.value = ''
+}
+function submitPreview() {
+  const title = demoInput.value.trim()
+  if (!title) { message.warning('请先填写工作项标题'); return }
+  submittedTitle.value = title
+  message.success('示例工作项已创建，仅保存在当前页面')
+}
+const shortcuts = [
+  { icon: 'layers', title: '组件实验室', desc: '从一个按钮，到完整业务界面', to: '/components' },
+  { icon: 'palette', title: '你的品牌，你的主题', desc: '用语义令牌建立统一的视觉语言', to: '/design/tokens' },
+  { icon: 'code', title: '熟悉的技术栈', desc: '查看各端实现与接入方式', to: '/design/cross-platform' }
+] as const
 
 /*
  * 立方体转到读者正在看的那一条价值观上。
@@ -109,28 +124,27 @@ const cubeFaces = [
 </script>
 
 <template>
-  <div class="home">
+  <main class="home">
     <!-- Hero -->
     <section class="hero">
       <div class="i-container hero__inner">
         <div class="hero__text">
-          <ITag type="brand" round>v0.1.0 · 开源设计体系</ITag>
+          <div class="hero__eyebrow"><span class="hero__signal" /> OPEN SOURCE DESIGN SYSTEM <span>v0.1.0</span></div>
           <!--
             两行是写死的，不交给 text-wrap 平衡。
             自动断行会把「一次决策落到每个端」从中间劈开，行尾留一个孤零零的「一」——
             中文标题断错位置比断得不匀难看得多，而这句的语义分界本来就在这里。
           -->
           <h1 class="hero__title">
-            中后台设计体系
-            <span class="hero__title-accent">一次决策，落到每个端</span>
+            让想法成形，
+            <span class="hero__title-accent">让体验一致。</span>
           </h1>
           <!--
             中文没有连字符，长句换行会从词中间断开（「渲染适配」被劈成两行）。
             与其加断行控制，不如把句子写短——一句话说完的事不必写成三句。
           -->
           <p class="hero__desc i-lead">
-            令牌、图标与交互规则只写一份，Web、小程序、移动端与 Flutter 只做渲染适配。
-            换一个主色，各端同时生效。
+            面向中后台的开源设计体系。用清晰的组件、统一的令牌与共享的交互规则，把每一个产品细节落到各端。
           </p>
           <div class="hero__actions">
             <RouterLink to="/components">
@@ -148,50 +162,42 @@ const cubeFaces = [
 
         <!-- 用组件本身搭出预览面板，既是展示也是回归用例 -->
         <div ref="preview" class="hero__preview" aria-label="组件预览">
-          <!--
-            首屏的三维物件：一块令牌基座，几片浮在上面的端面板。
-            材质颜色全部从 CSS 令牌读——顶栏换主题、主题面板调主色，它当场重新上色，
-            演的正是标题那句「换一个主色，各端同时生效」。
-            WebGL 起不来或 chunk 拉不到时退回原来的插画，首屏不会留空。
-          -->
-          <TokenScene class="hero__scene i-tilt__layer" style="--i-layer-depth: 24" :height="300">
-            <template #fallback>
-              <img
-                class="hero__art"
-                :src="hero.src"
-                :srcset="hero.srcset"
-                width="600"
-                alt=""
-                fetchpriority="high"
-              />
-            </template>
-          </TokenScene>
+          <div class="preview__chrome"><span class="preview__identity"><IIcon name="layers" :size="16" /> Workspace</span><ITag type="brand" round>交互演示</ITag></div>
+          <div class="preview__intro"><div><span class="preview__overline">MAKE SPACE FOR IDEAS</span><h2>下一件好作品，从这里开始。</h2><p>试着创建工作项，感受组件之间的配合。</p></div><img :src="hero.src" :srcset="hero.srcset" width="120" height="100" alt="小白与十五的组件插画" /></div>
           <ICard class="i-tilt__layer" style="--i-layer-depth: 10" title="创建工作项" hoverable>
             <ISteps class="preview__steps" :items="previewSteps" :current="1" />
             <div class="preview__field">
-              <label>标题</label>
-              <IInput v-model="demoInput" placeholder="请输入工作项标题" />
+              <label for="preview-title">标题</label>
+              <IInput id="preview-title" v-model="demoInput" placeholder="请输入工作项标题" />
             </div>
             <div class="preview__field preview__field--row">
               <label>自动分配负责人</label>
-              <ISwitch v-model="demoSwitch" />
+              <ISwitch v-model="demoSwitch" aria-label="自动分配负责人" />
             </div>
             <div class="preview__tags">
               <ITag type="brand">需求</ITag>
               <ITag type="success">已评审</ITag>
               <ITag type="warning">高优先级</ITag>
             </div>
-            <IAlert type="info">提交后将同步到迭代看板。</IAlert>
+            <IAlert :type="submittedTitle ? 'success' : 'info'">{{ submittedTitle ? `已创建：${submittedTitle}` : '这是交互示例，数据仅保存在当前页面。' }}</IAlert>
             <template #footer>
               <div class="preview__footer">
-                <IButton variant="text">取消</IButton>
-                <IButton variant="primary" @click="message.success('工作项已创建')">提交</IButton>
+                <IButton variant="text" @click="resetPreview">重置</IButton>
+                <IButton variant="primary" @click="submitPreview">提交</IButton>
               </div>
             </template>
           </ICard>
         </div>
       </div>
     </section>
+
+    <nav class="i-container entry-grid" aria-label="探索设计体系">
+      <RouterLink v-for="item in shortcuts" :key="item.to" :to="item.to" class="entry">
+        <span class="entry__icon"><IIcon :name="item.icon" :size="22" /></span>
+        <div><h2>{{ item.title }}</h2><p>{{ item.desc }}</p></div>
+        <IIcon name="arrow-right" :size="18" />
+      </RouterLink>
+    </nav>
 
     <!-- 设计价值观 -->
     <section class="i-container section">
@@ -224,10 +230,9 @@ const cubeFaces = [
     <section class="section section--muted">
       <div class="i-container">
         <span class="i-eyebrow">How</span>
-        <h2 class="section__title">靠什么保证不跑偏</h2>
+        <h2 class="section__title">一致体验，源于共同的基础</h2>
         <p class="section__desc i-lead">
-          跨端体系最容易烂在「哪一端偷偷改了一点」。下面四条都是仓库里的具体机制，
-          可以直接去代码里核对。
+          从设计到实现，共享令牌、交互规则与校验机制，让每次迭代都有据可循。
         </p>
         <div class="features i-stagger">
           <ICard
@@ -374,101 +379,39 @@ app.use(IDesign)"
         </RouterLink>
       </div>
     </section>
-  </div>
+  </main>
 </template>
 
 <style scoped>
-/* Hero */
-/*
- * 首屏收紧一点：原先上下各留 80/64px，加上插画与预览卡纵向叠起来，
- * 1440×900 的屏上卡片会被折线切掉一截——首屏露出半张卡，
- * 观感上就是「没做完」，而不是「下面还有」。
- */
-.hero {
-  position: relative;
-  padding: var(--i-spacing-12) 0;
-  overflow: hidden;
-  background:
-    radial-gradient(50% 60% at 12% -10%, var(--i-color-brand-subtle), transparent 70%),
-    radial-gradient(40% 50% at 90% 0%, var(--i-color-ring), transparent 70%),
-    var(--i-color-bg);
-}
-/* 细网格只出现在顶部，越往下越淡，避免整块背景显脏 */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--i-color-hairline) 1px, transparent 1px),
-    linear-gradient(90deg, var(--i-color-hairline) 1px, transparent 1px);
-  background-size: 40px 40px;
-  -webkit-mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
-  mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
-  pointer-events: none;
-}
-.hero__inner { position: relative; }
-.hero__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--i-spacing-12);
-  align-items: center;
-}
-.hero__title {
-  margin: var(--i-spacing-5) 0 var(--i-spacing-4);
-  font-size: var(--i-font-size-5xl);
-  letter-spacing: -0.02em;
-  line-height: 1.18;
-}
-/* 副句独占一行：语义分界在这里，断行也该在这里 */
-.hero__title-accent {
-  display: block;
-  color: var(--i-color-brand);
-}
-.hero__actions { display: flex; gap: var(--i-spacing-3); margin-top: var(--i-spacing-8); }
-.hero__facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: var(--i-spacing-3) var(--i-spacing-6);
-  margin: var(--i-spacing-8) 0 0;
-  padding: 0;
-  list-style: none;
-}
-.hero__facts li {
-  display: flex;
-  align-items: center;
-  gap: var(--i-spacing-2);
-  font-size: var(--i-font-size-sm);
-  color: var(--i-color-text-secondary);
-}
-.hero__facts svg { color: var(--i-color-brand); flex: none; }
-
-/*
- * 插画收小并右对齐，让它退成陪衬。
- *
- * 首屏真正该被看见的是右边那张用组件本身搭出来的卡片——它同时是展示与回归用例。
- * 插画铺满一整列时，读者第一眼落在插画上，而插画说明不了这套体系能做什么。
- */
-.hero__art {
-  display: block;
-  width: 100%;
-  max-width: 340px;
-  height: auto;
-  margin: 0 0 calc(var(--i-spacing-4) * -1) auto;
-}
-/* 三维画布压在预览卡上方一点，两者叠出层次；负边距让它不额外占高 */
-.hero__scene { margin-bottom: calc(var(--i-spacing-6) * -1); }
-.hero__preview {
-  filter: drop-shadow(var(--i-shadow-xl));
-  /* 时长与「不超过 320ms」这条价值观对齐；曲线用 easing-out，进场要快进慢停 */
-  animation: hero-float var(--i-motion-slow) var(--i-motion-easing-out) both;
-}
-@keyframes hero-float {
-  from { opacity: 0; transform: translateY(8px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero__preview { animation: none; }
-}
+.hero { position: relative; padding: 80px 0 64px; overflow: hidden; background: var(--i-color-bg); }
+.hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 85% 35%, var(--i-color-brand-subtle), transparent 65%); }
+.hero__inner { position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 64px; }
+.hero__eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font: 11px var(--i-font-family-mono); letter-spacing: .1em; color: var(--i-color-text-secondary); }
+.hero__eyebrow > span:last-child { padding: 4px 8px; border: 1px solid var(--i-color-border); border-radius: var(--i-radius-full); }
+.hero__signal { width: 7px; height: 7px; border-radius: 50%; background: var(--i-color-brand); }
+.hero__title { margin: 28px 0 24px; font-size: clamp(38px, 4.3vw, 64px); line-height: 1.2; letter-spacing: -.055em; font-weight: 650; }
+.hero__title-accent { display: block; color: var(--i-color-brand); }
+.hero__desc { max-width: 440px; font-size: 16px; line-height: 1.9; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.hero__facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 32px 0 0; padding: 0; list-style: none; }
+.hero__facts li { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--i-color-text-secondary); }
+.hero__facts svg { flex: none; color: var(--i-color-brand); }
+.hero__preview { padding: 20px; border: 1px solid var(--i-color-border); border-radius: 24px; background: var(--i-color-bg-subtle); box-shadow: 0 24px 64px -28px var(--i-color-ring); }
+.preview__chrome { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.preview__identity { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.preview__identity svg { color: var(--i-color-brand); }
+.preview__intro { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 28px 0 20px; }
+.preview__intro h2 { font-size: 18px; margin: 8px 0; letter-spacing: -.025em; }
+.preview__intro p { font-size: 12px; color: var(--i-color-text-secondary); }
+.preview__intro img { object-fit: contain; flex: none; width: 100px; }
+.preview__overline { font: 9px var(--i-font-family-mono); letter-spacing: .12em; color: var(--i-color-brand); }
+.entry-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding-top: 16px; padding-bottom: 24px; }
+.entry { display: flex; align-items: center; gap: 16px; padding: 24px; border: 1px solid var(--i-color-border); border-radius: 16px; color: var(--i-color-text); background: var(--i-color-bg-elevated); transition: border-color .2s, transform .2s; }
+.entry:hover { border-color: var(--i-color-brand); transform: translateY(-3px); }
+.entry__icon { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border-radius: 12px; color: var(--i-color-brand); background: var(--i-color-brand-subtle); }
+.entry h2 { font-size: 15px; margin-bottom: 6px; }
+.entry p { font-size: 12px; color: var(--i-color-text-secondary); }
+.entry > svg { margin-left: auto; flex: none; color: var(--i-color-text-tertiary); }
 .preview__field { margin-bottom: var(--i-spacing-4); }
 .preview__field label {
   display: block;
@@ -691,6 +634,7 @@ app.use(IDesign)"
   box-shadow: var(--i-shadow-brand);
 }
 .cta::after {
+  pointer-events: none;
   content: '';
   position: absolute;
   inset: 0;
@@ -708,11 +652,24 @@ app.use(IDesign)"
 .cta h2 { font-size: var(--i-font-size-2xl); }
 .cta p { margin-top: var(--i-spacing-2); opacity: 0.85; }
 
+@media (prefers-reduced-motion: reduce) { .entry { transition: none; } .entry:hover { transform: none; } }
+@media (max-width: 1100px) { .entry { padding: 18px; gap: 10px; } .entry > svg { display: none; } }
 @media (max-width: 960px) {
+  .entry-grid { grid-template-columns: 1fr; }
+  .hero__preview { max-width: 560px; width: 100%; margin-inline: auto; }
+  .hero__text { max-width: 600px; }
+
   .hero { padding-top: var(--i-spacing-16); }
   .hero__inner { grid-template-columns: 1fr; gap: var(--i-spacing-10); }
   .hero__title { font-size: var(--i-font-size-4xl); }
   .hero__facts { grid-template-columns: 1fr; gap: var(--i-spacing-3); }
   .cta { padding: var(--i-spacing-8); }
+}
+@media (max-width: 480px) {
+  .hero { padding: 40px 0 24px; }
+  .hero__preview { padding: 14px; border-radius: 18px; }
+  .preview__intro img { width: 64px; height: 80px; }
+  .preview__intro h2 { font-size: 16px; }
+  .hero__eyebrow { font-size: 9px; }
 }
 </style>

@@ -37,14 +37,14 @@ watch(() => route.path, revealActive)
 <style scoped>
 .doc-layout {
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
+  grid-template-columns: 216px minmax(0, 1fr);
   gap: var(--i-spacing-12);
   padding-top: var(--i-spacing-10);
   align-items: start;
 }
 .doc-layout__side {
   position: sticky;
-  top: 84px;
+  top: 92px;
   display: grid;
   gap: var(--i-spacing-6);
   align-content: start;
@@ -52,10 +52,11 @@ watch(() => route.path, revealActive)
    * 侧栏比视口高时，仅靠 sticky 会让下半截永远够不到——粘住顶部后它不随页面滚动，
    * 只有父容器快结束时才「解锁」，表现为菜单与内容错位。因此让它自己成为滚动容器。
    */
-  max-height: calc(100vh - 84px - var(--i-spacing-6));
+  max-height: calc(100vh - 92px - var(--i-spacing-6));
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: var(--i-spacing-2);
+  padding-right: var(--i-spacing-4);
+  border-right: 1px solid var(--i-color-hairline);
 }
 /* 细滚动条，静止时隐藏，避免侧栏出现一条常驻竖线 */
 .doc-layout__side::-webkit-scrollbar { width: 4px; }
