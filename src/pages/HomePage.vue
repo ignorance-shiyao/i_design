@@ -1,718 +1,940 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useTilt } from '@/composables/useTilt'
-import ValueCube from '@/site/ValueCube.vue'
-import TokenScene from '@/site/TokenScene.vue'
-import IButton from '@/components/IButton.vue'
-import IInput from '@/components/IInput.vue'
-import ICard from '@/components/ICard.vue'
-import ITag from '@/components/ITag.vue'
-import IAlert from '@/components/IAlert.vue'
-import ISwitch from '@/components/ISwitch.vue'
-import { componentCategories } from '@/data/components'
-import { useTheme } from '@/composables/useTheme'
-import { heroIllustrations } from '@i-design/common'
-import CodeBlock from '@/site/CodeBlock.vue'
-import IIcon from '@/components/IIcon.vue'
-import ISteps from '@/components/ISteps.vue'
-import ILoading from '@/components/ILoading.vue'
-import { message } from '@/components/message'
-import { frameworks } from '@/data/frameworks'
+import { computed, ref } from "vue";
+import IIcon from "@/components/IIcon.vue";
+import IButton from "@/components/IButton.vue";
+import IInput from "@/components/IInput.vue";
+import ISwitch from "@/components/ISwitch.vue";
+import ITag from "@/components/ITag.vue";
+import CodeBlock from "@/site/CodeBlock.vue";
+import { heroIllustrations } from "@i-design/common";
+import { useTheme } from "@/composables/useTheme";
 
-const values = [
-  {
-    key: '沉浸',
-    en: 'Immersive',
-    desc: '减少视觉噪音，把注意力还给内容本身。以克制的色彩与留白，让用户长时间专注于任务。'
-  },
-  {
-    key: '灵活',
-    en: 'Flexible',
-    desc: '令牌驱动的主题体系，组件不写死任何具体色值，换肤、深色模式与业务定制均只改语义层。'
-  },
-  {
-    key: '至简',
-    en: 'Minimal',
-    desc: '每个组件只暴露必要的 API，默认值即最佳实践，让常见场景零配置可用。'
+const { theme } = useTheme();
+const illustration = computed(() =>
+  theme.value === "dark" ? heroIllustrations.dark : heroIllustrations.light
+);
+const baseUrl = import.meta.env.BASE_URL;
+const name = ref("Design something good");
+const notifications = ref(true);
+const copied = ref(false);
+const command = "git clone https://github.com/ignorance-shiyao/i_design.git";
+async function copyCommand() {
+  try {
+    await navigator.clipboard.writeText(command);
+    copied.value = true;
+  } catch {
+    copied.value = false;
   }
-]
-
-/*
- * 这一组讲的是「靠什么保证不跑偏」，而不是「我们有多好」。
- * 每条都对应仓库里一个具体的机制，读者可以去代码里核对。
- */
-const guards = [
+}
+const platforms = [
   {
-    icon: 'layers',
-    title: '令牌只有一份',
-    desc: 'CSS 变量、WXSS 变量与 Dart 常量都由同一份令牌编译产出。任何一端想改颜色，都得回到那份定义。'
+    title: "桌面端",
+    en: "DESKTOP",
+    icon: "layout",
+    description: "为复杂业务提供清晰、稳定的操作体验。",
+    tags: ["Vue 3", "Vue 2", "React"],
+    to: "/components",
+    kind: "desktop",
   },
   {
-    icon: 'code',
-    title: '交互规则是纯函数',
-    desc: '翻页判定、浮层避让、树的半选推导写成不依赖框架的函数，各端只负责渲染，不重新解释一遍规则。'
+    title: "移动端",
+    en: "MOBILE",
+    icon: "layers",
+    description: "统一视觉语言，适配移动设备的交互节奏。",
+    tags: ["Mobile Vue", "Mobile React", "Flutter"],
+    to: "/components/mobile",
+    kind: "mobile",
   },
   {
-    icon: 'check-circle',
-    title: '一致性由测试兜底',
-    desc: '跨端期望值由同一份实现算出，逐值比对。「两端表现不同」会让构建失败，而不是等用户发现。'
+    title: "小程序",
+    en: "MINI PROGRAM",
+    icon: "grid",
+    description: "让轻量业务也拥有完整、一致的产品体验。",
+    tags: ["微信小程序", "共享令牌"],
+    to: "/design/cross-platform",
+    kind: "mini",
+  },
+];
+const resources = [
+  {
+    icon: "palette",
+    title: "设计令牌",
+    desc: "色彩、字体、间距与动效，从同一套规范出发。",
+    to: "/design/tokens",
   },
   {
-    icon: 'palette',
-    title: '换肤不改组件',
-    desc: '组件只引用语义令牌，不写死色值。深色模式与品牌换肤都只覆盖语义层，业务代码零改动。'
-  }
-] as const
-
-const { theme } = useTheme()
-// 插画有明暗两版，跟随主题切换而不是靠滤镜硬套
-const hero = computed(() =>
-  theme.value === 'dark'
-    ? heroIllustrations.dark
-    : heroIllustrations.light
-)
-
-/*
- * Hero 预览卡随指针轻微倾斜，插画层浮在卡片之前形成纵深。
- * 角度压到 3 度：再大就从「有厚度」变成「在耍花样」，
- * 而首屏承载的是「这套体系长什么样」，不是特效演示。
- */
-const preview = ref<HTMLElement | null>(null)
-useTilt(preview, { max: 3 })
-
-const usageSnippet = `<IButton variant="primary">
-  提交
-</IButton>`
-
-const previewSteps = [{ title: '基本信息' }, { title: '关联迭代' }, { title: '确认' }]
-
-const demoInput = ref('')
-const demoSwitch = ref(true)
-
-/*
- * 立方体转到读者正在看的那一条价值观上。
- * 键盘同样要能驱动它——只挂 hover 的话，用 Tab 浏览的人看到的是一个不动的方块。
- */
-/*
- * 首页每类只列前几项。
- *
- * 首页是「先看看这是什么」，不是查手册：一列 19 项、另一列 4 项，
- * 高矮相差五倍，读者既数不完也对不齐。完整清单在组件总览里，那里才需要穷举。
- */
-const COVERAGE_PREVIEW = 6
-
-const activeValue = ref(-1)
-const cubeFaces = [
-  ...values.map((v) => ({ key: v.key, en: v.en })),
-  { key: '一致', en: 'Consistent' }
-]
+    icon: "code",
+    title: "跨端实现",
+    desc: "查看不同技术栈的组件实现与使用方式。",
+    to: "/design/cross-platform",
+  },
+  {
+    icon: "layers",
+    title: "设计资源",
+    desc: "把图标与插画带进你的下一件作品。",
+    to: "/resources",
+  },
+] as const;
 </script>
 
 <template>
-  <div class="home">
-    <!-- Hero -->
-    <section class="hero">
-      <div class="i-container hero__inner">
-        <div class="hero__text">
-          <ITag type="brand" round>v0.1.0 · 开源设计体系</ITag>
-          <!--
-            两行是写死的，不交给 text-wrap 平衡。
-            自动断行会把「一次决策落到每个端」从中间劈开，行尾留一个孤零零的「一」——
-            中文标题断错位置比断得不匀难看得多，而这句的语义分界本来就在这里。
-          -->
-          <h1 class="hero__title">
-            中后台设计体系
-            <span class="hero__title-accent">一次决策，落到每个端</span>
-          </h1>
-          <!--
-            中文没有连字符，长句换行会从词中间断开（「渲染适配」被劈成两行）。
-            与其加断行控制，不如把句子写短——一句话说完的事不必写成三句。
-          -->
-          <p class="hero__desc i-lead">
-            令牌、图标与交互规则只写一份，Web、小程序、移动端与 Flutter 只做渲染适配。
-            换一个主色，各端同时生效。
-          </p>
-          <div class="hero__actions">
-            <RouterLink to="/components">
-              <IButton variant="primary" size="lg">开始使用<IIcon name="arrow-right" :size="16" /></IButton>
-            </RouterLink>
-            <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
-          </div>
-          <ul class="hero__facts">
-            <li><IIcon name="layers" :size="16" /><span>令牌是唯一数据源</span></li>
-            <li><IIcon name="palette" :size="16" /><span>换肤只改语义层</span></li>
-            <li><IIcon name="code" :size="16" /><span>跨端行为逐值比对</span></li>
-            <li><IIcon name="check-circle" :size="16" /><span>对比度与键盘可达经校验</span></li>
-          </ul>
-        </div>
-
-        <!-- 用组件本身搭出预览面板，既是展示也是回归用例 -->
-        <div ref="preview" class="hero__preview" aria-label="组件预览">
-          <!--
-            首屏的三维物件：一块令牌基座，几片浮在上面的端面板。
-            材质颜色全部从 CSS 令牌读——顶栏换主题、主题面板调主色，它当场重新上色，
-            演的正是标题那句「换一个主色，各端同时生效」。
-            WebGL 起不来或 chunk 拉不到时退回原来的插画，首屏不会留空。
-          -->
-          <TokenScene class="hero__scene i-tilt__layer" style="--i-layer-depth: 24" :height="300">
-            <template #fallback>
-              <img
-                class="hero__art"
-                :src="hero.src"
-                :srcset="hero.srcset"
-                width="600"
-                alt=""
-                fetchpriority="high"
-              />
-            </template>
-          </TokenScene>
-          <ICard class="i-tilt__layer" style="--i-layer-depth: 10" title="创建工作项" hoverable>
-            <ISteps class="preview__steps" :items="previewSteps" :current="1" />
-            <div class="preview__field">
-              <label>标题</label>
-              <IInput v-model="demoInput" placeholder="请输入工作项标题" />
-            </div>
-            <div class="preview__field preview__field--row">
-              <label>自动分配负责人</label>
-              <ISwitch v-model="demoSwitch" />
-            </div>
-            <div class="preview__tags">
-              <ITag type="brand">需求</ITag>
-              <ITag type="success">已评审</ITag>
-              <ITag type="warning">高优先级</ITag>
-            </div>
-            <IAlert type="info">提交后将同步到迭代看板。</IAlert>
-            <template #footer>
-              <div class="preview__footer">
-                <IButton variant="text">取消</IButton>
-                <IButton variant="primary" @click="message.success('工作项已创建')">提交</IButton>
-              </div>
-            </template>
-          </ICard>
+  <main class="design-home">
+    <section class="design-hero">
+      <div class="hero-art" aria-hidden="true">
+        <img
+          :src="`${baseUrl}images/component-sculpture.png`"
+          alt=""
+          width="1672"
+          height="941"
+          fetchpriority="high"
+        />
+      </div>
+      <div class="i-container hero-content">
+        <span class="hero-kicker">开源 · 多端 · 企业级设计体系</span>
+        <h1>i-design<span>让设计与实现，自然一致。</span></h1>
+        <p>从设计语言到业务界面，为设计师与开发者提供共同的起点。</p>
+        <div class="hero-actions">
+          <RouterLink class="primary-link" to="/components"
+            >开始使用 <IIcon name="arrow-right" :size="18"
+          /></RouterLink>
+          <RouterLink class="secondary-link" to="/design/values"
+            >了解设计体系 <IIcon name="chevron-right" :size="18"
+          /></RouterLink>
         </div>
       </div>
-    </section>
-
-    <!-- 设计价值观 -->
-    <section class="i-container section">
-      <span class="i-eyebrow">Principles</span>
-      <h2 class="section__title">设计价值观</h2>
-      <p class="section__desc i-lead">三条价值观贯穿每一次设计决策，也是评审组件是否合格的标尺。</p>
-      <div class="values-3d">
-        <ValueCube :size="200" :active="activeValue" :faces="cubeFaces" />
-        <div class="values i-stagger">
-          <article
-            v-for="(value, index) in values"
-            :key="value.key"
-            v-reveal:left
-            class="value"
-            tabindex="0"
-            @mouseenter="activeValue = index"
-            @focusin="activeValue = index"
-            @mouseleave="activeValue = -1"
-            @focusout="activeValue = -1"
-          >
-          <span class="value__en">{{ value.en }}</span>
-          <h3 class="value__title">{{ value.key }}</h3>
-            <p>{{ value.desc }}</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- 能力特性 -->
-    <section class="section section--muted">
-      <div class="i-container">
-        <span class="i-eyebrow">How</span>
-        <h2 class="section__title">靠什么保证不跑偏</h2>
-        <p class="section__desc i-lead">
-          跨端体系最容易烂在「哪一端偷偷改了一点」。下面四条都是仓库里的具体机制，
-          可以直接去代码里核对。
-        </p>
-        <div class="features i-stagger">
-          <ICard
-            v-for="(feature, index) in guards"
-            :key="feature.title"
-            v-reveal:depth
-            hoverable
-            class="feature i-lift"
-          >
-            <span class="feature__icon"><IIcon :name="feature.icon" :size="20" /></span>
-            <h3 class="feature__title">{{ feature.title }}</h3>
-            <p class="feature__desc">{{ feature.desc }}</p>
-          </ICard>
-        </div>
-      </div>
-    </section>
-
-    <!-- 覆盖范围 -->
-    <section class="i-container section">
-      <span class="i-eyebrow">Coverage</span>
-      <h2 class="section__title">覆盖范围</h2>
-      <p class="section__desc i-lead">
-        按中后台的真实使用场景分类，而不是按实现难度。标为规划中的是该有、但还没做到可用的——
-        把边界写出来，比让人在文档里反复搜一个不存在的组件要好。
-      </p>
-      <div class="coverage i-stagger">
-        <div
-          v-for="(category, index) in componentCategories"
-          :key="category.title"
-          v-reveal
-          class="coverage__col"
+      <nav class="i-container hero-resources" aria-label="设计体系资源">
+        <RouterLink
+          v-for="item in resources"
+          :key="item.to"
+          :to="item.to"
+          class="resource-link"
         >
-          <div class="coverage__head">
-            <h3>{{ category.title }}</h3>
-            <span class="coverage__count">
-              {{ category.items.filter((i) => i.status === 'ready').length }} / {{ category.items.length }}
-            </span>
+          <IIcon :name="item.icon" :size="22" />
+          <div>
+            <h2>{{ item.title }}</h2>
+            <p>{{ item.desc }}</p>
           </div>
-          <ul>
-            <li
-              v-for="item in category.items.slice(0, COVERAGE_PREVIEW)"
-              :key="item.name"
-              :class="{ 'is-planned': item.status === 'planned' }"
-            >
-              <RouterLink v-if="item.status === 'ready'" :to="item.to">{{ item.name }}</RouterLink>
-              <span v-else>{{ item.name }}</span>
-            </li>
-            <li v-if="category.items.length > COVERAGE_PREVIEW" class="coverage__more">
-              <RouterLink to="/components">还有 {{ category.items.length - COVERAGE_PREVIEW }} 个</RouterLink>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <p class="coverage__legend">
-        <span class="dot" /> 已实现
-        <span class="dot dot--planned" /> 规划中
-      </p>
-    </section>
-
-    <!-- 跨端 -->
-    <section class="section section--muted">
-      <div class="i-container">
-        <span class="i-eyebrow">Cross-platform</span>
-        <h2 class="section__title">你的技术栈在里面</h2>
-        <p class="section__desc i-lead">
-          各端不是「移植版」，而是同一份令牌与规则的不同渲染层。
-          因此不必为某一端单独维护一套设计稿，也不会出现「Web 上是这样，小程序上不是」。
-        </p>
-        <div class="stacks i-stagger">
-          <RouterLink
-            v-for="(f, index) in frameworks"
-            :key="f.id"
-            v-reveal
-            class="stack"
-            to="/design/cross-platform"
-          >
-            <span class="stack__label">{{ f.label }}</span>
-            <span class="stack__runtime">{{ f.runtime }}</span>
-          </RouterLink>
-        </div>
-        <p class="stacks__foot">
-          <RouterLink to="/design/cross-platform">看同一个组件在各端怎么写 →</RouterLink>
-        </p>
-      </div>
-    </section>
-
-    <!-- 快速上手 -->
-    <section class="i-container section">
-      <span class="i-eyebrow">Get started</span>
-      <h2 class="section__title">三步接入</h2>
-      <!--
-        第一步写清楚是 clone 而不是 npm install。
-        包还没发到 npm，只写「npm install」对外部使用者是一条执行不了的指令——
-        照着做失败一次，人就走了。没发布就直说没发布。
-      -->
-      <p class="section__desc i-lead">
-        还没有发到 npm，先克隆仓库使用；令牌与组件都在 <code>packages/</code> 下，可以整包引，也可以只取需要的那几个。
-      </p>
-      <div class="steps i-stagger">
-        <div v-reveal:depth class="step i-lift">
-          <span class="step__no">1</span>
-          <h3>取得代码</h3>
-          <CodeBlock
-            lang="bash"
-            :copyable="false"
-            code="git clone https://github.com/ignorance-shiyao/i_design
-cd i_design && npm install"
-          />
-        </div>
-        <div v-reveal:depth class="step i-lift">
-          <span class="step__no">2</span>
-          <h3>引入令牌与组件</h3>
-          <CodeBlock
-            lang="ts"
-            :copyable="false"
-            code="import '@/styles/global.css'
-import IDesign from '@/components'
-
-app.use(IDesign)"
-          />
-        </div>
-        <div v-reveal:depth class="step i-lift">
-          <span class="step__no">3</span>
-          <h3>直接使用</h3>
-          <CodeBlock
-            lang="vue"
-            :copyable="false"
-            :code="usageSnippet"
-          />
-        </div>
-      </div>
-    </section>
-
-    <section class="i-container">
-      <div v-reveal:depth class="cta">
-        <div>
-          <h2>从令牌开始读</h2>
-          <p>令牌表是这套体系的地基，组件的每一个取值都能在那里找到出处。</p>
-        </div>
-        <RouterLink to="/design/tokens">
-          <IButton variant="primary" size="lg">
-            查看设计令牌<IIcon name="arrow-right" :size="16" />
-          </IButton>
+          <IIcon name="arrow-right" :size="18" />
         </RouterLink>
+      </nav>
+    </section>
+
+    <section class="i-container home-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-label">面向不同平台</span>
+          <h2>熟悉的技术栈，一致的体验</h2>
+        </div>
+        <RouterLink to="/design/cross-platform"
+          >查看跨端支持 <IIcon name="arrow-right" :size="16"
+        /></RouterLink>
+      </div>
+      <div class="platforms">
+        <article
+          v-for="platform in platforms"
+          :key="platform.kind"
+          class="platform"
+        >
+          <div
+            class="platform__visual"
+            :class="platform.kind"
+            aria-hidden="true"
+          >
+            <div v-if="platform.kind === 'desktop'" class="device-desktop">
+              <div class="device-bar"><i /><i /><i /></div>
+              <div class="device-body">
+                <aside />
+                <div><b /><span /><span /><span /></div>
+              </div>
+            </div>
+            <div v-else-if="platform.kind === 'mobile'" class="device-mobile">
+              <i /><b /><span /><span />
+              <div />
+              <span />
+            </div>
+            <div v-else class="device-mini">
+              <div />
+              <i /><b /><span />
+            </div>
+          </div>
+          <div class="platform__body">
+            <span class="section-label">{{ platform.en }}</span>
+            <h3>{{ platform.title }}</h3>
+            <p>{{ platform.description }}</p>
+            <div class="platform__tags">
+              <span v-for="tag in platform.tags" :key="tag">{{ tag }}</span>
+            </div>
+            <RouterLink :to="platform.to"
+              >探索组件 <IIcon name="arrow-right" :size="16"
+            /></RouterLink>
+          </div>
+        </article>
       </div>
     </section>
-  </div>
+
+    <section class="showcase-section">
+      <div class="i-container showcase">
+        <div class="showcase-copy">
+          <span class="section-label">从规范，到细节</span>
+          <h2>好的体验，<br />藏在每一次交互里。</h2>
+          <p>
+            清晰的层级，恰当的反馈。用真实组件搭建界面，让设计意图直接成为可操作的体验。
+          </p>
+          <RouterLink to="/components/button"
+            >浏览组件文档 <IIcon name="arrow-right" :size="18" /></RouterLink
+          ><img
+            :src="illustration.src"
+            :srcset="illustration.srcset"
+            width="240"
+            height="160"
+            alt="小白与十五的设计世界"
+            loading="lazy"
+          />
+        </div>
+        <div class="component-gallery">
+          <div class="sample sample-controls">
+            <span class="sample-label">交互 / INTERACTION</span>
+            <div class="sample-buttons">
+              <IButton variant="primary" @click="name = '从一个好想法开始'"
+                >开始创作<IIcon name="arrow-right" :size="16" /></IButton
+              ><RouterLink to="/components/button" class="sample-text-link"
+                >更多按钮</RouterLink
+              >
+            </div>
+            <label for="sample-name">作品名称</label
+            ><IInput
+              id="sample-name"
+              v-model="name"
+              placeholder="输入作品名称"
+            />
+            <div class="sample-switch">
+              <span>接收更新通知</span
+              ><ISwitch v-model="notifications" aria-label="接收更新通知" />
+            </div>
+          </div>
+          <RouterLink class="sample sample-colors" to="/design/tokens"
+            ><span class="sample-label">色彩 / COLOR</span>
+            <div class="color-swatch"><i /><i /><i /><i /><i /></div>
+            <strong>品牌，从一个颜色开始。</strong
+            ><span class="sample-note"
+              >探索语义令牌 <IIcon name="arrow-right" :size="14" /></span
+          ></RouterLink>
+          <div class="sample sample-type">
+            <span class="sample-label">字体 / TYPOGRAPHY</span>
+            <div class="type-display">Aa<span>字</span></div>
+            <p>清晰可读，主次分明。</p>
+          </div>
+          <div class="sample sample-status">
+            <span class="sample-label">反馈 / FEEDBACK</span>
+            <div class="status-line">
+              <span class="status-icon"
+                ><IIcon name="check-circle" :size="22"
+              /></span>
+              <div>
+                <strong>每一步，都有回应</strong>
+                <p>用明确的状态传递进展</p>
+              </div>
+            </div>
+            <div class="status-tags">
+              <ITag type="brand">进行中</ITag><ITag type="success">已完成</ITag
+              ><ITag type="warning">待确认</ITag>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="i-container home-section start-section">
+      <div>
+        <span class="section-label">一起构建</span>
+        <h2>从这里，开始下一件作品。</h2>
+        <p>
+          克隆源码，运行文档站，探索适合你的组件。<br />当前通过仓库使用，暂未发布到
+          npm。
+        </p>
+        <a
+          class="secondary-link"
+          href="https://github.com/ignorance-shiyao/i_design"
+          target="_blank"
+          rel="noreferrer"
+          >访问 GitHub <IIcon name="arrow-right" :size="16"
+        /></a>
+      </div>
+      <div class="start-code">
+        <div class="start-code__bar">
+          <span>Terminal</span
+          ><button @click="copyCommand">
+            {{ copied ? "已复制克隆命令" : "复制克隆命令"
+            }}<IIcon name="copy" :size="14" />
+          </button>
+        </div>
+        <CodeBlock
+          :copyable="false"
+          lang="bash"
+          :code="`${command}\ncd i_design\nnpm install\nnpm run dev`"
+        />
+      </div>
+    </section>
+  </main>
 </template>
 
 <style scoped>
-/* Hero */
-/*
- * 首屏收紧一点：原先上下各留 80/64px，加上插画与预览卡纵向叠起来，
- * 1440×900 的屏上卡片会被折线切掉一截——首屏露出半张卡，
- * 观感上就是「没做完」，而不是「下面还有」。
- */
-.hero {
-  position: relative;
-  padding: var(--i-spacing-12) 0;
-  overflow: hidden;
-  background:
-    radial-gradient(50% 60% at 12% -10%, var(--i-color-brand-subtle), transparent 70%),
-    radial-gradient(40% 50% at 90% 0%, var(--i-color-ring), transparent 70%),
-    var(--i-color-bg);
+.design-home {
+  --home-radius: var(--i-radius-lg);
 }
-/* 细网格只出现在顶部，越往下越淡，避免整块背景显脏 */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--i-color-hairline) 1px, transparent 1px),
-    linear-gradient(90deg, var(--i-color-hairline) 1px, transparent 1px);
-  background-size: 40px 40px;
-  -webkit-mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
-  mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
+.design-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--i-color-bg-subtle);
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  padding-top: 132px;
+  padding-bottom: 76px;
   pointer-events: none;
 }
-.hero__inner { position: relative; }
-.hero__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--i-spacing-12);
-  align-items: center;
+.hero-content a {
+  pointer-events: auto;
 }
-.hero__title {
-  margin: var(--i-spacing-5) 0 var(--i-spacing-4);
-  font-size: var(--i-font-size-5xl);
-  letter-spacing: -0.02em;
-  line-height: 1.18;
+.hero-kicker,
+.section-label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--i-color-text-secondary);
 }
-/* 副句独占一行：语义分界在这里，断行也该在这里 */
-.hero__title-accent {
-  display: block;
+h1 {
+  margin: 18px 0 20px;
   color: var(--i-color-brand);
+  font-size: clamp(64px, 7vw, 100px);
+  line-height: 1;
+  letter-spacing: -0.055em;
+  font-weight: 700;
 }
-.hero__actions { display: flex; gap: var(--i-spacing-3); margin-top: var(--i-spacing-8); }
-.hero__facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: var(--i-spacing-3) var(--i-spacing-6);
-  margin: var(--i-spacing-8) 0 0;
-  padding: 0;
-  list-style: none;
-}
-.hero__facts li {
-  display: flex;
-  align-items: center;
-  gap: var(--i-spacing-2);
-  font-size: var(--i-font-size-sm);
-  color: var(--i-color-text-secondary);
-}
-.hero__facts svg { color: var(--i-color-brand); flex: none; }
-
-/*
- * 插画收小并右对齐，让它退成陪衬。
- *
- * 首屏真正该被看见的是右边那张用组件本身搭出来的卡片——它同时是展示与回归用例。
- * 插画铺满一整列时，读者第一眼落在插画上，而插画说明不了这套体系能做什么。
- */
-.hero__art {
+h1 span {
   display: block;
-  width: 100%;
-  max-width: 340px;
-  height: auto;
-  margin: 0 0 calc(var(--i-spacing-4) * -1) auto;
+  margin-top: 24px;
+  color: var(--i-color-text);
+  font-size: clamp(24px, 2.7vw, 36px);
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: -0.035em;
 }
-/* 三维画布压在预览卡上方一点，两者叠出层次；负边距让它不额外占高 */
-.hero__scene { margin-bottom: calc(var(--i-spacing-6) * -1); }
-.hero__preview {
-  filter: drop-shadow(var(--i-shadow-xl));
-  /* 时长与「不超过 320ms」这条价值观对齐；曲线用 easing-out，进场要快进慢停 */
-  animation: hero-float var(--i-motion-slow) var(--i-motion-easing-out) both;
-}
-@keyframes hero-float {
-  from { opacity: 0; transform: translateY(8px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero__preview { animation: none; }
-}
-.preview__field { margin-bottom: var(--i-spacing-4); }
-.preview__field label {
-  display: block;
-  margin-bottom: var(--i-spacing-2);
-  font-size: var(--i-font-size-sm);
+.hero-content > p {
+  max-width: 420px;
   color: var(--i-color-text-secondary);
+  font-size: 16px;
+  line-height: 1.9;
 }
-.preview__field--row {
+.hero-actions {
   display: flex;
+  gap: 24px;
+  margin-top: 32px;
   align-items: center;
-  justify-content: space-between;
 }
-.preview__field--row label { margin-bottom: 0; }
-.preview__tags { display: flex; gap: var(--i-spacing-2); margin-bottom: var(--i-spacing-4); }
-.preview__footer { display: flex; justify-content: flex-end; gap: var(--i-spacing-2); }
-
-/* 价值观：立方体与文案并排 */
-.values-3d {
-  display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
-  gap: var(--i-spacing-12);
+.primary-link,
+.secondary-link {
+  display: inline-flex;
+  gap: 16px;
   align-items: center;
-  margin-top: var(--i-spacing-8);
+  font-size: 14px;
 }
-.values-3d .values { grid-template-columns: 1fr; gap: var(--i-spacing-4); }
-
-@media (max-width: 860px) {
-  .values-3d { grid-template-columns: 1fr; gap: var(--i-spacing-10); }
-}
-
-/* 覆盖范围 */
-.coverage {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--i-spacing-8) var(--i-spacing-6);
-  margin-top: var(--i-spacing-8);
-  align-items: start;
-}
-.coverage__more a {
-  color: var(--i-color-text-tertiary);
-  font-size: var(--i-font-size-sm);
-}
-.coverage__more a:hover { color: var(--i-color-brand); }
-.coverage__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding-bottom: var(--i-spacing-2);
-  border-bottom: 1px solid var(--i-color-border);
-}
-.coverage__head h3 { font-size: var(--i-font-size-md); }
-.coverage__count {
-  font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-xs);
-  color: var(--i-color-text-tertiary);
-}
-.coverage__col ul {
-  margin: var(--i-spacing-3) 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: var(--i-spacing-2);
-  font-size: var(--i-font-size-sm);
-}
-.coverage__col li::before {
-  content: '';
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin-right: var(--i-spacing-2);
-  border-radius: var(--i-radius-full);
+.primary-link {
+  padding: 14px 24px;
   background: var(--i-color-brand);
-  vertical-align: middle;
+  color: var(--i-color-text-inverse);
+  border-radius: var(--i-radius-md);
 }
-.coverage__col li.is-planned { color: var(--i-color-text-tertiary); }
-.coverage__col li.is-planned::before { background: var(--i-color-border-strong); }
-.coverage__col a { color: var(--i-color-text-secondary); }
-.coverage__col a:hover { color: var(--i-color-brand); }
-.coverage__legend {
-  margin-top: var(--i-spacing-6);
-  font-size: var(--i-font-size-sm);
-  color: var(--i-color-text-tertiary);
+.primary-link:hover {
+  background: var(--i-color-brand-active);
 }
-.coverage__legend .dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin: 0 var(--i-spacing-2) 0 var(--i-spacing-4);
-  border-radius: var(--i-radius-full);
-  background: var(--i-color-brand);
-  vertical-align: middle;
-}
-.coverage__legend .dot:first-child { margin-left: 0; }
-.coverage__legend .dot--planned { background: var(--i-color-border-strong); }
-
-.preview__steps { margin-bottom: var(--i-spacing-5); }
-
-/* 通用区块 */
-.stacks {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--i-spacing-3);
-}
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--i-spacing-1);
-  padding: var(--i-spacing-5) var(--i-spacing-4);
-  border: 1px solid var(--i-color-border);
-  border-radius: var(--i-radius-lg);
-  background: var(--i-color-bg-elevated);
-  text-decoration: none;
-  transition: transform var(--i-motion-base) var(--i-motion-easing),
-    box-shadow var(--i-motion-base) var(--i-motion-easing),
-    border-color var(--i-motion-fast) var(--i-motion-easing);
-}
-.stack:hover {
-  transform: translateY(-3px);
-  border-color: var(--i-color-brand);
-  box-shadow: var(--i-shadow-md);
-}
-.stack__label {
-  font-size: var(--i-font-size-lg);
-  font-weight: 600;
+.secondary-link {
   color: var(--i-color-text);
 }
-.stack__runtime { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
-.stacks__foot { margin-top: var(--i-spacing-6); font-size: var(--i-font-size-md); }
-.section { padding: var(--i-spacing-16) var(--i-spacing-6); }
-.section--muted { background: var(--i-color-bg-subtle); }
-.section__title { font-size: var(--i-font-size-3xl); margin-bottom: var(--i-spacing-3); }
-.section__desc { margin-bottom: var(--i-spacing-10); }
-
-.values {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--i-spacing-6);
-}
-.value {
+.hero-resources {
   position: relative;
-  padding: var(--i-spacing-6);
-  background: var(--i-color-bg-elevated);
-  border: 1px solid var(--i-color-hairline);
-  border-radius: var(--i-radius-xl);
-  box-shadow: var(--i-shadow-sm);
-  overflow: hidden;
-  transition: box-shadow var(--i-motion-base) var(--i-motion-easing),
-    transform var(--i-motion-base) var(--i-motion-easing);
-}
-.value:hover { transform: translateY(-2px); box-shadow: var(--i-shadow-md); }
-.value__en {
-  font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--i-color-brand);
-}
-.value__title { font-size: var(--i-font-size-xl); margin: var(--i-spacing-2) 0 var(--i-spacing-3); }
-.value p { color: var(--i-color-text-secondary); }
-
-.feature__icon {
+  z-index: 1;
   display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  margin-bottom: var(--i-spacing-4);
-  border-radius: var(--i-radius-lg);
-  color: var(--i-color-brand);
-  background: var(--i-color-brand-subtle);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding-bottom: 40px;
 }
-.feature__title { font-size: var(--i-font-size-lg); margin-bottom: var(--i-spacing-2); }
-.feature__desc { color: var(--i-color-text-secondary); font-size: var(--i-font-size-md); }
-
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--i-spacing-5);
-  margin-top: var(--i-spacing-8);
-}
-
-.steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--i-spacing-6);
-  margin-top: var(--i-spacing-8);
-}
-.step {
-  padding: var(--i-spacing-6);
-  border: 1px solid var(--i-color-hairline);
-  border-radius: var(--i-radius-xl);
-  background: var(--i-color-bg-elevated);
-  box-shadow: var(--i-shadow-sm);
-}
-.step__no {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--i-radius-full);
-  background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
-  font-weight: 600;
-  margin-bottom: var(--i-spacing-3);
-}
-.step h3 { font-size: var(--i-font-size-lg); margin-bottom: var(--i-spacing-3); }
-
-
-.cta {
-  position: relative;
+.resource-link {
+  padding: 26px 24px;
   display: flex;
-  flex-wrap: wrap;
+  gap: 18px;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--i-spacing-6);
-  padding: var(--i-spacing-12);
-  border-radius: var(--i-radius-xl);
-  background: var(--i-color-brand);
-  color: #fff;
-  overflow: hidden;
-  box-shadow: var(--i-shadow-brand);
+  background: var(--i-color-bg-elevated);
+  border-radius: var(--home-radius);
+  color: var(--i-color-text);
+  border: 1px solid var(--i-color-hairline);
+  transition: border-color 0.2s;
 }
-.cta::after {
-  content: '';
+.resource-link:hover {
+  border-color: var(--i-color-brand);
+}
+.resource-link > svg {
+  color: var(--i-color-brand);
+  flex: none;
+}
+.resource-link > svg:last-child {
+  margin-left: auto;
+  color: var(--i-color-text-secondary);
+}
+.resource-link h2 {
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.resource-link p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--i-color-text-secondary);
+}
+.hero-art {
+  position: absolute;
+  inset: 0 0 90px;
+  overflow: hidden;
+}
+.hero-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.hero-art::after {
+  content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
-  background-size: 20px 20px;
-  -webkit-mask-image: radial-gradient(60% 100% at 100% 0%, #000, transparent);
-  mask-image: radial-gradient(60% 100% at 100% 0%, #000, transparent);
+  background: linear-gradient(
+    90deg,
+    var(--i-color-bg-subtle) 0%,
+    transparent 56%
+  );
 }
-.cta > * { position: relative; }
-.cta :deep(.i-button--primary) {
-  background: #fff;
-  color: var(--i-color-brand-active);
+:global([data-theme="dark"]) .hero-art {
+  opacity: 0.36;
 }
-.cta :deep(.i-button--primary:hover) { background: rgba(255, 255, 255, 0.9); }
-.cta h2 { font-size: var(--i-font-size-2xl); }
-.cta p { margin-top: var(--i-spacing-2); opacity: 0.85; }
+:global([data-theme="dark"]) .hero-art::after {
+  background: linear-gradient(
+    90deg,
+    var(--i-color-bg-subtle) 10%,
+    transparent 90%
+  );
+}
+.home-section {
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+.section-heading h2,
+.start-section h2 {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  margin-top: 12px;
+}
+.section-heading > a,
+.platform__body > a,
+.showcase-copy > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--i-color-brand);
+  font-size: 14px;
+}
+.platforms {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.platform {
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--home-radius);
+  overflow: hidden;
+}
+.platform__visual {
+  height: 210px;
+  background: var(--i-color-bg-subtle);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.platform__body {
+  padding: 28px;
+}
+.platform__body h3 {
+  font-size: 27px;
+  margin: 10px 0;
+  font-weight: 500;
+}
+.platform__body p {
+  font-size: 14px;
+  color: var(--i-color-text-secondary);
+  line-height: 1.8;
+}
+.platform__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0 28px;
+}
+.platform__tags span {
+  font-size: 12px;
+  background: var(--i-color-bg-subtle);
+  padding: 4px 10px;
+  border-radius: var(--i-radius-sm);
+  color: var(--i-color-text-secondary);
+}
+.device-desktop {
+  width: 218px;
+  height: 142px;
+  transform: perspective(650px) rotateY(-16deg) rotateX(12deg);
+  background: var(--i-color-bg-elevated);
+  border: 1px solid var(--i-color-border);
+  border-radius: 8px;
+  box-shadow: 10px 12px 0 var(--i-color-border),
+    18px 20px 24px var(--i-color-hairline);
+  padding: 12px;
+}
+.device-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.device-bar i {
+  width: 4px;
+  height: 4px;
+  background: var(--i-color-border-strong);
+  border-radius: 50%;
+}
+.device-body {
+  display: flex;
+  gap: 12px;
+  height: 95px;
+}
+.device-body aside {
+  width: 35px;
+  background: var(--i-color-bg-muted);
+  border-radius: 3px;
+}
+.device-body > div {
+  flex: 1;
+}
+.device-body b {
+  display: block;
+  height: 34px;
+  background: var(--i-color-brand);
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+.device-body span {
+  display: block;
+  height: 8px;
+  margin-top: 6px;
+  background: var(--i-color-brand-subtle);
+}
+.device-mobile {
+  width: 90px;
+  height: 170px;
+  padding: 12px 9px;
+  border: 3px solid var(--i-color-border);
+  border-radius: 16px;
+  background: var(--i-color-bg-elevated);
+  transform: rotate(-14deg);
+  box-shadow: 8px 10px 0 var(--i-color-bg-muted);
+}
+.device-mobile i {
+  display: block;
+  width: 24px;
+  height: 4px;
+  background: var(--i-color-border-strong);
+  border-radius: 9px;
+  margin: 0 auto 14px;
+}
+.device-mobile b {
+  display: block;
+  height: 44px;
+  background: var(--i-color-brand);
+  border-radius: 5px;
+}
+.device-mobile span {
+  display: block;
+  height: 7px;
+  background: var(--i-color-bg-muted);
+  margin: 8px 0;
+}
+.device-mobile > div {
+  height: 25px;
+  background: var(--i-color-brand-subtle);
+  border-radius: 4px;
+}
+.device-mini {
+  width: 144px;
+  height: 144px;
+  border: 1px solid var(--i-color-border);
+  border-radius: 30px;
+  background: var(--i-color-bg-elevated);
+  transform: rotate(-12deg);
+  box-shadow: 10px 12px 0 var(--i-color-bg-muted);
+  padding: 27px;
+  position: relative;
+}
+.device-mini > div {
+  width: 54px;
+  height: 54px;
+  border: 14px solid var(--i-color-brand);
+  border-radius: 18px;
+}
+.device-mini i {
+  position: absolute;
+  top: 36px;
+  right: 24px;
+  width: 14px;
+  height: 14px;
+  background: var(--i-color-brand-subtle);
+  border-radius: 50%;
+}
+.device-mini b,
+.device-mini span {
+  display: block;
+  height: 6px;
+  width: 86px;
+  margin-top: 12px;
+  background: var(--i-color-bg-muted);
+}
+.device-mini span {
+  width: 55px;
+  margin-top: 6px;
+}
+.showcase-section {
+  background: var(--i-color-bg-subtle);
+  padding: 80px 0;
+}
+.showcase {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 80px;
+  align-items: center;
+}
+.showcase-copy h2 {
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.035em;
+  margin: 18px 0;
+}
+.showcase-copy p {
+  color: var(--i-color-text-secondary);
+  line-height: 1.9;
+  font-size: 15px;
+  max-width: 350px;
+  margin-bottom: 26px;
+}
+.showcase-copy img {
+  display: block;
+  object-fit: contain;
+  margin-top: 24px;
+}
+.component-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.sample {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--i-color-hairline);
+  background: var(--i-color-bg-elevated);
+  border-radius: var(--home-radius);
+  color: var(--i-color-text);
+}
+.sample-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--i-color-text-secondary);
+  margin-bottom: 24px;
+}
+.sample-controls {
+  grid-row: span 2;
+}
+.sample-buttons {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.sample-text-link {
+  font-size: 12px;
+  color: var(--i-color-brand);
+}
+.sample-controls label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.sample-switch {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  margin-top: 24px;
+}
+.color-swatch {
+  display: flex;
+  margin-bottom: 20px;
+  height: 44px;
+}
+.color-swatch i {
+  flex: 1;
+  background: var(--i-color-brand);
+}
+.color-swatch i:nth-child(1) {
+  background: var(--i-color-brand-subtle);
+}
+.color-swatch i:nth-child(2) {
+  background: var(--i-color-ring);
+}
+.color-swatch i:nth-child(3) {
+  background: var(--i-color-brand-hover);
+}
+.color-swatch i:nth-child(5) {
+  background: var(--i-color-brand-active);
+}
+.sample-colors strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.sample-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--i-color-text-secondary);
+}
+.sample-type .sample-label {
+  margin-bottom: 8px;
+}
+.type-display {
+  font-size: 50px;
+  font-weight: 500;
+  letter-spacing: -0.06em;
+}
+.type-display span {
+  font-size: 35px;
+  margin-left: 20px;
+  color: var(--i-color-brand);
+}
+.sample-type p {
+  font-size: 12px;
+  color: var(--i-color-text-secondary);
+}
+.sample-status {
+  grid-column: 1 / -1;
+}
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.status-icon {
+  color: var(--i-color-success);
+}
+.status-line strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.status-line p {
+  font-size: 12px;
+  color: var(--i-color-text-secondary);
+  margin-top: 4px;
+}
+.status-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.start-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.start-section p {
+  color: var(--i-color-text-secondary);
+  font-size: 14px;
+  line-height: 1.9;
+  margin: 22px 0;
+}
+.start-code {
+  min-width: 0;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--home-radius);
+  overflow: hidden;
+}
+.start-code__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--i-color-bg-subtle);
+  font-size: 12px;
+  color: var(--i-color-text-secondary);
+}
+.start-code__bar button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: none;
+  border: 0;
+  color: var(--i-color-text-secondary);
+  cursor: pointer;
+  font: inherit;
+}
+.start-code :deep(.code) {
+  border: 0;
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
 
-@media (max-width: 960px) {
-  .hero { padding-top: var(--i-spacing-16); }
-  .hero__inner { grid-template-columns: 1fr; gap: var(--i-spacing-10); }
-  .hero__title { font-size: var(--i-font-size-4xl); }
-  .hero__facts { grid-template-columns: 1fr; gap: var(--i-spacing-3); }
-  .cta { padding: var(--i-spacing-8); }
+@media (max-width: 1100px) {
+  .hero-art img {
+    object-position: 60% center;
+  }
+  .hero-content {
+    padding-top: 100px;
+  }
+  .resource-link {
+    padding: 20px;
+  }
+  .resource-link > svg:first-child {
+    display: none;
+  }
+  .showcase {
+    gap: 36px;
+  }
+  .platform__body {
+    padding: 22px;
+  }
+}
+@media (max-width: 800px) {
+  .hero-content {
+    padding-top: 64px;
+    padding-bottom: 52px;
+  }
+  .hero-art {
+    opacity: 0.32;
+    bottom: 200px;
+  }
+  .hero-art img {
+    object-position: 55% center;
+  }
+  .hero-resources,
+  .platforms {
+    grid-template-columns: 1fr;
+  }
+  .hero-resources {
+    gap: 10px;
+  }
+  .resource-link {
+    padding: 18px 22px;
+  }
+  .resource-link > svg:first-child {
+    display: block;
+  }
+  .resource-link h2 {
+    margin-bottom: 4px;
+  }
+  .home-section {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+  .section-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .section-heading h2,
+  .start-section h2 {
+    font-size: 26px;
+  }
+  .showcase,
+  .start-section {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .showcase-section {
+    padding: 48px 0;
+  }
+  .showcase-copy img {
+    display: none;
+  }
+  .showcase-copy h2 {
+    font-size: 30px;
+  }
+  .platform {
+    display: grid;
+    grid-template-columns: 0.7fr 1fr;
+  }
+  .platform__visual {
+    height: 100%;
+    min-height: 220px;
+  }
+  .platform__tags {
+    margin: 16px 0;
+  }
+}
+@media (max-width: 480px) {
+  h1 {
+    font-size: 64px;
+  }
+  .hero-actions {
+    gap: 16px;
+  }
+  .primary-link {
+    padding: 12px 18px;
+  }
+  .hero-content > p {
+    font-size: 14px;
+  }
+  .platform {
+    display: block;
+  }
+  .platform__visual {
+    height: 180px;
+    min-height: 0;
+  }
+  .component-gallery {
+    grid-template-columns: 1fr;
+  }
+  .sample-controls {
+    grid-row: auto;
+  }
+  .sample-status {
+    grid-column: auto;
+  }
+  .sample {
+    padding: 22px;
+  }
+  .sample-type {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resource-link {
+    transition: none;
+  }
 }
 </style>

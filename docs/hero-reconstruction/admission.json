@@ -1,0 +1,14 @@
+{
+  "admitted": true,
+  "reasons": [],
+  "provenance": {
+    "viewpoint": "reference",
+    "sourcePath": "public/images/component-sculpture.png",
+    "width": 1672,
+    "height": 941,
+    "foregroundCoverage": 0.1696,
+    "largestComponentFraction": 0.9292,
+    "pHash": 16125380619307230600,
+    "duplicateOfHash": null
+  }
+}

@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { componentCategories } from '@/data/components'
-import ITag from '@/components/ITag.vue'
+import { componentCategories } from "@/data/components";
+import ITag from "@/components/ITag.vue";
 </script>
 
 <template>
   <article>
     <h1>组件总览</h1>
     <p class="i-lead">
-      按使用场景分类，而不是按实现难度——你要找的东西通常是「用来干什么」，
-      不是「它属于哪一类控件」。标灰的是规划中：把边界写出来，
-      比让人在文档里反复搜一个还不存在的组件要好。
+      按业务场景浏览组件，查看交互示例、接口说明与跨端代码。标记为「规划中」的组件尚未开放使用。
     </p>
 
-    <section v-for="category in componentCategories" :key="category.title" class="cat">
+    <section
+      v-for="category in componentCategories"
+      :key="category.title"
+      class="cat"
+    >
       <h2>{{ category.title }}</h2>
       <p>{{ category.desc }}</p>
       <div class="grid">
@@ -37,7 +39,9 @@ import ITag from '@/components/ITag.vue'
 </template>
 
 <style scoped>
-.cat h2 { margin-top: var(--i-spacing-10); }
+.cat h2 {
+  margin-top: var(--i-spacing-10);
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -48,10 +52,10 @@ import ITag from '@/components/ITag.vue'
   display: block;
   padding: var(--i-spacing-4);
   border: 1px solid var(--i-color-hairline);
-  border-radius: var(--i-radius-xl);
+  border-radius: var(--i-radius-md);
   color: var(--i-color-text);
   background: var(--i-color-bg-elevated);
-  box-shadow: var(--i-shadow-sm);
+  box-shadow: none;
   transition: border-color var(--i-motion-base) var(--i-motion-easing),
     box-shadow var(--i-motion-base) var(--i-motion-easing),
     transform var(--i-motion-base) var(--i-motion-easing);
@@ -59,7 +63,7 @@ import ITag from '@/components/ITag.vue'
 .tile:not(.is-planned):hover {
   border-color: color-mix(in srgb, var(--i-color-brand) 40%, transparent);
   box-shadow: var(--i-shadow-md);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 .tile.is-planned {
   background: var(--i-color-bg-subtle);
@@ -68,13 +72,25 @@ import ITag from '@/components/ITag.vue'
   color: var(--i-color-text-tertiary);
   cursor: default;
 }
-.tile__head { display: flex; align-items: center; justify-content: space-between; gap: var(--i-spacing-2); }
-.tile__name { font-weight: 600; }
-.tile__cn { font-size: var(--i-font-size-sm); color: var(--i-color-text-tertiary); }
+.tile__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-2);
+}
+.tile__name {
+  font-weight: 600;
+}
+.tile__cn {
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+}
 .tile__desc {
   margin: var(--i-spacing-2) 0 0;
   font-size: var(--i-font-size-sm);
   color: var(--i-color-text-secondary);
 }
-.tile.is-planned .tile__desc { color: var(--i-color-text-tertiary); }
+.tile.is-planned .tile__desc {
+  color: var(--i-color-text-tertiary);
+}
 </style>
