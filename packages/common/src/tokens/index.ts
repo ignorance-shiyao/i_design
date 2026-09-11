@@ -30,8 +30,17 @@ export const palette: Record<string, Palette> = {
   },
   gray: {
     10: '#ffffff',
-    20: '#f7f8fa',
-    30: '#eef0f5',
+    /*
+     * 15 是页面底色，专门加进来的一档。
+     *
+     * 在这之前页面底色与浮起面同为 #ffffff，卡片、弹层、输入框放上去完全没有分界，
+     * 全靠一条极淡的发丝线撑着——整页于是像压平的一张纸，层级关系读不出来。
+     * 深色模式一直是分开的（#171b26 对 #1f2431），浅色这边只是没跟上。
+     * 差值给得很小：底色仍然读作白，但浮起面一放上去就浮得起来。
+     */
+    15: '#f8f9fb',
+    20: '#f1f3f7',
+    30: '#e7eaf1',
     40: '#dfe1e6',
     50: '#c3c6cd',
     60: '#8a8e99',
@@ -196,7 +205,7 @@ export const lightTheme: Record<string, string> = {
   'color-brand-active': palette.brand[60],
   'color-brand-subtle': palette.brand[10],
 
-  'color-bg': palette.gray[10],
+  'color-bg': palette.gray[15],
   'color-bg-elevated': '#ffffff',
   'color-bg-subtle': palette.gray[20],
   'color-bg-muted': palette.gray[30],
@@ -216,7 +225,8 @@ export const lightTheme: Record<string, string> = {
 
   'color-border': palette.gray[40],
   'color-border-strong': palette.gray[50],
-  'color-hairline': 'rgba(20, 24, 34, 0.08)',
+  // 0.08 在多数屏幕上已经看不见了，只是名义上有条线
+  'color-hairline': 'rgba(20, 24, 34, 0.11)',
   'color-ring': 'rgba(94, 124, 224, 0.18)',
 
   'color-success': palette.success[50],

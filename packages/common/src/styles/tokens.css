@@ -4,10 +4,10 @@
   --i-color-brand-hover: #7ea1ff;
   --i-color-brand-active: #4a63c4;
   --i-color-brand-subtle: #eef3ff;
-  --i-color-bg: #ffffff;
+  --i-color-bg: #f8f9fb;
   --i-color-bg-elevated: #ffffff;
-  --i-color-bg-subtle: #f7f8fa;
-  --i-color-bg-muted: #eef0f5;
+  --i-color-bg-subtle: #f1f3f7;
+  --i-color-bg-muted: #e7eaf1;
   --i-color-bg-inverse: #141822;
   --i-color-text: #252b3a;
   --i-color-text-secondary: #575d6c;
@@ -17,7 +17,7 @@
   --i-color-text-link: #5e7ce0;
   --i-color-border: #dfe1e6;
   --i-color-border-strong: #c3c6cd;
-  --i-color-hairline: rgba(20, 24, 34, 0.08);
+  --i-color-hairline: rgba(20, 24, 34, 0.11);
   --i-color-ring: rgba(94, 124, 224, 0.18);
   --i-color-success: #3ac295;
   --i-color-success-subtle: #e8f8f0;
@@ -138,7 +138,7 @@
   --i-color-bg-elevated: #1f2431;
   --i-color-bg-subtle: #1e2330;
   --i-color-bg-muted: #272d3d;
-  --i-color-bg-inverse: #f7f8fa;
+  --i-color-bg-inverse: #f1f3f7;
   --i-color-text: #e6e8ef;
   --i-color-text-secondary: #b3b8c6;
   --i-color-text-tertiary: #8a8e99;

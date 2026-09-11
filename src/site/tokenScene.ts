@@ -59,23 +59,101 @@ export async function createTokenScene(
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  /*
+   * 影调映射。没有它，高光一到 1.0 就直接削平成一片纯白，
+   * 圆角上那道最该体现材质的滚边会糊成一块白斑。
+   *
+   * 用 Neutral 而不是常见的 ACES：ACES 是给电影调的，它会把饱和色往白里推，
+   * 品牌蓝经它一过就成了灰扑扑的藕荷色——对一套「换个主色各端同时生效」的体系来说，
+   * 主色在自家首屏上被渲染成另一个颜色是不能接受的。
+   * Neutral（Khronos 的 PBR neutral）只压高光、不动色相饱和度。
+   */
+  renderer.toneMapping = THREE.NeutralToneMapping
+  renderer.toneMappingExposure = 1
 
   const scene = new THREE.Scene()
-  const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 100)
-  camera.position.set(0.2, 3.9, 9.4)
-  // 看向堆叠的中段而不是基座：镜头对准哪里，视线就落在哪里，
-  // 对准基座会让上面几片显得是溢出画面的多余物
-  camera.lookAt(0, 0.75, 0)
+
+  /*
+   * 环境贴图——这一块是整个场景「有没有质感」的分水岭。
+   *
+   * 只用平行光时，材质表面每一点的亮度只由「法线对着光的角度」决定，
+   * 于是大平面上是一整片均匀的颜色，圆角上是一条生硬的明暗交界。
+   * 那正是塑料玩具和橡皮泥的样子：它没有在反射任何东西。
+   *
+   * 真实物体的表面时刻在反射周围的环境，亮度沿着曲面连续变化，
+   * 圆角上会拉出一条细长的高光——人判断「这是什么材质」靠的几乎全是这个。
+   * 这里自己搭一间中性的灯棚，而不是用 three 自带的 RoomEnvironment：
+   * 那间房里的光源是暖色的，白色面板反射出来会泛奶黄——
+   * 而这套体系的面色就是 #ffffff，首屏上把它渲染成米色等于在说谎。
+   * 自己搭还省掉一个外部 HDR 文件，不必为了好看多下载几百 KB。
+   */
+  const envScene = new THREE.Scene()
+  envScene.background = new THREE.Color(0x2a2f3a)
+  const panelLights: [number, number, number, number, number, number][] = [
+    // [宽, 高, x, y, z, 亮度] —— 顶上一块大的定主高光，两侧各一块补出轮廓
+    [10, 10, 0, 7, 0, 4.2],
+    [6, 6, -6, 1.5, 2, 1.1],
+    [6, 6, 6, 1, -1, 0.8],
+    [10, 6, 0, 0, -7, 0.6]
+  ]
+  for (const [w, h, x, y, z, power] of panelLights) {
+    const lightPanel = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(power, power, power) })
+    )
+    lightPanel.position.set(x, y, z)
+    lightPanel.lookAt(0, 0, 0)
+    envScene.add(lightPanel)
+  }
+  const pmrem = new THREE.PMREMGenerator(renderer)
+  const envRT = pmrem.fromScene(envScene, 0.04)
+  scene.environment = envRT.texture
+  pmrem.dispose()
+  envScene.traverse((obj) => {
+    const mesh = obj as Mesh
+    if (mesh.isMesh) {
+      mesh.geometry.dispose()
+      ;(mesh.material as Material).dispose()
+    }
+  })
+
+  const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 100)
+  /*
+   * 机位要留出边距，不能贴着物体切。
+   *
+   * 上一版的取景把最上面两片切在画面外，看起来不是「叠得很高」，
+   * 而是「这张图没放下」——溢出画框的物体一律读作事故，不读作纵深。
+   * 现在按整摞的高度反推距离：可见高度约 4 个单位，内容占 2.9 个，
+   * 上下各留半个单位的余量。
+   */
+  // 机位与朝向在 frameCamera() 里按包围盒算出来，见下
+  const camDir = new THREE.Vector3(0.28, 0.62, 1).normalize()
 
   /*
    * 三点布光的简化版：一盏主光负责投影与体积，一盏补光把暗面提起来，
    * 再加一点环境光。只有主光投影——多一盏投影灯就多一遍阴影贴图，
    * 而这个场景里第二道影子只会让画面更脏。
    */
-  const key = new THREE.DirectionalLight(0xffffff, 2.1)
-  key.position.set(3.2, 6.4, 4.2)
+  /*
+   * 有了环境贴图之后，环境光与补光都要收。
+   *
+   * 它们提供的是「各个方向一样亮」，而环境贴图提供的是「各个方向不一样亮」——
+   * 后者才是形状的来源。两者叠加时，均匀的那份会把有方向的那份冲淡，
+   * 结果是加了环境贴图却依然平。主光只留下来投影与定一个高光方向。
+   */
+  const key = new THREE.DirectionalLight(0xffffff, 1.15)
+  /*
+   * 主光偏顶而不是偏侧。
+   *
+   * 侧光把每一片的影子甩到旁边，这些影子落在地面上、又从基座边缘露出来，
+   * 看着像多出来几块灰板——读者数不清到底有几片面板。
+   * 压到接近正上方之后，影子收在各自下方，只剩「悬空」这一个信息。
+   */
+  key.position.set(1.6, 8.2, 3.0)
   key.castShadow = true
   key.shadow.mapSize.set(1024, 1024)
+  // 影子边缘要软：硬边的影子在浅色底上读作实心物体，而不是影子
+  key.shadow.radius = 4
   key.shadow.camera.near = 1
   key.shadow.camera.far = 20
   key.shadow.camera.left = -6
@@ -86,11 +164,11 @@ export async function createTokenScene(
   scene.add(key)
 
   // 补光比常规配比重一些：面板是浅色的，暗面一沉就显脏，而不是显立体
-  const fill = new THREE.DirectionalLight(0xffffff, 0.9)
+  const fill = new THREE.DirectionalLight(0xffffff, 0.25)
   fill.position.set(-4.5, 2.6, 3.4)
   scene.add(fill)
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.85)
+  const ambient = new THREE.AmbientLight(0xffffff, 0.12)
   scene.add(ambient)
 
   /*
@@ -101,7 +179,7 @@ export async function createTokenScene(
    * 就是四块黑板。半球光只提朝上的面，形状立刻读得出来，
    * 而颜色仍然是令牌里那个值，没有为了好看去挑一个不属于这个语义的浅色。
    */
-  const sky = new THREE.HemisphereLight(0xffffff, 0x000000, 0.6)
+  const sky = new THREE.HemisphereLight(0xffffff, 0x000000, 0.25)
   sky.position.set(0, 6, 0)
   scene.add(sky)
 
@@ -115,38 +193,77 @@ export async function createTokenScene(
    * 而它要表达的只是「同一个来源，若干层消费者」这个结构本身。
    * 形状用圆角盒而不是纯立方体——这套体系里没有一个直角控件。
    */
-  const baseGeometry = new RoundedBoxGeometry(4.6, 0.42, 3.1, 4, 0.16)
-  const baseMaterial = new THREE.MeshStandardMaterial({ roughness: 0.42, metalness: 0.04 })
+  /*
+ * 圆角半径必须小于最短边的一半，否则圆角在中间对穿，棱上会出现一圈规则的缺口。
+ * 那看着像模型坏了，而它既不报错也不会让构建失败。
+ * 分段数给到 8：4 段时圆角本身是可见的折线，物体一放大就露馅。
+ */
+  const baseGeometry = new RoundedBoxGeometry(4.0, 0.34, 2.7, 8, 0.14)
+  /*
+   * 基座用 MeshPhysicalMaterial 而不是 Standard，为的是 clearcoat：
+   * 它在本体着色之上再叠一层薄薄的清漆，圆角会因此拉出一道细而亮的高光。
+   * 现实里的注塑件、烤漆件都有这一层，少了它，饱和的蓝就只是一块蓝色的橡皮。
+   */
+  const baseMaterial = new THREE.MeshPhysicalMaterial({
+    roughness: 0.28,
+    metalness: 0,
+    clearcoat: 0.9,
+    clearcoatRoughness: 0.18
+  })
   const base = new THREE.Mesh(baseGeometry, baseMaterial)
-  base.position.y = -0.55
+  base.position.y = -0.72
   base.castShadow = true
-  base.receiveShadow = true
+  // 基座同样不接影：三片面板会在它的上表面印出三块硬边的灰
+  base.receiveShadow = false
   group.add(base)
 
-  const panelGeometry = new RoundedBoxGeometry(2.5, 0.16, 1.72, 4, 0.09)
+  // 面板加厚到 0.24：上一版厚 0.14、圆角 0.08，半径比半厚还大，
+  // 棱上于是一路是缺口。加厚之后圆角合法，看起来也更像一块有份量的板子
+  const panelGeometry = new RoundedBoxGeometry(2.35, 0.24, 1.6, 8, 0.1)
   const panels: { mesh: Mesh; material: MeshStandardMaterial; phase: number }[] = []
   /*
-   * 逐层向上、交替错开，而不是随机散布。
+   * 三片，像摊开的一副牌那样错开，而不是四片紧紧摞着。
    *
-   * 散布看起来是「一堆板子」；规则地错开才读得出「同一个来源，一层层往上」。
-   * 错开量控制在半片以内——错太多就断开成了几个互不相干的物体。
+   * 上一版是四片、层距 0.44——那个间距下每一片都落在下一片的正上方，
+   * 中间两片于是整片处在别人的影子里，渲染出来是两块灰。那看着像没做完的占位物，
+   * 而不是白色的面板。层数减到三、层距拉到 0.7，每两片之间才透得出光，
+   * 各自的轮廓也才分得开。
+   *
+   * 横向同样要错开够：错开量小于半片时，正视图里它们的边缘几乎重合，
+   * 读者看到的是一个模糊的多边形，而不是三个物体。
    */
   const layout = [
-    { x: -0.62, y: 0.12, z: 0.34, rot: -0.05 },
-    { x: 0.34, y: 0.56, z: 0.02, rot: 0.04 },
-    { x: -0.34, y: 1.0, z: -0.3, rot: -0.03 },
-    { x: 0.55, y: 1.44, z: -0.62, rot: 0.06 }
+    { x: -0.78, y: 0.2, z: 0.42, rot: -0.06 },
+    { x: 0.1, y: 0.9, z: 0.0, rot: 0.05 },
+    { x: 0.92, y: 1.6, z: -0.44, rot: -0.04 }
   ]
   layout.forEach((spot, i) => {
-    // 比基座光滑：浅色面板要能把补光反出来，否则四片叠在一起就是四块灰
-    const material = new THREE.MeshStandardMaterial({ roughness: 0.22, metalness: 0.02 })
+    // 比基座光滑：浅色面板要能把补光反出来，否则叠在一起就是几块灰
+    /*
+     * 面板比基座更光滑一点：浅色表面要靠环境反射拉出的渐变来体现厚度，
+     * 磨砂得太狠，反射被打散成一片均匀的灰，圆角就又没有形状了。
+     */
+    const material = new THREE.MeshPhysicalMaterial({
+      roughness: 0.18,
+      metalness: 0,
+      clearcoat: 1,
+      clearcoatRoughness: 0.12
+    })
     const mesh = new THREE.Mesh(panelGeometry, material)
     mesh.position.set(spot.x, spot.y, spot.z)
     mesh.rotation.y = spot.rot
     mesh.castShadow = true
-    mesh.receiveShadow = true
+    /*
+     * 面板不接影——这一行是整个场景最要紧的一处。
+     *
+     * 面板互相接影时，每一片的上表面都印着上一片的影子，白色于是变成灰色，
+     * 而且是一块边界僵硬的灰。它不会报错，也不会在任何检查里露出来，
+     * 只是让整摞看起来脏。落影仍然有：它们照样往地面投，
+     * 那一道才是真正提供「悬空」这个信息的影子。
+     */
+    mesh.receiveShadow = false
     group.add(mesh)
-    panels.push({ mesh, material, phase: i * 1.4 })
+    panels.push({ mesh, material, phase: i * 1.6 })
   })
 
   /*
@@ -154,12 +271,19 @@ export async function createTokenScene(
    * 用 ShadowMaterial 而不是一块灰色的地板——它只画影子本身，
    * 页面的背景色能原样透上来，换主题时不必再去调这块地板的颜色。
    */
+  /*
+   * 接影平面收到基座正下方一点点，并且把影子压得很淡。
+   *
+   * 影子在这里只负责回答「它们是悬空的吗」，不负责好看。浓一点的影子在浅色底上
+   * 会立刻被读成一个实心物体——上一版正是如此：中间那片的影子从基座边缘探出来，
+   * 看起来像第四块灰板。
+   */
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(30, 30),
-    new THREE.ShadowMaterial({ opacity: 0.16 })
+    new THREE.ShadowMaterial({ opacity: 0.15 })
   )
   ground.rotation.x = -Math.PI / 2
-  ground.position.y = -0.8
+  ground.position.y = -0.9
   ground.receiveShadow = true
   scene.add(ground)
 
@@ -167,6 +291,15 @@ export async function createTokenScene(
     const brand = token('--i-color-brand', '#5e7ce0')
     const surface = token('--i-color-bg-elevated', '#ffffff')
     const subtle = token('--i-color-brand-subtle', '#eef3ff')
+    /*
+     * 中间那片取品牌淡色与面色的中点，在这里算而不是写死一个色值——
+     * 写死的那个值主题一换就不对了。
+     *
+     * 注意不能图省事写成 CSS 的 color-mix()：Color.setStyle 只认 #hex、
+     * rgb()、hsl() 与颜色名，给它一个 color-mix() 字符串既不报错也不生效，
+     * 那一片会保持上一次的颜色。
+     */
+    const mix = new THREE.Color(subtle).lerp(new THREE.Color(surface), 0.55)
     const dark = document.documentElement.getAttribute('data-theme') === 'dark'
 
     baseMaterial.color.setStyle(brand)
@@ -175,9 +308,15 @@ export async function createTokenScene(
     baseMaterial.emissiveIntensity = dark ? 0.22 : 0.08
 
     panels.forEach(({ material }, i) => {
-      // 只有最靠近基座的那片染上品牌淡色，越往上越回到中性面色：
-      // 全部染成品牌色就看不出「谁是源头」了
-      material.color.setStyle(i === 0 ? subtle : surface)
+      /*
+       * 自下而上从品牌淡色过渡到中性面色。
+       *
+       * 只给最底下一片上色的话，另外两片完全同色，读起来是「两片一样的白板」；
+       * 全部染成品牌色又看不出谁是源头。渐次退色才说得清方向：
+       * 越靠近基座越带着它的颜色，越往上越回到各端自己的面色。
+       */
+      if (i === 1) material.color.copy(mix)
+      else material.color.setStyle(i === 0 ? subtle : surface)
       /*
        * 深色下不去「提亮」面板，而是给它一圈品牌色的自发光。
        *
@@ -196,7 +335,7 @@ export async function createTokenScene(
     // 天顶用面色、地面用品牌色：朝上的面被面色提亮，朝下的面染上一点基座的反光
     sky.color.setStyle(surface)
     sky.groundColor.setStyle(brand)
-    sky.intensity = dark ? 1.4 : 0.55
+    sky.intensity = dark ? 0.7 : 0.25
 
     /*
      * 深色不是把灯调暗。
@@ -205,12 +344,73 @@ export async function createTokenScene(
      * 照着现实调光会得到一张什么都看不见的图。这里反而要把光打足，
      * 让暗色的面靠高光和边缘读出体积。
      */
-    ambient.intensity = dark ? 0.5 : 0.85
-    key.intensity = dark ? 2.6 : 2.1
-    fill.intensity = dark ? 1.15 : 0.9
-    ;(ground.material as ShadowMaterial).opacity = dark ? 0.34 : 0.12
+    ambient.intensity = dark ? 0.2 : 0.12
+    key.intensity = dark ? 1.5 : 1.15
+    fill.intensity = dark ? 0.4 : 0.25
+    // 深色下把环境反射也收一点：白房间的反射在暗底上会让面板泛出一层灰白的膜
+    scene.environmentIntensity = dark ? 0.45 : 1
+    ;(ground.material as ShadowMaterial).opacity = dark ? 0.26 : 0.15
   }
   retheme()
+
+  /*
+   * 取景按包围盒算，不写死机位。
+   *
+   * 手调的那组坐标只在某一个画布尺寸下成立：画布一变窄，竖直方向就装不下，
+   * 基座被切掉一截——而它在开发机的那个宽度上看着好好的。
+   * 这里改成：量出整摞的包围盒，按当前视角与宽高比反推需要多远，
+   * 于是任何尺寸下都留着同样的边距，改布局也不必再回来对一遍数字。
+   */
+  const fitBox = new THREE.Box3()
+  const fitCenter = new THREE.Vector3()
+  const fitCorner = new THREE.Vector3()
+
+  function frameCamera() {
+    group.updateWorldMatrix(true, true)
+    fitBox.setFromObject(group)
+    if (fitBox.isEmpty()) return
+    fitBox.getCenter(fitCenter)
+
+    const fovY = (camera.fov * Math.PI) / 180
+    const tanY = Math.tan(fovY / 2)
+    const tanX = tanY * camera.aspect
+
+    /*
+     * 把包围盒的八个角逐个投到相机空间里去量，而不是按「包围盒尺寸 ÷ 视角」估。
+     *
+     * 估算默认所有内容都落在过中心的那个平面上，可这摞东西有 2.7 个单位的进深：
+     * 离镜头更近的那几个角张的角度更大，估出来的距离于是总是偏近，
+     * 最靠前的基座前沿就被切在画面外——上一版正是这样，而且只在某些宽高比下露出来。
+     *
+     * 这里改成迭代：先按估算放一次，量出最挤的那个角超了多少，把距离乘上去，
+     * 再量一次。两三轮就收敛，之后任何宽高比、任何布局都能保证整摞在画面内。
+     */
+    let distance = fitBox.getSize(fitCorner).length()
+    for (let step = 0; step < 4; step++) {
+      camera.position.copy(camDir).multiplyScalar(distance).add(fitCenter)
+      camera.lookAt(fitCenter)
+      camera.updateMatrixWorld()
+
+      let worst = 0
+      for (let i = 0; i < 8; i++) {
+        fitCorner.set(
+          i & 1 ? fitBox.max.x : fitBox.min.x,
+          i & 2 ? fitBox.max.y : fitBox.min.y,
+          i & 4 ? fitBox.max.z : fitBox.min.z
+        )
+        camera.worldToLocal(fitCorner)
+        // 相机空间里视线朝 -z；角跑到镜头背后时这一项会失效，加个下限兜住
+        const depth = Math.max(0.001, -fitCorner.z)
+        worst = Math.max(worst, Math.abs(fitCorner.y) / depth / tanY, Math.abs(fitCorner.x) / depth / tanX)
+      }
+      if (worst <= 0) break
+      distance *= worst
+    }
+
+    // 1.1 是留白系数：正好装满的构图看起来像被裁过，留出一点余量才像是摆好的
+    camera.position.copy(camDir).multiplyScalar(distance * 1.1).add(fitCenter)
+    camera.lookAt(fitCenter)
+  }
 
   function resize() {
     const rect = canvas.getBoundingClientRect()
@@ -218,6 +418,7 @@ export async function createTokenScene(
     renderer.setSize(rect.width, rect.height, false)
     camera.aspect = rect.width / rect.height
     camera.updateProjectionMatrix()
+    frameCamera()
   }
   resize()
   const observer = new ResizeObserver(resize)
@@ -268,6 +469,7 @@ export async function createTokenScene(
       panels.forEach(({ material }) => material.dispose())
       ground.geometry.dispose()
       ;(ground.material as Material).dispose()
+      envRT.dispose()
       renderer.dispose()
     },
     retheme,

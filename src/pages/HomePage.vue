@@ -23,17 +23,17 @@ const values = [
   {
     key: '沉浸',
     en: 'Immersive',
-    desc: '减少视觉噪音，把注意力还给内容本身。以克制的色彩与留白，让用户长时间专注于任务。'
+    desc: '颜色用得克制，留白给得够。中后台是要盯一整天的界面，花哨的那些看两眼就累了。'
   },
   {
     key: '灵活',
     en: 'Flexible',
-    desc: '令牌驱动的主题体系，组件不写死任何具体色值，换肤、深色模式与业务定制均只改语义层。'
+    desc: '组件里不写死任何一个色值，全部读令牌。所以换品牌色、开深色模式，都不用碰组件代码。'
   },
   {
     key: '至简',
     en: 'Minimal',
-    desc: '每个组件只暴露必要的 API，默认值即最佳实践，让常见场景零配置可用。'
+    desc: '常见的用法不用配置，默认值就是推荐做法。属性少一个，用的人就少猜一次。'
   }
 ]
 
@@ -45,22 +45,22 @@ const guards = [
   {
     icon: 'layers',
     title: '令牌只有一份',
-    desc: 'CSS 变量、WXSS 变量与 Dart 常量都由同一份令牌编译产出。任何一端想改颜色，都得回到那份定义。'
+    desc: 'CSS 变量、WXSS 变量、Dart 常量都是从同一份令牌编译出来的。哪一端想改颜色，都得回到那份定义去改。'
   },
   {
     icon: 'code',
     title: '交互规则是纯函数',
-    desc: '翻页判定、浮层避让、树的半选推导写成不依赖框架的函数，各端只负责渲染，不重新解释一遍规则。'
+    desc: '翻页、浮层避让、树的半选这些判断，都是不依赖框架的普通函数。各端拿来直接调，不用自己再解释一遍。'
   },
   {
     icon: 'check-circle',
     title: '一致性由测试兜底',
-    desc: '跨端期望值由同一份实现算出，逐值比对。「两端表现不同」会让构建失败，而不是等用户发现。'
+    desc: '各端的期望值由同一份实现算出来，一个一个比。哪两端对不上，构建当场就红，不用等用户来报。'
   },
   {
     icon: 'palette',
     title: '换肤不改组件',
-    desc: '组件只引用语义令牌，不写死色值。深色模式与品牌换肤都只覆盖语义层，业务代码零改动。'
+    desc: '组件只认语义令牌。深色模式和品牌换肤都是在令牌那一层覆盖，业务代码一行都不用动。'
   }
 ] as const
 
@@ -121,16 +121,16 @@ const cubeFaces = [
             中文标题断错位置比断得不匀难看得多，而这句的语义分界本来就在这里。
           -->
           <h1 class="hero__title">
-            中后台设计体系
-            <span class="hero__title-accent">一次决策，落到每个端</span>
+            组件写一遍
+            <span class="hero__title-accent">各端都能用</span>
           </h1>
           <!--
             中文没有连字符，长句换行会从词中间断开（「渲染适配」被劈成两行）。
             与其加断行控制，不如把句子写短——一句话说完的事不必写成三句。
           -->
           <p class="hero__desc i-lead">
-            令牌、图标与交互规则只写一份，Web、小程序、移动端与 Flutter 只做渲染适配。
-            换一个主色，各端同时生效。
+            颜色、图标和交互判断都放在同一份代码里，Vue、React、小程序、Flutter 各自只负责画出来。
+            想换个主色，改一个地方就够了。
           </p>
           <div class="hero__actions">
             <RouterLink to="/components">
@@ -139,10 +139,10 @@ const cubeFaces = [
             <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
           </div>
           <ul class="hero__facts">
-            <li><IIcon name="layers" :size="16" /><span>令牌是唯一数据源</span></li>
-            <li><IIcon name="palette" :size="16" /><span>换肤只改语义层</span></li>
-            <li><IIcon name="code" :size="16" /><span>跨端行为逐值比对</span></li>
-            <li><IIcon name="check-circle" :size="16" /><span>对比度与键盘可达经校验</span></li>
+            <li><IIcon name="layers" :size="16" /><span>颜色和尺寸只有一处定义</span></li>
+            <li><IIcon name="palette" :size="16" /><span>换主题不用动组件</span></li>
+            <li><IIcon name="code" :size="16" /><span>各端行为有测试对齐</span></li>
+            <li><IIcon name="check-circle" :size="16" /><span>对比度和键盘操作都测过</span></li>
           </ul>
         </div>
 
@@ -197,7 +197,7 @@ const cubeFaces = [
     <section class="i-container section">
       <span class="i-eyebrow">Principles</span>
       <h2 class="section__title">设计价值观</h2>
-      <p class="section__desc i-lead">三条价值观贯穿每一次设计决策，也是评审组件是否合格的标尺。</p>
+      <p class="section__desc i-lead">新组件要过这三关，过不了就不合进来。</p>
       <div class="values-3d">
         <ValueCube :size="200" :active="activeValue" :faces="cubeFaces" />
         <div class="values i-stagger">
@@ -226,8 +226,8 @@ const cubeFaces = [
         <span class="i-eyebrow">How</span>
         <h2 class="section__title">靠什么保证不跑偏</h2>
         <p class="section__desc i-lead">
-          跨端体系最容易烂在「哪一端偷偷改了一点」。下面四条都是仓库里的具体机制，
-          可以直接去代码里核对。
+          跨端最容易烂在「某一端偷偷改了一点」。下面四条不是态度，是仓库里跑着的东西，
+          你可以直接去代码里对。
         </p>
         <div class="features i-stagger">
           <ICard
@@ -250,8 +250,8 @@ const cubeFaces = [
       <span class="i-eyebrow">Coverage</span>
       <h2 class="section__title">覆盖范围</h2>
       <p class="section__desc i-lead">
-        按中后台的真实使用场景分类，而不是按实现难度。标为规划中的是该有、但还没做到可用的——
-        把边界写出来，比让人在文档里反复搜一个不存在的组件要好。
+        按实际用途分类，不按实现难度。标成规划中的是还没做完的——
+        先摆出来，省得你在文档里翻半天，最后发现根本没有。
       </p>
       <div class="coverage i-stagger">
         <div
@@ -291,10 +291,10 @@ const cubeFaces = [
     <section class="section section--muted">
       <div class="i-container">
         <span class="i-eyebrow">Cross-platform</span>
-        <h2 class="section__title">你的技术栈在里面</h2>
+        <h2 class="section__title">你用的框架，这里有没有</h2>
         <p class="section__desc i-lead">
-          各端不是「移植版」，而是同一份令牌与规则的不同渲染层。
-          因此不必为某一端单独维护一套设计稿，也不会出现「Web 上是这样，小程序上不是」。
+          各端不是互相移植出来的，是同一份令牌和规则各画各的。
+          所以不用为某一端单独维护设计稿，也不会出现「Web 上是这样，小程序上不是」。
         </p>
         <div class="stacks i-stagger">
           <RouterLink
@@ -317,7 +317,7 @@ const cubeFaces = [
     <!-- 快速上手 -->
     <section class="i-container section">
       <span class="i-eyebrow">Get started</span>
-      <h2 class="section__title">三步接入</h2>
+      <h2 class="section__title">怎么用起来</h2>
       <!--
         第一步写清楚是 clone 而不是 npm install。
         包还没发到 npm，只写「npm install」对外部使用者是一条执行不了的指令——
@@ -329,7 +329,7 @@ const cubeFaces = [
       <div class="steps i-stagger">
         <div v-reveal:depth class="step i-lift">
           <span class="step__no">1</span>
-          <h3>取得代码</h3>
+          <h3>拿代码</h3>
           <CodeBlock
             lang="bash"
             :copyable="false"
@@ -339,7 +339,7 @@ cd i_design && npm install"
         </div>
         <div v-reveal:depth class="step i-lift">
           <span class="step__no">2</span>
-          <h3>引入令牌与组件</h3>
+          <h3>引进来</h3>
           <CodeBlock
             lang="ts"
             :copyable="false"
@@ -351,7 +351,7 @@ app.use(IDesign)"
         </div>
         <div v-reveal:depth class="step i-lift">
           <span class="step__no">3</span>
-          <h3>直接使用</h3>
+          <h3>开始写</h3>
           <CodeBlock
             lang="vue"
             :copyable="false"
@@ -364,8 +364,8 @@ app.use(IDesign)"
     <section class="i-container">
       <div v-reveal:depth class="cta">
         <div>
-          <h2>从令牌开始读</h2>
-          <p>令牌表是这套体系的地基，组件的每一个取值都能在那里找到出处。</p>
+          <h2>先看令牌</h2>
+          <p>组件里的每一个取值，都能在令牌表里找到出处。想看懂这套东西，从那儿开始最快。</p>
         </div>
         <RouterLink to="/design/tokens">
           <IButton variant="primary" size="lg">
@@ -456,8 +456,14 @@ app.use(IDesign)"
   height: auto;
   margin: 0 0 calc(var(--i-spacing-4) * -1) auto;
 }
-/* 三维画布压在预览卡上方一点，两者叠出层次；负边距让它不额外占高 */
-.hero__scene { margin-bottom: calc(var(--i-spacing-6) * -1); }
+/*
+ * 三维画布与预览卡之间留一条实打实的间距。
+ *
+ * 原先用负边距把画布压在卡片上「叠出层次」，实际得到的是碰撞：
+ * 基座被卡片切掉一截，看起来像图层顺序出了错。两个都想被看清的东西不该互相压，
+ * 叠压只适合一方明确是背景的场合。
+ */
+.hero__scene { margin-bottom: var(--i-spacing-4); }
 .hero__preview {
   filter: drop-shadow(var(--i-shadow-xl));
   /* 时长与「不超过 320ms」这条价值观对齐；曲线用 easing-out，进场要快进慢停 */

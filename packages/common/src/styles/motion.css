@@ -124,28 +124,28 @@
   place-content: center;
   gap: var(--i-spacing-2);
   text-align: center;
-  /* 半透明玻璃：能透出后面的面，体积感才出得来；纯白面在白底上等于隐形 */
-  border: 1px solid color-mix(in srgb, var(--i-color-brand) 35%, transparent);
-  border-radius: var(--i-radius-lg);
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--i-color-brand) 12%, transparent),
-      color-mix(in srgb, var(--i-color-brand) 4%, transparent)
-    ),
-    color-mix(in srgb, var(--i-color-bg-elevated) 72%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #fff 60%, transparent),
-    0 0 24px -8px color-mix(in srgb, var(--i-color-brand) 40%, transparent);
   /*
-   * 面必须不透光。
+   * 面要有实打实的颜色，不能只描一道淡边。
    *
-   * 之前的面是半透明的，本意是让体积感出来，代价是对面那一面的字
-   * 会反着透过来——屏幕上同时出现「至简」和镜像的「简至」，看着像渲染坏了。
-   * backface-visibility 挡不住这种情况：它挡的是背对镜头的那一面自己，
-   * 挡不住透过前面这层玻璃看见的后面那一面。
+   * 之前边框 35%、底色 12% 的品牌色叠在白底上，屏幕上几乎什么都看不见：
+   * 一个隐形的立方体等于没有这个立方体，还白占掉半幅版面。
+   * 现在底色加重、边加实，三个可见面各自读得出轮廓，
+   * 体积是靠面与面之间的明暗差出来的，而不是靠一圈描边暗示。
    */
-  background-color: var(--i-color-bg-elevated);
+  border: 1px solid color-mix(in srgb, var(--i-color-brand) 42%, transparent);
+  border-radius: var(--i-radius-lg);
+  background: color-mix(in srgb, var(--i-color-brand) 10%, var(--i-color-bg-elevated));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 70%, transparent),
+    0 0 32px -10px color-mix(in srgb, var(--i-color-brand) 55%, transparent);
+  /*
+   * 上面那个 background 必须算出一个不透明的颜色——color-mix 的另一头是
+   * 不透明的面色，所以它天然满足；改成带 alpha 的写法就会破掉这条。
+   *
+   * 半透明的面会把对面那一面的字反着透过来，屏幕上同时出现「至简」和镜像的
+   * 「简至」，看着像渲染坏了。backface-visibility 挡不住这种情况：
+   * 它挡的是背对镜头的那一面自己，挡不住透过前面这层玻璃看见的后面那一面。
+   */
   /*
    * 隐藏背面。半透明面板会把对面的字反着透出来，六面同时可读只会糊成一团；
    * backface-visibility 必须作用在被旋转的面本身——加在子元素上无效，

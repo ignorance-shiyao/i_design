@@ -9,10 +9,10 @@ class IDesignTokensLight {
   static const colorBrandHover = Color(0xFF7EA1FF);
   static const colorBrandActive = Color(0xFF4A63C4);
   static const colorBrandSubtle = Color(0xFFEEF3FF);
-  static const colorBg = Color(0xFFFFFFFF);
+  static const colorBg = Color(0xFFF8F9FB);
   static const colorBgElevated = Color(0xFFFFFFFF);
-  static const colorBgSubtle = Color(0xFFF7F8FA);
-  static const colorBgMuted = Color(0xFFEEF0F5);
+  static const colorBgSubtle = Color(0xFFF1F3F7);
+  static const colorBgMuted = Color(0xFFE7EAF1);
   static const colorBgInverse = Color(0xFF141822);
   static const colorText = Color(0xFF252B3A);
   static const colorTextSecondary = Color(0xFF575D6C);
@@ -22,7 +22,7 @@ class IDesignTokensLight {
   static const colorTextLink = Color(0xFF5E7CE0);
   static const colorBorder = Color(0xFFDFE1E6);
   static const colorBorderStrong = Color(0xFFC3C6CD);
-  static const colorHairline = Color(0x14141822);
+  static const colorHairline = Color(0x1C141822);
   static const colorRing = Color(0x2E5E7CE0);
   static const colorSuccess = Color(0xFF3AC295);
   static const colorSuccessSubtle = Color(0xFFE8F8F0);
@@ -122,7 +122,7 @@ class IDesignTokensDark {
   static const colorBgElevated = Color(0xFF1F2431);
   static const colorBgSubtle = Color(0xFF1E2330);
   static const colorBgMuted = Color(0xFF272D3D);
-  static const colorBgInverse = Color(0xFFF7F8FA);
+  static const colorBgInverse = Color(0xFFF1F3F7);
   static const colorText = Color(0xFFE6E8EF);
   static const colorTextSecondary = Color(0xFFB3B8C6);
   static const colorTextTertiary = Color(0xFF8A8E99);
