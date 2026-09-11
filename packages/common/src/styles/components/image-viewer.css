@@ -1,0 +1,88 @@
+/* IImageViewer —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 全屏预览层。它从 IImage 里拆出来单独成件：
+ * 列表页、聊天记录、上传回显都要「点开看大图」，但它们未必用 IImage 渲染缩略图，
+ * 把预览层绑死在图片组件上，这些地方就只能各自再写一遍。
+ */
+
+.i-image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--i-z-modal);
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.72);
+}
+.i-image-viewer__full {
+  max-width: 88vw;
+  max-height: 82vh;
+  transition: transform var(--i-motion-base) var(--i-motion-easing-out);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+/* 拖动过程中不做过渡：带着 200ms 的过渡拖图，手感是黏的 */
+.i-image-viewer__full:active { transition: none; }
+
+.i-image-viewer__close,
+.i-image-viewer__nav,
+.i-image-viewer__toolbar button {
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--i-radius-full);
+  background: rgb(255 255 255 / 0.14);
+  color: #fff;
+  cursor: pointer;
+}
+.i-image-viewer__close {
+  position: absolute;
+  top: var(--i-spacing-5);
+  right: var(--i-spacing-5);
+  width: 36px;
+  height: 36px;
+}
+.i-image-viewer__nav {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  transform: translateY(-50%);
+}
+.i-image-viewer__nav.is-prev { left: var(--i-spacing-5); }
+.i-image-viewer__nav.is-next { right: var(--i-spacing-5); }
+.i-image-viewer__nav:disabled { opacity: 0.3; cursor: default; }
+.i-image-viewer__close:hover,
+.i-image-viewer__nav:hover:not(:disabled),
+.i-image-viewer__toolbar button:hover { background: rgb(255 255 255 / 0.26); }
+
+.i-image-viewer__toolbar {
+  position: absolute;
+  bottom: var(--i-spacing-6);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2);
+  border-radius: var(--i-radius-full);
+  background: rgb(0 0 0 / 0.5);
+}
+.i-image-viewer__toolbar button { width: 32px; height: 32px; }
+.i-image-viewer__zoom,
+.i-image-viewer__count {
+  min-width: 48px;
+  text-align: center;
+  color: #fff;
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * 小程序端的触发容器。
+ * 那一端的预览交给 wx.previewImage，组件自身只是一个入口，
+ * 因此这里只需要让它不影响布局——不给它任何视觉。
+ */
+.i-image-viewer-trigger {
+  display: contents;
+}

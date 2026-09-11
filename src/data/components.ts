@@ -78,6 +78,7 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'InfiniteScroll', cn: '无限滚动', to: '/components/mobile', desc: '翻到底自动续下一页', status: 'ready' },
       { name: 'Descriptions', cn: '描述列表', to: '/components/descriptions', desc: '成组展示只读字段', status: 'ready' },
       { name: 'Comment', cn: '评论', to: '/components/comment', desc: '展示一条讨论记录', status: 'ready' },
+      { name: 'ImageViewer', cn: '图片预览', to: '/components/image-viewer', desc: '全屏看大图，支持缩放与翻页', status: 'ready' },
       { name: 'Skeleton', cn: '骨架屏', to: '/components/skeleton', desc: '加载中的内容占位', status: 'ready' }
     ]
   },

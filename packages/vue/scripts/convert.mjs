@@ -38,6 +38,7 @@ const manual = new Set([
   'IAutoComplete.vue',
   'ITimePicker.vue',
   'IImage.vue',
+  'IImageViewer.vue',
   'IColorPicker.vue'
 ])
 

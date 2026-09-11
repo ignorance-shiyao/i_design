@@ -539,6 +539,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IImageViewer",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IInfiniteScroll",
     "ends": {
       "vue-next": true,

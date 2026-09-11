@@ -60,6 +60,7 @@ export { FormItem, type FormItemRenderProps, type FormItemProps } from './compon
 export { Row, Col, type RowProps, type ColProps } from './components/Grid'
 export { Icon, type IconProps } from './components/Icon'
 export { Image, type ImageProps } from './components/Image'
+export { ImageViewer, type ImageViewerProps } from './components/ImageViewer'
 export { InfiniteScroll, type InfiniteScrollProps } from './components/InfiniteScroll'
 export { Input, type InputProps } from './components/Input'
 export { InputAdornment, type InputAdornmentProps } from './components/InputAdornment'

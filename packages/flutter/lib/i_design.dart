@@ -83,6 +83,7 @@ export 'src/components/i_form.dart';
 export 'src/components/i_grid.dart';
 export 'src/components/i_icon.dart';
 export 'src/components/i_image.dart';
+export 'src/components/i_image_viewer.dart';
 export 'src/components/i_infinite_scroll.dart';
 export 'src/components/i_input.dart';
 export 'src/components/i_input_adornment.dart';

@@ -51,6 +51,10 @@ const routes: RouteRecordRaw[] = [
       { path: 'link', component: () => import('@/pages/components/LinkPage.vue') },
       { path: 'comment', component: () => import('@/pages/components/CommentPage.vue') },
       {
+        path: 'image-viewer',
+        component: () => import('@/pages/components/ImageViewerPage.vue')
+      },
+      {
         path: 'input-adornment',
         component: () => import('@/pages/components/InputAdornmentPage.vue')
       },

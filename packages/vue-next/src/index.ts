@@ -79,6 +79,7 @@ import IAffix from './IAffix.vue'
 import IBackTop from './IBackTop.vue'
 import IWatermark from './IWatermark.vue'
 import IImage from './IImage.vue'
+import IImageViewer from './IImageViewer.vue'
 import ISplitter from './ISplitter.vue'
 import IVirtualList from './IVirtualList.vue'
 import IColorPicker from './IColorPicker.vue'
@@ -154,6 +155,7 @@ export {
   IBackTop,
   IWatermark,
   IImage,
+  IImageViewer,
   ISplitter,
   IVirtualList,
   IColorPicker,
