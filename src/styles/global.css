@@ -104,3 +104,23 @@
   opacity: 0;
   pointer-events: none;
 }
+
+/*
+ * 关掉 View Transitions 自带的淡入淡出。
+ *
+ * 浏览器默认会给新旧两层各加一条 250ms 的 opacity 动画。它和我们自己的
+ * 圆形揭幕是并行的两回事：圆才扩到一小圈，整屏的明暗已经靠这条淡入换完了——
+ * 于是看到的是「先闪一下，然后有个圈慢慢爬」，既突兀又对不上因果。
+ * 把它们关掉，让揭幕成为唯一的解释：光从开关那里漫出来，扫过的地方才变。
+ *
+ * mix-blend-mode 也要一并复位。默认的 plus-lighter 是为淡入淡出配的，
+ * 两层都不透明时它会把重叠处叠出一片过亮的边。
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+/* 旧主题留在下面当底衬，新主题在上面被裁切着揭开 */
+::view-transition-old(root) { z-index: 0; }
+::view-transition-new(root) { z-index: 1; }
