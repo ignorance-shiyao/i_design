@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import IButton from './IButton.vue'
 import IIcon from './IIcon.vue'
 import {
+  rafThrottle,
   resolveOverlay,
   tourHole,
   tourNeedsScroll,
@@ -87,18 +88,22 @@ const onResize = () => locate()
  * 焦点还在那个按钮上——Esc 会毫无反应，而这在开发时最容易漏测，
  * 因为写测试的人总会先点一下浮层。
  */
+const onReposition = rafThrottle(() => onResize())
+
 watch(
   () => props.modelValue >= 0,
   (on) => {
     if (on) {
-      window.addEventListener('resize', onResize)
-      window.addEventListener('scroll', onResize, { passive: true })
+      // 引导开着时页面仍可能滚动，高亮框要跟着走；合并到每帧一次，别拖累滚动
+      window.addEventListener('resize', onReposition, { passive: true })
+      window.addEventListener('scroll', onReposition, { passive: true })
       document.addEventListener('keydown', onKeydown)
       // 焦点挪进浮层：读屏与 Tab 顺序都应当落在当前这一步上
       nextTick(() => pop.value?.focus())
     } else {
-      window.removeEventListener('resize', onResize)
-      window.removeEventListener('scroll', onResize)
+      window.removeEventListener('resize', onReposition)
+      window.removeEventListener('scroll', onReposition)
+      onReposition.cancel()
       document.removeEventListener('keydown', onKeydown)
     }
   },

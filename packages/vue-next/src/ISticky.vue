@@ -16,7 +16,7 @@
  * 好让调用方能给吸住态换个样式或收到事件——这件事 CSS 至今给不出答案。
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { resolveAffix, type AffixState } from '@i-design/common'
+import { rafThrottle, resolveAffix, type AffixState } from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{
@@ -41,7 +41,6 @@ const inner = ref<HTMLElement | null>(null)
 const sentinel = ref<HTMLElement | null>(null)
 const state = ref<AffixState>({ mode: 'none', offset: 0 })
 let scroller: HTMLElement | null = null
-let frame = 0
 
 /** 找最近的可滚动祖先：容器没写死时，组件应当自己认出该跟谁走 */
 function findScroller(el: HTMLElement | null): HTMLElement | null {
@@ -55,7 +54,6 @@ function findScroller(el: HTMLElement | null): HTMLElement | null {
 }
 
 function measure() {
-  frame = 0
   const holder = inner.value
   const flag = sentinel.value
   if (!holder || !flag || !scroller) return
@@ -77,10 +75,8 @@ function measure() {
   state.value = next
 }
 
-function onScroll() {
-  if (frame) return
-  frame = requestAnimationFrame(measure)
-}
+/* 合并到每帧一次：measure 要量 sentinel 与容器的位置，合并逻辑走公共层 */
+const onScroll = rafThrottle(measure)
 
 onMounted(() => {
   scroller = props.container
@@ -94,7 +90,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   scroller?.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onScroll)
-  if (frame) cancelAnimationFrame(frame)
+  onScroll.cancel()
 })
 
 /* 吸附交给原生 sticky，一直挂着；判定只负责标记状态 */

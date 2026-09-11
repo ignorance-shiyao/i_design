@@ -1,5 +1,5 @@
 import { onBeforeUnmount, ref, watch, type Ref } from 'vue'
-import { resolveOverlay, type Placement } from '@i-design/common'
+import { rafThrottle, resolveOverlay, type Placement } from '@i-design/common'
 
 export interface UseOverlayPositionOptions {
   placement: () => Placement
@@ -52,18 +52,27 @@ export function useOverlayPosition(
     onOutsideClick?.()
   }
 
+  /*
+   * 重算合并到每帧一次。
+   *
+   * capture 让页面上任何一个滚动容器的滚动都会打到这里，而 place() 要量触发器、
+   * 浮层与视口三处尺寸——不合并的话，浮层开着时整页滚动都会变涩。
+   */
+  const onReposition = rafThrottle(() => place())
+
   function detach() {
-    window.removeEventListener('scroll', place, true)
-    window.removeEventListener('resize', place)
+    window.removeEventListener('scroll', onReposition, true)
+    window.removeEventListener('resize', onReposition)
     document.removeEventListener('click', handleDocumentClick)
+    onReposition.cancel()
   }
 
   watch(visible, (open) => {
     if (open) {
       place()
       // 滚动与缩放都会让算好的位置失效；passive 避免拖累滚动性能
-      window.addEventListener('scroll', place, { passive: true, capture: true })
-      window.addEventListener('resize', place)
+      window.addEventListener('scroll', onReposition, { passive: true, capture: true })
+      window.addEventListener('resize', onReposition, { passive: true })
       if (options.closeOnOutsideClick) document.addEventListener('click', handleDocumentClick)
     } else {
       detach()

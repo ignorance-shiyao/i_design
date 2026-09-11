@@ -5,10 +5,23 @@
   box-sizing: border-box;
 }
 
-html,
+/*
+ * 用 min-height 而不是 height。
+ *
+ * height: 100% 会把 #app 的高度钉死在一屏，而 sticky 元素只能在自己父级的盒子里停留——
+ * 顶栏因此滚过一屏就跟着走了，看起来像「sticky 没生效」。
+ * 这个 bug 在桌面端同样存在，只是手机上一屏更短、更早暴露。
+ *
+ * 100dvh 而不是 100vh：移动端浏览器的地址栏会收起展开，vh 用的是最大高度，
+ * 页面底部会多出一条空白。
+ */
+html {
+  height: 100%;
+}
 body,
 #app {
-  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 body {

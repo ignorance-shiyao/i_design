@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type MouseEvent } from 'react'
-import { activeAnchor, anchorScrollTop, type AnchorTarget } from '@i-design/common'
+import { rafThrottle, activeAnchor, anchorScrollTop, type AnchorTarget } from '@i-design/common'
 
 export interface AnchorItem {
   key: string
@@ -39,12 +39,18 @@ export function Anchor({ items, offset = 80, onChange }: AnchorProps) {
   }, [items, offset, onChange])
 
   useEffect(() => {
+    /*
+     * 合并到每帧一次：update 会把每个锚点的 rect 量一遍，
+     * 而一次滑动能打出上百个 scroll 事件——不合并的话主线程全耗在测量上。
+     */
+    const onScroll = rafThrottle(update)
     update()
-    window.addEventListener('scroll', update, { passive: true })
-    window.addEventListener('resize', update)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
     return () => {
-      window.removeEventListener('scroll', update)
-      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      onScroll.cancel()
     }
   }, [update])
 

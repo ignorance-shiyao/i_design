@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { resolveOverlay, type Placement } from '@i-design/common'
+import { rafThrottle, resolveOverlay, type Placement } from '@i-design/common'
 
 export interface PopoverProps {
   title?: string
@@ -72,14 +72,16 @@ export function Popover({
       if (triggerRef.current?.contains(target) || popupRef.current?.contains(target)) return
       setVisible(false)
     }
-    // 滚动与缩放都会让算好的位置失效
-    window.addEventListener('scroll', place, { passive: true, capture: true })
-    window.addEventListener('resize', place)
+    // 滚动与缩放都会让算好的位置失效；重算合并到每帧一次，否则浮层开着时整页滚动都变涩
+    const onReposition = rafThrottle(place)
+    window.addEventListener('scroll', onReposition, { passive: true, capture: true })
+    window.addEventListener('resize', onReposition, { passive: true })
     if (trigger === 'click') document.addEventListener('click', onDocumentClick)
     return () => {
-      window.removeEventListener('scroll', place, true)
-      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', onReposition, true)
+      window.removeEventListener('resize', onReposition)
       document.removeEventListener('click', onDocumentClick)
+      onReposition.cancel()
     }
   }, [visible, place, trigger])
 
