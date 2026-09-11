@@ -20,6 +20,7 @@
 - `npm run build`（含 Vue/TypeScript 检查）。
 - `node scripts/check-theme-readability.mjs`：检查默认暗色正文/次级/辅助文字与四类基础表面，最低 5.75:1；代码配色、品牌预设、边界、持久化、恢复、缩放、动效和色阶响应。
 - Playwright 实机截图：面板七个分页、字号自定义档、切换主题色后的全站效果、极端配置（衬线字体 + 自定义圆角 + 130% 间距 + 175% 阴影 + 60% 中性色偏移）下的亮暗两态，控制台无报错。
+- `node scripts/check-scoped-css.mjs`：`<style scoped>` 编译出的规则必须带 data-v 属性。暗色下曾因 `:global([data-theme="dark"]) .hero-art` 被编译成 `[data-theme=dark]{opacity:.16}`，整个 `<html>` 变成 16% 不透明度，全站文字与卡片一起发灰——构建与数值检查都不会报错，故补此检查。
 - 数值检查使用令牌与模拟 DOM，不等同于整站 WCAG 合规认证。
 
 对比度提示按 [WCAG 2.2 SC 1.4.3](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html) 区分普通文字 4.5:1 与大字 3:1。普通按钮文字不能因为位于控件上而按 3:1 判定。自定义品牌色未必满足普通文字门槛，面板保留实际数值提示。
