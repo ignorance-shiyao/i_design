@@ -37,6 +37,22 @@ const expanded = ref<string[]>(['platform', 'auth'])
 const selected = ref('account')
 const picked = ref('')
 const pickedMany = ref<string[]>([])
+
+/* 三层、共八千余个节点：不虚拟化的话，展开根节点那一下页面就停住了 */
+const bigTree: TreeNode[] = Array.from({ length: 20 }, (_, a) => ({
+  key: `a${a}`,
+  label: `区域 ${a + 1}`,
+  children: Array.from({ length: 20 }, (_, b) => ({
+    key: `a${a}b${b}`,
+    label: `机房 ${a + 1}-${b + 1}`,
+    children: Array.from({ length: 20 }, (_, c) => ({
+      key: `a${a}b${b}c${c}`,
+      label: `机柜 ${a + 1}-${b + 1}-${c + 1}`
+    }))
+  }))
+}))
+const bigExpanded = ref<string[]>(bigTree.flatMap((a) => [a.key, ...(a.children ?? []).map((b) => b.key)]))
+const bigChecked = ref<string[]>([])
 </script>
 
 <template>
@@ -81,6 +97,31 @@ const pickedMany = ref<string[]>([])
     >
       <ITree :data="data" searchable checkable v-model:checked="checked" style="max-width: 320px" />
     </DemoBlock>
+    <DemoBlock
+      title="长列表"
+      description="给了 height 之后，展开的行超过一定条数就只渲染看得见的那十来行，上下用两块空白撑开滚动条。下面这棵树全展开有八千多行，勾选联动与滚动都和几十行时一样跟手。不给 height 就不虚拟化——没有可视高度算不出该渲染哪几行，拿一个猜的高度去算会把行定位到看不见的地方。"
+      code='<ITree :data="data" height="320px" checkable v-model:checked="checked" />'
+    >
+      <div style="width: 420px; max-width: 100%">
+        <ITree
+          :data="bigTree"
+          height="320px"
+          checkable
+          v-model:checked="bigChecked"
+          v-model:expanded="bigExpanded"
+        />
+        <p class="i-tree-demo-value">已勾选 {{ bigChecked.length }} 项</p>
+      </div>
+    </DemoBlock>
+
+    <h2>各端差异</h2>
+    <p>
+      Web 与小程序端自己算窗口，只渲染看得见的那十来行（小程序读不到 <code>offsetHeight</code>，
+      行高用一次测量取得，量不到才退回兜底值）；Flutter 端交给能按需建子项的列表，
+      由框架决定建哪几行，结果一样。三端都是「给了高度才虚拟化」：
+      没有可视高度就算不出该渲染哪几行。
+    </p>
+
     <h2>TreeSelect 树选择</h2>
     <p>
       当层级数据只是「一个字段的候选值」时，整棵树摊在页面上太占地方。

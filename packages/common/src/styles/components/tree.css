@@ -62,3 +62,19 @@
   border-radius: 2px;
   background: var(--i-color-warning-subtle);
 }
+
+/*
+ * 给了高度时列表自己滚。不给高度就不滚，也不虚拟化——
+ * 没有可视高度算不出该渲染哪几行，拿一个猜的高度去算会把行定位到看不见的地方。
+ */
+.i-tree__list.is-scrollable { overflow-y: auto; }
+
+/*
+ * 虚拟滚动撑开上下空白的两个占位。它们不是节点，不能被读屏当成 treeitem 念出来，
+ * 也不该有内边距——有内边距的话高度就不再等于算出来的那个数，越滚偏得越多。
+ */
+.i-tree__spacer {
+  padding: 0;
+  margin: 0;
+  pointer-events: none;
+}

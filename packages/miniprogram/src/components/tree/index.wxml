@@ -7,9 +7,16 @@
     bindinput="onSearch"
   />
 
-  <view class="i-tree__list">
+  <scroll-view
+    class="i-tree__list {{height ? 'is-scrollable' : ''}}"
+    style="{{height ? 'height:' + height + 'px' : ''}}"
+    scroll-y="{{!!height}}"
+    bindscroll="onScroll"
+  >
+    <!-- 上下两块撑开的空白替代没渲染的那些行，滚动条长度才和真实行数相称 -->
+    <view wx:if="{{virtual}}" class="i-tree__spacer" style="height:{{paddingTop}}px" />
     <view
-      wx:for="{{rows}}"
+      wx:for="{{visible}}"
       wx:key="key"
       class="i-tree__row {{item.selected ? 'is-selected' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
       style="padding-left:{{item.indent}}px"
@@ -36,7 +43,8 @@
         <text wx:for="{{item.parts}}" wx:for-item="part" wx:key="index" class="{{part.hit ? 'i-tree__hit' : ''}}">{{part.text}}</text>
       </view>
     </view>
-  </view>
+    <view wx:if="{{virtual}}" class="i-tree__spacer" style="height:{{paddingBottom}}px" />
+  </scroll-view>
 
-  <view wx:if="{{rows.length === 0}}" class="i-tree__empty">{{emptyText}}</view>
+  <view wx:if="{{total === 0}}" class="i-tree__empty">{{emptyText}}</view>
 </view>

@@ -17,6 +17,7 @@ class ITree extends StatefulWidget {
     this.expanded = const [],
     this.checkable = false,
     this.selected,
+    this.height,
     this.emptyText = '没有匹配的节点',
     this.onCheckedChanged,
     this.onExpandedChanged,
@@ -30,6 +31,10 @@ class ITree extends StatefulWidget {
   /// 显示复选框；不显示时点击行即为选中
   final bool checkable;
   final String? selected;
+
+  /// 列表区高度。给了就在这个高度里滚动，由 ListView.builder 按需建行——
+  /// 上万行时一次建完会卡住。不给时整棵树平铺，由外层滚动容器负责。
+  final double? height;
   final String emptyText;
   final ValueChanged<List<String>>? onCheckedChanged;
   final ValueChanged<List<String>>? onExpandedChanged;
@@ -78,6 +83,17 @@ class _ITreeState extends State<ITree> {
             fontSize: IDesignTokensLight.fontSizeSm,
             color: c.textTertiary,
           ),
+        ),
+      );
+    }
+
+    if (widget.height != null) {
+      // ListView.builder 只建看得见的那几行，等同于 Web 端自己算的虚拟窗口
+      return SizedBox(
+        height: widget.height,
+        child: ListView.builder(
+          itemCount: rows.length,
+          itemBuilder: (_, i) => _buildRow(context, entities, state, rows[i]),
         ),
       );
     }

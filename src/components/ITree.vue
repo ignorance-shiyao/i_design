@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import {
   flattenTree,
+  rafThrottle,
   resolveCheckState,
   searchTree,
+  shouldVirtualize,
   toggleChecked,
+  virtualWindow,
   visibleRows,
   type TreeNode
 } from '@i-design/common'
@@ -24,6 +27,11 @@ const props = withDefaults(
     searchable?: boolean
     /** 单选场景下当前选中的节点 */
     selected?: string
+    /**
+     * 列表区高度，如 `320px`。给了才能虚拟化——没有可视高度就算不出该渲染哪几行。
+     * 不给时整棵树平铺，由外层页面滚动。
+     */
+    height?: string
     emptyText?: string
   }>(),
   {
@@ -32,6 +40,7 @@ const props = withDefaults(
     checkable: false,
     searchable: false,
     selected: '',
+    height: '',
     emptyText: '没有匹配的节点'
   }
 )
@@ -69,6 +78,50 @@ const rows = computed(() =>
 )
 
 const state = computed(() => resolveCheckState(entities.value, props.checked))
+
+/* ----------------------------------------------------------- 虚拟滚动 */
+
+/*
+ * 展开一棵大树会一次铺出上万行。行本身不复杂，但每行都带一个复选框与一个折叠键，
+ * 真正拖慢的是这三样东西乘以行数。
+ *
+ * 只有给了 height 才虚拟化：没有可视高度就算不出该渲染哪几行，
+ * 这时不如老老实实全渲染，也不要拿一个猜的高度去算，那会把行定位到看不见的地方。
+ */
+const ROW_FALLBACK_HEIGHT = 32
+const list = ref<HTMLElement | null>(null)
+const rowHeight = ref(ROW_FALLBACK_HEIGHT)
+const scrollTop = ref(0)
+const viewportHeight = ref(0)
+
+const virtual = computed(() => Boolean(props.height) && shouldVirtualize(rows.value.length))
+const window_ = computed(() =>
+  virtualWindow(scrollTop.value, viewportHeight.value, rowHeight.value, rows.value.length)
+)
+const visible = computed(() => {
+  if (!virtual.value) return rows.value
+  return rows.value.slice(window_.value.start, window_.value.end + 1)
+})
+
+/* 滚动事件远多于帧，而每次都要读一次布局 */
+const onScroll = rafThrottle(() => {
+  if (list.value) scrollTop.value = list.value.scrollTop
+})
+onBeforeUnmount(() => onScroll.cancel())
+
+function measure() {
+  const el = list.value
+  if (!el) return
+  viewportHeight.value = el.clientHeight
+  const first = el.querySelector<HTMLElement>('.i-tree__row')
+  if (first && first.offsetHeight > 0) rowHeight.value = first.offsetHeight
+}
+
+watch(
+  () => [props.height, rows.value.length],
+  () => nextTick(measure),
+  { immediate: true }
+)
 
 function toggleExpand(key: string) {
   if (filtering.value) return
@@ -122,9 +175,18 @@ function highlight(label: string) {
       placeholder="搜索节点"
     />
 
-    <ul class="i-tree__list" role="tree">
+    <ul
+      ref="list"
+      class="i-tree__list"
+      :class="{ 'is-scrollable': !!height }"
+      :style="{ height: height || undefined }"
+      role="tree"
+      @scroll.passive="onScroll"
+    >
+      <!-- 上下两块撑开的空白替代没渲染的那些行，滚动条长度才和真实行数相称 -->
+      <li v-if="virtual" class="i-tree__spacer" role="none" :style="{ height: `${window_.paddingTop}px` }" />
       <li
-        v-for="row in rows"
+        v-for="row in visible"
         :key="row.key"
         class="i-tree__row"
         :class="{
@@ -167,6 +229,12 @@ function highlight(label: string) {
           </template>
         </span>
       </li>
+      <li
+        v-if="virtual"
+        class="i-tree__spacer"
+        role="none"
+        :style="{ height: `${window_.paddingBottom}px` }"
+      />
     </ul>
 
     <p v-if="!rows.length" class="i-tree__empty">{{ emptyText }}</p>
