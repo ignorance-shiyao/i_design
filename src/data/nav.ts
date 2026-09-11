@@ -32,7 +32,8 @@ export const docNav: NavGroup[] = [
       { to: '/components/tag', label: 'Tag 标签' },
       { to: '/components/divider', label: 'Divider 分割线' },
       { to: '/components/link', label: 'Link 链接' },
-      { to: '/components/sticky-tool', label: 'StickyTool 侧边工具条' }
+      { to: '/components/sticky-tool', label: 'StickyTool 侧边工具条' },
+      { to: '/components/scrollbar', label: 'Scrollbar 滚动条' }
     ]
   },
   {
@@ -56,6 +57,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/textarea', label: 'Textarea 多行文本框' },
       { to: '/components/select', label: 'Select 下拉选择' },
       { to: '/components/date-picker', label: 'DatePicker 日期选择器' },
+      { to: '/components/time-select', label: 'TimeSelect 时间下拉' },
       { to: '/components/radio', label: 'Radio 单选框' },
       { to: '/components/checkbox', label: 'Checkbox 多选框' },
       { to: '/components/switch', label: 'Switch 开关' },

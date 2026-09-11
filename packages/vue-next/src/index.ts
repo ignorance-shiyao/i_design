@@ -39,6 +39,7 @@ import IInput from './IInput.vue'
 import IInputAdornment from './IInputAdornment.vue'
 import ITextarea from './ITextarea.vue'
 import ISelect from './ISelect.vue'
+import IScrollbar from './IScrollbar.vue'
 import ISelectInput from './ISelectInput.vue'
 import IRadio from './IRadio.vue'
 import IRadioGroup from './IRadioGroup.vue'
@@ -81,6 +82,7 @@ import ITour from './ITour.vue'
 import ITagInput from './ITagInput.vue'
 import IAutoComplete from './IAutoComplete.vue'
 import ITimePicker from './ITimePicker.vue'
+import ITimeSelect from './ITimeSelect.vue'
 import ITransfer from './ITransfer.vue'
 import IAffix from './IAffix.vue'
 import IBackTop from './IBackTop.vue'
@@ -120,6 +122,7 @@ export {
   IInput,
   ITextarea,
   ISelect,
+  IScrollbar,
   ISelectInput,
   IRadio,
   IRadioGroup,
@@ -162,6 +165,7 @@ export {
   ITagInput,
   IAutoComplete,
   ITimePicker,
+  ITimeSelect,
   ITransfer,
   IAffix,
   IBackTop,
@@ -260,6 +264,7 @@ const components = {
   IInput,
   ITextarea,
   ISelect,
+  IScrollbar,
   ISelectInput,
   IRadio,
   IRadioGroup,

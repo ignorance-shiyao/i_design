@@ -849,6 +849,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IScrollbar",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ISegmented",
     "ends": {
       "vue-next": true,
@@ -1030,6 +1040,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "ITimePicker",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ITimeSelect",
     "ends": {
       "vue-next": true,
       "vue": true,

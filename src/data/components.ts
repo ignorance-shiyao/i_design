@@ -24,7 +24,8 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Tag', cn: '标签', to: '/components/tag', desc: '标记分类或状态', status: 'ready' },
       { name: 'Divider', cn: '分割线', to: '/components/divider', desc: '分隔内容区块', status: 'ready' },
       { name: 'Link', cn: '链接', to: '/components/link', desc: '跳转到另一个地址', status: 'ready' },
-      { name: 'StickyTool', cn: '侧边工具条', to: '/components/sticky-tool', desc: '贴边的一组快捷入口', status: 'ready' }
+      { name: 'StickyTool', cn: '侧边工具条', to: '/components/sticky-tool', desc: '贴边的一组快捷入口', status: 'ready' },
+      { name: 'Scrollbar', cn: '滚动条', to: '/components/scrollbar', desc: '不占布局的自绘滚动条', status: 'ready' }
     ]
   },
   {
@@ -53,6 +54,7 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Switch', cn: '开关', to: '/components/switch', desc: '两个互斥状态间切换', status: 'ready' },
       { name: 'Form', cn: '表单', to: '/components/form', desc: '布局、校验与提交', status: 'ready' },
       { name: 'DatePicker', cn: '日期选择器', to: '/components/date-picker', desc: '选择日期', status: 'ready' },
+      { name: 'TimeSelect', cn: '时间下拉', to: '/components/time-select', desc: '在固定时间点里挑一个', status: 'ready' },
       { name: 'Upload', cn: '上传', to: '/components/upload', desc: '上传文件与进度反馈', status: 'ready' },
       { name: 'Cascader', cn: '级联选择', to: '/components/cascader', desc: '多级联动选择', status: 'ready' },
       { name: 'TreeSelect', cn: '树选择', to: '/components/tree', desc: '在层级里选一项或多项', status: 'ready' },

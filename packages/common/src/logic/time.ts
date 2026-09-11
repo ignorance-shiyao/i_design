@@ -137,3 +137,68 @@ export function clampTime(time: TimeValue, options: TimeOptions = {}): TimeValue
 export function isValidRange(start: TimeValue, end: TimeValue): boolean {
   return toSeconds(end) >= toSeconds(start)
 }
+
+/* ------------------------------------------------ 固定间隔的时间点序列 */
+
+export interface TimeSelectRange {
+  /** 首个时间点，如 09:00 */
+  start: string
+  /** 末个时间点（含），如 18:00 */
+  end: string
+  /** 间隔分钟数 */
+  step: number
+  /** 早于它的时间点不可选，如「结束时间不能早于开始时间」 */
+  minTime?: string
+  /** 晚于它的时间点不可选 */
+  maxTime?: string
+}
+
+export interface TimeSelectOption {
+  value: string
+  disabled: boolean
+}
+
+/**
+ * 生成「每隔 N 分钟一个」的时间点。
+ *
+ * 用分钟数递增而不是「小时循环里嵌分钟循环」：步长是 45、90 这类不能整除 60 的值时，
+ * 嵌套循环会漏掉跨小时的那些点（09:45 之后应当是 10:30，而不是回到 10:00）。
+ *
+ * 不可选的点仍然生成、只标记 disabled：直接过滤掉的话，列表长度会随另一端的取值
+ * 变来变去，用户刚记住「第三个是 10:00」，换个开始时间就不是了。
+ */
+export function timeSelectOptions(range: TimeSelectRange): TimeSelectOption[] {
+  const step = Math.max(1, Math.round(range.step))
+  const from = minutesOfClock(range.start)
+  const to = minutesOfClock(range.end)
+  if (from === null || to === null || to < from) return []
+
+  const min = range.minTime ? minutesOfClock(range.minTime) : null
+  const max = range.maxTime ? minutesOfClock(range.maxTime) : null
+
+  const out: TimeSelectOption[] = []
+  for (let minutes = from; minutes <= to; minutes += step) {
+    out.push({
+      value: clockOfMinutes(minutes),
+      disabled: (min !== null && minutes <= min) || (max !== null && minutes >= max)
+    })
+  }
+  return out
+}
+
+/** "HH:mm" → 当天分钟数；格式不对返回 null，而不是悄悄当成 0 点 */
+export function minutesOfClock(text: string): number | null {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(text.trim())
+  if (!match) return null
+  const hour = Number(match[1])
+  const minute = Number(match[2])
+  if (hour > 23 || minute > 59) return null
+  return hour * 60 + minute
+}
+
+/** 当天分钟数 → "HH:mm"，两位补零 */
+export function clockOfMinutes(minutes: number): string {
+  const hour = Math.floor(minutes / 60) % 24
+  const minute = minutes % 60
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+}

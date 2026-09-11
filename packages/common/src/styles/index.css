@@ -91,6 +91,7 @@
 @import './components/range-input.css';
 @import './components/rate.css';
 @import './components/result.css';
+@import './components/scrollbar.css';
 @import './components/search-bar.css';
 @import './components/segmented.css';
 @import './components/select-input.css';
@@ -114,6 +115,7 @@
 @import './components/tag.css';
 @import './components/taginput.css';
 @import './components/textarea.css';
+@import './components/time-select.css';
 @import './components/timeline.css';
 @import './components/timepicker.css';
 @import './components/toast.css';

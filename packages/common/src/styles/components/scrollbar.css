@@ -1,0 +1,74 @@
+/* IScrollbar —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 自绘滚动条。
+ *
+ * 为什么不直接用系统滚动条：Windows 上它是一条 17px 宽的灰槽，会把右侧内容挤窄，
+ * 而 macOS 上默认根本不占位——同一份布局在两个系统上看到的宽度不一样。
+ * 自绘的滚动条浮在内容之上、不占布局，两边就一致了。
+ *
+ * 但不隐藏原生滚动的能力：滚动仍由浏览器负责（滚轮惯性、触控板、键盘、
+ * 无障碍工具都指望它），我们只是把那条槽藏起来、另画一条。
+ */
+.i-scrollbar {
+  position: relative;
+  overflow: hidden;
+}
+.i-scrollbar__view {
+  height: 100%;
+  overflow: auto;
+  /* 藏掉原生滚动槽，滚动本身不受影响 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.i-scrollbar__view::-webkit-scrollbar {
+  display: none;
+}
+
+.i-scrollbar__track {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  bottom: 2px;
+  width: 8px;
+  border-radius: var(--i-radius-full);
+  opacity: 0;
+  /* 看不见的时候也不该挡住内容：这条 8px 宽的带子压在文字上，
+     不关掉指针事件的话，右边缘的链接与选词都会被它吃掉 */
+  pointer-events: none;
+  transition: opacity var(--i-motion-base) var(--i-motion-easing);
+}
+/* 平时不显示，鼠标进入容器或正在拖动时才出现——滚动条本身不是内容 */
+.i-scrollbar:hover .i-scrollbar__track,
+.i-scrollbar.is-dragging .i-scrollbar__track {
+  opacity: 1;
+  pointer-events: auto;
+}
+.i-scrollbar.is-always .i-scrollbar__track {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/*
+ * 轨道始终留在布局里，只把滑块藏起来。
+ *
+ * 反过来（内容装得下就把轨道 display:none）会锁死：滑块长度要按轨道高度算，
+ * 轨道不在布局里高度就是 0，于是永远算出「不需要滚动条」，滚动条再也不出现。
+ */
+.i-scrollbar__thumb[hidden] {
+  display: none;
+}
+
+.i-scrollbar__thumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-border-strong);
+  cursor: pointer;
+  transition: background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-scrollbar__thumb:hover,
+.i-scrollbar.is-dragging .i-scrollbar__thumb {
+  background: var(--i-color-text-tertiary);
+}
