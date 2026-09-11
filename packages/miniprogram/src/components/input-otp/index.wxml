@@ -1,0 +1,19 @@
+<view class="i-input-otp {{password ? 'i-input-otp--password' : ''}} {{invalid ? 'is-invalid' : ''}}">
+  <block wx:for="{{cells}}" wx:key="index">
+    <text
+      wx:if="{{separatorAt && index === separatorAt}}"
+      class="i-input-otp__separator"
+    >-</text>
+    <input
+      class="i-input-otp__cell"
+      value="{{item}}"
+      type="{{mode === 'numeric' ? 'number' : 'text'}}"
+      password="{{password}}"
+      maxlength="2"
+      disabled="{{disabled}}"
+      focus="{{focusIndex === index}}"
+      data-index="{{index}}"
+      bindinput="onInput"
+    />
+  </block>
+</view>

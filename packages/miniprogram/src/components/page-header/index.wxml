@@ -1,0 +1,17 @@
+<view class="i-page-header">
+  <block wx:if="{{back}}">
+    <view class="i-page-header__back" bindtap="onBack">
+      <i-icon name="chevron-left" size="18" />
+      <text wx:if="{{backText}}">{{backText}}</text>
+    </view>
+    <view class="i-page-header__divider" />
+  </block>
+
+  <view class="i-page-header__main">
+    <text class="i-page-header__title">{{title}}</text>
+    <text wx:if="{{subtitle}}" class="i-page-header__subtitle">{{subtitle}}</text>
+  </view>
+
+  <view class="i-page-header__extra"><slot name="extra" /></view>
+  <view class="i-page-header__content"><slot /></view>
+</view>

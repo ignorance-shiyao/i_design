@@ -22,6 +22,7 @@
 @import './components/badge.css';
 @import './components/base.css';
 @import './components/breadcrumb.css';
+@import './components/button-group.css';
 @import './components/button.css';
 @import './components/calendar.css';
 @import './components/card.css';
@@ -35,6 +36,7 @@
 @import './components/chat-thinking.css';
 @import './components/chat-tool.css';
 @import './components/chat-typing.css';
+@import './components/check-tag.css';
 @import './components/checkbox-group.css';
 @import './components/checkbox.css';
 @import './components/collapse.css';
@@ -60,6 +62,7 @@
 @import './components/infinite.css';
 @import './components/input-adornment.css';
 @import './components/input-number.css';
+@import './components/input-otp.css';
 @import './components/input.css';
 @import './components/keypad.css';
 @import './components/layout.css';
@@ -74,6 +77,7 @@
 @import './components/notice-bar.css';
 @import './components/notification.css';
 @import './components/overlay.css';
+@import './components/page-header.css';
 @import './components/pagination.css';
 @import './components/picker.css';
 @import './components/popconfirm.css';
@@ -87,6 +91,7 @@
 @import './components/range-input.css';
 @import './components/rate.css';
 @import './components/result.css';
+@import './components/scrollbar.css';
 @import './components/search-bar.css';
 @import './components/segmented.css';
 @import './components/select-input.css';
@@ -110,6 +115,7 @@
 @import './components/tag.css';
 @import './components/taginput.css';
 @import './components/textarea.css';
+@import './components/time-select.css';
 @import './components/timeline.css';
 @import './components/timepicker.css';
 @import './components/toast.css';

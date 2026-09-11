@@ -1,0 +1,8 @@
+<scroll-view
+  class="i-scrollbar"
+  scroll-y="{{true}}"
+  style="{{height ? 'height:' + height + ';' : ''}}{{maxHeight ? 'max-height:' + maxHeight + ';' : ''}}"
+  bindscroll="onScroll"
+>
+  <view class="i-scrollbar__view"><slot /></view>
+</scroll-view>

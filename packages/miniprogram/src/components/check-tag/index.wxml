@@ -1,0 +1,4 @@
+<view
+  class="i-check-tag {{round ? 'i-check-tag--round' : ''}} {{checked ? 'is-checked' : ''}} {{disabled ? 'is-disabled' : ''}}"
+  bindtap="onTap"
+>{{text}}<slot /></view>

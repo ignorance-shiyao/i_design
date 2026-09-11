@@ -1,0 +1,25 @@
+<view class="i-time-select">
+  <view
+    class="i-select-input {{open ? 'is-open' : ''}} {{disabled ? 'is-disabled' : ''}} {{invalid ? 'is-invalid' : ''}}"
+    bindtap="onToggle"
+  >
+    <view class="i-select-input__body">
+      <text
+        class="i-select-input__value {{value ? '' : 'i-select-input__placeholder'}}"
+      >{{value || placeholder}}</text>
+    </view>
+    <view class="i-select-input__suffix">
+      <i-icon class="i-select-input__arrow" name="chevron-down" size="16" />
+    </view>
+  </view>
+
+  <view wx:if="{{open}}" class="i-time-select__panel">
+    <view
+      wx:for="{{options}}"
+      wx:key="value"
+      class="i-time-select__option {{item.value === value ? 'is-active' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+      data-option="{{item}}"
+      bindtap="onPick"
+    >{{item.value}}</view>
+  </view>
+</view>

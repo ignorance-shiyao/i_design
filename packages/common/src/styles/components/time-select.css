@@ -1,0 +1,57 @@
+/* ITimeSelect —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 固定间隔的时间下拉：09:00、09:30、10:00……
+ *
+ * 与 TimePicker 的分工：能选任意时刻的用 TimePicker，
+ * 只在若干个整点/半点里挑的用这个——后者的选项是有限的，
+ * 用三列滚轮去选「上午九点半」既慢又容易滑过头。
+ */
+.i-time-select {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+}
+.i-time-select__panel {
+  position: absolute;
+  top: calc(100% + var(--i-spacing-1));
+  left: 0;
+  right: 0;
+  z-index: var(--i-z-dropdown);
+  max-height: 240px;
+  overflow-y: auto;
+  padding: var(--i-spacing-1);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-md);
+}
+.i-time-select__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 var(--i-spacing-3);
+  border: 0;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  color: var(--i-color-text);
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-md);
+  text-align: left;
+  cursor: pointer;
+}
+.i-time-select__option:hover:not(:disabled) { background: var(--i-color-bg-subtle); }
+.i-time-select__option.is-active {
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand);
+}
+/*
+ * 不可选的时间点仍然占位、只是变灰——直接过滤掉的话，列表长度会随另一端的取值
+ * 变来变去，用户刚记住「第三个是 10:00」，换个开始时间就不是了。
+ */
+.i-time-select__option:disabled {
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}

@@ -1,0 +1,55 @@
+/* ICheckTag —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 可选中的标签：长得像标签，行为像多选框。
+ *
+ * 用在「兴趣标签」「筛选条件」这类场景——比一排 Checkbox 省地方，
+ * 也比 Checkbox 更适合数量不定的项。
+ *
+ * 选中态用填充色而不是加一圈粗边：粗边会让选中项的视觉面积变大，
+ * 一排标签选中几个之后，间距看起来就不匀了。
+ */
+.i-check-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  min-height: 28px;
+  padding: 0 var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
+  transition: background var(--i-motion-fast) var(--i-motion-easing),
+    color var(--i-motion-fast) var(--i-motion-easing);
+}
+/*
+ * 悬停态要把选中态排除掉。
+ *
+ * `:hover:not(.is-disabled)` 的特指度（0,3,0）高于 `.is-checked`（0,2,0）——
+ * 不排除的话，鼠标停在一个已选中的标签上，它会变回未选中的样子，
+ * 用户以为自己刚把它取消了。
+ */
+.i-check-tag:hover:not(.is-disabled):not(.is-checked) {
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text);
+}
+.i-check-tag.is-checked {
+  background: var(--i-color-brand-subtle);
+  border-color: transparent;
+  color: var(--i-color-brand);
+}
+/* 选中项的悬停：在原有底色上再深一档，仍然是「选中」的样子 */
+.i-check-tag.is-checked:hover:not(.is-disabled) {
+  background: color-mix(in srgb, var(--i-color-brand) 18%, transparent);
+}
+.i-check-tag.is-disabled {
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+.i-check-tag:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+}
+.i-check-tag--round { border-radius: var(--i-radius-full); }
