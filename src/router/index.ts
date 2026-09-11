@@ -57,6 +57,7 @@ const routes: RouteRecordRaw[] = [
         path: 'select-input',
         component: () => import('@/pages/components/SelectInputPage.vue')
       },
+      { path: 'input-otp', component: () => import('@/pages/components/InputOtpPage.vue') },
       { path: 'qrcode', component: () => import('@/pages/components/QrcodePage.vue') },
       {
         path: 'sticky-tool',

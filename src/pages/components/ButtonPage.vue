@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import IButtonGroup from '@/components/IButtonGroup.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { snippets } from '@/data/snippets'
@@ -52,6 +53,24 @@ import { snippets } from '@/data/snippets'
     >
       <IButton variant="primary" loading>提交中</IButton>
       <IButton disabled>禁用</IButton>
+    </DemoBlock>
+
+    <h2>ButtonGroup 按钮组</h2>
+    <p>
+      一组紧挨着的按钮，表达「同一类操作的几个变体」。相接的两边去掉圆角、
+      边框合成一条——两个 1px 边框贴在一起，视觉上就是加粗了一条线。
+    </p>
+    <DemoBlock
+      title="按钮组"
+      code='<IButtonGroup>
+  <IButton>上一页</IButton>
+  <IButton>下一页</IButton>
+</IButtonGroup>'
+    >
+      <IButtonGroup>
+        <IButton>上一页</IButton>
+        <IButton>下一页</IButton>
+      </IButtonGroup>
     </DemoBlock>
 
     <h2>API</h2>

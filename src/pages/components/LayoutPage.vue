@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import ILayout from '@/components/ILayout.vue'
+import IPageHeader from '@/components/IPageHeader.vue'
+import { message } from '@/components/message'
 import ISpace from '@/components/ISpace.vue'
 import ITypography from '@/components/ITypography.vue'
 import IRow from '@/components/IRow.vue'
@@ -38,6 +40,31 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
       三个用来「把东西摆正」的基础件。它们本身没有视觉主张，作用是让间距、栅格与字号
       只能取自令牌——一旦允许就地写数值，一个产品里很快会长出七种正文字号与十几种间距。
     </p>
+
+    <h2>PageHeader 页头</h2>
+    <p>
+      返回、标题、副标题与右侧操作。返回键与标题同一行而不是叠在标题上方：
+      叠起来会让标题看着像副标题，而它是这一页最重要的那行字。
+    </p>
+    <DemoBlock
+      title="页头"
+      code='<IPageHeader title="实例详情" subtitle="ins-8f21c" @back="...">
+  <template #extra><IButton>编辑</IButton></template>
+</IPageHeader>'
+    >
+      <div class="full">
+        <IPageHeader
+          title="实例详情"
+          subtitle="ins-8f21c · 华东一区"
+          @back="message.info('返回列表')"
+        >
+          <template #extra>
+            <IButton size="sm">编辑</IButton>
+            <IButton size="sm" variant="primary">部署</IButton>
+          </template>
+        </IPageHeader>
+      </div>
+    </DemoBlock>
 
     <h2>Layout 页面骨架</h2>
     <p>

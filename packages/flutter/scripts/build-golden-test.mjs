@@ -65,6 +65,10 @@ const { groupByIndex, activeIndexAt } = await bundle(
   'packages/common/src/logic/indexes.ts',
   'indexes'
 )
+const { otpFromText, otpValue, otpBackspace, otpNextIndex } = await bundle(
+  'packages/common/src/logic/otp.ts',
+  'otp'
+)
 const {
   splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
 } = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
@@ -1094,6 +1098,38 @@ const pairRangeExpectations = pairRangeCases.flatMap(([a, b]) => {
  * 下拉刷新：阻尼曲线与阈值。
  * 「拉到多远算够」在两端上差几像素，用户就会觉得某一端「刷不动」。
  */
+/*
+ * 验证码：粘贴分配与退格。
+ * 「123 456」这种带空格的粘贴、以及「当前格已空再退格」这两条最容易各端各写一版。
+ */
+const otpPasteCases = ['123456', '123 456', '12-34-56', '12ab34', '1234567890', '']
+const otpPasteExpectations = otpPasteCases.flatMap((text) => {
+  const cells = otpFromText(text, 6)
+  const dart = `[${cells.map((c) => `'${c}'`).join(', ')}]`
+  return [
+    `    expect(otpFromText('${text}', 6), ${dart});`,
+    `    expect(otpValue(${dart}), '${otpValue(cells)}');`
+  ]
+})
+const otpBackspaceCases = [
+  [['1', '2', '3', '', '', ''], 2],
+  [['1', '2', '3', '', '', ''], 3],
+  [['1', '', '', '', '', ''], 0],
+  [['1', '2', '3', '4', '5', '6'], 5],
+]
+const otpBackspaceExpectations = otpBackspaceCases.flatMap(([cells, index]) => {
+  const result = otpBackspace(cells, index)
+  const before = `[${cells.map((c) => `'${c}'`).join(', ')}]`
+  const after = `[${result.cells.map((c) => `'${c}'`).join(', ')}]`
+  return [
+    `    expect(otpBackspace(${before}, ${index}).cells, ${after});`,
+    `    expect(otpBackspace(${before}, ${index}).index, ${result.index});`
+  ]
+})
+const otpNextExpectations = [[0, 6], [4, 6], [5, 6], [5, 1]].map(
+  ([i, len]) => `    expect(otpNextIndex(${i}, ${len}), ${otpNextIndex(i, len)});`
+)
+
 const pullCases = [0, 10, 30, 56, 80, 120, 200, 480, 1000]
 const pullExpectations = pullCases.flatMap((raw) => {
   const distance = pullDistance(raw)
@@ -1366,6 +1402,7 @@ import 'package:i_design/src/logic/range.dart';
 import 'package:i_design/src/logic/qrcode.dart';
 import 'package:i_design/src/logic/pull.dart';
 import 'package:i_design/src/logic/indexes.dart';
+import 'package:i_design/src/logic/otp.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1681,6 +1718,12 @@ ${tt_columnExpectations.join('\n')}
 ${enabledExpectations.join('\n')}
 ${tt_clampExpectations.join('\n')}
 ${rangeExpectations.join('\n')}
+  });
+
+  test('验证码的粘贴分配与退格与 Web 端一致', () {
+${otpPasteExpectations.join('\n')}
+${otpBackspaceExpectations.join('\n')}
+${otpNextExpectations.join('\n')}
   });
 
   test('下拉刷新的阻尼与阈值与 Web 端一致', () {

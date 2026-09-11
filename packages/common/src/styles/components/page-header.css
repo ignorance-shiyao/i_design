@@ -1,0 +1,64 @@
+/* IPageHeader —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 页头：返回、标题、副标题、右侧操作。
+ *
+ * 返回键与标题同一行而不是叠在标题上方：叠起来会让标题看着像副标题，
+ * 而它是这一页最重要的那行字。
+ */
+.i-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  padding-bottom: var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-page-header__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  min-height: var(--i-control-height-md);
+  padding: 0 var(--i-spacing-2) 0 0;
+  border: 0;
+  background: none;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-md);
+  cursor: pointer;
+}
+.i-page-header__back:hover { color: var(--i-color-brand); }
+
+/* 返回与标题之间的竖线：两段文字挨着时读起来是一句话，一条线就分开了 */
+.i-page-header__divider {
+  width: 1px;
+  height: 16px;
+  background: var(--i-color-border);
+}
+
+.i-page-header__main {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--i-spacing-2);
+  min-width: 0;
+}
+.i-page-header__title {
+  font-size: var(--i-font-size-xl);
+  font-weight: var(--i-font-weight-semibold);
+  color: var(--i-color-text);
+}
+.i-page-header__subtitle {
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+}
+.i-page-header__extra {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  margin-left: auto;
+}
+.i-page-header__content {
+  flex-basis: 100%;
+  margin-top: var(--i-spacing-3);
+}

@@ -29,6 +29,7 @@ import 'package:i_design/src/logic/range.dart';
 import 'package:i_design/src/logic/qrcode.dart';
 import 'package:i_design/src/logic/pull.dart';
 import 'package:i_design/src/logic/indexes.dart';
+import 'package:i_design/src/logic/otp.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1046,6 +1047,33 @@ void main() {
     expect(isValidRange(const ITimeValue(hour: 9, minute: 0, second: 0), const ITimeValue(hour: 18, minute: 0, second: 0)), true);
     expect(isValidRange(const ITimeValue(hour: 9, minute: 0, second: 0), const ITimeValue(hour: 9, minute: 0, second: 0)), true);
     expect(isValidRange(const ITimeValue(hour: 18, minute: 0, second: 0), const ITimeValue(hour: 9, minute: 0, second: 0)), false);
+  });
+
+  test('验证码的粘贴分配与退格与 Web 端一致', () {
+    expect(otpFromText('123456', 6), ['1', '2', '3', '4', '5', '6']);
+    expect(otpValue(['1', '2', '3', '4', '5', '6']), '123456');
+    expect(otpFromText('123 456', 6), ['1', '2', '3', '4', '5', '6']);
+    expect(otpValue(['1', '2', '3', '4', '5', '6']), '123456');
+    expect(otpFromText('12-34-56', 6), ['1', '2', '3', '4', '5', '6']);
+    expect(otpValue(['1', '2', '3', '4', '5', '6']), '123456');
+    expect(otpFromText('12ab34', 6), ['1', '2', '3', '4', '', '']);
+    expect(otpValue(['1', '2', '3', '4', '', '']), '');
+    expect(otpFromText('1234567890', 6), ['1', '2', '3', '4', '5', '6']);
+    expect(otpValue(['1', '2', '3', '4', '5', '6']), '123456');
+    expect(otpFromText('', 6), ['', '', '', '', '', '']);
+    expect(otpValue(['', '', '', '', '', '']), '');
+    expect(otpBackspace(['1', '2', '3', '', '', ''], 2).cells, ['1', '2', '', '', '', '']);
+    expect(otpBackspace(['1', '2', '3', '', '', ''], 2).index, 2);
+    expect(otpBackspace(['1', '2', '3', '', '', ''], 3).cells, ['1', '2', '', '', '', '']);
+    expect(otpBackspace(['1', '2', '3', '', '', ''], 3).index, 2);
+    expect(otpBackspace(['1', '', '', '', '', ''], 0).cells, ['', '', '', '', '', '']);
+    expect(otpBackspace(['1', '', '', '', '', ''], 0).index, 0);
+    expect(otpBackspace(['1', '2', '3', '4', '5', '6'], 5).cells, ['1', '2', '3', '4', '5', '']);
+    expect(otpBackspace(['1', '2', '3', '4', '5', '6'], 5).index, 5);
+    expect(otpNextIndex(0, 6), 1);
+    expect(otpNextIndex(4, 6), 5);
+    expect(otpNextIndex(5, 6), 5);
+    expect(otpNextIndex(5, 1), 0);
   });
 
   test('下拉刷新的阻尼与阈值与 Web 端一致', () {

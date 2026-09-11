@@ -1,0 +1,1 @@
+<view class="i-button-group"><slot /></view>

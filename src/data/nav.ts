@@ -51,6 +51,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/input', label: 'Input 输入框' },
       { to: '/components/input-adornment', label: 'InputAdornment 输入前后缀' },
       { to: '/components/range-input', label: 'RangeInput 区间输入' },
+      { to: '/components/input-otp', label: 'InputOtp 验证码输入' },
       { to: '/components/select-input', label: 'SelectInput 选择器外壳' },
       { to: '/components/textarea', label: 'Textarea 多行文本框' },
       { to: '/components/select', label: 'Select 下拉选择' },

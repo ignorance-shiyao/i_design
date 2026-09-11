@@ -10,6 +10,7 @@ import IChartScatter from './IChartScatter.vue'
 import IChartPie from './IChartPie.vue'
 import ISparkline from './ISparkline.vue'
 import IInputNumber from './IInputNumber.vue'
+import IInputOtp from './IInputOtp.vue'
 import ISlider from './ISlider.vue'
 import IQrcode from './IQrcode.vue'
 import IRangeInput from './IRangeInput.vue'
@@ -33,6 +34,7 @@ import IChatSources from './IChatSources.vue'
 import IChatSuggestions from './IChatSuggestions.vue'
 import IPromptInput from './IPromptInput.vue'
 import IButton from './IButton.vue'
+import IButtonGroup from './IButtonGroup.vue'
 import IInput from './IInput.vue'
 import IInputAdornment from './IInputAdornment.vue'
 import ITextarea from './ITextarea.vue'
@@ -41,6 +43,7 @@ import ISelectInput from './ISelectInput.vue'
 import IRadio from './IRadio.vue'
 import IRadioGroup from './IRadioGroup.vue'
 import ICheckbox from './ICheckbox.vue'
+import ICheckTag from './ICheckTag.vue'
 import ICheckboxGroup from './ICheckboxGroup.vue'
 import ISwitch from './ISwitch.vue'
 import IDatePicker from './IDatePicker.vue'
@@ -100,6 +103,7 @@ import ITabs from './ITabs.vue'
 import IBreadcrumb from './IBreadcrumb.vue'
 import ISteps from './ISteps.vue'
 import IPagination from './IPagination.vue'
+import IPageHeader from './IPageHeader.vue'
 import ICard from './ICard.vue'
 import ITable from './ITable.vue'
 import ITooltip from './ITooltip.vue'
@@ -112,6 +116,7 @@ import ILoading from './ILoading.vue'
 export {
   IIcon,
   IButton,
+  IButtonGroup,
   IInput,
   ITextarea,
   ISelect,
@@ -119,6 +124,7 @@ export {
   IRadio,
   IRadioGroup,
   ICheckbox,
+  ICheckTag,
   ICheckboxGroup,
   ISwitch,
   IDatePicker,
@@ -178,6 +184,7 @@ export {
   IBreadcrumb,
   ISteps,
   IPagination,
+  IPageHeader,
   ICard,
   ITable,
   ITooltip,
@@ -203,6 +210,7 @@ export {
   ITimeline,
   IInputAdornment,
   IInputNumber,
+  IInputOtp,
   ISlider,
   IQrcode,
   IRangeInput,
@@ -248,6 +256,7 @@ export { icons, iconNames } from './icons'
 const components = {
   IIcon,
   IButton,
+  IButtonGroup,
   IInput,
   ITextarea,
   ISelect,
@@ -255,6 +264,7 @@ const components = {
   IRadio,
   IRadioGroup,
   ICheckbox,
+  ICheckTag,
   ICheckboxGroup,
   ISwitch,
   IDatePicker,
@@ -276,6 +286,7 @@ const components = {
   IBreadcrumb,
   ISteps,
   IPagination,
+  IPageHeader,
   ICard,
   ITable,
   ITooltip,
@@ -301,6 +312,7 @@ const components = {
   ITimeline,
   IInputAdornment,
   IInputNumber,
+  IInputOtp,
   ISlider,
   IQrcode,
   IRangeInput,

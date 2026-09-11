@@ -1,0 +1,53 @@
+/* IInputOtp —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 验证码输入：几个并排的格子，一格一个字符。
+ *
+ * 为什么不用一个普通输入框：分格能让人一眼看出「要填几位」，
+ * 也让填到第几位这件事不必靠数。代价是粘贴、删除、自动填充都要自己处理。
+ */
+.i-input-otp {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+}
+.i-input-otp__cell {
+  width: 44px;
+  height: 52px;
+  padding: 0;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  /* 等宽数字：不同数字宽度一致，光标在格子里才不会左右跳 */
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-xl);
+  text-align: center;
+  outline: none;
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    box-shadow var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-input-otp__cell:focus {
+  border-color: var(--i-color-brand);
+  box-shadow: 0 0 0 3px var(--i-color-ring);
+}
+.i-input-otp__cell:disabled {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+.i-input-otp.is-invalid .i-input-otp__cell { border-color: var(--i-color-danger); }
+
+/* 分隔符：常见于「前三位 - 后三位」的验证码，纯装饰 */
+.i-input-otp__separator {
+  color: var(--i-color-text-tertiary);
+  user-select: none;
+}
+
+/* 密码形态：字符用圆点遮住，但格数仍然看得见 */
+.i-input-otp--password .i-input-otp__cell {
+  /* 用 text-security 而不是 type=password：后者会触发浏览器的密码管理器，
+     在验证码场景下弹出「保存密码吗」是错的 */
+  -webkit-text-security: disc;
+  text-security: disc;
+}

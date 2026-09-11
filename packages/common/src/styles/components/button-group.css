@@ -1,0 +1,29 @@
+/* IButtonGroup —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 一组紧挨着的按钮，表达「同一类操作的几个变体」。
+ *
+ * 相接的两边去掉圆角、边框只留一份，否则中间会出现一条两像素的粗线——
+ * 两个 1px 边框贴在一起，视觉上就是加粗了。
+ */
+.i-button-group {
+  display: inline-flex;
+  align-items: stretch;
+}
+.i-button-group > .i-button:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  /* 负 1px 让相邻边框重叠成一条 */
+  margin-left: -1px;
+}
+.i-button-group > .i-button:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+/* 悬停与选中的按钮要压在相邻按钮之上，否则它的边框会被下一个盖掉半条 */
+.i-button-group > .i-button:hover,
+.i-button-group > .i-button:focus-visible,
+.i-button-group > .i-button.is-active {
+  position: relative;
+  z-index: 1;
+}

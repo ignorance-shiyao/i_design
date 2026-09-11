@@ -129,6 +129,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IButtonGroup",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ICalendar",
     "ends": {
       "vue-next": true,
@@ -340,6 +350,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IChatTyping",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ICheckTag",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -589,6 +609,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IInputOtp",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ILayout",
     "ends": {
       "vue-next": true,
@@ -670,6 +700,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "INumberKeypad",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IPageHeader",
     "ends": {
       "vue-next": true,
       "vue": true,
