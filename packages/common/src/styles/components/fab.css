@@ -1,0 +1,42 @@
+/* IFab —— 移动端悬浮操作按钮（mobile-vue / mobile-react 共享） */
+
+/*
+ * 一页只该有一个：它表达的是「这一页最主要的那件事」，
+ * 出现两个就等于没有主次，用户还得先读一遍才知道点哪个。
+ *
+ * 位置避开手势区：底部留出安全区高度，否则在全面屏上会与home 条重叠，
+ * 上滑手势会先被系统吃掉。
+ */
+.i-fab {
+  position: fixed;
+  right: var(--i-spacing-5);
+  bottom: calc(var(--i-spacing-6) + var(--i-safe-bottom, 0px));
+  z-index: var(--i-z-sticky);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0 var(--i-spacing-5);
+  border: 0;
+  border-radius: var(--i-radius-full);
+  /* 纯色而不是渐变：同一个主题色在不同尺寸的元件上要看着是同一个色 */
+  background: var(--i-color-brand);
+  color: var(--i-color-text-on-brand);
+  font-size: var(--i-font-size-md);
+  box-shadow: var(--i-shadow-lg);
+  cursor: pointer;
+  transition: transform var(--i-motion-fast) var(--i-motion-easing),
+    opacity var(--i-motion-base) var(--i-motion-easing);
+}
+.i-fab--left { right: auto; left: var(--i-spacing-5); }
+/* 只有图标时收成正圆 */
+.i-fab--round { padding: 0; width: 56px; }
+.i-fab:active { transform: scale(0.94); }
+
+/* 滚动时淡出：内容比这个入口重要，挡住正文的按钮先让路 */
+.i-fab.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+}

@@ -1,0 +1,33 @@
+/* IPullDownRefresh —— 移动端下拉刷新（mobile-vue / mobile-react 共享） */
+
+.i-pull-refresh {
+  position: relative;
+  overflow: hidden;
+  /* 交给组件处理竖向手势，浏览器不要同时滚：两者同时生效时页面会抖 */
+  touch-action: pan-x;
+}
+.i-pull-refresh__body {
+  will-change: transform;
+}
+/* 松手回弹才加过渡：拖动过程中加过渡，手指与内容之间会差半拍 */
+.i-pull-refresh__body.is-settling {
+  transition: transform var(--i-motion-base) var(--i-motion-easing-out);
+}
+
+.i-pull-refresh__indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--i-spacing-2);
+  height: 48px;
+  margin-top: -48px;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}
+.i-pull-refresh__arrow {
+  transition: transform var(--i-motion-fast) var(--i-motion-easing);
+}

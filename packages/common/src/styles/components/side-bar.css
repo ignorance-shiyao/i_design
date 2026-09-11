@@ -1,0 +1,53 @@
+/* ISideBar —— 移动端侧边导航（mobile-vue / mobile-react 共享） */
+
+/*
+ * 左侧一条竖排导航，右侧是内容。多见于分类页：左边是类目，右边是该类目的商品。
+ *
+ * 选中项用淡底色块 + 主题色文字，并把右缘与内容区连成一片（底色相同），
+ * 表达「右边这块属于它」。不用左侧粗竖线——那是被禁用的状态暗示。
+ */
+.i-side-bar {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: 96px;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--i-color-bg-subtle);
+  -webkit-overflow-scrolling: touch;
+}
+.i-side-bar__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-height: 52px;
+  padding: var(--i-spacing-3) var(--i-spacing-2);
+  border: 0;
+  background: none;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  line-height: 1.4;
+  text-align: center;
+  cursor: pointer;
+}
+.i-side-bar__item.is-active {
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-brand);
+  font-weight: var(--i-font-weight-medium);
+}
+.i-side-bar__item:disabled {
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+.i-side-bar__badge {
+  margin-left: var(--i-spacing-1);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-danger);
+  color: #fff;
+  font-size: 10px;
+  line-height: 16px;
+}

@@ -57,6 +57,14 @@ const {
 } = await bundle('packages/common/src/logic/time.ts', 'time')
 const { orderRange, isRangeEmpty } = await bundle('packages/common/src/logic/range.ts', 'range')
 const { qrMatrix, qrVersionFor } = await bundle('packages/common/src/logic/qrcode.ts', 'qrcode')
+const { pullDistance, pullRelease, pullRotate } = await bundle(
+  'packages/common/src/logic/pull.ts',
+  'pull'
+)
+const { groupByIndex, activeIndexAt } = await bundle(
+  'packages/common/src/logic/indexes.ts',
+  'indexes'
+)
 const {
   splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
 } = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
@@ -1082,6 +1090,44 @@ const pairRangeExpectations = pairRangeCases.flatMap(([a, b]) => {
  * 都会得到一张「看起来也是二维码」但扫出来是别的内容的图。
  * 因此把每一行压成 0/1 字符串整张比，错一格就当场失败。
  */
+/*
+ * 下拉刷新：阻尼曲线与阈值。
+ * 「拉到多远算够」在两端上差几像素，用户就会觉得某一端「刷不动」。
+ */
+const pullCases = [0, 10, 30, 56, 80, 120, 200, 480, 1000]
+const pullExpectations = pullCases.flatMap((raw) => {
+  const distance = pullDistance(raw)
+  return [
+    `    expect(pullDistance(${raw}), ${distance});`,
+    `    expect(pullRelease(${distance}), ${pullRelease(distance)});`,
+    `    expect(pullRotate(${distance}), ${pullRotate(distance)});`
+  ]
+})
+
+/*
+ * 索引列表：分组顺序与「#」的位置。
+ * 数字该归到哪一组、# 排前还是排后，两端各判一次就会得到不同长度的索引条。
+ */
+const indexItems = ['Anna', 'bob', '3M', 'Zoe', 'apple', '', '中文', 'Bill']
+const indexGroups = groupByIndex(indexItems, (item) => item)
+const indexExpectations = [
+  `    final groups = groupByIndex<String>(${JSON.stringify(indexItems)}, (item) => item);`,
+  `    expect(groups.map((g) => g.index).toList(), ${JSON.stringify(indexGroups.map((g) => g.index))});`,
+  `    expect(groups.map((g) => g.items.length).toList(), ${JSON.stringify(indexGroups.map((g) => g.items.length))});`
+]
+const offsets = [
+  { index: 'A', top: 0 },
+  { index: 'B', top: 120 },
+  { index: '#', top: 260 }
+]
+const dartOffsets = `[${offsets
+  .map((o) => `(index: '${o.index}', top: ${o.top.toFixed(1)})`)
+  .join(', ')}]`
+const activeExpectations = [0, 119, 120, 259, 400].map(
+  (top) =>
+    `    expect(activeIndexAt(${dartOffsets}, ${top.toFixed(1)}), '${activeIndexAt(offsets, top)}');`
+)
+
 const qrCases = [
   ['i-design', 'L'],
   ['https://ignorance-shiyao.github.io/', 'M'],
@@ -1318,6 +1364,8 @@ import 'package:i_design/src/logic/calendar.dart';
 import 'package:i_design/src/logic/mention.dart';
 import 'package:i_design/src/logic/range.dart';
 import 'package:i_design/src/logic/qrcode.dart';
+import 'package:i_design/src/logic/pull.dart';
+import 'package:i_design/src/logic/indexes.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1633,6 +1681,15 @@ ${tt_columnExpectations.join('\n')}
 ${enabledExpectations.join('\n')}
 ${tt_clampExpectations.join('\n')}
 ${rangeExpectations.join('\n')}
+  });
+
+  test('下拉刷新的阻尼与阈值与 Web 端一致', () {
+${pullExpectations.join('\n')}
+  });
+
+  test('索引列表的分组与定位与 Web 端一致', () {
+${indexExpectations.join('\n')}
+${activeExpectations.join('\n')}
   });
 
   test('二维码矩阵与 Web 端逐格一致', () {
