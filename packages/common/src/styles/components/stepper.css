@@ -1,0 +1,52 @@
+/* IStepper —— 移动端步进器（mobile-vue / mobile-react 共享） */
+
+/*
+ * 与 Web 的 InputNumber 是两件东西，不是同一件的大号版：
+ * 桌面端的数字框以键盘输入为主、加减键是补充；手机上反过来——
+ * 拇指点加减是主路径，键盘要弹出整块面板，代价高得多。
+ * 因此这里加减键是主体，中间的数字才是那个补充。
+ */
+.i-stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: var(--i-radius-md);
+  overflow: hidden;
+  background: var(--i-color-bg-subtle);
+}
+.i-stepper__btn {
+  display: grid;
+  place-items: center;
+  /* 44px：Apple HIG 与 Material 的可点击区域下限，拇指点得准的最小尺寸 */
+  width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text);
+  cursor: pointer;
+  transition: background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-stepper__btn:active:not(:disabled) { background: var(--i-color-border); }
+.i-stepper__btn:disabled {
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.i-stepper__input {
+  width: 56px;
+  border: 0;
+  padding: 0 var(--i-spacing-1);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text);
+  /* 16px：低于此值 iOS Safari 会在聚焦时自动放大整页 */
+  font-size: var(--i-font-size-md);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.i-stepper__input:disabled {
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.i-stepper--sm .i-stepper__btn { width: 36px; min-height: 36px; }
+.i-stepper--sm .i-stepper__input { width: 44px; }

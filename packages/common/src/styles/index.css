@@ -46,7 +46,9 @@
 @import './components/divider.css';
 @import './components/drawer.css';
 @import './components/empty.css';
+@import './components/fab.css';
 @import './components/flow.css';
+@import './components/footer.css';
 @import './components/form-item.css';
 @import './components/form.css';
 @import './components/grid.css';
@@ -86,11 +88,13 @@
 @import './components/segmented.css';
 @import './components/select-input.css';
 @import './components/select.css';
+@import './components/side-bar.css';
 @import './components/skeleton.css';
 @import './components/slider.css';
 @import './components/space.css';
 @import './components/splitter.css';
 @import './components/statistic.css';
+@import './components/stepper.css';
 @import './components/steps.css';
 @import './components/sticky-tool.css';
 @import './components/sticky.css';

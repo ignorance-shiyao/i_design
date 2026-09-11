@@ -4,11 +4,11 @@
  */
 export const frameworkStats: Record<string, number> = {
   "vue-next": 109,
-  "vue": 100,
+  "vue": 109,
   "react": 109,
   "miniprogram": 110,
-  "mobile-vue": 121,
-  "mobile-react": 121,
+  "mobile-vue": 125,
+  "mobile-react": 125,
   "flutter": 101
 }
 

@@ -9,6 +9,10 @@ import ISwipeCell from '@i-design/mobile-vue/src/components/ISwipeCell.vue'
 import ICell from '@i-design/mobile-vue/src/components/ICell.vue'
 import ISearchBar from '@i-design/mobile-vue/src/components/ISearchBar.vue'
 import ICountDown from '@i-design/mobile-vue/src/components/ICountDown.vue'
+import IStepper from '@i-design/mobile-vue/src/components/IStepper.vue'
+import IFab from '@i-design/mobile-vue/src/components/IFab.vue'
+import IFooter from '@i-design/mobile-vue/src/components/IFooter.vue'
+import ISideBar from '@i-design/mobile-vue/src/components/ISideBar.vue'
 import IPicker from '@i-design/mobile-vue/src/components/IPicker.vue'
 import IButton from '@/components/IButton.vue'
 import IInfiniteScroll from '@/components/IInfiniteScroll.vue'
@@ -39,6 +43,14 @@ const entries = [
 
 const popupOpen = ref(false)
 const keyword = ref('')
+const quantity = ref(1)
+const category = ref('cloud')
+const categories = [
+  { value: 'cloud', label: '云服务' },
+  { value: 'data', label: '数据库', badge: 3 },
+  { value: 'net', label: '网络' },
+  { value: 'sec', label: '安全' }
+]
 
 // 级联：下一列的候选由上一列决定，children 里放下级
 const regions = [
@@ -188,6 +200,51 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
       </div>
     </DemoBlock>
 
+    <h2>步进器、悬浮按钮、侧边导航与页脚</h2>
+    <p>
+      这四件都是手机上才成立的形态。步进器不是把桌面端的数字输入框放大——
+      桌面端以键盘输入为主、加减键是补充，手机上反过来：拇指点加减是主路径，
+      弹一次键盘要占掉半屏。因此加减键做到 44px，数字反而是那个补充。
+    </p>
+    <p>
+      悬浮按钮一页只该有一个：它表达的是「这一页最主要的那件事」，
+      出现两个就等于没有主次。底部留出安全区高度，否则在全面屏上会压住手势条，
+      上滑会先被系统吃掉。
+    </p>
+
+    <DemoBlock
+      title="分类页与购买数量"
+      description="侧边导航的选中项底色与右侧内容区相同，表达「右边这块属于它」——不用左侧粗竖线，那在这套体系里是留给状态与类型的暗示。"
+      code='<ISideBar v-model="category" :items="categories" />
+<IStepper v-model="quantity" :min="1" :max="99" />
+<IFab text="新建" @click="..." />'
+    >
+      <div class="phone-wrap">
+        <!-- 加 transform 让 .phone 成为固定定位的包含块，
+             悬浮按钮才会贴在这台「手机」里而不是整个浏览器视口上 -->
+        <div class="phone phone--contained">
+          <div class="phone__screen phone__screen--split">
+            <ISideBar v-model="category" :items="categories" />
+            <div class="phone__pane">
+              <div class="phone__section">
+                购买数量
+                <IStepper v-model="quantity" :min="1" :max="99" />
+              </div>
+              <div class="phone__section">
+                当前类目：{{ categories.find((c) => c.value === category)?.label }}
+              </div>
+              <IFooter
+                text="© 2026 Ignorance Design"
+                :links="[{ label: '服务协议' }, { label: '隐私政策' }]"
+                @select="(link) => message.info(link.label)"
+              />
+            </div>
+          </div>
+          <IFab text="新建" @click="message.info('新建工作项')" />
+        </div>
+      </div>
+    </DemoBlock>
+
     <h2>无限滚动</h2>
     <p>
       触发规则里最容易漏的一条是「内容还没撑满容器时直接加载」。第一页太短就没有滚动条，
@@ -303,4 +360,29 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
 .amount__value { font-size: var(--i-font-size-3xl); color: var(--i-color-text); }
 .rules { line-height: 1.9; }
 .rules li { margin-bottom: var(--i-spacing-2); }
+
+/* 分类页示例：左导航固定宽度，右侧内容自适应。
+   .phone__screen 本身是竖向 flex，这里必须显式改回横向 */
+.phone__screen--split {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+}
+.phone__pane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--i-color-bg-elevated);
+}
+.phone__pane .i-footer {
+  margin-top: auto;
+  /* 给悬浮按钮让出位置：真实页面里同样要留，否则页脚最后一行会被按钮压住 */
+  padding-bottom: 72px;
+}
+
+.phone--contained {
+  transform: translateZ(0);
+}
 </style>

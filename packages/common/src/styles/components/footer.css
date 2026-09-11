@@ -1,0 +1,32 @@
+/* IFooter —— 移动端页脚（mobile-vue / mobile-react 共享） */
+
+/*
+ * 页面到底了的收尾：版权、备案、几个次要链接。
+ * 字号与颜色都压到最低一档——它存在的意义是「需要时找得到」，不是被看见。
+ */
+.i-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-6) var(--i-spacing-4)
+    calc(var(--i-spacing-6) + var(--i-safe-bottom, 0px));
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  text-align: center;
+}
+.i-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--i-spacing-3);
+}
+.i-footer__link {
+  color: var(--i-color-text-secondary);
+  text-decoration: none;
+  /* 命中区撑到 44px，但视觉高度不变：链接之间挨得近，点错的代价是跳错页 */
+  padding: var(--i-spacing-3) 0;
+}
+.i-footer__sep { color: var(--i-color-border); }
+.i-footer__text { line-height: 1.6; }
