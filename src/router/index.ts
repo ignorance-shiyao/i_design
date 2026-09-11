@@ -53,6 +53,10 @@ const routes: RouteRecordRaw[] = [
         path: 'range-input',
         component: () => import('@/pages/components/RangeInputPage.vue')
       },
+      {
+        path: 'select-input',
+        component: () => import('@/pages/components/SelectInputPage.vue')
+      },
       { path: 'qrcode', component: () => import('@/pages/components/QrcodePage.vue') },
       {
         path: 'sticky-tool',

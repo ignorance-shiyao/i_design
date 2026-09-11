@@ -37,6 +37,7 @@ import IInput from './IInput.vue'
 import IInputAdornment from './IInputAdornment.vue'
 import ITextarea from './ITextarea.vue'
 import ISelect from './ISelect.vue'
+import ISelectInput from './ISelectInput.vue'
 import IRadio from './IRadio.vue'
 import IRadioGroup from './IRadioGroup.vue'
 import ICheckbox from './ICheckbox.vue'
@@ -114,6 +115,7 @@ export {
   IInput,
   ITextarea,
   ISelect,
+  ISelectInput,
   IRadio,
   IRadioGroup,
   ICheckbox,
@@ -249,6 +251,7 @@ const components = {
   IInput,
   ITextarea,
   ISelect,
+  ISelectInput,
   IRadio,
   IRadioGroup,
   ICheckbox,

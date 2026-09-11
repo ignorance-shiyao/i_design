@@ -44,6 +44,7 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Input', cn: '输入框', to: '/components/input', desc: '单行文本输入', status: 'ready' },
       { name: 'InputAdornment', cn: '输入前后缀', to: '/components/input-adornment', desc: '把固定的前后缀移出输入框', status: 'ready' },
       { name: 'RangeInput', cn: '区间输入', to: '/components/range-input', desc: '一次填一个区间的两端', status: 'ready' },
+      { name: 'SelectInput', cn: '选择器外壳', to: '/components/select-input', desc: '自定义选择器的输入框外壳', status: 'ready' },
       { name: 'Textarea', cn: '多行文本框', to: '/components/textarea', desc: '多行文本输入与字数统计', status: 'ready' },
       { name: 'Select', cn: '下拉选择', to: '/components/select', desc: '从预设项中选择', status: 'ready' },
       { name: 'Radio', cn: '单选框', to: '/components/radio', desc: '一组互斥选项中选一个', status: 'ready' },

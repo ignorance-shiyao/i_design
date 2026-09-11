@@ -1,0 +1,2 @@
+@import '../../../dist/styles/select-input.wxss';
+@import '../../../dist/styles/icons.wxss';

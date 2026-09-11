@@ -829,6 +829,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ISelectInput",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ISkeleton",
     "ends": {
       "vue-next": true,
