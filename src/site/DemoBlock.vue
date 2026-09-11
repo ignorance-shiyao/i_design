@@ -62,10 +62,17 @@ const showCode = ref(false)
   flex-wrap: wrap;
   align-items: center;
   gap: var(--i-spacing-3);
-  padding: var(--i-spacing-8) var(--i-spacing-6);
-  /* 极淡的点阵底纹，把示例区与说明区分开又不抢眼 */
-  background-image: radial-gradient(var(--i-color-hairline) 1px, transparent 1px);
-  background-size: 16px 16px;
+  padding: var(--i-spacing-6);
+  /*
+   * 示例区用页面底色，读作从卡片上凹下去的一块，而不是铺一层点阵底纹。
+   *
+   * 点阵是为了把示例区和说明区分开——可它同时也在和示例里那个组件抢注意力，
+   * 而这一整页存在的理由就是让人看清那个组件。凹下去这件事本身就够分了，
+   * 而且它用的是已有的层级关系，不是又发明一种装饰。
+   */
+  background: var(--i-color-bg);
+  border-top: 1px solid var(--i-color-hairline);
+  border-bottom: 1px solid var(--i-color-hairline);
 }
 .demo__foot {
   border-top: 1px solid var(--i-color-hairline);

@@ -74,12 +74,19 @@ watch(() => route.path, revealActive)
   margin-bottom: var(--i-spacing-2);
   padding-left: var(--i-spacing-3);
 }
+/*
+ * 侧栏排得紧一些。
+ *
+ * 组件有一百来个，条目按正文字号、松散排下来时，一屏只装得下十来条，
+ * 找任何一个都要滚半天。文档站的侧栏是导航不是正文，
+ * 密一点才扫得快——这也是所有真正被用起来的文档站的做法。
+ */
 .doc-layout__side a {
   position: relative;
-  padding: var(--i-spacing-2) var(--i-spacing-3);
+  padding: 5px var(--i-spacing-3);
   border-radius: var(--i-radius-md);
   color: var(--i-color-text-secondary);
-  font-size: var(--i-font-size-md);
+  font-size: var(--i-font-size-sm);
   transition: color var(--i-motion-fast) var(--i-motion-easing),
     background var(--i-motion-fast) var(--i-motion-easing);
 }
