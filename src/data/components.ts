@@ -81,6 +81,7 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Collapse', cn: '折叠面板', to: '/components/collapse', desc: '折叠次要内容', status: 'ready' },
       { name: 'Tree', cn: '树', to: '/components/tree', desc: '展示层级结构', status: 'ready' },
       { name: 'Carousel', cn: '走马灯', to: '/components/data-display', desc: '一组内容轮播，移动端即 Swiper', status: 'ready' },
+      { name: 'Countdown', cn: '倒计时', to: '/components/data-display', desc: '倒数到某个截止时刻', status: 'ready' },
       { name: 'InfiniteScroll', cn: '无限滚动', to: '/components/mobile', desc: '翻到底自动续下一页', status: 'ready' },
       { name: 'Descriptions', cn: '描述列表', to: '/components/descriptions', desc: '成组展示只读字段', status: 'ready' },
       { name: 'Comment', cn: '评论', to: '/components/comment', desc: '展示一条讨论记录', status: 'ready' },

@@ -25,6 +25,7 @@ import ICol from './ICol.vue'
 import ISegmented from './ISegmented.vue'
 import IProgress from './IProgress.vue'
 import IStatistic from './IStatistic.vue'
+import ICountdown from './ICountdown.vue'
 import ITimeline from './ITimeline.vue'
 import IChatMessage from './IChatMessage.vue'
 import IChatTyping from './IChatTyping.vue'
@@ -211,6 +212,7 @@ export {
   ISegmented,
   IProgress,
   IStatistic,
+  ICountdown,
   ITimeline,
   IInputAdornment,
   IInputNumber,
@@ -314,6 +316,7 @@ const components = {
   ISegmented,
   IProgress,
   IStatistic,
+  ICountdown,
   ITimeline,
   IInputAdornment,
   IInputNumber,

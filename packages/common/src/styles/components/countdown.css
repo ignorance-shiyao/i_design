@@ -20,3 +20,48 @@
   font-weight: 600;
 }
 .i-countdown__unit { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
+
+/* ------------------------------------------------ 桌面端的指标式倒计时 */
+
+/*
+ * 同一个 .i-countdown 底下有两种排布：移动端那种贴着一行文字的（上面那段），
+ * 和这里这种带标题、数字占一整行的指标卡。后者用 --block 修饰符另起一套，
+ * 而不是改上面的基础规则——改基础规则会把已经在用的移动端版本一起挪位。
+ */
+.i-countdown--block {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+.i-countdown__title {
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+  margin-bottom: var(--i-spacing-2);
+}
+.i-countdown__value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--i-spacing-1);
+  font-size: var(--i-font-size-3xl);
+  font-weight: 600;
+  color: var(--i-color-text);
+  line-height: 1.2;
+}
+.i-countdown--sm .i-countdown__value { font-size: var(--i-font-size-2xl); }
+.i-countdown--brand .i-countdown__value { color: var(--i-color-brand); }
+.i-countdown--success .i-countdown__value { color: var(--i-color-success); }
+.i-countdown--danger .i-countdown__value { color: var(--i-color-danger); }
+
+.i-countdown__affix {
+  font-size: var(--i-font-size-lg);
+  font-weight: 400;
+  color: var(--i-color-text-secondary);
+}
+
+/*
+ * 归零后退成次级文字色。不换成某个「已结束」的专用颜色——倒计时结束往往紧接着
+ * 一次跳转或刷新，这一眼的变化只需要表示「这个数不再动了」，换色会让人以为出了错。
+ */
+.i-countdown.is-finished .i-countdown__value {
+  color: var(--i-color-text-tertiary);
+}

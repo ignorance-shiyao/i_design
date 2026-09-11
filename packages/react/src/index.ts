@@ -49,6 +49,7 @@ export { Collapse, type CollapseItem, type CollapseProps } from './components/Co
 export { ColorPicker, type ColorPickerProps } from './components/ColorPicker'
 export { Comment, type CommentProps } from './components/Comment'
 export { ContextCards, type ContextCardsProps } from './components/ContextCards'
+export { Countdown, type CountdownProps } from './components/Countdown'
 export { DatePicker, type DatePickerProps } from './components/DatePicker'
 export { Descriptions, type DescriptionItem, type DescriptionsProps } from './components/Descriptions'
 export { DiffTable, type DiffTableProps } from './components/DiffTable'

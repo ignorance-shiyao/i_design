@@ -7,6 +7,9 @@ import type { CalendarMark, DateRange } from '@i-design/common'
 import ISegmented from '@/components/ISegmented.vue'
 import IProgress from '@/components/IProgress.vue'
 import IStatistic from '@/components/IStatistic.vue'
+import ICountdown from '@/components/ICountdown.vue'
+import IButton from '@/components/IButton.vue'
+import { message } from '@/components/message'
 import ITimeline from '@/components/ITimeline.vue'
 import ICard from '@/components/ICard.vue'
 import ICarousel from '@/components/ICarousel.vue'
@@ -21,6 +24,17 @@ const ranges = [
   { label: '月', value: 'month' },
   { label: '年', value: 'year', disabled: true }
 ]
+
+const deadline = ref(Date.now() + 2 * 86400000 + 3 * 3600000 + 25 * 60000)
+const sprint = ref(Date.now() + 95 * 1000)
+const running = ref(true)
+function onDraw() {
+  message.success('开奖了')
+}
+function restartSprint() {
+  sprint.value = Date.now() + 95 * 1000
+  running.value = true
+}
 
 const slide = ref(0)
 const slides = [
@@ -131,6 +145,49 @@ const groups = [
             <ICard><IStatistic title="待处理工单" :value="27" type="danger" extra="其中 4 条超时" /></ICard>
           </ICol>
         </IRow>
+      </div>
+    </DemoBlock>
+
+    <h2>Countdown 倒计时</h2>
+    <p>
+      每一跳都从绝对截止时刻重算，而不是把上一次的值减掉一个间隔——后者每跳都会积累几毫秒误差，
+      页面挂一晚上能差出好几秒；标签页被切到后台时定时器还会被浏览器压慢，回来就直接错了。
+    </p>
+    <p>
+      归零的时机也有讲究：不显示毫秒时按「向上取整到秒」显示，剩 1.4 秒时是 02 而不是 01。
+      向下取整的话，最后那个 00 会挂满整整一秒才结束，用户看到的是「归零了却还没完」。
+    </p>
+    <DemoBlock
+      title="截止时刻"
+      description="模板里没写的那一位会并进相邻的更小单位，而不是被丢掉：用 mm:ss 而剩余超过一小时时显示 65:30，不会骗人地显示成 05:30。"
+      code='<ICountdown title="距活动结束" :value="deadline" format="DD 天 HH:mm:ss" />'
+    >
+      <div class="metrics">
+        <IRow :gutter="16">
+          <ICol :span="8" :sm="24">
+            <ICard><ICountdown title="距活动结束" :value="deadline" format="DD 天 HH:mm:ss" /></ICard>
+          </ICol>
+          <ICol :span="8" :sm="24">
+            <ICard><ICountdown title="仅按分秒计" :value="deadline" format="mm:ss" size="sm" type="brand" /></ICard>
+          </ICol>
+          <ICol :span="8" :sm="24">
+            <ICard><ICountdown title="精确到毫秒" :value="sprint" format="mm:ss.SSS" size="sm" type="danger" /></ICard>
+          </ICol>
+        </IRow>
+      </div>
+    </DemoBlock>
+
+    <DemoBlock
+      title="暂停与结束"
+      description="暂停后重新打开走的仍是绝对时刻，不会「补回」暂停期间的时间。finish 只在真正走到零的那一次触发——截止时刻早已过去时刷新页面不该把跳转、弹窗这些副作用再跑一遍。"
+      code='<ICountdown :value="sprint" :running="running" @finish="onFinish" />'
+    >
+      <div class="cd-demo">
+        <ICountdown :value="sprint" :running="running" suffix="后开奖" @finish="onDraw" />
+        <div class="cd-demo__actions">
+          <IButton size="sm" @click="running = !running">{{ running ? '暂停' : '继续' }}</IButton>
+          <IButton size="sm" @click="restartSprint">重新计时</IButton>
+        </div>
       </div>
     </DemoBlock>
 
@@ -250,6 +307,16 @@ const groups = [
 </template>
 
 <style scoped>
+.cd-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--i-spacing-4);
+}
+.cd-demo__actions {
+  display: flex;
+  gap: var(--i-spacing-2);
+}
 .cal-demo { max-width: 620px; }
 .mention-demo { max-width: 520px; }
 .hint { margin: var(--i-spacing-3) 0 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }

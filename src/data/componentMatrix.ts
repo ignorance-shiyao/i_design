@@ -439,6 +439,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ICountdown",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IDatePicker",
     "ends": {
       "vue-next": true,
