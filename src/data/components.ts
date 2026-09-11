@@ -23,7 +23,8 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Icon', cn: '图标', to: '/components/icon', desc: '38 个内联 SVG 图标', status: 'ready' },
       { name: 'Tag', cn: '标签', to: '/components/tag', desc: '标记分类或状态', status: 'ready' },
       { name: 'Divider', cn: '分割线', to: '/components/divider', desc: '分隔内容区块', status: 'ready' },
-      { name: 'Link', cn: '链接', to: '/components/link', desc: '跳转到另一个地址', status: 'ready' }
+      { name: 'Link', cn: '链接', to: '/components/link', desc: '跳转到另一个地址', status: 'ready' },
+      { name: 'StickyTool', cn: '侧边工具条', to: '/components/sticky-tool', desc: '贴边的一组快捷入口', status: 'ready' }
     ]
   },
   {
@@ -42,6 +43,7 @@ export const componentCategories: ComponentCategory[] = [
     items: [
       { name: 'Input', cn: '输入框', to: '/components/input', desc: '单行文本输入', status: 'ready' },
       { name: 'InputAdornment', cn: '输入前后缀', to: '/components/input-adornment', desc: '把固定的前后缀移出输入框', status: 'ready' },
+      { name: 'RangeInput', cn: '区间输入', to: '/components/range-input', desc: '一次填一个区间的两端', status: 'ready' },
       { name: 'Textarea', cn: '多行文本框', to: '/components/textarea', desc: '多行文本输入与字数统计', status: 'ready' },
       { name: 'Select', cn: '下拉选择', to: '/components/select', desc: '从预设项中选择', status: 'ready' },
       { name: 'Radio', cn: '单选框', to: '/components/radio', desc: '一组互斥选项中选一个', status: 'ready' },

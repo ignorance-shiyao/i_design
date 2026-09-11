@@ -55,6 +55,7 @@ const {
 const {
   formatTime, parseTime, timeColumn, isUnitEnabled, clampTime, isValidRange
 } = await bundle('packages/common/src/logic/time.ts', 'time')
+const { orderRange, isRangeEmpty } = await bundle('packages/common/src/logic/range.ts', 'range')
 const {
   splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
 } = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
@@ -1057,6 +1058,22 @@ const ai_panExpectations = [
 const ai_stepExpectations = [[0, 3, 1], [2, 3, 1], [0, 3, -1], [1, 3, -1], [0, 0, 1]].map(([c, n, d]) =>
   `    expect(stepImage(${c}, ${n}, ${d}), ${stepImage(c, n, d)});`)
 
+/*
+ * 区间：起止对调只在两端都有值时发生。
+ * 「只填了一头」与「正在输入」这两种中间态最容易被各端各自解释一遍。
+ */
+const pairRangeCases = [
+  ['1', '9'], ['9', '1'], ['', '5'], ['5', ''], ['', ''],
+  ['10', '9'], ['2026-01-05', '2026-01-03'], ['b', 'a'], ['a', 'a'],
+]
+const pairRangeExpectations = pairRangeCases.flatMap(([a, b]) => {
+  const ordered = orderRange([a, b])
+  return [
+    `    expect(orderRange(['${a}', '${b}']), ['${ordered[0]}', '${ordered[1]}']);`,
+    `    expect(isRangeEmpty(['${a}', '${b}']), ${isRangeEmpty([a, b])});`
+  ]
+})
+
 const altExpectations = [
   ['loading', '示例图'], ['error', '示例图'], ['loaded', '示例图'],
   ['error', ''], ['loading', ''],
@@ -1274,6 +1291,7 @@ import 'package:i_design/src/logic/virtual.dart';
 import 'package:i_design/src/logic/color.dart';
 import 'package:i_design/src/logic/calendar.dart';
 import 'package:i_design/src/logic/mention.dart';
+import 'package:i_design/src/logic/range.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
@@ -1580,6 +1598,10 @@ ${tt_columnExpectations.join('\n')}
 ${enabledExpectations.join('\n')}
 ${tt_clampExpectations.join('\n')}
 ${rangeExpectations.join('\n')}
+  });
+
+  test('区间的起止对调与空判定与 Web 端一致', () {
+${pairRangeExpectations.join('\n')}
   });
 
   test('穿梭框的搬运、勾选与全选与 Web 端一致', () {

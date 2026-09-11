@@ -739,6 +739,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IRangeInput",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IRate",
     "ends": {
       "vue-next": true,
@@ -870,6 +880,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "ISticky",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IStickyTool",
     "ends": {
       "vue-next": true,
       "vue": true,

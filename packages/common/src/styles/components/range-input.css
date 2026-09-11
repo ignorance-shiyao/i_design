@@ -1,0 +1,57 @@
+/* IRangeInput —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 区间输入：两个输入框共用一圈边框，中间一个分隔符。
+ *
+ * 不做成两个独立的输入框并排：那样用户看到的是两个字段，
+ * 而「起」和「止」是同一个字段的两端——校验、清空、聚焦态都应当作为一个整体。
+ */
+.i-range-input {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  height: var(--i-control-height-md);
+  padding: 0 var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    box-shadow var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-range-input--sm { height: var(--i-control-height-sm); }
+.i-range-input--lg { height: var(--i-control-height-lg); }
+
+/* 聚焦态挂在外壳上：焦点在哪一头都要让整个控件亮起来，它是一个字段 */
+.i-range-input.is-focused {
+  border-color: var(--i-color-brand);
+  box-shadow: 0 0 0 3px var(--i-color-ring);
+}
+.i-range-input.is-invalid { border-color: var(--i-color-danger); }
+.i-range-input.is-disabled {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.i-range-input__field {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--i-font-size-md);
+  outline: none;
+}
+.i-range-input__field::placeholder { color: var(--i-color-text-tertiary); }
+.i-range-input__field:disabled { cursor: not-allowed; }
+/* 起止两端左右对齐：数字在中间相遇，比较两端时眼睛不用来回找 */
+.i-range-input__field--end { text-align: right; }
+
+.i-range-input__separator {
+  flex: none;
+  color: var(--i-color-text-tertiary);
+  user-select: none;
+}

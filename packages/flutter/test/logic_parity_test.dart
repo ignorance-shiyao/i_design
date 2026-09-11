@@ -25,6 +25,7 @@ import 'package:i_design/src/logic/virtual.dart';
 import 'package:i_design/src/logic/color.dart';
 import 'package:i_design/src/logic/calendar.dart';
 import 'package:i_design/src/logic/mention.dart';
+import 'package:i_design/src/logic/range.dart';
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '$label 点位不一致');
@@ -1033,6 +1034,27 @@ void main() {
     expect(isValidRange(const ITimeValue(hour: 9, minute: 0, second: 0), const ITimeValue(hour: 18, minute: 0, second: 0)), true);
     expect(isValidRange(const ITimeValue(hour: 9, minute: 0, second: 0), const ITimeValue(hour: 9, minute: 0, second: 0)), true);
     expect(isValidRange(const ITimeValue(hour: 18, minute: 0, second: 0), const ITimeValue(hour: 9, minute: 0, second: 0)), false);
+  });
+
+  test('区间的起止对调与空判定与 Web 端一致', () {
+    expect(orderRange(['1', '9']), ['1', '9']);
+    expect(isRangeEmpty(['1', '9']), false);
+    expect(orderRange(['9', '1']), ['1', '9']);
+    expect(isRangeEmpty(['9', '1']), false);
+    expect(orderRange(['', '5']), ['', '5']);
+    expect(isRangeEmpty(['', '5']), false);
+    expect(orderRange(['5', '']), ['5', '']);
+    expect(isRangeEmpty(['5', '']), false);
+    expect(orderRange(['', '']), ['', '']);
+    expect(isRangeEmpty(['', '']), true);
+    expect(orderRange(['10', '9']), ['9', '10']);
+    expect(isRangeEmpty(['10', '9']), false);
+    expect(orderRange(['2026-01-05', '2026-01-03']), ['2026-01-03', '2026-01-05']);
+    expect(isRangeEmpty(['2026-01-05', '2026-01-03']), false);
+    expect(orderRange(['b', 'a']), ['a', 'b']);
+    expect(isRangeEmpty(['b', 'a']), false);
+    expect(orderRange(['a', 'a']), ['a', 'a']);
+    expect(isRangeEmpty(['a', 'a']), false);
   });
 
   test('穿梭框的搬运、勾选与全选与 Web 端一致', () {

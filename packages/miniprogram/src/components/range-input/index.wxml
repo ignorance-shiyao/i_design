@@ -1,0 +1,25 @@
+<view
+  class="i-range-input i-range-input--{{size}} {{focused ? 'is-focused' : ''}} {{disabled ? 'is-disabled' : ''}} {{invalid ? 'is-invalid' : ''}}"
+>
+  <input
+    class="i-range-input__field"
+    value="{{value[0]}}"
+    placeholder="{{placeholders[0]}}"
+    disabled="{{disabled}}"
+    bindinput="onStart"
+    bindfocus="onFocus"
+    bindblur="onBlur"
+  />
+
+  <text class="i-range-input__separator">{{separator}}</text>
+
+  <input
+    class="i-range-input__field i-range-input__field--end"
+    value="{{value[1]}}"
+    placeholder="{{placeholders[1]}}"
+    disabled="{{disabled}}"
+    bindinput="onEnd"
+    bindfocus="onFocus"
+    bindblur="onBlur"
+  />
+</view>

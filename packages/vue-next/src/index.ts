@@ -11,6 +11,7 @@ import IChartPie from './IChartPie.vue'
 import ISparkline from './ISparkline.vue'
 import IInputNumber from './IInputNumber.vue'
 import ISlider from './ISlider.vue'
+import IRangeInput from './IRangeInput.vue'
 import IRate from './IRate.vue'
 import ILink from './ILink.vue'
 import IList from './IList.vue'
@@ -86,6 +87,7 @@ import IColorPicker from './IColorPicker.vue'
 import ICalendar from './ICalendar.vue'
 import IMentions from './IMentions.vue'
 import ISticky from './ISticky.vue'
+import IStickyTool from './IStickyTool.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
 import ITag from './ITag.vue'
@@ -162,6 +164,7 @@ export {
   ICalendar,
   IMentions,
   ISticky,
+  IStickyTool,
   IForm,
   IFormItem,
   ITag,
@@ -197,6 +200,7 @@ export {
   IInputAdornment,
   IInputNumber,
   ISlider,
+  IRangeInput,
   IRate,
   ILink,
   IList,
@@ -291,6 +295,7 @@ const components = {
   IInputAdornment,
   IInputNumber,
   ISlider,
+  IRangeInput,
   IRate,
   ILink,
   IList,

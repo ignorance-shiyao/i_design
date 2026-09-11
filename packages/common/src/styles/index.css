@@ -77,6 +77,7 @@
 @import './components/prompt-input.css';
 @import './components/radio-group.css';
 @import './components/radio.css';
+@import './components/range-input.css';
 @import './components/rate.css';
 @import './components/result.css';
 @import './components/search-bar.css';
@@ -88,6 +89,7 @@
 @import './components/splitter.css';
 @import './components/statistic.css';
 @import './components/steps.css';
+@import './components/sticky-tool.css';
 @import './components/sticky.css';
 @import './components/swipe-cell.css';
 @import './components/switch.css';

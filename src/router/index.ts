@@ -49,6 +49,14 @@ const routes: RouteRecordRaw[] = [
       { path: 'modal', component: () => import('@/pages/components/ModalPage.vue') },
       { path: 'divider', component: () => import('@/pages/components/DividerPage.vue') },
       { path: 'link', component: () => import('@/pages/components/LinkPage.vue') },
+      {
+        path: 'range-input',
+        component: () => import('@/pages/components/RangeInputPage.vue')
+      },
+      {
+        path: 'sticky-tool',
+        component: () => import('@/pages/components/StickyToolPage.vue')
+      },
       { path: 'comment', component: () => import('@/pages/components/CommentPage.vue') },
       {
         path: 'image-viewer',
