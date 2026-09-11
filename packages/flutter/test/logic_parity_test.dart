@@ -32,6 +32,7 @@ import 'package:i_design/src/logic/indexes.dart';
 import 'package:i_design/src/logic/otp.dart';
 import 'package:i_design/src/logic/time_select.dart';
 import 'package:i_design/src/logic/scrollbar.dart';
+import 'package:i_design/src/logic/countdown.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1072,6 +1073,50 @@ void main() {
     expect(clockOfMinutes(545), '09:05');
     expect(clockOfMinutes(1439), '23:59');
     expect(clockOfMinutes(1440), '00:00');
+  });
+
+  test('倒计时的取整、并位与刷新间隔与 Web 端一致', () {
+    expect(formatCountdown(3661000, 'HH:mm:ss'), '01:01:01');
+    expect(formatCountdown(0, 'HH:mm:ss'), '00:00:00');
+    expect(formatCountdown(1400, 'ss'), '02');
+    expect(formatCountdown(1400, 'ss.SSS'), '01.400');
+    expect(formatCountdown(5430000, 'mm:ss'), '90:30');
+    expect(formatCountdown(176400000, 'DD 天 HH:mm:ss'), '02 天 01:00:00');
+    expect(formatCountdown(176400000, 'HH:mm:ss'), '49:00:00');
+    expect(formatCountdown(3661000, 'H:m:s'), '1:1:1');
+    expect(formatCountdown(999, 'ss'), '01');
+    expect(formatCountdown(1000, 'ss'), '01');
+    expect(formatCountdown(1001, 'ss'), '02');
+    expect(countdownParts(1400, false).days, 0);
+    expect(countdownParts(1400, false).hours, 0);
+    expect(countdownParts(1400, false).minutes, 0);
+    expect(countdownParts(1400, false).seconds, 2);
+    expect(countdownParts(1400, false).milliseconds, 400);
+    expect(countdownParts(1400, true).days, 0);
+    expect(countdownParts(1400, true).hours, 0);
+    expect(countdownParts(1400, true).minutes, 0);
+    expect(countdownParts(1400, true).seconds, 1);
+    expect(countdownParts(1400, true).milliseconds, 400);
+    expect(countdownParts(0, false).days, 0);
+    expect(countdownParts(0, false).hours, 0);
+    expect(countdownParts(0, false).minutes, 0);
+    expect(countdownParts(0, false).seconds, 0);
+    expect(countdownParts(0, false).milliseconds, 0);
+    expect(countdownParts(86399999, false).days, 1);
+    expect(countdownParts(86399999, false).hours, 0);
+    expect(countdownParts(86399999, false).minutes, 0);
+    expect(countdownParts(86399999, false).seconds, 0);
+    expect(countdownParts(86399999, false).milliseconds, 999);
+    expect(countdownParts(86400000, true).days, 1);
+    expect(countdownParts(86400000, true).hours, 0);
+    expect(countdownParts(86400000, true).minutes, 0);
+    expect(countdownParts(86400000, true).seconds, 0);
+    expect(countdownParts(86400000, true).milliseconds, 0);
+    expect(countdownRemaining(500, 100), 400);
+    expect(countdownRemaining(100, 500), 0);
+    expect(countdownInterval(1400), 400);
+    expect(countdownInterval(2000), 1000);
+    expect(countdownInterval(1400, true), 50);
   });
 
   test('自绘滚动条的滑块长度与位置与 Web 端一致', () {

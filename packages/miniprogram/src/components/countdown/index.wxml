@@ -1,0 +1,8 @@
+<view class="i-countdown i-countdown--block i-countdown--{{type}} i-countdown--{{size}} {{finished ? 'is-finished' : ''}}">
+  <view wx:if="{{title}}" class="i-countdown__title">{{title}}</view>
+  <view class="i-countdown__value">
+    <text wx:if="{{prefix}}" class="i-countdown__affix">{{prefix}}</text>
+    <text>{{text}}</text>
+    <text wx:if="{{suffix}}" class="i-countdown__affix">{{suffix}}</text>
+  </view>
+</view>

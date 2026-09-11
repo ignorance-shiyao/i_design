@@ -77,6 +77,10 @@ const { scrollThumb, scrollTopOfThumb } = await bundle(
   'packages/common/src/logic/scroll.ts',
   'scroll-thumb'
 )
+const { formatCountdown, countdownParts, countdownRemaining, countdownInterval } = await bundle(
+  'packages/common/src/logic/countdown.ts',
+  'countdown'
+)
 const {
   splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
 } = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
@@ -1167,6 +1171,40 @@ const thumbExpectations = thumbCases.flatMap(([top, client, total, track]) => {
   ]
 })
 
+/*
+ * 倒计时：取整方向与「模板里没写的那一位并进更小单位」这两条最容易各端写歪。
+ * 一端在最后一秒显示 00:01、另一端显示 00:00，用户会截图来问哪个是对的。
+ */
+const countdownCases = [
+  [3661000, 'HH:mm:ss'], [0, 'HH:mm:ss'], [1400, 'ss'], [1400, 'ss.SSS'],
+  [5430000, 'mm:ss'], [176400000, 'DD 天 HH:mm:ss'], [176400000, 'HH:mm:ss'],
+  [3661000, 'H:m:s'], [999, 'ss'], [1000, 'ss'], [1001, 'ss'],
+]
+const countdownExpectations = countdownCases.map(([ms, fmt]) =>
+  `    expect(formatCountdown(${ms}, '${fmt}'), '${formatCountdown(ms, fmt)}');`)
+
+const countdownPartCases = [[1400, false], [1400, true], [0, false], [86399999, false], [86400000, true]]
+  .map(([ms, showMs]) => [ms, showMs])
+const countdownPartExpectations = countdownPartCases.flatMap(([ms, showMs]) => {
+  const p = countdownParts(ms, showMs)
+  const call = `countdownParts(${ms}, ${showMs})`
+  return [
+    `    expect(${call}.days, ${p.days});`,
+    `    expect(${call}.hours, ${p.hours});`,
+    `    expect(${call}.minutes, ${p.minutes});`,
+    `    expect(${call}.seconds, ${p.seconds});`,
+    `    expect(${call}.milliseconds, ${p.milliseconds});`
+  ]
+})
+
+const countdownMiscExpectations = [
+  `    expect(countdownRemaining(500, 100), ${countdownRemaining(500, 100)});`,
+  `    expect(countdownRemaining(100, 500), ${countdownRemaining(100, 500)});`,
+  `    expect(countdownInterval(1400), ${countdownInterval(1400)});`,
+  `    expect(countdownInterval(2000), ${countdownInterval(2000)});`,
+  `    expect(countdownInterval(1400, true), ${countdownInterval(1400, true)});`
+]
+
 const otpPasteCases = ['123456', '123 456', '12-34-56', '12ab34', '1234567890', '']
 const otpPasteExpectations = otpPasteCases.flatMap((text) => {
   const cells = otpFromText(text, 6)
@@ -1470,6 +1508,7 @@ import 'package:i_design/src/logic/indexes.dart';
 import 'package:i_design/src/logic/otp.dart';
 import 'package:i_design/src/logic/time_select.dart';
 import 'package:i_design/src/logic/scrollbar.dart';
+import 'package:i_design/src/logic/countdown.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1791,6 +1830,12 @@ ${rangeExpectations.join('\n')}
 ${timeSelectExpectations.join('\n')}
 ${clockExpectations.join('\n')}
 ${clockBackExpectations.join('\n')}
+  });
+
+  test('倒计时的取整、并位与刷新间隔与 Web 端一致', () {
+${countdownExpectations.join('\n')}
+${countdownPartExpectations.join('\n')}
+${countdownMiscExpectations.join('\n')}
   });
 
   test('自绘滚动条的滑块长度与位置与 Web 端一致', () {
