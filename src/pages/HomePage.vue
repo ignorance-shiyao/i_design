@@ -1,718 +1,669 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useTilt } from '@/composables/useTilt'
-import ValueCube from '@/site/ValueCube.vue'
-import TokenScene from '@/site/TokenScene.vue'
-import IButton from '@/components/IButton.vue'
-import IInput from '@/components/IInput.vue'
-import ICard from '@/components/ICard.vue'
-import ITag from '@/components/ITag.vue'
-import IAlert from '@/components/IAlert.vue'
-import ISwitch from '@/components/ISwitch.vue'
 import { componentCategories } from '@/data/components'
-import { useTheme } from '@/composables/useTheme'
-import { heroIllustrations } from '@i-design/common'
-import CodeBlock from '@/site/CodeBlock.vue'
-import IIcon from '@/components/IIcon.vue'
-import ISteps from '@/components/ISteps.vue'
-import ILoading from '@/components/ILoading.vue'
-import { message } from '@/components/message'
 import { frameworks } from '@/data/frameworks'
+import IAlert from '@/components/IAlert.vue'
+import IButton from '@/components/IButton.vue'
+import ICard from '@/components/ICard.vue'
+import IIcon from '@/components/IIcon.vue'
+import IInput from '@/components/IInput.vue'
+import ISwitch from '@/components/ISwitch.vue'
+import ITag from '@/components/ITag.vue'
+import { message } from '@/components/message'
 
-const values = [
-  {
-    key: '沉浸',
-    en: 'Immersive',
-    desc: '减少视觉噪音，把注意力还给内容本身。以克制的色彩与留白，让用户长时间专注于任务。'
-  },
-  {
-    key: '灵活',
-    en: 'Flexible',
-    desc: '令牌驱动的主题体系，组件不写死任何具体色值，换肤、深色模式与业务定制均只改语义层。'
-  },
-  {
-    key: '至简',
-    en: 'Minimal',
-    desc: '每个组件只暴露必要的 API，默认值即最佳实践，让常见场景零配置可用。'
-  }
-]
+const demoTitle = ref('设计系统升级')
+const demoAutoAssign = ref(true)
 
-/*
- * 这一组讲的是「靠什么保证不跑偏」，而不是「我们有多好」。
- * 每条都对应仓库里一个具体的机制，读者可以去代码里核对。
- */
-const guards = [
+const allComponents = computed(() => componentCategories.flatMap((category) => category.items))
+const readyCount = computed(() => allComponents.value.filter((item) => item.status === 'ready').length)
+const plannedCount = computed(() => allComponents.value.filter((item) => item.status === 'planned').length)
+
+const highlights = computed(() => [
+  { value: `${readyCount.value}`, label: '已实现组件' },
+  { value: `${frameworks.length}`, label: '运行时覆盖' },
+  { value: `${componentCategories.length}`, label: '场景分类' },
+  { value: `${plannedCount.value}`, label: '规划中' }
+])
+
+const architecture = [
   {
     icon: 'layers',
-    title: '令牌只有一份',
-    desc: 'CSS 变量、WXSS 变量与 Dart 常量都由同一份令牌编译产出。任何一端想改颜色，都得回到那份定义。'
+    index: '01',
+    title: '一套语义令牌',
+    desc: '颜色、间距、圆角与动效从统一语义层生成，各端只消费结果，不各自维护设计常量。'
   },
   {
     icon: 'code',
-    title: '交互规则是纯函数',
-    desc: '翻页判定、浮层避让、树的半选推导写成不依赖框架的函数，各端只负责渲染，不重新解释一遍规则。'
+    index: '02',
+    title: '一套交互规则',
+    desc: '把分页、浮层、树选择等行为收敛成可测试的规则，框架层只负责渲染与事件适配。'
   },
   {
     icon: 'check-circle',
-    title: '一致性由测试兜底',
-    desc: '跨端期望值由同一份实现算出，逐值比对。「两端表现不同」会让构建失败，而不是等用户发现。'
-  },
-  {
-    icon: 'palette',
-    title: '换肤不改组件',
-    desc: '组件只引用语义令牌，不写死色值。深色模式与品牌换肤都只覆盖语义层，业务代码零改动。'
+    index: '03',
+    title: '一条一致性基线',
+    desc: '构建、类型检查与跨端 parity 校验进入同一条质量链，减少“同名组件、不同表现”。'
   }
 ] as const
 
-const { theme } = useTheme()
-// 插画有明暗两版，跟随主题切换而不是靠滤镜硬套
-const hero = computed(() =>
-  theme.value === 'dark'
-    ? heroIllustrations.dark
-    : heroIllustrations.light
+const featuredCategories = computed(() =>
+  componentCategories.map((category) => ({
+    ...category,
+    ready: category.items.filter((item) => item.status === 'ready').length,
+    preview: category.items.filter((item) => item.status === 'ready').slice(0, 4)
+  }))
 )
-
-/*
- * Hero 预览卡随指针轻微倾斜，插画层浮在卡片之前形成纵深。
- * 角度压到 3 度：再大就从「有厚度」变成「在耍花样」，
- * 而首屏承载的是「这套体系长什么样」，不是特效演示。
- */
-const preview = ref<HTMLElement | null>(null)
-useTilt(preview, { max: 3 })
-
-const usageSnippet = `<IButton variant="primary">
-  提交
-</IButton>`
-
-const previewSteps = [{ title: '基本信息' }, { title: '关联迭代' }, { title: '确认' }]
-
-const demoInput = ref('')
-const demoSwitch = ref(true)
-
-/*
- * 立方体转到读者正在看的那一条价值观上。
- * 键盘同样要能驱动它——只挂 hover 的话，用 Tab 浏览的人看到的是一个不动的方块。
- */
-/*
- * 首页每类只列前几项。
- *
- * 首页是「先看看这是什么」，不是查手册：一列 19 项、另一列 4 项，
- * 高矮相差五倍，读者既数不完也对不齐。完整清单在组件总览里，那里才需要穷举。
- */
-const COVERAGE_PREVIEW = 6
-
-const activeValue = ref(-1)
-const cubeFaces = [
-  ...values.map((v) => ({ key: v.key, en: v.en })),
-  { key: '一致', en: 'Consistent' }
-]
 </script>
 
 <template>
-  <div class="home">
-    <!-- Hero -->
+  <main class="home">
     <section class="hero">
+      <div class="hero__grid" aria-hidden="true" />
       <div class="i-container hero__inner">
-        <div class="hero__text">
-          <ITag type="brand" round>v0.1.0 · 开源设计体系</ITag>
-          <!--
-            两行是写死的，不交给 text-wrap 平衡。
-            自动断行会把「一次决策落到每个端」从中间劈开，行尾留一个孤零零的「一」——
-            中文标题断错位置比断得不匀难看得多，而这句的语义分界本来就在这里。
-          -->
-          <h1 class="hero__title">
-            中后台设计体系
-            <span class="hero__title-accent">一次决策，落到每个端</span>
+        <div class="hero__copy">
+          <div class="hero__meta">
+            <span class="hero__status"><i /> Open source</span>
+            <span class="hero__version">iDesign · v0.1.0</span>
+          </div>
+
+          <h1>
+            为复杂产品，建立一套
+            <span>清晰、稳定、可复用</span>
+            的界面语言。
           </h1>
-          <!--
-            中文没有连字符，长句换行会从词中间断开（「渲染适配」被劈成两行）。
-            与其加断行控制，不如把句子写短——一句话说完的事不必写成三句。
-          -->
-          <p class="hero__desc i-lead">
-            令牌、图标与交互规则只写一份，Web、小程序、移动端与 Flutter 只做渲染适配。
-            换一个主色，各端同时生效。
+
+          <p class="hero__lead">
+            面向企业中后台与智能体产品的跨端设计系统。组件、令牌和交互规则统一维护，
+            Vue、React、小程序与 Flutter 使用同一套设计语义。
           </p>
+
           <div class="hero__actions">
             <RouterLink to="/components">
-              <IButton variant="primary" size="lg">开始使用<IIcon name="arrow-right" :size="16" /></IButton>
+              <IButton variant="primary" size="lg">
+                浏览组件
+                <IIcon name="arrow-right" :size="16" />
+              </IButton>
             </RouterLink>
-            <RouterLink to="/design/values"><IButton size="lg">设计价值观</IButton></RouterLink>
+            <RouterLink to="/design/tokens">
+              <IButton size="lg">查看设计令牌</IButton>
+            </RouterLink>
           </div>
-          <ul class="hero__facts">
-            <li><IIcon name="layers" :size="16" /><span>令牌是唯一数据源</span></li>
-            <li><IIcon name="palette" :size="16" /><span>换肤只改语义层</span></li>
-            <li><IIcon name="code" :size="16" /><span>跨端行为逐值比对</span></li>
-            <li><IIcon name="check-circle" :size="16" /><span>对比度与键盘可达经校验</span></li>
-          </ul>
+
+          <div class="hero__stats" aria-label="iDesign 概览">
+            <div v-for="item in highlights" :key="item.label" class="hero__stat">
+              <strong>{{ item.value }}</strong>
+              <span>{{ item.label }}</span>
+            </div>
+          </div>
         </div>
 
-        <!-- 用组件本身搭出预览面板，既是展示也是回归用例 -->
-        <div ref="preview" class="hero__preview" aria-label="组件预览">
-          <!--
-            首屏的三维物件：一块令牌基座，几片浮在上面的端面板。
-            材质颜色全部从 CSS 令牌读——顶栏换主题、主题面板调主色，它当场重新上色，
-            演的正是标题那句「换一个主色，各端同时生效」。
-            WebGL 起不来或 chunk 拉不到时退回原来的插画，首屏不会留空。
-          -->
-          <TokenScene class="hero__scene i-tilt__layer" style="--i-layer-depth: 24" :height="300">
-            <template #fallback>
-              <img
-                class="hero__art"
-                :src="hero.src"
-                :srcset="hero.srcset"
-                width="600"
-                alt=""
-                fetchpriority="high"
-              />
-            </template>
-          </TokenScene>
-          <ICard class="i-tilt__layer" style="--i-layer-depth: 10" title="创建工作项" hoverable>
-            <ISteps class="preview__steps" :items="previewSteps" :current="1" />
-            <div class="preview__field">
-              <label>标题</label>
-              <IInput v-model="demoInput" placeholder="请输入工作项标题" />
+        <div class="lab" aria-label="组件实时预览">
+          <div class="lab__glow" aria-hidden="true" />
+          <div class="lab__window">
+            <div class="lab__bar">
+              <div class="lab__dots" aria-hidden="true"><i /><i /><i /></div>
+              <span>Live component</span>
+              <ITag type="success" round>Ready</ITag>
             </div>
-            <div class="preview__field preview__field--row">
-              <label>自动分配负责人</label>
-              <ISwitch v-model="demoSwitch" />
-            </div>
-            <div class="preview__tags">
-              <ITag type="brand">需求</ITag>
-              <ITag type="success">已评审</ITag>
-              <ITag type="warning">高优先级</ITag>
-            </div>
-            <IAlert type="info">提交后将同步到迭代看板。</IAlert>
-            <template #footer>
-              <div class="preview__footer">
-                <IButton variant="text">取消</IButton>
-                <IButton variant="primary" @click="message.success('工作项已创建')">提交</IButton>
+
+            <div class="lab__body">
+              <div class="lab__caption">
+                <span>FORM / DEFAULT</span>
+                <span>实时交互</span>
               </div>
-            </template>
-          </ICard>
-        </div>
-      </div>
-    </section>
 
-    <!-- 设计价值观 -->
-    <section class="i-container section">
-      <span class="i-eyebrow">Principles</span>
-      <h2 class="section__title">设计价值观</h2>
-      <p class="section__desc i-lead">三条价值观贯穿每一次设计决策，也是评审组件是否合格的标尺。</p>
-      <div class="values-3d">
-        <ValueCube :size="200" :active="activeValue" :faces="cubeFaces" />
-        <div class="values i-stagger">
-          <article
-            v-for="(value, index) in values"
-            :key="value.key"
-            v-reveal:left
-            class="value"
-            tabindex="0"
-            @mouseenter="activeValue = index"
-            @focusin="activeValue = index"
-            @mouseleave="activeValue = -1"
-            @focusout="activeValue = -1"
-          >
-          <span class="value__en">{{ value.en }}</span>
-          <h3 class="value__title">{{ value.key }}</h3>
-            <p>{{ value.desc }}</p>
-          </article>
-        </div>
-      </div>
-    </section>
+              <ICard title="创建工作项" class="lab__card">
+                <div class="lab__field">
+                  <label>标题</label>
+                  <IInput v-model="demoTitle" placeholder="请输入工作项标题" />
+                </div>
 
-    <!-- 能力特性 -->
-    <section class="section section--muted">
-      <div class="i-container">
-        <span class="i-eyebrow">How</span>
-        <h2 class="section__title">靠什么保证不跑偏</h2>
-        <p class="section__desc i-lead">
-          跨端体系最容易烂在「哪一端偷偷改了一点」。下面四条都是仓库里的具体机制，
-          可以直接去代码里核对。
-        </p>
-        <div class="features i-stagger">
-          <ICard
-            v-for="(feature, index) in guards"
-            :key="feature.title"
-            v-reveal:depth
-            hoverable
-            class="feature i-lift"
-          >
-            <span class="feature__icon"><IIcon :name="feature.icon" :size="20" /></span>
-            <h3 class="feature__title">{{ feature.title }}</h3>
-            <p class="feature__desc">{{ feature.desc }}</p>
-          </ICard>
-        </div>
-      </div>
-    </section>
+                <div class="lab__row">
+                  <div>
+                    <strong>自动分配负责人</strong>
+                    <p>根据当前迭代和工作负载自动选择。</p>
+                  </div>
+                  <ISwitch v-model="demoAutoAssign" />
+                </div>
 
-    <!-- 覆盖范围 -->
-    <section class="i-container section">
-      <span class="i-eyebrow">Coverage</span>
-      <h2 class="section__title">覆盖范围</h2>
-      <p class="section__desc i-lead">
-        按中后台的真实使用场景分类，而不是按实现难度。标为规划中的是该有、但还没做到可用的——
-        把边界写出来，比让人在文档里反复搜一个不存在的组件要好。
-      </p>
-      <div class="coverage i-stagger">
-        <div
-          v-for="(category, index) in componentCategories"
-          :key="category.title"
-          v-reveal
-          class="coverage__col"
-        >
-          <div class="coverage__head">
-            <h3>{{ category.title }}</h3>
-            <span class="coverage__count">
-              {{ category.items.filter((i) => i.status === 'ready').length }} / {{ category.items.length }}
-            </span>
+                <div class="lab__tags">
+                  <ITag type="brand">需求</ITag>
+                  <ITag type="success">已评审</ITag>
+                  <ITag type="warning">高优先级</ITag>
+                </div>
+
+                <IAlert type="info">提交后将同步到当前迭代。</IAlert>
+
+                <template #footer>
+                  <div class="lab__footer">
+                    <IButton variant="text">取消</IButton>
+                    <IButton variant="primary" @click="message.success('工作项已创建')">提交</IButton>
+                  </div>
+                </template>
+              </ICard>
+            </div>
           </div>
-          <ul>
-            <li
-              v-for="item in category.items.slice(0, COVERAGE_PREVIEW)"
-              :key="item.name"
-              :class="{ 'is-planned': item.status === 'planned' }"
-            >
-              <RouterLink v-if="item.status === 'ready'" :to="item.to">{{ item.name }}</RouterLink>
-              <span v-else>{{ item.name }}</span>
-            </li>
-            <li v-if="category.items.length > COVERAGE_PREVIEW" class="coverage__more">
-              <RouterLink to="/components">还有 {{ category.items.length - COVERAGE_PREVIEW }} 个</RouterLink>
-            </li>
-          </ul>
+
+          <div class="lab__chip lab__chip--top">
+            <IIcon name="palette" :size="15" />
+            Semantic tokens
+          </div>
+          <div class="lab__chip lab__chip--bottom">
+            <IIcon name="check-circle" :size="15" />
+            Cross-platform parity
+          </div>
         </div>
       </div>
-      <p class="coverage__legend">
-        <span class="dot" /> 已实现
-        <span class="dot dot--planned" /> 规划中
-      </p>
     </section>
 
-    <!-- 跨端 -->
-    <section class="section section--muted">
-      <div class="i-container">
-        <span class="i-eyebrow">Cross-platform</span>
-        <h2 class="section__title">你的技术栈在里面</h2>
-        <p class="section__desc i-lead">
-          各端不是「移植版」，而是同一份令牌与规则的不同渲染层。
-          因此不必为某一端单独维护一套设计稿，也不会出现「Web 上是这样，小程序上不是」。
-        </p>
-        <div class="stacks i-stagger">
-          <RouterLink
-            v-for="(f, index) in frameworks"
-            :key="f.id"
-            v-reveal
-            class="stack"
-            to="/design/cross-platform"
-          >
-            <span class="stack__label">{{ f.label }}</span>
-            <span class="stack__runtime">{{ f.runtime }}</span>
+    <section class="i-container section section--components">
+      <div class="section__head">
+        <div>
+          <span class="i-eyebrow">Components</span>
+          <h2>从场景找到组件</h2>
+          <p>不按技术实现堆目录，按用户在产品里要完成的任务组织。</p>
+        </div>
+        <RouterLink class="section__link" to="/components">
+          查看全部组件 <IIcon name="arrow-right" :size="15" />
+        </RouterLink>
+      </div>
+
+      <div class="category-grid">
+        <article v-for="category in featuredCategories" :key="category.title" class="category-card">
+          <div class="category-card__head">
+            <div>
+              <h3>{{ category.title }}</h3>
+              <p>{{ category.desc }}</p>
+            </div>
+            <span>{{ category.ready }}/{{ category.items.length }}</span>
+          </div>
+          <div class="category-card__items">
+            <RouterLink v-for="item in category.preview" :key="item.name" :to="item.to">
+              <span>{{ item.name }}</span>
+              <small>{{ item.cn }}</small>
+            </RouterLink>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="platform-section">
+      <div class="i-container platform">
+        <div class="platform__copy">
+          <span class="i-eyebrow">One system · Many runtimes</span>
+          <h2>设计决策只做一次，渲染适配交给各端。</h2>
+          <p>
+            组件 API 可以因框架语法而不同，但视觉令牌、交互语义和验收基线保持一致。
+            业务团队无需再维护多套“长得差不多”的组件规范。
+          </p>
+          <RouterLink class="section__link" to="/design/cross-platform">
+            查看跨端实现 <IIcon name="arrow-right" :size="15" />
           </RouterLink>
         </div>
-        <p class="stacks__foot">
-          <RouterLink to="/design/cross-platform">看同一个组件在各端怎么写 →</RouterLink>
-        </p>
+
+        <div class="platform__stack">
+          <div v-for="(framework, index) in frameworks" :key="framework.id" class="runtime">
+            <span class="runtime__index">0{{ index + 1 }}</span>
+            <div>
+              <strong>{{ framework.label }}</strong>
+              <small>{{ framework.runtime }}</small>
+            </div>
+            <code>{{ framework.pkg }}</code>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 快速上手 -->
     <section class="i-container section">
-      <span class="i-eyebrow">Get started</span>
-      <h2 class="section__title">三步接入</h2>
-      <!--
-        第一步写清楚是 clone 而不是 npm install。
-        包还没发到 npm，只写「npm install」对外部使用者是一条执行不了的指令——
-        照着做失败一次，人就走了。没发布就直说没发布。
-      -->
-      <p class="section__desc i-lead">
-        还没有发到 npm，先克隆仓库使用；令牌与组件都在 <code>packages/</code> 下，可以整包引，也可以只取需要的那几个。
-      </p>
-      <div class="steps i-stagger">
-        <div v-reveal:depth class="step i-lift">
-          <span class="step__no">1</span>
-          <h3>取得代码</h3>
-          <CodeBlock
-            lang="bash"
-            :copyable="false"
-            code="git clone https://github.com/ignorance-shiyao/i_design
-cd i_design && npm install"
-          />
-        </div>
-        <div v-reveal:depth class="step i-lift">
-          <span class="step__no">2</span>
-          <h3>引入令牌与组件</h3>
-          <CodeBlock
-            lang="ts"
-            :copyable="false"
-            code="import '@/styles/global.css'
-import IDesign from '@/components'
-
-app.use(IDesign)"
-          />
-        </div>
-        <div v-reveal:depth class="step i-lift">
-          <span class="step__no">3</span>
-          <h3>直接使用</h3>
-          <CodeBlock
-            lang="vue"
-            :copyable="false"
-            :code="usageSnippet"
-          />
+      <div class="section__head section__head--architecture">
+        <div>
+          <span class="i-eyebrow">Architecture</span>
+          <h2>组件库之外，还有一套可验证的约束。</h2>
+          <p>设计系统的稳定性来自单一数据源、明确契约和自动校验，而不是文档约定。</p>
         </div>
       </div>
-    </section>
 
-    <section class="i-container">
-      <div v-reveal:depth class="cta">
-        <div>
-          <h2>从令牌开始读</h2>
-          <p>令牌表是这套体系的地基，组件的每一个取值都能在那里找到出处。</p>
+      <div class="architecture-grid">
+        <article v-for="item in architecture" :key="item.title" class="architecture-card">
+          <div class="architecture-card__top">
+            <span class="architecture-card__icon"><IIcon :name="item.icon" :size="19" /></span>
+            <span>{{ item.index }}</span>
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.desc }}</p>
+        </article>
+      </div>
+
+      <div class="token-strip">
+        <div class="token-strip__copy">
+          <span>DESIGN TOKENS</span>
+          <strong>换一个主色，各端一起变化。</strong>
+          <p>组件只消费语义令牌，不直接绑定业务色值。</p>
+        </div>
+        <div class="token-strip__swatches" aria-hidden="true">
+          <i /><i /><i /><i /><i />
         </div>
         <RouterLink to="/design/tokens">
-          <IButton variant="primary" size="lg">
-            查看设计令牌<IIcon name="arrow-right" :size="16" />
-          </IButton>
+          <IButton>查看 Token 体系</IButton>
         </RouterLink>
       </div>
     </section>
-  </div>
+
+    <section class="i-container final-cta">
+      <div>
+        <span>START BUILDING</span>
+        <h2>先从一个真实页面开始。</h2>
+        <p>浏览组件、复制示例，再按语义令牌完成业务主题适配。</p>
+      </div>
+      <div class="final-cta__actions">
+        <RouterLink to="/components"><IButton variant="primary" size="lg">进入组件库</IButton></RouterLink>
+        <a href="https://github.com/ignorance-shiyao/i_design" target="_blank" rel="noreferrer">
+          <IButton size="lg"><IIcon name="github" :size="16" /> GitHub</IButton>
+        </a>
+      </div>
+    </section>
+  </main>
 </template>
 
 <style scoped>
-/* Hero */
-/*
- * 首屏收紧一点：原先上下各留 80/64px，加上插画与预览卡纵向叠起来，
- * 1440×900 的屏上卡片会被折线切掉一截——首屏露出半张卡，
- * 观感上就是「没做完」，而不是「下面还有」。
- */
+.home { overflow: hidden; }
+
 .hero {
   position: relative;
-  padding: var(--i-spacing-12) 0;
-  overflow: hidden;
+  min-height: 700px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--i-color-hairline);
   background:
-    radial-gradient(50% 60% at 12% -10%, var(--i-color-brand-subtle), transparent 70%),
-    radial-gradient(40% 50% at 90% 0%, var(--i-color-ring), transparent 70%),
-    var(--i-color-bg);
+    radial-gradient(circle at 74% 30%, color-mix(in srgb, var(--i-color-brand) 13%, transparent), transparent 28%),
+    linear-gradient(180deg, color-mix(in srgb, var(--i-color-bg-subtle) 48%, transparent), transparent 64%);
 }
-/* 细网格只出现在顶部，越往下越淡，避免整块背景显脏 */
-.hero::before {
-  content: '';
+.hero__grid {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(var(--i-color-hairline) 1px, transparent 1px),
-    linear-gradient(90deg, var(--i-color-hairline) 1px, transparent 1px);
-  background-size: 40px 40px;
-  -webkit-mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
-  mask-image: radial-gradient(60% 50% at 50% 0%, #000, transparent 100%);
   pointer-events: none;
+  opacity: .58;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--i-color-hairline) 68%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--i-color-hairline) 68%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 88%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 88%);
 }
-.hero__inner { position: relative; }
 .hero__inner {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--i-spacing-12);
+  grid-template-columns: minmax(0, .95fr) minmax(460px, .8fr);
+  gap: clamp(48px, 7vw, 112px);
   align-items: center;
+  padding-top: 88px;
+  padding-bottom: 88px;
 }
-.hero__title {
-  margin: var(--i-spacing-5) 0 var(--i-spacing-4);
-  font-size: var(--i-font-size-5xl);
-  letter-spacing: -0.02em;
-  line-height: 1.18;
-}
-/* 副句独占一行：语义分界在这里，断行也该在这里 */
-.hero__title-accent {
-  display: block;
-  color: var(--i-color-brand);
-}
-.hero__actions { display: flex; gap: var(--i-spacing-3); margin-top: var(--i-spacing-8); }
-.hero__facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: var(--i-spacing-3) var(--i-spacing-6);
-  margin: var(--i-spacing-8) 0 0;
-  padding: 0;
-  list-style: none;
-}
-.hero__facts li {
+.hero__copy { min-width: 0; }
+.hero__meta {
   display: flex;
   align-items: center;
-  gap: var(--i-spacing-2);
-  font-size: var(--i-font-size-sm);
-  color: var(--i-color-text-secondary);
-}
-.hero__facts svg { color: var(--i-color-brand); flex: none; }
-
-/*
- * 插画收小并右对齐，让它退成陪衬。
- *
- * 首屏真正该被看见的是右边那张用组件本身搭出来的卡片——它同时是展示与回归用例。
- * 插画铺满一整列时，读者第一眼落在插画上，而插画说明不了这套体系能做什么。
- */
-.hero__art {
-  display: block;
-  width: 100%;
-  max-width: 340px;
-  height: auto;
-  margin: 0 0 calc(var(--i-spacing-4) * -1) auto;
-}
-/* 三维画布压在预览卡上方一点，两者叠出层次；负边距让它不额外占高 */
-.hero__scene { margin-bottom: calc(var(--i-spacing-6) * -1); }
-.hero__preview {
-  filter: drop-shadow(var(--i-shadow-xl));
-  /* 时长与「不超过 320ms」这条价值观对齐；曲线用 easing-out，进场要快进慢停 */
-  animation: hero-float var(--i-motion-slow) var(--i-motion-easing-out) both;
-}
-@keyframes hero-float {
-  from { opacity: 0; transform: translateY(8px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero__preview { animation: none; }
-}
-.preview__field { margin-bottom: var(--i-spacing-4); }
-.preview__field label {
-  display: block;
-  margin-bottom: var(--i-spacing-2);
-  font-size: var(--i-font-size-sm);
-  color: var(--i-color-text-secondary);
-}
-.preview__field--row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.preview__field--row label { margin-bottom: 0; }
-.preview__tags { display: flex; gap: var(--i-spacing-2); margin-bottom: var(--i-spacing-4); }
-.preview__footer { display: flex; justify-content: flex-end; gap: var(--i-spacing-2); }
-
-/* 价值观：立方体与文案并排 */
-.values-3d {
-  display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
-  gap: var(--i-spacing-12);
-  align-items: center;
-  margin-top: var(--i-spacing-8);
-}
-.values-3d .values { grid-template-columns: 1fr; gap: var(--i-spacing-4); }
-
-@media (max-width: 860px) {
-  .values-3d { grid-template-columns: 1fr; gap: var(--i-spacing-10); }
-}
-
-/* 覆盖范围 */
-.coverage {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--i-spacing-8) var(--i-spacing-6);
-  margin-top: var(--i-spacing-8);
-  align-items: start;
-}
-.coverage__more a {
-  color: var(--i-color-text-tertiary);
-  font-size: var(--i-font-size-sm);
-}
-.coverage__more a:hover { color: var(--i-color-brand); }
-.coverage__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding-bottom: var(--i-spacing-2);
-  border-bottom: 1px solid var(--i-color-border);
-}
-.coverage__head h3 { font-size: var(--i-font-size-md); }
-.coverage__count {
-  font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-xs);
-  color: var(--i-color-text-tertiary);
-}
-.coverage__col ul {
-  margin: var(--i-spacing-3) 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: var(--i-spacing-2);
-  font-size: var(--i-font-size-sm);
-}
-.coverage__col li::before {
-  content: '';
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin-right: var(--i-spacing-2);
-  border-radius: var(--i-radius-full);
-  background: var(--i-color-brand);
-  vertical-align: middle;
-}
-.coverage__col li.is-planned { color: var(--i-color-text-tertiary); }
-.coverage__col li.is-planned::before { background: var(--i-color-border-strong); }
-.coverage__col a { color: var(--i-color-text-secondary); }
-.coverage__col a:hover { color: var(--i-color-brand); }
-.coverage__legend {
-  margin-top: var(--i-spacing-6);
-  font-size: var(--i-font-size-sm);
-  color: var(--i-color-text-tertiary);
-}
-.coverage__legend .dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin: 0 var(--i-spacing-2) 0 var(--i-spacing-4);
-  border-radius: var(--i-radius-full);
-  background: var(--i-color-brand);
-  vertical-align: middle;
-}
-.coverage__legend .dot:first-child { margin-left: 0; }
-.coverage__legend .dot--planned { background: var(--i-color-border-strong); }
-
-.preview__steps { margin-bottom: var(--i-spacing-5); }
-
-/* 通用区块 */
-.stacks {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: var(--i-spacing-3);
-}
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--i-spacing-1);
-  padding: var(--i-spacing-5) var(--i-spacing-4);
-  border: 1px solid var(--i-color-border);
-  border-radius: var(--i-radius-lg);
-  background: var(--i-color-bg-elevated);
-  text-decoration: none;
-  transition: transform var(--i-motion-base) var(--i-motion-easing),
-    box-shadow var(--i-motion-base) var(--i-motion-easing),
-    border-color var(--i-motion-fast) var(--i-motion-easing);
-}
-.stack:hover {
-  transform: translateY(-3px);
-  border-color: var(--i-color-brand);
-  box-shadow: var(--i-shadow-md);
-}
-.stack__label {
-  font-size: var(--i-font-size-lg);
-  font-weight: 600;
-  color: var(--i-color-text);
-}
-.stack__runtime { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
-.stacks__foot { margin-top: var(--i-spacing-6); font-size: var(--i-font-size-md); }
-.section { padding: var(--i-spacing-16) var(--i-spacing-6); }
-.section--muted { background: var(--i-color-bg-subtle); }
-.section__title { font-size: var(--i-font-size-3xl); margin-bottom: var(--i-spacing-3); }
-.section__desc { margin-bottom: var(--i-spacing-10); }
-
-.values {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--i-spacing-6);
-}
-.value {
-  position: relative;
-  padding: var(--i-spacing-6);
-  background: var(--i-color-bg-elevated);
-  border: 1px solid var(--i-color-hairline);
-  border-radius: var(--i-radius-xl);
-  box-shadow: var(--i-shadow-sm);
-  overflow: hidden;
-  transition: box-shadow var(--i-motion-base) var(--i-motion-easing),
-    transform var(--i-motion-base) var(--i-motion-easing);
-}
-.value:hover { transform: translateY(-2px); box-shadow: var(--i-shadow-md); }
-.value__en {
+  margin-bottom: var(--i-spacing-6);
   font-family: var(--i-font-family-mono);
   font-size: var(--i-font-size-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  color: var(--i-color-text-tertiary);
+}
+.hero__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--i-color-text-secondary);
+}
+.hero__status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #27b36a;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #27b36a 14%, transparent);
+}
+.hero__version {
+  padding-left: var(--i-spacing-3);
+  border-left: 1px solid var(--i-color-border);
+}
+.hero h1 {
+  max-width: 780px;
+  margin: 0;
+  font-size: clamp(46px, 5.4vw, 78px);
+  line-height: 1.06;
+  letter-spacing: -0.055em;
+  font-weight: 650;
+  text-wrap: balance;
+}
+.hero h1 span {
   color: var(--i-color-brand);
 }
-.value__title { font-size: var(--i-font-size-xl); margin: var(--i-spacing-2) 0 var(--i-spacing-3); }
-.value p { color: var(--i-color-text-secondary); }
-
-.feature__icon {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  margin-bottom: var(--i-spacing-4);
-  border-radius: var(--i-radius-lg);
-  color: var(--i-color-brand);
-  background: var(--i-color-brand-subtle);
+.hero__lead {
+  max-width: 670px;
+  margin: var(--i-spacing-6) 0 0;
+  font-size: clamp(17px, 1.5vw, 20px);
+  line-height: 1.8;
+  color: var(--i-color-text-secondary);
 }
-.feature__title { font-size: var(--i-font-size-lg); margin-bottom: var(--i-spacing-2); }
-.feature__desc { color: var(--i-color-text-secondary); font-size: var(--i-font-size-md); }
-
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--i-spacing-5);
-  margin-top: var(--i-spacing-8);
-}
-
-.steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--i-spacing-6);
-  margin-top: var(--i-spacing-8);
-}
-.step {
-  padding: var(--i-spacing-6);
-  border: 1px solid var(--i-color-hairline);
-  border-radius: var(--i-radius-xl);
-  background: var(--i-color-bg-elevated);
-  box-shadow: var(--i-shadow-sm);
-}
-.step__no {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--i-radius-full);
-  background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
-  font-weight: 600;
-  margin-bottom: var(--i-spacing-3);
-}
-.step h3 { font-size: var(--i-font-size-lg); margin-bottom: var(--i-spacing-3); }
-
-
-.cta {
-  position: relative;
+.hero__actions {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--i-spacing-3);
+  margin-top: var(--i-spacing-8);
+}
+.hero__actions :deep(.i-button) { min-height: 44px; }
+.hero__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: var(--i-spacing-10);
+  padding-top: var(--i-spacing-6);
+  border-top: 1px solid var(--i-color-hairline);
+}
+.hero__stat {
+  display: grid;
+  gap: 5px;
+  padding-right: var(--i-spacing-4);
+}
+.hero__stat + .hero__stat {
+  padding-left: var(--i-spacing-4);
+  border-left: 1px solid var(--i-color-hairline);
+}
+.hero__stat strong {
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-xl);
+  letter-spacing: -.03em;
+}
+.hero__stat span { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
+
+.lab { position: relative; padding: 44px 16px 36px 30px; }
+.lab__glow {
+  position: absolute;
+  inset: 16% 8% 12%;
+  border-radius: 50%;
+  background: var(--i-color-brand);
+  opacity: .12;
+  filter: blur(70px);
+}
+.lab__window {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--i-color-border) 82%, transparent);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--i-color-bg-elevated) 94%, transparent);
+  box-shadow: 0 34px 90px color-mix(in srgb, #000 13%, transparent), var(--i-shadow-md);
+  transform: perspective(1200px) rotateY(-3deg) rotateX(1deg);
+}
+.lab__bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  min-height: 48px;
+  padding: 0 var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-hairline);
+  color: var(--i-color-text-tertiary);
+  font: 500 var(--i-font-size-xs)/1 var(--i-font-family-mono);
+}
+.lab__bar > :last-child { justify-self: end; }
+.lab__dots { display: flex; gap: 6px; }
+.lab__dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--i-color-border); }
+.lab__body { padding: var(--i-spacing-5); background: color-mix(in srgb, var(--i-color-bg-subtle) 52%, transparent); }
+.lab__caption {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--i-spacing-3);
+  color: var(--i-color-text-tertiary);
+  font: 500 10px/1 var(--i-font-family-mono);
+  letter-spacing: .1em;
+}
+.lab__card { box-shadow: var(--i-shadow-sm); }
+.lab__field { display: grid; gap: var(--i-spacing-2); }
+.lab__field label, .lab__row strong { font-size: var(--i-font-size-sm); font-weight: 550; }
+.lab__row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--i-spacing-6);
-  padding: var(--i-spacing-12);
-  border-radius: var(--i-radius-xl);
-  background: var(--i-color-brand);
-  color: #fff;
-  overflow: hidden;
-  box-shadow: var(--i-shadow-brand);
+  margin-top: var(--i-spacing-5);
+  padding: var(--i-spacing-4) 0;
+  border-top: 1px solid var(--i-color-hairline);
+  border-bottom: 1px solid var(--i-color-hairline);
 }
-.cta::after {
-  content: '';
+.lab__row p { margin: 4px 0 0; font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
+.lab__tags { display: flex; flex-wrap: wrap; gap: var(--i-spacing-2); margin: var(--i-spacing-4) 0; }
+.lab__footer { display: flex; justify-content: flex-end; gap: var(--i-spacing-2); }
+.lab__chip {
   position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
-  background-size: 20px 20px;
-  -webkit-mask-image: radial-gradient(60% 100% at 100% 0%, #000, transparent);
-  mask-image: radial-gradient(60% 100% at 100% 0%, #000, transparent);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-full);
+  background: color-mix(in srgb, var(--i-color-bg-elevated) 88%, transparent);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--i-shadow-md);
+  color: var(--i-color-text-secondary);
+  font-size: 11px;
 }
-.cta > * { position: relative; }
-.cta :deep(.i-button--primary) {
-  background: #fff;
-  color: var(--i-color-brand-active);
-}
-.cta :deep(.i-button--primary:hover) { background: rgba(255, 255, 255, 0.9); }
-.cta h2 { font-size: var(--i-font-size-2xl); }
-.cta p { margin-top: var(--i-spacing-2); opacity: 0.85; }
+.lab__chip :deep(svg) { color: var(--i-color-brand); }
+.lab__chip--top { top: 13px; right: -7px; }
+.lab__chip--bottom { left: 0; bottom: 4px; }
 
-@media (max-width: 960px) {
-  .hero { padding-top: var(--i-spacing-16); }
-  .hero__inner { grid-template-columns: 1fr; gap: var(--i-spacing-10); }
-  .hero__title { font-size: var(--i-font-size-4xl); }
-  .hero__facts { grid-template-columns: 1fr; gap: var(--i-spacing-3); }
-  .cta { padding: var(--i-spacing-8); }
+.section { padding-top: 112px; padding-bottom: 112px; }
+.section__head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--i-spacing-8);
+  margin-bottom: var(--i-spacing-8);
+}
+.section__head h2, .platform h2, .final-cta h2 {
+  margin: var(--i-spacing-3) 0 0;
+  max-width: 760px;
+  font-size: clamp(32px, 3.4vw, 48px);
+  line-height: 1.15;
+  letter-spacing: -.04em;
+}
+.section__head p, .platform__copy > p, .final-cta p {
+  max-width: 680px;
+  margin: var(--i-spacing-3) 0 0;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-md);
+  line-height: 1.75;
+}
+.section__link {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 7px;
+  color: var(--i-color-brand);
+  font-size: var(--i-font-size-sm);
+  font-weight: 550;
+}
+.section__link:hover { gap: 10px; }
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--i-spacing-4);
+}
+.category-card {
+  min-height: 250px;
+  padding: var(--i-spacing-5);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: 18px;
+  background: var(--i-color-bg-elevated);
+  transition: transform var(--i-motion-base) var(--i-motion-easing), border-color var(--i-motion-base) var(--i-motion-easing), box-shadow var(--i-motion-base) var(--i-motion-easing);
+}
+.category-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--i-color-brand) 28%, var(--i-color-border));
+  box-shadow: var(--i-shadow-md);
+}
+.category-card__head { display: flex; justify-content: space-between; gap: var(--i-spacing-4); min-height: 82px; }
+.category-card__head h3 { margin: 0; font-size: var(--i-font-size-lg); letter-spacing: -.02em; }
+.category-card__head p { margin: 7px 0 0; color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); line-height: 1.55; }
+.category-card__head > span {
+  flex: none;
+  font: 500 var(--i-font-size-xs)/1 var(--i-font-family-mono);
+  color: var(--i-color-text-tertiary);
+}
+.category-card__items { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: var(--i-spacing-5); }
+.category-card__items a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-2);
+  padding: 10px 11px;
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+}
+.category-card__items a:hover { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
+.category-card__items small { color: var(--i-color-text-tertiary); }
+
+.platform-section {
+  border-top: 1px solid var(--i-color-hairline);
+  border-bottom: 1px solid var(--i-color-hairline);
+  background: var(--i-color-bg-subtle);
+}
+.platform {
+  display: grid;
+  grid-template-columns: minmax(0, .82fr) minmax(520px, 1fr);
+  gap: clamp(56px, 9vw, 140px);
+  align-items: center;
+  padding-top: 112px;
+  padding-bottom: 112px;
+}
+.platform__copy .section__link { margin-top: var(--i-spacing-6); }
+.platform__stack {
+  overflow: hidden;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: 18px;
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-sm);
+}
+.runtime {
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  gap: var(--i-spacing-4);
+  align-items: center;
+  min-height: 66px;
+  padding: 0 var(--i-spacing-5);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.runtime:last-child { border-bottom: 0; }
+.runtime:hover { background: var(--i-color-bg-subtle); }
+.runtime__index { font: 500 10px/1 var(--i-font-family-mono); color: var(--i-color-text-tertiary); }
+.runtime div { display: grid; gap: 3px; }
+.runtime strong { font-size: var(--i-font-size-sm); }
+.runtime small { color: var(--i-color-text-tertiary); font-size: 11px; }
+.runtime code {
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font: 500 10px/1 var(--i-font-family-mono);
+}
+
+.architecture-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--i-spacing-4); }
+.architecture-card {
+  padding: var(--i-spacing-6);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: 18px;
+  background: var(--i-color-bg-elevated);
+}
+.architecture-card__top { display: flex; align-items: center; justify-content: space-between; color: var(--i-color-text-tertiary); font: 500 10px/1 var(--i-font-family-mono); }
+.architecture-card__icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand);
+}
+.architecture-card h3 { margin: var(--i-spacing-8) 0 0; font-size: var(--i-font-size-xl); letter-spacing: -.025em; }
+.architecture-card p { margin: var(--i-spacing-3) 0 0; color: var(--i-color-text-secondary); line-height: 1.7; font-size: var(--i-font-size-sm); }
+.token-strip {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--i-spacing-8);
+  margin-top: var(--i-spacing-4);
+  padding: var(--i-spacing-6);
+  border: 1px solid color-mix(in srgb, var(--i-color-brand) 24%, var(--i-color-hairline));
+  border-radius: 18px;
+  background: linear-gradient(110deg, var(--i-color-brand-subtle), var(--i-color-bg-elevated) 46%);
+}
+.token-strip__copy { display: grid; gap: 6px; }
+.token-strip__copy > span { font: 500 10px/1 var(--i-font-family-mono); letter-spacing: .12em; color: var(--i-color-brand); }
+.token-strip__copy strong { font-size: var(--i-font-size-lg); }
+.token-strip__copy p { margin: 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+.token-strip__swatches { display: flex; align-items: center; }
+.token-strip__swatches i { width: 36px; height: 36px; margin-left: -7px; border: 3px solid var(--i-color-bg-elevated); border-radius: 50%; background: var(--i-color-brand); }
+.token-strip__swatches i:nth-child(2) { opacity: .78; }
+.token-strip__swatches i:nth-child(3) { opacity: .56; }
+.token-strip__swatches i:nth-child(4) { opacity: .34; }
+.token-strip__swatches i:nth-child(5) { opacity: .16; }
+
+.final-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-8);
+  margin-bottom: 96px;
+  padding-top: var(--i-spacing-10);
+  padding-bottom: var(--i-spacing-10);
+  border-top: 1px solid var(--i-color-hairline);
+}
+.final-cta > div:first-child > span { font: 500 10px/1 var(--i-font-family-mono); letter-spacing: .13em; color: var(--i-color-brand); }
+.final-cta h2 { margin-top: var(--i-spacing-3); font-size: clamp(30px, 3vw, 42px); }
+.final-cta__actions { display: flex; flex: none; gap: var(--i-spacing-3); }
+
+@media (max-width: 1080px) {
+  .hero { min-height: auto; }
+  .hero__inner { grid-template-columns: 1fr; gap: var(--i-spacing-8); padding-top: 84px; padding-bottom: 84px; }
+  .hero__copy { max-width: 820px; }
+  .lab { width: min(720px, 100%); padding-right: 30px; }
+  .category-grid { grid-template-columns: repeat(2, 1fr); }
+  .platform { grid-template-columns: 1fr; }
+  .platform__copy { max-width: 720px; }
+}
+
+@media (max-width: 760px) {
+  .hero__inner { padding-top: 64px; padding-bottom: 64px; }
+  .hero h1 { font-size: clamp(40px, 11vw, 58px); }
+  .hero__stats { grid-template-columns: repeat(2, 1fr); row-gap: var(--i-spacing-5); }
+  .hero__stat:nth-child(3) { padding-left: 0; border-left: 0; }
+  .hero__stat:nth-child(3), .hero__stat:nth-child(4) { padding-top: var(--i-spacing-4); border-top: 1px solid var(--i-color-hairline); }
+  .lab { padding: 30px 0 28px; }
+  .lab__window { transform: none; border-radius: 16px; }
+  .lab__chip { display: none; }
+  .lab__body { padding: var(--i-spacing-3); }
+  .section { padding-top: 78px; padding-bottom: 78px; }
+  .section__head { align-items: start; flex-direction: column; }
+  .category-grid, .architecture-grid { grid-template-columns: 1fr; }
+  .platform { padding-top: 78px; padding-bottom: 78px; gap: var(--i-spacing-8); }
+  .platform__stack { border-radius: 14px; }
+  .runtime { grid-template-columns: 28px 1fr; padding: var(--i-spacing-3) var(--i-spacing-4); }
+  .runtime code { grid-column: 2; justify-self: start; }
+  .token-strip { grid-template-columns: 1fr; gap: var(--i-spacing-5); }
+  .token-strip__swatches { display: none; }
+  .final-cta { align-items: flex-start; flex-direction: column; margin-bottom: 56px; }
+}
+
+@media (max-width: 480px) {
+  .hero__actions, .final-cta__actions { display: grid; width: 100%; }
+  .hero__actions a, .final-cta__actions a { display: block; }
+  .hero__actions :deep(.i-button), .final-cta__actions :deep(.i-button) { width: 100%; }
+  .category-card__items { grid-template-columns: 1fr; }
+  .hero__stats { font-size: 90%; }
 }
 </style>
