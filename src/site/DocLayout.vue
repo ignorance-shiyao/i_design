@@ -6,10 +6,6 @@ import { docNav } from '@/data/nav'
 const side = ref<HTMLElement | null>(null)
 const route = useRoute()
 
-/**
- * 侧栏是独立滚动容器，进入深层页面时当前项可能在可视区之外。
- * 路由变化后把它滚进视野，用户才知道自己在导航树的哪个位置。
- */
 async function revealActive() {
   await nextTick()
   const active = side.value?.querySelector('a.router-link-exact-active')
@@ -22,12 +18,21 @@ watch(() => route.path, revealActive)
 
 <template>
   <div class="i-container doc-layout">
-    <aside ref="side" class="doc-layout__side">
+    <aside ref="side" class="doc-layout__side" aria-label="文档导航">
+      <div class="doc-layout__side-head">
+        <span>DOCUMENTATION</span>
+        <i />
+      </div>
+
       <div v-for="group in docNav" :key="group.title" class="doc-layout__group">
         <p class="doc-layout__group-title">{{ group.title }}</p>
-        <RouterLink v-for="item in group.items" :key="item.to" :to="item.to">{{ item.label }}</RouterLink>
+        <RouterLink v-for="item in group.items" :key="item.to" :to="item.to">
+          <span>{{ item.label }}</span>
+          <i aria-hidden="true" />
+        </RouterLink>
       </div>
     </aside>
+
     <main class="doc-layout__main i-doc">
       <RouterView />
     </main>
@@ -37,72 +42,111 @@ watch(() => route.path, revealActive)
 <style scoped>
 .doc-layout {
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
-  gap: var(--i-spacing-12);
-  padding-top: var(--i-spacing-10);
+  grid-template-columns: 214px minmax(0, 1fr);
+  gap: clamp(40px, 5vw, 72px);
   align-items: start;
+  padding-top: var(--i-spacing-8);
 }
+
 .doc-layout__side {
   position: sticky;
-  top: 84px;
+  top: 86px;
   display: grid;
-  gap: var(--i-spacing-6);
+  gap: var(--i-spacing-7);
   align-content: start;
-  /*
-   * 侧栏比视口高时，仅靠 sticky 会让下半截永远够不到——粘住顶部后它不随页面滚动，
-   * 只有父容器快结束时才「解锁」，表现为菜单与内容错位。因此让它自己成为滚动容器。
-   */
-  max-height: calc(100vh - 84px - var(--i-spacing-6));
+  max-height: calc(100vh - 104px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: var(--i-spacing-2);
+  padding-right: var(--i-spacing-3);
 }
-/* 细滚动条，静止时隐藏，避免侧栏出现一条常驻竖线 */
-.doc-layout__side::-webkit-scrollbar { width: 4px; }
-.doc-layout__side::-webkit-scrollbar-thumb {
-  border-radius: var(--i-radius-full);
-  background: transparent;
-}
-.doc-layout__side:hover::-webkit-scrollbar-thumb { background: var(--i-color-border); }
-.doc-layout__group { display: grid; gap: var(--i-spacing-1); }
-.doc-layout__group-title {
-  font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+
+.doc-layout__side-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 22px;
+  padding: 0 var(--i-spacing-2);
   color: var(--i-color-text-tertiary);
-  margin-bottom: var(--i-spacing-2);
-  padding-left: var(--i-spacing-3);
+  font: 500 9px/1 var(--i-font-family-mono);
+  letter-spacing: .13em;
 }
+
+.doc-layout__side-head i {
+  flex: 1;
+  height: 1px;
+  background: var(--i-color-hairline);
+}
+
+.doc-layout__side::-webkit-scrollbar { width: 4px; }
+.doc-layout__side::-webkit-scrollbar-thumb { border-radius: var(--i-radius-full); background: transparent; }
+.doc-layout__side:hover::-webkit-scrollbar-thumb { background: var(--i-color-border); }
+
+.doc-layout__group { display: grid; gap: 2px; }
+
+.doc-layout__group-title {
+  margin: 0 0 7px;
+  padding: 0 var(--i-spacing-2);
+  color: var(--i-color-text-tertiary);
+  font: 600 10px/1 var(--i-font-family-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
 .doc-layout__side a {
-  position: relative;
-  padding: var(--i-spacing-2) var(--i-spacing-3);
-  border-radius: var(--i-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-3);
+  min-height: 34px;
+  padding: 7px var(--i-spacing-2);
+  border-radius: 8px;
   color: var(--i-color-text-secondary);
-  font-size: var(--i-font-size-md);
-  transition: color var(--i-motion-fast) var(--i-motion-easing),
-    background var(--i-motion-fast) var(--i-motion-easing);
+  font-size: 12px;
+  transition:
+    color var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing),
+    transform var(--i-motion-fast) var(--i-motion-easing);
 }
-.doc-layout__side a:hover { background: var(--i-color-bg-subtle); color: var(--i-color-text); }
-/* 用 exact-active：否则父路径（如 /components 总览）在所有子页都会被标记为选中 */
+
+.doc-layout__side a > i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background var(--i-motion-fast) var(--i-motion-easing), box-shadow var(--i-motion-fast) var(--i-motion-easing);
+}
+
+.doc-layout__side a:hover {
+  color: var(--i-color-text);
+  background: var(--i-color-bg-subtle);
+  transform: translateX(1px);
+}
+
 .doc-layout__side a.router-link-exact-active {
   background: var(--i-color-brand-subtle);
   color: var(--i-color-brand);
-  font-weight: 500;
+  font-weight: 550;
 }
-/*
- * 选中态只用底色 + 文字色 + 字重，不加左侧竖条。
- * 那种「一条更粗更深的边线」的标记方式在本体系里是禁止的，见 CLAUDE.md。
- */
-.doc-layout__main { min-width: 0; padding-bottom: var(--i-spacing-16); }
+
+.doc-layout__side a.router-link-exact-active > i {
+  background: var(--i-color-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--i-color-brand) 12%, transparent);
+}
+
+.doc-layout__main {
+  min-width: 0;
+  width: 100%;
+  max-width: 960px;
+  padding-bottom: var(--i-spacing-16);
+}
 
 @media (max-width: 860px) {
-  /*
-   * 窄屏不再把侧栏摊平：横向排列会把几十个入口铺成好几屏，正文被挤到视野之外。
-   * 导航改由页头的抽屉承担（MobileNav），这里只留正文。
-   */
-  .doc-layout { grid-template-columns: 1fr; gap: 0; padding-top: var(--i-spacing-6); }
+  .doc-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-top: var(--i-spacing-6);
+  }
   .doc-layout__side { display: none; }
-  .doc-layout__main { padding-bottom: var(--i-spacing-10); }
+  .doc-layout__main { max-width: none; padding-bottom: var(--i-spacing-10); }
 }
 </style>
