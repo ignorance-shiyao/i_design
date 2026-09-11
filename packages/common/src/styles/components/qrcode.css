@@ -1,0 +1,45 @@
+/* IQrcode —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 二维码。
+ *
+ * 静默区（四周的留白）不是装饰：扫描器靠它把码与背景分开，
+ * 留白不够时相机要么找不到码，要么把旁边的文字当成模块。规范给的下限是 4 个模块。
+ *
+ * 颜色只允许「深色码 + 浅色底」这一种搭配，且不跟随主题色：
+ * 主题色一旦是中等明度，码与底的对比度就掉到扫不出来。这一条不做成可配置项。
+ */
+.i-qrcode {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--i-spacing-2);
+}
+.i-qrcode__canvas {
+  display: block;
+  /* 模块是硬边方块，缩放时不要抗锯齿——糊掉的边会让扫描器读错 */
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+  background: #fff;
+  border-radius: var(--i-radius-sm);
+}
+.i-qrcode__label {
+  max-width: 100%;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* 装不下时据实说明，不画一张残缺的码：残码扫出来是另一个地址 */
+.i-qrcode__error {
+  display: grid;
+  place-items: center;
+  padding: var(--i-spacing-4);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-danger-subtle);
+  color: var(--i-color-danger);
+  font-size: var(--i-font-size-xs);
+  text-align: center;
+}

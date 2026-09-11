@@ -74,6 +74,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/descriptions', label: 'Descriptions 描述列表' },
       { to: '/components/comment', label: 'Comment 评论' },
       { to: '/components/image-viewer', label: 'ImageViewer 图片预览' },
+      { to: '/components/qrcode', label: 'Qrcode 二维码' },
       { to: '/components/skeleton', label: 'Skeleton 骨架屏' },
       { to: '/components/data-display', label: '数据展示' },
       { to: '/components/chart', label: '图表' },

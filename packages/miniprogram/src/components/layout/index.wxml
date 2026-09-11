@@ -1,0 +1,15 @@
+<view class="i-layout i-layout--aside-{{asidePlacement}}">
+  <view wx:if="{{hasHeader}}" class="i-layout__header"><slot name="header" /></view>
+
+  <view class="i-layout__row">
+    <view
+      wx:if="{{hasAside}}"
+      class="i-layout__aside {{collapsed ? 'is-collapsed' : ''}}"
+    >
+      <slot name="aside" />
+    </view>
+    <view class="i-layout__content"><slot /></view>
+  </view>
+
+  <view wx:if="{{hasFooter}}" class="i-layout__footer"><slot name="footer" /></view>
+</view>

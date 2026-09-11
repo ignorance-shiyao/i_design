@@ -1,0 +1,80 @@
+/* ILayout —— 由 Vue / React / mobile 各端共享 */
+
+/*
+ * 页面骨架：顶栏、侧栏、正文、底栏。
+ *
+ * 它只负责把这四块摆对位置，不管里面放什么——
+ * 页面级的结构一旦被组件塞进具体内容，换一个产品就只能重写。
+ *
+ * 用语义标签（header / aside / main / footer）而不是一水儿的 div：
+ * 读屏用户靠这几个地标在页面里跳转，全是 div 的页面对他们来说是一整块。
+ */
+.i-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--i-color-bg);
+}
+
+/* 有侧栏时，中间这一段横向排：侧栏与正文并列，顶栏底栏仍然通栏 */
+.i-layout__row {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.i-layout--aside-right .i-layout__row { flex-direction: row-reverse; }
+
+.i-layout__header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-4);
+  height: var(--i-layout-header-height, 64px);
+  padding: 0 var(--i-spacing-6);
+  border-bottom: 1px solid var(--i-color-hairline);
+  background: var(--i-color-bg-elevated);
+}
+
+.i-layout__aside {
+  flex: none;
+  width: var(--i-layout-aside-width, 232px);
+  padding: var(--i-spacing-4) 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--i-color-hairline);
+  background: var(--i-color-bg-elevated);
+  transition: width var(--i-motion-base) var(--i-motion-easing);
+}
+.i-layout--aside-right .i-layout__aside {
+  border-right: 0;
+  border-left: 1px solid var(--i-color-hairline);
+}
+/* 收起后只留图标宽度。不把它整个藏掉——入口消失比变窄更难找回来 */
+.i-layout__aside.is-collapsed { width: var(--i-layout-aside-collapsed-width, 64px); }
+
+.i-layout__content {
+  flex: 1;
+  min-width: 0;
+  padding: var(--i-spacing-6);
+  overflow: auto;
+}
+
+.i-layout__footer {
+  flex: none;
+  padding: var(--i-spacing-4) var(--i-spacing-6);
+  border-top: 1px solid var(--i-color-hairline);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  background: var(--i-color-bg-elevated);
+}
+
+/* 窄屏收起侧栏：232px 的侧栏在手机上会把正文压成一条 */
+@media (max-width: 768px) {
+  .i-layout__row { flex-direction: column; }
+  .i-layout--aside-right .i-layout__row { flex-direction: column; }
+  .i-layout__aside {
+    width: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--i-color-hairline);
+  }
+  .i-layout__content { padding: var(--i-spacing-4); }
+}

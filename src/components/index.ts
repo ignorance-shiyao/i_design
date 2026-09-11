@@ -11,9 +11,11 @@ import IChartPie from './IChartPie.vue'
 import ISparkline from './ISparkline.vue'
 import IInputNumber from './IInputNumber.vue'
 import ISlider from './ISlider.vue'
+import IQrcode from './IQrcode.vue'
 import IRangeInput from './IRangeInput.vue'
 import IRate from './IRate.vue'
 import ILink from './ILink.vue'
+import ILayout from './ILayout.vue'
 import IList from './IList.vue'
 import ISpace from './ISpace.vue'
 import ITypography from './ITypography.vue'
@@ -200,8 +202,10 @@ export {
   IInputAdornment,
   IInputNumber,
   ISlider,
+  IQrcode,
   IRangeInput,
   IRate,
+  ILayout,
   ILink,
   IList,
   IChart,
@@ -295,8 +299,10 @@ const components = {
   IInputAdornment,
   IInputNumber,
   ISlider,
+  IQrcode,
   IRangeInput,
   IRate,
+  ILayout,
   ILink,
   IList,
   IChart,

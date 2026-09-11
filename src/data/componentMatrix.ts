@@ -589,6 +589,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ILayout",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ILink",
     "ends": {
       "vue-next": true,
@@ -710,6 +720,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IPromptInput",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IQrcode",
     "ends": {
       "vue-next": true,
       "vue": true,

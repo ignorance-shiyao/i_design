@@ -58,6 +58,7 @@
 @import './components/input-number.css';
 @import './components/input.css';
 @import './components/keypad.css';
+@import './components/layout.css';
 @import './components/link.css';
 @import './components/list.css';
 @import './components/loading.css';
@@ -75,6 +76,7 @@
 @import './components/popup.css';
 @import './components/progress.css';
 @import './components/prompt-input.css';
+@import './components/qrcode.css';
 @import './components/radio-group.css';
 @import './components/radio.css';
 @import './components/range-input.css';

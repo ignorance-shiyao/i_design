@@ -56,6 +56,7 @@ const {
   formatTime, parseTime, timeColumn, isUnitEnabled, clampTime, isValidRange
 } = await bundle('packages/common/src/logic/time.ts', 'time')
 const { orderRange, isRangeEmpty } = await bundle('packages/common/src/logic/range.ts', 'range')
+const { qrMatrix, qrVersionFor } = await bundle('packages/common/src/logic/qrcode.ts', 'qrcode')
 const {
   splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
 } = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
@@ -1074,6 +1075,30 @@ const pairRangeExpectations = pairRangeCases.flatMap(([a, b]) => {
   ]
 })
 
+/*
+ * 二维码：整张矩阵逐行比对。
+ *
+ * 只比版本与掩码是不够的——纠错码字、交织顺序、掩码惩罚分里任何一处偏差，
+ * 都会得到一张「看起来也是二维码」但扫出来是别的内容的图。
+ * 因此把每一行压成 0/1 字符串整张比，错一格就当场失败。
+ */
+const qrCases = [
+  ['i-design', 'L'],
+  ['https://ignorance-shiyao.github.io/', 'M'],
+  ['设计体系 · 多端一致', 'Q'],
+  ['x', 'H'],
+]
+const qrExpectations = qrCases.flatMap(([text, level]) => {
+  const m = qrMatrix(text, level)
+  const rows = m.modules.map((row) => row.map((v) => (v ? '1' : '0')).join('')).join('|')
+  const dartLevel = `QrEcLevel.${level.toLowerCase()}`
+  return [
+    `    _expectQr('${text}', ${dartLevel}, ${m.version}, ${m.mask}, '${rows}');`
+  ]
+})
+const qrCapacityExpectations = [[10, 'M'], [200, 'L'], [400, 'H'], [1, 'H']].map(([len, level]) =>
+  `    expect(qrVersionFor(${len}, QrEcLevel.${level.toLowerCase()}), ${qrVersionFor(len, level)});`)
+
 const altExpectations = [
   ['loading', '示例图'], ['error', '示例图'], ['loaded', '示例图'],
   ['error', ''], ['loading', ''],
@@ -1292,6 +1317,16 @@ import 'package:i_design/src/logic/color.dart';
 import 'package:i_design/src/logic/calendar.dart';
 import 'package:i_design/src/logic/mention.dart';
 import 'package:i_design/src/logic/range.dart';
+import 'package:i_design/src/logic/qrcode.dart';
+
+void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
+  final m = qrMatrix(text, level);
+  expect(m, isNotNull, reason: '\$text 应当能编码');
+  expect(m!.version, version, reason: '\$text 版本不一致');
+  expect(m.mask, mask, reason: '\$text 掩码不一致');
+  final actual = m.modules.map((row) => row.map((v) => v ? '1' : '0').join()).join('|');
+  expect(actual, rows, reason: '\$text 矩阵与 Web 端不一致');
+}
 
 void _expectDots(DotRange actual, List<int> items, int active, String label) {
   expect(actual.items, items, reason: '\$label 点位不一致');
@@ -1598,6 +1633,11 @@ ${tt_columnExpectations.join('\n')}
 ${enabledExpectations.join('\n')}
 ${tt_clampExpectations.join('\n')}
 ${rangeExpectations.join('\n')}
+  });
+
+  test('二维码矩阵与 Web 端逐格一致', () {
+${qrExpectations.join('\n')}
+${qrCapacityExpectations.join('\n')}
   });
 
   test('区间的起止对调与空判定与 Web 端一致', () {

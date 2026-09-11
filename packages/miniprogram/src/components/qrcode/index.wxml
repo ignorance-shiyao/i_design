@@ -1,0 +1,12 @@
+<view class="i-qrcode">
+  <canvas
+    wx:if="{{!failed}}"
+    class="i-qrcode__canvas"
+    canvas-id="{{canvasId}}"
+    style="width: {{size}}px; height: {{size}}px"
+  />
+
+  <view wx:else class="i-qrcode__error">内容过长，超出二维码容量</view>
+
+  <text wx:if="{{label}}" class="i-qrcode__label">{{label}}</text>
+</view>
