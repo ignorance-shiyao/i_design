@@ -35,7 +35,7 @@
 ```
 src/                        文档站(也是 Vue 3 组件的源头)
   components/               ★ Vue 3 组件源头,改这里
-  data/                     站点数据,多数是生成的(见第 4 节)
+  data/                     站点数据,多数是生成的(见第 3 节)
   pages/                    文档站页面
 packages/
   common/                   ★ 跨端共享层
@@ -48,9 +48,9 @@ packages/
 scripts/                    跨端构建与校验脚本
 ```
 
-`packages/common/src/logic/` 现有:`avatar chart countdown date flow indexes number pagination
-picker pull qrcode range select table theme toast upload validate`。**任何"算法"都应该落在这里**,而不是写在某个端的组件里——
-它是 Web / 小程序 / Flutter 三套渲染共用的同一份真值。
+共享逻辑模块按目录列在 [SOURCE_STATUS.md](SOURCE_STATUS.md)，不在这里手写清单。
+业务算法进 `packages/common/src/logic/`，由各端复用；目录扫描等构建工具留在 `scripts/`。
+文件存在只证明实现入口存在，行为仍需按主台账的验收条件验证。
 
 ---
 
@@ -65,6 +65,9 @@ picker pull qrcode range select table theme toast upload validate`。**任何"�
 | `packages/common/src/styles/index.css` | `build-styles-index.mjs` |
 | `packages/vue-next/**`(整个目录) | `build-vue-next.mjs`,从 `src/components` 复制 |
 | `packages/vue/src/components/**`(除人工清单) | `packages/vue/scripts/convert.mjs` |
+| `packages/mobile-{vue,react}/src/index.ts` | `build-mobile-index.mjs` |
+| `packages/flutter/test/logic_parity_test.dart` | `packages/flutter/scripts/build-golden-test.mjs` |
+| `docs/SOURCE_STATUS.md` | `scripts/build-doc-status.mjs`（`npm run build:docs`） |
 | `packages/react/src/index.ts` | `build-react-index.mjs` |
 | `packages/flutter/lib/i_design.dart` | `build-barrel.mjs` |
 | `packages/miniprogram/src/components/*/index.json`、`index.wxss` | `scaffold.mjs` |
@@ -94,7 +97,8 @@ React 端 17 个组件实现了却从未导出;移动端三个组件样式没进
    `index.json` 与 `index.wxss` 由 `scaffold.mjs` 生成,别手写。
 7. **Flutter**:`packages/flutter/lib/src/components/i_foo.dart`,逻辑用 `lib/src/logic/` 的 Dart 版
    (与 TS 版同名同算法,有 golden test 兜底)。
-8. 跑第 5 节的校验,全绿再提交。
+8. 补文档页、路由与目录的稳定标识，运行 `npm run build:catalog` 和 `npm run build:docs`。
+9. 跑第 5 节的校验，按主台账验收后更新任务状态，全绿再提交。
 
 **移动专有形态**(NavBar / Tabbar / Popup / SwipeCell / Picker 这类)只放 `mobile-vue` 与 `mobile-react`,
 不进 Web 各端矩阵。
@@ -104,23 +108,22 @@ React 端 17 个组件实现了却从未导出;移动端三个组件样式没进
 ## 5. 怎么证明改对了
 
 ```bash
-npm run build          # 令牌编译 + 类型检查 + 站点构建
-npm run check:parity   # ★ 跨端一致性,10 项,包含下面所有子检查
-npm run check:mp       # 小程序静态校验
-npm run check:flutter  # Flutter 校验 + golden test
+npm run check:parity   # 目录、文档快照、跨端与生成物等检查链
+npm run typecheck
+npm run build
+node scripts/check-theme-readability.mjs
 ```
 
-`check:parity` 的 10 项在查什么(理解它们比记住命令重要):
+核心 `scripts/check-parity.mjs` 检查令牌数量及逐值一致、Dart 类型、样式隔离与入口覆盖、
+Vue 2 语法、文件类型映射、Avatar 调色板、Vue 3 发布源同步、组件导出及未定义令牌。
+完整命令链以 `package.json` 的 `check:parity` 为准，避免这里再维护一份会过期的编号表。
 
-1-3. CSS / WXSS / JSON 三份令牌产物数量与逐值相等
-4. Dart 颜色与 CSS 等价——**读的是 `packages/flutter/lib/` 里那份,不是 `dist`**。
-   曾经因为读 dist,"令牌已同步"通过了校验而 Flutter 端什么都没拿到。
-5. Dart 尺寸声明为 `double`(整数会让 `EdgeInsets` 编译失败)
-6. 共享样式无全局泄漏的通用选择器
-7. Vue 2 产物无 Vue 3 专有语法
-8. Avatar 调色板 TS 与 Dart 一致
-9. `@i-design/vue-next` 与 `src/components` 逐字节同步
-10. `src/components` 的组件都已在 `index.ts` 导出
+`check:mp` 会生成并静态检查小程序四件套；`check:flutter` 会生成 Dart golden 断言并执行
+静态校验，**不等于已运行 `flutter test`**。有 Flutter SDK 时再运行包内测试。
+覆盖矩阵与 golden 断言数量不得回退；当前数量及口径见自动生成的源码快照。
+
+界面变更必须做 Playwright 实机验证。截图放 PR 描述的附件，不提交二进制截图进仓库；
+仓库只留文本验证结果。令牌只能改源文件，`build:tokens` 生成 CSS / WXSS / Dart。
 
 小程序校验额外查:四件套齐全、JS 可解析、`styleIsolation: apply-shared`、
 WXML 用到的类名在 WXSS 里有规则、`usingComponents` 声明齐全
@@ -157,18 +160,16 @@ export const SCATTER_MAX_SERIES = 3
 
 ## 7. 待办
 
-详细计划见 **`docs/ROADMAP.md`**：按批次排好顺序，每项写明了做什么、
-可以复用哪份共享逻辑、以及验收标准。进度以站内「组件全景」页
-（`src/data/componentCatalog.ts`）的 `ready` / `planned` 为准。
-
-下一批是「补完浮层与文件类型的其余端」——先还债再加新组件，
-否则「各端一致」这条承诺会先烂在这里。
+唯一待办入口是 **`docs/当前现状&后续规划_Claude .md` 第 2 节**。
+`ROADMAP.md` 保留历史理由和旧项去向，不再维护未勾选清单。
+F0 已实现源码驱动的目录状态；F1 完成后继续按主台账推进 E1 / E2 等交付短板。
+每项独立分支、独立 PR，具体门槛见主台账第 4 节。
 
 ## 8. 几个容易踩的坑
 
 - **`.npmrc` 里的 `legacy-peer-deps=true` 不要删。** 仓库同时维护 Vue 2.7 与 Vue 3 两套实现,
   peer 冲突是刻意的架构而非待修的依赖错误。删掉会让 CI 的 `npm ci` 直接失败。
-- **改了 `src/components` 一定要跑 `build:vue-next`**,否则校验第 9 项会失败。
+- **改了 `src/components` 一定要跑 `build:vue-next`**,否则 Vue 3 发布源同步检查会失败。
 - **小程序没有 SVG**,图形走 `canvas type="2d"`,记得按 `devicePixelRatio` 缩放,
   否则在高分屏上是糊的。但**需要被读屏读到的数值不要画进 canvas**——
   热力图就是因此用 `view` 排格子而非 canvas。
@@ -193,7 +194,7 @@ npm run build:styles
 
 # 3. 各端实现
 vim src/components/IDropdown.vue                # Vue 3 源头
-vim src/components/index.ts                     # 导出(校验项 10 会查)
+vim src/components/index.ts                     # 导出（导出覆盖检查会查）
 vim packages/react/src/components/Dropdown.tsx
 node packages/vue/scripts/convert.mjs           # Vue 2 自动转换
 vim packages/miniprogram/src/components/dropdown/index.{js,wxml}
@@ -204,7 +205,11 @@ vim src/data/componentCatalog.ts                # 补稳定 api 与场景说明�
 npm run build:catalog                           # 按源码目录更新两页共用的状态依据
 
 # 5. 全量校验
-npm run build && npm run check:parity
+npm run build:docs
+npm run check:parity
+npm run typecheck
+npm run build
+node scripts/check-theme-readability.mjs
 ```
 
 提交前确认 `git status` 干净、各端覆盖矩阵没有回退。
