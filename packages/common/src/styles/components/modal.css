@@ -66,3 +66,21 @@
 }
 .i-modal-enter-from .i-modal__panel,
 .i-modal-leave-to .i-modal__panel { transform: translateY(-8px) scale(0.98); }
+
+/* ------------------------------------------------ 命令式确认框 */
+
+.i-confirm__text {
+  margin: 0;
+  color: var(--i-color-text-secondary);
+  line-height: 1.6;
+}
+.i-confirm__field { margin-top: var(--i-spacing-4); }
+/*
+ * 错误文案跟在输入框下面，而不是换成边框变红就完事——
+ * 只变色的话，色觉障碍用户看到的是「按了确定没反应」。
+ */
+.i-confirm__error {
+  margin: var(--i-spacing-2) 0 0;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-danger);
+}

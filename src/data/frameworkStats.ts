@@ -4,12 +4,12 @@
  */
 export const frameworkStats: Record<string, number> = {
   "vue-next": 116,
-  "vue": 116,
+  "vue": 117,
   "react": 116,
-  "miniprogram": 117,
+  "miniprogram": 118,
   "mobile-vue": 135,
   "mobile-react": 135,
-  "flutter": 108
+  "flutter": 109
 }
 
 /** 以 vue-next 为基准的组件总数 */

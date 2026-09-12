@@ -1,0 +1,37 @@
+<view
+  wx:for="{{queue}}"
+  wx:key="id"
+  class="i-modal"
+  bindtap="onMask"
+  catchtouchmove="noop"
+>
+  <view class="i-modal__panel" style="width:420px" catchtap="noop">
+    <view wx:if="{{item.title}}" class="i-modal__header">
+      <view class="i-modal__title">{{item.title}}</view>
+    </view>
+
+    <view class="i-modal__body">
+      <view wx:if="{{item.content}}" class="i-confirm__text">{{item.content}}</view>
+      <view wx:if="{{item.kind === 'prompt'}}" class="i-confirm__field">
+        <input
+          class="i-input {{error ? 'is-invalid' : ''}}"
+          placeholder="{{item.placeholder}}"
+          value="{{value}}"
+          bindinput="onInput"
+        />
+        <view wx:if="{{error}}" class="i-confirm__error">{{error}}</view>
+      </view>
+    </view>
+
+    <view class="i-modal__footer">
+      <view
+        wx:for="{{item.actions}}"
+        wx:for-item="action"
+        wx:key="role"
+        class="i-button i-button--{{action.primary ? (action.danger ? 'danger' : 'primary') : 'secondary'}} i-button--md"
+        data-role="{{action.role}}"
+        bindtap="onAction"
+      >{{action.text}}</view>
+    </view>
+  </view>
+</view>

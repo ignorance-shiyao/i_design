@@ -4,11 +4,48 @@ import IModal from '@/components/IModal.vue'
 import IButton from '@/components/IButton.vue'
 import IInput from '@/components/IInput.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import { confirm as confirmBox } from '@/components/confirm'
 
 const basic = ref(false)
 const form = ref(false)
 const confirm = ref(false)
 const title = ref('')
+
+const lastResult = ref('（还没操作）')
+
+async function askDelete() {
+  try {
+    await confirmBox.confirm({
+      title: '删除这条迭代？',
+      content: '迭代里的 12 个工作项会一并移入回收站，30 天后彻底清除。',
+      confirmText: '删除',
+      danger: true
+    })
+    lastResult.value = '用户确认了删除'
+  } catch {
+    lastResult.value = '用户取消了'
+  }
+}
+
+async function askName() {
+  try {
+    const name = await confirmBox.prompt({
+      title: '新建迭代',
+      placeholder: '例如 2026 Q2 第三迭代',
+      required: true,
+      requiredMessage: '迭代名不能为空',
+      validate: (value) => (value.trim().length > 20 ? '不超过 20 个字' : null)
+    })
+    lastResult.value = `新建了「${name}」`
+  } catch {
+    lastResult.value = '用户取消了'
+  }
+}
+
+async function tellDone() {
+  await confirmBox.alert({ title: '已提交', content: '审批结果会在一个工作日内通知你。' })
+  lastResult.value = '用户读完了提示'
+}
 </script>
 
 <template>
@@ -81,6 +118,42 @@ const title = ref('')
       </IModal>
     </DemoBlock>
 
+    <h2>命令式确认框</h2>
+    <p>
+      「删除吗？」这种一次性的询问不值得在页面里养一个 <code>visible</code>：
+      状态的生命周期只有那三秒，却要占一个 ref、一段模板和一个回调。
+      <code>confirm</code> 把它折成一次 <code>await</code>。
+    </p>
+    <p>
+      取消走 reject 而不是 <code>resolve(false)</code>：<code>await</code> 之后那几行就是
+      「用户同意了才做的事」，不必再缩进一层 <code>if</code>。不想处理拒绝时
+      <code>.catch(() =&gt; {})</code> 一笔带过。
+    </p>
+    <p>
+      按钮顺序是取消在左、确认在右——对话框是一条从左读到右的句子，确认是句尾的动作。
+      反过来放的话，视线读完正文落在右边，右边却是「取消」，最容易点到的位置放的是放弃操作。
+      破坏性操作把主按钮换成危险色，并且默认不允许点遮罩关闭：那一下太容易误触，而它旁边就是「确定」。
+    </p>
+
+    <DemoBlock
+      title="三种用法"
+      description="prompt 的校验不通过时对话框不会关闭，错误文案跟在输入框下面——只把边框变红的话，色觉障碍用户看到的是「按了确定没反应」。"
+      code="import { confirm } from '@i-design/vue-next'
+
+await confirm.confirm({ title: '删除这条迭代？', danger: true })
+const name = await confirm.prompt({ title: '新建迭代', required: true })
+await confirm.alert({ title: '已提交' })"
+    >
+      <div class="confirm-demo">
+        <div class="confirm-demo__actions">
+          <IButton variant="danger" @click="askDelete">删除迭代</IButton>
+          <IButton @click="askName">新建迭代</IButton>
+          <IButton variant="text" @click="tellDone">提示</IButton>
+        </div>
+        <p class="confirm-demo__result">上一次的结果：{{ lastResult }}</p>
+      </div>
+    </DemoBlock>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -108,3 +181,22 @@ const title = ref('')
     </p>
   </article>
 </template>
+
+<style scoped>
+.confirm-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--i-spacing-4);
+}
+.confirm-demo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+}
+.confirm-demo__result {
+  margin: 0;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+</style>

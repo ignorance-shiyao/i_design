@@ -18,6 +18,7 @@ const emit = defineEmits<{ 'update:modelValue': [boolean]; close: [] }>()
 
 const panel = ref<HTMLElement | null>(null)
 let lastActive: HTMLElement | null = null
+let wasOpen = false
 
 function close() {
   emit('update:modelValue', false)
@@ -43,11 +44,21 @@ watch(
       await nextTick()
       panel.value?.focus()
     } else {
+      // 没打开过就什么都不用收：immediate 会让每个挂载中的 Modal 都跑一次这里，
+      // 照做的话，一个刚挂载的关闭态 Modal 会把另一个已打开的锁的滚动解开
+      if (!wasOpen) return
       document.removeEventListener('keydown', onKeydown)
       document.body.style.overflow = ''
       lastActive?.focus()
     }
-  }
+    wasOpen = open
+  },
+  /*
+   * immediate：命令式对话框是「挂载时就已经是打开的」，modelValue 从头到尾都是 true，
+   * 不带 immediate 的话这段根本不跑——Esc 关不掉、背景照样能滚、焦点也不进面板。
+   * 页面里 v-model 切换的用法看不出这个差别，所以它能一直藏着。
+   */
+  { immediate: true }
 )
 
 onBeforeUnmount(() => {

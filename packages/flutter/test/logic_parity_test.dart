@@ -34,6 +34,7 @@ import 'package:i_design/src/logic/time_select.dart';
 import 'package:i_design/src/logic/scrollbar.dart';
 import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
+import 'package:i_design/src/logic/confirm.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1074,6 +1075,69 @@ void main() {
     expect(clockOfMinutes(545), '09:05');
     expect(clockOfMinutes(1439), '23:59');
     expect(clockOfMinutes(1440), '00:00');
+  });
+
+  test('确认框的按钮编排、关闭语义与输入校验与 Web 端一致', () {
+    expect(confirmActions(IConfirmKind.confirm).length, 2);
+    expect(confirmActions(IConfirmKind.confirm)[0].role, IConfirmRole.cancel);
+    expect(confirmActions(IConfirmKind.confirm)[0].text, '取消');
+    expect(confirmActions(IConfirmKind.confirm)[0].primary, false);
+    expect(confirmActions(IConfirmKind.confirm)[0].danger, false);
+    expect(confirmActions(IConfirmKind.confirm)[1].role, IConfirmRole.confirm);
+    expect(confirmActions(IConfirmKind.confirm)[1].text, '确定');
+    expect(confirmActions(IConfirmKind.confirm)[1].primary, true);
+    expect(confirmActions(IConfirmKind.confirm)[1].danger, false);
+    expect(confirmActions(IConfirmKind.alert).length, 1);
+    expect(confirmActions(IConfirmKind.alert)[0].role, IConfirmRole.confirm);
+    expect(confirmActions(IConfirmKind.alert)[0].text, '确定');
+    expect(confirmActions(IConfirmKind.alert)[0].primary, true);
+    expect(confirmActions(IConfirmKind.alert)[0].danger, false);
+    expect(confirmActions(IConfirmKind.prompt).length, 2);
+    expect(confirmActions(IConfirmKind.prompt)[0].role, IConfirmRole.cancel);
+    expect(confirmActions(IConfirmKind.prompt)[0].text, '取消');
+    expect(confirmActions(IConfirmKind.prompt)[0].primary, false);
+    expect(confirmActions(IConfirmKind.prompt)[0].danger, false);
+    expect(confirmActions(IConfirmKind.prompt)[1].role, IConfirmRole.confirm);
+    expect(confirmActions(IConfirmKind.prompt)[1].text, '确定');
+    expect(confirmActions(IConfirmKind.prompt)[1].primary, true);
+    expect(confirmActions(IConfirmKind.prompt)[1].danger, false);
+    expect(confirmActions(IConfirmKind.confirm, danger: true).length, 2);
+    expect(confirmActions(IConfirmKind.confirm, danger: true)[0].role, IConfirmRole.cancel);
+    expect(confirmActions(IConfirmKind.confirm, danger: true)[0].text, '取消');
+    expect(confirmActions(IConfirmKind.confirm, danger: true)[0].primary, false);
+    expect(confirmActions(IConfirmKind.confirm, danger: true)[0].danger, false);
+    expect(confirmActions(IConfirmKind.confirm, danger: true)[1].role, IConfirmRole.confirm);
+    expect(confirmActions(IConfirmKind.confirm, danger: true)[1].text, '确定');
+    expect(confirmActions(IConfirmKind.confirm, danger: true)[1].primary, true);
+    expect(confirmActions(IConfirmKind.confirm, danger: true)[1].danger, true);
+    expect(confirmActions(IConfirmKind.confirm, confirmText: '删除', cancelText: '再想想', danger: true).length, 2);
+    expect(confirmActions(IConfirmKind.confirm, confirmText: '删除', cancelText: '再想想', danger: true)[0].role, IConfirmRole.cancel);
+    expect(confirmActions(IConfirmKind.confirm, confirmText: '删除', cancelText: '再想想', danger: true)[0].text, '再想想');
+    expect(confirmActions(IConfirmKind.confirm, confirmText: '删除', cancelText: '再想想', danger: true)[0].primary, false);
+    expect(confirmActions(IConfirmKind.confirm, confirmText: '删除', cancelText: '再想想', danger: true)[0].danger, false);
+    expect(confirmActions(IConfirmKind.confirm, confirmText: '删除', cancelText: '再想想', danger: true)[1].role, IConfirmRole.confirm);
+    expect(confirmActions(IConfirmKind.confirm, confirmText: '删除', cancelText: '再想想', danger: true)[1].text, '删除');
+    expect(confirmActions(IConfirmKind.confirm, confirmText: '删除', cancelText: '再想想', danger: true)[1].primary, true);
+    expect(confirmActions(IConfirmKind.confirm, confirmText: '删除', cancelText: '再想想', danger: true)[1].danger, true);
+    expect(confirmActions(IConfirmKind.alert, confirmText: '知道了').length, 1);
+    expect(confirmActions(IConfirmKind.alert, confirmText: '知道了')[0].role, IConfirmRole.confirm);
+    expect(confirmActions(IConfirmKind.alert, confirmText: '知道了')[0].text, '知道了');
+    expect(confirmActions(IConfirmKind.alert, confirmText: '知道了')[0].primary, true);
+    expect(confirmActions(IConfirmKind.alert, confirmText: '知道了')[0].danger, false);
+    expect(isConfirmed(IConfirmKind.confirm, IConfirmRole.confirm), true);
+    expect(isConfirmed(IConfirmKind.confirm, IConfirmRole.cancel), false);
+    expect(isConfirmed(IConfirmKind.confirm, IConfirmRole.close), false);
+    expect(isConfirmed(IConfirmKind.alert, IConfirmRole.confirm), true);
+    expect(isConfirmed(IConfirmKind.alert, IConfirmRole.close), true);
+    expect(isConfirmed(IConfirmKind.prompt, IConfirmRole.confirm), true);
+    expect(isConfirmed(IConfirmKind.prompt, IConfirmRole.close), false);
+    expect(validatePromptValue('', required: true), '此项必填');
+    expect(validatePromptValue('  ', required: true), '此项必填');
+    expect(validatePromptValue('x', required: true), null);
+    expect(validatePromptValue(''), null);
+    expect(validatePromptValue('abc', pattern: RegExp(r'^\d+$')), '格式不正确');
+    expect(validatePromptValue('123', pattern: RegExp(r'^\d+$')), null);
+    expect(validatePromptValue('', required: true, requiredMessage: '请填写名称'), '请填写名称');
   });
 
   test('多选的追加顺序与标签折叠与 Web 端一致', () {
