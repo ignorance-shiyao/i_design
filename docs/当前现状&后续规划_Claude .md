@@ -165,7 +165,7 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 | `claude/cross-framework-component-library-2wawj9` | 0 | 已并入，可删 |
 | `redesign/tdesign-20260911` | 0 | 已并入，可删 |
 | `claude/devui-design-reference-exzjpm` | 6 | **只挑不合**：里面的 Gantt 与 WordCloud 正是 A1/A2，值得摘出来；同分支的 IndexBar / PullRefresh 在 main 里已有等价实现（`IIndexes` / `IPullDownRefresh`），摘了会重复；其余四个提交是首页与明暗切换的返工，会把当前这版视觉改回去 |
-| `feat/agent-interaction-primitives` | 1 | **不要合**。它走的是另一套目录结构（`packages/core`、`playground/`），合进来会变成两套并存的包布局。但里面的 `ci.yml`、`check-package-exports.mjs`、`tests/agent.test.tsx` 可以当 E1/E2/E5 的参考 |
+| `feat/agent-interaction-primitives`（PR #3） | 1 | **已关闭**。分支点在 `03488d2`（重构前），针对的是 `packages/core` + `playground/` + pnpm 那套已经不存在的结构，GitHub 判定为 conflict。它的四个组件（ApprovalCard / TaskList / ContextCard / ToolChip）里前三个 main 已有且更完整，只剩 ToolChip 是真缺的，见 B1。唯一值得留下的想法已抄成 E7 |
 | `feat/visual-refresh-20260911` | 1 | 首页与顶栏的另一版样式，与当前基准冲突。除非确认要换，否则删掉 |
 
 处理建议：先从 `devui` 分支 cherry-pick Gantt 与 WordCloud（勾掉 A1/A2），
@@ -219,6 +219,20 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
     `overflow`（判定方向）、`locale`（局部覆盖）
   - 验收：`npm test` 通过并接进 CI；故意把 `isTextOverflowing` 的方向写反，测试变红
   - 依赖：E2
+
+- [ ] **E7 · 外链地址加协议白名单**（P2，来自已关闭的 PR #3）
+  - 现状：`IChatSources` 与 `IContextCards` 把数据里的 `url` / `href` 直接绑到
+    `<a href>` 上，**代码里没有任何协议检查**。今天没被利用是因为两处都带了
+    `target="_blank"`，而 Chromium 会拒绝把 `javascript:` 导航到新上下文——
+    也就是说安全是浏览器顺手给的，不是我们设计的
+  - 为什么要管：这两个组件的数据来自模型与工具输出，是**不可信内容**。
+    哪天有人去掉 `target`、或者 Flutter 接上 `url_launcher`、小程序接上 `navigateTo`，
+    这道口子立刻变成真的
+  - 落点：`packages/common/src/logic/` 加 `safeHref(href)`，只放行
+    `http(s)://`、站内相对路径与锚点；协议相对（`//evil.com`）、
+    `javascript:`、`data:`、含控制字符的一律返回 undefined。各端绑定前过一道
+  - 验收：传 `javascript:alert(1)` 时链接退化成纯文本而不是可点的 `<a>`；
+    补 golden 断言把白名单规则钉在各端
 
 - [ ] **E6 · 无障碍自动检查**（P2）
   - 落点：Playwright + axe，遍历文档站路由，亮暗两态各跑一遍
