@@ -134,6 +134,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ITimePicker.vue",
   "src/components/ITimeSelect.vue",
   "src/components/ITimeline.vue",
+  "src/components/IToolChips.vue",
   "src/components/ITooltip.vue",
   "src/components/ITour.vue",
   "src/components/ITransfer.vue",

@@ -1,0 +1,26 @@
+<view class="i-chips">
+  <view
+    wx:for="{{rows}}"
+    wx:key="key"
+    class="i-chips__item i-chips__item--{{item.status}}"
+    data-key="{{item.key}}"
+    bindtap="choose"
+  >
+    <view class="i-chips__icon">
+      <i-loading wx:if="{{item.status === 'running'}}" size="sm" />
+      <view wx:else class="i-icon i-icon--{{item.icon}}" style="width:13px;height:13px" />
+    </view>
+    <text class="i-chips__label">{{item.label}}</text>
+    <!-- 统计用文字而不是只用颜色：灰度打印与色觉障碍下「+13 −4」谁都读得出来 -->
+    <view wx:if="{{item.hasStat}}" class="i-chips__stat">
+      <text wx:if="{{item.added}}" class="i-chips__stat-add">+{{item.added}}</text>
+      <text wx:if="{{item.removed}}" class="i-chips__stat-remove">−{{item.removed}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{clipped}}" class="i-chips__more" bindtap="expand">
+    <text>{{moreText}}</text>
+    <text wx:if="{{hiddenStat}}" class="i-chips__stat">{{hiddenStat}}</text>
+    <text wx:if="{{failedText}}" class="i-chips__more-failed">{{failedText}}</text>
+  </view>
+</view>

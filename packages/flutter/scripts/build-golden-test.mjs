@@ -107,6 +107,10 @@ const { searchCommands, moveCommandIndex } = await bundle(
   'packages/common/src/logic/command.ts',
   'command'
 )
+const { toolChipStat, summarizeToolChips, toolChipIcon } = await bundle(
+  'packages/common/src/logic/toolchip.ts',
+  'toolchip'
+)
 const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
@@ -1715,6 +1719,41 @@ const commandMoveExpectations = [
 ].map(([cur, delta, total]) =>
   `    expect(moveCommandIndex(${cur}, ${delta}, ${total}), ${moveCommandIndex(cur, delta, total)});`)
 
+/*
+ * 工具芯片的统计写法：同一次调用在两端写出来的字必须逐字相同，
+ * 一端写「+13 −4」另一端写「13 增 4 删」的话，读者会以为是两件事。
+ */
+const statCases = [[13, 4], [13, 0], [0, 4], [0, 0], [1, 1], [999, 1000]]
+const chipStatExpectations = statCases.map(
+  ([a, r]) => `    expect(toolChipStat(${a}, ${r}), ${JSON.stringify(toolChipStat(a, r))});`
+)
+const chipItems = [
+  { key: 'a', label: 'App.tsx', status: 'success', added: 74, removed: 41 },
+  { key: 'b', label: 'flavors.css', status: 'error' },
+  { key: 'c', label: 'grep', status: 'running', added: 2 },
+  { key: 'd', label: 'main.ts', status: 'success', added: 0, removed: 9 }
+]
+const dartChipItems = `<IToolChipItem>[${chipItems
+  .map(
+    (i) =>
+      `IToolChipItem(key: '${i.key}', label: '${i.label}', ` +
+      `status: IToolChipStatus.${i.status}, added: ${i.added ?? 0}, removed: ${i.removed ?? 0})`
+  )
+  .join(', ')}]`
+const chipSummary = summarizeToolChips(chipItems)
+const chipSummaryExpectations = [
+  `    expect(summarizeToolChips(chips).total, ${chipSummary.total});`,
+  `    expect(summarizeToolChips(chips).running, ${chipSummary.running});`,
+  `    expect(summarizeToolChips(chips).failed, ${chipSummary.failed});`,
+  `    expect(summarizeToolChips(chips).added, ${chipSummary.added});`,
+  `    expect(summarizeToolChips(chips).removed, ${chipSummary.removed});`,
+  `    expect(summarizeToolChips(<IToolChipItem>[]).total, ${summarizeToolChips([]).total});`,
+  `    expect(summarizeToolChips(<IToolChipItem>[]).added, ${summarizeToolChips([]).added});`,
+  ...['success', 'error'].map(
+    (s) => `    expect(toolChipIcon(IToolChipStatus.${s}), ${JSON.stringify(toolChipIcon(s))});`
+  )
+]
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -2276,6 +2315,12 @@ ${lineDiffExpectations.join('\n')}
 ${commandExpectations.join('\n')}
     expect(searchCommands(items, '', limit: 2).length, ${commandLimitCount});
 ${commandMoveExpectations.join('\n')}
+  });
+
+  test('工具芯片的统计写法与折叠汇总与 Web 端一致', () {
+    final chips = ${dartChipItems};
+${chipStatExpectations.join('\n')}
+${chipSummaryExpectations.join('\n')}
   });
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {

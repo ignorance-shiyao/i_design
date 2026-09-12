@@ -150,6 +150,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'PromptInput', cn: '输入台', to: '/components/chat', desc: '多行输入、附件与发送' },
       { name: 'ChatThinking', cn: '思考过程', to: '/components/chat', desc: '可展开的推理步骤' },
       { name: 'ChatToolCall', cn: '工具调用', to: '/components/chat', desc: '调用了什么、拿到什么' },
+      { name: 'ToolChips', cn: '工具芯片', to: '/components/chat', desc: '一串调用压成一行行芯片' },
       { name: 'ApprovalCard', cn: '征求确认', to: '/components/chat', desc: '行动前的人类介入' },
       { name: 'AgentTasks', cn: '任务行', to: '/components/chat', desc: '任务的实时状态' },
       { name: 'RecommendCard', cn: '建议卡', to: '/components/chat', desc: '带置信度的主动建议' },

@@ -1305,6 +1305,25 @@ void main() {
     expect(moveCommandIndex(5, 1, 0), 0);
   });
 
+  test('工具芯片的统计写法与折叠汇总与 Web 端一致', () {
+    final chips = <IToolChipItem>[IToolChipItem(key: 'a', label: 'App.tsx', status: IToolChipStatus.success, added: 74, removed: 41), IToolChipItem(key: 'b', label: 'flavors.css', status: IToolChipStatus.error, added: 0, removed: 0), IToolChipItem(key: 'c', label: 'grep', status: IToolChipStatus.running, added: 2, removed: 0), IToolChipItem(key: 'd', label: 'main.ts', status: IToolChipStatus.success, added: 0, removed: 9)];
+    expect(toolChipStat(13, 4), "+13 −4");
+    expect(toolChipStat(13, 0), "+13");
+    expect(toolChipStat(0, 4), "−4");
+    expect(toolChipStat(0, 0), "");
+    expect(toolChipStat(1, 1), "+1 −1");
+    expect(toolChipStat(999, 1000), "+999 −1000");
+    expect(summarizeToolChips(chips).total, 4);
+    expect(summarizeToolChips(chips).running, 1);
+    expect(summarizeToolChips(chips).failed, 1);
+    expect(summarizeToolChips(chips).added, 76);
+    expect(summarizeToolChips(chips).removed, 50);
+    expect(summarizeToolChips(<IToolChipItem>[]).total, 0);
+    expect(summarizeToolChips(<IToolChipItem>[]).added, 0);
+    expect(toolChipIcon(IToolChipStatus.success), "check-circle");
+    expect(toolChipIcon(IToolChipStatus.error), "error-circle");
+  });
+
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
     expect(shouldShowElapsed(0), false);
     expect(shouldShowElapsed(2999), false);

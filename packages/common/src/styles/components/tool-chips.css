@@ -1,0 +1,106 @@
+/* IToolChips —— 由 Vue / React / 小程序各端共享 */
+.i-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+}
+
+.i-chips__item,
+.i-chips__more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  max-width: 100%;
+  padding: var(--i-spacing-1) var(--i-spacing-3);
+  /*
+   * 四边等宽的发丝线。状态不靠加粗某一条边表达——那样的边线在灰度下与
+   * 普通边框没区别，而这里的三种状态恰恰是最需要读准的信息。
+   */
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-xs);
+  font-family: inherit;
+  line-height: 1.8;
+  cursor: pointer;
+  transition: border-color var(--i-motion-fast) var(--i-motion-easing),
+    background var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-chips__item:hover,
+.i-chips__more:hover {
+  border-color: var(--i-color-border-strong);
+  background: var(--i-color-bg-muted);
+}
+.i-chips__item:focus-visible,
+.i-chips__more:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+}
+
+/*
+ * 状态落在图标那一格：图标形状不同（勾 / 叉 / 转圈），底下再垫一块淡色。
+ * 颜色只是第三条线索，灰度打印与色觉障碍下靠形状仍然读得出来。
+ */
+.i-chips__icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--i-radius-full);
+}
+.i-chips__item--success .i-chips__icon {
+  color: var(--i-color-success-text);
+  background: var(--i-color-success-subtle);
+}
+.i-chips__item--error .i-chips__icon {
+  color: var(--i-color-danger-text);
+  background: var(--i-color-danger-subtle);
+}
+.i-chips__item--running .i-chips__icon {
+  color: var(--i-color-brand-text);
+  background: var(--i-color-brand-subtle);
+}
+
+.i-chips__label {
+  overflow: hidden;
+  font-family: var(--i-font-family-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.i-chips__stat {
+  display: inline-flex;
+  flex: none;
+  gap: var(--i-spacing-1);
+  color: var(--i-color-text-secondary);
+  /* 数字等宽：一排芯片的统计不会因为位数不同而看着错位 */
+  font-variant-numeric: tabular-nums;
+}
+/*
+ * 增删用淡底色块 + 正文色，而不是把字直接染成语义色：
+ * 12px 的小字染成绿色在浅底上只有 2.1:1，看得见颜色却读不出数字。
+ */
+.i-chips__stat-add,
+.i-chips__stat-remove {
+  padding: 0 var(--i-spacing-1);
+  border-radius: var(--i-radius-sm);
+  color: var(--i-color-text);
+}
+.i-chips__stat-add {
+  background: var(--i-color-success-subtle);
+}
+.i-chips__stat-remove {
+  background: var(--i-color-danger-subtle);
+}
+
+.i-chips__more {
+  color: var(--i-color-text-secondary);
+}
+.i-chips__more-failed {
+  padding: 0 var(--i-spacing-1);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-danger-subtle);
+  color: var(--i-color-text);
+}

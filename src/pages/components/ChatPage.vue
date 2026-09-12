@@ -4,6 +4,7 @@ import IChatMessage from '@/components/IChatMessage.vue'
 import IChatTyping from '@/components/IChatTyping.vue'
 import IChatThinking from '@/components/IChatThinking.vue'
 import IChatToolCall from '@/components/IChatToolCall.vue'
+import IToolChips from '@/components/IToolChips.vue'
 import IChatSources from '@/components/IChatSources.vue'
 import IChatSuggestions from '@/components/IChatSuggestions.vue'
 import IPromptInput from '@/components/IPromptInput.vue'
@@ -188,6 +189,15 @@ const diffRows: DiffRow[] = [
     cells: { flavor: { value: '黑芝麻' }, category: { value: '当季' }, supplier: { value: '南岭食品' } }
   }
 ]
+const chips = [
+  { key: 'a', label: 'App.tsx', status: 'success' as const, added: 74, removed: 41 },
+  { key: 'b', label: 'flavors.css', status: 'success' as const, added: 13 },
+  { key: 'c', label: 'grep', status: 'running' as const },
+  { key: 'd', label: 'run_tests', status: 'error' as const },
+  { key: 'e', label: 'tokens.json', status: 'success' as const, added: 2, removed: 2 },
+  { key: 'f', label: 'README.md', status: 'success' as const, added: 8 }
+]
+const chipsExpanded = ref(false)
 </script>
 
 <template>
@@ -301,6 +311,22 @@ const diffRows: DiffRow[] = [
         />
         <IChatToolCall name="run_tests" status="error" summary="npm run check:parity" error="超时：120 秒内未返回结果" />
       </div>
+    </DemoBlock>
+
+    <h2>芯片与卡片</h2>
+    <p>
+      同一次工具调用有两种形态：<strong>芯片是折叠态，卡片是展开态</strong>。
+      智能体一次回答里可能调十几次工具，每次都摊成一张卡片，读者要滚三屏才看得到结论；
+      全藏起来又没人知道它动了什么。所以默认给芯片——一行里只留「做了什么」与「动了多少」，
+      点开某一片才换成上面那种完整的卡片。
+    </p>
+    <DemoBlock
+      title="压成一行"
+      description="超过 max 片就折叠，按钮上带着被藏起来那部分的统计与失败数——折叠不该等于把信息删掉。状态靠图标形状与文字，颜色只是第三条线索。"
+      lang="vue"
+      code='<IToolChips :items="chips" :max="4" v-model:expanded="expanded" @select="onSelect" />'
+    >
+      <IToolChips :items="chips" :max="4" v-model:expanded="chipsExpanded" />
     </DemoBlock>
 
     <h2>来源与追问</h2>
@@ -460,6 +486,7 @@ const diffRows: DiffRow[] = [
         <tr><td>IChatMessage</td><td>role、name、time、streaming、error</td><td>copy、retry</td></tr>
         <tr><td>IChatThinking</td><td>label、duration、pending、defaultOpen</td><td>—</td></tr>
         <tr><td>IChatToolCall</td><td>name、summary、status、args、result、error</td><td>—</td></tr>
+        <tr><td>IToolChips</td><td>items、max、expanded</td><td>select、update:expanded</td></tr>
         <tr><td>IChatSources</td><td>sources</td><td>—</td></tr>
         <tr><td>IChatSuggestions</td><td>items、title</td><td>select</td></tr>
         <tr><td>IPromptInput</td><td>modelValue、generating、maxLength、attachments、hint、submitOnEnter</td><td>submit、stop、attach、removeAttachment</td></tr>

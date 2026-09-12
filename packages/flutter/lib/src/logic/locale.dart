@@ -66,6 +66,12 @@ class ILocale {
   final String toolInput;
   final String toolError;
   final String toolResult;
+
+  /// 工具芯片折叠起来的那部分：「还有 N 个」
+  final String Function(int count) toolMoreText;
+
+  /// 折叠部分里失败的次数。单独说是因为「共 10 次」把「全成」与「有一次失败」说成了一样
+  final String Function(int count) toolFailedText;
   final String next;
   final String skip;
   final String otherOption;
@@ -129,6 +135,8 @@ class ILocale {
     required this.toolInput,
     required this.toolError,
     required this.toolResult,
+    required this.toolMoreText,
+    required this.toolFailedText,
     required this.next,
     required this.skip,
     required this.otherOption,
@@ -191,6 +199,8 @@ class ILocale {
     String? toolInput,
     String? toolError,
     String? toolResult,
+    String Function(int count)? toolMoreText,
+    String Function(int count)? toolFailedText,
     String? next,
     String? skip,
     String? otherOption,
@@ -243,6 +253,8 @@ class ILocale {
         toolInput: toolInput ?? this.toolInput,
         toolError: toolError ?? this.toolError,
         toolResult: toolResult ?? this.toolResult,
+        toolMoreText: toolMoreText ?? this.toolMoreText,
+        toolFailedText: toolFailedText ?? this.toolFailedText,
         next: next ?? this.next,
         skip: skip ?? this.skip,
         otherOption: otherOption ?? this.otherOption,
@@ -307,6 +319,8 @@ final ILocale zhCN = ILocale(
   toolInput: '入参',
   toolError: '错误',
   toolResult: '结果',
+  toolMoreText: (count) => '还有 $count 个',
+  toolFailedText: (count) => '$count 个失败',
   next: '下一题',
   skip: '跳过',
   otherOption: '其他',
@@ -368,6 +382,8 @@ final ILocale enUS = ILocale(
   toolInput: 'Input',
   toolError: 'Error',
   toolResult: 'Result',
+  toolMoreText: (count) => '$count more',
+  toolFailedText: (count) => '$count failed',
   next: 'Next',
   skip: 'Skip',
   otherOption: 'Other',

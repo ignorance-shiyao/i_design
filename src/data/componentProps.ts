@@ -816,6 +816,11 @@ export const componentProps: Record<string, PropMeta[]> = {
   ITimeline: [
     {"name":"items","type":"TimelineItem[]","doc":"","defaultText":"() => []","control":null},
   ],
+  IToolChips: [
+    {"name":"items","type":"ToolChipItem[]","doc":"","defaultText":null,"control":null},
+    {"name":"max","type":"number","doc":"超过这个数量就折叠，留一个「还有 N 个」的按钮；0 表示不折叠","defaultText":"0","control":{"kind":"number"}},
+    {"name":"expanded","type":"boolean","doc":"已展开（用 v-model:expanded 控制）","defaultText":"false","control":{"kind":"boolean"}},
+  ],
   ITooltip: [
     {"name":"content","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"placement","type":"Placement","doc":"","defaultText":"'top'","control":null},

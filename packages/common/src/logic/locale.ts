@@ -71,6 +71,10 @@ export interface Locale {
   toolInput: string
   toolError: string
   toolResult: string
+  /** 工具芯片折叠起来的那部分：「还有 N 个」 */
+  toolMoreText: (count: number) => string
+  /** 折叠部分里失败的次数。单独说是因为「共 10 次」把「全成」与「有一次失败」说成了一样 */
+  toolFailedText: (count: number) => string
 
   /* 逐题确认 */
   next: string
@@ -145,6 +149,8 @@ export const zhCN: Locale = {
   toolInput: '入参',
   toolError: '错误',
   toolResult: '结果',
+  toolMoreText: (count) => `还有 ${count} 个`,
+  toolFailedText: (count) => `${count} 个失败`,
   next: '下一题',
   skip: '跳过',
   otherOption: '其他',
@@ -203,6 +209,8 @@ export const enUS: Locale = {
   toolInput: 'Input',
   toolError: 'Error',
   toolResult: 'Result',
+  toolMoreText: (count) => `${count} more`,
+  toolFailedText: (count) => `${count} failed`,
   next: 'Next',
   skip: 'Skip',
   otherOption: 'Other',

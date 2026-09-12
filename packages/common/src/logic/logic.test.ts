@@ -28,6 +28,7 @@ import { ELAPSED_THRESHOLD, elapsedInterval, elapsedParts, shouldShowElapsed } f
 import { detectLang, normalizeLang, tokenize, tokenizeLines } from './highlight'
 import { diffLines, diffStat } from './diff'
 import { moveCommandIndex, searchCommands, type CommandItem } from './command'
+import { summarizeToolChips, toolChipIcon, toolChipStat } from './toolchip'
 
 describe('countdown', () => {
   it('不显示毫秒时向上取整到秒：剩 1.4 秒给 2 秒', () => {
@@ -399,5 +400,44 @@ describe('command', () => {
     expect(moveCommandIndex(2, 1, 3)).toBe(0)
     expect(moveCommandIndex(0, -1, 3)).toBe(2)
     expect(moveCommandIndex(0, 1, 0)).toBe(0)
+  })
+})
+
+describe('工具芯片', () => {
+  it('零的那一半不写出来', () => {
+    // 「+13 −0」里的 0 不带信息，却和真数字长得一样，读者要多看一眼才知道它是空的
+    expect(toolChipStat(13, 0)).toBe('+13')
+    expect(toolChipStat(0, 4)).toBe('−4')
+    expect(toolChipStat(13, 4)).toBe('+13 −4')
+  })
+
+  it('没有改动就不挂统计', () => {
+    expect(toolChipStat(0, 0)).toBe('')
+    expect(toolChipStat()).toBe('')
+  })
+
+  it('减号用的是减号，不是连字符', () => {
+    // 连字符比数字矮一截，排在数字前面看着像断开的
+    expect(toolChipStat(0, 4).charCodeAt(0)).toBe(0x2212)
+  })
+
+  it('汇总把失败单独数出来', () => {
+    // 十次里有一次失败与十次全成是两件事，「共 10 次」把它们说成一样的
+    const summary = summarizeToolChips([
+      { key: 'a', label: 'a.ts', status: 'success', added: 13, removed: 4 },
+      { key: 'b', label: 'b.ts', status: 'error' },
+      { key: 'c', label: 'c.ts', status: 'running', added: 2 }
+    ])
+    expect(summary).toEqual({ total: 3, running: 1, failed: 1, added: 15, removed: 4 })
+  })
+
+  it('空列表汇总成全零，而不是崩掉', () => {
+    expect(summarizeToolChips([])).toEqual({ total: 0, running: 0, failed: 0, added: 0, removed: 0 })
+  })
+
+  it('成功与失败用形状不同的图标，不靠颜色区分', () => {
+    expect(toolChipIcon('error')).toBe('error-circle')
+    expect(toolChipIcon('success')).toBe('check-circle')
+    expect(toolChipIcon()).toBe('check-circle')
   })
 })
