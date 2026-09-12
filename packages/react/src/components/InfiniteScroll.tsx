@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { rafThrottle, loadHint, shouldLoadMore, type LoadStatus } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Loading } from './Loading'
 
 export interface InfiniteScrollProps {
@@ -26,6 +27,7 @@ export function InfiniteScroll({
   onRetry,
   className = ''
 }: InfiniteScrollProps) {
+  const { locale } = useConfig()
   const root = useRef<HTMLDivElement>(null)
 
   const check = useCallback(() => {
@@ -64,7 +66,7 @@ export function InfiniteScroll({
     }
   }, [check, height])
 
-  const hint = loadHint(status, empty)
+  const hint = loadHint(status, empty, locale)
 
   return (
     <div

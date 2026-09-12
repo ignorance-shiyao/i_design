@@ -5,6 +5,8 @@
  * 要么同一页连发三次请求，要么翻到底了再也不动。
  */
 
+import { zhCN, type Locale } from './locale'
+
 export type LoadStatus = 'idle' | 'loading' | 'finished' | 'error'
 
 export interface ScrollMetrics {
@@ -52,11 +54,16 @@ export function shouldLoadMore(
   return distance <= threshold
 }
 
-/** 底部该显示哪句话。文案与状态绑死，各端不会一个写「加载中」一个写「努力加载」 */
-export function loadHint(status: LoadStatus, empty = false): string {
-  if (status === 'loading') return '加载中…'
-  if (status === 'error') return '加载失败，点击重试'
-  if (status === 'finished') return empty ? '暂无内容' : '没有更多了'
+/**
+ * 底部该显示哪句话。文案与状态绑死，各端不会一个写「加载中」一个写「努力加载」。
+ *
+ * 具体的字从字典来，默认中文。写死在这里的话，这套组件就只能用在中文产品里，
+ * 而且改一句要翻五个包。
+ */
+export function loadHint(status: LoadStatus, empty = false, locale: Locale = zhCN): string {
+  if (status === 'loading') return locale.loading
+  if (status === 'error') return locale.loadFailed
+  if (status === 'finished') return empty ? locale.emptyContent : locale.noMore
   return ''
 }
 

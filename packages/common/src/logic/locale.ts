@@ -1,0 +1,145 @@
+/**
+ * 文案字典。
+ *
+ * 组件里那些用户看得见的固定字——「暂无数据」「加载中…」「共 12 条」——
+ * 散落在各端各写一遍时，改一处要翻五个包，而且永远有一端漏掉。
+ * 更要紧的是：写死的中文让这套组件只能用在中文产品里。
+ *
+ * 这里只管字典与合并规则，「怎么把字典送到组件手上」由各端自己决定
+ * （Vue/React 用上下文、Flutter 用 InheritedWidget、小程序用模块级设置）。
+ */
+
+export interface Locale {
+  /** 语言标记，如 zh-CN。给 lang 属性与读屏用 */
+  name: string
+
+  /* 空与加载 */
+  empty: string
+  /** 列表翻到底却一条都没有。与 empty 分开：一个是「没有数据」，一个是「翻完了」 */
+  emptyContent: string
+  loading: string
+  loadMore: string
+  loadFailed: string
+  noMore: string
+
+  /* 选择 */
+  placeholder: string
+  selectAll: string
+  search: string
+  noMatch: string
+  clear: string
+
+  /* 确认 */
+  confirm: string
+  cancel: string
+  acknowledge: string
+
+  /* 展开 */
+  expand: string
+  collapse: string
+
+  /* 校验 */
+  required: string
+  invalidFormat: string
+
+  /** 分页的「共 N 条」。用函数而不是模板串：有的语言要按数量变形 */
+  totalText: (total: number) => string
+  /** 分页的「第 11-20 条 / 共 95 条」。整句交给字典，各语言的语序本来就不同 */
+  rangeText: (from: number, to: number, total: number) => string
+
+  /**
+   * 空态的四种成因各配一句标题与一句说明。
+   *
+   * 「为什么空」比「空了」有用得多：搜不到要提示换关键词，没权限要指向管理员。
+   * 这四对文案跟着字典走，否则换语言之后空态会是整个界面里唯一还在说中文的地方。
+   */
+  emptyPresets: Record<EmptyReason, { title: string; description: string }>
+}
+
+export type EmptyReason = 'empty' | 'search' | 'error' | 'permission'
+
+export const zhCN: Locale = {
+  name: 'zh-CN',
+  empty: '暂无数据',
+  emptyContent: '暂无内容',
+  loading: '加载中…',
+  loadMore: '加载更多',
+  loadFailed: '加载失败，点击重试',
+  noMore: '没有更多了',
+  placeholder: '请选择',
+  selectAll: '全选',
+  search: '搜索',
+  noMatch: '无匹配选项',
+  clear: '清除',
+  confirm: '确定',
+  cancel: '取消',
+  acknowledge: '知道了',
+  expand: '展开',
+  collapse: '收起',
+  required: '此项必填',
+  invalidFormat: '格式不正确',
+  totalText: (total) => `共 ${total} 条`,
+  rangeText: (from, to, total) => `第 ${from}-${to} 条 / 共 ${total} 条`,
+  emptyPresets: {
+    empty: { title: '暂无数据', description: '这里还没有内容，创建第一条试试。' },
+    search: { title: '没有匹配结果', description: '换个关键词，或减少筛选条件。' },
+    error: { title: '加载失败', description: '请检查网络后重试。' },
+    permission: { title: '无访问权限', description: '请联系管理员申请该资源的访问权限。' }
+  }
+}
+
+export const enUS: Locale = {
+  name: 'en-US',
+  empty: 'No data',
+  emptyContent: 'Nothing here yet',
+  loading: 'Loading…',
+  loadMore: 'Load more',
+  loadFailed: 'Failed to load, tap to retry',
+  noMore: 'No more items',
+  placeholder: 'Select',
+  selectAll: 'Select all',
+  search: 'Search',
+  noMatch: 'No matches',
+  clear: 'Clear',
+  confirm: 'OK',
+  cancel: 'Cancel',
+  acknowledge: 'Got it',
+  expand: 'Expand',
+  collapse: 'Collapse',
+  required: 'This field is required',
+  invalidFormat: 'Invalid format',
+  totalText: (total) => `${total} item${total === 1 ? '' : 's'}`,
+  rangeText: (from, to, total) => `${from}-${to} of ${total}`,
+  emptyPresets: {
+    empty: { title: 'No data', description: 'Nothing here yet — create the first one.' },
+    search: { title: 'No matches', description: 'Try another keyword, or drop a filter.' },
+    error: { title: 'Failed to load', description: 'Check your connection and try again.' },
+    permission: { title: 'No access', description: 'Ask an administrator for access to this resource.' }
+  }
+}
+
+/**
+ * 把局部覆盖合并到一份完整字典上。
+ *
+ * 缺的键回落到 base 而不是显示成空串或键名：接入方十有八九只想改两三句话
+ * （把「暂无数据」换成「这个筛选条件下没有工单」），不该逼他们抄一整份字典，
+ * 也不该因为抄漏了一个键就在界面上开天窗。
+ *
+ * base 默认中文而不是英文：这套组件的默认语言是中文，覆盖式接入时
+ * 没提到的那些句子应当维持原样，而不是突然冒出几句英文。
+ *
+ * empty 会顺带改掉空态那一句标题。这两处说的是同一件事，只是长短不同：
+ * empty 是列表、下拉里那一行短字，emptyPresets.empty.title 是整块空态的大标题。
+ * 只改了 empty 却发现空态还写着「暂无数据」，接入方会以为覆盖没生效——
+ * 而真要分开写时，把 emptyPresets 一并传进来即可，那时以传进来的为准。
+ */
+export function resolveLocale(overrides: Partial<Locale> = {}, base: Locale = zhCN): Locale {
+  const merged = { ...base, ...overrides }
+  if (overrides.empty && !overrides.emptyPresets) {
+    merged.emptyPresets = {
+      ...merged.emptyPresets,
+      empty: { ...merged.emptyPresets.empty, title: overrides.empty }
+    }
+  }
+  return merged
+}

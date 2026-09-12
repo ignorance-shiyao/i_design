@@ -24,8 +24,8 @@
       </view>
     </view>
 
-    <view wx:if="{{loading}}" class="i-table-c__state">加载中…</view>
-    <view wx:elif="{{total === 0}}" class="i-table-c__state">{{emptyText}}</view>
+    <view wx:if="{{loading}}" class="i-table-c__state">{{loadingLabel}}</view>
+    <view wx:elif="{{total === 0}}" class="i-table-c__state">{{emptyLabel}}</view>
     <!-- 上下两块空白替代没渲染的那些行，滚动条长度才和真实行数相称 -->
     <view wx:elif="{{virtual}}" class="i-table-c__spacer" style="height:{{paddingTop}}px" />
     <view

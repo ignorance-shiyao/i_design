@@ -1,4 +1,5 @@
 import { buildPages, clampPage, pageCountOf, rangeText } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 
 export interface PaginationProps {
@@ -22,6 +23,7 @@ export function Pagination({
   showTotal = true,
   onChange
 }: PaginationProps) {
+  const { locale } = useConfig()
   // 页码序列、边界收敛与区间文案全部来自公共层，与 Vue 端逐字相同
   const pageCount = pageCountOf(total, pageSize)
   const page = clampPage(current, pageCount)
@@ -40,7 +42,7 @@ export function Pagination({
         .join(' ')}
       aria-label="分页"
     >
-      {showTotal && <span className="i-pagination__total">{rangeText(page, pageSize, total)}</span>}
+      {showTotal && <span className="i-pagination__total">{rangeText(page, pageSize, total, locale)}</span>}
 
       <button
         className="i-pagination__item"

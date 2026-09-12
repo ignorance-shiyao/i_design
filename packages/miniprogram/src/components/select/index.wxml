@@ -9,7 +9,7 @@
       </view>
       <view wx:if="{{restCount}}" class="i-select__tag i-select__tag--rest">+{{restCount}}</view>
     </view>
-    <text wx:else class="i-select__label {{hasValue ? '' : 'is-placeholder'}}">{{hasValue ? label : placeholder}}</text>
+    <text wx:else class="i-select__label {{hasValue ? '' : 'is-placeholder'}}">{{hasValue ? label : placeholderText}}</text>
 
     <view
       wx:if="{{clearable && hasValue && !disabled}}"
@@ -47,6 +47,6 @@
       />
     </view>
     <view wx:if="{{virtual}}" class="i-select__spacer" style="height:{{paddingBottom}}px" />
-    <view wx:if="{{options.length === 0}}" class="i-select__empty">{{emptyText}}</view>
+    <view wx:if="{{options.length === 0}}" class="i-select__empty">{{emptyLabel}}</view>
   </scroll-view>
 </view>

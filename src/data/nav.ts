@@ -33,7 +33,8 @@ export const docNav: NavGroup[] = [
       { to: '/components/divider', label: 'Divider 分割线' },
       { to: '/components/link', label: 'Link 链接' },
       { to: '/components/sticky-tool', label: 'StickyTool 侧边工具条' },
-      { to: '/components/scrollbar', label: 'Scrollbar 滚动条' }
+      { to: '/components/scrollbar', label: 'Scrollbar 滚动条' },
+      { to: '/components/config-provider', label: 'ConfigProvider 全局配置' }
     ]
   },
   {

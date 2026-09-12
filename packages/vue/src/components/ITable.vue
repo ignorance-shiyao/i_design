@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { rafThrottle, shouldVirtualize, virtualWindow } from '@i-design/common'
+import { useConfig } from './useConfig'
 
 export type TableRow = Record<string, any>
 
@@ -42,7 +43,7 @@ const props = withDefaults(
     size: 'md',
     striped: false,
     loading: false,
-    emptyText: '暂无数据',
+    emptyText: '',
     selectable: false,
     selected: () => [],
     height: ''
@@ -50,6 +51,10 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{ (e: 'update:selected', a0: (string | number)[]): void }>()
+
+const { locale } = useConfig()
+/* 传了就用传的，没传才回落到字典——空态文案最该由调用方说清楚为什么空 */
+const emptyLabel = computed(() => props.emptyText || locale.value.empty)
 
 const wrap = ref<HTMLElement | null>(null)
 
@@ -217,10 +222,10 @@ watch(
       </thead>
       <tbody>
         <tr v-if="loading">
-          <td :colspan="columns.length + (selectable ? 1 : 0)" class="i-table-c__state">加载中…</td>
+          <td :colspan="columns.length + (selectable ? 1 : 0)" class="i-table-c__state">{{ locale.loading }}</td>
         </tr>
         <tr v-else-if="!sortedData.length">
-          <td :colspan="columns.length + (selectable ? 1 : 0)" class="i-table-c__state">{{ emptyText }}</td>
+          <td :colspan="columns.length + (selectable ? 1 : 0)" class="i-table-c__state">{{ emptyLabel }}</td>
         </tr>
         <template v-else>
         <!-- 上下两行空白替代没渲染的那些行，滚动条长度才和真实行数相称 -->

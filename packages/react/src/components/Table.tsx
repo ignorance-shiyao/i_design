@@ -8,6 +8,7 @@ import {
   type SortOrder
 } from '@i-design/common'
 import type { ReactNode } from 'react'
+import { useConfig } from './ConfigProvider'
 
 export interface TableColumn<T = any> {
   key: string
@@ -49,12 +50,16 @@ export function Table<T extends Record<string, any>>({
   size = 'md',
   striped = false,
   loading = false,
-  emptyText = '暂无数据',
+  emptyText = '',
   selectable = false,
   selected = [],
   height = '',
   onSelectedChange
 }: TableProps<T>) {
+  const { locale } = useConfig()
+  /* 传了就用传的，没传才回落到字典——空态文案最该由调用方说清楚为什么空 */
+  const emptyLabel = emptyText || locale.empty
+
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [order, setOrder] = useState<SortOrder>(null)
 
@@ -201,11 +206,11 @@ export function Table<T extends Record<string, any>>({
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={columns.length + (selectable ? 1 : 0)} className="i-table-c__state">加载中…</td>
+              <td colSpan={columns.length + (selectable ? 1 : 0)} className="i-table-c__state">{locale.loading}</td>
             </tr>
           ) : !rows.length ? (
             <tr>
-              <td colSpan={columns.length + (selectable ? 1 : 0)} className="i-table-c__state">{emptyText}</td>
+              <td colSpan={columns.length + (selectable ? 1 : 0)} className="i-table-c__state">{emptyLabel}</td>
             </tr>
           ) : (
             <>
