@@ -242,6 +242,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"label","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"pending","type":"boolean","doc":"仍在推理中：标题旁的点持续呼吸","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"defaultOpen","type":"boolean","doc":"初始是否展开；默认折叠——推理过程有用，但它不是答案","defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"steps","type":"ThinkingStep[]","doc":"分步轨迹。给了就按步展示，每步可单独展开； 不给则退回默认插槽，仍是一整段文字。","defaultText":"() => []","control":null},
   ],
   IChatToolCall: [
     {"name":"name","type":"string","doc":"","defaultText":null,"control":{"kind":"string"}},

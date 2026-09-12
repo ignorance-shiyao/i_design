@@ -189,6 +189,13 @@ const diffRows: DiffRow[] = [
     cells: { flavor: { value: '黑芝麻' }, category: { value: '当季' }, supplier: { value: '南岭食品' } }
   }
 ]
+const thinkingSteps = [
+  { key: 'a', title: '拆解问题：分页规则该放在哪一层', kind: 'reason' as const, status: 'done' as const, detail: '写在组件里的话，各端会各写一份，翻页边界迟早对不上。' },
+  { key: 'b', title: '检索仓库里已有的实现', kind: 'search' as const, status: 'done' as const, detail: 'packages/common/src/logic/pagination.ts：buildPages / clampPage / pageCountOf，各端共用。' },
+  { key: 'c', title: '补一条省略号的边界用例', kind: 'code' as const, status: 'running' as const, detail: '总页数正好等于窗口宽度时，两端都不该出现省略号。' },
+  { key: 'd', title: '跑跨端一致性校验', kind: 'tool' as const, status: 'done' as const }
+]
+
 const chips = [
   { key: 'a', label: 'App.tsx', status: 'success' as const, added: 74, removed: 41 },
   { key: 'b', label: 'flavors.css', status: 'success' as const, added: 13 },
@@ -280,6 +287,17 @@ const chipsExpanded = ref(false)
         <IChatThinking duration="思考了 12 秒" :default-open="true">
 先确认分页规则写在哪一层：如果写在组件里，各端就会各写一份。查到 packages/common/src/logic/pagination.ts，多端共用同一份实现。
         </IChatThinking>
+      </div>
+    </DemoBlock>
+
+    <DemoBlock
+      title="分步轨迹"
+      description="一整段流水账读者只会跳过。拆成步之后，「走到哪一步」与「哪一步出了问题」都摆在面上：折叠时标题上顶着进度，展开后出错与进行中的那几步已经是打开的——它们正是此刻要看的。"
+      lang="vue"
+      code='<IChatThinking :steps="steps" :default-open="true" duration="思考了 12 秒" />'
+    >
+      <div class="chat chat--plain">
+        <IChatThinking :steps="thinkingSteps" :default-open="true" duration="思考了 12 秒" />
       </div>
     </DemoBlock>
 
@@ -466,7 +484,7 @@ const chipsExpanded = ref(false)
       </thead>
       <tbody>
         <tr><td>IChatMessage</td><td>role、name、time、streaming、error</td><td>copy、retry</td></tr>
-        <tr><td>IChatThinking</td><td>label、duration、pending、defaultOpen</td><td>—</td></tr>
+        <tr><td>IChatThinking</td><td>label、duration、pending、defaultOpen、steps</td><td>—</td></tr>
         <tr><td>IChatToolCall</td><td>name、summary、status、args、result、error</td><td>—</td></tr>
         <tr><td>IToolChips</td><td>items、max、expanded</td><td>select、update:expanded</td></tr>
         <tr><td>IChatSources</td><td>sources</td><td>—</td></tr>

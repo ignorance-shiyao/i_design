@@ -112,6 +112,9 @@ const { toolChipStat, summarizeToolChips, toolChipIcon } = await bundle(
   'toolchip'
 )
 const {
+  defaultOpenSteps, summarizeThinking, thinkingStepIcon, toggleThinkingStep
+} = await bundle('packages/common/src/logic/thinking.ts', 'thinking')
+const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
 const { wordFontSize, wordLayout, wordOverflow, wordTone } = await bundle(
@@ -1754,6 +1757,40 @@ const chipSummaryExpectations = [
   )
 ]
 
+/*
+ * 推理轨迹：默认展开哪几步必须两端一致。
+ * 一端展开出错那步、另一端全折叠的话，用户得学两遍。
+ */
+const thinkSteps = [
+  { key: 'a', title: '拆解问题', kind: 'reason', status: 'done' },
+  { key: 'b', title: '检索文档', kind: 'search', status: 'error' },
+  { key: 'c', title: '写补丁', kind: 'code', status: 'running' },
+  { key: 'd', title: '复核', kind: 'tool', status: 'done' }
+]
+const dartThinkSteps = `<IThinkingStep>[${thinkSteps
+  .map(
+    (s) =>
+      `IThinkingStep(key: '${s.key}', title: '${s.title}', ` +
+      `kind: IThinkingStepKind.${s.kind}, status: IThinkingStepStatus.${s.status})`
+  )
+  .join(', ')}]`
+const dartStepKeys = (keys) => `<String>[${keys.map((k) => `'${k}'`).join(', ')}]`
+const thinkingExpectations = [
+  `    expect(defaultOpenSteps(steps), ${dartStepKeys(defaultOpenSteps(thinkSteps))});`,
+  `    expect(defaultOpenSteps(<IThinkingStep>[]), <String>[]);`,
+  `    expect(summarizeThinking(steps).total, ${summarizeThinking(thinkSteps).total});`,
+  `    expect(summarizeThinking(steps).done, ${summarizeThinking(thinkSteps).done});`,
+  `    expect(summarizeThinking(steps).running, ${summarizeThinking(thinkSteps).running});`,
+  `    expect(summarizeThinking(steps).failed, ${summarizeThinking(thinkSteps).failed});`,
+  `    expect(summarizeThinking(steps).activeIndex, ${summarizeThinking(thinkSteps).activeIndex});`,
+  `    expect(summarizeThinking(<IThinkingStep>[]).activeIndex, ${summarizeThinking([]).activeIndex});`,
+  ...['reason', 'search', 'code', 'tool'].map(
+    (k) => `    expect(thinkingStepIcon(IThinkingStepKind.${k}), ${JSON.stringify(thinkingStepIcon(k))});`
+  ),
+  `    expect(toggleThinkingStep(${dartStepKeys(['b'])}, 'c'), ${dartStepKeys(toggleThinkingStep(['b'], 'c'))});`,
+  `    expect(toggleThinkingStep(${dartStepKeys(['b', 'c'])}, 'b'), ${dartStepKeys(toggleThinkingStep(['b', 'c'], 'b'))});`
+]
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -2321,6 +2358,11 @@ ${commandMoveExpectations.join('\n')}
     final chips = ${dartChipItems};
 ${chipStatExpectations.join('\n')}
 ${chipSummaryExpectations.join('\n')}
+  });
+
+  test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
+    final steps = ${dartThinkSteps};
+${thinkingExpectations.join('\n')}
   });
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {

@@ -3,10 +3,38 @@
     <view wx:if="{{pending}}" class="i-chat-thinking__pulse" />
     <view class="i-chat-thinking__arrow i-icon i-icon--chevron-right" style="width:14px;height:14px" />
     <text class="i-chat-thinking__label">{{labelText}}</text>
+    <text wx:if="{{progress}}" class="i-chat-thinking__progress">{{progress}}</text>
     <text wx:if="{{duration}}" class="i-chat-thinking__duration">{{duration}}</text>
   </view>
   <view wx:if="{{open}}" class="i-chat-thinking__body">
-    <text wx:if="{{text}}">{{text}}</text>
-    <slot />
+    <view wx:if="{{rows.length}}" class="i-chat-thinking__steps">
+      <view
+        wx:for="{{rows}}"
+        wx:key="key"
+        class="i-chat-thinking__step i-chat-thinking__step--{{item.status}}"
+      >
+        <view class="i-chat-thinking__step-head" data-key="{{item.key}}" bindtap="onToggleStep">
+          <view class="i-chat-thinking__step-icon">
+            <i-loading wx:if="{{item.status === 'running'}}" size="sm" />
+            <view
+              wx:else
+              class="i-icon i-icon--{{item.icon}}"
+              style="width:13px;height:13px"
+            />
+          </view>
+          <text class="i-chat-thinking__step-title">{{item.title}}</text>
+          <view
+            wx:if="{{item.detail}}"
+            class="i-chat-thinking__step-arrow i-icon i-icon--chevron-right"
+            style="width:12px;height:12px"
+          />
+        </view>
+        <text wx:if="{{item.detail && item.open}}" class="i-chat-thinking__step-detail">{{item.detail}}</text>
+      </view>
+    </view>
+    <block wx:else>
+      <text wx:if="{{text}}">{{text}}</text>
+      <slot />
+    </block>
   </view>
 </view>

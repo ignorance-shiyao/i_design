@@ -29,6 +29,12 @@ import { detectLang, normalizeLang, tokenize, tokenizeLines } from './highlight'
 import { diffLines, diffStat } from './diff'
 import { moveCommandIndex, searchCommands, type CommandItem } from './command'
 import { summarizeToolChips, toolChipIcon, toolChipStat } from './toolchip'
+import {
+  defaultOpenSteps,
+  summarizeThinking,
+  thinkingStepIcon,
+  toggleThinkingStep
+} from './thinking'
 
 describe('countdown', () => {
   it('不显示毫秒时向上取整到秒：剩 1.4 秒给 2 秒', () => {
@@ -439,5 +445,53 @@ describe('工具芯片', () => {
     expect(toolChipIcon('error')).toBe('error-circle')
     expect(toolChipIcon('success')).toBe('check-circle')
     expect(toolChipIcon()).toBe('check-circle')
+  })
+})
+
+describe('推理轨迹', () => {
+  const steps = [
+    { key: 'a', title: '拆解问题', status: 'done' as const },
+    { key: 'b', title: '检索文档', kind: 'search' as const, status: 'error' as const },
+    { key: 'c', title: '写补丁', kind: 'code' as const, status: 'running' as const },
+    { key: 'd', title: '复核', status: 'done' as const }
+  ]
+
+  it('出错与进行中的那几步默认展开', () => {
+    // 出错那步让用户再点一下才看得到，是白费一次操作
+    expect(defaultOpenSteps(steps)).toEqual(['b', 'c'])
+  })
+
+  it('做完且做对的步骤默认折叠', () => {
+    expect(defaultOpenSteps([{ key: 'a', title: '拆解问题', status: 'done' }])).toEqual([])
+  })
+
+  it('进度停在进行中的那一步，没有进行中的就是最后一步', () => {
+    expect(summarizeThinking(steps).activeIndex).toBe(2)
+    expect(summarizeThinking([steps[0], steps[3]]).activeIndex).toBe(1)
+    expect(summarizeThinking([]).activeIndex).toBe(-1)
+  })
+
+  it('概括把失败单独数出来', () => {
+    expect(summarizeThinking(steps)).toEqual({
+      total: 4,
+      done: 2,
+      running: 1,
+      failed: 1,
+      activeIndex: 2
+    })
+  })
+
+  it('种类靠形状区分，不靠颜色', () => {
+    expect(thinkingStepIcon('search')).toBe('search')
+    expect(thinkingStepIcon('code')).toBe('code')
+    expect(thinkingStepIcon('tool')).toBe('layers')
+    expect(thinkingStepIcon()).toBe('sparkle')
+  })
+
+  it('展开与收起返回新数组，各端的响应式才认得出变化', () => {
+    const open = ['b']
+    expect(toggleThinkingStep(open, 'c')).toEqual(['b', 'c'])
+    expect(toggleThinkingStep(open, 'b')).toEqual([])
+    expect(open).toEqual(['b'])
   })
 })

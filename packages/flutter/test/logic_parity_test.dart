@@ -1324,6 +1324,24 @@ void main() {
     expect(toolChipIcon(IToolChipStatus.error), "error-circle");
   });
 
+  test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
+    final steps = <IThinkingStep>[IThinkingStep(key: 'a', title: '拆解问题', kind: IThinkingStepKind.reason, status: IThinkingStepStatus.done), IThinkingStep(key: 'b', title: '检索文档', kind: IThinkingStepKind.search, status: IThinkingStepStatus.error), IThinkingStep(key: 'c', title: '写补丁', kind: IThinkingStepKind.code, status: IThinkingStepStatus.running), IThinkingStep(key: 'd', title: '复核', kind: IThinkingStepKind.tool, status: IThinkingStepStatus.done)];
+    expect(defaultOpenSteps(steps), <String>['b', 'c']);
+    expect(defaultOpenSteps(<IThinkingStep>[]), <String>[]);
+    expect(summarizeThinking(steps).total, 4);
+    expect(summarizeThinking(steps).done, 2);
+    expect(summarizeThinking(steps).running, 1);
+    expect(summarizeThinking(steps).failed, 1);
+    expect(summarizeThinking(steps).activeIndex, 2);
+    expect(summarizeThinking(<IThinkingStep>[]).activeIndex, -1);
+    expect(thinkingStepIcon(IThinkingStepKind.reason), "sparkle");
+    expect(thinkingStepIcon(IThinkingStepKind.search), "search");
+    expect(thinkingStepIcon(IThinkingStepKind.code), "code");
+    expect(thinkingStepIcon(IThinkingStepKind.tool), "layers");
+    expect(toggleThinkingStep(<String>['b'], 'c'), <String>['b', 'c']);
+    expect(toggleThinkingStep(<String>['b', 'c'], 'b'), <String>['c']);
+  });
+
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
     expect(shouldShowElapsed(0), false);
     expect(shouldShowElapsed(2999), false);

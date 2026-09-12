@@ -25,8 +25,8 @@
 | vue | IConfirmLayer | — | IConfirmLayer — confirm() 的宿主。Vue 2.7 没有 Teleport，宿主要由使用方自己放进模板，所以只有那一端对外导出 |
 | react | — | — | — |
 
-golden 文件包含 **1208** 条 expect；构建脚本生成断言，不执行 Dart SDK 测试。
-共享 SVG 图标定义 **52** 项；共享逻辑模块 **54** 个。
+golden 文件包含 **1222** 条 expect；构建脚本生成断言，不执行 Dart SDK 测试。
+共享 SVG 图标定义 **52** 项；共享逻辑模块 **55** 个。
 
 ## 共享逻辑目录
 
@@ -74,6 +74,7 @@ golden 文件包含 **1208** 条 expect；构建脚本生成断言，不执行 D
 - [table.ts](../packages/common/src/logic/table.ts)
 - [taginput.ts](../packages/common/src/logic/taginput.ts)
 - [theme.ts](../packages/common/src/logic/theme.ts)
+- [thinking.ts](../packages/common/src/logic/thinking.ts)
 - [time.ts](../packages/common/src/logic/time.ts)
 - [toast.ts](../packages/common/src/logic/toast.ts)
 - [toolchip.ts](../packages/common/src/logic/toolchip.ts)
