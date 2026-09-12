@@ -5,7 +5,7 @@
  * Web 端可以靠光标变化提示「这里能拖」，这一端只能靠看得见的抓手。
  * 夹取规则走公共层：两栏的下限一起夹，只夹一栏的话另一栏会被挤到零宽。
  */
-import { paneRatio, resizePane } from '@i-design/common'
+import { paneRatio, resetPaneSize, resizePane } from '@i-design/common'
 
 Component({
   options: { addGlobalClass: true },
@@ -18,6 +18,8 @@ Component({
     minSecond: { type: Number, value: 120 },
     maxFirst: { type: Number, value: 0 },
     gutter: { type: Number, value: 4 },
+    /** 双击分隔条复位到这个比例 */
+    resetTo: { type: Number, value: 0.5 },
     height: { type: Number, value: 0 }
   },
   data: { dragging: false, percent: 50, rootStyle: '' },
@@ -61,6 +63,28 @@ Component({
       this.triggerEvent('change', { value: ratio })
     },
 
-    onUp() { this.setData({ dragging: false }) }
+    onUp() { this.setData({ dragging: false }) },
+
+    /*
+     * 双击分隔条复位。
+     *
+     * 这一端没有键盘等价物，双击是唯一的复位手势，所以更不能省。
+     * 复位照样过一遍夹取：容器变窄之后，五五开算出来的第一栏可能比 minFirst 还小，
+     * 直接写回比例会得到一个拖都拖不出来的状态。
+     */
+    reset() {
+      this.measure(() => {
+        const size = resetPaneSize(
+          this.data.resetTo,
+          this.total,
+          { min: this.data.minFirst, max: this.data.maxFirst || undefined },
+          { min: this.data.minSecond },
+          this.data.gutter
+        )
+        const ratio = paneRatio(size, this.total, this.data.gutter)
+        this.setData({ value: ratio })
+        this.triggerEvent('change', { value: ratio })
+      })
+    }
   }
 })

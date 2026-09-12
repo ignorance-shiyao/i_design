@@ -44,6 +44,34 @@ export function paneSize(ratio: number, total: number, gutter = 4): number {
 }
 
 /**
+ * 复位到指定比例后的实际尺寸。
+ *
+ * 复位不能直接把比例写回去：目标比例可能违反两栏的下限——
+ * 容器变窄之后，「五五开」算出来的第一栏可能比 minFirst 还小。
+ * 那样双击一下反而得到一个拖都拖不出来的状态。所以照样过一遍夹取。
+ */
+export function resetPaneSize(
+  ratio: number,
+  total: number,
+  first: SplitterPane = {},
+  second: SplitterPane = {},
+  gutter = 4
+): number {
+  return resizePane(total, paneSize(ratio, total, gutter), first, second, gutter)
+}
+
+/**
+ * 这个按键是不是「复位」。
+ *
+ * 双击分隔条是复位的常见手势，但双击对键盘使用者不存在，
+ * 对只能单击的辅助设备也不存在。分隔条本来就可聚焦，
+ * 在它上面按 Enter 或空格是同一个动作的键盘等价物。
+ */
+export function isSplitterResetKey(key: string): boolean {
+  return key === 'Enter' || key === ' ' || key === 'Spacebar'
+}
+
+/**
  * 键盘调整的步长。
  *
  * 分隔条必须能用键盘拖——它是个真正的控件，不是装饰。

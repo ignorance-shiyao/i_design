@@ -697,6 +697,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"minSecond","type":"number","doc":"","defaultText":"120","control":{"kind":"number"}},
     {"name":"maxFirst","type":"number","doc":"","defaultText":"0","control":{"kind":"number"}},
     {"name":"gutter","type":"number","doc":"","defaultText":"4","control":{"kind":"number"}},
+    {"name":"resetTo","type":"number","doc":"双击分隔条复位到这个比例","defaultText":"0.5","control":{"kind":"number"}},
   ],
   IStatistic: [
     {"name":"title","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},

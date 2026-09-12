@@ -45,3 +45,33 @@ double keyboardStep(String key, bool shift) {
   if (key == 'ArrowRight' || key == 'ArrowDown') return step;
   return 0;
 }
+
+/// 复位到指定比例后的实际尺寸。
+///
+/// 复位不能直接把比例写回去：目标比例可能违反两栏的下限——容器变窄之后，
+/// 「五五开」算出来的第一栏可能比 minFirst 还小，那样双击一下反而得到一个
+/// 拖都拖不出来的状态。所以照样过一遍夹取。
+double resetPaneSize(
+  double ratio,
+  double total, {
+  double firstMin = 0,
+  double? firstMax,
+  double secondMin = 0,
+  double gutter = 4,
+}) {
+  return resizePane(
+    total,
+    paneSize(ratio, total, gutter: gutter),
+    firstMin: firstMin,
+    firstMax: firstMax,
+    secondMin: secondMin,
+    gutter: gutter,
+  );
+}
+
+/// 这个按键是不是「复位」。
+///
+/// 双击分隔条是复位的常见手势，但双击对键盘使用者不存在。
+/// 分隔条本来就可聚焦，Enter 或空格是同一个动作的键盘等价物。
+bool isSplitterResetKey(String key) =>
+    key == 'Enter' || key == ' ' || key == 'Spacebar';

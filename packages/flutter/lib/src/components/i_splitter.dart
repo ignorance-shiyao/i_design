@@ -18,6 +18,7 @@ class ISplitter extends StatefulWidget {
     this.minSecond = 120,
     this.maxFirst,
     this.gutter = 4,
+    this.resetTo = 0.5,
   });
 
   final Widget first;
@@ -33,6 +34,9 @@ class ISplitter extends StatefulWidget {
   final double minSecond;
   final double? maxFirst;
   final double gutter;
+
+  /// 双击分隔条复位到这个比例
+  final double resetTo;
 
   @override
   State<ISplitter> createState() => _ISplitterState();
@@ -53,6 +57,22 @@ class _ISplitterState extends State<ISplitter> {
     widget.onChanged?.call(paneRatio(clamped, total, gutter: widget.gutter));
   }
 
+  /// 双击分隔条复位。
+  ///
+  /// 复位照样过一遍夹取：容器变窄之后，五五开算出来的第一栏可能比 minFirst 还小，
+  /// 直接写回比例会得到一个拖都拖不出来的状态。
+  void _reset(double total) {
+    final size = resetPaneSize(
+      widget.resetTo,
+      total,
+      firstMin: widget.minFirst,
+      firstMax: widget.maxFirst,
+      secondMin: widget.minSecond,
+      gutter: widget.gutter,
+    );
+    widget.onChanged?.call(paneRatio(size, total, gutter: widget.gutter));
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = iColorsOf(context);
@@ -67,6 +87,7 @@ class _ISplitterState extends State<ISplitter> {
           cursor: isRow ? SystemMouseCursors.resizeColumn : SystemMouseCursors.resizeRow,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
+            onDoubleTap: () => _reset(total),
             onHorizontalDragStart: isRow ? (_) => setState(() => _dragging = true) : null,
             onHorizontalDragEnd: isRow ? (_) => setState(() => _dragging = false) : null,
             onHorizontalDragUpdate:

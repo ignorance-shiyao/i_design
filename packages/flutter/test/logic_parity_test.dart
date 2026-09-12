@@ -1714,6 +1714,27 @@ void main() {
         resizePane(100.0, 50.0,
             firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
         closeTo(120, 1e-9));
+    expect(
+        resetPaneSize(0.50, 1000.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(498, 1e-9));
+    expect(
+        resetPaneSize(0.50, 300.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(136, 1e-9));
+    expect(
+        resetPaneSize(0.20, 1000.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(199.20000000000002, 1e-9));
+    expect(
+        resetPaneSize(0.90, 1000.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(836, 1e-9));
+    expect(isSplitterResetKey('Enter'), true);
+    expect(isSplitterResetKey(' '), true);
+    expect(isSplitterResetKey('Spacebar'), true);
+    expect(isSplitterResetKey('ArrowLeft'), false);
+    expect(isSplitterResetKey('a'), false);
     expect(paneRatio(500.0, 1000.0, gutter: 4.0),
         closeTo(0.5020080321285141, 1e-9));
     expect(paneRatio(0.0, 1000.0, gutter: 4.0),

@@ -36,7 +36,7 @@ const { findMention, applyMention, filterMentions } = await bundle(
   'mention'
 )
 const {
-  resizePane, paneRatio, paneSize, keyboardStep
+  resizePane, paneRatio, paneSize, keyboardStep, resetPaneSize, isSplitterResetKey
 } = await bundle('packages/common/src/logic/splitter.ts', 'splitter')
 const {
   virtualWindow, scrollToRow, shouldVirtualize
@@ -1591,6 +1591,22 @@ const ratioExpectationsSp = [[500, 1000], [0, 1000], [1200, 1000]].map(([size, t
     `    expect(paneSize(${ratio.toFixed(2)}, ${total.toFixed(1)}, gutter: 4.0),
         closeTo(${paneSize(ratio, total, 4)}, 1e-9));`))
 
+/*
+ * 复位：目标比例照样要过夹取。容器窄到五五开都违反下限时，
+ * 双击一下不能把用户送进一个拖都拖不出来的状态。
+ */
+const resetExpectations = [[0.5, 1000], [0.5, 300], [0.2, 1000], [0.9, 1000]].map(
+  ([ratio, total]) =>
+    `    expect(
+        resetPaneSize(${ratio.toFixed(2)}, ${total.toFixed(1)},
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(${resetPaneSize(ratio, total, { min: 120 }, { min: 160 }, 4)}, 1e-9));`
+).concat(
+  ['Enter', ' ', 'Spacebar', 'ArrowLeft', 'a'].map(
+    (key) => `    expect(isSplitterResetKey('${key}'), ${isSplitterResetKey(key)});`
+  )
+)
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -2224,6 +2240,7 @@ ${altExpectations.join('\n')}
 
   test('分栏夹取与键盘步长与 Web 端一致', () {
 ${paneExpectations.join('\n')}
+${resetExpectations.join('\n')}
 ${ratioExpectationsSp.join('\n')}
 ${b2_keyExpectations.join('\n')}
   });

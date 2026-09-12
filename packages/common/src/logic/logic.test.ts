@@ -22,6 +22,7 @@ import { qrMatrix, qrVersionFor } from './qrcode'
 import { avatarSizePx, initialsOf, tintOf } from './avatar'
 import { safeHref } from './href'
 import { floatActionDelay, floatActionOffset, floatActionShift } from './float'
+import { isSplitterResetKey, paneRatio, resetPaneSize } from './splitter'
 
 describe('countdown', () => {
   it('不显示毫秒时向上取整到秒：剩 1.4 秒给 2 秒', () => {
@@ -186,6 +187,29 @@ describe('avatar', () => {
 
   it('同一个姓名任何时候都得到同一个底色', () => {
     expect(tintOf('林岚')).toBe(tintOf('林岚'))
+  })
+})
+
+describe('splitter', () => {
+  const panes = [{ min: 120 }, { min: 160 }, 4] as const
+
+  it('复位到目标比例', () => {
+    expect(resetPaneSize(0.5, 1000, panes[0], panes[1], panes[2])).toBe(498)
+    expect(paneRatio(resetPaneSize(0.2, 1000, panes[0], panes[1], panes[2]), 1000, 4)).toBeCloseTo(0.2)
+  })
+
+  it('容器太窄时复位仍受两栏下限约束', () => {
+    // 300 宽下五五开只有 148，低于第一栏的 120 下限还好；但第二栏只剩 148 < 160，
+    // 所以第一栏要让出来。不夹取的话，双击一下会得到一个拖都拖不出来的状态
+    const size = resetPaneSize(0.5, 300, panes[0], panes[1], panes[2])
+    expect(size).toBeGreaterThanOrEqual(120)
+    expect(296 - size).toBeGreaterThanOrEqual(160)
+  })
+
+  it('Enter 与空格是双击的键盘等价物', () => {
+    expect(isSplitterResetKey('Enter')).toBe(true)
+    expect(isSplitterResetKey(' ')).toBe(true)
+    expect(isSplitterResetKey('ArrowLeft')).toBe(false)
   })
 })
 

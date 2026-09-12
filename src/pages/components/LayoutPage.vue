@@ -293,7 +293,7 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
     </p>
     <DemoBlock
       title="拖动分隔条，或用方向键"
-      description="Tab 到分隔条上试试方向键。两栏最小 120px，拖到底就停住。"
+      description="Tab 到分隔条上试试方向键。两栏最小 120px，拖到底就停住。双击分隔条复位；键盘上按 Enter 或空格是同一个动作——双击对键盘使用者不存在。"
       code='<ISplitter v-model="ratio" :min-first="120" :min-second="120" />'
     >
       <ISplitter v-model="split" :min-first="120" :min-second="160" class="split-demo">
@@ -306,7 +306,7 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
         <template #second>
           <div class="split-pane">
             <strong>内容</strong>
-            <p>拖动中间那条线，或聚焦它后按左右方向键。</p>
+            <p>拖动中间那条线，或聚焦它后按左右方向键。双击复位到一半。</p>
           </div>
         </template>
       </ISplitter>
