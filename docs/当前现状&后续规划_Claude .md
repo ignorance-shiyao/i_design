@@ -156,7 +156,19 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 
 ### 1.8 分支现状
 
-`main` 是唯一基准。其余分支已在 2026-09-12 全部删除，删之前逐个核对并捞干净了。
+`main` 是唯一基准。其余分支**已经捞干净、可以删了，但还没删**——
+当前这套远程环境的 git 代理会把删除请求静默忽略（报 `Everything up-to-date`，引用照旧在），
+GitHub 的工具集里也没有删分支这一项。请在本地或 GitHub 界面上执行：
+
+```bash
+git push origin --delete claude/cross-framework-component-library-2wawj9 \
+  claude/devui-design-reference-exzjpm feat/agent-interaction-primitives \
+  feat/visual-refresh-20260911 redesign/tdesign-20260911
+```
+
+（`claude/bold-bohr-fl0nig` 是当前的开发分支，与 main 同步，留着。）
+指向这些分支的引用已经断干净了：`deploy.yml` 的触发分支只剩 main，
+HANDOVER 开头也不再写死某个开发分支。
 
 **捞走的**：`devui` 分支的 `f062a11`（Gantt、WordCloud 与令牌定义校验）已 cherry-pick，
 A1/A2 因此完成；同分支的 IndexBar / PullRefresh 没摘——main 里已有等价的
