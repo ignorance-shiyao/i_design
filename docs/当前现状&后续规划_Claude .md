@@ -135,9 +135,10 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 
 ### 1.7 已知的坑与债
 
-- **包发不出去**：`packages/*` 的 `main` 指向 `src/index.ts`，没有构建产物、
-  没有类型声明、没有 `exports` / `files` 字段。也就是说现在**没人能 `npm install` 用起来**。
-  这是「组件库」这个定位下最硬的短板。→ E1
+- **包已能装（E1）**：各包产出 ESM/CJS + 类型声明 + 打平样式，`exports` 等字段补齐，
+  `npm run build:packages` 一步到位，入口由 `check-package-exports.mjs` 核对。
+  已在干净树打包后装进空白 Vue 3 / React 项目实测渲染与类型。
+  **Vue 2.7 那个包例外**：它至今编译不过去，不在构建之列 → E9
 - **CI 仍缺 PR 检查**：`deploy.yml` 已只触发 main，过期分支名已清理；
   尚未拆分 PR 校验与部署工作流。→ E2
 - **覆盖数字口径不同**：矩阵按组件文件、frameworkStats 按导出名计数，
@@ -148,7 +149,7 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 - **两份目录共用实现状态**：保留全景页的场景说明与总览页的文档入口，
   `componentInventory.ts` 按 Web / 移动 Vue 源目录生成，`componentStatus.ts` 统一推导状态。
   `check:catalog` 检查清单新鲜度、错误状态与有效入口，已接入 `check:parity`；
-  状态仅代表示例源码存在，包可安装性与跨端覆盖仍分别见 E1 与覆盖矩阵。
+  状态仅代表示例源码存在，跨端覆盖另见覆盖矩阵。
 - **文档已校准（F1）**：HANDOVER 指向唯一主台账，ROADMAP 原 32 项中 11 项补完成记录，
   其余 21 项迁入本文；Splitter 双击复位、水印节点恢复与浮层审计补入 A5 / A6 / E8。
   源码快照及旧任务去向由 `check:docs` 检查。
@@ -200,16 +201,25 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
 
 ### E 交付与质量基建（P0 优先）
 
-- [ ] **E1 · 让包真的能装**（P0）
+- [x] **E1 · 让包真的能装**（P0，已完成）
   - 目标：`npm install @i-design/vue-next` 之后 import 得到组件与类型
-  - 落点：各 `packages/*/package.json` 补 `exports` / `types` / `files` / `sideEffects`；
-    加构建脚本（建议 Vite library 模式 + `vue-tsc --declaration` 出 `.d.ts`）；
-    样式产物单独出口（`@i-design/common/styles`）
-  - 注意：Vue 2.7 与 Vue 3 两套实现共存是刻意的，
-    `.npmrc` 的 `legacy-peer-deps=true` 不能删（删了 CI 的 `npm ci` 直接失败）
-  - 验收：在 `git archive` 出的干净树里 `npm pack` 后装进一个空白 Vite 项目，
-    Vue 3 / React 各渲染一个按钮 + 一个 Select，类型提示正常，样式生效
-  - 依赖：无
+  - 落地：新增 `scripts/build-packages.mjs`（`npm run build:packages`），
+    逐包做 Vite library 构建，产出 ESM/CJS + sourcemap + `dist/types` 类型声明；
+    公共样式打平成单文件（使用方不必依赖自己的打包器解析相对 `@import`）；
+    各包补齐 `exports` / `main` / `module` / `types` / `files` / `sideEffects`
+  - 外置的东西：`vue` / `react` 与仓库内互相依赖的包都不打进产物——
+    内联会让使用方项目里出现两份 Vue 运行时（组件渲染得出来但 `inject` 全是
+    undefined）或两份同名组件
+  - 仓库自身改走源码：`tsconfig.json` 给各包加了 `paths`，文档站与 demo 的样式
+    引用改成相对路径。否则开发时读到的是上一次构建的产物
+  - 新增 `scripts/check-package-exports.mjs`：核对承诺的入口确实存在。
+    这类错误只在别人的项目里暴露，仓库内的 alias 与 paths 天然看不见
+  - 实测：`git archive` 出干净树 → `npm install` → `build:packages` → `npm pack`，
+    装进两个空白 Vite 项目（Vue 3 / React），各渲染一个按钮 + 一个 Select：
+    构建通过、浏览器里无报错、按钮底色取到品牌色、`.i-select` 渲染出来；
+    把 `variant` 写成非法值时两端类型检查都报错（证明 `.d.ts` 真的生效，
+    而不是退化成 `any`）；React 产物里 grep 不到 vue
+  - 未覆盖：Vue 2.7 那个包不在构建之列，见 E9
 
 - [ ] **E2 · CI 在 PR 上跑，并清掉过期分支名**（P0）
   - 已完成部分：部署触发分支已仅保留 main。剩余落点：`.github/workflows/`，拆成 `ci.yml`（PR + push 跑 `check:parity`、
@@ -255,6 +265,23 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
     接 `url_launcher` 时必须先过这道白名单——那一端没有浏览器兜底
   - 实测：喂 `javascript:alert(1)` 时 Link 退化成 `<button>` 且不带 href、文字保留，
     正常地址照常渲染成 `<a>`；golden test +18 条把白名单钉在各端
+
+- [ ] **E9 · 让 `packages/vue`（Vue 2.7）能编译**（P1）
+  - 现状：这个包**从来没编译通过过**，不是哪次改动弄坏的——把当前改动全部
+    stash 掉，在 main 上一样失败。它的源码由 `packages/vue/scripts/convert.mjs`
+    从 Vue 3 源自动转换而来，转换器对某些语法的产物是过不了编译的
+  - 已修的一处：`convertEmits` 遇到 Vue 3 的具名元组（`select: [task: AgentTask]`）
+    会产出非法的 `a0: task: AgentTask`，已修，影响 8 个文件
+  - 仍卡住：`ICalendar` 还有一处报错，位置偏移在改动可疑代码后并不移动，
+    尚未定位。逐文件探测时用 `write: false` 会触发一个插件侧的假错误
+    （`currentInput.slice is not a function`），这条路先别走
+  - 为什么要管：覆盖矩阵把它算作完整的一端，而它现在装出去是报错的——
+    也就是说矩阵里有一列是虚的
+  - 落点：`packages/vue/scripts/convert.mjs` 与它的产物；修好后接进
+    `scripts/build-packages.mjs` 的 `targets`
+  - 验收：`packages/vue` 能构建出 dist 并通过 `check-package-exports.mjs`，
+    装进一个空白 Vue 2.7 项目能渲染按钮
+  - 依赖：无
 
 - [ ] **E6 · 无障碍自动检查**（P2）
   - 落点：Playwright + axe，遍历文档站路由，亮暗两态各跑一遍
@@ -367,7 +394,7 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
     组合 API、命令式宿主与移动专有组件显式识别，移动 IFab 不会冒充 Web FloatButton。
   - 验收：`npm run check:catalog` 已接入 `check:parity`，包含陈旧清单、错误状态、
     错误排除、无效链接及组合宿主缺失的回归验证；界面证据见 `docs/reviews/F0/README.md`。
-  - 边界：只校准目录状态及对应入口，不代表 E1 包发布或 E4 覆盖口径已完成。
+  - 边界：只校准目录状态及对应入口，不代表 E4 覆盖口径已统一。
 
 - [x] **F1 · 把 HANDOVER 与 ROADMAP 校准到现状**（P0）
   - 完成：ROADMAP 原 32 项逐项核对，11 项补完成记录，21 项映射到唯一主台账；
@@ -501,7 +528,7 @@ PR 描述里应该已经写清楚了。
 
 1. **F0 / F1 已完成**：目录按源码推导，历史计划与唯一台账已校准。
 2. **E2**：让质量检查在 PR 上生效，与部署分离
-3. **E1**（1–2 天）：包能装出去，这个项目才配叫组件库
+3. ~~**E1**：包能装出去，这个项目才配叫组件库~~（已完成；Vue 2.7 的缺口转入 **E9**）
 4. **D1**（2–3 天）：参数 playground，示例站从「能看」变成「能试」
 5. **E3 + E5**（1–2 天）：属性差异与逻辑测试，把回归挡在 PR 上
 6. **B1–B5**（按批推进）：AI 交互这条线的缺口最大，也最能体现这套库的差异点
