@@ -27,6 +27,7 @@ import { watermarkTampered } from './watermark'
 import { ELAPSED_THRESHOLD, elapsedInterval, elapsedParts, shouldShowElapsed } from './elapsed'
 import { detectLang, normalizeLang, tokenize, tokenizeLines } from './highlight'
 import { diffLines, diffStat } from './diff'
+import { moveCommandIndex, searchCommands, type CommandItem } from './command'
 
 describe('countdown', () => {
   it('不显示毫秒时向上取整到秒：剩 1.4 秒给 2 秒', () => {
@@ -351,5 +352,52 @@ describe('diff', () => {
     const added = lines.find((l) => l.kind === 'add')!
     expect(added.before).toBeUndefined()
     expect(added.after).toBe(2)
+  })
+})
+
+describe('command', () => {
+  const items: CommandItem[] = [
+    { key: 'button', label: '按钮', description: '触发一个即时操作', keywords: ['Button'] },
+    { key: 'button-group', label: '按钮组', description: '一组并列的按钮', keywords: ['ButtonGroup'] },
+    { key: 'form', label: '表单 校验', description: '把一组输入组织成一次提交', keywords: ['Form'] },
+    { key: 'tag', label: '标签', description: '标记状态或分类；可用按钮触发', keywords: ['Tag'] }
+  ]
+
+  it('整串相等排在前缀命中之前', () => {
+    // 搜「按钮」时第一条必须是按钮本身，不是以它开头的另一件东西
+    expect(searchCommands(items, '按钮').map((m) => m.item.key)).toEqual(['button', 'button-group', 'tag'])
+  })
+
+  it('标题命中排在描述命中之前', () => {
+    const keys = searchCommands(items, '按钮').map((m) => m.item.key)
+    expect(keys.indexOf('button')).toBeLessThan(keys.indexOf('tag'))
+  })
+
+  it('英文关键词也能搜到', () => {
+    expect(searchCommands(items, 'form')[0].item.key).toBe('form')
+  })
+
+  it('词首命中比词中命中分高', () => {
+    const [first] = searchCommands(items, '校验')
+    expect(first.item.key).toBe('form')
+  })
+
+  it('空查询给出全部条目，而不是一片空白', () => {
+    // 搜索框刚打开时该看到「有哪些东西可搜」
+    expect(searchCommands(items, '   ').length).toBe(items.length)
+  })
+
+  it('高亮区间只落在标题上', () => {
+    const [first] = searchCommands(items, '按钮')
+    expect(first.ranges).toEqual([[0, 2]])
+    const viaDesc = searchCommands(items, '分类').find((m) => m.item.key === 'tag')!
+    expect(viaDesc.ranges).toEqual([])
+  })
+
+  it('上下键到头绕回去', () => {
+    // 停在最后一条的话，用户会以为键盘失灵然后去够鼠标
+    expect(moveCommandIndex(2, 1, 3)).toBe(0)
+    expect(moveCommandIndex(0, -1, 3)).toBe(2)
+    expect(moveCommandIndex(0, 1, 0)).toBe(0)
   })
 })

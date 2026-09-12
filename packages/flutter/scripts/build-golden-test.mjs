@@ -103,6 +103,10 @@ const { shouldShowElapsed, elapsedParts, elapsedInterval } = await bundle(
   'elapsed'
 )
 const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
+const { searchCommands, moveCommandIndex } = await bundle(
+  'packages/common/src/logic/command.ts',
+  'command'
+)
 const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
@@ -1666,6 +1670,51 @@ const lineDiffExpectations = diffCases.flatMap(([before, after], i) => {
   ]
 })
 
+/*
+ * 命令搜索：排序错一次，用户下次就不用搜索了。
+ * 因此断言的不只是「搜到了几条」，还有第一条是谁——那才是搜索的产出。
+ */
+const cmdItems = [
+  { key: 'button', label: '按钮', description: '触发一个动作', keywords: ['button'], group: '基础' },
+  { key: 'button-group', label: '按钮组', description: '一组并排的按钮', keywords: ['button group'] },
+  { key: 'tag', label: '标签', description: '用按钮旁的小块标记状态', keywords: ['tag'] },
+  { key: 'form-validate', label: '表单 校验', keywords: ['validate'] },
+  { key: 'empty', label: '空状态', keywords: ['empty', 'placeholder'] }
+]
+const dartStr = (t) => `'${String(t).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
+const dartCmdItems = `<ICommandItem>[${cmdItems
+  .map(
+    (i) =>
+      `ICommandItem(key: ${dartStr(i.key)}, label: ${dartStr(i.label)}` +
+      (i.description ? `, description: ${dartStr(i.description)}` : '') +
+      `, keywords: <String>[${(i.keywords ?? []).map(dartStr).join(', ')}]` +
+      (i.group ? `, group: ${dartStr(i.group)}` : '') +
+      ')'
+  )
+  .join(', ')}]`
+const cmdQueries = ['按钮', 'button', '校验', 'placeholder', '', '不存在的词', '标签']
+const commandExpectations = cmdQueries.flatMap((q) => {
+  const hits = searchCommands(cmdItems, q)
+  return [
+    `    // 搜 ${q || '（空）'}`,
+    `    expect(searchCommands(items, ${dartStr(q)}).length, ${hits.length});`,
+    ...hits.map(
+      (h, i) => `    expect(searchCommands(items, ${dartStr(q)})[${i}].item.key, ${dartStr(h.item.key)});`
+    ),
+    ...(hits[0]?.ranges.length
+      ? [
+          `    expect(searchCommands(items, ${dartStr(q)})[0].ranges.first[0], ${hits[0].ranges[0][0]});`,
+          `    expect(searchCommands(items, ${dartStr(q)})[0].ranges.first[1], ${hits[0].ranges[0][1]});`
+        ]
+      : [])
+  ]
+})
+const commandLimitCount = searchCommands(cmdItems, '', 2).length
+const commandMoveExpectations = [
+  [0, 1, 3], [2, 1, 3], [0, -1, 3], [1, -1, 3], [0, 1, 0], [5, 1, 0]
+].map(([cur, delta, total]) =>
+  `    expect(moveCommandIndex(${cur}, ${delta}, ${total}), ${moveCommandIndex(cur, delta, total)});`)
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -2220,6 +2269,13 @@ ${hrefExpectations.join('\n')}
 
   test('行 diff 的分组、顺序与统计与 Web 端一致', () {
 ${lineDiffExpectations.join('\n')}
+  });
+
+  test('命令搜索的排序、高亮区间与索引环绕与 Web 端一致', () {
+    final items = ${dartCmdItems};
+${commandExpectations.join('\n')}
+    expect(searchCommands(items, '', limit: 2).length, ${commandLimitCount});
+${commandMoveExpectations.join('\n')}
   });
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {

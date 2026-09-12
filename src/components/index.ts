@@ -91,6 +91,7 @@ import ITransfer from './ITransfer.vue'
 import IAffix from './IAffix.vue'
 import IBackTop from './IBackTop.vue'
 import ICodeBlock from './ICodeBlock.vue'
+import ICommandSearch from './ICommandSearch.vue'
 import IFloatButton from './IFloatButton.vue'
 import IWatermark from './IWatermark.vue'
 import IImage from './IImage.vue'
@@ -178,6 +179,7 @@ export {
   IAffix,
   IBackTop,
   ICodeBlock,
+  ICommandSearch,
   IFloatButton,
   IWatermark,
   IImage,

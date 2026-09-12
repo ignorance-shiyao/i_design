@@ -297,6 +297,12 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"showContrast","type":"boolean","doc":"显示对比度读数：挑主色时最该看的就是这个","defaultText":"true","control":{"kind":"boolean"}},
   ],
+  ICommandSearch: [
+    {"name":"items","type":"CommandItem[]","doc":"可搜的全部条目","defaultText":null,"control":null},
+    {"name":"open","type":"boolean","doc":"是否打开；用 v-model:open 控制","defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"placeholder","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
+    {"name":"limit","type":"number","doc":"最多显示多少条","defaultText":"20","control":{"kind":"number"}},
+  ],
   IComment: [
     {"name":"author","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"datetime","type":"string","doc":"已经格式化好的时间文案。相对时间的算法在 logic/date，由调用方决定用哪种","defaultText":"''","control":{"kind":"string"}},

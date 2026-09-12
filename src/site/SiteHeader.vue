@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { useTheme } from "@/composables/useTheme";
 import IIcon from "@/components/IIcon.vue";
 import MobileNav from "./MobileNav.vue";
+import ICommandSearch from "@/components/ICommandSearch.vue";
+import { buildSearchIndex } from "./searchIndex";
+import type { CommandItem } from "@i-design/common";
 import { mobileNavOpen } from "@/composables/useMobileNav";
 
 import ThemePanel from "@/site/ThemePanel.vue";
@@ -19,6 +23,28 @@ function onToggleTheme(event: MouseEvent) {
     themeConfig.themeTransition
   );
 }
+
+const router = useRouter();
+const searchOpen = ref(false);
+const searchItems = buildSearchIndex();
+
+/* 条目的 key 就是它的路由，选中即跳转——搜索的产出是「到那一页」，不是「知道有这一页」 */
+function onSelect(item: CommandItem) {
+  router.push(item.key);
+}
+
+/*
+ * Cmd/Ctrl + K 唤起。挂在 window 上而不是某个输入框上：
+ * 快捷键的意义就是「不管现在在看哪一段，都能立刻开始搜」。
+ */
+function onKeydown(event: KeyboardEvent) {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+    event.preventDefault();
+    searchOpen.value = true;
+  }
+}
+onMounted(() => window.addEventListener("keydown", onKeydown));
+onUnmounted(() => window.removeEventListener("keydown", onKeydown));
 
 const links = [
   { to: "/design/values", label: "设计价值观" },
@@ -43,6 +69,17 @@ const links = [
       </nav>
 
       <div class="header__actions">
+        <button
+          class="header__search"
+          title="搜索文档"
+          aria-label="搜索文档"
+          @click="searchOpen = true"
+        >
+          <IIcon name="search" :size="14" />
+          <span class="header__search-text">搜索</span>
+          <!-- 把快捷键写在按钮上：不写的话，会用快捷键的人也得先用一次鼠标才知道有 -->
+          <kbd class="header__search-kbd">⌘K</kbd>
+        </button>
         <a
           class="header__icon"
           href="https://github.com/ignorance-shiyao/i_design"
@@ -81,6 +118,12 @@ const links = [
         </button>
       </div>
     </div>
+    <ICommandSearch
+      v-model:open="searchOpen"
+      :items="searchItems"
+      placeholder="搜索组件与文档"
+      @select="onSelect"
+    />
     <MobileNav />
     <ThemePanel v-model:open="themePanelOpen" />
   </header>
@@ -174,6 +217,35 @@ const links = [
   display: none;
 }
 
+.header__search {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  height: 32px;
+  padding: 0 var(--i-spacing-2) 0 var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  font-family: inherit;
+  cursor: pointer;
+  transition: color var(--i-motion-fast) var(--i-motion-easing),
+    border-color var(--i-motion-fast) var(--i-motion-easing);
+}
+.header__search:hover {
+  border-color: var(--i-color-brand);
+  color: var(--i-color-brand);
+}
+.header__search-kbd {
+  padding: 0 var(--i-spacing-1);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-muted);
+  /* 灰底上用二级文字色：三级色在 #eef0f5 上只有 4.33，差一点点过不去 */
+  color: var(--i-color-text-secondary);
+  font-family: inherit;
+}
+
 @media (max-width: 860px) {
   .header__inner {
     gap: var(--i-spacing-3);
@@ -191,6 +263,15 @@ const links = [
   .header__icon {
     width: 40px;
     height: 40px;
+  }
+  /* 窄屏上只留图标：快捷键提示对没有键盘的设备毫无意义，「搜索」二字也让位给导航 */
+  .header__search {
+    height: 40px;
+    padding: 0 var(--i-spacing-3);
+  }
+  .header__search-text,
+  .header__search-kbd {
+    display: none;
   }
 }
 @media (max-width: 420px) {

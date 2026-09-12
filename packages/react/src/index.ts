@@ -50,6 +50,7 @@ export { CheckboxGroup, Checkbox, type CheckboxGroupProps, type CheckboxProps } 
 export { CodeBlock, type CodeBlockProps } from './components/CodeBlock'
 export { Collapse, type CollapseItem, type CollapseProps } from './components/Collapse'
 export { ColorPicker, type ColorPickerProps } from './components/ColorPicker'
+export { CommandSearch, type CommandSearchProps } from './components/CommandSearch'
 export { Comment, type CommentProps } from './components/Comment'
 export { useConfig, ConfigProvider, type ConfigValue, type ConfigProviderProps } from './components/ConfigProvider'
 export { confirm, type ConfirmBoxOptions, type PromptOptions } from './components/ConfirmLayer'

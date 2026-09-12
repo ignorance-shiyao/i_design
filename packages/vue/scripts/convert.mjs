@@ -41,7 +41,8 @@ const manual = new Set([
   'ITimePicker.vue',
   'IImage.vue',
   'IImageViewer.vue',
-  'IColorPicker.vue'
+  'IColorPicker.vue',
+  'ICommandSearch.vue'
 ])
 
 /**

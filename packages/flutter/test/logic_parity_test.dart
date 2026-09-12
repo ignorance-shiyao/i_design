@@ -1261,6 +1261,50 @@ void main() {
     expect(diffLines('', 'a')[1].kind, IDiffKind.add);
   });
 
+  test('命令搜索的排序、高亮区间与索引环绕与 Web 端一致', () {
+    final items = <ICommandItem>[ICommandItem(key: 'button', label: '按钮', description: '触发一个动作', keywords: <String>['button'], group: '基础'), ICommandItem(key: 'button-group', label: '按钮组', description: '一组并排的按钮', keywords: <String>['button group']), ICommandItem(key: 'tag', label: '标签', description: '用按钮旁的小块标记状态', keywords: <String>['tag']), ICommandItem(key: 'form-validate', label: '表单 校验', keywords: <String>['validate']), ICommandItem(key: 'empty', label: '空状态', keywords: <String>['empty', 'placeholder'])];
+    // 搜 按钮
+    expect(searchCommands(items, '按钮').length, 3);
+    expect(searchCommands(items, '按钮')[0].item.key, 'button');
+    expect(searchCommands(items, '按钮')[1].item.key, 'button-group');
+    expect(searchCommands(items, '按钮')[2].item.key, 'tag');
+    expect(searchCommands(items, '按钮')[0].ranges.first[0], 0);
+    expect(searchCommands(items, '按钮')[0].ranges.first[1], 2);
+    // 搜 button
+    expect(searchCommands(items, 'button').length, 2);
+    expect(searchCommands(items, 'button')[0].item.key, 'button');
+    expect(searchCommands(items, 'button')[1].item.key, 'button-group');
+    // 搜 校验
+    expect(searchCommands(items, '校验').length, 1);
+    expect(searchCommands(items, '校验')[0].item.key, 'form-validate');
+    expect(searchCommands(items, '校验')[0].ranges.first[0], 3);
+    expect(searchCommands(items, '校验')[0].ranges.first[1], 5);
+    // 搜 placeholder
+    expect(searchCommands(items, 'placeholder').length, 1);
+    expect(searchCommands(items, 'placeholder')[0].item.key, 'empty');
+    // 搜 （空）
+    expect(searchCommands(items, '').length, 5);
+    expect(searchCommands(items, '')[0].item.key, 'button');
+    expect(searchCommands(items, '')[1].item.key, 'button-group');
+    expect(searchCommands(items, '')[2].item.key, 'tag');
+    expect(searchCommands(items, '')[3].item.key, 'form-validate');
+    expect(searchCommands(items, '')[4].item.key, 'empty');
+    // 搜 不存在的词
+    expect(searchCommands(items, '不存在的词').length, 0);
+    // 搜 标签
+    expect(searchCommands(items, '标签').length, 1);
+    expect(searchCommands(items, '标签')[0].item.key, 'tag');
+    expect(searchCommands(items, '标签')[0].ranges.first[0], 0);
+    expect(searchCommands(items, '标签')[0].ranges.first[1], 2);
+    expect(searchCommands(items, '', limit: 2).length, 2);
+    expect(moveCommandIndex(0, 1, 3), 1);
+    expect(moveCommandIndex(2, 1, 3), 0);
+    expect(moveCommandIndex(0, -1, 3), 2);
+    expect(moveCommandIndex(1, -1, 3), 0);
+    expect(moveCommandIndex(0, 1, 0), 0);
+    expect(moveCommandIndex(5, 1, 0), 0);
+  });
+
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
     expect(shouldShowElapsed(0), false);
     expect(shouldShowElapsed(2999), false);

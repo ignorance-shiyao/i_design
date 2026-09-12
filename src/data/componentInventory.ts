@@ -63,6 +63,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ICol.vue",
   "src/components/ICollapse.vue",
   "src/components/IColorPicker.vue",
+  "src/components/ICommandSearch.vue",
   "src/components/IComment.vue",
   "src/components/IConfigProvider.vue",
   "src/components/IConfirmLayer.vue",

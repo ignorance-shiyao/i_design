@@ -42,6 +42,7 @@
 @import './components/code-block.css';
 @import './components/collapse.css';
 @import './components/colorpicker.css';
+@import './components/command-search.css';
 @import './components/comment.css';
 @import './components/countdown.css';
 @import './components/date-picker.css';
