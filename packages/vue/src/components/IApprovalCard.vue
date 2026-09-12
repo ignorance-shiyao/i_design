@@ -25,7 +25,7 @@ const props = withDefaults(
   { confirmText: '继续', skipText: '跳过', closable: true }
 )
 
-const emit = defineEmits<{ (e: 'complete', a0: answers: Record<string, ApprovalAnswer>): void; (e: 'close'): void }>()
+const emit = defineEmits<{ (e: 'complete', answers: Record<string, ApprovalAnswer>): void; (e: 'close'): void }>()
 
 const index = ref(0)
 const selected = ref<string[]>([])

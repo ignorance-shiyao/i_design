@@ -24,7 +24,7 @@ const props = withDefaults(
   { title: '待应用的改动' }
 )
 
-const emit = defineEmits<{ (e: 'apply', a0: ids: string[]): void }>()
+const emit = defineEmits<{ (e: 'apply', ids: string[]): void }>()
 
 // 默认全选：智能体给的是一整套方案，逐个勾选反而是例外
 const selected = ref<string[]>(defaultDiffSelection(props.rows))

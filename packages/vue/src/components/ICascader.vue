@@ -40,7 +40,7 @@ const { locale } = useConfig()
 /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
 const placeholderText = computed(() => props.placeholder || locale.value.placeholder)
 
-const emit = defineEmits<{ (e: 'input', a0: key: string): void; (e: 'change', a0: key: string, a1: path: string[]): void }>()
+const emit = defineEmits<{ (e: 'input', key: string): void; (e: 'change', key: string, path: string[]): void }>()
 
 const entities = computed(() => flattenTree(props.data))
 // 打开时从当前值恢复路径，用户看到的是上次停在哪儿，而不是从头开始

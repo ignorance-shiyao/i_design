@@ -50,7 +50,7 @@ const props = withDefaults(
   }
 )
 
-const emit = defineEmits<{ (e: 'update:checked', a0: keys: string[]): void; (e: 'update:expanded', a0: keys: string[]): void; (e: 'update:selected', a0: key: string): void; (e: 'select', a0: node: TreeNode): void }>()
+const emit = defineEmits<{ (e: 'update:checked', keys: string[]): void; (e: 'update:expanded', keys: string[]): void; (e: 'update:selected', key: string): void; (e: 'select', node: TreeNode): void }>()
 
 const { locale } = useConfig()
 

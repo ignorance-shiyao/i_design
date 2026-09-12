@@ -30,7 +30,8 @@
     "check:catalog": "node scripts/check-catalog.mjs && node --test scripts/check-catalog.test.mjs",
     "predev": "npm run build:catalog",
     "build:docs": "node scripts/build-doc-status.mjs",
-    "check:docs": "node scripts/build-doc-status.mjs --check"
+    "check:docs": "node scripts/build-doc-status.mjs --check",
+    "build:packages": "node scripts/build-packages.mjs && node scripts/check-package-exports.mjs"
   },
   "dependencies": {
     "three": "^0.186.0",

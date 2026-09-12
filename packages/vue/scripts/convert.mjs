@@ -79,7 +79,14 @@ function convertEmits(source) {
       const [, name, argsRaw] = m
       // 按嵌套深度切参数，否则 Record<string, any> 里的逗号会被误当作分隔符
       const parts = argsRaw.trim() ? splitTop(argsRaw, ',') : []
-      const args = parts.map((t, i) => `a${i}: ${t.trim()}`).join(', ')
+      /*
+       * 元组元素可能本来就带名字（Vue 3 的 `select: [task: AgentTask]`）。
+       * 无条件再套一层 a0 会得到 `a0: task: AgentTask`——不是合法 TS，
+       * 而且 Vue 2 包一直没被编译过，所以这个错能一直躺着。
+       * 带名字的直接沿用，IDE 里也能看出参数叫什么；只有匿名的才补 a{i}。
+       */
+      const named = (t) => /^[A-Za-z_$][\w$]*\??\s*:/.test(splitTop(t, ':').length > 1 ? t.trim() : '')
+      const args = parts.map((t, i) => (named(t) ? t.trim() : `a${i}: ${t.trim()}`)).join(', ')
       const sig = `(e: '${name}'${args ? ', ' + args : ''}): void`
       // 去重：Checkbox 的 update:modelValue 与 change 会映射到同一个事件名
       if (!sigs.includes(sig)) sigs.push(sig)

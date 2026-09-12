@@ -22,7 +22,7 @@ const props = withDefaults(
   { offset: 80 }
 )
 
-const emit = defineEmits<{ (e: 'change', a0: key: string): void }>()
+const emit = defineEmits<{ (e: 'change', key: string): void }>()
 const active = ref('')
 
 function measure(): AnchorTarget[] {

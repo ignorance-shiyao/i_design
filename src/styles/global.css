@@ -1,4 +1,4 @@
-@import "@i-design/common/styles/index.css";
+@import "../../packages/common/src/styles/index.css";
 
 /* 以下是文档站自身的排版，不属于组件库 */
 /* 文档站通用排版 */

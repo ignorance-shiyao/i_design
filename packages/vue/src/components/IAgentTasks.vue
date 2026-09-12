@@ -19,7 +19,7 @@ const props = withDefaults(
   { variant: 'capsule', showSummary: true }
 )
 
-const emit = defineEmits<{ (e: 'select', a0: task: AgentTask): void }>()
+const emit = defineEmits<{ (e: 'select', task: AgentTask): void }>()
 const opened = ref<Set<string>>(new Set())
 const summary = computed(() => summarizeTasks(props.tasks))
 

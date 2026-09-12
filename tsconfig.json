@@ -26,6 +26,18 @@
       ],
       "@i-design/common/*": [
         "packages/common/src/*"
+      ],
+      "@i-design/vue-next": [
+        "packages/vue-next/src/index.ts"
+      ],
+      "@i-design/react": [
+        "packages/react/src/index.ts"
+      ],
+      "@i-design/mobile-vue": [
+        "packages/mobile-vue/src/index.ts"
+      ],
+      "@i-design/mobile-react": [
+        "packages/mobile-react/src/index.ts"
       ]
     }
   },
@@ -37,6 +49,7 @@
     "packages/*/src/**/*.tsx",
     "vite.config.ts"
   ],
+  "//paths": "各包的 package.json 指向的是构建产物（dist），仓库自身开发时要走源码——否则改了组件得先构建才看得见，且类型会停在上一次构建的样子",
   "//": "Vue 2 包用的是另一套框架类型（vue@2.7），由它自己的构建校验；混进 Vue 3 的 vue-tsc 只会误报",
   "exclude": [
     "packages/vue/**",

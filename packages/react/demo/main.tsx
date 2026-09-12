@@ -7,7 +7,7 @@ import {
   Skeleton, Steps, Switch, Table, Tabs, Tag, Textarea, Tooltip, Upload
 } from '../src'
 import type { UploadFile } from '@i-design/common'
-import '@i-design/common/styles/index.css'
+import '../../common/src/styles/index.css'
 
 /** 覆盖全部导出组件的验证页：文件存在不等于能用，每个都要真渲染一次 */
 function App() {
