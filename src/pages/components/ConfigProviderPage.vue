@@ -6,6 +6,11 @@ import ISelect from '@/components/ISelect.vue'
 import IEmpty from '@/components/IEmpty.vue'
 import IPagination from '@/components/IPagination.vue'
 import ISegmented from '@/components/ISegmented.vue'
+import ICascader from '@/components/ICascader.vue'
+import IDatePicker from '@/components/IDatePicker.vue'
+import IPopconfirm from '@/components/IPopconfirm.vue'
+import IButton from '@/components/IButton.vue'
+import ITypography from '@/components/ITypography.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 
 const lang = ref<'zh' | 'en'>('zh')
@@ -45,6 +50,15 @@ const picked = ref<string | number | null>(null)
           <div class="cp-demo__grid">
             <ISelect v-model="picked" :options="[]" clearable />
             <IPagination v-model="page" :total="95" :page-size="10" show-total />
+            <ICascader :data="[]" />
+            <IDatePicker />
+            <IPopconfirm title="确认执行该操作？">
+              <IButton size="sm">气泡确认</IButton>
+            </IPopconfirm>
+            <ITypography :ellipsis="2" expandable>
+              可展开的多行省略：展开与收起两个字也来自字典，换语言时不会剩下一个中文按钮。
+              这段文字要足够长才会被截断，因此再补上一句凑够两行以上的篇幅。
+            </ITypography>
             <IEmpty size="sm" type="search" />
           </div>
         </IConfigProvider>

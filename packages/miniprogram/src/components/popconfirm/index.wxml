@@ -21,11 +21,11 @@
     </view>
     <view wx:if="{{content}}" class="i-popconfirm__content">{{content}}</view>
     <view class="i-popconfirm__foot">
-      <view class="i-button i-button--text i-button--sm" bindtap="onCancel">{{cancelText}}</view>
+      <view class="i-button i-button--text i-button--sm" bindtap="onCancel">{{cancelLabel}}</view>
       <view
         class="i-button i-button--{{theme === 'danger' ? 'danger' : 'primary'}} i-button--sm"
         bindtap="onConfirm"
-      >{{confirmText}}</view>
+      >{{confirmLabel}}</view>
     </view>
   </view>
 </view>

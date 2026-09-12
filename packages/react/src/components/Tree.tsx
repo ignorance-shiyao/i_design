@@ -18,6 +18,7 @@ import {
   visibleRows,
   type TreeNode
 } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 import { Checkbox } from './Checkbox'
 import { Input } from './Input'
@@ -76,6 +77,7 @@ export function Tree({
   onExpandedChange,
   onSelect
 }: TreeProps) {
+  const { locale } = useConfig()
   const entities = useMemo(() => flattenTree(data), [data])
   const [keyword, setKeyword] = useState('')
   const [localExpanded, setLocalExpanded] = useState<string[]>(expanded)
@@ -163,7 +165,7 @@ export function Tree({
         <Input
           className="i-tree__search"
           value={keyword}
-          placeholder="搜索节点"
+          placeholder={locale.searchNode}
           onChange={(value: string) => setKeyword(value)}
         />
       )}
@@ -210,7 +212,7 @@ export function Tree({
               ]
                 .filter(Boolean)
                 .join(' ')}
-              aria-label={row.expanded ? '折叠' : '展开'}
+              aria-label={row.expanded ? locale.collapse : locale.expand}
               tabIndex={-1}
               onClick={(e) => {
                 e.stopPropagation()

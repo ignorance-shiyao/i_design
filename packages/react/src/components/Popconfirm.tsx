@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import type { Placement } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { arrowStyle, useOverlayPosition } from '../useOverlayPosition'
 import type { IconName } from '@i-design/common'
 import { Button } from './Button'
@@ -24,8 +25,8 @@ export interface PopconfirmProps {
 export function Popconfirm({
   title = '确认执行该操作？',
   content = '',
-  confirmText = '确定',
-  cancelText = '取消',
+  confirmText = '',
+  cancelText = '',
   type = 'brand',
   placement = 'top',
   icon = 'help-circle',
@@ -34,6 +35,10 @@ export function Popconfirm({
   onCancel,
   children
 }: PopconfirmProps) {
+  const { locale } = useConfig()
+  /* 传了就用传的，没传才回落到字典——按钮上的字最该由调用方说清楚要确认什么 */
+  const confirmLabel = confirmText || locale.confirm
+  const cancelLabel = cancelText || locale.cancel
   const root = useRef<HTMLSpanElement | null>(null)
   const panel = useRef<HTMLDivElement | null>(null)
   const [visible, setVisible] = useState(false)
@@ -93,7 +98,7 @@ export function Popconfirm({
                   close()
                 }}
               >
-                {cancelText}
+                {cancelLabel}
               </Button>
               <Button
                 size="sm"
@@ -103,7 +108,7 @@ export function Popconfirm({
                   close()
                 }}
               >
-                {confirmText}
+                {confirmLabel}
               </Button>
             </div>
           </div>,

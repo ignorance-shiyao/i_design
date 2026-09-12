@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Icon } from './Icon'
+import { useConfig } from './ConfigProvider'
 
 export interface DrawerProps {
   open: boolean
@@ -26,6 +27,7 @@ export function Drawer({
   onClose,
   children
 }: DrawerProps) {
+  const { locale } = useConfig()
   const panel = useRef<HTMLDivElement | null>(null)
   const lastActive = useRef<HTMLElement | null>(null)
 
@@ -62,7 +64,7 @@ export function Drawer({
           <header className="i-drawer__header">
             <h3 className="i-drawer__title">{title}</h3>
             {closable && (
-              <button className="i-drawer__close" aria-label="关闭" onClick={onClose}>
+              <button className="i-drawer__close" aria-label={locale.close} onClick={onClose}>
                 <Icon name="close" size={18} />
               </button>
             )}

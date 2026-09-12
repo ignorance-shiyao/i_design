@@ -3,6 +3,7 @@ import IIcon from './IIcon.vue'
 import IButton from './IButton.vue'
 import { closeNotification, notifications, type NotificationType } from './notification'
 import type { IconName } from './icons'
+import { useConfig } from './useConfig'
 
 const ICONS: Record<NotificationType, IconName> = {
   info: 'info-circle',
@@ -10,6 +11,8 @@ const ICONS: Record<NotificationType, IconName> = {
   warning: 'warning-triangle',
   danger: 'error-circle'
 }
+
+const { locale } = useConfig()
 </script>
 
 <template>
@@ -37,7 +40,7 @@ const ICONS: Record<NotificationType, IconName> = {
             </IButton>
           </div>
         </div>
-        <button class="i-notification__close" aria-label="关闭" @click="closeNotification(item.id)">
+        <button class="i-notification__close" :aria-label="locale.close" @click="closeNotification(item.id)">
           <IIcon name="close" :size="14" />
         </button>
       </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
   confirmActions,
@@ -8,6 +8,7 @@ import {
   type ConfirmRole,
   type PromptRules
 } from '@i-design/common'
+import { bridgedLocale, subscribeBridgedLocale } from './localeBridge'
 import { Modal } from './Modal'
 import { Button } from './Button'
 import { Input } from './Input'
@@ -68,6 +69,8 @@ function ensureHost() {
 
 function open(kind: ConfirmKind, options: PromptOptions): Promise<string> {
   ensureHost()
+  /* 浮层不在 React 树里，读 ConfigProvider 留下的那份字典 */
+  const locale = bridgedLocale()
   return new Promise<string>((resolve, reject) => {
     const id = ++seed
     records = [
@@ -77,8 +80,9 @@ function open(kind: ConfirmKind, options: PromptOptions): Promise<string> {
         kind,
         title: options.title ?? '',
         content: options.content ?? '',
-        confirmText: options.confirmText ?? (kind === 'alert' ? '知道了' : '确定'),
-        cancelText: options.cancelText ?? '取消',
+        confirmText:
+          options.confirmText ?? (kind === 'alert' ? locale.acknowledge : locale.confirm),
+        cancelText: options.cancelText ?? locale.cancel,
         danger: options.danger ?? false,
         // 破坏性确认默认不允许点遮罩关闭：那一下太容易误触，而它旁边就是「确定」
         maskClosable: options.maskClosable ?? !options.danger,
@@ -119,6 +123,8 @@ export const confirm = {
 }
 
 function ConfirmHost() {
+  /* 浮层不在 React 树里，读 ConfigProvider 留下的那份字典 */
+  const locale = useSyncExternalStore(subscribeBridgedLocale, bridgedLocale, bridgedLocale)
   const [list, setList] = useState<ConfirmRecord[]>([])
   /* 每条记录自己一份输入值与错误：连着弹两个 prompt 时共用一份会带出残值 */
   const [values, setValues] = useState<Record<number, string>>({})

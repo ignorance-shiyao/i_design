@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { Icon } from './Icon'
 import { Button } from './Button'
 import type { IconName } from '@i-design/common'
+import { bridgedLocale, subscribeBridgedLocale } from './localeBridge'
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'danger'
 
@@ -65,6 +66,8 @@ export const notification = {
 
 /** 挂在应用根部一次即可，通知由 notification.* 命令式推入 */
 export function NotificationLayer() {
+  /* 浮层不在 React 树里，读 ConfigProvider 留下的那份字典 */
+  const locale = useSyncExternalStore(subscribeBridgedLocale, bridgedLocale, bridgedLocale)
   const [list, setList] = useState<NotificationItem[]>(items)
 
   useEffect(() => {

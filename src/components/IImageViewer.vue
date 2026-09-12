@@ -11,6 +11,7 @@ import {
   zoomImage,
   type ImageTransform
 } from '@i-design/common'
+import { useConfig } from './useConfig'
 
 /**
  * 全屏图片预览。
@@ -28,6 +29,8 @@ const props = withDefaults(
   }>(),
   { startIndex: 0, alt: '' }
 )
+
+const { locale } = useConfig()
 
 const open = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ change: [number] }>()
@@ -115,7 +118,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
         @pointercancel="onUp"
       />
 
-      <button class="i-image-viewer__close" type="button" aria-label="关闭" @click="close">
+      <button class="i-image-viewer__close" type="button" :aria-label="locale.close" @click="close">
         <IIcon name="close" :size="18" />
       </button>
 

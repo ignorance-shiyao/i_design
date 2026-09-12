@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { flattenTree, labelPath, leafKeys, type TreeNode } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 import { Popover } from './Popover'
 import { Tree } from './Tree'
@@ -28,7 +29,7 @@ export function TreeSelect({
   value = '',
   checked = [],
   multiple = false,
-  placeholder = '请选择',
+  placeholder = '',
   disabled = false,
   searchable = true,
   showPath = true,
@@ -37,6 +38,9 @@ export function TreeSelect({
   onChange,
   onCheckedChange
 }: TreeSelectProps) {
+  const { locale } = useConfig()
+  /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+  const placeholderText = placeholder || locale.placeholder
   const entities = useMemo(() => flattenTree(data), [data])
   const [open, setOpen] = useState(false)
   const [expanded, setExpanded] = useState<string[]>([])
@@ -96,9 +100,9 @@ export function TreeSelect({
           .filter(Boolean)
           .join(' ')}
         disabled={disabled}
-        aria-label={display || placeholder}
+        aria-label={display || placeholderText}
       >
-        <span className="i-select__label">{display || placeholder}</span>
+        <span className="i-select__label">{display || placeholderText}</span>
         <Icon name="chevron-down" size={14} />
       </button>
     </Popover>

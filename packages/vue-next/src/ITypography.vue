@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch } 
 import { isTextOverflowing, rafThrottle } from '@i-design/common'
 import IIcon from './IIcon.vue'
 import ITooltip from './ITooltip.vue'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -46,8 +47,8 @@ const props = withDefaults(
     ellipsis: false,
     ellipsisTooltip: false,
     expandable: false,
-    expandText: '展开',
-    collapseText: '收起',
+    expandText: '',
+    collapseText: '',
     copyable: false,
     copyText: '',
     as: ''
@@ -62,6 +63,11 @@ const tag = computed(() => {
   return props.variant === 'caption' ? 'span' : 'p'
 })
 
+const { locale } = useConfig()
+/* 传了就用传的，没传才回落到字典 */
+const expandLabel = computed(() => props.expandText || locale.value.expand)
+const collapseLabel = computed(() => props.collapseText || locale.value.collapse)
+
 const lines = computed(() => (typeof props.ellipsis === 'number' ? props.ellipsis : 0))
 
 const expanded = ref(false)
@@ -71,6 +77,7 @@ const clamped = computed(() => lines.value > 0 && !expanded.value)
 const slots = useSlots()
 const root = ref<HTMLElement | null>(null)
 const copied = ref(false)
+const copyLabel = computed(() => (copied.value ? locale.value.copied : locale.value.copy))
 
 /* ------------------------------------------------------ 截断才给提示 */
 
@@ -219,14 +226,14 @@ void slots
       :aria-expanded="expanded"
       @click="expanded = !expanded"
     >
-      {{ expanded ? collapseText : expandText }}
+      {{ expanded ? collapseLabel : expandLabel }}
     </button>
 
     <button
       v-if="copyable"
       type="button"
       class="i-typo__copy"
-      :aria-label="copied ? '已复制' : '复制'"
+      :aria-label="copyLabel"
       @click="copy"
     >
       <IIcon :name="copied ? 'check' : 'copy'" />

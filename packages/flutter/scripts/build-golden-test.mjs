@@ -1227,8 +1227,9 @@ const countdownMiscExpectations = [
  */
 const localeKeys = [
   'name', 'empty', 'emptyContent', 'loading', 'loadMore', 'loadFailed', 'noMore',
-  'placeholder', 'selectAll', 'search', 'noMatch', 'clear',
-  'confirm', 'cancel', 'acknowledge', 'expand', 'collapse', 'required', 'invalidFormat'
+  'placeholder', 'datePlaceholder', 'selectAll', 'search', 'searchNode', 'noMatch', 'clear',
+  'confirm', 'cancel', 'acknowledge', 'close', 'retry', 'copy', 'copied',
+  'expand', 'collapse', 'required', 'invalidFormat'
 ]
 const dartString = (text) => `'${text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\$/g, '\\$')}'`
 const localeExpectations = [

@@ -7,6 +7,7 @@ import {
   nodePath,
   type TreeNode
 } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 import { Popover } from './Popover'
 
@@ -25,12 +26,15 @@ export interface CascaderProps {
 export function Cascader({
   data,
   value = '',
-  placeholder = '请选择',
+  placeholder = '',
   disabled = false,
   changeOnSelect = false,
   separator = ' / ',
   onChange
 }: CascaderProps) {
+  const { locale } = useConfig()
+  /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+  const placeholderText = placeholder || locale.placeholder
   const entities = useMemo(() => flattenTree(data), [data])
   // 打开时从当前值恢复路径，用户看到的是上次停在哪儿，而不是从头开始
   const [active, setActive] = useState<string[]>(value ? nodePath(entities, value) : [])
@@ -100,9 +104,9 @@ export function Cascader({
           .filter(Boolean)
           .join(' ')}
         disabled={disabled}
-        aria-label={display || placeholder}
+        aria-label={display || placeholderText}
       >
-        <span className="i-select__label">{display || placeholder}</span>
+        <span className="i-select__label">{display || placeholderText}</span>
         <Icon name="chevron-down" size={14} />
       </button>
     </Popover>

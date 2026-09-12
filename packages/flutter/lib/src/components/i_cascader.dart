@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/i_theme.dart';
+import 'i_config_provider.dart';
 import '../tokens/tokens.dart';
 import '../logic/tree.dart';
 import 'i_icon.dart';
@@ -13,7 +14,7 @@ class ICascader extends StatefulWidget {
     super.key,
     required this.data,
     this.value,
-    this.placeholder = '请选择',
+    this.placeholder = '',
     this.disabled = false,
 
     /// 允许选中非叶子节点；默认只有叶子才算完成选择
@@ -82,7 +83,11 @@ class _ICascaderState extends State<ICascader> {
           children: [
             Expanded(
               child: Text(
-                display.isEmpty ? widget.placeholder : display,
+                display.isEmpty
+                    ? (widget.placeholder.isEmpty
+                        ? IConfigProvider.localeOf(context).placeholder
+                        : widget.placeholder)
+                    : display,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: IDesignTokensLight.fontSizeSm,

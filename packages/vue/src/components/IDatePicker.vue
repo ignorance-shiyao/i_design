@@ -16,6 +16,7 @@ import {
   toISO,
   weekdayLabels
 } from './date'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -37,7 +38,7 @@ const props = withDefaults(
   }>(),
   {
     value: null,
-    placeholder: '请选择日期',
+    placeholder: '',
     size: 'md',
     disabled: false,
     invalid: false,
@@ -49,6 +50,10 @@ const props = withDefaults(
     weekStart: 1
   }
 )
+
+const { locale } = useConfig()
+/* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+const placeholderText = computed(() => props.placeholder || locale.value.datePlaceholder)
 
 const emit = defineEmits<{ (e: 'input', a0: string | null): void; (e: 'change', a0: string | null): void }>()
 
@@ -172,7 +177,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
       @keydown="onKeydown"
     >
       <IIcon class="i-date__calendar" name="calendar" :size="15" />
-      <span class="i-date__value">{{ display || placeholder }}</span>
+      <span class="i-date__value">{{ display || placeholderText }}</span>
       <span
         v-if="clearable && selected && !disabled"
         class="i-date__clear"

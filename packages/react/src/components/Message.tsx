@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { IconName } from '@i-design/common'
+import { bridgedLocale, subscribeBridgedLocale } from './localeBridge'
 import { Icon } from './Icon'
 
 export type MessageType = 'info' | 'success' | 'warning' | 'danger'
@@ -76,6 +77,8 @@ export const message = {
 }
 
 function MessageHost() {
+  /* 浮层不在 React 树里，读 ConfigProvider 留下的那份字典 */
+  const locale = useSyncExternalStore(subscribeBridgedLocale, bridgedLocale, bridgedLocale)
   const [list, setList] = useState<MessageRecord[]>([])
   useEffect(() => {
     emit = setList

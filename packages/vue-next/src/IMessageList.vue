@@ -2,6 +2,7 @@
 import { closeMessage, messages } from './messageState'
 import IIcon from './IIcon.vue'
 import type { IconName } from './icons'
+import { useConfig } from './useConfig'
 
 const iconOf: Record<string, IconName> = {
   info: 'info-circle',
@@ -9,6 +10,8 @@ const iconOf: Record<string, IconName> = {
   warning: 'warning-triangle',
   danger: 'error-circle'
 }
+
+const { locale } = useConfig()
 </script>
 
 <template>
@@ -18,7 +21,7 @@ const iconOf: Record<string, IconName> = {
       <div v-for="item in messages" :key="item.id" class="i-message" :class="`i-message--${item.type}`">
         <IIcon class="i-message__icon" :name="iconOf[item.type]" :size="18" />
         <span class="i-message__text">{{ item.content }}</span>
-        <button v-if="item.closable" class="i-message__close" aria-label="关闭" @click="closeMessage(item.id)">
+        <button v-if="item.closable" class="i-message__close" :aria-label="locale.close" @click="closeMessage(item.id)">
           <IIcon name="close" :size="15" />
         </button>
       </div>

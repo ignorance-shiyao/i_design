@@ -10,6 +10,7 @@ import {
   zoomImage,
   type ImageTransform
 } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 
 export interface ImageViewerProps {
@@ -36,6 +37,7 @@ export function ImageViewer({
   alt = '',
   onChange
 }: ImageViewerProps) {
+  const { locale } = useConfig()
   const [index, setIndex] = useState(startIndex)
   const [transform, setTransform] = useState<ImageTransform>({ ...IMAGE_IDENTITY })
   const dragging = useRef<{ x: number; y: number } | null>(null)
@@ -114,7 +116,7 @@ export function ImageViewer({
         onPointerCancel={onUp}
       />
 
-      <button className="i-image-viewer__close" type="button" aria-label="关闭" onClick={onClose}>
+      <button className="i-image-viewer__close" type="button" aria-label={locale.close} onClick={onClose}>
         <Icon name="close" size={18} />
       </button>
 

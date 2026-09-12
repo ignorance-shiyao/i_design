@@ -26,14 +26,26 @@ class ILocale {
   final String noMore;
 
   final String placeholder;
+
+  /// 日期选择器的占位。与通用占位分开：「请选择」放在日历上太含糊
+  final String datePlaceholder;
   final String selectAll;
   final String search;
+
+  /// 树的搜索框。比泛泛的「搜索」具体，用户一眼知道搜的是节点不是整页
+  final String searchNode;
   final String noMatch;
   final String clear;
 
   final String confirm;
   final String cancel;
   final String acknowledge;
+
+  /// 关闭键的无障碍名。读屏用户听到的就是这一句，不跟着字典走等于没翻译
+  final String close;
+  final String retry;
+  final String copy;
+  final String copied;
 
   final String expand;
   final String collapse;
@@ -61,13 +73,19 @@ class ILocale {
     required this.loadFailed,
     required this.noMore,
     required this.placeholder,
+    required this.datePlaceholder,
     required this.selectAll,
     required this.search,
+    required this.searchNode,
     required this.noMatch,
     required this.clear,
     required this.confirm,
     required this.cancel,
     required this.acknowledge,
+    required this.close,
+    required this.retry,
+    required this.copy,
+    required this.copied,
     required this.expand,
     required this.collapse,
     required this.required,
@@ -95,13 +113,19 @@ class ILocale {
     String? loadFailed,
     String? noMore,
     String? placeholder,
+    String? datePlaceholder,
     String? selectAll,
     String? search,
+    String? searchNode,
     String? noMatch,
     String? clear,
     String? confirm,
     String? cancel,
     String? acknowledge,
+    String? close,
+    String? retry,
+    String? copy,
+    String? copied,
     String? expand,
     String? collapse,
     String? required,
@@ -119,13 +143,19 @@ class ILocale {
         loadFailed: loadFailed ?? this.loadFailed,
         noMore: noMore ?? this.noMore,
         placeholder: placeholder ?? this.placeholder,
+        datePlaceholder: datePlaceholder ?? this.datePlaceholder,
         selectAll: selectAll ?? this.selectAll,
         search: search ?? this.search,
+        searchNode: searchNode ?? this.searchNode,
         noMatch: noMatch ?? this.noMatch,
         clear: clear ?? this.clear,
         confirm: confirm ?? this.confirm,
         cancel: cancel ?? this.cancel,
         acknowledge: acknowledge ?? this.acknowledge,
+        close: close ?? this.close,
+        retry: retry ?? this.retry,
+        copy: copy ?? this.copy,
+        copied: copied ?? this.copied,
         expand: expand ?? this.expand,
         collapse: collapse ?? this.collapse,
         required: required ?? this.required,
@@ -155,13 +185,19 @@ final ILocale zhCN = ILocale(
   loadFailed: '加载失败，点击重试',
   noMore: '没有更多了',
   placeholder: '请选择',
+  datePlaceholder: '请选择日期',
   selectAll: '全选',
   search: '搜索',
+  searchNode: '搜索节点',
   noMatch: '无匹配选项',
   clear: '清除',
   confirm: '确定',
   cancel: '取消',
   acknowledge: '知道了',
+  close: '关闭',
+  retry: '重试',
+  copy: '复制',
+  copied: '已复制',
   expand: '展开',
   collapse: '收起',
   required: '此项必填',
@@ -188,13 +224,19 @@ final ILocale enUS = ILocale(
   loadFailed: 'Failed to load, tap to retry',
   noMore: 'No more items',
   placeholder: 'Select',
+  datePlaceholder: 'Pick a date',
   selectAll: 'Select all',
   search: 'Search',
+  searchNode: 'Search nodes',
   noMatch: 'No matches',
   clear: 'Clear',
   confirm: 'OK',
   cancel: 'Cancel',
   acknowledge: 'Got it',
+  close: 'Close',
+  retry: 'Retry',
+  copy: 'Copy',
+  copied: 'Copied',
   expand: 'Expand',
   collapse: 'Collapse',
   required: 'This field is required',

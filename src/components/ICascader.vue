@@ -10,6 +10,7 @@ import {
 } from '@i-design/common'
 import IIcon from './IIcon.vue'
 import IPopover from './IPopover.vue'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -24,12 +25,16 @@ const props = withDefaults(
   }>(),
   {
     modelValue: '',
-    placeholder: '请选择',
+    placeholder: '',
     disabled: false,
     changeOnSelect: false,
     separator: ' / '
   }
 )
+
+const { locale } = useConfig()
+/* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+const placeholderText = computed(() => props.placeholder || locale.value.placeholder)
 
 const emit = defineEmits<{
   'update:modelValue': [key: string]
@@ -71,9 +76,9 @@ function choose(node: TreeNode) {
       class="i-select__trigger"
       :class="{ 'is-disabled': disabled, 'is-placeholder': !display }"
       :disabled="disabled"
-      :aria-label="display || placeholder"
+      :aria-label="display || placeholderText"
     >
-      <span class="i-select__label">{{ display || placeholder }}</span>
+      <span class="i-select__label">{{ display || placeholderText }}</span>
       <IIcon name="chevron-down" :size="14" />
     </button>
 
