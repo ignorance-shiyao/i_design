@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs'
+// 导出名单解析与 build-framework-stats.mjs 共用一份
+import { exportedComponents } from './lib/exported-components.mjs'
 import { build } from 'esbuild'
 
 // 只生成可机械核对的事实；“文件存在”不能替代交互验收或包安装验收。
@@ -48,6 +50,35 @@ for (const [, id] of roadmap.matchAll(/转入 \*\*([A-F]\d+)\*\*/g)) {
 }
 const perEnd = Object.keys(componentMatrix[0].ends).map((end) =>
   `| ${end} | ${componentMatrix.filter((row) => row.ends[end]).length} | ${frameworkStats[end]} |`).join('\n')
+
+/*
+ * 两列口径不同，此前只写了一句「不能互当总数」——读者无从判断差额是合理的还是漏了什么。
+ * 这里把差额逐个列出来：能一一对上，两个数字才都可信。
+ */
+const matrixNames = new Set(componentMatrix.map((row) => row.name))
+
+/*
+ * 已经解释清楚的差额。新出现一条而这里没有说明时，check:docs 直接失败——
+ * 否则「两列口径不同」会变成一句万能的挡箭牌，把真正的漏导出也盖过去。
+ */
+const GAP_NOTES = {
+  IConfirmLayer: 'confirm() 的宿主。Vue 2.7 没有 Teleport，宿主要由使用方自己放进模板，所以只有那一端对外导出'
+}
+const exportGap = [
+  ['vue-next', exportedComponents('src/components/index.ts')],
+  ['vue', exportedComponents('packages/vue/src/index.ts')],
+  ['react', exportedComponents('packages/react/src/index.ts')]
+].map(([end, names]) => {
+  // React 端导出的是不带 I 前缀的名字，比对前统一
+  const normalized = new Set([...names].map((n) => (/^I[A-Z]/.test(n) ? n : `I${n}`)))
+  const extra = [...normalized].filter((n) => !matrixNames.has(n)).sort()
+  const missing = [...matrixNames].filter((n) => !normalized.has(n)).sort()
+  for (const name of [...extra, ...missing]) {
+    assert.ok(GAP_NOTES[name], `${end} 的覆盖差额多出 ${name}，但没有说明：要么是漏导出，要么在 build-doc-status.mjs 的 GAP_NOTES 里写清楚为什么`)
+  }
+  const note = [...extra, ...missing].map((n) => `${n} — ${GAP_NOTES[n]}`).join('；') || '—'
+  return `| ${end} | ${extra.join('、') || '—'} | ${missing.join('、') || '—'} | ${note} |`
+}).join('\n')
 const out = `# 源码状态快照
 
 <!-- 由 scripts/build-doc-status.mjs 生成，请勿手改。 -->
@@ -61,7 +92,14 @@ const out = `# 源码状态快照
 | --- | ---: | ---: |
 ${perEnd}
 
-两列口径不同，不能互当总数。移动专有组件不进入 Web 覆盖矩阵。
+两列口径不同，不能互当总数：矩阵数的是各端的源组件文件，frameworkStats 数的是
+使用方能 import 到的名字。差额逐项如下——能一一对上，两个数字才都可信。
+移动专有组件不进入 Web 覆盖矩阵。
+
+| 端 | 导出里有、矩阵里没有 | 矩阵里有、导出里没有 | 说明 |
+| --- | --- | --- | --- |
+${exportGap}
+
 golden 文件包含 **${golden}** 条 expect；构建脚本生成断言，不执行 Dart SDK 测试。
 共享 SVG 图标定义 **${Object.keys(icons).length}** 项；共享逻辑模块 **${modules.length}** 个。
 

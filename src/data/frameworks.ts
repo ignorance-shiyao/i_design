@@ -1,5 +1,3 @@
-import { frameworkStats } from './frameworkStats'
-
 export type FrameworkId =
   | 'vue-next'
   | 'vue'
@@ -91,5 +89,11 @@ export const frameworks: Framework[] = [
 
 export const frameworkById = (id: FrameworkId) => frameworks.find((f) => f.id === id)!
 
-/** 各端实际导出的组件数，由脚本统计，非手填 */
-export const componentCountOf = (id: FrameworkId) => frameworkStats[id] ?? 0
+/*
+ * 这里不再对外给「各端有多少个组件」的取数口径。
+ *
+ * 站点上曾经有两个口径（源组件文件数与导出名数），数字对不上，读者无从判断谁对。
+ * 现在口径只留在 docs/SOURCE_STATUS.md 里，两列并排且差额逐项解释；
+ * 站点展示的是覆盖矩阵本身——读者真正关心的是「我这一端有没有这个组件」，
+ * 而不是总数。
+ */

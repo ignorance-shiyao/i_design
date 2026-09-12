@@ -8,34 +8,9 @@
  * 站点上的覆盖数字如果是手填的，第二天就会和代码对不上——React 端漏导出
  * 17 个组件那次，任何手写的清单都会照旧写着「全覆盖」。
  */
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
-
-/** 从 export 语句里取出大写开头的值导出（跳过 type 导出与工具函数） */
-function exportedComponents(file) {
-  const src = readFileSync(file, 'utf8')
-  const names = new Set()
-
-  // export { default as IButton } from './...'
-  for (const [, name] of src.matchAll(/export \{ default as ([A-Z]\w*) \}/g)) names.add(name)
-  // export { Button, type ButtonProps } from './...'
-  for (const [, group] of src.matchAll(/export \{([^}]*)\} from/g)) {
-    for (const entry of group.split(',')) {
-      const token = entry.trim()
-      if (!token || token.startsWith('type ') || token.startsWith('default ')) continue
-      const name = token.split(/\s+as\s+/).pop().trim()
-      // FormContext 之类的上下文对象是给使用方拼装表单用的，不是组件
-      if (/^[A-Z]/.test(name) && !/(Context|Provider)$/.test(name)) names.add(name)
-    }
-  }
-  // export { IButton, IInput, ... }（vue-next 的聚合导出块）
-  for (const [, group] of src.matchAll(/export \{([^}]*)\}\s*(?:\n|$)/g)) {
-    for (const entry of group.split(',')) {
-      const name = entry.trim()
-      if (/^I[A-Z]\w*$/.test(name)) names.add(name)
-    }
-  }
-  return names
-}
+import { readdirSync, writeFileSync } from 'node:fs'
+// 名单解析与 build-doc-status.mjs 共用一份
+import { exportedComponents } from './lib/exported-components.mjs'
 
 const vueNext = exportedComponents('src/components/index.ts')
 const vue2 = exportedComponents('packages/vue/src/index.ts')
