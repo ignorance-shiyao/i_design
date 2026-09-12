@@ -3,8 +3,10 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
-import { computed, ref, useSlots } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch } from 'vue'
+import { isTextOverflowing, rafThrottle } from '@i-design/common'
 import IIcon from './IIcon.vue'
+import ITooltip from './ITooltip.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -19,6 +21,11 @@ const props = withDefaults(
     mono?: boolean
     /** 超出显示省略号；给数字表示最多几行 */
     ellipsis?: boolean | number
+    /**
+     * 截断时把完整内容放进浮层提示。
+     * 只有真的截断了才挂——没截断也挂的话，鼠标扫过一列短文案会一路冒浮层。
+     */
+    ellipsisTooltip?: boolean
     /** 折叠时可展开：多行省略的长文案，读者要有办法读到后半段 */
     expandable?: boolean
     expandText?: string
@@ -41,6 +48,7 @@ const props = withDefaults(
     del: false,
     mono: false,
     ellipsis: false,
+    ellipsisTooltip: false,
     expandable: false,
     expandText: '展开',
     collapseText: '收起',
@@ -67,6 +75,69 @@ const clamped = computed(() => lines.value > 0 && !expanded.value)
 const slots = useSlots()
 const root = ref<HTMLElement | null>(null)
 const copied = ref(false)
+
+/* ------------------------------------------------------ 截断才给提示 */
+
+const body = ref<HTMLElement | null>(null)
+const overflowing = ref(false)
+const fullText = ref('')
+
+/*
+ * 判定要量真实布局，而窗口一变宽，原本截断的可能就不截断了——
+ * 所以挂了 resize 监听。合并到每帧一次：拖动窗口边缘会连发上百个事件，
+ * 而这里每次都要读四个布局值。
+ */
+function measure() {
+  /*
+   * 量的必须是真正在裁剪的那个元素：多行截断裁在 .i-typo__body 上，
+   * 而单行省略的 overflow/white-space 写在根元素上。量错了永远量不出溢出。
+   */
+  const el = clamped.value ? body.value : root.value
+  if (!el) return
+  overflowing.value = isTextOverflowing(
+    {
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight
+    },
+    clamped.value
+  )
+  if (overflowing.value) fullText.value = el.textContent?.trim() ?? ''
+}
+
+const onResize = rafThrottle(measure)
+let observer: ResizeObserver | null = null
+
+function observe() {
+  observer?.disconnect()
+  const el = clamped.value ? body.value : root.value
+  if (!el) return
+  observer = new ResizeObserver(onResize)
+  observer.observe(el)
+}
+
+onMounted(() => {
+  if (!props.ellipsisTooltip) return
+  measure()
+  observe()
+  window.addEventListener('resize', onResize)
+})
+onBeforeUnmount(() => {
+  onResize.cancel()
+  observer?.disconnect()
+  window.removeEventListener('resize', onResize)
+})
+
+// 展开之后不再截断，提示要跟着撤掉——留着的话浮层与正文一字不差。
+// 裁剪元素也跟着换（展开后根元素才是那个），所以监听也要重新挂
+watch(expanded, () =>
+  nextTick(() => {
+    if (!props.ellipsisTooltip) return
+    measure()
+    observe()
+  })
+)
 
 async function copy() {
   // 优先读 DOM 里的实际文本：插槽内容可能是嵌套元素，取 textContent 才准
@@ -123,7 +194,23 @@ void slots
       截断作用在内层而不是根元素：clamp 会把展开按钮和复制按钮一起截掉，
       于是「有省略号但没有展开入口」——正是最该有入口的那种情况。
     -->
+    <!--
+      开了提示才套这一层。ITooltip 的外壳是 inline-flex，不开也套上去的话，
+      它会把里面的文字收缩到内容宽度，截断就再也不发生了。
+      套上之后用 disabled 开关，而不是按 overflowing 去 v-if——
+      v-if 会把这个 span 换成新节点，而 ResizeObserver 还盯着旧的那个。
+    -->
+    <ITooltip v-if="ellipsisTooltip" :content="fullText" :disabled="!overflowing">
+      <span
+        ref="body"
+        class="i-typo__body"
+        :class="{ 'is-clamp': clamped }"
+        :style="clamped ? { '--i-typo-lines': lines } : undefined"
+      ><slot /></span>
+    </ITooltip>
     <span
+      v-else
+      ref="body"
       class="i-typo__body"
       :class="{ 'is-clamp': clamped }"
       :style="clamped ? { '--i-typo-lines': lines } : undefined"

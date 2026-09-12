@@ -29,6 +29,7 @@ export 'src/logic/menu.dart';
 export 'src/logic/multiselect.dart';
 export 'src/logic/number.dart';
 export 'src/logic/otp.dart';
+export 'src/logic/overflow.dart';
 export 'src/logic/overlay.dart';
 export 'src/logic/pagination.dart';
 export 'src/logic/pull.dart';

@@ -35,6 +35,7 @@ import 'package:i_design/src/logic/scrollbar.dart';
 import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
+import 'package:i_design/src/logic/overflow.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1075,6 +1076,16 @@ void main() {
     expect(clockOfMinutes(545), '09:05');
     expect(clockOfMinutes(1439), '23:59');
     expect(clockOfMinutes(1440), '00:00');
+  });
+
+  test('文本截断的判定方向与亚像素容差与 Web 端一致', () {
+    expect(isTextOverflowing(const OverflowMetrics(scrollWidth: 200.0, clientWidth: 100.0, scrollHeight: 20.0, clientHeight: 20.0), false), true);
+    expect(isTextOverflowing(const OverflowMetrics(scrollWidth: 200.0, clientWidth: 100.0, scrollHeight: 20.0, clientHeight: 20.0), true), false);
+    expect(isTextOverflowing(const OverflowMetrics(scrollWidth: 100.0, clientWidth: 100.0, scrollHeight: 60.0, clientHeight: 40.0), true), true);
+    expect(isTextOverflowing(const OverflowMetrics(scrollWidth: 100.0, clientWidth: 100.0, scrollHeight: 60.0, clientHeight: 40.0), false), false);
+    expect(isTextOverflowing(const OverflowMetrics(scrollWidth: 100.5, clientWidth: 100.0, scrollHeight: 20.0, clientHeight: 20.0), false), false);
+    expect(isTextOverflowing(const OverflowMetrics(scrollWidth: 101.5, clientWidth: 100.0, scrollHeight: 20.0, clientHeight: 20.0), false), true);
+    expect(isTextOverflowing(const OverflowMetrics(scrollWidth: 100.0, clientWidth: 100.0, scrollHeight: 40.5, clientHeight: 40.0), true), false);
   });
 
   test('确认框的按钮编排、关闭语义与输入校验与 Web 端一致', () {
