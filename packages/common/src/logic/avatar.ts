@@ -13,6 +13,20 @@ export function initialsOf(name: string) {
     .join('')
 }
 
+/**
+ * 尺寸档位对应的像素值。
+ *
+ * 此前 Vue、React、小程序各抄了一份 `{ sm: 24, md: 32, lg: 44 }`，
+ * 改一处不会有任何报错，另外两端就此偏离。
+ *
+ * 头像组里「+N」那个圆点也要用它：它原先在样式里写死 32px，
+ * 也就是只有 md 一档对得上，sm 与 lg 都会比旁边的头像大一圈或小一圈。
+ */
+export function avatarSizePx(size: 'sm' | 'md' | 'lg' | number): number {
+  if (typeof size === 'number') return size
+  return { sm: 24, md: 32, lg: 44 }[size] ?? 32
+}
+
 /** 字符码求和取模：稳定、无需存储、跨端一致 */
 export function tintOf(name: string) {
   if (!name) return avatarPalette[0]

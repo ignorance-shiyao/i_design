@@ -9,8 +9,9 @@
 .i-avatar-group__more {
   display: inline-grid;
   place-items: center;
-  min-width: 32px;
-  height: 32px;
+  /* 跟随组的尺寸档位；未指定时落回 md 那一档，与单个头像的默认值一致 */
+  min-width: var(--i-avatar-group-size, 32px);
+  height: var(--i-avatar-group-size, 32px);
   margin-left: -8px;
   padding: 0 var(--i-spacing-1);
   border-radius: var(--i-radius-full);

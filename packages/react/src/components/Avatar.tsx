@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { initialsOf, tintOf, type IconName } from '@i-design/common'
+import { avatarSizePx, initialsOf, tintOf, type IconName } from '@i-design/common'
 import { Icon } from './Icon'
 
 export interface AvatarProps {
@@ -11,8 +11,6 @@ export interface AvatarProps {
   colorful?: boolean
   className?: string
 }
-
-const sizeMap = { sm: 24, md: 32, lg: 44 }
 
 export function Avatar({
   src = '',
@@ -26,7 +24,7 @@ export function Avatar({
   const [failed, setFailed] = useState(false)
   useEffect(() => setFailed(false), [src])
 
-  const px = typeof size === 'number' ? size : sizeMap[size]
+  const px = avatarSizePx(size)
   // 取字与配色规则来自公共层：同一个人在 Vue 端和 React 端结果一致
   const initials = initialsOf(name)
   const showImage = !!src && !failed

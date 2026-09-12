@@ -6,6 +6,7 @@
 import { computed, ref, watch } from 'vue'
 import IIcon from './IIcon.vue'
 import type { IconName } from './icons'
+import { avatarSizePx } from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{
@@ -24,10 +25,7 @@ const props = withDefaults(
 const failed = ref(false)
 watch(() => props.src, () => (failed.value = false))
 
-const px = computed(() => {
-  if (typeof props.size === 'number') return props.size
-  return { sm: 24, md: 32, lg: 44 }[props.size]
-})
+const px = computed(() => avatarSizePx(props.size))
 
 /** 中文取末两字（更能区分同姓），西文取首字母缩写 */
 const initials = computed(() => {

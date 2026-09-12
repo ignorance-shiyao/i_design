@@ -153,8 +153,8 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 - **文档已校准（F1）**：HANDOVER 指向唯一主台账，ROADMAP 原 32 项中 11 项补完成记录，
   其余 21 项迁入本文；Splitter 双击复位、水印节点恢复与浮层审计补入 A5 / A6 / E8。
   源码快照及旧任务去向由 `check:docs` 检查。
-- **跨端 API 差异查不出来**：`check:parity` 只比「组件在不在」，比不到「属性一不一样」。
-  已知 Input 的 `clearable` 在 Vue 端有、React 端没有。→ E3
+- **跨端 API 差异已能查出（E3）**：`check:props` 比对两端属性，白名单只留 5 条刻意差异。
+  首次跑出的真问题是头像组的 `size` 三端缺失或空转，已修。
 - **动效尚未全覆盖**：进出场与回弹曲线已定义，Collapse / Menu 已有展开过渡；
   Tree、列表移动、按压及 reduced-motion / 主题开关全覆盖仍待 A3。
 
@@ -238,13 +238,25 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
   - 待 PR 级确认：`pull_request` 事件要等这份 workflow 进了默认分支后，
     在下一个 PR 上才看得到实际运行结果
 
-- [ ] **E3 · 跨端属性一致性检查**（P1）
-  - 目标：`check:parity` 能发现「Vue 有 `clearable`、React 没有」这类差异
-  - 落点：新增 `scripts/check-props.mjs`。从 Vue SFC 的 `defineProps` 与 React 的
-    `interface XxxProps` 里抽属性名比对，差异写进白名单才放行
-  - 验收：故意删掉 React 某组件一个 prop，检查失败并报出组件名与属性名；
-    把已知的 Input `clearable` 差异修掉而不是加进白名单
-  - 依赖：E2（让它在 PR 上生效才有意义）
+- [x] **E3 · 跨端属性一致性检查**（P1，已完成）
+  - 落地：新增 `scripts/check-props.mjs`（`npm run check:props`，已接进 `check:parity`），
+    比对 Vue 3 源的 `defineProps` / `defineModel` / 具名插槽与 React 的 `XxxProps` 接口，
+    覆盖 112 对组件
+  - 关键是**先把不算差异的差异化解掉**，否则 55 条噪声里看不见真问题：
+    v-model 对应 React 的 `value` / `checked` / `open` / `current` / `index`；
+    插槽只用来满足 React 的 `footer` / `renderFooter`，反向不作要求；
+    `readonly` / `readOnly` 这类大小写惯例统一转小写；
+    React `extends InputHTMLAttributes` 时继承来的 DOM 属性不必重复声明
+  - 白名单 `KNOWN` 只剩 5 条，每条写明理由。差异塞进白名单是最省事也最没用的做法
+  - 顺带修掉真差异：`IAvatarGroup` 的 `size` 在 Vue 端**声明了却没人读**，
+    React 与小程序端连声明都没有，而「+N」圆点的尺寸在样式里写死 32px——
+    也就是 sm 与 lg 两档一直和旁边的头像不一样高（Flutter 端本来是对的）。
+    现在尺寸档位收进 `logic/avatar.ts` 的 `avatarSizePx`，Web / React / 小程序
+    三处各自抄的 `{ sm: 24, md: 32, lg: 44 }` 一并删掉
+  - 实测：删掉 React `Select` 的 `clearable` → 报「Select：Vue 有而 React 没有 — clearable」；
+    浏览器里量三档头像组，头像与 +N 圆点高度分别为 24/24、32/32、44/44
+  - 更正：台账原先记的「Input 的 `clearable` 两端不一致」不成立，
+    两端的 Input 都没有这个属性
 
 - [ ] **E4 · 统一「覆盖了多少」的口径**（P2）
   - 目标：站点上不再出现两个互相矛盾的数字
@@ -541,7 +553,7 @@ PR 描述里应该已经写清楚了。
 2. ~~**E2**：让质量检查在 PR 上生效，与部署分离~~（已完成）
 3. ~~**E1**：包能装出去，这个项目才配叫组件库~~（已完成；Vue 2.7 的缺口转入 **E9**）
 4. **D1**（2–3 天）：参数 playground，示例站从「能看」变成「能试」
-5. **E3 + E5**（1–2 天）：属性差异与逻辑测试，把回归挡在 PR 上
+5. **E5**（1 天）：逻辑测试，把回归挡在 PR 上；E3 已完成
 6. **B1–B5**（按批推进）：AI 交互这条线的缺口最大，也最能体现这套库的差异点
 7. **A3–A6 / C 组**：按需求密度推进；A1 / A2 已完成
 

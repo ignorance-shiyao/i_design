@@ -5,9 +5,7 @@
  * 同一个人在 Web、小程序、React 上得到完全相同的缩写与底色，
  * 这正是把逻辑抽出来的价值——没有第二处规则可以走偏。
  */
-import { initialsOf, tintOf } from '@i-design/common'
-
-const SIZE_MAP = { sm: 24, md: 32, lg: 44 }
+import { avatarSizePx, initialsOf, tintOf } from '@i-design/common'
 
 Component({
   options: { addGlobalClass: true },
@@ -21,7 +19,7 @@ Component({
   data: { px: 32, fontSize: 12, initials: '', tint: '#5e7ce0', showImage: false },
   observers: {
     'src, name, size, colorful': function (src, name, size, colorful) {
-      const px = typeof size === 'number' ? size : SIZE_MAP[size] || SIZE_MAP.md
+      const px = avatarSizePx(size)
       this.setData({
         px,
         fontSize: Math.max(11, Math.round(px * 0.38)),
