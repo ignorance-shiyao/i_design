@@ -25,8 +25,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # 跨端一致性：任何一端的令牌或规则偏离都会让构建失败
-      - run: npm run check:parity
+      # 各项校验由 ci.yml 承担（PR 与 push 到 main 都会跑），这里只管把站点构建出来，
+      # 免得同一批检查在同一次推送上跑两遍
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

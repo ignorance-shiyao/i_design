@@ -1,0 +1,55 @@
+name: CI
+
+# PR 上也要跑。此前只在 push 到 main 时检查，等于「合进去之后才知道坏了」——
+# 而这套东西的多数约束（跨端一致、生成物新鲜度、包入口）恰恰是人眼看不出来的。
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# 同一个 PR 连续推送时，只保留最新一次
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # 每一步单列一个 step：CI 变红时能直接从步骤名看出是哪一类约束没过，
+      # 不必翻日志。合成一条 && 串起来的话，红的永远是同一个名字。
+      - name: 跨端一致性与生成物新鲜度
+        run: npm run check:parity
+
+      - name: 类型检查
+        run: npm run typecheck
+
+      - name: 文档站构建
+        run: npm run build
+
+      # 包的入口只在使用方的项目里才会暴露问题，仓库内的 alias 与 paths 看不见，
+      # 所以必须在 CI 里真构建一次并核对入口
+      - name: 发布产物构建与入口核对
+        run: npm run build:packages
+
+      # 生成物是提交进仓库的。上面几步会重新生成它们，若与提交的内容不一致，
+      # 说明改了源码却没跑生成脚本——这种漏掉不会让任何一步失败，只能这样兜住。
+      - name: 生成物是否已提交
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::有生成物未提交，请在本地运行 npm run check:parity 后提交改动"
+            git status --porcelain
+            git diff
+            exit 1
+          fi
