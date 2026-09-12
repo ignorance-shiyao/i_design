@@ -6,6 +6,7 @@
  * 加十个属性，是因为这些东西只在会话场景成立。
  */
 .i-prompt {
+  position: relative;
   border: 1px solid var(--i-color-border-strong);
   border-radius: var(--i-radius-xl);
   background: var(--i-color-bg);
@@ -146,4 +147,51 @@
   padding: 0 var(--i-spacing-4) var(--i-spacing-2);
   font-size: var(--i-font-size-xs);
   color: var(--i-color-text-tertiary);
+}
+
+/*
+ * `@` 引用与 `/` 命令的候选面板。
+ *
+ * 压在输入台上方而不是下方：输入台多半贴着页面底部，往下弹会被视口边缘切掉。
+ * 只在真有候选时出现——空面板比没有面板更糟，它挡住正文还把回车键抢走。
+ */
+.i-prompt__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + var(--i-spacing-2));
+  z-index: var(--i-z-dropdown);
+  max-height: 240px;
+  margin: 0;
+  padding: var(--i-spacing-2);
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-lg);
+}
+.i-prompt__option {
+  display: flex;
+  align-items: baseline;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-md);
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
+}
+/* 键盘走到哪一条与鼠标停在哪一条共用同一种表达，省得读者要学两套 */
+.i-prompt__option.is-active {
+  background: var(--i-color-bg-muted);
+}
+.i-prompt__option-label {
+  flex: none;
+  color: var(--i-color-text);
+}
+.i-prompt__option-desc {
+  overflow: hidden;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

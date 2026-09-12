@@ -189,6 +189,19 @@ const diffRows: DiffRow[] = [
     cells: { flavor: { value: '黑芝麻' }, category: { value: '当季' }, supplier: { value: '南岭食品' } }
   }
 ]
+const sourceOptions = [
+  { label: 'pagination.ts', description: 'packages/common/src/logic', keywords: ['分页'] },
+  { label: 'table.ts', description: 'packages/common/src/logic', keywords: ['表格'] },
+  { label: '设计令牌', description: 'docs/design/tokens', keywords: ['token'] },
+  { label: '覆盖矩阵', description: 'docs/SOURCE_STATUS.md', keywords: ['matrix'] }
+]
+const commandOptions = [
+  { label: 'explain', description: '解释选中的这段代码' },
+  { label: 'test', description: '给这个函数补一组边界用例' },
+  { label: 'review', description: '按仓库约定评审这次改动' }
+]
+const draft2 = ref('')
+
 const thinkingSteps = [
   { key: 'a', title: '拆解问题：分页规则该放在哪一层', kind: 'reason' as const, status: 'done' as const, detail: '写在组件里的话，各端会各写一份，翻页边界迟早对不上。' },
   { key: 'b', title: '检索仓库里已有的实现', kind: 'search' as const, status: 'done' as const, detail: 'packages/common/src/logic/pagination.ts：buildPages / clampPage / pageCountOf，各端共用。' },
@@ -370,6 +383,22 @@ const chipsExpanded = ref(false)
       </div>
     </DemoBlock>
 
+    <DemoBlock
+      title="@ 引用与 / 命令"
+      description="打一个 @ 引用资料、打一个 / 唤起命令，候选就地弹出，↑↓ 选、回车插入、Esc 收起。候选开着时回车归它用——不这么让的话，用户刚打出「@分页」按回车，发出去的是半截问题。邮箱里的 @ 与词中间的 @ 都不会误弹。"
+      lang="vue"
+      code='<IPromptInput v-model="draft" :mentions="sources" :commands="commands" @pick="onPick" />'
+    >
+      <div class="chat chat--plain">
+        <IPromptInput
+          v-model="draft2"
+          :mentions="sourceOptions"
+          :commands="commandOptions"
+          hint="试试打一个 @ 或 /"
+        />
+      </div>
+    </DemoBlock>
+
     <h2>智能体交互</h2>
     <p>
       上面几节解决的是「一问一答」。接下来这些解决的是<strong>智能体替你做事</strong>时的沟通：它要在行动前征求同意、要报告进度、要给出带把握程度的建议、要说明它读了哪些资料。
@@ -489,7 +518,7 @@ const chipsExpanded = ref(false)
         <tr><td>IToolChips</td><td>items、max、expanded</td><td>select、update:expanded</td></tr>
         <tr><td>IChatSources</td><td>sources</td><td>—</td></tr>
         <tr><td>IChatSuggestions</td><td>items、title</td><td>select</td></tr>
-        <tr><td>IPromptInput</td><td>modelValue、generating、maxLength、attachments、hint、submitOnEnter</td><td>submit、stop、attach、removeAttachment</td></tr>
+        <tr><td>IPromptInput</td><td>modelValue、generating、maxLength、attachments、hint、submitOnEnter、mentions、commands</td><td>submit、stop、attach、removeAttachment、pick</td></tr>
         <tr><td>IApprovalCard</td><td>questions、confirmText、skipText、closable</td><td>complete、close</td></tr>
         <tr><td>IAgentTasks</td><td>tasks、variant、showSummary</td><td>select</td></tr>
         <tr><td>IRecommendCard</td><td>title、confidence、acceptText、alternativeText、showAlternative</td><td>accept、alternative</td></tr>

@@ -67,6 +67,15 @@ class ILocale {
   final String toolError;
   final String toolResult;
 
+  /// 输入台的占位与三个按钮
+  final String promptPlaceholder;
+  final String attach;
+  final String send;
+  final String stopGenerating;
+
+  /// 移除某个附件的无障碍名。读屏用户听到的就是这一句
+  final String Function(String name) removeAttachmentText;
+
   /// 工具芯片折叠起来的那部分：「还有 N 个」
   final String Function(int count) toolMoreText;
 
@@ -135,6 +144,11 @@ class ILocale {
     required this.toolInput,
     required this.toolError,
     required this.toolResult,
+    required this.promptPlaceholder,
+    required this.attach,
+    required this.send,
+    required this.stopGenerating,
+    required this.removeAttachmentText,
     required this.toolMoreText,
     required this.toolFailedText,
     required this.next,
@@ -199,6 +213,11 @@ class ILocale {
     String? toolInput,
     String? toolError,
     String? toolResult,
+    String? promptPlaceholder,
+    String? attach,
+    String? send,
+    String? stopGenerating,
+    String Function(String name)? removeAttachmentText,
     String Function(int count)? toolMoreText,
     String Function(int count)? toolFailedText,
     String? next,
@@ -253,6 +272,11 @@ class ILocale {
         toolInput: toolInput ?? this.toolInput,
         toolError: toolError ?? this.toolError,
         toolResult: toolResult ?? this.toolResult,
+        promptPlaceholder: promptPlaceholder ?? this.promptPlaceholder,
+        attach: attach ?? this.attach,
+        send: send ?? this.send,
+        stopGenerating: stopGenerating ?? this.stopGenerating,
+        removeAttachmentText: removeAttachmentText ?? this.removeAttachmentText,
         toolMoreText: toolMoreText ?? this.toolMoreText,
         toolFailedText: toolFailedText ?? this.toolFailedText,
         next: next ?? this.next,
@@ -319,6 +343,11 @@ final ILocale zhCN = ILocale(
   toolInput: '入参',
   toolError: '错误',
   toolResult: '结果',
+  promptPlaceholder: '问点什么…',
+  attach: '附件',
+  send: '发送',
+  stopGenerating: '停止生成',
+  removeAttachmentText: (name) => '移除 $name',
   toolMoreText: (count) => '还有 $count 个',
   toolFailedText: (count) => '$count 个失败',
   next: '下一题',
@@ -382,6 +411,11 @@ final ILocale enUS = ILocale(
   toolInput: 'Input',
   toolError: 'Error',
   toolResult: 'Result',
+  promptPlaceholder: 'Ask anything…',
+  attach: 'Attach',
+  send: 'Send',
+  stopGenerating: 'Stop generating',
+  removeAttachmentText: (name) => 'Remove $name',
   toolMoreText: (count) => '$count more',
   toolFailedText: (count) => '$count failed',
   next: 'Next',

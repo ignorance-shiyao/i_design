@@ -72,6 +72,13 @@ export interface Locale {
   toolError: string
   toolResult: string
   /** 工具芯片折叠起来的那部分：「还有 N 个」 */
+  /** 输入台的占位与三个按钮：写死中文的话，换成英文字典后这一块会是唯一还说中文的地方 */
+  promptPlaceholder: string
+  attach: string
+  send: string
+  stopGenerating: string
+  /** 移除某个附件的无障碍名。读屏用户听到的就是这一句 */
+  removeAttachmentText: (name: string) => string
   toolMoreText: (count: number) => string
   /** 折叠部分里失败的次数。单独说是因为「共 10 次」把「全成」与「有一次失败」说成了一样 */
   toolFailedText: (count: number) => string
@@ -149,6 +156,11 @@ export const zhCN: Locale = {
   toolInput: '入参',
   toolError: '错误',
   toolResult: '结果',
+  promptPlaceholder: '问点什么…',
+  attach: '附件',
+  send: '发送',
+  stopGenerating: '停止生成',
+  removeAttachmentText: (name) => `移除 ${name}`,
   toolMoreText: (count) => `还有 ${count} 个`,
   toolFailedText: (count) => `${count} 个失败`,
   next: '下一题',
@@ -209,6 +221,11 @@ export const enUS: Locale = {
   toolInput: 'Input',
   toolError: 'Error',
   toolResult: 'Result',
+  promptPlaceholder: 'Ask anything…',
+  attach: 'Attach',
+  send: 'Send',
+  stopGenerating: 'Stop generating',
+  removeAttachmentText: (name) => `Remove ${name}`,
   toolMoreText: (count) => `${count} more`,
   toolFailedText: (count) => `${count} failed`,
   next: 'Next',

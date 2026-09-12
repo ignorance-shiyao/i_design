@@ -581,13 +581,15 @@ export const componentProps: Record<string, PropMeta[]> = {
   ],
   IPromptInput: [
     {"name":"modelValue","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
-    {"name":"placeholder","type":"string","doc":"","defaultText":"'问点什么…'","control":{"kind":"string"}},
+    {"name":"placeholder","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"generating","type":"boolean","doc":"正在生成：发送按钮变为停止，输入仍可继续","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"maxLength","type":"number","doc":"","defaultText":"0","control":{"kind":"number"}},
     {"name":"attachments","type":"PromptAttachment[]","doc":"","defaultText":"() => []","control":null},
     {"name":"hint","type":"string","doc":"底部说明，如快捷键提示","defaultText":"''","control":{"kind":"string"}},
     {"name":"submitOnEnter","type":"boolean","doc":"回车发送；关掉后回车换行、Ctrl/Cmd + 回车发送","defaultText":"true","control":{"kind":"boolean"}},
+    {"name":"mentions","type":"PromptOption[]","doc":"打 `@` 时可引用的来源；不给就不弹","defaultText":"() => []","control":null},
+    {"name":"commands","type":"PromptOption[]","doc":"打 `/` 时可用的命令；不给就不弹","defaultText":"() => []","control":null},
   ],
   IQrcode: [
     {"name":"value","type":"string","doc":"","defaultText":null,"control":{"kind":"string"}},

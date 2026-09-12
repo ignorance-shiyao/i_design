@@ -1,10 +1,27 @@
 import { useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
-import { fileTypeOf, formatSize } from '@i-design/common'
+import {
+  applyMention,
+  fileTypeOf,
+  filterMentions,
+  findMention,
+  formatSize,
+  moveCommandIndex
+} from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 
 export interface PromptAttachment {
   name: string
   size?: number
+}
+
+/** `@` 引用与 `/` 命令共用一种候选项 */
+export interface PromptOption {
+  label: string
+  /** 副标题：来源的路径、命令的一句说明 */
+  description?: string
+  /** 额外可搜的词：英文名、别名 */
+  keywords?: string[]
 }
 
 export interface PromptInputProps {
@@ -18,7 +35,13 @@ export interface PromptInputProps {
   hint?: string
   /** 回车发送；关掉后回车换行、Ctrl/Cmd + 回车发送 */
   submitOnEnter?: boolean
+  /** 打 `@` 时可引用的来源；不给就不弹 */
+  mentions?: PromptOption[]
+  /** 打 `/` 时可用的命令；不给就不弹 */
+  commands?: PromptOption[]
   onChange?: (value: string) => void
+  /** 选中了一个候选项。symbol 区分是 @ 还是 / */
+  onPick?: (option: PromptOption, symbol: string) => void
   onSubmit?: (value: string) => void
   onStop?: () => void
   onAttach?: () => void
@@ -30,14 +53,17 @@ export interface PromptInputProps {
 
 export function PromptInput({
   value = '',
-  placeholder = '问点什么…',
+  placeholder = '',
   disabled = false,
   generating = false,
   maxLength = 0,
   attachments = [],
   hint = '',
   submitOnEnter = true,
+  mentions = [],
+  commands = [],
   onChange,
+  onPick,
   onSubmit,
   onStop,
   onAttach,
@@ -45,8 +71,17 @@ export function PromptInput({
   tools,
   className = ''
 }: PromptInputProps) {
+  /* 占位与按钮名都走字典：写死中文的话，换成英文字典后这一块会是唯一还说中文的地方 */
+  const { locale } = useConfig()
   const field = useRef<HTMLTextAreaElement>(null)
   const [focused, setFocused] = useState(false)
+  const [trigger, setTrigger] = useState<{ at: number; symbol: string; query: string } | null>(null)
+  const [active, setActive] = useState(0)
+  /*
+   * Esc 关掉之后，光标还停在同一段 `@…` 上，下一次按键又会把它算出来。
+   * 记住被关掉的是哪一段，直到用户挪到别处或改写这一段为止——否则 Esc 等于没按。
+   */
+  const dismissed = useRef<number | null>(null)
   // 组字状态由 composition 事件维护：输入法确认候选词的回车不能当成发送
   const composing = useRef(false)
 
@@ -61,12 +96,75 @@ export function PromptInput({
     el.style.height = `${el.scrollHeight}px`
   }, [value])
 
+  const symbols = [...(mentions.length ? ['@'] : []), ...(commands.length ? ['/'] : [])]
+  const options = trigger
+    ? filterMentions(trigger.symbol === '/' ? commands : mentions, trigger.query)
+    : []
+  /*
+   * 候选面板只在真有候选时出现。
+   * 一个空面板比没有面板更糟：它挡住正文，还把回车键抢走。
+   */
+  const panelOpen = !!trigger && options.length > 0
+
+  function syncTrigger() {
+    const el = field.current
+    if (!el || !symbols.length) return
+    const next = findMention(el.value, el.selectionStart ?? el.value.length, symbols)
+    if (!next || next.at !== dismissed.current) dismissed.current = null
+    // 触发段变了就把高亮拉回第一条：停在原来的序号上会指到一条完全不相干的候选
+    if (next?.at !== trigger?.at || next?.query !== trigger?.query) setActive(0)
+    setTrigger(next && next.at === dismissed.current ? null : next)
+  }
+
+  function pick(option: PromptOption) {
+    const el = field.current
+    if (!el || !trigger) return
+    const caret = el.selectionStart ?? el.value.length
+    const next = applyMention(value, trigger, option.label, caret)
+    onChange?.(next.text)
+    onPick?.(option, trigger.symbol)
+    setTrigger(null)
+    dismissed.current = null
+    requestAnimationFrame(() => {
+      el.focus()
+      el.setSelectionRange(next.caret, next.caret)
+    })
+  }
+
   function submit() {
     if (!canSend) return
     onSubmit?.(value)
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    /*
+     * 候选面板开着时，方向键与回车归面板用。
+     * 不这么让的话，用户刚打出 `@张` 按回车，发出去的是半截问题。
+     */
+    if (panelOpen) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        setActive(moveCommandIndex(active, 1, options.length))
+        return
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        setActive(moveCommandIndex(active, -1, options.length))
+        return
+      }
+      if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+        event.preventDefault()
+        pick(options[active])
+        return
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        dismissed.current = trigger?.at ?? null
+        setTrigger(null)
+        return
+      }
+    }
+
     if (event.key !== 'Enter') return
     if (composing.current || event.nativeEvent.isComposing) return
 
@@ -83,6 +181,36 @@ export function PromptInput({
         .filter(Boolean)
         .join(' ')}
     >
+      {/*
+        候选面板压在输入台上方而不是下方：输入台本身多半贴着页面底部，
+        往下弹会被视口边缘切掉。
+      */}
+      {panelOpen && (
+        <ul className="i-prompt__panel" role="listbox">
+          {options.map((option, index) => (
+            <li
+              key={option.label}
+              className={`i-prompt__option${index === active ? ' is-active' : ''}`}
+              role="option"
+              aria-selected={index === active}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                pick(option)
+              }}
+              onMouseMove={() => setActive(index)}
+            >
+              <span className="i-prompt__option-label">
+                {trigger?.symbol}
+                {option.label}
+              </span>
+              {option.description && (
+                <span className="i-prompt__option-desc">{option.description}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
       {attachments.length > 0 && (
         <div className="i-prompt__attachments">
           {attachments.map((file, index) => (
@@ -107,7 +235,7 @@ export function PromptInput({
               </span>
               <button
                 className="i-prompt__file-remove"
-                aria-label={`移除 ${file.name}`}
+                aria-label={locale.removeAttachmentText(file.name)}
                 onClick={() => onRemoveAttachment?.(index)}
               >
                 <Icon name="close" size={12} />
@@ -122,10 +250,15 @@ export function PromptInput({
         className="i-prompt__field"
         rows={1}
         value={value}
-        placeholder={placeholder}
+        placeholder={placeholder || locale.promptPlaceholder}
         disabled={disabled}
-        onChange={(e) => onChange?.(e.target.value)}
+        onChange={(e) => {
+          onChange?.(e.target.value)
+          syncTrigger()
+        }}
         onKeyDown={onKeyDown}
+        onClick={syncTrigger}
+        onKeyUp={syncTrigger}
         onCompositionStart={() => (composing.current = true)}
         onCompositionEnd={() => (composing.current = false)}
         onFocus={() => setFocused(true)}
@@ -136,7 +269,7 @@ export function PromptInput({
         <div className="i-prompt__tools">
           <button className="i-prompt__tool" onClick={onAttach}>
             <Icon name="plus" size={14} />
-            附件
+            {locale.attach}
           </button>
           {tools}
         </div>
@@ -148,11 +281,16 @@ export function PromptInput({
         )}
 
         {generating ? (
-          <button className="i-prompt__send is-stop" aria-label="停止生成" onClick={onStop}>
+          <button className="i-prompt__send is-stop" aria-label={locale.stopGenerating} onClick={onStop}>
             <Icon name="close" size={14} />
           </button>
         ) : (
-          <button className="i-prompt__send" aria-label="发送" disabled={!canSend} onClick={submit}>
+          <button
+            className="i-prompt__send"
+            aria-label={locale.send}
+            disabled={!canSend}
+            onClick={submit}
+          >
             <Icon name="arrow-right" size={16} />
           </button>
         )}
