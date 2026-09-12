@@ -68,6 +68,7 @@ picker pull qrcode range select table theme toast upload validate`。**任何"�
 | `packages/react/src/index.ts` | `build-react-index.mjs` |
 | `packages/flutter/lib/i_design.dart` | `build-barrel.mjs` |
 | `packages/miniprogram/src/components/*/index.json`、`index.wxss` | `scaffold.mjs` |
+| `src/data/componentInventory.ts` | `scripts/build-component-inventory.mjs`（`npm run build:catalog`） |
 | `src/data/componentMatrix.ts`、`frameworkStats.ts` | `build-component-matrix.mjs`、`build-framework-stats.mjs` |
 
 **为什么全都生成**:手写清单必然会漏,而漏掉不会让构建失败。这个仓库真实发生过——
@@ -199,7 +200,8 @@ vim packages/miniprogram/src/components/dropdown/index.{js,wxml}
 vim packages/flutter/lib/src/components/i_dropdown.dart
 
 # 4. 目录页状态
-vim src/data/componentCatalog.ts                # planned → ready
+vim src/data/componentCatalog.ts                # 补稳定 api 与场景说明，不手写 ready / planned
+npm run build:catalog                           # 按源码目录更新两页共用的状态依据
 
 # 5. 全量校验
 npm run build && npm run check:parity
