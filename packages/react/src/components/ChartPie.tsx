@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useConfig } from './ConfigProvider'
 import { formatTick, pieSlices } from '@i-design/common'
 
 export interface PieItem {
@@ -26,6 +27,8 @@ export function ChartPie({
   unit = '',
   className = ''
 }: ChartPieProps) {
+  /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
+  const { locale } = useConfig()
   const [active, setActive] = useState<number | null>(null)
   const [showTable, setShowTable] = useState(false)
 
@@ -87,15 +90,15 @@ export function ChartPie({
       </div>
 
       <button className="i-chart__table-toggle" onClick={() => setShowTable(!showTable)}>
-        {showTable ? '收起数据表' : '查看数据表'}
+        {showTable ? locale.chartTableHide : locale.chartTableShow}
       </button>
       {showTable && (
         <table className="i-chart__table">
           <thead>
             <tr>
-              <th>类别</th>
-              <th>数值</th>
-              <th>占比</th>
+              <th>{locale.chartCategory}</th>
+              <th>{locale.chartValue}</th>
+              <th>{locale.chartPercent}</th>
             </tr>
           </thead>
           <tbody>

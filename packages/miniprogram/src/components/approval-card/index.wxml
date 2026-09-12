@@ -24,7 +24,7 @@
     wx:if="{{current.allowCustom}}"
     class="i-approval__custom"
     value="{{custom}}"
-    placeholder="{{current.customPlaceholder || '其他……'}}"
+    placeholder="{{current.customPlaceholder || otherLabel + '……'}}"
     bindinput="onCustom"
   />
 
@@ -35,9 +35,9 @@
       <view class="i-approval__nav" bindtap="onNext"><i-icon name="chevron-down" size="14" /></view>
     </view>
     <view class="i-approval__actions">
-      <i-button wx:if="{{current.skippable}}" size="sm" bindtap="onSkip">{{skipText}}</i-button>
+      <i-button wx:if="{{current.skippable}}" size="sm" bindtap="onSkip">{{skipLabel}}</i-button>
       <i-button size="sm" variant="primary" disabled="{{!advanceable}}" bindtap="onNext">
-        {{isLast ? confirmText : '下一题'}}
+        {{isLast ? confirmLabel : nextLabel}}
       </i-button>
     </view>
   </view>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useConfig } from './ConfigProvider'
 import { formatTick, treemapLayout, type TreemapItem } from '@i-design/common'
 
 export interface ChartTreemapProps {
@@ -11,6 +12,8 @@ export interface ChartTreemapProps {
 const W = 640
 
 export function ChartTreemap({ items, title = '', height = 300, unit = '' }: ChartTreemapProps) {
+  /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
+  const { locale } = useConfig()
   const [active, setActive] = useState<string | null>(null)
   const [showTable, setShowTable] = useState(false)
 
@@ -90,12 +93,12 @@ export function ChartTreemap({ items, title = '', height = 300, unit = '' }: Cha
       )}
 
       <button className="i-chart__table-toggle" onClick={() => setShowTable(!showTable)}>
-        {showTable ? '收起数据表' : '查看数据表'}
+        {showTable ? locale.chartTableHide : locale.chartTableShow}
       </button>
       {showTable && (
         <table className="i-chart__table">
           <thead>
-            <tr><th>项目</th><th>数值</th><th>占比</th></tr>
+            <tr><th>项目</th><th>{locale.chartValue}</th><th>{locale.chartPercent}</th></tr>
           </thead>
           <tbody>
             {tiles.map((tile) => (

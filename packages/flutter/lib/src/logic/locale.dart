@@ -53,6 +53,34 @@ class ILocale {
   final String required;
   final String invalidFormat;
 
+
+  /* 图表的数据表、AI 交互与逐题确认 */
+  final String chartTableShow;
+  final String chartTableHide;
+  final String chartCategory;
+  final String chartValue;
+  final String chartPercent;
+  final String chartOther;
+  final String regenerate;
+  final String thinking;
+  final String toolInput;
+  final String toolError;
+  final String toolResult;
+  final String next;
+  final String skip;
+  final String otherOption;
+
+
+  /* 移动端专有：下拉刷新、新建与倒计时单位 */
+  final String pullToRefresh;
+  final String releaseToRefresh;
+  final String refreshing;
+  final String create;
+  final String dayUnit;
+  final String hourUnit;
+  final String minuteUnit;
+  final String secondUnit;
+
   /// 分页的「共 N 条」。用函数而不是模板串：有的语言要按数量变形
   final String Function(int total) totalText;
 
@@ -90,6 +118,28 @@ class ILocale {
     required this.collapse,
     required this.required,
     required this.invalidFormat,
+    required this.chartTableShow,
+    required this.chartTableHide,
+    required this.chartCategory,
+    required this.chartValue,
+    required this.chartPercent,
+    required this.chartOther,
+    required this.regenerate,
+    required this.thinking,
+    required this.toolInput,
+    required this.toolError,
+    required this.toolResult,
+    required this.next,
+    required this.skip,
+    required this.otherOption,
+    required this.pullToRefresh,
+    required this.releaseToRefresh,
+    required this.refreshing,
+    required this.create,
+    required this.dayUnit,
+    required this.hourUnit,
+    required this.minuteUnit,
+    required this.secondUnit,
     required this.totalText,
     required this.rangeText,
     required this.emptyPresets,
@@ -130,6 +180,28 @@ class ILocale {
     String? collapse,
     String? required,
     String? invalidFormat,
+    String? chartTableShow,
+    String? chartTableHide,
+    String? chartCategory,
+    String? chartValue,
+    String? chartPercent,
+    String? chartOther,
+    String? regenerate,
+    String? thinking,
+    String? toolInput,
+    String? toolError,
+    String? toolResult,
+    String? next,
+    String? skip,
+    String? otherOption,
+    String? pullToRefresh,
+    String? releaseToRefresh,
+    String? refreshing,
+    String? create,
+    String? dayUnit,
+    String? hourUnit,
+    String? minuteUnit,
+    String? secondUnit,
     String Function(int total)? totalText,
     String Function(int from, int to, int total)? rangeText,
     Map<IEmptyReason, IEmptyPreset>? emptyPresets,
@@ -160,6 +232,28 @@ class ILocale {
         collapse: collapse ?? this.collapse,
         required: required ?? this.required,
         invalidFormat: invalidFormat ?? this.invalidFormat,
+        chartTableShow: chartTableShow ?? this.chartTableShow,
+        chartTableHide: chartTableHide ?? this.chartTableHide,
+        chartCategory: chartCategory ?? this.chartCategory,
+        chartValue: chartValue ?? this.chartValue,
+        chartPercent: chartPercent ?? this.chartPercent,
+        chartOther: chartOther ?? this.chartOther,
+        regenerate: regenerate ?? this.regenerate,
+        thinking: thinking ?? this.thinking,
+        toolInput: toolInput ?? this.toolInput,
+        toolError: toolError ?? this.toolError,
+        toolResult: toolResult ?? this.toolResult,
+        next: next ?? this.next,
+        skip: skip ?? this.skip,
+        otherOption: otherOption ?? this.otherOption,
+        pullToRefresh: pullToRefresh ?? this.pullToRefresh,
+        releaseToRefresh: releaseToRefresh ?? this.releaseToRefresh,
+        refreshing: refreshing ?? this.refreshing,
+        create: create ?? this.create,
+        dayUnit: dayUnit ?? this.dayUnit,
+        hourUnit: hourUnit ?? this.hourUnit,
+        minuteUnit: minuteUnit ?? this.minuteUnit,
+        secondUnit: secondUnit ?? this.secondUnit,
         totalText: totalText ?? this.totalText,
         rangeText: rangeText ?? this.rangeText,
         emptyPresets: emptyPresets ??
@@ -202,6 +296,28 @@ final ILocale zhCN = ILocale(
   collapse: '收起',
   required: '此项必填',
   invalidFormat: '格式不正确',
+  chartTableShow: '查看数据表',
+  chartTableHide: '收起数据表',
+  chartCategory: '类别',
+  chartValue: '数值',
+  chartPercent: '占比',
+  chartOther: '其他',
+  regenerate: '重新生成',
+  thinking: '推理过程',
+  toolInput: '入参',
+  toolError: '错误',
+  toolResult: '结果',
+  next: '下一题',
+  skip: '跳过',
+  otherOption: '其他',
+  pullToRefresh: '下拉刷新',
+  releaseToRefresh: '松手即可刷新',
+  refreshing: '正在刷新',
+  create: '新建',
+  dayUnit: '天',
+  hourUnit: '时',
+  minuteUnit: '分',
+  secondUnit: '秒',
   totalText: (total) => '共 $total 条',
   rangeText: (from, to, total) => '第 $from-$to 条 / 共 $total 条',
   emptyPresets: const {
@@ -241,6 +357,28 @@ final ILocale enUS = ILocale(
   collapse: 'Collapse',
   required: 'This field is required',
   invalidFormat: 'Invalid format',
+  chartTableShow: 'Show data table',
+  chartTableHide: 'Hide data table',
+  chartCategory: 'Category',
+  chartValue: 'Value',
+  chartPercent: 'Share',
+  chartOther: 'Other',
+  regenerate: 'Regenerate',
+  thinking: 'Reasoning',
+  toolInput: 'Input',
+  toolError: 'Error',
+  toolResult: 'Result',
+  next: 'Next',
+  skip: 'Skip',
+  otherOption: 'Other',
+  pullToRefresh: 'Pull to refresh',
+  releaseToRefresh: 'Release to refresh',
+  refreshing: 'Refreshing',
+  create: 'New',
+  dayUnit: 'd',
+  hourUnit: 'h',
+  minuteUnit: 'm',
+  secondUnit: 's',
   totalText: (total) => '$total item${total == 1 ? '' : 's'}',
   rangeText: (from, to, total) => '$from-$to of $total',
   emptyPresets: const {

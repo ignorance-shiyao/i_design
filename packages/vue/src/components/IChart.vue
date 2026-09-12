@@ -3,6 +3,7 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
+import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
 import {
   areaPath,
@@ -18,6 +19,9 @@ import {
   labelStep,
   showLabelAt
 } from '@i-design/common'
+
+/* 文案走字典：图表的数据表是它的无障碍出口，按钮与表头也得跟着换语言 */
+const { locale } = useConfig()
 
 const props = withDefaults(
   defineProps<{
@@ -218,7 +222,7 @@ const showTable = ref(false)
  * 两者都不该逼读者回去找数据源。
  */
 function exportCsv() {
-  const head = [props.title || '类别', ...props.series.map((s) => s.name)]
+  const head = [props.title || locale.value.chartCategory, ...props.series.map((s) => s.name)]
   const rows = props.labels.map((label, i) => [label, ...props.series.map((s) => String(s.data[i] ?? ''))])
   // 字段里可能有逗号或引号，按 RFC 4180 转义，否则列会串位
   const cell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
@@ -429,14 +433,14 @@ function exportCsv() {
 
     <div class="i-chart__actions">
       <button class="i-chart__table-toggle" @click="showTable = !showTable">
-        {{ showTable ? '收起数据表' : '查看数据表' }}
+        {{ showTable ? locale.chartTableHide : locale.chartTableShow }}
       </button>
       <button class="i-chart__table-toggle" @click="exportCsv">导出 CSV</button>
     </div>
     <table v-if="showTable" class="i-chart__table">
       <thead>
         <tr>
-          <th>{{ title || '类别' }}</th>
+          <th>{{ title || locale.chartCategory }}</th>
           <th v-for="s in series" :key="`th-${s.name}`">{{ s.name }}</th>
         </tr>
       </thead>

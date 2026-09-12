@@ -3,8 +3,12 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
+import { useConfig } from './useConfig'
 import IAvatar from './IAvatar.vue'
 import IIcon from './IIcon.vue'
+
+/* 「重试」与「重新生成」是两件事：一个是失败后重来，一个是对结果不满意再来一次 */
+const { locale } = useConfig()
 
 withDefaults(
   defineProps<{
@@ -54,10 +58,10 @@ defineEmits<{ (e: 'copy'): void; (e: 'retry'): void }>()
       <!-- 生成过程中不给操作按钮：此时复制到的是半截内容，重试也没有意义 -->
       <div v-if="!streaming" class="i-chat-msg__actions">
         <button class="i-chat-msg__action" @click="$emit('copy')">
-          <IIcon name="copy" :size="12" />复制
+          <IIcon name="copy" :size="12" />{{ locale.copy }}
         </button>
         <button v-if="role === 'assistant'" class="i-chat-msg__action" @click="$emit('retry')">
-          <IIcon name="refresh" :size="12" />{{ error ? '重试' : '重新生成' }}
+          <IIcon name="refresh" :size="12" />{{ error ? locale.retry : locale.regenerate }}
         </button>
       </div>
     </div>

@@ -13,6 +13,7 @@ import {
 } from '@i-design/common'
 import IIcon from './IIcon.vue'
 import IButton from './IButton.vue'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -22,8 +23,13 @@ const props = withDefaults(
     skipText?: string
     closable?: boolean
   }>(),
-  { confirmText: '继续', skipText: '跳过', closable: true }
+  { confirmText: '', skipText: '', closable: true }
 )
+
+/* 「跳过」「下一题」「其他」都走字典；组件自己传了以传进来的为准 */
+const { locale } = useConfig()
+const skipText = computed(() => props.skipText || locale.value.skip)
+const confirmText = computed(() => props.confirmText || locale.value.confirm)
 
 const emit = defineEmits<{ (e: 'complete', answers: Record<string, ApprovalAnswer>): void; (e: 'close'): void }>()
 
@@ -115,8 +121,8 @@ function skip() {
       v-if="current.allowCustom"
       v-model="custom"
       class="i-approval__custom"
-      :placeholder="current.customPlaceholder ?? '其他……'"
-      :aria-label="current.customPlaceholder ?? '其他'"
+      :placeholder="current.customPlaceholder ?? `${locale.otherOption}……`"
+      :aria-label="current.customPlaceholder ?? locale.otherOption"
     />
 
     <footer class="i-approval__foot">
@@ -132,7 +138,7 @@ function skip() {
         {{ progress }}
         <button
           class="i-approval__nav"
-          aria-label="下一题"
+          :aria-label="locale.next"
           :disabled="isLast || !advanceable"
           @click="next"
         >
@@ -143,7 +149,7 @@ function skip() {
       <div class="i-approval__actions">
         <IButton v-if="current.skippable" size="sm" @click="skip">{{ skipText }}</IButton>
         <IButton size="sm" variant="primary" :disabled="!advanceable" @click="next">
-          {{ isLast ? confirmText : '下一题' }}
+          {{ isLast ? confirmText : locale.next }}
         </IButton>
       </div>
     </footer>

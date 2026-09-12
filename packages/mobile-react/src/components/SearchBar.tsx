@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react'
-import { Icon } from '@i-design/react'
+import { Icon, useConfig } from '@i-design/react'
 
 export interface SearchBarProps {
   value: string
@@ -20,10 +20,10 @@ export interface SearchBarProps {
 export function SearchBar({
   value,
   onChange,
-  placeholder = '搜索',
+  placeholder = '',
   shape = 'round',
   cancelable = true,
-  cancelText = '取消',
+  cancelText = '',
   disabled = false,
   readOnly = false,
   onSearch,
@@ -31,6 +31,10 @@ export function SearchBar({
   onCancel,
   className = ''
 }: SearchBarProps) {
+  /* 占位与取消走字典；组件自己传了以传进来的为准 */
+  const { locale } = useConfig()
+  const resolvedPlaceholder = placeholder || locale.search
+  const resolvedCancel = cancelText || locale.cancel
   const [focused, setFocused] = useState(false)
   const input = useRef<HTMLInputElement>(null)
   const showCancel = cancelable && (focused || value !== '')
@@ -58,7 +62,7 @@ export function SearchBar({
           type="search"
           enterKeyHint="search"
           value={value}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           disabled={disabled}
           readOnly={readOnly}
           onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
@@ -92,7 +96,7 @@ export function SearchBar({
             input.current?.blur()
           }}
         >
-          {cancelText}
+          {resolvedCancel}
         </button>
       )}
     </form>

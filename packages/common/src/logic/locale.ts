@@ -51,6 +51,47 @@ export interface Locale {
   required: string
   invalidFormat: string
 
+
+  /* 图表：数据表是图表的无障碍出口，它自己的按钮与表头也得跟着字典走 */
+  /** 展开数据表的按钮 */
+  chartTableShow: string
+  /** 收起数据表的按钮 */
+  chartTableHide: string
+  /** 数据表的第一列表头 */
+  chartCategory: string
+  chartValue: string
+  chartPercent: string
+  /** 系列过多时合并出来的那一项 */
+  chartOther: string
+
+  /* AI 交互 */
+  /** 重新生成。与 retry 分开：一个是失败后重来，一个是对结果不满意再来一次 */
+  regenerate: string
+  thinking: string
+  toolInput: string
+  toolError: string
+  toolResult: string
+
+  /* 逐题确认 */
+  next: string
+  skip: string
+  /** 预置选项之外的自填项 */
+  otherOption: string
+
+
+  /* 移动端专有 */
+  /** 下拉刷新的三段提示 */
+  pullToRefresh: string
+  releaseToRefresh: string
+  refreshing: string
+  /** 悬浮新建按钮的无障碍名 */
+  create: string
+  /** 倒计时的单位字，如「3 天 12 时」 */
+  dayUnit: string
+  hourUnit: string
+  minuteUnit: string
+  secondUnit: string
+
   /** 分页的「共 N 条」。用函数而不是模板串：有的语言要按数量变形 */
   totalText: (total: number) => string
   /** 分页的「第 11-20 条 / 共 95 条」。整句交给字典，各语言的语序本来就不同 */
@@ -93,6 +134,28 @@ export const zhCN: Locale = {
   collapse: '收起',
   required: '此项必填',
   invalidFormat: '格式不正确',
+  chartTableShow: '查看数据表',
+  chartTableHide: '收起数据表',
+  chartCategory: '类别',
+  chartValue: '数值',
+  chartPercent: '占比',
+  chartOther: '其他',
+  regenerate: '重新生成',
+  thinking: '推理过程',
+  toolInput: '入参',
+  toolError: '错误',
+  toolResult: '结果',
+  next: '下一题',
+  skip: '跳过',
+  otherOption: '其他',
+  pullToRefresh: '下拉刷新',
+  releaseToRefresh: '松手即可刷新',
+  refreshing: '正在刷新',
+  create: '新建',
+  dayUnit: '天',
+  hourUnit: '时',
+  minuteUnit: '分',
+  secondUnit: '秒',
   totalText: (total) => `共 ${total} 条`,
   rangeText: (from, to, total) => `第 ${from}-${to} 条 / 共 ${total} 条`,
   emptyPresets: {
@@ -129,6 +192,28 @@ export const enUS: Locale = {
   collapse: 'Collapse',
   required: 'This field is required',
   invalidFormat: 'Invalid format',
+  chartTableShow: 'Show data table',
+  chartTableHide: 'Hide data table',
+  chartCategory: 'Category',
+  chartValue: 'Value',
+  chartPercent: 'Share',
+  chartOther: 'Other',
+  regenerate: 'Regenerate',
+  thinking: 'Reasoning',
+  toolInput: 'Input',
+  toolError: 'Error',
+  toolResult: 'Result',
+  next: 'Next',
+  skip: 'Skip',
+  otherOption: 'Other',
+  pullToRefresh: 'Pull to refresh',
+  releaseToRefresh: 'Release to refresh',
+  refreshing: 'Refreshing',
+  create: 'New',
+  dayUnit: 'd',
+  hourUnit: 'h',
+  minuteUnit: 'm',
+  secondUnit: 's',
   totalText: (total) => `${total} item${total === 1 ? '' : 's'}`,
   rangeText: (from, to, total) => `${from}-${to} of ${total}`,
   emptyPresets: {

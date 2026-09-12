@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 
 export interface ChatThinkingProps {
@@ -15,12 +16,15 @@ export interface ChatThinkingProps {
 
 export function ChatThinking({
   duration = '',
-  label = '推理过程',
+  label = '',
   pending = false,
   defaultOpen = false,
   className = '',
   children
 }: ChatThinkingProps) {
+  /* 标题走字典：不传时用「推理过程」那一句，传了以传进来的为准 */
+  const { locale } = useConfig()
+  const resolvedLabel = label || locale.thinking
   // 推理结束后不自动展开：用户此时正在读答案，弹开一大段过程会把答案推走
   const [open, setOpen] = useState(defaultOpen)
 
@@ -31,7 +35,7 @@ export function ChatThinking({
       <button className="i-chat-thinking__head" aria-expanded={open} onClick={() => setOpen(!open)}>
         {pending && <span className="i-chat-thinking__pulse" />}
         <Icon className="i-chat-thinking__arrow" name="chevron-right" size={14} />
-        <span className="i-chat-thinking__label">{label}</span>
+        <span className="i-chat-thinking__label">{resolvedLabel}</span>
         {duration && <span className="i-chat-thinking__duration">{duration}</span>}
       </button>
       {open && <div className="i-chat-thinking__body">{children}</div>}

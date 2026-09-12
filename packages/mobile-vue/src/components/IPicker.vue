@@ -6,6 +6,7 @@ import {
   resolveColumns,
   type PickerColumns
 } from '@i-design/common'
+import { useConfig } from '@i-design/vue-next'
 
 const props = withDefaults(
   defineProps<{
@@ -19,8 +20,13 @@ const props = withDefaults(
     /** 可见候选行数，取奇数才有居中的那一行 */
     visibleCount?: number
   }>(),
-  { title: '', cancelText: '取消', okText: '确定', visibleCount: 5 }
+  { title: '', cancelText: '', okText: '', visibleCount: 5 }
 )
+
+/* 取消与确定走字典；组件自己传了以传进来的为准 */
+const { locale } = useConfig()
+const cancelText = computed(() => props.cancelText || locale.value.cancel)
+const okText = computed(() => props.okText || locale.value.confirm)
 
 const emit = defineEmits<{
   'update:modelValue': [(string | number)[]]

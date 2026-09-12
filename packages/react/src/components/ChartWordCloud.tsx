@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useConfig } from './ConfigProvider'
 import { WORD_MAX_SIZE, wordLayout, wordOverflow, wordTone, type WordItem } from '@i-design/common'
 
 export interface ChartWordCloudProps {
@@ -27,6 +28,8 @@ export function ChartWordCloud({
   rotate = true,
   className = ''
 }: ChartWordCloudProps) {
+  /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
+  const { locale } = useConfig()
   const [measured, setMeasured] = useState<Measured[]>([])
   const [showTable, setShowTable] = useState(false)
   const [active, setActive] = useState(-1)
@@ -126,7 +129,7 @@ export function ChartWordCloud({
       )}
 
       <button className="i-chart__table-toggle" onClick={() => setShowTable((v) => !v)}>
-        {showTable ? '收起数据表' : '查看数据表'}
+        {showTable ? locale.chartTableHide : locale.chartTableShow}
       </button>
       {showTable && (
         <table className="i-chart__table">

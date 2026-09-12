@@ -3,8 +3,12 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
+import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
 import { boxStats, formatTick, niceTicks, scaleY } from '@i-design/common'
+
+/* 文案走字典：图表的数据表是它的无障碍出口，按钮与表头也得跟着换语言 */
+const { locale } = useConfig()
 
 export interface BoxGroup {
   label: string
@@ -139,7 +143,7 @@ const showTable = ref(false)
 
     <!-- 数据表：图形之外的另一条读取路径，读屏与灰度打印都靠它 -->
     <button class="i-chart__table-toggle" @click="showTable = !showTable">
-      {{ showTable ? '收起数据表' : '查看数据表' }}
+      {{ showTable ? locale.chartTableHide : locale.chartTableShow }}
     </button>
     <table v-if="showTable" class="i-chart__table">
       <thead>

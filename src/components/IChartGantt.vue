@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
 import {
   daysBetween,
@@ -10,6 +11,9 @@ import {
   ganttTodayX,
   type GanttTask
 } from '@i-design/common'
+
+/* 文案走字典：图表的数据表是它的无障碍出口，按钮与表头也得跟着换语言 */
+const { locale } = useConfig()
 
 const props = withDefaults(
   defineProps<{
@@ -184,7 +188,7 @@ const percent = (v?: number) => `${Math.round((v ?? 0) * 100)}%`
     </div>
 
     <button class="i-chart__table-toggle" @click="showTable = !showTable">
-      {{ showTable ? '收起数据表' : '查看数据表' }}
+      {{ showTable ? locale.chartTableHide : locale.chartTableShow }}
     </button>
     <table v-if="showTable" class="i-chart__table">
       <thead>

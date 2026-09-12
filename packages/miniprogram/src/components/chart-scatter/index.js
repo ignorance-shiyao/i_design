@@ -5,6 +5,8 @@
  * 本体系的分类色在这个更严的口径下只有前三槽同时通过亮暗两种模式。
  * 超出的系列合并成「其他」，不再取第四个颜色。
  */
+import { getLocale } from '../../config'
+
 import { bubbleRadius, extentOf, formatTick, niceTicks, trendLine } from '@i-design/common'
 
 const PALETTE = ['#5e7ce0', '#b7622a', '#0f8a68']
@@ -53,7 +55,7 @@ Component({
       const head = series.slice(0, MAX_SERIES - 1)
       const rest = series.slice(MAX_SERIES - 1)
       return head.concat([
-        { name: '其他', data: rest.reduce((all, s) => all.concat(s.data), []) }
+        { name: getLocale().chartOther, data: rest.reduce((all, s) => all.concat(s.data), []) }
       ])
     },
     draw() {

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useConfig } from './ConfigProvider'
 import {
   SCATTER_MAX_SERIES,
   bubbleRadius,
@@ -38,6 +39,8 @@ export function ChartScatter({
   trend = false,
   className = ''
 }: ChartScatterProps) {
+  /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
+  const { locale } = useConfig()
   const [hidden, setHidden] = useState<Set<string>>(new Set())
   const [active, setActive] = useState<{ series: string; point: ScatterPoint } | null>(null)
   const [showTable, setShowTable] = useState(false)
@@ -53,7 +56,7 @@ export function ChartScatter({
     if (series.length <= SCATTER_MAX_SERIES) return series
     const head = series.slice(0, SCATTER_MAX_SERIES - 1)
     const rest = series.slice(SCATTER_MAX_SERIES - 1)
-    return [...head, { name: '其他', data: rest.flatMap((s) => s.data) }]
+    return [...head, { name: locale.chartOther, data: rest.flatMap((s) => s.data) }]
   }, [series])
 
   const plotW = W - PAD.left - PAD.right
@@ -223,7 +226,7 @@ export function ChartScatter({
       {/* 数据表：散点的坐标读屏读不出来，表格是唯一能读到的形式 */}
       <div className="i-chart__actions">
         <button className="i-chart__table-toggle" onClick={() => setShowTable(!showTable)}>
-          {showTable ? '收起数据表' : '查看数据表'}
+          {showTable ? locale.chartTableHide : locale.chartTableShow}
         </button>
       </div>
       {showTable && (

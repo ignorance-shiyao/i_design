@@ -15,15 +15,15 @@
 
   <view wx:if="{{open}}" class="i-chat-tool__body">
     <view wx:if="{{argsText}}" class="i-chat-tool__section">
-      <text class="i-chat-tool__label">入参</text>
+      <text class="i-chat-tool__label">{{inputLabel}}</text>
       <view class="i-chat-tool__code">{{argsText}}</view>
     </view>
     <view wx:if="{{error}}" class="i-chat-tool__section">
-      <text class="i-chat-tool__label">错误</text>
+      <text class="i-chat-tool__label">{{errorLabel}}</text>
       <text class="i-chat-tool__error">{{error}}</text>
     </view>
     <view wx:elif="{{resultText}}" class="i-chat-tool__section">
-      <text class="i-chat-tool__label">结果</text>
+      <text class="i-chat-tool__label">{{resultLabel}}</text>
       <view class="i-chat-tool__code">{{resultText}}</view>
     </view>
   </view>

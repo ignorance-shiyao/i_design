@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import IIcon from './IIcon.vue'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -12,8 +13,15 @@ const props = withDefaults(
     /** 初始是否展开；默认折叠——推理过程有用，但它不是答案 */
     defaultOpen?: boolean
   }>(),
-  { duration: '', label: '推理过程', pending: false, defaultOpen: false }
+  { duration: '', label: '', pending: false, defaultOpen: false }
 )
+
+/*
+ * 标题走字典：不传时用「推理过程」那一句，传了以传进来的为准。
+ * 默认值写死中文的话，换成英文字典后这里会是整块界面里唯一还说中文的地方。
+ */
+const { locale } = useConfig()
+const label = computed(() => props.label || locale.value.thinking)
 
 // 推理结束后不自动展开：用户此时正在读答案，弹开一大段过程会把答案推走
 const open = ref(props.defaultOpen)

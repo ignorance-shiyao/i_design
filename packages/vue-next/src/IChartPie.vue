@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
 import { formatTick, pieSlices } from '@i-design/common'
+
+/* 文案走字典：图表的数据表是它的无障碍出口，按钮与表头也得跟着换语言 */
+const { locale } = useConfig()
 
 export interface PieItem {
   name: string
@@ -99,11 +103,11 @@ const colorOf = (index: number) => `var(--i-chart-${(index % 8) + 1})`
     </div>
 
     <button class="i-chart__table-toggle" @click="showTable = !showTable">
-      {{ showTable ? '收起数据表' : '查看数据表' }}
+      {{ showTable ? locale.chartTableHide : locale.chartTableShow }}
     </button>
     <table v-if="showTable" class="i-chart__table">
       <thead>
-        <tr><th>类别</th><th>数值</th><th>占比</th></tr>
+        <tr><th>{{ locale.chartCategory }}</th><th>{{ locale.chartValue }}</th><th>{{ locale.chartPercent }}</th></tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in items" :key="`row-${item.name}`">

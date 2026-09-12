@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import IIcon from './_Icon.vue'
 import type { IconName } from '@i-design/common'
+import { useConfig } from '@i-design/vue-next'
 
 /**
  * 悬浮操作按钮。
@@ -20,6 +21,9 @@ withDefaults(
   { icon: 'plus', text: '', placement: 'right', hidden: false }
 )
 
+/* 无障碍名走字典：读屏用户听到的就是这一句 */
+const { locale } = useConfig()
+
 const emit = defineEmits<{ click: [] }>()
 </script>
 
@@ -31,7 +35,7 @@ const emit = defineEmits<{ click: [] }>()
       { 'i-fab--round': !text, 'is-hidden': hidden }
     ]"
     type="button"
-    :aria-label="text || '新建'"
+    :aria-label="text || locale.create"
     :aria-hidden="hidden || undefined"
     @click="emit('click')"
   >

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import IIcon from './_Icon.vue'
+import { useConfig } from '@i-design/vue-next'
 
 const props = withDefaults(
   defineProps<{
@@ -14,14 +15,19 @@ const props = withDefaults(
     readonly?: boolean
   }>(),
   {
-    placeholder: '搜索',
+    placeholder: '',
     shape: 'round',
     cancelable: true,
-    cancelText: '取消',
+    cancelText: '',
     disabled: false,
     readonly: false
   }
 )
+
+/* 占位与取消走字典；组件自己传了以传进来的为准 */
+const { locale } = useConfig()
+const placeholder = computed(() => props.placeholder || locale.value.search)
+const cancelText = computed(() => props.cancelText || locale.value.cancel)
 
 const emit = defineEmits<{
   'update:modelValue': [string]

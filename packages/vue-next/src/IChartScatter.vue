@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
 import {
   SCATTER_MAX_SERIES,
@@ -10,6 +11,9 @@ import {
   type ScatterPoint,
   type ScatterSeries
 } from '@i-design/common'
+
+/* 文案走字典：图表的数据表是它的无障碍出口，按钮与表头也得跟着换语言 */
+const { locale } = useConfig()
 
 const props = withDefaults(
   defineProps<{
@@ -41,7 +45,7 @@ const shown = computed(() => {
   if (props.series.length <= SCATTER_MAX_SERIES) return props.series
   const head = props.series.slice(0, SCATTER_MAX_SERIES - 1)
   const rest = props.series.slice(SCATTER_MAX_SERIES - 1)
-  return [...head, { name: '其他', data: rest.flatMap((s) => s.data) }]
+  return [...head, { name: locale.value.chartOther, data: rest.flatMap((s) => s.data) }]
 })
 
 const hidden = ref<Set<string>>(new Set())
@@ -215,7 +219,7 @@ const clipId = `i-scatter-clip-${Math.random().toString(36).slice(2, 9)}`
     <!-- 数据表：散点的坐标读屏读不出来，表格是唯一能读到的形式 -->
     <div class="i-chart__actions">
       <button class="i-chart__table-toggle" @click="showTable = !showTable">
-        {{ showTable ? '收起数据表' : '查看数据表' }}
+        {{ showTable ? locale.chartTableHide : locale.chartTableShow }}
       </button>
     </div>
     <table v-if="showTable" class="i-chart__table">

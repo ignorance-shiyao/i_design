@@ -243,6 +243,11 @@ export {
   IChartScatter
 }
 
+/*
+ * 配置读取器也要对外：移动端那几个组件在另一个包里，拿不到相对路径，
+ * 而它们同样需要读字典。React 端本来就导出了 useConfig，这里补齐。
+ */
+export { useConfig } from './useConfig'
 export { message } from './message'
 export { confirm } from './confirm'
 export type { SelectOption } from './ISelect.vue'

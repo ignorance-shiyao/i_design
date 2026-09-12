@@ -8,6 +8,7 @@ import {
   pullRotate,
   pullState
 } from '@i-design/common'
+import { useConfig } from '@i-design/vue-next'
 
 /**
  * 下拉刷新。
@@ -22,9 +23,18 @@ const props = withDefaults(
     /** 各状态的文案，方便按业务口径改写 */
     texts?: { pulling: string; ready: string; refreshing: string }
   }>(),
-  {
-    texts: () => ({ pulling: '下拉刷新', ready: '松手即可刷新', refreshing: '正在刷新' })
-  }
+  { texts: undefined }
+)
+
+/* 三段提示走字典；调用方传了 texts 则以它为准 */
+const { locale } = useConfig()
+const texts = computed(
+  () =>
+    props.texts ?? {
+      pulling: locale.value.pullToRefresh,
+      ready: locale.value.releaseToRefresh,
+      refreshing: locale.value.refreshing
+    }
 )
 
 const emit = defineEmits<{ refresh: [] }>()
@@ -38,10 +48,10 @@ const offset = computed(() => (props.refreshing ? PULL_LOADING_HEIGHT : distance
 const state = computed(() => pullState(distance.value, props.refreshing))
 const text = computed(() =>
   state.value === 'refreshing'
-    ? props.texts.refreshing
+    ? texts.value.refreshing
     : state.value === 'ready'
-      ? props.texts.ready
-      : props.texts.pulling
+      ? texts.value.ready
+      : texts.value.pulling
 )
 
 function onStart(event: TouchEvent) {

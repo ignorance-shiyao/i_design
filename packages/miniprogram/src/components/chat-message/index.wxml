@@ -26,11 +26,11 @@
     <view wx:if="{{!streaming}}" class="i-chat-msg__actions">
       <view class="i-chat-msg__action" bindtap="onCopy">
         <view class="i-icon i-icon--copy" style="width:12px;height:12px" />
-        <text>复制</text>
+        <text>{{copyLabel}}</text>
       </view>
       <view wx:if="{{role === 'assistant'}}" class="i-chat-msg__action" bindtap="onRetry">
         <view class="i-icon i-icon--refresh" style="width:12px;height:12px" />
-        <text>{{error ? '重试' : '重新生成'}}</text>
+        <text>{{error ? retryLabel : regenerateLabel}}</text>
       </view>
     </view>
   </view>

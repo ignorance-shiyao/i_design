@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { countdownInterval, countdownParts, formatCountdown } from '@i-design/common'
+import { useConfig } from '@i-design/vue-next'
 
 const props = withDefaults(
   defineProps<{
@@ -24,6 +25,9 @@ const props = withDefaults(
     separated: false
   }
 )
+
+/* 单位字走字典：换成英文字典后这里不该还写着「天时分秒」 */
+const { locale } = useConfig()
 
 const emit = defineEmits<{ end: []; change: [number] }>()
 
@@ -73,10 +77,10 @@ const text = computed(() => formatCountdown(remaining.value, props.format))
 const parts = computed(() => {
   const p = countdownParts(remaining.value)
   const cells: { value: string; label: string }[] = []
-  if (props.format.includes('D')) cells.push({ value: String(p.days), label: '天' })
-  if (props.format.includes('H')) cells.push({ value: String(p.hours).padStart(2, '0'), label: '时' })
-  if (props.format.includes('m')) cells.push({ value: String(p.minutes).padStart(2, '0'), label: '分' })
-  if (props.format.includes('s')) cells.push({ value: String(p.seconds).padStart(2, '0'), label: '秒' })
+  if (props.format.includes('D')) cells.push({ value: String(p.days), label: locale.value.dayUnit })
+  if (props.format.includes('H')) cells.push({ value: String(p.hours).padStart(2, '0'), label: locale.value.hourUnit })
+  if (props.format.includes('m')) cells.push({ value: String(p.minutes).padStart(2, '0'), label: locale.value.minuteUnit })
+  if (props.format.includes('s')) cells.push({ value: String(p.seconds).padStart(2, '0'), label: locale.value.secondUnit })
   return cells
 })
 

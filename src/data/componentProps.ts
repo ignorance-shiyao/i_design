@@ -40,8 +40,8 @@ export const componentProps: Record<string, PropMeta[]> = {
   ],
   IApprovalCard: [
     {"name":"questions","type":"ApprovalQuestion[]","doc":"一组问题，逐题回答；只有一题时不显示分页","defaultText":null,"control":null},
-    {"name":"confirmText","type":"string","doc":"","defaultText":"'继续'","control":{"kind":"string"}},
-    {"name":"skipText","type":"string","doc":"","defaultText":"'跳过'","control":{"kind":"string"}},
+    {"name":"confirmText","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
+    {"name":"skipText","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"closable","type":"boolean","doc":"","defaultText":"true","control":{"kind":"boolean"}},
   ],
   IAutoComplete: [
@@ -239,7 +239,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   ],
   IChatThinking: [
     {"name":"duration","type":"string","doc":"推理耗时的展示文案，如「思考了 12 秒」","defaultText":"''","control":{"kind":"string"}},
-    {"name":"label","type":"string","doc":"","defaultText":"'推理过程'","control":{"kind":"string"}},
+    {"name":"label","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"pending","type":"boolean","doc":"仍在推理中：标题旁的点持续呼吸","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"defaultOpen","type":"boolean","doc":"初始是否展开；默认折叠——推理过程有用，但它不是答案","defaultText":"false","control":{"kind":"boolean"}},
   ],

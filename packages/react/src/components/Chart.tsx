@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react'
+import { useConfig } from './ConfigProvider'
 import {
   areaPath,
   bandPath,
@@ -50,6 +51,8 @@ export function Chart({
   thresholds = [],
   className = ''
 }: ChartProps) {
+  /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
+  const { locale } = useConfig()
   const root = useRef<HTMLElement>(null)
   const [hidden, setHidden] = useState<Set<string>>(new Set())
   const [active, setActive] = useState<number | null>(null)
@@ -137,7 +140,7 @@ export function Chart({
 
   /** 导出 CSV：数据表让读屏能读到，导出让人能拿去自己算 */
   function exportCsv() {
-    const head = [title || '类别', ...series.map((s) => s.name)]
+    const head = [title || locale.chartCategory, ...series.map((s) => s.name)]
     const rows = labels.map((label, i) => [label, ...series.map((s) => String(s.data[i] ?? ''))])
     // 字段里可能有逗号或引号，按 RFC 4180 转义，否则列会串位
     const cell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
@@ -375,7 +378,7 @@ export function Chart({
 
       <div className="i-chart__actions">
         <button className="i-chart__table-toggle" onClick={() => setShowTable(!showTable)}>
-          {showTable ? '收起数据表' : '查看数据表'}
+          {showTable ? locale.chartTableHide : locale.chartTableShow}
         </button>
         <button className="i-chart__table-toggle" onClick={exportCsv}>
           导出 CSV
@@ -385,7 +388,7 @@ export function Chart({
         <table className="i-chart__table">
           <thead>
             <tr>
-              <th>{title || '类别'}</th>
+              <th>{title || locale.chartCategory}</th>
               {series.map((s) => (
                 <th key={`th-${s.name}`}>{s.name}</th>
               ))}

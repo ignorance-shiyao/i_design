@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useConfig } from './ConfigProvider'
 import { formatTick, sankeyLayout, type SankeyLink } from '@i-design/common'
 
 export interface ChartSankeyProps {
@@ -20,6 +21,8 @@ export function ChartSankey({
   height = 300,
   unit = ''
 }: ChartSankeyProps) {
+  /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
+  const { locale } = useConfig()
   const [active, setActive] = useState<string | null>(null)
   const [showTable, setShowTable] = useState(false)
 
@@ -94,7 +97,7 @@ export function ChartSankey({
       </svg>
 
       <button className="i-chart__table-toggle" onClick={() => setShowTable(!showTable)}>
-        {showTable ? '收起数据表' : '查看数据表'}
+        {showTable ? locale.chartTableHide : locale.chartTableShow}
       </button>
       {showTable && (
         <table className="i-chart__table">

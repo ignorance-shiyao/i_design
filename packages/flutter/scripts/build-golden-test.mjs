@@ -1357,7 +1357,14 @@ const localeKeys = [
   'name', 'empty', 'emptyContent', 'loading', 'loadMore', 'loadFailed', 'noMore',
   'placeholder', 'datePlaceholder', 'selectAll', 'search', 'searchNode', 'noMatch', 'clear',
   'confirm', 'cancel', 'acknowledge', 'close', 'retry', 'copy', 'copied',
-  'expand', 'collapse', 'required', 'invalidFormat'
+  'expand', 'collapse', 'required', 'invalidFormat',
+  // 图表数据表、AI 交互与逐题确认：这几处以前是各端各写一遍的硬编码中文
+  'chartTableShow', 'chartTableHide', 'chartCategory', 'chartValue', 'chartPercent',
+  'chartOther', 'regenerate', 'thinking', 'toolInput', 'toolError', 'toolResult',
+  'next', 'skip', 'otherOption',
+  // 移动端专有：下拉刷新、新建与倒计时单位
+  'pullToRefresh', 'releaseToRefresh', 'refreshing', 'create',
+  'dayUnit', 'hourUnit', 'minuteUnit', 'secondUnit'
 ]
 const dartString = (text) => `'${text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\$/g, '\\$')}'`
 const localeExpectations = [

@@ -363,15 +363,23 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
     分别是 42 / 34 / 28 px，而显式写了 `size="sm"` 的按钮始终 28 px
   - 未覆盖：小程序与移动端两套实现暂未接入全局尺寸，各自仍用自己的默认值
 
-- [ ] **D3 · 文案字典接到其余组件**（P1）
-  - 现状：已接 Select / Table / Empty / Pagination / InfiniteScroll / Loading /
-    Popconfirm / Typography / Tree / Cascader / DatePicker / TreeSelect / SelectInput
-    与所有关闭、清除的无障碍名
-  - 还缺：图表的「查看数据表 / 收起数据表」「类别」、AI 组件的「重试 / 重新生成 /
-    推理过程 / 引用片段」、ApprovalCard 的「继续 / 跳过 / 其他」、移动端那 19 个
-  - 落点：`packages/common/src/logic/locale.ts` 加键，各端组件改读字典
-  - 规则：组件自己传了属性优先于字典；新增键要同步 Dart 版并补 golden 断言
-  - 验收：切到 `enUS` 后整页没有残留中文（AI 与图表页各截一张图核对）
+- [x] **D3 · 文案字典接到其余组件**（P1，已完成）
+  - 新增 22 个键，三处缺口一次补齐：
+    图表的数据表（`chartTableShow/Hide`、`chartCategory/Value/Percent/Other`）、
+    AI 交互（`regenerate`、`thinking`、`toolInput/Error/Result`）、
+    逐题确认（`next`、`skip`、`otherOption`），
+    以及移动端专有的下拉刷新三段提示、新建与倒计时单位
+  - 覆盖端：Vue 3 / React / 小程序 / 移动 Vue / 移动 React，Dart 字典同步，
+    golden 断言 1062 → 1106
+  - 一律「组件自己传了优先于字典」：默认值从写死中文改成空串再回落字典，
+    与 D2 的尺寸同一条规则
+  - 顺带补了一处跨端不一致：Vue 端此前没有对外导出 `useConfig`（React 端一直有），
+    移动端那几个组件在另一个包里、拿不到相对路径，也就读不到字典
+  - 文档站的「换一种语言」示例补进图表、AI 与逐题确认三类组件——
+    它们以前各自写死中文，换语言后会是整页里唯一还在说中文的地方
+  - 实测：切到 `enUS` 后扫描示例区，残留的中文只剩示例自己传进去的内容
+    （问题文案、正文、语言开关上的「中文」二字），组件自带文案全部跟着换。
+    扫描过程中抓到一处漏网的「复制」按钮，已一并接上
 
 - [ ] **D4 · 示例站可搜索**（P2）
   - 目标：Cmd+K 搜组件名、属性名、令牌名

@@ -11,6 +11,9 @@ import IDatePicker from '@/components/IDatePicker.vue'
 import IPopconfirm from '@/components/IPopconfirm.vue'
 import IButton from '@/components/IButton.vue'
 import ITypography from '@/components/ITypography.vue'
+import IChartPie from '@/components/IChartPie.vue'
+import IChatMessage from '@/components/IChatMessage.vue'
+import IApprovalCard from '@/components/IApprovalCard.vue'
 import IInput from '@/components/IInput.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 
@@ -29,6 +32,15 @@ const sizes = [
   { label: 'sm', value: 'sm' },
   { label: 'md', value: 'md' },
   { label: 'lg', value: 'lg' }
+]
+
+/* 给「换一种语言」示例用：验证图表、AI 与逐题确认三类也跟着字典走 */
+const pieItems = [
+  { name: 'A', value: 40 },
+  { name: 'B', value: 60 }
+]
+const approvalQuestions = [
+  { id: 'scope', title: '这次改动要包含测试吗？', options: [{ value: 'yes', label: '要' }], skippable: true, allowCustom: true }
 ]
 
 const page = ref(2)
@@ -92,6 +104,16 @@ const picked = ref<string | number | null>(null)
               这段文字要足够长才会被截断，因此再补上一句凑够两行以上的篇幅。
             </ITypography>
             <IEmpty size="sm" type="search" />
+          </div>
+
+          <!--
+            图表、AI 与逐题确认这三类也接了字典。
+            它们以前各自写死中文，换语言后会是整页里唯一还在说中文的地方。
+          -->
+          <div class="cp-demo__grid">
+            <IChartPie :items="pieItems" :height="150" />
+            <IChatMessage role="assistant" :actions="['regenerate']">生成的一段答复。</IChatMessage>
+            <IApprovalCard :questions="approvalQuestions" />
           </div>
         </IConfigProvider>
       </div>
