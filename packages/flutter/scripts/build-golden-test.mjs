@@ -102,6 +102,7 @@ const { shouldShowElapsed, elapsedParts, elapsedInterval } = await bundle(
   'packages/common/src/logic/elapsed.ts',
   'elapsed'
 )
+const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
 const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
@@ -1638,6 +1639,33 @@ const elapsedExpectations = [
   )
 ]
 
+/*
+ * 行 diff：同一个补丁在两端必须比出同一份结果。
+ * 开头插一行时若退化成逐行对齐，后面每一行都会被标成改动——两端各错各的。
+ */
+const diffCases = [
+  ['b\nc', 'a\nb\nc'],
+  ['x\nold\ny', 'x\nnew\ny'],
+  ['a\nb', 'a\nb'],
+  ['a\nb\nc', 'c\nb\na'],
+  ['', 'a']
+]
+const lineDiffExpectations = diffCases.flatMap(([before, after], i) => {
+  const lines = diffLines(before, after)
+  const stat = diffStat(lines)
+  const dart = (t) => `'${t.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n')}'`
+  return [
+    `    // 第 ${i + 1} 组`,
+    `    expect(diffLines(${dart(before)}, ${dart(after)}).length, ${lines.length});`,
+    `    expect(diffStat(diffLines(${dart(before)}, ${dart(after)})).added, ${stat.added});`,
+    `    expect(diffStat(diffLines(${dart(before)}, ${dart(after)})).removed, ${stat.removed});`,
+    ...lines.map(
+      (line, n) =>
+        `    expect(diffLines(${dart(before)}, ${dart(after)})[${n}].kind, IDiffKind.${line.kind});`
+    )
+  ]
+})
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -1839,6 +1867,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/diff.dart';
 import 'package:i_design/src/logic/elapsed.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
@@ -2187,6 +2216,10 @@ ${toneExpectations.join('\n')}
 
   test('外链白名单的放行与拒绝清单与 Web 端一致', () {
 ${hrefExpectations.join('\n')}
+  });
+
+  test('行 diff 的分组、顺序与统计与 Web 端一致', () {
+${lineDiffExpectations.join('\n')}
   });
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {

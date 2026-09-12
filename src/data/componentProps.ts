@@ -269,6 +269,15 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"max","type":"number","doc":"最多可选数量，达到后未选中项自动禁用","defaultText":"undefined","control":{"kind":"number"}},
     {"name":"direction","type":"'horizontal' | 'vertical'","doc":"","defaultText":"'horizontal'","control":{"kind":"enum","options":["horizontal","vertical"]}},
   ],
+  ICodeBlock: [
+    {"name":"code","type":"string","doc":"","defaultText":null,"control":{"kind":"string"}},
+    {"name":"lang","type":"string","doc":"语言；不传则按内容猜，猜不出就不高亮","defaultText":"''","control":{"kind":"string"}},
+    {"name":"filename","type":"string","doc":"标题栏左侧的文件名；不传则显示语言名","defaultText":"''","control":{"kind":"string"}},
+    {"name":"lineNumbers","type":"boolean","doc":"显示行号","defaultText":"true","control":{"kind":"boolean"}},
+    {"name":"copyable","type":"boolean","doc":"显示复制按钮","defaultText":"true","control":{"kind":"boolean"}},
+    {"name":"before","type":"string","doc":"改动前的内容。给了就切成统一 diff 视图： `code` 是改动后的样子，这里是改动前的。","defaultText":"''","control":{"kind":"string"}},
+    {"name":"maxLines","type":"number","doc":"超过多少行折叠起来；0 表示不折叠","defaultText":"0","control":{"kind":"number"}},
+  ],
   ICol: [
     {"name":"span","type":"number","doc":"24 栅格中的跨度","defaultText":"24","control":{"kind":"number"}},
     {"name":"offset","type":"number","doc":"","defaultText":"0","control":{"kind":"number"}},

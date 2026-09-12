@@ -25,6 +25,8 @@ import { floatActionDelay, floatActionOffset, floatActionShift } from './float'
 import { isSplitterResetKey, paneRatio, resetPaneSize } from './splitter'
 import { watermarkTampered } from './watermark'
 import { ELAPSED_THRESHOLD, elapsedInterval, elapsedParts, shouldShowElapsed } from './elapsed'
+import { detectLang, normalizeLang, tokenize, tokenizeLines } from './highlight'
+import { diffLines, diffStat } from './diff'
 
 describe('countdown', () => {
   it('不显示毫秒时向上取整到秒：剩 1.4 秒给 2 秒', () => {
@@ -286,5 +288,68 @@ describe('href', () => {
   it('挡掉协议相对地址：它看起来像站内路径，实际指向别的站点', () => {
     expect(safeHref('//evil.com')).toBeUndefined()
     expect(safeHref('\\\\evil.com')).toBeUndefined()
+  })
+})
+
+describe('highlight', () => {
+  it('token 拼回去必须等于原文，一个字符都不能少', () => {
+    // 少一个字符就说明切错了，而渲染出来往往看不出来——代码会静悄悄少一个括号
+    for (const [code, lang] of [
+      ["const a = { b: 'c' } // 注释", 'ts'],
+      ['<IButton :disabled="true">确定</IButton>', 'vue'],
+      ['.a { color: var(--i-color-brand); }', 'css'],
+      ['{"a": 1, "b": [true, null]}', 'json'],
+      ['npm run build --if-present', 'bash']
+    ] as const) {
+      expect(tokenize(code, lang).map((t) => t.text).join('')).toBe(code)
+    }
+  })
+
+  it('认不出语言时退化成纯文本，而不是乱标', () => {
+    expect(tokenize('随便一段中文', 'text')).toEqual([{ type: 'text', text: '随便一段中文' }])
+    expect(detectLang('随便一段中文')).toBe('text')
+  })
+
+  it('语言别名落到同一套规则', () => {
+    expect(normalizeLang('typescript')).toBe('ts')
+    expect(normalizeLang('jsx')).toBe('ts')
+    expect(normalizeLang('template')).toBe('vue')
+    expect(normalizeLang('sh')).toBe('bash')
+    expect(normalizeLang('随便')).toBe('text')
+  })
+
+  it('按行切分时换行不进 token，行数与原文一致', () => {
+    const code = "const a = 1\nconst b = 2\n\nconst c = 3"
+    const lines = tokenizeLines(code, 'ts')
+    expect(lines.length).toBe(4)
+    expect(lines[2]).toEqual([])
+    expect(lines.map((l) => l.map((t) => t.text).join('')).join('\n')).toBe(code)
+  })
+})
+
+describe('diff', () => {
+  it('开头插一行时，其余行不算改动', () => {
+    // 逐行对齐的写法会把后面所有行都标成改动，那样的 diff 没法用
+    const lines = diffLines('b\nc', 'a\nb\nc')
+    expect(diffStat(lines)).toEqual({ added: 1, removed: 0 })
+    expect(lines[0]).toMatchObject({ kind: 'add', text: 'a', after: 1 })
+    expect(lines[1]).toMatchObject({ kind: 'same', text: 'b', before: 1, after: 2 })
+  })
+
+  it('同一处改动里删除排在新增之前', () => {
+    // 视线顺序是「原来是什么 → 变成了什么」，反过来每一处都要在脑子里倒一次
+    const lines = diffLines('x\nold\ny', 'x\nnew\ny')
+    expect(lines.map((l) => l.kind)).toEqual(['same', 'remove', 'add', 'same'])
+  })
+
+  it('完全相同的两段没有改动', () => {
+    expect(diffStat(diffLines('a\nb', 'a\nb'))).toEqual({ added: 0, removed: 0 })
+  })
+
+  it('行号按各自的文本编号，新增行没有旧行号', () => {
+    const lines = diffLines('a\nb', 'a\nc\nb')
+    const added = lines.find((l) => l.kind === 'add')!
+    expect(added.before).toBeUndefined()
+    expect(added.after).toBe(2)
   })
 })

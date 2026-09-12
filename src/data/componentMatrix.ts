@@ -409,6 +409,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ICodeBlock",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ICol",
     "ends": {
       "vue-next": true,

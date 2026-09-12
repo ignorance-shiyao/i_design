@@ -90,6 +90,7 @@ import ITimeSelect from './ITimeSelect.vue'
 import ITransfer from './ITransfer.vue'
 import IAffix from './IAffix.vue'
 import IBackTop from './IBackTop.vue'
+import ICodeBlock from './ICodeBlock.vue'
 import IFloatButton from './IFloatButton.vue'
 import IWatermark from './IWatermark.vue'
 import IImage from './IImage.vue'
@@ -176,6 +177,7 @@ export {
   ITransfer,
   IAffix,
   IBackTop,
+  ICodeBlock,
   IFloatButton,
   IWatermark,
   IImage,

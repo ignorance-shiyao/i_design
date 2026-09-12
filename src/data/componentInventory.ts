@@ -59,6 +59,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ICheckTag.vue",
   "src/components/ICheckbox.vue",
   "src/components/ICheckboxGroup.vue",
+  "src/components/ICodeBlock.vue",
   "src/components/ICol.vue",
   "src/components/ICollapse.vue",
   "src/components/IColorPicker.vue",

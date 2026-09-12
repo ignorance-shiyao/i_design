@@ -27,15 +27,26 @@ import { chromium } from 'playwright'
 import AxeBuilder from '@axe-core/playwright'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 
-/** 从路由表里抽出所有可直接访问的路径，避免这里再手写一份清单 */
+/**
+ * 从路由表里抽出所有可直接访问的路径，避免这里再手写一份清单。
+ *
+ * 子路由要认两种写法：`{ path: 'x', component: … }` 写成一行，
+ * 以及组件名太长时换行写的 `{\n  path: 'x',`。
+ * 只认一行的那种时，用换行写法新加的页面会被静默跳过——
+ * 检查照常报绿，而那一页从来没被扫过。这里出过一次：
+ * code-block 与 float-button 两页加进来之后，扫描数一直停在 112。
+ */
 function routesFromSource() {
   const src = readFileSync('src/router/index.ts', 'utf8')
   const paths = ['/']
   let group = ''
   for (const line of src.split('\n')) {
     const parent = /path: '(\/[a-z-]*)',\s*$/.exec(line)
-    if (parent) group = parent[1]
-    const child = /\{ path: '([a-z0-9-]+)'/.exec(line)
+    if (parent) {
+      group = parent[1]
+      continue
+    }
+    const child = /^\s*(?:\{\s*)?path: '([a-z0-9-]+)'/.exec(line)
     if (child && group) paths.push(`${group}/${child[1]}`)
   }
   return [...new Set(paths)]

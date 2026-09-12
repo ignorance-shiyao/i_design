@@ -24,6 +24,11 @@ class IColors {
     required this.chartDiv1,
     required this.chartDiv5,
     required this.hairline,
+    required this.codeBg,
+    required this.codeBar,
+    required this.codeBorder,
+    required this.codeText,
+    required this.codeMuted,
     required this.success,
     required this.successSubtle,
     required this.warning,
@@ -59,6 +64,14 @@ class IColors {
   final Color chartDiv1;
   final Color chartDiv5;
   final Color hairline;
+
+  /* 代码块的一套底色：亮暗两套差别很大，不能拿常规背景色凑合 */
+  final Color codeBg;
+  final Color codeBar;
+  final Color codeBorder;
+  final Color codeText;
+  final Color codeMuted;
+
   final Color success;
   final Color successSubtle;
   final Color warning;
@@ -85,6 +98,11 @@ class IColors {
     chartDiv1: IDesignTokensLight.chartDiv1,
     chartDiv5: IDesignTokensLight.chartDiv5,
     hairline: IDesignTokensLight.colorHairline,
+    codeBg: IDesignTokensLight.colorCodeBg,
+    codeBar: IDesignTokensLight.colorCodeBar,
+    codeBorder: IDesignTokensLight.colorCodeBorder,
+    codeText: IDesignTokensLight.colorCodeText,
+    codeMuted: IDesignTokensLight.colorCodeMuted,
     success: IDesignTokensLight.colorSuccess,
     successSubtle: IDesignTokensLight.colorSuccessSubtle,
     warning: IDesignTokensLight.colorWarning,
@@ -112,6 +130,11 @@ class IColors {
     chartDiv1: IDesignTokensDark.chartDiv1,
     chartDiv5: IDesignTokensDark.chartDiv5,
     hairline: IDesignTokensDark.colorHairline,
+    codeBg: IDesignTokensDark.colorCodeBg,
+    codeBar: IDesignTokensDark.colorCodeBar,
+    codeBorder: IDesignTokensDark.colorCodeBorder,
+    codeText: IDesignTokensDark.colorCodeText,
+    codeMuted: IDesignTokensDark.colorCodeMuted,
     success: IDesignTokensDark.colorSuccess,
     successSubtle: IDesignTokensDark.colorSuccessSubtle,
     warning: IDesignTokensDark.colorWarning,

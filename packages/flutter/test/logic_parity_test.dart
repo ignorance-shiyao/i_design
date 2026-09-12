@@ -36,6 +36,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/diff.dart';
 import 'package:i_design/src/logic/elapsed.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
@@ -1219,6 +1220,45 @@ void main() {
     expect(safeHref('\\\\evil.com'), null);
     expect(safeHref('  javascript:alert(1)  '), null);
     expect(safeHref(''), null);
+  });
+
+  test('行 diff 的分组、顺序与统计与 Web 端一致', () {
+    // 第 1 组
+    expect(diffLines('b\nc', 'a\nb\nc').length, 3);
+    expect(diffStat(diffLines('b\nc', 'a\nb\nc')).added, 1);
+    expect(diffStat(diffLines('b\nc', 'a\nb\nc')).removed, 0);
+    expect(diffLines('b\nc', 'a\nb\nc')[0].kind, IDiffKind.add);
+    expect(diffLines('b\nc', 'a\nb\nc')[1].kind, IDiffKind.same);
+    expect(diffLines('b\nc', 'a\nb\nc')[2].kind, IDiffKind.same);
+    // 第 2 组
+    expect(diffLines('x\nold\ny', 'x\nnew\ny').length, 4);
+    expect(diffStat(diffLines('x\nold\ny', 'x\nnew\ny')).added, 1);
+    expect(diffStat(diffLines('x\nold\ny', 'x\nnew\ny')).removed, 1);
+    expect(diffLines('x\nold\ny', 'x\nnew\ny')[0].kind, IDiffKind.same);
+    expect(diffLines('x\nold\ny', 'x\nnew\ny')[1].kind, IDiffKind.remove);
+    expect(diffLines('x\nold\ny', 'x\nnew\ny')[2].kind, IDiffKind.add);
+    expect(diffLines('x\nold\ny', 'x\nnew\ny')[3].kind, IDiffKind.same);
+    // 第 3 组
+    expect(diffLines('a\nb', 'a\nb').length, 2);
+    expect(diffStat(diffLines('a\nb', 'a\nb')).added, 0);
+    expect(diffStat(diffLines('a\nb', 'a\nb')).removed, 0);
+    expect(diffLines('a\nb', 'a\nb')[0].kind, IDiffKind.same);
+    expect(diffLines('a\nb', 'a\nb')[1].kind, IDiffKind.same);
+    // 第 4 组
+    expect(diffLines('a\nb\nc', 'c\nb\na').length, 5);
+    expect(diffStat(diffLines('a\nb\nc', 'c\nb\na')).added, 2);
+    expect(diffStat(diffLines('a\nb\nc', 'c\nb\na')).removed, 2);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[0].kind, IDiffKind.remove);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[1].kind, IDiffKind.remove);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[2].kind, IDiffKind.same);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[3].kind, IDiffKind.add);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[4].kind, IDiffKind.add);
+    // 第 5 组
+    expect(diffLines('', 'a').length, 2);
+    expect(diffStat(diffLines('', 'a')).added, 1);
+    expect(diffStat(diffLines('', 'a')).removed, 1);
+    expect(diffLines('', 'a')[0].kind, IDiffKind.remove);
+    expect(diffLines('', 'a')[1].kind, IDiffKind.add);
   });
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
