@@ -36,6 +36,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/locale.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
@@ -1077,6 +1078,27 @@ void main() {
     expect(clockOfMinutes(545), '09:05');
     expect(clockOfMinutes(1439), '23:59');
     expect(clockOfMinutes(1440), '00:00');
+  });
+
+  test('外链白名单的放行与拒绝清单与 Web 端一致', () {
+    expect(safeHref('https://a.com/x'), 'https://a.com/x');
+    expect(safeHref('http://a.com'), 'http://a.com');
+    expect(safeHref('/docs/a'), '/docs/a');
+    expect(safeHref('#top'), '#top');
+    expect(safeHref('./a'), './a');
+    expect(safeHref('../a'), '../a');
+    expect(safeHref('a/b'), 'a/b');
+    expect(safeHref('mailto:a@b.c'), 'mailto:a@b.c');
+    expect(safeHref('tel:123'), 'tel:123');
+    expect(safeHref('javascript:alert(1)'), null);
+    expect(safeHref('JavaScript:alert(1)'), null);
+    expect(safeHref('java\tscript:alert(1)'), null);
+    expect(safeHref('data:text/html,x'), null);
+    expect(safeHref('//evil.com'), null);
+    expect(safeHref('vbscript:m'), null);
+    expect(safeHref('\\\\evil.com'), null);
+    expect(safeHref('  javascript:alert(1)  '), null);
+    expect(safeHref(''), null);
   });
 
   test('文案字典的两份译文与局部覆盖规则与 Web 端一致', () {

@@ -3,7 +3,7 @@
  * 折叠阈值与字符统计走共享的 chunkLength / chunkPreview：
  * 按码点算而不是按 UTF-16 单元，否则截断会把 emoji 劈成两半。
  */
-import { chunkLength, chunkPreview, fileTypeOf } from '@i-design/common'
+import { chunkLength, chunkPreview, fileTypeOf, safeHref } from '@i-design/common'
 
 Component({
   options: { addGlobalClass: true },
@@ -35,7 +35,8 @@ Component({
             expanded,
             foldable: length > previewLimit,
             source: chunk.source || '',
-            href: chunk.href || '',
+            /* 出处来自检索结果，属于不可信内容，过一道白名单再往下传 */
+            href: safeHref(chunk.href) || '',
             icon: type ? type.icon : '',
             slot: type ? type.slot || 1 : 1
           }

@@ -1,3 +1,5 @@
+import { safeHref } from '@i-design/common'
+
 export interface ChatSource {
   title: string
   url?: string
@@ -21,11 +23,12 @@ export function ChatSources({ sources, className = '' }: ChatSourcesProps) {
             <span className="i-chat-sources__title">{item.title}</span>
           </>
         )
-        return item.url ? (
+        const url = safeHref(item.url)
+        return url ? (
           <a
             key={item.title + index}
             className="i-chat-sources__item"
-            href={item.url}
+            href={url}
             target="_blank"
             rel="noopener noreferrer"
           >

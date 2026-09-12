@@ -21,6 +21,7 @@ export 'src/logic/confirm.dart';
 export 'src/logic/countdown.dart';
 export 'src/logic/file.dart';
 export 'src/logic/flow.dart';
+export 'src/logic/href.dart';
 export 'src/logic/image.dart';
 export 'src/logic/indexes.dart';
 export 'src/logic/keypad.dart';

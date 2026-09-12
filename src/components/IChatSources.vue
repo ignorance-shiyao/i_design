@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { safeHref } from '@i-design/common'
+
 export interface ChatSource {
   title: string
   url?: string
@@ -7,19 +9,22 @@ export interface ChatSource {
 }
 
 withDefaults(defineProps<{ sources: ChatSource[] }>(), { sources: () => [] })
+
+/* 来源地址来自模型与工具输出，属于不可信内容，绑上去之前过一道白名单 */
+const safeUrl = (url?: string) => safeHref(url)
 </script>
 
 <template>
   <!-- 编号与正文里的角标一一对应，来源必须能被追溯回具体某句话 -->
   <div class="i-chat-sources">
     <component
-      :is="item.url ? 'a' : 'span'"
+      :is="safeUrl(item.url) ? 'a' : 'span'"
       v-for="(item, index) in sources"
       :key="item.title + index"
       class="i-chat-sources__item"
-      :href="item.url"
-      :target="item.url ? '_blank' : undefined"
-      :rel="item.url ? 'noopener noreferrer' : undefined"
+      :href="safeUrl(item.url)"
+      :target="safeUrl(item.url) ? '_blank' : undefined"
+      :rel="safeUrl(item.url) ? 'noopener noreferrer' : undefined"
     >
       <span class="i-chat-sources__index">{{ index + 1 }}</span>
       <span class="i-chat-sources__title">{{ item.title }}</span>

@@ -4,7 +4,7 @@
 -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import { chunkLength, chunkPreview, fileTypeOf, type ContextChunk } from '@i-design/common'
+import { chunkLength, chunkPreview, fileTypeOf, safeHref, type ContextChunk } from '@i-design/common'
 import IIcon from './IIcon.vue'
 
 const props = withDefaults(
@@ -25,6 +25,9 @@ function toggle(id: string) {
   else next.add(id)
   expanded.value = next
 }
+
+/* 出处地址来自检索结果，属于不可信内容，绑上去之前过一道白名单 */
+const safeUrl = (url?: string) => safeHref(url)
 </script>
 
 <template>
@@ -57,8 +60,8 @@ function toggle(id: string) {
       <a
         v-if="chunk.source"
         class="i-chunk__source"
-        :href="chunk.href || undefined"
-        :target="chunk.href ? '_blank' : undefined"
+        :href="safeUrl(chunk.href)"
+        :target="safeUrl(chunk.href) ? '_blank' : undefined"
         rel="noreferrer"
         :style="{ '--i-file-color': `var(--i-chart-${fileTypeOf(chunk.source).slot || 1})` }"
       >
