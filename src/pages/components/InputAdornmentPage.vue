@@ -57,6 +57,13 @@ const price = ref<number | null>(null)
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>前后缀本身可点、且是一个独立操作时——那是按钮组合，别让人去点一个看起来像装饰的东西。</li>
+      <li>前缀是用来解释这个字段的时——那是标签或说明文字，塞进框里会被当成输入内容的一部分。</li>
+      <li>单位会随输入变化时——放在框外，框内的文字跟着跳会让人以为自己打错了。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

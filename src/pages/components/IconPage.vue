@@ -85,6 +85,13 @@ async function copyName(name: string) {
     </div>
     <p v-if="!filtered.length" class="empty">没有匹配「{{ keyword }}」的图标。</p>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>图标含义不是人人都懂时——配上文字。只有放大镜、齿轮这类极少数图标可以独自成立。</li>
+      <li>想用它表达状态的强弱时——图标只有「是什么」，强弱靠颜色与文字标签。</li>
+      <li>需要插画式的表达时——图标是 24 格线性图形，撑大到 100px 会露出描边的破绽。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

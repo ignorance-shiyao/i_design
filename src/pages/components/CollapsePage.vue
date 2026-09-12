@@ -73,6 +73,13 @@ const accordion = ref<string[]>(['what'])
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>内容是页面的主线时——折叠起来等于把它藏了，用户不会去点开一个不知道里面有什么的标题。</li>
+      <li>只有一段内容时——那是一个多余的开关，直接展示。</li>
+      <li>用户需要对比两段内容时——手风琴一次只开一段，来回点开会把对比拆成两次记忆。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

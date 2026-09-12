@@ -73,6 +73,13 @@ import { message } from '@/components/message'
       <IPopconfirm placement="right" title="出现在右侧"><IButton>右侧</IButton></IPopconfirm>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>操作不可逆且影响很大时（删除整个项目、清空数据）——用对话框，并要求用户读完后果再确认。</li>
+      <li>操作随手可撤销时——直接执行，给一个「撤销」更省事：每次都问一句会把人训练成闭眼点确定。</li>
+      <li>确认时还要填东西时——那是一个小表单，弹出框装不下，用对话框。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

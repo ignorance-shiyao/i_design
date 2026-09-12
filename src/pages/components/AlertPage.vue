@@ -41,6 +41,13 @@ const visible = ref(true)
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>提示只与某一个输入项有关时——那是表单项自己的错误文案，写在字段下面，用户不必抬头找。</li>
+      <li>消息是一次性的、看过就不必再看时（保存成功、已复制）——用 message 飘一下，常驻的横幅会一直占着版面。</li>
+      <li>需要用户当场做决定时——横幅拦不住人，那是对话框或 Popconfirm 的事。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

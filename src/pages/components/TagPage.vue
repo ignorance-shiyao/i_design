@@ -57,6 +57,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
       <p class="check-tags__value">已选：{{ picked.join('、') || '（无）' }}</p>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>文字本身就够说明问题时——一圈边框并不会让它更清楚，只会更花。</li>
+      <li>用来表示可点的操作时——那是按钮或链接，标签看起来是不可点的。</li>
+      <li>一行里挂七八个标签时——先分主次，全都标出来等于什么都没标。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

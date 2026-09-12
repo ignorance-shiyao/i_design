@@ -48,6 +48,13 @@ const coarse = ref('')
       <div class="ts-field"><ITimeSelect model-value="09:30" disabled /></div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>时间点是任意的、精确到秒时——用时间选择器，固定间隔的列表给不出 09:37:12。</li>
+      <li>用户真正要选的是时长而不是时刻时——那是一个数字加单位。</li>
+      <li>可选时段随日期变化时——要连着日期一起选，单独一个时间列表会让人选到一个不存在的时段。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

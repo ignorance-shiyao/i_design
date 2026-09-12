@@ -42,6 +42,13 @@ const fixed = ref('')
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>内容是单行且不长时——用输入框，多行框会诱使人写长。</li>
+      <li>要写的是富文本或代码时——那是编辑器，多行框既不高亮也不缩进。</li>
+      <li>有字数上限时别只在超出后报错——把计数显示出来，让人边写边知道还剩多少。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

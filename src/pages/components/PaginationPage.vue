@@ -88,6 +88,13 @@ const pagedRows = computed(() =>
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>内容是连续消费的流（消息、动态）时——用无限滚动，翻页会打断阅读节奏。</li>
+      <li>总数少于两页时——不要显示分页器，它只会让人以为后面还有。</li>
+      <li>用户需要的是「最新的几条」而不是「第几页」时——给排序与筛选，页码在这里没有意义。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

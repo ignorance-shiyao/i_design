@@ -126,6 +126,13 @@ function toggle(zone: string) {
       </tbody>
     </table>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>就是一个普通下拉时——直接用 Select，这一层是给自定义弹出内容用的外壳。</li>
+      <li>弹出内容需要自己管理焦点与滚动时——先确认外壳的浮层定位够用，否则两套定位会打架。</li>
+      <li>只是要一个带图标的输入框时——用输入框的前后缀。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

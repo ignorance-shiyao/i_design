@@ -336,6 +336,12 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
     </DemoBlock>
 
     <IBackTop />
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>页面只有一栏内容时——直接写，套一层栅格只会多出一层嵌套。</li>
+      <li>要做的是组件内部的排布时——用 Space 或 flex，栅格是页面级的骨架。</li>
+      <li>各栏宽度必须随内容变化时——栅格是等分的，那种情况用 flex 更合适。</li>
+    </ul>
   </article>
 </template>
 

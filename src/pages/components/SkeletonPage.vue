@@ -62,6 +62,13 @@ const loading = ref(true)
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>加载很快时——骨架闪一下再消失，比直接出内容更晃眼。</li>
+      <li>布局与真实内容对不上时——骨架的意义就是先把位置占住，占错了内容一到就整页跳。</li>
+      <li>失败时——骨架不能一直转下去，要切到明确的失败态并给重试。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

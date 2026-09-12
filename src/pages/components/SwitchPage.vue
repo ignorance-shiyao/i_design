@@ -22,6 +22,13 @@ const off = ref(false)
       <ISwitch :model-value="false" disabled />
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>改动需要提交才生效时——用多选框：Switch 暗示「拨一下就生效了」。</li>
+      <li>两个状态不是「开 / 关」而是两个并列选项时（如「按天 / 按周」）——用分段控件。</li>
+      <li>操作有后果且不可逆时——拨一下就执行太轻，加一层确认。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

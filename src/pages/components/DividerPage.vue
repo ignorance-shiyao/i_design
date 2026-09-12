@@ -45,6 +45,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
       </span>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>用间距就能分开两块内容时——留白比线更安静，页面上每多一条线就多一分拥挤。</li>
+      <li>想用它表达层级时——线只能表达「这里断开了」，表达层级要靠标题与留白。</li>
+      <li>列表项之间已经有边框时——再加分割线就是两条线叠在一起。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

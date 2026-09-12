@@ -45,6 +45,13 @@ handle.close()"
       <IButton variant="text" @click="message.closeAll()">全部关闭</IButton>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>信息需要用户采取行动时——飘一下就没了，那种信息该用提示条或对话框。</li>
+      <li>同一个动作可能连着触发很多次时——十条一样的提示叠在屏幕顶上比不提示更糟，先合并。</li>
+      <li>错误需要用户读完并记住细节时（报错堆栈、失败原因）——用能停留的形态，而不是三秒后消失的浮层。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>方法</th><th>签名</th><th>说明</th></tr></thead>

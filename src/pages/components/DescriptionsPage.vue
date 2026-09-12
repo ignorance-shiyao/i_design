@@ -80,6 +80,13 @@ const items: DescriptionItem[] = [
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>字段可编辑时——那是表单。描述列表是只读的，把输入框塞进来会让人分不清哪些能改。</li>
+      <li>同构数据有很多条时——用表格，一条条描述列表排下去无法横向对比。</li>
+      <li>只有两三个字段时——直接写成段落更自然，键值对的对齐反而显得公文腔。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

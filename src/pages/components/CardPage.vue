@@ -34,6 +34,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>内容是同构的一长串时——用列表或表格，卡片的边框与留白会让扫读变慢。</li>
+      <li>只是想给一段文字加个底色时——卡片是「一个独立对象」的容器，滥用之后页面会变成一堆方块。</li>
+      <li>卡片里只有一行字时——它的内边距比内容还多，直接写在页面上更好。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

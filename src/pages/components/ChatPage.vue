@@ -526,6 +526,12 @@ const chipsExpanded = ref(false)
         <tr><td>IDiffTable</td><td>title、columns、rows</td><td>apply</td></tr>
       </tbody>
     </table>
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>交互是一次性的表单式问答时——直接给表单，对话的来回会把三个字段问成三轮。</li>
+      <li>结果是结构化数据（一张表、一份报告）时——用对应的展示组件，把表格塞进气泡里行长会被压垮。</li>
+      <li>智能体的动作有后果时——不要只在正文里说一句「我已经删了」，用征求确认让人在动手前拦下来。</li>
+    </ul>
   </article>
 </template>
 

@@ -60,6 +60,13 @@ const vertical = ref('auto')
       </IRadioGroup>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>选项超过五六个时——用下拉，一排单选按钮会把版面撑开且难以扫读。</li>
+      <li>选项可以多选时——那是多选框。</li>
+      <li>两个选项且是开关语义、改完立即生效时——用 Switch，「开 / 关」两个单选按钮是绕远路。</li>
+    </ul>
+
     <h2>API</h2>
     <h3>IRadioGroup</h3>
     <table class="i-table">

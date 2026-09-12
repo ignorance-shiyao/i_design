@@ -53,6 +53,13 @@ const errorStep = ref(1)
       <ISteps :items="items" :current="1" direction="vertical" />
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>步骤之间可以任意跳时——那是标签页，编号会让人以为必须按顺序来。</li>
+      <li>只有两步时——直接做成一页，或用「下一步」按钮，画一条步骤条太隆重。</li>
+      <li>步骤多到十几个时——先分组，再在组内分步；一条横着排十几个点谁也读不出自己在哪。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

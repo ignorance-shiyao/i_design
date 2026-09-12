@@ -12,7 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build:tokens": "node packages/common/scripts/build-tokens.mjs",
-    "check:parity": "npm run check:catalog && npm run build:tokens && npm run build:styles && npm run build:vue-next && npm run build:vue2 && npm run build:react-index && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:mobile-index && npm run build:stats && npm run build:matrix && npm run build:props && npm run check:snippets && npm run check:scoped-css && npm run check:props && npm run check:cjk && npm run check:docs",
+    "check:parity": "npm run check:catalog && npm run build:tokens && npm run build:styles && npm run build:vue-next && npm run build:vue2 && npm run build:react-index && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:mobile-index && npm run build:stats && npm run build:matrix && npm run build:props && npm run check:snippets && npm run check:scoped-css && npm run check:props && npm run check:cjk && npm run check:whennot && npm run check:docs",
     "build:styles:mp": "node packages/miniprogram/scripts/build-styles.mjs",
     "build:react-demo": "vite build --config packages/react/vite.config.ts",
     "build:styles": "node scripts/build-styles-index.mjs",
@@ -37,7 +37,8 @@
     "check:props": "node --test scripts/lib/parse-props.test.mjs && node scripts/check-props.mjs",
     "check:a11y": "node scripts/check-a11y.mjs",
     "build:props": "node scripts/build-component-props.mjs",
-    "check:cjk": "node --test scripts/check-cjk-wrap.test.mjs && node scripts/check-cjk-wrap.mjs"
+    "check:cjk": "node --test scripts/check-cjk-wrap.test.mjs && node scripts/check-cjk-wrap.mjs",
+    "check:whennot": "node --test scripts/check-when-not.test.mjs && node scripts/check-when-not.mjs"
   },
   "dependencies": {
     "three": "^0.186.0",

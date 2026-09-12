@@ -73,6 +73,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
       </ISpace>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>点下去不离开当前地址、只是触发一个动作时——那是按钮。链接的右键菜单会给出「在新标签页打开」，而那一项在这里是坏的。</li>
+      <li>整块区域都可点时——让整块可点，一行里只有几个字能点会让人反复试。</li>
+      <li>链接文字是「点击这里」时——把目的地写进文字里，读屏用户听到的正是这几个字。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

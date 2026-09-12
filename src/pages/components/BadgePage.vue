@@ -52,6 +52,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
       <IBadge :count="99" />
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>数字本身要被读清楚时（余额、库存）——徽标是「有没有、大概多少」的提示，正经的数字该用统计数值。</li>
+      <li>没有宿主元素可依附时——它是贴在别的东西右上角的角标，单独放着没人知道它在说什么。</li>
+      <li>状态需要解释时——一个红点说不出「为什么红」，该用带文字的标签或提示条。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

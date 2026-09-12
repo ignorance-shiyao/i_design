@@ -77,6 +77,13 @@ import { snippets } from '@/data/snippets'
       </IButtonGroup>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>点下去是跳转到另一个地址时——那是链接，用 Link：用户要能中键新开、能复制地址。</li>
+      <li>一屏里出现三个以上主按钮时——主按钮表达的是「这一屏最该做的那件事」，有三个就等于没有。</li>
+      <li>操作不可逆且后果大时，光有一个按钮不够——外面还要套一层确认（Popconfirm 或对话框）。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

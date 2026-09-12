@@ -148,6 +148,13 @@ await confirm.alert({ title: '已提交' })"
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>内容长到要在对话框里滚动时——那是一个页面，不是一个对话框。</li>
+      <li>只是确认一次轻量操作时——用 Popconfirm，就地问一句，不必让整页失焦。</li>
+      <li>要在对话框里再开一个对话框时——重新想一下流程，层层叠叠之后用户不知道关掉哪一层会丢什么。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

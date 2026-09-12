@@ -99,6 +99,13 @@ function onReject(file: File, reason: string) {
       浏览器原生的 <code>accept</code> 只过滤文件选择框，<strong>拖拽进来的文件不受它约束</strong>，因此组件对类型、体积、数量做了二次校验。被拒的文件通过 <code>reject</code>事件抛出而非静默丢弃——用户需要知道为什么少了一个文件。
     </p>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>文件很大且网络不稳时——先做分片与断点续传，一个进度条撑不住一次失败。</li>
+      <li>用户其实是要粘贴一段文本时——给一个文本框，不要逼人先存成文件。</li>
+      <li>格式要求很严时——在选文件之前就把要求写出来，等上传完再报错是浪费一次等待。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

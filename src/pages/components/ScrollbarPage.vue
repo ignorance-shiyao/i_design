@@ -42,6 +42,13 @@ const rows = Array.from({ length: 24 }, (_, i) => `第 ${i + 1} 行内容`)
       </IScrollbar>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>容器就是页面本身时——让浏览器画它自己的滚动条，系统的滚动条与用户的其他软件一致。</li>
+      <li>内容可能非常长时（几万行）——先虚拟化，自绘滚动条解决的是观感，不是性能。</li>
+      <li>触屏为主的场景——那里本来就没有常驻滚动条，多一条反而挡内容。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

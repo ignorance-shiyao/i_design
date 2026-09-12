@@ -147,6 +147,13 @@ const picked = ref<string | number | null>(null)
       Vue 与 React 用上下文、Flutter 用 <code>InheritedWidget</code>，三者都支持嵌套覆盖。小程序没有上下文机制，配置落在模块级的 <code>setLocale()</code>，代价是表达不了「页面里这一块换另一种语言」——需要局部覆盖时给那几个组件单独传属性。这是平台限制，不是取舍。
     </p>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>只是想改某一处的文案时——直接给那个组件传属性，为一句话套一层全局配置，后面的人会找不到它从哪来。</li>
+      <li>想用它做主题切换时——主题走的是令牌与 data-theme，这里管的是文案字典与默认尺寸。</li>
+      <li>在组件树之外调用命令式方法（message、confirm）时——它们不在这棵树里，配置要单独设一次。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

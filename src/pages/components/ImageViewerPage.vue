@@ -65,6 +65,13 @@ function openAt(index: number) {
       </tbody>
     </table>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>图片本身就已经足够大、看得清时——再套一层预览只是多一次点击。</li>
+      <li>用户要对比多张图时——预览一次只看一张，那种场景该并排铺开。</li>
+      <li>内容是文档或表格的截图时——提供原文件比让人在图上放大更实在。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

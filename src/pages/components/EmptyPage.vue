@@ -39,6 +39,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
       </IEmpty>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>数据还在加载时——那是骨架屏。这时说「暂无数据」是在撒谎，一秒后它又变出来了。</li>
+      <li>加载失败时不要用默认的「暂无数据」——那会让用户去找不存在的内容，用 error 那一种成因。</li>
+      <li>列表里只是筛掉了内容、原始数据并不空时——说清是筛选条件的结果，并给一个清除筛选的出口。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

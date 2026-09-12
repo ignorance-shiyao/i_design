@@ -70,6 +70,13 @@ const card = ref('members')
       </tbody>
     </table>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>几块内容需要同时看到时——标签页一次只留一块，那种场景该并排。</li>
+      <li>标签多到要横向滚动时——改成侧边导航或二级页面，滚动的标签栏里永远有一半看不见。</li>
+      <li>内容之间是先后顺序时——那是步骤条。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

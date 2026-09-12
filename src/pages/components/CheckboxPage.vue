@@ -74,6 +74,13 @@ const indeterminate = computed(
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>选项互斥时——那是单选框。用多选框表达互斥，用户会以为可以都选。</li>
+      <li>只有一个开关语义的选项、且改完立即生效时——用 Switch：多选框暗示「要等提交」。</li>
+      <li>选项超过十来个时——用穿梭框或带搜索的多选下拉，一屏排不下的复选框谁也数不清选了几个。</li>
+    </ul>
+
     <h2>API</h2>
     <h3>ICheckboxGroup</h3>
     <table class="i-table">

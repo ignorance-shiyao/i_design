@@ -123,6 +123,12 @@ const grouped: DropdownItem[] = [
       </div>
       <ITour v-model="tourStep" :steps="tourSteps" />
     </DemoBlock>
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>内容是页面主线时——浮层一关就没了，主线内容该留在页面上。</li>
+      <li>浮层里还要再开浮层时——层层叠叠之后没人知道关掉一层会丢什么，改用整页或分步。</li>
+      <li>触屏为主时——悬停触发的浮层在那里根本摸不到，改成点击触发。</li>
+    </ul>
   </article>
 </template>
 

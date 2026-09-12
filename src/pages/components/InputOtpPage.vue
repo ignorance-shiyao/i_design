@@ -64,6 +64,13 @@ function onComplete(value: string) {
       </tbody>
     </table>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>要填的不是定长验证码时——普通输入框就好，分格会把正常文本切得七零八落。</li>
+      <li>验证码可能被粘贴进来时要留意——组件支持整串粘贴，但别把格子做成只收单字符的死限制。</li>
+      <li>位数超过八位时——分格反而更难数，用一个普通输入框加格式提示。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
