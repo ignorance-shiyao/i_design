@@ -154,22 +154,25 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 - **动效没有统一规则**：`--i-motion-fast/base/slow` 有，进出场曲线
   （`easing-in` / `-out` / `-spring`）没有；`prefers-reduced-motion` 只在 4 个组件里零散照顾到。→ A3
 
-### 1.8 远端分支现状
+### 1.8 分支现状
 
-`main` 是唯一基准。除它之外远端还留着五个分支，**其中三个有未合并提交，
-但都不该直接合**——记在这里，免得下一个人重新查一遍：
+`main` 是唯一基准。其余分支已在 2026-09-12 全部删除，删之前逐个核对并捞干净了。
 
-| 分支 | 未合并 | 该怎么处理 |
+**捞走的**：`devui` 分支的 `f062a11`（Gantt、WordCloud 与令牌定义校验）已 cherry-pick，
+A1/A2 因此完成；同分支的 IndexBar / PullRefresh 没摘——main 里已有等价的
+`IIndexes` / `IPullDownRefresh`，摘了就是两套并存。
+PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
+
+**丢掉的提交**（仍可按 SHA 找回，GitHub 上短期内也还能访问）：
+
+| SHA | 内容 | 为什么不要 |
 | --- | --- | --- |
-| `claude/bold-bohr-fl0nig` | 0 | 已并入 main，可删 |
-| `claude/cross-framework-component-library-2wawj9` | 0 | 已并入，可删 |
-| `redesign/tdesign-20260911` | 0 | 已并入，可删 |
-| `claude/devui-design-reference-exzjpm` | 6 | **已捞完，可删**：Gantt 与 WordCloud 已 cherry-pick（A1/A2 完成），连带捡回第 13 项令牌校验；IndexBar / PullRefresh 在 main 里已有等价实现（`IIndexes` / `IPullDownRefresh`），不摘；其余四个提交是首页与明暗切换的返工，会把当前这版视觉改回去，不摘 |
-| `feat/agent-interaction-primitives`（PR #3） | 1 | **已关闭**。分支点在 `03488d2`（重构前），针对的是 `packages/core` + `playground/` + pnpm 那套已经不存在的结构，GitHub 判定为 conflict。它的四个组件（ApprovalCard / TaskList / ContextCard / ToolChip）里前三个 main 已有且更完整，只剩 ToolChip 是真缺的，见 B1。唯一值得留下的想法已抄成 E7 |
-| `feat/visual-refresh-20260911` | 1 | 首页与顶栏的另一版样式，与当前基准冲突。除非确认要换，否则删掉 |
+| `f18baa9` `4d9731c` `ea6e241` `2e29cd0` | 首屏三维、示例区凹陷面、明暗切换返工 | 会把当前这版视觉改回去 |
+| `2750b7d` | IndexBar / PullRefresh | main 已有等价实现 |
+| `e9ff28f`（PR #3） | agent primitives | 基于 `packages/core` + `playground/` + pnpm 那套已不存在的结构 |
+| `6b4760b` | 首页与顶栏另一版样式 | 与当前基准冲突 |
 
-处理建议：先从 `devui` 分支 cherry-pick Gantt 与 WordCloud（勾掉 A1/A2），
-确认没别的要捞之后，把五个分支一起删掉——留着只会让下一个人反复确认它们是死是活。
+真要翻旧账时 `git show <SHA>` 即可，不必重新去猜哪个分支有什么。
 
 ---
 
