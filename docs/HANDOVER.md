@@ -69,6 +69,7 @@ scripts/                    跨端构建与校验脚本
 | `packages/flutter/test/logic_parity_test.dart` | `packages/flutter/scripts/build-golden-test.mjs` |
 | `docs/SOURCE_STATUS.md` | `scripts/build-doc-status.mjs`（`npm run build:docs`） |
 | `packages/*/dist/**`(发布产物) | `scripts/build-packages.mjs`（`npm run build:packages`） |
+| `src/data/componentProps.ts` | `scripts/build-component-props.mjs`（`npm run build:props`） |
 | `packages/react/src/index.ts` | `build-react-index.mjs` |
 | `packages/flutter/lib/i_design.dart` | `build-barrel.mjs` |
 | `packages/miniprogram/src/components/*/index.json`、`index.wxss` | `scaffold.mjs` |

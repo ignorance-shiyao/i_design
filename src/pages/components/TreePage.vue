@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import ITree from '@/components/ITree.vue'
 import ITreeSelect from '@/components/ITreeSelect.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import Playground from '@/site/Playground.vue'
 import type { TreeNode } from '@i-design/common'
 
 const data: TreeNode[] = [
@@ -53,6 +54,9 @@ const bigTree: TreeNode[] = Array.from({ length: 20 }, (_, a) => ({
 }))
 const bigExpanded = ref<string[]>(bigTree.flatMap((a) => [a.key, ...(a.children ?? []).map((b) => b.key)]))
 const bigChecked = ref<string[]>([])
+
+/* playground 代码片段里固定属性的写法（模板里写会和属性引号打架） */
+const treePgCode = [':data="data"']
 </script>
 
 <template>
@@ -62,6 +66,15 @@ const bigChecked = ref<string[]>([])
       层级数据的展开与选择。父子勾选联动、半选态、禁用继承与搜索过滤都由组件负责，
       调用方只管收结果。
     </p>
+
+    <h2>现场调参</h2>
+    <p>下面的控件由源码里的属性类型生成，改动即时生效，代码区给出对应写法。</p>
+    <Playground
+      name="ITree"
+      :is="ITree"
+      :fixed="{ data }"
+      :fixed-code="treePgCode"
+    />
 
     <DemoBlock
       title="单选"

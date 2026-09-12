@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
     "build:tokens": "node packages/common/scripts/build-tokens.mjs",
-    "check:parity": "npm run check:docs && npm run check:catalog && npm run build:tokens && npm run build:styles && npm run build:vue-next && npm run build:vue2 && npm run build:react-index && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:mobile-index && npm run build:stats && npm run build:matrix && npm run check:snippets && npm run check:scoped-css && npm run check:props",
+    "check:parity": "npm run check:docs && npm run check:catalog && npm run build:tokens && npm run build:styles && npm run build:vue-next && npm run build:vue2 && npm run build:react-index && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:mobile-index && npm run build:stats && npm run build:matrix && npm run build:props && npm run check:snippets && npm run check:scoped-css && npm run check:props",
     "build:styles:mp": "node packages/miniprogram/scripts/build-styles.mjs",
     "build:react-demo": "vite build --config packages/react/vite.config.ts",
     "build:styles": "node scripts/build-styles-index.mjs",
@@ -32,7 +32,8 @@
     "build:docs": "node scripts/build-doc-status.mjs",
     "check:docs": "node scripts/build-doc-status.mjs --check",
     "build:packages": "node scripts/build-packages.mjs && node scripts/check-package-exports.mjs",
-    "check:props": "node scripts/check-props.mjs"
+    "check:props": "node scripts/check-props.mjs",
+    "build:props": "node scripts/build-component-props.mjs"
   },
   "dependencies": {
     "three": "^0.186.0",

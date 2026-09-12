@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import ISelect, { type SelectOption } from '@/components/ISelect.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import Playground from '@/site/Playground.vue'
 import { snippets } from '@/data/snippets'
 
 const options: SelectOption[] = [
@@ -33,6 +34,9 @@ const cities: SelectOption[] = Array.from({ length: 10000 }, (_, i) => ({
   label: `编号 ${String(i + 1).padStart(5, '0')} 号仓位`,
   value: i + 1
 }))
+
+/* playground 代码片段里固定属性的写法（模板里写会和属性引号打架） */
+const selectPgCode = [':options="options"']
 </script>
 
 <template>
@@ -41,6 +45,15 @@ const cities: SelectOption[] = Array.from({ length: 10000 }, (_, i) => ({
     <p class="i-lead">
       从一组预设项中选择一个值。选项少于三个时优先考虑单选框，用户可以少一次点击。
     </p>
+
+    <h2>现场调参</h2>
+    <p>下面的控件由源码里的属性类型生成，改动即时生效，代码区给出对应写法。</p>
+    <Playground
+      name="ISelect"
+      :is="ISelect"
+      :fixed="{ options }"
+      :fixed-code="selectPgCode"
+    />
 
     <DemoBlock
       title="多端用法"

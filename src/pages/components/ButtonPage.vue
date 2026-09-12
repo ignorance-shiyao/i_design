@@ -2,6 +2,7 @@
 import IButtonGroup from '@/components/IButtonGroup.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import Playground from '@/site/Playground.vue'
 import { snippets } from '@/data/snippets'
 </script>
 
@@ -9,6 +10,10 @@ import { snippets } from '@/data/snippets'
   <article>
     <h1>Button 按钮</h1>
     <p class="i-lead">触发一个即时操作。一屏之内主按钮应当只有一个，指向该页面最主要的动作。</p>
+
+    <h2>现场调参</h2>
+    <p>下面的控件由源码里的属性类型生成，改动即时生效，代码区给出对应写法。</p>
+    <Playground name="IButton" :is="IButton" slot-text="提交" />
 
     <DemoBlock
       title="多端用法"

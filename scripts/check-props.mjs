@@ -25,6 +25,9 @@
  * 把差异塞进白名单是最省事也最没用的做法——白名单里每一条都得有理由。
  */
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
+// 解析器与 build-component-props.mjs 共用一份：两处都靠它理解 defineProps，
+// 各写一份的话，playground 与这个检查会对同一个组件得出不同的属性表
+import { braceBody, parseVueProps, topLevelEntries } from './lib/parse-props.mjs'
 
 const VUE_DIR = 'src/components'
 const REACT_DIR = 'packages/react/src/components'
@@ -54,64 +57,18 @@ const MODEL_ALIASES = ['value', 'checked', 'open', 'current', 'index']
 /** 与组件属性无关，不参与比对 */
 const IGNORED = new Set(['classname', 'children', 'style', 'key', 'ref'])
 
-const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
-
-/**
- * 取出一段类型体里的顶层键名。
- *
- * 不用正则一把梭：属性的类型本身可能是对象或联合（`options?: { label: string }[]`），
- * 里面的 `label:` 不是属性。按括号深度切分才不会把它们算进来。
- */
-function topLevelKeys(body) {
-  const keys = []
-  let depth = 0
-  let buf = ''
-  const flush = () => {
-    const m = /^\s*'?([A-Za-z_$][\w$]*)'?\s*\??\s*:/.exec(buf)
-    if (m) keys.push(m[1])
-    buf = ''
-  }
-  for (const ch of stripComments(body)) {
-    if ('{(['.includes(ch)) depth++
-    else if ('})]'.includes(ch)) depth--
-    if (depth === 0 && (ch === '\n' || ch === ';' || ch === ',')) { flush(); continue }
-    buf += ch
-  }
-  flush()
-  return keys
-}
-
-/** 从 `{` 处取出配对的整段花括号内容 */
-function braceBody(text, openIdx) {
-  let depth = 0
-  for (let i = openIdx; i < text.length; i++) {
-    if (text[i] === '{') depth++
-    else if (text[i] === '}') { depth--; if (!depth) return text.slice(openIdx + 1, i) }
-  }
-  return ''
-}
-
-function readVue(file) {
-  const text = readFileSync(file, 'utf8')
-  const m = /defineProps<\s*\{/.exec(text)
-  const props = m ? topLevelKeys(braceBody(text, m.index + m[0].length - 1)) : null
-  // `defineModel()` 是 defineProps 之外的另一种声明方式，等价于一个 modelValue 属性。
-  // 不认它的话，用它的组件会被整批报成「React 端多了 value」
-  if (props && /\bdefineModel[<(]/.test(text) && !props.includes('modelValue')) props.push('modelValue')
-  return {
-    props,
-    slots: [...text.matchAll(/<slot\s+name="([a-zA-Z-]+)"/g)].map((s) => s[1])
-  }
-}
-
 function readReact(file, name) {
   const text = readFileSync(file, 'utf8')
   const m = new RegExp(`interface ${name}Props([^{]*)\\{`).exec(text)
   if (!m) return null
-  return {
-    props: topLevelKeys(braceBody(text, m.index + m[0].length - 1)),
-    inheritsDom: /HTMLAttributes/.test(m[1])
-  }
+  const body = braceBody(text, m.index + m[0].length - 1)
+  // React 侧只需要键名，但同样要按括号深度切分：属性的类型里可能嵌着对象，
+  // 里面的键不是属性。写成一行的接口也要认得出来
+  const props = topLevelEntries(body.replace(/\/\*[\s\S]*?\*\//g, ''))
+    .map((entry) => /^\s*'?([A-Za-z_$][\w$]*)'?\s*\??\s*:/.exec(entry.replace(/\/\/[^\n]*/g, '')))
+    .filter(Boolean)
+    .map((hit) => hit[1])
+  return { props, inheritsDom: /HTMLAttributes/.test(m[1]) }
 }
 
 const lower = (s) => s.toLowerCase()
@@ -127,7 +84,8 @@ for (const file of readdirSync(VUE_DIR).filter((f) => f.endsWith('.vue')).sort()
   const reactFile = `${REACT_DIR}/${name}.tsx`
   if (!existsSync(reactFile)) continue
 
-  const vue = readVue(`${VUE_DIR}/${file}`)
+  const parsed = parseVueProps(`${VUE_DIR}/${file}`)
+  const vue = { props: parsed.props?.map((p) => p.name) ?? null, slots: parsed.slots }
   const react = readReact(reactFile, name)
   // 没有 defineProps 或没有 Props 接口的组件（纯插槽容器）无从比起
   if (!vue.props || !react) continue

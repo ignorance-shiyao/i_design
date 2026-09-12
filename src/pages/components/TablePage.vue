@@ -3,6 +3,7 @@ import ITable, { type TableColumn, type TableRow } from '@/components/ITable.vue
 import ITag from '@/components/ITag.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import Playground from '@/site/Playground.vue'
 
 import { ref } from 'vue'
 
@@ -46,6 +47,9 @@ const actionColumns: TableColumn[] = [
   { key: 'owner', title: '负责人', width: '110px' },
   { key: 'action', title: '操作', width: '120px', align: 'right' }
 ]
+
+/* playground 代码片段里固定属性的写法（模板里写会和属性引号打架） */
+const tablePgCode = [':columns="columns"', ':data="data"']
 </script>
 
 <template>
@@ -54,6 +58,15 @@ const actionColumns: TableColumn[] = [
     <p class="i-lead">
       展示结构化的行列数据。列宽应按内容语义固定，避免用户在翻页时因列宽跳动而重新定位。
     </p>
+
+    <h2>现场调参</h2>
+    <p>下面的控件由源码里的属性类型生成，改动即时生效，代码区给出对应写法。</p>
+    <Playground
+      name="ITable"
+      :is="ITable"
+      :fixed="{ columns, data }"
+      :fixed-code="tablePgCode"
+    />
 
     <DemoBlock
       title="基础用法与排序"
