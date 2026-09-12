@@ -154,6 +154,23 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 - **动效没有统一规则**：`--i-motion-fast/base/slow` 有，进出场曲线
   （`easing-in` / `-out` / `-spring`）没有；`prefers-reduced-motion` 只在 4 个组件里零散照顾到。→ A3
 
+### 1.8 远端分支现状
+
+`main` 是唯一基准。除它之外远端还留着五个分支，**其中三个有未合并提交，
+但都不该直接合**——记在这里，免得下一个人重新查一遍：
+
+| 分支 | 未合并 | 该怎么处理 |
+| --- | --- | --- |
+| `claude/bold-bohr-fl0nig` | 0 | 已并入 main，可删 |
+| `claude/cross-framework-component-library-2wawj9` | 0 | 已并入，可删 |
+| `redesign/tdesign-20260911` | 0 | 已并入，可删 |
+| `claude/devui-design-reference-exzjpm` | 6 | **只挑不合**：里面的 Gantt 与 WordCloud 正是 A1/A2，值得摘出来；同分支的 IndexBar / PullRefresh 在 main 里已有等价实现（`IIndexes` / `IPullDownRefresh`），摘了会重复；其余四个提交是首页与明暗切换的返工，会把当前这版视觉改回去 |
+| `feat/agent-interaction-primitives` | 1 | **不要合**。它走的是另一套目录结构（`packages/core`、`playground/`），合进来会变成两套并存的包布局。但里面的 `ci.yml`、`check-package-exports.mjs`、`tests/agent.test.tsx` 可以当 E1/E2/E5 的参考 |
+| `feat/visual-refresh-20260911` | 1 | 首页与顶栏的另一版样式，与当前基准冲突。除非确认要换，否则删掉 |
+
+处理建议：先从 `devui` 分支 cherry-pick Gantt 与 WordCloud（勾掉 A1/A2），
+确认没别的要捞之后，把五个分支一起删掉——留着只会让下一个人反复确认它们是死是活。
+
 ---
 
 ## 2. 任务台账
