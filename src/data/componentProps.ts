@@ -879,5 +879,6 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"gapY","type":"number","doc":"","defaultText":"100","control":{"kind":"number"}},
     {"name":"opacity","type":"number","doc":"","defaultText":"0.12","control":{"kind":"number"}},
     {"name":"color","type":"string","doc":"不传时跟随文字色，深浅主题都能看见","defaultText":"''","control":{"kind":"string"}},
+    {"name":"guard","type":"boolean","doc":"水印层被删除或被改样式时自动重建","defaultText":"true","control":{"kind":"boolean"}},
   ],
 }

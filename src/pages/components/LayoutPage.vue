@@ -258,6 +258,13 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
         </div>
       </IWatermark>
     </DemoBlock>
+    <p>
+      水印层被删掉或被改样式时会自动重建（<code>guard</code>，默认开）。不守的话，
+      在开发者工具里一秒就能抹掉，这个组件也就基本没有意义了。
+      但能力边界要说清楚：<strong>它挡的是随手删一下的人</strong>，挡不住关掉 JavaScript、
+      改本地代码、或者截图前把页面存下来的人。真需要防的内容不该先发到浏览器里——
+      水印是「留下痕迹」，不是访问控制。
+    </p>
 
     <h2>Image 图片</h2>
     <p>

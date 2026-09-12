@@ -23,6 +23,7 @@ import { avatarSizePx, initialsOf, tintOf } from './avatar'
 import { safeHref } from './href'
 import { floatActionDelay, floatActionOffset, floatActionShift } from './float'
 import { isSplitterResetKey, paneRatio, resetPaneSize } from './splitter'
+import { watermarkTampered } from './watermark'
 
 describe('countdown', () => {
   it('不显示毫秒时向上取整到秒：剩 1.4 秒给 2 秒', () => {
@@ -210,6 +211,21 @@ describe('splitter', () => {
     expect(isSplitterResetKey('Enter')).toBe(true)
     expect(isSplitterResetKey(' ')).toBe(true)
     expect(isSplitterResetKey('ArrowLeft')).toBe(false)
+  })
+})
+
+describe('watermark', () => {
+  it('删掉水印层算动过手脚', () => {
+    expect(watermarkTampered(true, null)).toBe(true)
+  })
+
+  it('改样式、类名与 hidden 算，其余属性不算', () => {
+    // 盯得太宽会被自己的样式过渡触发，陷进「改了又恢复」的循环
+    expect(watermarkTampered(false, 'style')).toBe(true)
+    expect(watermarkTampered(false, 'class')).toBe(true)
+    expect(watermarkTampered(false, 'hidden')).toBe(true)
+    expect(watermarkTampered(false, 'data-x')).toBe(false)
+    expect(watermarkTampered(false, null)).toBe(false)
   })
 })
 
