@@ -24,8 +24,12 @@ export interface Locale {
 
   /* 选择 */
   placeholder: string
+  /** 日期选择器的占位。与通用占位分开：「请选择」放在日历上太含糊 */
+  datePlaceholder: string
   selectAll: string
   search: string
+  /** 树的搜索框。比泛泛的「搜索」具体，用户一眼知道搜的是节点不是整页 */
+  searchNode: string
   noMatch: string
   clear: string
 
@@ -33,6 +37,11 @@ export interface Locale {
   confirm: string
   cancel: string
   acknowledge: string
+  /** 关闭键的无障碍名。读屏用户听到的就是这一句，不跟着字典走等于没翻译 */
+  close: string
+  retry: string
+  copy: string
+  copied: string
 
   /* 展开 */
   expand: string
@@ -67,13 +76,19 @@ export const zhCN: Locale = {
   loadFailed: '加载失败，点击重试',
   noMore: '没有更多了',
   placeholder: '请选择',
+  datePlaceholder: '请选择日期',
   selectAll: '全选',
   search: '搜索',
+  searchNode: '搜索节点',
   noMatch: '无匹配选项',
   clear: '清除',
   confirm: '确定',
   cancel: '取消',
   acknowledge: '知道了',
+  close: '关闭',
+  retry: '重试',
+  copy: '复制',
+  copied: '已复制',
   expand: '展开',
   collapse: '收起',
   required: '此项必填',
@@ -97,13 +112,19 @@ export const enUS: Locale = {
   loadFailed: 'Failed to load, tap to retry',
   noMore: 'No more items',
   placeholder: 'Select',
+  datePlaceholder: 'Pick a date',
   selectAll: 'Select all',
   search: 'Search',
+  searchNode: 'Search nodes',
   noMatch: 'No matches',
   clear: 'Clear',
   confirm: 'OK',
   cancel: 'Cancel',
   acknowledge: 'Got it',
+  close: 'Close',
+  retry: 'Retry',
+  copy: 'Copy',
+  copied: 'Copied',
   expand: 'Expand',
   collapse: 'Collapse',
   required: 'This field is required',

@@ -3,7 +3,7 @@
     class="i-select__trigger {{disabled ? 'is-disabled' : ''}} {{display ? '' : 'is-placeholder'}}"
     bindtap="onToggle"
   >
-    <text class="i-select__label">{{display || placeholder}}</text>
+    <text class="i-select__label">{{display || placeholderText}}</text>
     <i-icon name="chevron-down" size="14" />
   </view>
 

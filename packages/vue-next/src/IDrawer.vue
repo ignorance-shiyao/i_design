@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import IIcon from './IIcon.vue'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -21,6 +22,8 @@ const props = withDefaults(
     closable: true
   }
 )
+
+const { locale } = useConfig()
 
 const emit = defineEmits<{ 'update:modelValue': [boolean]; close: [] }>()
 
@@ -77,7 +80,7 @@ onBeforeUnmount(() => {
         >
           <header v-if="title || closable" class="i-drawer__header">
             <h3 class="i-drawer__title">{{ title }}</h3>
-            <button v-if="closable" class="i-drawer__close" aria-label="关闭" @click="close">
+            <button v-if="closable" class="i-drawer__close" :aria-label="locale.close" @click="close">
               <IIcon name="close" :size="18" />
             </button>
           </header>

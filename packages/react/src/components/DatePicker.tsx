@@ -10,6 +10,7 @@ import {
   toISO,
   weekdayLabels
 } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 
 export interface DatePickerProps {
@@ -32,7 +33,7 @@ export interface DatePickerProps {
 export function DatePicker({
   value = null,
   onChange,
-  placeholder = '请选择日期',
+  placeholder = '',
   size = 'md',
   disabled = false,
   invalid = false,
@@ -43,6 +44,9 @@ export function DatePicker({
   format = 'YYYY-MM-DD',
   weekStart = 1
 }: DatePickerProps) {
+  const { locale } = useConfig()
+  /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+  const placeholderText = placeholder || locale.datePlaceholder
   const root = useRef<HTMLDivElement | null>(null)
   const [open, setOpen] = useState(false)
   const selected = useMemo(() => parseISO(value), [value])
@@ -130,7 +134,7 @@ export function DatePicker({
         onKeyDown={onKeyDown}
       >
         <Icon className="i-date__calendar" name="calendar" size={15} />
-        <span className="i-date__value">{selected ? formatDate(selected, format) : placeholder}</span>
+        <span className="i-date__value">{selected ? formatDate(selected, format) : placeholderText}</span>
         {clearable && selected && !disabled && (
           <span
             className="i-date__clear"

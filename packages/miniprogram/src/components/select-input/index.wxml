@@ -10,7 +10,7 @@
       wx:if="{{filterable}}"
       class="i-select-input__input"
       value="{{keyword}}"
-      placeholder="{{value || placeholder}}"
+      placeholder="{{value || placeholderText}}"
       disabled="{{disabled}}"
       bindinput="onInput"
       catchtap="noop"
@@ -18,7 +18,7 @@
     <text
       wx:else
       class="i-select-input__value {{value ? '' : 'i-select-input__placeholder'}}"
-    >{{value || placeholder}}</text>
+    >{{value || placeholderText}}</text>
   </view>
 
   <view class="i-select-input__suffix">

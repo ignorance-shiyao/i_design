@@ -18,6 +18,7 @@ import {
 import IIcon from './IIcon.vue'
 import ICheckbox from './ICheckbox.vue'
 import IInput from './IInput.vue'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -50,6 +51,8 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{ (e: 'update:checked', a0: keys: string[]): void; (e: 'update:expanded', a0: keys: string[]): void; (e: 'update:selected', a0: key: string): void; (e: 'select', a0: node: TreeNode): void }>()
+
+const { locale } = useConfig()
 
 const entities = computed(() => flattenTree(props.data))
 const keyword = ref('')
@@ -171,7 +174,7 @@ function highlight(label: string) {
       v-if="searchable"
       v-model="keyword"
       class="i-tree__search"
-      placeholder="搜索节点"
+      :placeholder="locale.searchNode"
     />
 
     <ul
@@ -205,7 +208,7 @@ function highlight(label: string) {
           type="button"
           class="i-tree__toggle"
           :class="{ 'is-expanded': row.expanded, 'is-leaf': !row.hasChildren }"
-          :aria-label="row.expanded ? '折叠' : '展开'"
+          :aria-label="row.expanded ? locale.collapse : locale.expand"
           :tabindex="-1"
           @click.stop="toggleExpand(row.key)"
         >

@@ -5,6 +5,7 @@
  * 树的展开、半选、搜索都不在这里重写。
  */
 import { flattenTree, labelPath, leafKeys } from '@i-design/common'
+import { getLocale } from '../../config'
 
 Component({
   options: { addGlobalClass: true },
@@ -13,14 +14,18 @@ Component({
     value: { type: String, value: '' },
     checked: { type: Array, value: [] },
     multiple: { type: Boolean, value: false },
-    placeholder: { type: String, value: '请选择' },
+    placeholder: { type: String, value: '' },
     disabled: { type: Boolean, value: false },
     searchable: { type: Boolean, value: true },
     showPath: { type: Boolean, value: true },
     separator: { type: String, value: ' / ' },
     maxDisplay: { type: Number, value: 2 }
   },
-  data: { visible: false, display: '' },
+  data: {
+    placeholderText: '',
+    visible: false,
+    display: ''
+  },
   observers: {
     'data, value, checked, multiple': function () {
       this.refresh()
@@ -28,6 +33,13 @@ Component({
   },
   lifetimes: { attached() { this.refresh() } },
   methods: {
+    /* 传了就用传的，没传才回落到字典 */
+    syncLocale() {
+      const locale = getLocale()
+      this.setData({
+        placeholderText: this.data.placeholder || locale.placeholder
+      })
+    },
     refresh() {
       const entities = flattenTree(this.data.data)
       this.entities = entities

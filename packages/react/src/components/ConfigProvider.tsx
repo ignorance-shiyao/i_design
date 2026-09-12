@@ -1,5 +1,6 @@
-import { createContext, useContext, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
 import { resolveLocale, zhCN, type Locale } from '@i-design/common'
+import { setBridgedLocale } from './localeBridge'
 
 export interface ConfigValue {
   locale: Locale
@@ -44,5 +45,11 @@ export function ConfigProvider({ locale = {}, base = zhCN, size = 'md', children
     () => ({ locale: resolveLocale(locale, base), size }),
     [locale, base, size]
   )
+  /*
+   * 同时写一份给挂在 body 上的那几层（message / confirm / notification）。
+   * 它们的宿主不在 React 树里，context 到不了那里。
+   */
+  useEffect(() => setBridgedLocale(value.locale), [value.locale])
+
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>
 }

@@ -1,3 +1,5 @@
+import { getLocale } from '../../config'
+
 /**
  * SelectInput —— 选择器外壳。
  *
@@ -8,7 +10,7 @@ Component({
   options: { addGlobalClass: true, multipleSlots: true },
   properties: {
     value: { type: String, value: '' },
-    placeholder: { type: String, value: '请选择' },
+    placeholder: { type: String, value: '' },
     size: { type: String, value: 'md' },
     disabled: { type: Boolean, value: false },
     invalid: { type: Boolean, value: false },
@@ -18,7 +20,22 @@ Component({
     keyword: { type: String, value: '' },
     open: { type: Boolean, value: false }
   },
+  data: {
+    placeholderText: ''
+  },
+  lifetimes: {
+    attached() {
+      this.syncLocale()
+    }
+  },
   methods: {
+    /* 传了就用传的，没传才回落到字典 */
+    syncLocale() {
+      const locale = getLocale()
+      this.setData({
+        placeholderText: this.data.placeholder || locale.placeholder
+      })
+    },
     onTap() {
       if (this.data.disabled) return
       this.triggerEvent('openchange', { open: !this.data.open })

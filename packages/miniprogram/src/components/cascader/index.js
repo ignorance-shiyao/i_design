@@ -11,18 +11,25 @@ import {
   labelPath,
   nodePath
 } from '@i-design/common'
+import { getLocale } from '../../config'
 
 Component({
   options: { addGlobalClass: true },
   properties: {
     data: { type: Array, value: [] },
     value: { type: String, value: '' },
-    placeholder: { type: String, value: '请选择' },
+    placeholder: { type: String, value: '' },
     disabled: { type: Boolean, value: false },
     changeOnSelect: { type: Boolean, value: false },
     separator: { type: String, value: ' / ' }
   },
-  data: { visible: false, columns: [], display: '', active: [] },
+  data: {
+    placeholderText: '',
+    visible: false,
+    columns: [],
+    display: '',
+    active: []
+  },
   observers: {
     'data, value': function () {
       this.rebuild()
@@ -30,6 +37,13 @@ Component({
   },
   lifetimes: { attached() { this.rebuild() } },
   methods: {
+    /* 传了就用传的，没传才回落到字典 */
+    syncLocale() {
+      const locale = getLocale()
+      this.setData({
+        placeholderText: this.data.placeholder || locale.placeholder
+      })
+    },
     rebuild() {
       const entities = flattenTree(this.data.data)
       this.entities = entities

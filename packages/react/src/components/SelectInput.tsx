@@ -1,5 +1,6 @@
 import { useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { Icon } from './Icon'
+import { useConfig } from './ConfigProvider'
 
 export interface SelectInputProps {
   /** 单选时显示的文案；多选请用 tags */
@@ -27,7 +28,7 @@ export interface SelectInputProps {
  */
 export function SelectInput({
   value = '',
-  placeholder = '请选择',
+  placeholder = '',
   size = 'md',
   disabled = false,
   invalid = false,
@@ -41,6 +42,9 @@ export function SelectInput({
   tags,
   className = ''
 }: SelectInputProps) {
+  const { locale } = useConfig()
+  /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+  const placeholderText = placeholder || locale.placeholder
   const [focused, setFocused] = useState(false)
   const hasValue = value !== '' || keyword !== ''
 
@@ -104,7 +108,7 @@ export function SelectInput({
           <input
             className="i-select-input__input"
             value={keyword}
-            placeholder={value || placeholder}
+            placeholder={value || placeholderText}
             disabled={disabled}
             onChange={(event) => onKeywordChange?.(event.target.value)}
             onClick={(event) => event.stopPropagation()}
@@ -115,7 +119,7 @@ export function SelectInput({
               .filter(Boolean)
               .join(' ')}
           >
-            {value || placeholder}
+            {value || placeholderText}
           </span>
         )}
       </div>
@@ -125,7 +129,7 @@ export function SelectInput({
           <button
             className="i-select-input__clear"
             type="button"
-            aria-label="清除"
+            aria-label={locale.clear}
             onClick={handleClear}
           >
             <Icon name="close" size={14} />

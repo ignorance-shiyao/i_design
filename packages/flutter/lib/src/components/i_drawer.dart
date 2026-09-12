@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/i_theme.dart';
+import 'i_config_provider.dart';
 import '../tokens/tokens.dart';
 import 'i_icon.dart';
 
@@ -111,7 +112,7 @@ class IDrawer extends StatelessWidget {
                       if (closable)
                         GestureDetector(
                           onTap: () => Navigator.of(context).pop(),
-                          child: IIcon('close', size: 18, color: c.textTertiary, semanticLabel: '关闭'),
+                          child: IIcon('close', size: 18, color: c.textTertiary, semanticLabel: IConfigProvider.localeOf(context).close),
                         ),
                     ],
                   ),

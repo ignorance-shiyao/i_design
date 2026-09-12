@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useConfig } from './ConfigProvider'
 
 export interface LoadingProps {
   loading?: boolean
@@ -16,8 +17,9 @@ export function Loading({
   fullscreen = false,
   children
 }: LoadingProps) {
+  const { locale } = useConfig()
   const indicator = (
-    <span className={`i-loading i-loading--${size}`} role="status" aria-label={text || '加载中'}>
+    <span className={`i-loading i-loading--${size}`} role="status" aria-label={text || locale.loading}>
       <span className="i-loading__spinner" />
       {text && <span className="i-loading__text">{text}</span>}
     </span>

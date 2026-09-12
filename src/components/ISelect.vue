@@ -276,7 +276,7 @@ onBeforeUnmount(() => {
         v-if="clearable && hasValue && !disabled"
         class="i-select__clear"
         role="button"
-        aria-label="清除"
+        :aria-label="locale.clear"
         @click.stop="clear"
       >
         <IIcon name="close" :size="14" />

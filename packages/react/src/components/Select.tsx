@@ -235,7 +235,7 @@ export function Select({
           <span
             className="i-select__clear"
             role="button"
-            aria-label="清除"
+            aria-label={locale.clear}
             onClick={(e) => {
               e.stopPropagation()
               onChange?.(multiple ? [] : null)

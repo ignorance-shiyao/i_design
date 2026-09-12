@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../logic/locale.dart';
 import '../theme/i_theme.dart';
+import 'i_config_provider.dart';
 import '../tokens/tokens.dart';
 
 enum IEmptyType { empty, search, error, permission }
@@ -28,17 +30,21 @@ class IEmpty extends StatelessWidget {
   final Widget Function(String fileName)? assetBuilder;
   final bool compact;
 
-  (String, String, String) get _preset => switch (type) {
-        IEmptyType.empty => ('暂无数据', '这里还没有内容，创建第一条试试。', 'no-data@2x.webp'),
-        IEmptyType.search => ('没有匹配结果', '换个关键词，或减少筛选条件。', 'search-empty@2x.webp'),
-        IEmptyType.error => ('加载失败', '请检查网络后重试。', 'load-failed@2x.webp'),
-        IEmptyType.permission => ('无访问权限', '请联系管理员申请该资源的访问权限。', 'no-permission@2x.webp'),
+  /// 只剩文件名留在这里，文案全部来自字典——换语言时空态不该是唯一还在说中文的地方
+  (IEmptyReason, String) get _art => switch (type) {
+        IEmptyType.empty => (IEmptyReason.empty, 'no-data@2x.webp'),
+        IEmptyType.search => (IEmptyReason.search, 'search-empty@2x.webp'),
+        IEmptyType.error => (IEmptyReason.error, 'load-failed@2x.webp'),
+        IEmptyType.permission => (IEmptyReason.permission, 'no-permission@2x.webp'),
       };
 
   @override
   Widget build(BuildContext context) {
     final c = iColorsOf(context);
-    final (presetTitle, presetDesc, file) = _preset;
+    final (reason, file) = _art;
+    final preset = IConfigProvider.localeOf(context).emptyPresets[reason]!;
+    final presetTitle = preset.title;
+    final presetDesc = preset.description;
 
     return Padding(
       padding: EdgeInsets.symmetric(

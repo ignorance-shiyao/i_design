@@ -5,6 +5,7 @@ import IButton from './IButton.vue'
 import IIcon from './IIcon.vue'
 import type { IconName } from './icons'
 import { arrowStyle, useOverlayPosition } from './overlayPosition'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -21,14 +22,19 @@ const props = withDefaults(
   {
     title: '确认执行该操作？',
     content: '',
-    confirmText: '确定',
-    cancelText: '取消',
+    confirmText: '',
+    cancelText: '',
     type: 'brand',
     placement: 'top',
     icon: 'help-circle',
     disabled: false
   }
 )
+
+const { locale } = useConfig()
+/* 传了就用传的，没传才回落到字典——按钮上的字最该由调用方说清楚要确认什么 */
+const confirmLabel = computed(() => props.confirmText || locale.value.confirm)
+const cancelLabel = computed(() => props.cancelText || locale.value.cancel)
 
 const emit = defineEmits<{ confirm: []; cancel: []; 'update:visible': [boolean] }>()
 
@@ -106,9 +112,9 @@ const style = computed(() => ({ left: `${pos.value.x}px`, top: `${pos.value.y}px
           </div>
         </div>
         <div class="i-popconfirm__foot">
-          <IButton size="sm" @click="onCancel">{{ cancelText }}</IButton>
+          <IButton size="sm" @click="onCancel">{{ cancelLabel }}</IButton>
           <IButton size="sm" :variant="type === 'danger' ? 'danger' : 'primary'" @click="onConfirm">
-            {{ confirmText }}
+            {{ confirmLabel }}
           </IButton>
         </div>
       </div>

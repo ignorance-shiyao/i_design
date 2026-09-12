@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/i_theme.dart';
+import 'i_config_provider.dart';
 import '../tokens/tokens.dart';
 import 'i_icon.dart';
 
@@ -13,7 +14,7 @@ class IDatePicker extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.placeholder = '请选择日期',
+    this.placeholder = '',
     this.size = ISize.md,
     this.enabled = true,
     this.invalid = false,
@@ -68,7 +69,9 @@ class IDatePicker extends StatelessWidget {
             const SizedBox(width: IDesignTokensLight.spacing2),
             Expanded(
               child: Text(
-                value == null ? placeholder : _format(value!),
+                value == null
+                    ? (placeholder.isEmpty ? IConfigProvider.localeOf(context).datePlaceholder : placeholder)
+                    : _format(value!),
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: value == null ? c.textTertiary : c.text,
@@ -79,7 +82,7 @@ class IDatePicker extends StatelessWidget {
             if (showClear)
               GestureDetector(
                 onTap: () => onChanged(null),
-                child: IIcon('close', size: 14, color: c.textTertiary, semanticLabel: '清除'),
+                child: IIcon('close', size: 14, color: c.textTertiary, semanticLabel: IConfigProvider.localeOf(context).clear),
               ),
           ],
         ),

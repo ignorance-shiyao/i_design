@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../logic/multiselect.dart';
 import '../logic/virtual.dart';
 import '../theme/i_theme.dart';
+import 'i_config_provider.dart';
 import '../tokens/tokens.dart';
 import 'i_icon.dart';
 
@@ -241,7 +242,7 @@ class ISelect extends StatelessWidget {
                     onChanged(null);
                   }
                 },
-                child: IIcon('close', size: 14, color: c.textTertiary, semanticLabel: '清除'),
+                child: IIcon('close', size: 14, color: c.textTertiary, semanticLabel: IConfigProvider.localeOf(context).clear),
               )
             else
               IIcon('chevron-down', size: 14, color: c.textTertiary),

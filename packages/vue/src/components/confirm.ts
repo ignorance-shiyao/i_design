@@ -2,6 +2,7 @@ import { createApp, type App } from 'vue'
 import { isConfirmed, type ConfirmKind, type PromptRules } from '@i-design/common'
 import IConfirmLayer from './IConfirmLayer.vue'
 import { confirms } from './confirmState'
+import { bridgedLocale } from './localeBridge'
 
 export interface ConfirmBoxOptions {
   title?: string
@@ -37,6 +38,8 @@ function ensureHost() {
 
 function open(kind: ConfirmKind, options: PromptOptions): Promise<string> {
   ensureHost()
+  /* 浮层不在组件树里，读 ConfigProvider 留下的那份字典 */
+  const locale = bridgedLocale.value
   return new Promise<string>((resolve, reject) => {
     const id = ++seed
     confirms.value = [
@@ -46,8 +49,9 @@ function open(kind: ConfirmKind, options: PromptOptions): Promise<string> {
         kind,
         title: options.title ?? '',
         content: options.content ?? '',
-        confirmText: options.confirmText ?? (kind === 'alert' ? '知道了' : '确定'),
-        cancelText: options.cancelText ?? '取消',
+        confirmText:
+          options.confirmText ?? (kind === 'alert' ? locale.acknowledge : locale.confirm),
+        cancelText: options.cancelText ?? locale.cancel,
         danger: options.danger ?? false,
         // 破坏性确认默认不允许点遮罩关闭：那一下太容易误触，而它旁边就是「确定」
         maskClosable: options.maskClosable ?? !options.danger,

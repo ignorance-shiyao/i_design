@@ -7,20 +7,42 @@
  * 与 modal 的分工同 Web 端：删一行用 popconfirm，删整个项目用 modal。
  */
 import { resolveOverlay } from '@i-design/common'
+import { getLocale } from '../../config'
 
 Component({
   options: { addGlobalClass: true, multipleSlots: true },
   properties: {
     title: { type: String, value: '' },
     content: { type: String, value: '' },
-    confirmText: { type: String, value: '确定' },
-    cancelText: { type: String, value: '取消' },
+    confirmText: { type: String, value: '' },
+    cancelText: { type: String, value: '' },
     placement: { type: String, value: 'top' },
     theme: { type: String, value: 'default' },
     disabled: { type: Boolean, value: false }
   },
-  data: { visible: false, left: 0, top: 0, arrow: 0, actual: 'top' },
+  data: {
+    confirmLabel: '',
+    cancelLabel: '',
+    visible: false,
+    left: 0,
+    top: 0,
+    arrow: 0,
+    actual: 'top'
+  },
+  lifetimes: {
+    attached() {
+      this.syncLocale()
+    }
+  },
   methods: {
+    /* 传了就用传的，没传才回落到字典 */
+    syncLocale() {
+      const locale = getLocale()
+      this.setData({
+        confirmLabel: this.data.confirmText || locale.confirm,
+        cancelLabel: this.data.cancelText || locale.cancel
+      })
+    },
     onToggle() {
       if (this.data.disabled) return
       if (this.data.visible) return this.setData({ visible: false })

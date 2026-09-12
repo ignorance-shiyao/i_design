@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import IIcon from './IIcon.vue'
+import { useConfig } from './useConfig'
 
 /**
  * 选择器外壳：长得像输入框、点开是一个面板。
@@ -29,7 +30,7 @@ const props = withDefaults(
   }>(),
   {
     value: '',
-    placeholder: '请选择',
+    placeholder: '',
     size: 'md',
     disabled: false,
     invalid: false,
@@ -37,6 +38,10 @@ const props = withDefaults(
     filterable: false
   }
 )
+
+const { locale } = useConfig()
+/* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+const placeholderText = computed(() => props.placeholder || locale.value.placeholder)
 
 /** 面板开合由调用方持有：它才知道选完要不要关 */
 const open = defineModel<boolean>('open', { default: false })
@@ -113,12 +118,12 @@ function onKeydown(event: KeyboardEvent) {
         v-if="filterable"
         v-model="keyword"
         class="i-select-input__input"
-        :placeholder="value || placeholder"
+        :placeholder="value || placeholderText"
         :disabled="disabled"
         @click.stop
       />
       <span v-else class="i-select-input__value" :class="{ 'i-select-input__placeholder': !value }">
-        {{ value || placeholder }}
+        {{ value || placeholderText }}
       </span>
     </div>
 
@@ -127,7 +132,7 @@ function onKeydown(event: KeyboardEvent) {
         v-if="clearable && hasValue && !disabled"
         class="i-select-input__clear"
         type="button"
-        aria-label="清除"
+        :aria-label="locale.clear"
         @click="onClear"
       >
         <IIcon name="close" :size="14" />

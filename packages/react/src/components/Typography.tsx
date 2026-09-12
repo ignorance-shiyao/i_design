@@ -9,6 +9,7 @@ import {
   type ReactNode
 } from 'react'
 import { isTextOverflowing, rafThrottle } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 import { Tooltip } from './Tooltip'
 
@@ -52,14 +53,17 @@ export function Typography({
   ellipsis = false,
   ellipsisTooltip = false,
   expandable = false,
-  expandText = '展开',
-  collapseText = '收起',
+  expandText = '',
+  collapseText = '',
   copyable = false,
   copyText = '',
   as,
   className = '',
   children
 }: TypographyProps) {
+  const { locale } = useConfig()
+  const expandLabel = expandText || locale.expand
+  const collapseLabel = collapseText || locale.collapse
   // 标题的样式与标签默认绑定：视觉层级与文档结构一致，读屏才能正确导航
   const tag = as || (variant.startsWith('h') ? variant : variant === 'caption' ? 'span' : 'p')
   const lines = typeof ellipsis === 'number' ? ellipsis : 0
@@ -208,11 +212,11 @@ export function Typography({
         aria-expanded={expanded}
         onClick={() => setExpanded(!expanded)}
       >
-        {expanded ? collapseText : expandText}
+        {expanded ? collapseLabel : expandLabel}
       </button>
     ) : null,
     copyable ? (
-      <button key="copy" type="button" className="i-typo__copy" aria-label={copied ? '已复制' : '复制'} onClick={copy}>
+      <button key="copy" type="button" className="i-typo__copy" aria-label={copied ? locale.copied : locale.copy} onClick={copy}>
         <Icon name={copied ? 'check' : 'copy'} />
       </button>
     ) : null

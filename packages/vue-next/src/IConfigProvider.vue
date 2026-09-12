@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, provide } from 'vue'
+import { computed, provide, watchEffect } from 'vue'
 import { resolveLocale, zhCN, type Locale } from '@i-design/common'
 import { configKey } from './context'
+import { setBridgedLocale } from './localeBridge'
 
 /**
  * 全局配置。包住一棵子树，里面的组件就用这里给的字典与默认尺寸。
@@ -22,6 +23,12 @@ const props = withDefaults(
 )
 
 const locale = computed(() => resolveLocale(props.locale, props.base))
+
+/*
+ * 同时写一份给挂在 body 上的那几层（message / confirm / notification）。
+ * 它们的宿主不在组件树里，inject 到不了那里。
+ */
+watchEffect(() => setBridgedLocale(locale.value))
 
 provide(configKey, {
   locale,
