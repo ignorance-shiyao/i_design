@@ -98,6 +98,10 @@ const { floatActionOffset, floatActionShift, floatActionDelay } = await bundle(
   'packages/common/src/logic/float.ts',
   'float'
 )
+const { shouldShowElapsed, elapsedParts, elapsedInterval } = await bundle(
+  'packages/common/src/logic/elapsed.ts',
+  'elapsed'
+)
 const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
@@ -1614,6 +1618,26 @@ const resetExpectations = [[0.5, 1000], [0.5, 300], [0.2, 1000], [0.9, 1000]].ma
   )
 )
 
+/*
+ * 等待时长：从第几秒开始显示、怎么进位、下一跳等多久——三处各端都容易各写一遍，
+ * 结果是同一次等待在两端显示出不同的秒数。
+ */
+const elapsedExpectations = [
+  ...[0, 2999, 3000, 61000, 3599999].map(
+    (ms) => `    expect(shouldShowElapsed(${ms}), ${shouldShowElapsed(ms)});`
+  ),
+  ...[0, 5400, 59999, 60000, 125000, -100].flatMap((ms) => {
+    const p = elapsedParts(ms)
+    return [
+      `    expect(elapsedParts(${ms}).minutes, ${p.minutes});`,
+      `    expect(elapsedParts(${ms}).seconds, ${p.seconds});`
+    ]
+  }),
+  ...[0, 1, 500, 999, 1000, 5400].map(
+    (ms) => `    expect(elapsedInterval(${ms}), ${elapsedInterval(ms)});`
+  )
+]
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -1815,6 +1839,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/elapsed.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -2162,6 +2187,10 @@ ${toneExpectations.join('\n')}
 
   test('外链白名单的放行与拒绝清单与 Web 端一致', () {
 ${hrefExpectations.join('\n')}
+  });
+
+  test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
+${elapsedExpectations.join('\n')}
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {

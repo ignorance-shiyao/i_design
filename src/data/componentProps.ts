@@ -487,6 +487,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"text","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md","lg"]}},
     {"name":"fullscreen","type":"boolean","doc":"遮罩是否覆盖整个父容器（父容器需为定位上下文）","defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"elapsed","type":"boolean","doc":"显示已等待时长。 智能体的一次调用动辄十几秒，只转圈不给数字的话，三秒和三十秒看起来一样， 于是有人反复点，或者以为卡死了刷新页面——前一次的结果就此丢掉。","defaultText":"false","control":{"kind":"boolean"}},
   ],
   IMentions: [
     {"name":"modelValue","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},

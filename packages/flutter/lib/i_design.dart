@@ -19,6 +19,7 @@ export 'src/logic/chart.dart';
 export 'src/logic/color.dart';
 export 'src/logic/confirm.dart';
 export 'src/logic/countdown.dart';
+export 'src/logic/elapsed.dart';
 export 'src/logic/file.dart';
 export 'src/logic/float.dart';
 export 'src/logic/flow.dart';

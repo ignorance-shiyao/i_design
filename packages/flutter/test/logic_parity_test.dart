@@ -36,6 +36,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/elapsed.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -1218,6 +1219,32 @@ void main() {
     expect(safeHref('\\\\evil.com'), null);
     expect(safeHref('  javascript:alert(1)  '), null);
     expect(safeHref(''), null);
+  });
+
+  test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
+    expect(shouldShowElapsed(0), false);
+    expect(shouldShowElapsed(2999), false);
+    expect(shouldShowElapsed(3000), true);
+    expect(shouldShowElapsed(61000), true);
+    expect(shouldShowElapsed(3599999), true);
+    expect(elapsedParts(0).minutes, 0);
+    expect(elapsedParts(0).seconds, 0);
+    expect(elapsedParts(5400).minutes, 0);
+    expect(elapsedParts(5400).seconds, 5);
+    expect(elapsedParts(59999).minutes, 0);
+    expect(elapsedParts(59999).seconds, 59);
+    expect(elapsedParts(60000).minutes, 1);
+    expect(elapsedParts(60000).seconds, 0);
+    expect(elapsedParts(125000).minutes, 2);
+    expect(elapsedParts(125000).seconds, 5);
+    expect(elapsedParts(-100).minutes, 0);
+    expect(elapsedParts(-100).seconds, 0);
+    expect(elapsedInterval(0), 1000);
+    expect(elapsedInterval(1), 999);
+    expect(elapsedInterval(500), 500);
+    expect(elapsedInterval(999), 1);
+    expect(elapsedInterval(1000), 1000);
+    expect(elapsedInterval(5400), 600);
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {

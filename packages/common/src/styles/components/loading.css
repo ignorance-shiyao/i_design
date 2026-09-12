@@ -38,3 +38,14 @@
   }
   @keyframes i-loading-pulse { 50% { opacity: 0.35; } }
 }
+
+/*
+ * 已等待时长。用次要色与更小的字号：它是参照信息，不是主信息——
+ * 与文案同重的话，读者会先读数字再读在等什么，顺序反了。
+ */
+.i-loading__elapsed {
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  /* 数字等宽，秒数跳动时整行不会左右晃 */
+  font-variant-numeric: tabular-nums;
+}

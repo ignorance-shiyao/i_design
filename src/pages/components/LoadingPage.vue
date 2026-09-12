@@ -6,6 +6,7 @@ import ICard from '@/components/ICard.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 
 const areaLoading = ref(true)
+const waiting = ref(true)
 </script>
 
 <template>
@@ -24,6 +25,19 @@ const areaLoading = ref(true)
       <ILoading size="sm" />
       <ILoading />
       <ILoading size="lg" text="加载中" />
+    </DemoBlock>
+
+    <DemoBlock
+      title="显示已等多久"
+      description="智能体的一次调用动辄十几秒。只转圈不给数字的话，三秒和三十秒看起来一样，于是有人反复点，或者以为卡死了刷新页面——前一次的结果就此丢掉。前三秒不显示：比它更快的请求，用户来不及产生「是不是卡了」的疑问。"
+      code='<ILoading elapsed text="正在生成" />'
+    >
+      <div class="stack">
+        <IButton size="sm" @click="waiting = !waiting">
+          {{ waiting ? '停止' : '重新开始' }}
+        </IButton>
+        <ILoading :loading="waiting" elapsed text="正在生成" />
+      </div>
     </DemoBlock>
 
     <DemoBlock

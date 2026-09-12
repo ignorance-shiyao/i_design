@@ -24,6 +24,7 @@ import { safeHref } from './href'
 import { floatActionDelay, floatActionOffset, floatActionShift } from './float'
 import { isSplitterResetKey, paneRatio, resetPaneSize } from './splitter'
 import { watermarkTampered } from './watermark'
+import { ELAPSED_THRESHOLD, elapsedInterval, elapsedParts, shouldShowElapsed } from './elapsed'
 
 describe('countdown', () => {
   it('不显示毫秒时向上取整到秒：剩 1.4 秒给 2 秒', () => {
@@ -211,6 +212,26 @@ describe('splitter', () => {
     expect(isSplitterResetKey('Enter')).toBe(true)
     expect(isSplitterResetKey(' ')).toBe(true)
     expect(isSplitterResetKey('ArrowLeft')).toBe(false)
+  })
+})
+
+describe('elapsed', () => {
+  it('三秒之内不显示数字', () => {
+    // 一秒内就返回的请求上挂一个「0 秒」只会让界面更吵
+    expect(shouldShowElapsed(2999)).toBe(false)
+    expect(shouldShowElapsed(ELAPSED_THRESHOLD)).toBe(true)
+  })
+
+  it('向下取整：显示的秒数不会比真实时间还大', () => {
+    expect(elapsedParts(5400)).toEqual({ minutes: 0, seconds: 5 })
+    expect(elapsedParts(59999)).toEqual({ minutes: 0, seconds: 59 })
+    expect(elapsedParts(125000)).toEqual({ minutes: 2, seconds: 5 })
+    expect(elapsedParts(-100)).toEqual({ minutes: 0, seconds: 0 })
+  })
+
+  it('刷新间隔对齐到下一个整秒，避免累积漂移', () => {
+    expect(elapsedInterval(5400)).toBe(600)
+    expect(elapsedInterval(1000)).toBe(1000)
   })
 })
 
