@@ -131,7 +131,7 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 新增共享逻辑时务必同步加断言，否则 Dart 端可以悄悄写出另一套算法。
 
 **已补（E5）**：`npm test` 覆盖共享逻辑里已经出过 bug 的那几处，并在 CI 上单列一步。
-**缺口**：没有无障碍自动检查。任务见 E 组。
+**缺口**：无障碍已有自动检查（E6），存量清理见 E10。
 
 ### 1.7 已知的坑与债
 
@@ -320,9 +320,38 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
     装进一个空白 Vue 2.7 项目能渲染按钮
   - 依赖：无
 
-- [ ] **E6 · 无障碍自动检查**（P2）
-  - 落点：Playwright + axe，遍历文档站路由，亮暗两态各跑一遍
-  - 验收：输出违规清单并接进 CI（先只报告不阻断，清零后再改成阻断）
+- [x] **E6 · 无障碍自动检查**（P2，已完成）
+  - 落地：`scripts/check-a11y.mjs`（`npm run check:a11y`），Playwright + axe 扫
+    文档站全部路由、亮暗两态共 112 个页面；已接进 `ci.yml`
+  - 只收 serious 与 critical：axe 的 minor / moderate 里大量是建议性条目，
+    一并算失败会让这个检查很快被当成噪声关掉
+  - **扫描前必须关掉动效**：进场是淡入的，axe 在淡入过程中取样量到的是半透明
+    状态下的颜色——同一份代码两次跑出不同结果。第一版就这样随机翻红，
+    而会随机翻红的检查比没有检查更糟。现在 `reducedMotion` 与 `data-motion`
+    两条都关，连跑三次结果一致
+  - **基线机制**：首次扫出 110 项存量，一次清零不现实，所以只有新增问题才算失败，
+    基线只能缩小（`--update`）。基线按「主题 + 路由 + 规则」记而不记选择器——
+    选择器里带着 scoped 哈希与 nth-child，改一行无关代码就会变
+  - **它立刻查出并修掉的组件级缺陷**（这些才是发给使用方的东西）：
+    Checkbox 半选只写了 `aria-checked="mixed"` 而没设原生 `indeterminate`
+    属性（读屏播报的仍是「未选中」）；Progress 的进度条没有名字；
+    Rate 用 `role="slider"` 套按钮属于嵌套交互，改成 radiogroup + radio；
+    Calendar 的 `gridcell` 没有 `role="row"` 父节点，用 `display: contents`
+    的行容器补语义而不动布局；VirtualList 在容器上写了只对表格类角色有效的
+    `aria-rowcount`，改成每项的 `aria-setsize` / `aria-posinset`——虚拟滚动
+    尤其需要，否则两万行会被念成「第 3 项，共 12 项」；Badge 的 `aria-label`
+    挂在无角色的 span 上；SelectInput 的组合框没有名字；Scrollbar 与
+    VirtualList 的滚动区不能用键盘进入；Dropdown 的包装层无条件写
+    `aria-haspopup`，与插槽里的按钮构成嵌套交互
+  - 剩余存量记在 `docs/a11y-baseline.json`，转入 E10
+
+- [ ] **E10 · 清理无障碍存量**（P2，来自 E6）
+  - 现状：`docs/a11y-baseline.json` 里 110 项，按规则分布大致是
+    对比度 ~70、缺标签 ~16、按钮没名字 ~14，其余是滚动区与 ARIA 细节
+  - 大头是文档站自己的样式（次要文字与链接在暗色下对比度不足）与示例里
+    没写标签的控件——不是组件库的缺陷，但同样是读者会撞上的页面
+  - 做法：每修好一批跑 `node scripts/check-a11y.mjs --update` 把基线缩小
+  - 验收：基线降到 0 后，把检查从「只挡新增」改成「一项都不许有」
 
 - [ ] **E8 · 浮层定位复用审计**（P2，迁自旧 ROADMAP 长期项）
   - 现状：Tooltip / Popconfirm / Popover / Dropdown 已使用统一定位适配，AutoComplete / TimePicker 也调用共享算法。
