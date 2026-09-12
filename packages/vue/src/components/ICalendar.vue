@@ -157,7 +157,7 @@ const cellClass = (iso: string, outside: boolean, today: boolean) => ({
           -->
           <span v-if="marksByDate.get(cell.iso)?.length" class="i-calendar__marks">
             <span
-              v-for="(mark, i) in marksByDate.get(cell.iso)!.slice(0, 2)"
+              v-for="(mark, i) in marksByDate.get(cell.iso).slice(0, 2)"
               :key="i"
               class="i-calendar__mark"
               :class="`is-${mark.type ?? 'brand'}`"
@@ -165,8 +165,8 @@ const cellClass = (iso: string, outside: boolean, today: boolean) => ({
             >
               {{ mark.label }}
             </span>
-            <span v-if="marksByDate.get(cell.iso)!.length > 2" class="i-calendar__more">
-              +{{ marksByDate.get(cell.iso)!.length - 2 }}
+            <span v-if="marksByDate.get(cell.iso).length > 2" class="i-calendar__more">
+              +{{ marksByDate.get(cell.iso).length - 2 }}
             </span>
           </span>
         </button>

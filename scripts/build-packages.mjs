@@ -8,14 +8,17 @@
  * 每个包单独一次 Vite library 构建，而不是打成一个大包：使用方装 React 那份时
  * 不该把 Vue 的实现也拖进 node_modules。
  *
- * Vue 2.7 那个包暂时不在这里——它现在编译不过去，而且不是这次改坏的
- * （详见台账 E9）。与其发一个装上去就报错的包，不如先不发。
+ * Vue 2.7 包现在可以编译了（台账 E9）：转换器剥掉模板里 Vue 2 不认的 TS
+ * 语法之后，和 vue-next 一样走 Vite library 构建。vue 必须解析到 2.7——
+ * 根目录的 vue 是 3.x，拿 3 的 compiler-sfc 去编 2.7 的 SFC 会编出另一套运行时。
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { build } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import vue2 from '@vitejs/plugin-vue2'
 import react from '@vitejs/plugin-react'
 
 /*
@@ -34,9 +37,12 @@ const EXTERNAL = [
   '@i-design/common', '@i-design/vue-next', '@i-design/react'
 ]
 
+const require = createRequire(import.meta.url)
+
 const targets = [
   { dir: 'common', entry: 'src/index.ts', plugins: () => [] },
   { dir: 'vue-next', entry: 'src/index.ts', plugins: () => [vue()] },
+  { dir: 'vue', entry: 'src/index.ts', plugins: () => [vue2()] },
   { dir: 'mobile-vue', entry: 'src/index.ts', plugins: () => [vue()] },
   { dir: 'react', entry: 'src/index.ts', plugins: () => [react()] },
   { dir: 'mobile-react', entry: 'src/index.ts', plugins: () => [react()] }
@@ -62,7 +68,11 @@ async function buildOne(target) {
     logLevel: 'warn',
     plugins: target.plugins(),
     resolve: {
-      alias: { '@i-design/common': join(root, 'packages/common/src/index.ts') }
+      alias: {
+        '@i-design/common': join(root, 'packages/common/src/index.ts'),
+        // Vue 2 包必须解析到 2.7：根 node_modules 的 vue 是 3.x
+        ...(target.dir === 'vue' ? { vue: dirname(require.resolve('vue/package.json', { paths: [dir] })) } : {})
+      }
     },
     build: {
       lib: { entry: join(dir, target.entry), formats: ['es', 'cjs'], fileName: (f) => `index.${f === 'es' ? 'mjs' : 'cjs'}` },
@@ -124,6 +134,14 @@ function buildStyles() {
  */
 function buildTypes(dirs) {
   for (const dir of dirs) {
+    /*
+     * Vue 2 不能走 vue-tsc：它绑的是 Vue 3 语言服务，拿 2.7 的 SFC 会把
+     * 合法的转换产物报成一堆错。属性声明按源码生成，见 build-types.mjs。
+     */
+    if (dir === 'vue') {
+      execFileSync('node', ['packages/vue/scripts/build-types.mjs'], { cwd: root, stdio: 'pipe' })
+      continue
+    }
     const pkg = join(root, 'packages', dir)
     const tsconfig = join(pkg, 'tsconfig.build.json')
     /*

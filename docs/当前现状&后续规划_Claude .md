@@ -141,7 +141,9 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 - **包已能装（E1）**：各包产出 ESM/CJS + 类型声明 + 打平样式，`exports` 等字段补齐，
   `npm run build:packages` 一步到位，入口由 `check-package-exports.mjs` 核对。
   已在干净树打包后装进空白 Vue 3 / React 项目实测渲染与类型。
-  **Vue 2.7 那个包例外**：它至今编译不过去，不在构建之列 → E9
+  Vue 2.7 包已能构建并装进空白项目（E9）：转换器剥掉模板里 Vue 2 不认的 TS，
+  `defineModel` / `useId` 注入垫片；类型声明按源码生成（vue-tsc 绑的是 Vue 3
+  语言服务，不能拿来编 2.7）。
 - **CI 已覆盖 PR（E2）**：`ci.yml` 在 PR 与 push 到 main 上跑校验、类型、站点构建
   与发布产物构建，并检查生成物是否已提交；`deploy.yml` 只管部署。
 - **覆盖数字口径已统一（E4）**：站点只展示覆盖矩阵；两列口径并排放在源码快照里，
@@ -222,7 +224,7 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
     构建通过、浏览器里无报错、按钮底色取到品牌色、`.i-select` 渲染出来；
     把 `variant` 写成非法值时两端类型检查都报错（证明 `.d.ts` 真的生效，
     而不是退化成 `any`）；React 产物里 grep 不到 vue
-  - 未覆盖：Vue 2.7 那个包不在构建之列，见 E9
+  - Vue 2.7 已纳入同一条构建，见 E9
 
 - [x] **E2 · CI 在 PR 上跑，并清掉过期分支名**（P0，已完成）
   - 落地：新增 `.github/workflows/ci.yml`，`pull_request` 与 push 到 main 都触发，
@@ -306,22 +308,25 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
   - 实测：喂 `javascript:alert(1)` 时 Link 退化成 `<button>` 且不带 href、文字保留，
     正常地址照常渲染成 `<a>`；golden test +18 条把白名单钉在各端
 
-- [ ] **E9 · 让 `packages/vue`（Vue 2.7）能编译**（P1）
-  - 现状：这个包**从来没编译通过过**，不是哪次改动弄坏的——把当前改动全部
-    stash 掉，在 main 上一样失败。它的源码由 `packages/vue/scripts/convert.mjs`
-    从 Vue 3 源自动转换而来，转换器对某些语法的产物是过不了编译的
-  - 已修的一处：`convertEmits` 遇到 Vue 3 的具名元组（`select: [task: AgentTask]`）
-    会产出非法的 `a0: task: AgentTask`，已修，影响 8 个文件
-  - 仍卡住：`ICalendar` 还有一处报错，位置偏移在改动可疑代码后并不移动，
-    尚未定位。逐文件探测时用 `write: false` 会触发一个插件侧的假错误
-    （`currentInput.slice is not a function`），这条路先别走
-  - 为什么要管：覆盖矩阵把它算作完整的一端，而它现在装出去是报错的——
-    也就是说矩阵里有一列是虚的
-  - 落点：`packages/vue/scripts/convert.mjs` 与它的产物；修好后接进
-    `scripts/build-packages.mjs` 的 `targets`
-  - 验收：`packages/vue` 能构建出 dist 并通过 `check-package-exports.mjs`，
-    装进一个空白 Vue 2.7 项目能渲染按钮
-  - 依赖：无
+- [x] **E9 · 让 `packages/vue`（Vue 2.7）能编译**（P1，已完成）
+  - 根因不在构建脚本：转换器产出的模板带 Vue 2 不认的 TS（`foo!`、`(x: T) =>`），
+    根 `<template>` 又只吃到第一处内层 `</template>`，IFlow 的 `resizeTarget!`
+    漏在后面。vite 报的 loc 是整份 SFC 压成一行，对不上源码。
+    另有 `defineModel` 原样留在 JS 里，使用方一渲染就 `is not defined`
+  - 落地：`convert.mjs` 改吃最后一个 `</template>`，剥非空断言与箭头参数类型，
+    kebab 的 `v-model` 也改成 `value` / `input`，注入 `defineModel` / `useId`
+    垫片（垫片本身不得出现 `modelValue`，否则 check:parity 会当残留）。
+    包接进 `build-packages.mjs` 的 targets，vue 解析到 2.7 而不是根目录的 3.x
+  - 类型：vue-tsc 绑的是 Vue 3 语言服务，拿去编 2.7 会把合法产物报成错。
+    改为 `build-types.mjs` 按 `parseVueProps` 生成 d.ts。解析器原先不算 `<>`
+    深度，`Record<string, T>` 被逗号切开写成非法的 `Record<string`——
+    使用方的类型检查会在第一处语法错处全部失败，看起来像「没有类型」
+  - 实测：空白 Vue 2.7 Vite 项目装上打包后的 `@i-design/vue`，IButton 渲染出来；
+    Playwright 量到亮色 1280 主按钮高 34px、底 `#5e7ce0`、白字，sm 28 / lg 42；
+    390px 下 md 44 / sm 36 / lg 52（自适应令牌，不是回归）。
+    `variant: 'nope'` 类型检查报错，`primary` 通过
+  - 静态闸：check:parity 的 Vue 2 扫描改为吃完整模板，并拦非空断言与参数类型
+
 
 - [x] **E6 · 无障碍自动检查**（P2，已完成）
   - 落地：`scripts/check-a11y.mjs`（`npm run check:a11y`），Playwright + axe 扫
@@ -670,7 +675,7 @@ PR 描述里应该已经写清楚了。
 
 1. **F0 / F1 已完成**：目录按源码推导，历史计划与唯一台账已校准。
 2. ~~**E2**：让质量检查在 PR 上生效，与部署分离~~（已完成）
-3. ~~**E1**：包能装出去，这个项目才配叫组件库~~（已完成；Vue 2.7 的缺口转入 **E9**）
+3. ~~**E1 / E9**：包能装出去，Vue 2.7 那一端也不再是虚的~~（已完成）
 4. ~~**D1**：参数 playground，示例站从「能看」变成「能试」~~（已完成，先接了四页；其余页面按需接入）
 5. ~~**E5**：逻辑测试，把回归挡在 PR 上~~（已完成；E3 亦已完成）
 6. **B1–B5**（按批推进）：AI 交互这条线的缺口最大，也最能体现这套库的差异点

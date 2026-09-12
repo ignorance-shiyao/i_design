@@ -12,7 +12,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const root = process.cwd()
-const packages = ['common', 'vue-next', 'mobile-vue', 'react', 'mobile-react']
+const packages = ['common', 'vue-next', 'vue', 'mobile-vue', 'react', 'mobile-react']
 const problems = []
 
 for (const name of packages) {

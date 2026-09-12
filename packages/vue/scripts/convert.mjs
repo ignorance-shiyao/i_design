@@ -7,12 +7,14 @@
  *
  *   1. v-model：Vue 3 用 modelValue / update:modelValue，Vue 2 用 value / input。
  *   2. defineEmits 类型：2.7 不认 Vue 3.3+ 的元组式，须转为调用签名式。
- *   3. 模板里的 TS 断言：Vue 2 的模板表达式解析器不认 `as T`，直接语法错。
+ *   3. 模板里的 TS：Vue 2 的模板表达式解析器不认 `as T`、`foo!`、`(x: T) =>`。
  *   4. ARIA 布尔属性：Vue 2 在值为 false 时删除属性，Vue 3 渲染 "false"。
- *   5. Teleport / 多根模板 / 命令式挂载：2.7 没有对应能力，改为人工实现。
+ *   5. useId / defineModel：2.7 没有，注入垫片。
+ *   6. Teleport / 多根模板 / 命令式挂载：2.7 没有对应能力，改为人工实现。
  */
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const srcDir = 'src/components'
 const outDir = 'packages/vue/src/components'
@@ -67,7 +69,7 @@ function splitTop(input, sep) {
 }
 
 /** defineEmits：{ 'input': [string] } → { (e: 'input', a0: string): void } */
-function convertEmits(source) {
+export function convertEmits(source) {
   return source.replace(/defineEmits<\{([\s\S]*?)\}>\(\)/g, (whole, body) => {
     if (body.includes('(e:')) return whole
     const cleaned = body.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
@@ -95,29 +97,62 @@ function convertEmits(source) {
   })
 }
 
-/** 模板层的两处降级：TS 断言与 ARIA 布尔属性 */
-function convertTemplate(source) {
-  return source.replace(/<template>([\s\S]*?)<\/template>/, (whole, tpl) => {
-    let out = tpl
-      .replace(/\(([^()]+?)\s+as\s+[A-Za-z_][\w.<>[\]| ]*\)/g, '($1)')
-      .replace(/\s+as\s+[A-Za-z_][\w.<>[\]|]*/g, '')
-    out = out.replace(
-      /:(aria-(?:checked|expanded|selected|pressed|busy))="([^"]+)"/g,
-      (m, attr, expr) => {
-        // 已显式给出 undefined 的是「有意移除」，保持原样
-        if (expr.includes('undefined') || /^['`]/.test(expr.trim())) return m
-        return `:${attr}="String(${expr})"`
-      }
-    )
-    return `<template>${out}</template>`
-  })
+/**
+ * 取出 SFC 的根 <template>。必须吃到最后一个 </template>：
+ * 组件内部还有 <template v-for> 时，非贪婪会在第一处内层闭合处截断，
+ * 后面的表达式（IFlow 的 resizeTarget!、ITree 的高亮片段）就漏网了。
+ */
+export function rootTemplate(source) {
+  const start = source.search(/<template>/)
+  if (start < 0) return null
+  const end = source.lastIndexOf('</template>')
+  if (end < start) return null
+  return { start, end: end + '</template>'.length, body: source.slice(start + '<template>'.length, end) }
 }
 
-function convert(source, name) {
+/** 模板层降级：TS 语法与 ARIA 布尔属性 */
+export function convertTemplate(source) {
+  const root = rootTemplate(source)
+  if (!root) return source
+  let out = root.body
+    .replace(/\(([^()]+?)\s+as\s+[A-Za-z_][\w.<>[\]| ]*\)/g, '($1)')
+    .replace(/\s+as\s+[A-Za-z_][\w.<>[\]|]*/g, '')
+  /*
+   * 非空断言：Vue 2 模板表达式解析器把 `foo!` 当普通 `!`，编出来的 render
+   * 是非法 JS，vite 插件再拿去给 babel 时就报 Unexpected token——而且 loc
+   * 落在「整份 SFC 压成一行」上，改源码对不上号。
+   * 不能误伤 != / !== / 前缀 !foo。
+   */
+  out = out.replace(/([A-Za-z0-9_)\]])!(?!=)/g, '$1')
+  /*
+   * 箭头参数类型：(next: boolean) => … 在 Vue 2 里是非法表达式。
+   * 只剥类型，参数名留下来，否则 ITree 勾选会变成无参箭头。
+   */
+  out = out.replace(/\(([^()]*?)\)\s*=>/g, (_, params) => {
+    const stripped = splitTop(params, ',')
+      .map((p) => p.replace(/\s*:\s*[\s\S]+/, '').trim())
+      .filter(Boolean)
+      .join(', ')
+    return `(${stripped}) =>`
+  })
+  out = out.replace(
+    /:(aria-(?:checked|expanded|selected|pressed|busy))="([^"]+)"/g,
+    (m, attr, expr) => {
+      // 已显式给出 undefined 的是「有意移除」，保持原样
+      if (expr.includes('undefined') || /^['`]/.test(expr.trim())) return m
+      return `:${attr}="String(${expr})"`
+    }
+  )
+  return source.slice(0, root.start) + `<template>${out}</template>` + source.slice(root.end)
+}
+
+export function convert(source, name) {
   let s = source
 
   // v-model：Vue 2 的默认 prop/event 是 value / input
   s = s.replace(/modelValue/g, 'value')
+  // 模板里写的是 kebab-case，上面那条驼峰替换够不着
+  s = s.replace(/model-value/g, 'value')
   s = s.replace(/update:value/g, 'input')
 
   s = convertEmits(s)
@@ -129,6 +164,37 @@ function convert(source, name) {
     s = s.replace(
       /<script setup lang="ts">/,
       `<script setup lang="ts">\n// Vue 2.7 没有 useId，用模块级计数器生成唯一 id\nlet uidSeed = 0\nconst useId = () => String(++uidSeed)`
+    )
+  }
+
+  /*
+   * defineModel：Vue 3.4 才有，2.7 的 compiler-sfc 会原样留在产物里，
+   * 使用方一渲染这些组件就报 defineModel is not defined。
+   * 默认模型名 modelValue 已经在上面改成了 value / input。
+   */
+  if (/\bdefineModel\b/.test(s)) {
+    s = s.replace(
+      /<script setup lang="ts">/,
+      `<script setup lang="ts">
+import { computed as _computedModel, getCurrentInstance as _modelInstance } from 'vue'
+function defineModel(nameOrOptions, maybeOptions) {
+  const named = typeof nameOrOptions === 'string'
+  const prop = named ? nameOrOptions : 'value'
+  const options = (named ? maybeOptions : nameOrOptions) ?? {}
+  const event = prop === 'value' ? 'input' : 'update:' + prop
+  const inst = _modelInstance()
+  const fallback = options.default
+  return _computedModel({
+    get() {
+      const proxy = inst.proxy
+      const v = proxy.$props[prop] !== undefined ? proxy.$props[prop] : proxy.$attrs[prop]
+      if (v !== undefined) return v
+      return typeof fallback === 'function' ? fallback() : fallback
+    },
+    set(v) { inst.proxy.$emit(event, v) }
+  })
+}
+`
     )
   }
 
@@ -149,25 +215,31 @@ function convert(source, name) {
   return header + s
 }
 
-mkdirSync(outDir, { recursive: true })
+export function runConvert() {
+  mkdirSync(outDir, { recursive: true })
 
-/* 组件依赖的 .ts 辅助文件同样要搬；message 相关由 Vue 2 单独实现 */
-const helperSkip = new Set(['message.ts', 'messageState.ts', 'index.ts'])
-for (const file of readdirSync(srcDir).filter((f) => f.endsWith('.ts'))) {
-  if (helperSkip.has(file)) continue
-  writeFileSync(join(outDir, file), readFileSync(join(srcDir, file), 'utf8'))
-}
-
-const converted = []
-const skipped = []
-for (const file of readdirSync(srcDir).filter((f) => f.endsWith('.vue'))) {
-  if (manual.has(file)) {
-    skipped.push(file)
-    continue
+  /* 组件依赖的 .ts 辅助文件同样要搬；message 相关由 Vue 2 单独实现 */
+  const helperSkip = new Set(['message.ts', 'messageState.ts', 'index.ts'])
+  for (const file of readdirSync(srcDir).filter((f) => f.endsWith('.ts'))) {
+    if (helperSkip.has(file)) continue
+    writeFileSync(join(outDir, file), readFileSync(join(srcDir, file), 'utf8'))
   }
-  writeFileSync(join(outDir, file), convert(readFileSync(join(srcDir, file), 'utf8'), file))
-  converted.push(file)
+
+  const converted = []
+  const skipped = []
+  for (const file of readdirSync(srcDir).filter((f) => f.endsWith('.vue'))) {
+    if (manual.has(file)) {
+      skipped.push(file)
+      continue
+    }
+    writeFileSync(join(outDir, file), convert(readFileSync(join(srcDir, file), 'utf8'), file))
+    converted.push(file)
+  }
+
+  console.log(`自动转换 ${converted.length} 个组件`)
+  console.log(`人工实现 ${skipped.length} 个：${skipped.join(', ')}`)
 }
 
-console.log(`自动转换 ${converted.length} 个组件`)
-console.log(`人工实现 ${skipped.length} 个：${skipped.join(', ')}`)
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  runConvert()
+}

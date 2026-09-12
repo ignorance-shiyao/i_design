@@ -53,11 +53,11 @@ function onInput(item: ConfirmRecord) {
   <IModal
     v-for="item in confirms"
     :key="item.id"
-    :model-value="true"
+    :value="true"
     :title="item.title"
     width="420px"
     :mask-closable="item.maskClosable"
-    @update:model-value="settle(item, 'close')"
+    @input="settle(item, 'close')"
   >
     <p v-if="item.content" class="i-confirm__text">{{ item.content }}</p>
 
@@ -66,7 +66,7 @@ function onInput(item: ConfirmRecord) {
         v-model="values[item.id]"
         :placeholder="item.placeholder"
         :invalid="!!errors[item.id]"
-        @update:model-value="onInput(item)"
+        @input="onInput(item)"
         @keydown.enter="settle(item, 'confirm')"
       />
       <p v-if="errors[item.id]" class="i-confirm__error">{{ errors[item.id] }}</p>

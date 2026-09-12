@@ -126,10 +126,13 @@ check(
 
 /* ---------- 5. Vue 2 端不得残留 Vue 3 专有语法 ---------- */
 /*
- * 转换器的产物必须真的能被 Vue 2.7 编译。这里静态拦下三类已经踩过的坑：
+ * 转换器的产物必须真的能被 Vue 2.7 编译。这里静态拦下已经踩过的坑：
  *   modelValue      —— Vue 2 的 v-model 走 value / input
- *   模板里的 as 断言 —— Vue 2 的模板表达式解析器不认，直接语法错
+ *   模板里的 as / ! / (x: T) => —— Vue 2 的模板表达式解析器不认，直接语法错
  *   Teleport        —— 2.7 没有，须用 _Portal.vue
+ *
+ * 根 <template> 必须吃到最后一个 </template>：组件内部还有 <template v-for>
+ * 时，非贪婪会在第一处内层闭合处截断，后面的非法表达式就查不到。
  */
 const vue2Dir = 'packages/vue/src/components'
 const vue2Issues = []
@@ -140,9 +143,13 @@ for (const file of readdirSync(vue2Dir).filter((f) => f.endsWith('.vue'))) {
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/[^\n]*/g, '')
-  const tpl = src.match(/<template>([\s\S]*?)<\/template>/)?.[1] ?? ''
+  const start = src.search(/<template>/)
+  const end = src.lastIndexOf('</template>')
+  const tpl = start >= 0 && end > start ? src.slice(start, end) : ''
   if (/\bmodelValue\b/.test(src)) vue2Issues.push(`${file}: 残留 modelValue`)
   if (/\s+as\s+[A-Z]/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 断言`)
+  if (/[\w)\]]!(?!=)/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 非空断言`)
+  if (/\([^)]*:\s*[A-Za-z_][^)]*\)\s*=>/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 参数类型`)
   if (/<Teleport/i.test(tpl)) vue2Issues.push(`${file}: 使用了 Teleport`)
 }
 /*

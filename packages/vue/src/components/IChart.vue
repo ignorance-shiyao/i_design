@@ -423,7 +423,7 @@ function exportCsv() {
         :key="`legend-${s.name}`"
         class="i-chart__legend-item"
         :class="{ 'is-off': hidden.has(s.name) }"
-        :aria-pressed="!hidden.has(s.name)"
+        :aria-pressed="String(!hidden.has(s.name))"
         @click="toggle(s.name)"
       >
         <span class="i-chart__swatch" :style="{ background: colorOf(s.name) }" />

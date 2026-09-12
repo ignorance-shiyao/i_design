@@ -523,7 +523,7 @@ const isActive = (edge: FlowEdge) =>
           height="8"
           rx="2"
           :style="{ cursor: h.cursor }"
-          @pointerdown="onHandleDown($event, resizeTarget!, h.handle)"
+          @pointerdown="onHandleDown($event, resizeTarget, h.handle)"
         />
 
         <rect
@@ -575,7 +575,7 @@ const isActive = (edge: FlowEdge) =>
         v-if="!readonly"
         class="i-flow__tool"
         :class="{ 'is-on': marqueeMode }"
-        :aria-pressed="marqueeMode"
+        :aria-pressed="String(marqueeMode)"
         aria-label="框选（或按住 Shift 拖动）"
         @click="marqueeMode = !marqueeMode"
       >
@@ -584,7 +584,7 @@ const isActive = (edge: FlowEdge) =>
       <button
         class="i-flow__tool"
         :class="{ 'is-on': showMinimap }"
-        :aria-pressed="showMinimap"
+        :aria-pressed="String(showMinimap)"
         aria-label="缩略图"
         @click="showMinimap = !showMinimap"
       >

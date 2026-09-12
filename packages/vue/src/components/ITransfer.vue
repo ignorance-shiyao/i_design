@@ -84,10 +84,10 @@ const panes: { side: TransferSide; title: string }[] = [
             把看不见的一起选中，再点搬运就会搬走一批他从没见过的条目。
           -->
           <ICheckbox
-            :model-value="header[pane.side].allChecked"
+            :value="header[pane.side].allChecked"
             :indeterminate="header[pane.side].someChecked"
             :disabled="header[pane.side].selectable === 0"
-            @update:model-value="onToggleAll(pane.side)"
+            @input="onToggleAll(pane.side)"
           />
           <span class="i-transfer__title">{{ pane.title }}</span>
           <span class="i-transfer__count">
@@ -108,9 +108,9 @@ const panes: { side: TransferSide; title: string }[] = [
             :class="{ 'is-disabled': item.disabled }"
           >
             <ICheckbox
-              :model-value="checked[pane.side].includes(item.key)"
+              :value="checked[pane.side].includes(item.key)"
               :disabled="item.disabled"
-              @update:model-value="onToggle(pane.side, item.key)"
+              @input="onToggle(pane.side, item.key)"
             >
               {{ item.label }}
             </ICheckbox>

@@ -3,6 +3,25 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
+import { computed as _computedModel, getCurrentInstance as _modelInstance } from 'vue'
+function defineModel(nameOrOptions, maybeOptions) {
+  const named = typeof nameOrOptions === 'string'
+  const prop = named ? nameOrOptions : 'value'
+  const options = (named ? maybeOptions : nameOrOptions) ?? {}
+  const event = prop === 'value' ? 'input' : 'update:' + prop
+  const inst = _modelInstance()
+  const fallback = options.default
+  return _computedModel({
+    get() {
+      const proxy = inst.proxy
+      const v = proxy.$props[prop] !== undefined ? proxy.$props[prop] : proxy.$attrs[prop]
+      if (v !== undefined) return v
+      return typeof fallback === 'function' ? fallback() : fallback
+    },
+    set(v) { inst.proxy.$emit(event, v) }
+  })
+}
+
 import { computed, ref } from 'vue'
 import IIcon from './IIcon.vue'
 import { useConfig } from './useConfig'

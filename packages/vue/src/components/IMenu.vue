@@ -126,7 +126,7 @@ function choose(item: MenuItem) {
         :disabled="item.disabled"
         @click="choose(item)"
       >
-        <IIcon v-if="item.icon" class="i-menu__icon" :name="item.icon as IconName" :size="16" />
+        <IIcon v-if="item.icon" class="i-menu__icon" :name="item.icon" :size="16" />
         <span class="i-menu__label">{{ item.label }}</span>
       </button>
     </template>

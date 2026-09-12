@@ -71,9 +71,9 @@ function toggle(id: string) {
           <td>
             <ICheckbox
               v-if="row.kind !== 'unchanged'"
-              :model-value="selected.includes(row.id)"
+              :value="selected.includes(row.id)"
               @click.stop
-              @update:model-value="() => toggle(row.id)"
+              @input="() => toggle(row.id)"
             />
           </td>
           <td v-for="(column, index) in columns" :key="column.key">

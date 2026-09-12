@@ -29,23 +29,30 @@ export function braceBody(text, openIdx) {
 /**
  * 把一段类型体按顶层分隔符切成若干条目。
  *
- * 不能按行切也不能一把梭正则：属性的类型本身可能带对象、数组与联合
- * （`options?: { label: string }[]`），里面的 `label:` 不是属性。
+ * 不能按行切也不能一把梭正则：属性的类型本身可能带对象、数组、联合与泛型
+ * （`options?: { label: string }[]`、`model: Record<string, any>`），
+ * 里面的 `label:` 和逗号不是属性。
+ *
+ * `<>` 要算进深度，否则 `Record<string, T>` 会在那个逗号处被切开，
+ * 生成物变成非法的 `Record<string`。`=>` 里的 `>` 不是闭合。
  */
 export function topLevelEntries(body) {
   const entries = []
   let depth = 0
   let buf = ''
   const flush = () => { if (buf.trim()) entries.push(buf); buf = '' }
-  for (const ch of body) {
-    if ('{(['.includes(ch)) depth++
-    else if ('})]'.includes(ch)) depth--
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i]
+    if (ch === '=' && body[i + 1] === '>') { buf += '=>'; i++; continue }
+    if ('<{(['.includes(ch)) depth++
+    else if ('>})]'.includes(ch)) depth--
     if (depth === 0 && (ch === '\n' || ch === ';' || ch === ',')) { flush(); continue }
     buf += ch
   }
   flush()
   return entries
 }
+
 
 /**
  * 属性上方的文档注释。

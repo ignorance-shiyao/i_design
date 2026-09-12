@@ -181,7 +181,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   ],
   IChartSankey: [
     {"name":"links","type":"SankeyLink[]","doc":"","defaultText":null,"control":null},
-    {"name":"labels","type":"Record<string","doc":"key → 显示名；不传就直接用 key","defaultText":"() => ({})","control":null},
+    {"name":"labels","type":"Record<string, string>","doc":"key → 显示名；不传就直接用 key","defaultText":"() => ({})","control":null},
     {"name":"title","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"height","type":"number","doc":"","defaultText":"300","control":{"kind":"number"}},
     {"name":"unit","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
@@ -384,8 +384,8 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"exportName","type":"string","doc":"导出文件名，不含扩展名","defaultText":"'flow'","control":{"kind":"string"}},
   ],
   IForm: [
-    {"name":"model","type":"Record<string","doc":"表单数据对象，FormItem 通过 prop 读写其中的字段","defaultText":null,"control":null},
-    {"name":"rules","type":"Record<string","doc":"","defaultText":"() => ({})","control":null},
+    {"name":"model","type":"Record<string, any>","doc":"表单数据对象，FormItem 通过 prop 读写其中的字段","defaultText":null,"control":null},
+    {"name":"rules","type":"Record<string, FormRule[]>","doc":"","defaultText":"() => ({})","control":null},
     {"name":"labelWidth","type":"string","doc":"","defaultText":"'96px'","control":{"kind":"string"}},
     {"name":"labelPlacement","type":"'left' | 'top'","doc":"","defaultText":"'left'","control":{"kind":"enum","options":["left","top"]}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
