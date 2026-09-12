@@ -1,5 +1,12 @@
-import { useState } from 'react'
-import { nextSortOrder, sortRows, type SortOrder } from '@i-design/common'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  nextSortOrder,
+  rafThrottle,
+  shouldVirtualize,
+  sortRows,
+  virtualWindow,
+  type SortOrder
+} from '@i-design/common'
 import type { ReactNode } from 'react'
 
 export interface TableColumn<T = any> {
@@ -24,8 +31,16 @@ export interface TableProps<T extends Record<string, any> = any> {
   selectable?: boolean
   /** 已选行的 rowKey 值 */
   selected?: (string | number)[]
+  /**
+   * 表体高度，如 `360px`。给了之后表头吸顶、表体自己滚，行多时只渲染看得见的那几行。
+   * 不给时整张表平铺，由外层页面滚动。
+   */
+  height?: string
   onSelectedChange?: (selected: (string | number)[]) => void
 }
+
+/** 行高实测不到时的兜底。主题面板能调字号与间距，所以不写死 */
+const ROW_FALLBACK_HEIGHT = 44
 
 export function Table<T extends Record<string, any>>({
   columns,
@@ -37,6 +52,7 @@ export function Table<T extends Record<string, any>>({
   emptyText = '暂无数据',
   selectable = false,
   selected = [],
+  height = '',
   onSelectedChange
 }: TableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -44,6 +60,46 @@ export function Table<T extends Record<string, any>>({
 
   // 三态循环与比较规则来自公共层，Vue 端改排序逻辑这里自动跟随
   const rows = sortRows(data, sortKey, order)
+
+  /* ----------------------------------------------------------- 虚拟滚动 */
+
+  /*
+   * 只有给了 height 才虚拟化：没有可视高度就算不出该渲染哪几行，
+   * 拿一个猜的高度去算会把行定位到看不见的地方，比不虚拟化更糟。
+   */
+  const wrap = useRef<HTMLDivElement | null>(null)
+  const [rowHeight, setRowHeight] = useState(ROW_FALLBACK_HEIGHT)
+  const [scrollTop, setScrollTop] = useState(0)
+  const [viewportHeight, setViewportHeight] = useState(0)
+
+  const virtual = Boolean(height) && shouldVirtualize(rows.length)
+  const win = virtualWindow(scrollTop, viewportHeight, rowHeight, rows.length)
+  const visible = useMemo(() => {
+    if (!virtual) return rows.map((row, index) => ({ row, index }))
+    const out: { row: T; index: number }[] = []
+    for (let i = win.start; i <= win.end; i++) out.push({ row: rows[i], index: i })
+    return out
+  }, [virtual, rows, win.start, win.end])
+
+  /* 滚动事件远多于帧，而每次都要读一次布局 */
+  const onScroll = useMemo(
+    () =>
+      rafThrottle(() => {
+        if (wrap.current) setScrollTop(wrap.current.scrollTop)
+      }),
+    []
+  )
+  useEffect(() => () => onScroll.cancel(), [onScroll])
+
+  const measure = useCallback(() => {
+    const el = wrap.current
+    if (!el) return
+    setViewportHeight(el.clientHeight)
+    const first = el.querySelector<HTMLElement>('tbody tr:not(.i-table-c__spacer)')
+    if (first && first.offsetHeight > 0) setRowHeight(first.offsetHeight)
+  }, [])
+
+  useLayoutEffect(measure, [measure, height, rows.length])
 
   const toggle = (column: TableColumn<T>) => {
     if (!column.sortable) return
@@ -93,7 +149,12 @@ export function Table<T extends Record<string, any>>({
   }
 
   return (
-    <div className="i-table-wrap">
+    <div
+      ref={wrap}
+      className={['i-table-wrap', height ? 'is-scrollable' : ''].filter(Boolean).join(' ')}
+      style={{ height: height || undefined }}
+      onScroll={onScroll}
+    >
       <table
         className={['i-table-c', `i-table-c--${size}`, striped ? 'is-striped' : '']
           .filter(Boolean)
@@ -147,7 +208,17 @@ export function Table<T extends Record<string, any>>({
               <td colSpan={columns.length + (selectable ? 1 : 0)} className="i-table-c__state">{emptyText}</td>
             </tr>
           ) : (
-            rows.map((row, index) => (
+            <>
+              {/* 上下两行空白替代没渲染的那些行，滚动条长度才和真实行数相称 */}
+              {virtual && (
+                <tr className="i-table-c__spacer" aria-hidden="true">
+                  <td
+                    colSpan={columns.length + (selectable ? 1 : 0)}
+                    style={{ height: win.paddingTop }}
+                  />
+                </tr>
+              )}
+              {visible.map(({ row, index }) => (
               <tr
                 key={String(row[rowKey] ?? index)}
                 className={selectable && isChecked(row) ? 'is-selected' : undefined}
@@ -169,7 +240,16 @@ export function Table<T extends Record<string, any>>({
                   </td>
                 ))}
               </tr>
-            ))
+              ))}
+              {virtual && (
+                <tr className="i-table-c__spacer" aria-hidden="true">
+                  <td
+                    colSpan={columns.length + (selectable ? 1 : 0)}
+                    style={{ height: win.paddingBottom }}
+                  />
+                </tr>
+              )}
+            </>
           )}
         </tbody>
       </table>

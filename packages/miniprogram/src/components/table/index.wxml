@@ -1,4 +1,10 @@
-<scroll-view class="i-table-wrap" scroll-x>
+<scroll-view
+  class="i-table-wrap {{height ? 'is-scrollable' : ''}}"
+  style="{{height ? 'height:' + height + 'px' : ''}}"
+  scroll-x
+  scroll-y="{{!!height}}"
+  bindscroll="onScroll"
+>
   <view class="i-table-c i-table-c--{{size}} {{striped ? 'is-striped' : ''}}">
     <view class="i-table-c__head">
       <view
@@ -19,8 +25,16 @@
     </view>
 
     <view wx:if="{{loading}}" class="i-table-c__state">加载中…</view>
-    <view wx:elif="{{rows.length === 0}}" class="i-table-c__state">{{emptyText}}</view>
-    <view wx:else class="i-table-c__row" wx:for="{{rows}}" wx:key="_key" wx:for-item="row">
+    <view wx:elif="{{total === 0}}" class="i-table-c__state">{{emptyText}}</view>
+    <!-- 上下两块空白替代没渲染的那些行，滚动条长度才和真实行数相称 -->
+    <view wx:elif="{{virtual}}" class="i-table-c__spacer" style="height:{{paddingTop}}px" />
+    <view
+      wx:if="{{!loading && total > 0}}"
+      class="i-table-c__row"
+      wx:for="{{visible}}"
+      wx:key="_key"
+      wx:for-item="row"
+    >
       <view
         wx:for="{{columns}}"
         wx:key="key"
@@ -29,5 +43,6 @@
         style="{{col.width ? 'width:' + col.width + ';' : 'flex:1;'}}text-align:{{col.align || 'left'}}"
       >{{row[col.key]}}</view>
     </view>
+    <view wx:if="{{virtual}}" class="i-table-c__spacer" style="height:{{paddingBottom}}px" />
   </view>
 </scroll-view>

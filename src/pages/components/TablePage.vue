@@ -7,6 +7,18 @@ import DemoBlock from '@/site/DemoBlock.vue'
 import { ref } from 'vue'
 
 const picked = ref<(string | number)[]>([])
+const bigPicked = ref<(string | number)[]>([])
+
+/* 两万行：不虚拟化的话，光是把 <tr> 建出来就要好几秒 */
+const owners = ['林岚', '沈黎', '周其', '安阳', '陆停云']
+const states = ['done', 'doing', 'todo']
+const bigData: TableRow[] = Array.from({ length: 20000 }, (_, i) => ({
+  id: `WI-${String(i + 1).padStart(5, '0')}`,
+  title: `第 ${i + 1} 个工作项`,
+  owner: owners[i % owners.length],
+  points: (i % 13) + 1,
+  status: states[i % states.length]
+}))
 
 const columns: TableColumn[] = [
   { key: 'id', title: '编号', width: '90px' },
@@ -104,6 +116,34 @@ const actionColumns: TableColumn[] = [
       </div>
     </DemoBlock>
 
+    <DemoBlock
+      title="长表格"
+      description="给了 height 之后表头吸顶、表体自己滚，行数超过一定条数就只渲染看得见的那几行，上下用两行空白撑开滚动条。下面这张是两万行，排序、勾选、滚动都和十行时一样跟手。不给 height 就不虚拟化——没有可视高度算不出该渲染哪几行。"
+      code='<ITable :columns="columns" :data="data" row-key="id" height="360px" selectable />'
+    >
+      <div class="stack">
+        <ITable
+          v-model:selected="bigPicked"
+          :columns="columns"
+          :data="bigData"
+          row-key="id"
+          height="360px"
+          size="sm"
+          selectable
+        />
+        <p class="big-hint">共 {{ bigData.length }} 行，已选 {{ bigPicked.length }} 行</p>
+      </div>
+    </DemoBlock>
+
+    <h2>各端差异</h2>
+    <p>
+      Web 与小程序端自己算窗口，只渲染看得见的那几行；Flutter 端交给能按需建子项的列表。
+      三端共同的一条：列宽必须算死了同时喂给表头与每一行——让每一行各自去量内容宽度的话，
+      滚起来列会左右跳，表头也对不上。所以 Web 端的滚动容器是表格外层而不是
+      <code>tbody</code>：给 <code>tbody</code> 加 <code>overflow</code> 会让它脱离表格布局，
+      列宽随即变成各行各算各的。
+    </p>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -115,6 +155,7 @@ const actionColumns: TableColumn[] = [
         <tr><td>striped</td><td><code>boolean</code></td><td><code>false</code></td><td>斑马纹</td></tr>
         <tr><td>loading</td><td><code>boolean</code></td><td><code>false</code></td><td>加载态</td></tr>
         <tr><td>emptyText</td><td><code>string</code></td><td><code>暂无数据</code></td><td>空态文案</td></tr>
+        <tr><td>height</td><td><code>string</code></td><td><code>''</code></td><td>表体高度。给了之后表头吸顶、表体自己滚，行多时只渲染看得见的那几行</td></tr>
       </tbody>
     </table>
 
@@ -139,6 +180,11 @@ const actionColumns: TableColumn[] = [
 </template>
 
 <style scoped>
+.big-hint {
+  margin-top: var(--i-spacing-3);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
 .picked-hint { margin: 0; font-size: var(--i-font-size-sm); color: var(--i-color-text-tertiary); }
 .stack { display: grid; gap: var(--i-spacing-6); width: 100%; }
 </style>
