@@ -7,12 +7,11 @@
 > **要审核**：读第 4 节（交付与审核）。两边看的是同一份标准。
 >
 > 与另外两份的分工：`HANDOVER.md` 讲「怎么改」（目录地图、不能手改的文件、标准流程），
-> `ROADMAP.md` 是早期按批次排的清单（已部分过期，见 F1）。本文是**现状盘点 + 任务台账**，
+> `ROADMAP.md` 保留历史实施记录与旧项去向，当前待办只在本文第 2 节维护。本文是**现状盘点 + 任务台账**，
 > 有冲突时以本文为准。
 
-最后校准：2026-09-12，对应 `main` 分支。文中所有数字都取自生成物
-（`src/data/componentMatrix.ts`、`src/data/frameworkStats.ts`、golden test），
-不是手填的——手填的数字会过期，而且过期了没人发现。
+最后校准：2026-09-12，F1 基于 `main@14c82a1`。规模数字集中在按源码生成的
+[SOURCE_STATUS.md](SOURCE_STATUS.md)，由 `check:docs` 检查新鲜度；本文保留现状与验收边界。
 
 ---
 
@@ -41,14 +40,14 @@
 ```
 packages/common/src/
   tokens/     设计令牌（编译成 CSS 变量 / Dart 常量 / 小程序 wxss）
-  icons/      50 个内联 SVG path
-  logic/      44 个纯逻辑模块，各端共用
+  icons/      共享内联 SVG path
+  logic/      纯逻辑模块，各端共用（清单见 SOURCE_STATUS）
   styles/     组件样式，只引用语义令牌
 
 src/components/          Vue 3 源头（也是文档站在用的那一份）
   ↓ 脚本转换
 packages/vue-next/       Vue 3 发布包
-packages/vue/            Vue 2.7（由 Vue 3 源自动转换 + 18 个人工实现）
+packages/vue/            Vue 2.7（由 Vue 3 源自动转换 + 显式人工清单）
 packages/react/          React
 packages/miniprogram/    原生小程序自定义组件
 packages/flutter/        Dart
@@ -61,19 +60,19 @@ packages/mobile-{vue,react}/  复用 Web 组件 + 移动专有形态
 
 ### 1.2 组件盘点
 
-覆盖矩阵（按文件存在与否统计，`build:matrix` 生成）：五端各 **117** 个，一致。
+覆盖矩阵由 `build:matrix` 按文件统计，各端一致；实时数量及导出口径见 [源码快照](SOURCE_STATUS.md)。
 
-| 分类 | 数量 | 备注 |
-| --- | --- | --- |
-| 基础 | 8 | Button / Icon / Tag / Divider / Link / Layout / StickyTool / Scrollbar |
-| 导航 | 4 | Tabs / Breadcrumb / Steps / Pagination |
-| 数据录入 | 24 | 含 Form、Select（多选 + 虚拟化）、DatePicker、TimeSelect、InputOtp 等 |
-| 数据展示 | 16 | 含 Table（虚拟化）、Tree（虚拟化）、Qrcode、Countdown 等 |
-| 消息反馈 | 9 | 含命令式 `message` / `confirm` / `notification` |
-| 图表 | 13 | 折线柱状面积 / 饼环 / 散点 / 热力 / 雷达 / 漏斗 / 仪表 / 箱线 / 瀑布 / 桑基 / 矩形树 / 区间缩放 / 迷你图 |
-| 流程图 | 4 | 画布 / 框选 / 缩略图 / 快照导出 |
-| AI 会话 | 9 | 见 1.3 |
-| 移动端 | 13 | 另有 19 个移动专有组件在 `packages/mobile-*` |
+| 分类 | 说明 |
+| --- | --- |
+| 基础 | Button / Icon / Tag / Divider / Link / Layout / StickyTool / Scrollbar |
+| 导航 | Tabs / Breadcrumb / Steps / Pagination |
+| 数据录入 | 含 Form、Select（多选 + 虚拟化）、DatePicker、TimeSelect、InputOtp 等 |
+| 数据展示 | 含 Table（虚拟化）、Tree（虚拟化）、Qrcode、Countdown 等 |
+| 消息反馈 | 含命令式 `message` / `confirm` / `notification` |
+| 图表 | 折线柱状面积 / 饼环 / 散点 / 热力 / 雷达 / 漏斗 / 仪表 / 箱线 / 瀑布 / 桑基 / 矩形树 / 区间缩放 / 迷你图 |
+| 流程图 | 画布 / 框选 / 缩略图 / 快照导出 |
+| AI 会话 | 见 1.3 |
+| 移动端 | 移动专有组件在 `packages/mobile-*` |
 
 近期（本轮）补的：InputOtp、CheckTag、PageHeader、ButtonGroup、TimeSelect、
 Scrollbar、Countdown、命令式确认框、文本截断提示、ConfigProvider 与文案字典；
@@ -101,7 +100,7 @@ RecommendCard（建议卡）、ContextCards（上下文卡）、DiffTable（差�
 
 ### 1.5 示例站
 
-- 路由 68 条，页面结构：设计价值观 / 设计令牌 / 跨端支持 / 组件全景 / 逐组件文档页
+- 页面结构：设计价值观 / 设计令牌 / 跨端支持 / 组件全景 / 逐组件文档页
 - 每个示例块（`DemoBlock`）可展开源码，部分组件带跨端代码片段（`FrameworkTabs`）
 - 站点用 hash 路由，部署在子路径下不需要服务端改写
 - 主题面板 8 个分区：色彩 / 字体 / 圆角 / 阴影 / 尺寸 / 质感 / 动效 / 导出，
@@ -121,16 +120,17 @@ RecommendCard（建议卡）、ContextCards（上下文卡）、DiffTable（差�
 | --- | --- |
 | `check-parity.mjs`（13 项） | 令牌/图标/逻辑各端不一致、组件建了文件没导出、样式引用了不存在的令牌 |
 | `check:mp` | 小程序四件套缺文件、JS 解析失败、样式隔离写错、图标未定义 |
-| `check:flutter` | Dart 尺寸声明成整数、组件缺失，并生成 **925 条** golden 断言 |
+| `check:flutter` | Dart 尺寸声明成整数、组件缺失，并生成 golden 断言（条数见源码快照；此命令不执行 Flutter SDK 测试） |
 | `check:snippets` | 跨端代码片段与真实 API 对不上 |
 | `check:scoped-css` | `<style scoped>` 编译后丢了 data-v 属性（曾导致整站发灰） |
 | `check-theme-readability.mjs` | 深色模式对比度不足、主题令牌残留 |
 | `build:matrix` / `build:stats` | 覆盖数字手填过期 |
+| `check:docs` | 源码快照陈旧、ROADMAP 再起待办清单或指向不存在的任务 |
 
 Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致性的主要保险**，
 新增共享逻辑时务必同步加断言，否则 Dart 端可以悄悄写出另一套算法。
 
-**缺口**：没有 TS 侧的单元测试跑起来（逻辑只在 Dart golden test 里被间接验证）、
+**缺口**：共享业务逻辑还没有统一的 TS 单元测试入口（已有 F0 的 Node 目录回归测试，不能替代业务逻辑测试）、
 没有无障碍自动检查、CI 只在 push 时跑不在 PR 上跑。任务见 E 组。
 
 ### 1.7 已知的坑与债
@@ -138,10 +138,10 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 - **包发不出去**：`packages/*` 的 `main` 指向 `src/index.ts`，没有构建产物、
   没有类型声明、没有 `exports` / `files` 字段。也就是说现在**没人能 `npm install` 用起来**。
   这是「组件库」这个定位下最硬的短板。→ E1
-- **CI 触发分支过期**：`deploy.yml` 里写着 `claude/devui-design-reference-exzjpm`，
-  那个分支早没了；而 PR 上不跑任何检查。→ E2
-- **两个覆盖数字对不上**：矩阵按文件数（五端各 117），frameworkStats 按导出名
-  （117/118/116/119/110）。两者量的不是一回事，但站点上并排显示会让人以为哪个错了。→ E4
+- **CI 仍缺 PR 检查**：`deploy.yml` 已只触发 main，过期分支名已清理；
+  尚未拆分 PR 校验与部署工作流。→ E2
+- **覆盖数字口径不同**：矩阵按组件文件、frameworkStats 按导出名计数，
+  两列实际值见源码快照；站点展示仍需按 E4 统一解释。
 - **组件目录状态已校准（F0）**：全景页原先 13 个已实现组件误标 `planned`，
   二维码误标 `excluded`，现均按源码清单显示 `ready`；仅 Web 悬浮操作按钮与会话列表
   保留 `planned`。总览页的时间选择器、穿梭框同步恢复可用并链接到现有示例。
@@ -149,12 +149,13 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
   `componentInventory.ts` 按 Web / 移动 Vue 源目录生成，`componentStatus.ts` 统一推导状态。
   `check:catalog` 检查清单新鲜度、错误状态与有效入口，已接入 `check:parity`；
   状态仅代表示例源码存在，包可安装性与跨端覆盖仍分别见 E1 与覆盖矩阵。
-- **文档过期**：`HANDOVER.md` 写的开发分支 `claude/devui-design-reference-exzjpm`
-  已不存在；`ROADMAP.md` 有 32 个未勾选项，其中近一半实际已完成。→ F1
+- **文档已校准（F1）**：HANDOVER 指向唯一主台账，ROADMAP 原 32 项中 11 项补完成记录，
+  其余 21 项迁入本文；Splitter 双击复位、水印节点恢复与浮层审计补入 A5 / A6 / E8。
+  源码快照及旧任务去向由 `check:docs` 检查。
 - **跨端 API 差异查不出来**：`check:parity` 只比「组件在不在」，比不到「属性一不一样」。
   已知 Input 的 `clearable` 在 Vue 端有、React 端没有。→ E3
-- **动效没有统一规则**：`--i-motion-fast/base/slow` 有，进出场曲线
-  （`easing-in` / `-out` / `-spring`）没有；`prefers-reduced-motion` 只在 4 个组件里零散照顾到。→ A3
+- **动效尚未全覆盖**：进出场与回弹曲线已定义，Collapse / Menu 已有展开过渡；
+  Tree、列表移动、按压及 reduced-motion / 主题开关全覆盖仍待 A3。
 
 ### 1.8 分支现状
 
@@ -168,7 +169,8 @@ git push origin --delete claude/cross-framework-component-library-2wawj9 \
   feat/visual-refresh-20260911 redesign/tdesign-20260911
 ```
 
-（`claude/bold-bohr-fl0nig` 是当前的开发分支，与 main 同步，留着。）
+上述是历史分支清理记录，不是新的开发基线；开发一律从最新 main 新开分支。
+`claude/bold-bohr-fl0nig` 的本轮改动已通过 PR #31 合入；F0 已通过 PR #30 合入。
 指向这些分支的引用已经断干净了：`deploy.yml` 的触发分支只剩 main，
 HANDOVER 开头也不再写死某个开发分支。
 
@@ -210,7 +212,7 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
   - 依赖：无
 
 - [ ] **E2 · CI 在 PR 上跑，并清掉过期分支名**（P0）
-  - 落点：`.github/workflows/`。拆成 `ci.yml`（PR + push 跑 `check:parity`、
+  - 已完成部分：部署触发分支已仅保留 main。剩余落点：`.github/workflows/`，拆成 `ci.yml`（PR + push 跑 `check:parity`、
     `typecheck`、`build`）与 `deploy.yml`（只在 main 跑部署）
   - 验收：开一个故意破坏一致性的 PR，CI 变红且指出是哪一项
   - 依赖：无
@@ -258,6 +260,11 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
   - 落点：Playwright + axe，遍历文档站路由，亮暗两态各跑一遍
   - 验收：输出违规清单并接进 CI（先只报告不阻断，清零后再改成阻断）
 
+- [ ] **E8 · 浮层定位复用审计**（P2，迁自旧 ROADMAP 长期项）
+  - 现状：Tooltip / Popconfirm / Popover / Dropdown 已使用统一定位适配，AutoComplete / TimePicker 也调用共享算法。
+  - 范围：逐端核对 Select / DatePicker / Cascader 等所有浮层，记录 DOM 测量与位置计算的分工。
+  - 验收：列明审计对象与结论；发现重复位置算法时归入 common，右缘/底缘翻转与滚动跟随实测通过。
+
 ### D 示例站与参数配置（P0/P1）
 
 - [ ] **D1 · 组件参数 playground**（P0，这是「支持配置各种参数」的主体）
@@ -303,14 +310,23 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
 - [x] **A1 · Gantt 甘特图**（已完成）：从 `devui` 分支捞回来的，五端齐备
 - [x] **A2 · WordCloud 词云**（已完成）：同上
 - [ ] **A3 · 动效规则统一**（P1）
-  - 补进出场曲线令牌（`--i-motion-easing-in` / `-out` / `-spring`）并说明各自用途
+  - 已有进出场与回弹曲线（`--i-motion-easing-in` / `-out` / `-spring`）及用途注释，保留现有定义
   - 列表进出场统一用带 `-move` 的过渡：删中间项时其余项平滑补位而不是瞬移
-  - 折叠展开统一用 `grid-template-rows` 过渡（`max-height` 猜值在长内容上会突变）
+  - Collapse / Menu 已接 `grid-template-rows`；Tree 分支及跨端行为仍需核对补齐
+  - 骨架扫光已有左到右效果，但时长仍写死，需接主题动效开关；加载态同步核对
   - 按压反馈：移动端没有 hover，按下去没反馈就像卡住
   - 全部尊重 `prefers-reduced-motion`，并接上主题面板的动效开关
   - 验收：随便挑三个列表类组件删中间一项，其余项是滑过去不是跳过去
 - [ ] **A4 · FloatButton 悬浮操作按钮**（P2）：Web 端缺（移动端已有 IFab）。
   与会话列表（B11）是组件全景页里**仅有的两项名副其实的 `planned`**
+
+- [ ] **A5 · Splitter 双击复位**（P2，迁自旧 ROADMAP 第 5 批）
+  - 现状：拖拽、两栏下限及键盘调整已有，双击复位未实现。
+  - 验收：明确复位目标比例，受控值同步；双击或键盘等价操作后两栏仍满足最小尺寸，各端验证。
+- [ ] **A6 · Watermark 节点删除恢复与能力边界**（P2，迁自旧 ROADMAP 第 5 批）
+  - 现状：已有水印平铺，未检测覆盖层删除/篡改。
+  - 范围：Web 可提供覆盖层意外删除后的恢复；前端可被用户控制，不能承诺防泄露或不可移除。
+  - 验收：恢复机制不循环、不影响点击、卸载时清理监听；明确非 Web 端适用范围与安全边界。
 
 ### B AI 交互组件（P1，这条线缺口最大）
 
@@ -353,11 +369,12 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
     错误排除、无效链接及组合宿主缺失的回归验证；界面证据见 `docs/reviews/F0/README.md`。
   - 边界：只校准目录状态及对应入口，不代表 E1 包发布或 E4 覆盖口径已完成。
 
-- [ ] **F1 · 把 HANDOVER 与 ROADMAP 校准到现状**（P0）
-  - `HANDOVER.md`：开发分支名 `claude/devui-design-reference-exzjpm` 已失效
-  - `ROADMAP.md`：32 个未勾选项里有近一半实际已完成，逐条核对后勾掉；
-    仍未做的合并进本文的任务台账，避免两处各记一份
-  - 验收：三份文档里不再有互相矛盾的说法
+- [x] **F1 · 把 HANDOVER 与 ROADMAP 校准到现状**（P0）
+  - 完成：ROADMAP 原 32 项逐项核对，11 项补完成记录，21 项映射到唯一主台账；
+    不把组件文件存在当作整条行为要求完成，部分要求落入 A5 / A6 / E8。
+  - HANDOVER 修正文档职责、生成物范围、检查链、Flutter 检查边界与源码状态维护流程。
+  - `build:docs` 按源码生成快照，`check:docs` 拦截陈旧快照、重复待办和失效任务编号。
+  - 验收：四项硬性命令通过，源码矩阵与 golden 断言不回退；仅文档及校验工具变更，无界面变更。
 - [ ] **F2 · 本文保持更新**：每合并一个 PR，把对应任务勾掉并在 1.x 现状里改一句话
 
 ---
@@ -482,13 +499,12 @@ PR 描述里应该已经写清楚了。
 
 ## 5. 建议的推进顺序
 
-1. **F0**（1 小时）：先把组件全景页的状态改对。线上正在告诉人「这些没有」，
-   而它们都有——这是投入产出比最高的一项
-2. **F1 + E2**（半天）：文档与 CI 校准，否则后面每一步都在错的地图上走
+1. **F0 / F1 已完成**：目录按源码推导，历史计划与唯一台账已校准。
+2. **E2**：让质量检查在 PR 上生效，与部署分离
 3. **E1**（1–2 天）：包能装出去，这个项目才配叫组件库
 4. **D1**（2–3 天）：参数 playground，示例站从「能看」变成「能试」
 5. **E3 + E5**（1–2 天）：属性差异与逻辑测试，把回归挡在 PR 上
 6. **B1–B5**（按批推进）：AI 交互这条线的缺口最大，也最能体现这套库的差异点
-7. **A1 / A3 / C 组**：按需求密度插空做
+7. **A3–A6 / C 组**：按需求密度推进；A1 / A2 已完成
 
 前五步做完，这套库就从「一个漂亮的演示站」变成「别人能装上、能试、改坏了会被拦住」的东西。
