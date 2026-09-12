@@ -145,17 +145,7 @@
   pointer-events: none;
 }
 
-/* 配置关闭动效时覆盖固定时长；保留结束事件，避免过渡组件滞留。 */
-:root[data-motion="off"] *,
-:root[data-motion="off"] *::before,
-:root[data-motion="off"] *::after {
-  transition-duration: 0s !important;
-  transition-delay: 0s !important;
-  animation-duration: 0.01ms !important;
-  animation-delay: 0s !important;
-  animation-iteration-count: 1 !important;
-  scroll-behavior: auto !important;
-}
+/* 通用的动效关闭规则已经在组件库的 motion.css 里，这里只补文档站自己的进场元素 */
 :root[data-motion="off"] .i-reveal {
   opacity: 1;
   transform: none;

@@ -25,6 +25,40 @@
 }
 
 /*
+ * 进出场本身只做淡入淡出加一点位移。
+ *
+ * 位移只有 4px：新增一项时大幅度的滑入会把注意力从「多了什么」引到动画本身，
+ * 而读者此刻要看的是内容。
+ */
+.i-list-enter-active,
+.i-table-row-enter-active,
+.i-tag-enter-active,
+.i-prompt-file-enter-active {
+  transition:
+    opacity var(--i-motion-base) var(--i-motion-easing-out),
+    transform var(--i-motion-base) var(--i-motion-easing-out);
+}
+.i-list-leave-active,
+.i-table-row-leave-active,
+.i-tag-leave-active,
+.i-prompt-file-leave-active {
+  transition:
+    opacity var(--i-motion-fast) var(--i-motion-easing-in),
+    transform var(--i-motion-fast) var(--i-motion-easing-in);
+}
+.i-list-enter-from,
+.i-list-leave-to,
+.i-table-row-enter-from,
+.i-table-row-leave-to,
+.i-tag-enter-from,
+.i-tag-leave-to,
+.i-prompt-file-enter-from,
+.i-prompt-file-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+/*
  * 按压反馈。移动端没有 hover，按下去没有任何变化就像点了个没反应的死区；
  * 缩放幅度必须很小（0.97），大了会显得廉价。
  */

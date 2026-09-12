@@ -227,6 +227,11 @@ watch(
         <tr v-else-if="!sortedData.length">
           <td :colspan="columns.length + (selectable ? 1 : 0)" class="i-table-c__state">{{ emptyLabel }}</td>
         </tr>
+        <!--
+          这里不接 -move 过渡：表体是虚拟滚动的，行的增删对 TransitionGroup 来说
+          与「滚动时换掉一批行」无法区分，滚动会被当成整表增删，每滚一下都在做动画。
+          真正需要补位动效的是 IList 与标签、附件这类不虚拟化的列表。
+        -->
         <template v-else>
         <!-- 上下两行空白替代没渲染的那些行，滚动条长度才和真实行数相称 -->
         <tr v-if="virtual" class="i-table-c__spacer" aria-hidden="true">

@@ -87,27 +87,30 @@ function onKeydown(event: KeyboardEvent) {
 <template>
   <div class="i-prompt" :class="{ 'is-focused': focused, 'is-disabled': disabled }">
     <div v-if="attachments.length" class="i-prompt__attachments">
-      <span
-        v-for="(file, index) in attachments"
-        :key="file.name + index"
-        class="i-prompt__file"
-        :style="{ '--i-file-color': `var(--i-chart-${fileTypeOf(file.name).slot || 1})` }"
-      >
-        <!-- 类型色只上在图标与底纹上，文件名保持正文色：彩色文件名会和链接混淆 -->
-        <IIcon class="i-prompt__file-icon" :name="fileTypeOf(file.name).icon" :size="14" />
-        <span class="i-prompt__file-name">{{ file.name }}</span>
-        <span class="i-prompt__file-meta">
-          {{ fileTypeOf(file.name).label
-          }}<template v-if="file.size"> · {{ formatSize(file.size) }}</template>
-        </span>
-        <button
-          class="i-prompt__file-remove"
-          :aria-label="`移除 ${file.name}`"
-          @click="$emit('removeAttachment', index)"
+      <!-- 移除一个附件时，后面的附件平滑补位，而不是整排瞬移 -->
+      <TransitionGroup name="i-prompt-file">
+        <span
+          v-for="(file, index) in attachments"
+          :key="file.name + index"
+          class="i-prompt__file"
+          :style="{ '--i-file-color': `var(--i-chart-${fileTypeOf(file.name).slot || 1})` }"
         >
-          <IIcon name="close" :size="12" />
-        </button>
-      </span>
+          <!-- 类型色只上在图标与底纹上，文件名保持正文色：彩色文件名会和链接混淆 -->
+          <IIcon class="i-prompt__file-icon" :name="fileTypeOf(file.name).icon" :size="14" />
+          <span class="i-prompt__file-name">{{ file.name }}</span>
+          <span class="i-prompt__file-meta">
+            {{ fileTypeOf(file.name).label
+            }}<template v-if="file.size"> · {{ formatSize(file.size) }}</template>
+          </span>
+          <button
+            class="i-prompt__file-remove"
+            :aria-label="`移除 ${file.name}`"
+            @click="$emit('removeAttachment', index)"
+          >
+            <IIcon name="close" :size="12" />
+          </button>
+        </span>
+      </TransitionGroup>
     </div>
 
     <textarea

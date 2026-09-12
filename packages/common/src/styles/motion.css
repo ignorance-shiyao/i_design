@@ -279,3 +279,24 @@
 
 /* 顶面与底面：只负责封住盒子，不承载内容，因此比侧面更淡 */
 .i-cube__face--cap { background-image: none; }
+
+/*
+ * 全局动效开关。
+ *
+ * 主题配置面板把它写在根元素的 data-motion 上。此前这条规则只存在于文档站
+ * 自己的样式表里——也就是说开关只对文档站有效，装了这个包的项目把开关关掉，
+ * 组件照旧动。规则属于组件库，跟着组件样式一起发出去才算数。
+ *
+ * 时长压到接近 0 而不是 `transition: none`：过渡与动画的结束事件仍会触发，
+ * 依赖 transitionend / animationend 收尾的浮层不会卡在半路上。
+ */
+:root[data-motion='off'] *,
+:root[data-motion='off'] *::before,
+:root[data-motion='off'] *::after {
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}

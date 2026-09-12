@@ -114,6 +114,7 @@ class IDesignTokensLight {
   static const motionFast = Duration(milliseconds: 120);
   static const motionBase = Duration(milliseconds: 200);
   static const motionSlow = Duration(milliseconds: 320);
+  static const motionSkeleton = Duration(milliseconds: 1400);
 }
 
 /// Ignorance Design 暗色令牌
@@ -229,6 +230,7 @@ class IDesignTokensDark {
   static const motionFast = Duration(milliseconds: 120);
   static const motionBase = Duration(milliseconds: 200);
   static const motionSlow = Duration(milliseconds: 320);
+  static const motionSkeleton = Duration(milliseconds: 1400);
 }
 
 /// 直接可用的 ThemeData，颜色与 Web 端逐值一致

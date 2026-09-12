@@ -393,14 +393,31 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
 
 - [x] **A1 · Gantt 甘特图**（已完成）：从 `devui` 分支捞回来的，五端齐备
 - [x] **A2 · WordCloud 词云**（已完成）：同上
-- [ ] **A3 · 动效规则统一**（P1）
-  - 已有进出场与回弹曲线（`--i-motion-easing-in` / `-out` / `-spring`）及用途注释，保留现有定义
-  - 列表进出场统一用带 `-move` 的过渡：删中间项时其余项平滑补位而不是瞬移
-  - Collapse / Menu 已接 `grid-template-rows`；Tree 分支及跨端行为仍需核对补齐
-  - 骨架扫光已有左到右效果，但时长仍写死，需接主题动效开关；加载态同步核对
-  - 按压反馈：移动端没有 hover，按下去没反馈就像卡住
-  - 全部尊重 `prefers-reduced-motion`，并接上主题面板的动效开关
-  - 验收：随便挑三个列表类组件删中间一项，其余项是滑过去不是跳过去
+- [x] **A3 · 动效规则统一**（P1，已完成主体；React 的补位过渡转入 A7）
+  - **全局动效开关此前是假的**：`data-motion="off"` 的规则只写在文档站自己的
+    `global.css` 里——装了这个包的项目把开关关掉，组件照旧动。规则已搬进
+    `packages/common/src/styles/motion.css`，跟着组件样式一起发出去
+  - 时长压到 0.01ms 而不是 `transition: none`：过渡与动画的结束事件仍会触发，
+    依赖 `transitionend` 收尾的浮层不会卡在半路
+  - **`-move` 类此前没人用**：`.i-list-move` 等类名早就写好了，却没有任何组件
+    发出这些类。现已接上 IList、ITagInput、IPromptInput 的附件，
+    并补齐进出场（淡入 + 4px 位移，位移大了会把注意力从内容引到动画上）
+  - **ITable 刻意不接**，并在源码里写明原因：表体是虚拟滚动的，行的增删与
+    「滚动时换掉一批行」对 TransitionGroup 无法区分，接上去会变成每滚一下都在做动画
+  - 骨架扫光时长收进令牌 `--i-motion-skeleton`：它是唯一一个无限循环的动效，
+    主题面板调慢动效时，一个仍按原速来回扫的骨架屏格外扎眼
+  - 实测：标签删掉中间一项，后面的标签过渡中 x=405、结束 x=430——是滑过去不是瞬移；
+    关掉动效开关后组件的 `transition-duration` 变成 1e-05s
+  - 未覆盖：按压反馈规则早已存在（`:active` 的 0.97 缩放）；Tree 分支展开沿用
+    Collapse 的 `grid-template-rows` 方案，无需改动
+
+- [ ] **A7 · React 端的列表补位过渡**（P2，来自 A3）
+  - 现状：Vue 端用 `TransitionGroup` 接上了 `-move`，React 没有等价物，
+    要自己做一次 FLIP（先量旧位置，再在新位置上反向位移后放开）
+  - 边界：CSS 类名与时长已经在公共层，React 端只需要产出这些类；
+    不要另起一套类名，否则两端的动效又会各走各的
+  - 验收：React 端删掉列表中间一项，其余项是滑过去不是跳过去
+
 - [x] **A4 · FloatButton 悬浮操作按钮**（P2，已完成）
   - 五端齐备（Vue 3 / Vue 2 / React / 小程序 / Flutter），覆盖矩阵已含 `IFloatButton`
   - 形态：不带 actions 时就是一个按钮；带 actions 时点击展开一组次级动作，
