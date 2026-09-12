@@ -116,7 +116,7 @@ RecommendCard（建议卡）、ContextCards（上下文卡）、DiffTable（差�
 
 | 检查 | 挡住的问题 |
 | --- | --- |
-| `check-parity.mjs`（12 项） | 令牌/图标/逻辑各端不一致、组件建了文件没导出 |
+| `check-parity.mjs`（13 项） | 令牌/图标/逻辑各端不一致、组件建了文件没导出、样式引用了不存在的令牌 |
 | `check:mp` | 小程序四件套缺文件、JS 解析失败、样式隔离写错、图标未定义 |
 | `check:flutter` | Dart 尺寸声明成整数、组件缺失，并生成 **925 条** golden 断言 |
 | `check:snippets` | 跨端代码片段与真实 API 对不上 |
@@ -164,7 +164,7 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 | `claude/bold-bohr-fl0nig` | 0 | 已并入 main，可删 |
 | `claude/cross-framework-component-library-2wawj9` | 0 | 已并入，可删 |
 | `redesign/tdesign-20260911` | 0 | 已并入，可删 |
-| `claude/devui-design-reference-exzjpm` | 6 | **只挑不合**：里面的 Gantt 与 WordCloud 正是 A1/A2，值得摘出来；同分支的 IndexBar / PullRefresh 在 main 里已有等价实现（`IIndexes` / `IPullDownRefresh`），摘了会重复；其余四个提交是首页与明暗切换的返工，会把当前这版视觉改回去 |
+| `claude/devui-design-reference-exzjpm` | 6 | **已捞完，可删**：Gantt 与 WordCloud 已 cherry-pick（A1/A2 完成），连带捡回第 13 项令牌校验；IndexBar / PullRefresh 在 main 里已有等价实现（`IIndexes` / `IPullDownRefresh`），不摘；其余四个提交是首页与明暗切换的返工，会把当前这版视觉改回去，不摘 |
 | `feat/agent-interaction-primitives`（PR #3） | 1 | **已关闭**。分支点在 `03488d2`（重构前），针对的是 `packages/core` + `playground/` + pnpm 那套已经不存在的结构，GitHub 判定为 conflict。它的四个组件（ApprovalCard / TaskList / ContextCard / ToolChip）里前三个 main 已有且更完整，只剩 ToolChip 是真缺的，见 B1。唯一值得留下的想法已抄成 E7 |
 | `feat/visual-refresh-20260911` | 1 | 首页与顶栏的另一版样式，与当前基准冲突。除非确认要换，否则删掉 |
 
@@ -283,8 +283,8 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
 
 ### A 通用组件补漏（P1/P2）
 
-- [ ] **A1 · Gantt 甘特图**（P1）：排期是中后台高频场景，现在完全没有
-- [ ] **A2 · WordCloud 词云**（P2）
+- [x] **A1 · Gantt 甘特图**（已完成）：从 `devui` 分支捞回来的，五端齐备
+- [x] **A2 · WordCloud 词云**（已完成）：同上
 - [ ] **A3 · 动效规则统一**（P1）
   - 补进出场曲线令牌（`--i-motion-easing-in` / `-out` / `-spring`）并说明各自用途
   - 列表进出场统一用带 `-move` 的过渡：删中间项时其余项平滑补位而不是瞬移

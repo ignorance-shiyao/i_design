@@ -1,0 +1,48 @@
+<view class="i-chart i-gantt">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+
+  <!-- 数据有环时明说，而不是画一张读不出结论的图。图标 + 文字，颜色不是唯一线索 -->
+  <view wx:if="{{cycle}}" class="i-gantt__warn">
+    <view class="i-gantt__warn-icon">!</view>
+    <text>任务 {{cycle}} 的依赖构成了环，已不画依赖线</text>
+  </view>
+
+  <view class="i-gantt__frame">
+    <!-- 任务名固定在左侧：横向滚动时跟着走的话，滚出去就对不上是哪一行了 -->
+    <view class="i-gantt__names">
+      <view class="i-gantt__names-head" style="height:28px">任务</view>
+      <view wx:for="{{rows}}" wx:key="name" class="i-gantt__name" style="height:{{rowHeight}}px">
+        {{item.name}}
+      </view>
+    </view>
+    <scroll-view class="i-gantt__scroll" scroll-x>
+      <canvas class="i-gantt__canvas" type="2d" style="width:{{chartW}}px;height:{{chartH + 28}}px" />
+    </scroll-view>
+  </view>
+
+  <view class="i-chart__legend">
+    <view class="i-chart__legend-item"><view class="i-gantt__swatch is-track" /><text>计划</text></view>
+    <view class="i-chart__legend-item"><view class="i-gantt__swatch is-progress" /><text>已完成</text></view>
+    <view class="i-chart__legend-item"><view class="i-gantt__swatch is-overdue" /><text>已逾期</text></view>
+    <view class="i-chart__legend-item"><view class="i-gantt__swatch is-milestone" /><text>里程碑</text></view>
+  </view>
+
+  <view class="i-chart__table i-chart__table--flat">
+    <view class="i-chart__table-row i-chart__table-head">
+      <text class="i-chart__table-cell">任务</text>
+      <text class="i-chart__table-cell">开始</text>
+      <text class="i-chart__table-cell">结束</text>
+      <text class="i-chart__table-cell">工期</text>
+      <text class="i-chart__table-cell">完成</text>
+      <text class="i-chart__table-cell">状态</text>
+    </view>
+    <view wx:for="{{rows}}" wx:key="name" class="i-chart__table-row">
+      <text class="i-chart__table-cell">{{item.name}}</text>
+      <text class="i-chart__table-cell">{{item.start}}</text>
+      <text class="i-chart__table-cell">{{item.end}}</text>
+      <text class="i-chart__table-cell">{{item.span}}</text>
+      <text class="i-chart__table-cell">{{item.progress}}</text>
+      <text class="i-chart__table-cell">{{item.status}}</text>
+    </view>
+  </view>
+</view>

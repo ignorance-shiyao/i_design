@@ -37,6 +37,8 @@ import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
 import 'package:i_design/src/logic/href.dart';
+import 'package:i_design/src/logic/gantt.dart';
+import 'package:i_design/src/logic/wordcloud.dart';
 import 'package:i_design/src/logic/locale.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
@@ -1078,6 +1080,122 @@ void main() {
     expect(clockOfMinutes(545), '09:05');
     expect(clockOfMinutes(1439), '23:59');
     expect(clockOfMinutes(1440), '00:00');
+  });
+
+  test('甘特图的时间域、条形与依赖折线与 Web 端一致', () {
+    final domain = ganttDomain(<IGanttTask>[const IGanttTask(id: 'a', name: '调研', start: '2026-03-04', end: '2026-03-12', progress: 1), const IGanttTask(id: 'b', name: '定稿', start: '2026-03-11', end: '2026-03-20', progress: 0.6, deps: <String>['a']), const IGanttTask(id: 'c', name: '开发', start: '2026-03-18', end: '2026-04-08', progress: 0.25, deps: <String>['b']), const IGanttTask(id: 'm', name: '发布', start: '2026-04-17', end: '2026-04-17', deps: <String>['c'], milestone: true)]);
+    final bars = ganttBars(<IGanttTask>[const IGanttTask(id: 'a', name: '调研', start: '2026-03-04', end: '2026-03-12', progress: 1), const IGanttTask(id: 'b', name: '定稿', start: '2026-03-11', end: '2026-03-20', progress: 0.6, deps: <String>['a']), const IGanttTask(id: 'c', name: '开发', start: '2026-03-18', end: '2026-04-08', progress: 0.25, deps: <String>['b']), const IGanttTask(id: 'm', name: '发布', start: '2026-04-17', end: '2026-04-17', deps: <String>['c'], milestone: true)], domain,
+        dayWidth: 18.0, rowHeight: 34.0, barHeight: 18.0, today: '2026-03-25');
+    final ticks = ganttTicks(domain, dayWidth: 18.0, today: '2026-03-25');
+    final links = ganttLinks(bars);
+    expect(domain.from, '2026-03-02');
+    expect(domain.to, '2026-04-19');
+    expect(domain.days, 49);
+    expect(bars[0].x, closeTo(36, 1e-9));
+    expect(bars[0].width, closeTo(162, 1e-9));
+    expect(bars[0].y, closeTo(8, 1e-9));
+    expect(bars[0].progressWidth, closeTo(162, 1e-9));
+    expect(bars[0].overdue, false);
+    expect(bars[1].x, closeTo(162, 1e-9));
+    expect(bars[1].width, closeTo(180, 1e-9));
+    expect(bars[1].y, closeTo(42, 1e-9));
+    expect(bars[1].progressWidth, closeTo(108, 1e-9));
+    expect(bars[1].overdue, true);
+    expect(bars[2].x, closeTo(288, 1e-9));
+    expect(bars[2].width, closeTo(396, 1e-9));
+    expect(bars[2].y, closeTo(76, 1e-9));
+    expect(bars[2].progressWidth, closeTo(99, 1e-9));
+    expect(bars[2].overdue, false);
+    expect(bars[3].x, closeTo(828, 1e-9));
+    expect(bars[3].width, closeTo(0, 1e-9));
+    expect(bars[3].y, closeTo(110, 1e-9));
+    expect(bars[3].progressWidth, closeTo(0, 1e-9));
+    expect(bars[3].overdue, false);
+    expect(ticks.map((t) => t.label).toList(),
+        <String>['3/2', '3/9', '3/16', '3/23', '3/30', '4/6', '4/13']);
+    expect(ticks.map((t) => t.current).toList(),
+        <bool>[false, false, false, true, false, false, false]);
+    expect(ganttTodayX(domain, dayWidth: 18.0, today: '2026-03-25'),
+        closeTo(414, 1e-9));
+    expect(ganttTodayX(domain, dayWidth: 18.0, today: '2027-01-01'), closeTo(-1, 1e-9));
+    expect(links.map((l) => l.id).toList(),
+        <String>['a->b', 'b->c', 'c->m']);
+    expect(links[0].points, <double>[198.0, 17.0, 206.0, 17.0, 206.0, 51.0, 162.0, 51.0]);
+    expect(links[1].points, <double>[342.0, 51.0, 350.0, 51.0, 350.0, 85.0, 288.0, 85.0]);
+    expect(links[2].points, <double>[684.0, 85.0, 820.0, 85.0, 820.0, 119.0, 828.0, 119.0]);
+    expect(daysBetween('2026-03-04', '2026-03-12') + 1, 9);
+    expect(ganttCycle(<IGanttTask>[
+      const IGanttTask(id: 'x', name: 'x', start: '2026-01-01', end: '2026-01-02', deps: <String>['y']),
+      const IGanttTask(id: 'y', name: 'y', start: '2026-01-01', end: '2026-01-02', deps: <String>['x']),
+    ]), <String>['x', 'y']);
+    expect(ganttCycle(<IGanttTask>[const IGanttTask(id: 'a', name: '调研', start: '2026-03-04', end: '2026-03-12', progress: 1), const IGanttTask(id: 'b', name: '定稿', start: '2026-03-11', end: '2026-03-20', progress: 0.6, deps: <String>['a']), const IGanttTask(id: 'c', name: '开发', start: '2026-03-18', end: '2026-04-08', progress: 0.25, deps: <String>['b']), const IGanttTask(id: 'm', name: '发布', start: '2026-04-17', end: '2026-04-17', deps: <String>['c'], milestone: true)]), isEmpty);
+  });
+
+  test('词云的字号映射、螺线落点与档位与 Web 端一致', () {
+    final placed = wordLayout(<IWordMeasured>[const IWordMeasured(text: '设计令牌', value: 96.0, width: 192.0, height: 54.0), const IWordMeasured(text: '多端一致', value: 84.0, width: 192.0, height: 54.0), const IWordMeasured(text: '无障碍', value: 71.0, width: 144.0, height: 54.0), const IWordMeasured(text: '主题定制', value: 65.0, width: 192.0, height: 54.0), const IWordMeasured(text: '暗色模式', value: 58.0, width: 192.0, height: 54.0), const IWordMeasured(text: '组件库', value: 54.0, width: 144.0, height: 54.0), const IWordMeasured(text: '覆盖矩阵', value: 47.0, width: 192.0, height: 54.0), const IWordMeasured(text: '小程序', value: 43.0, width: 144.0, height: 54.0), const IWordMeasured(text: '图表', value: 39.0, width: 96.0, height: 54.0), const IWordMeasured(text: '动效', value: 28.0, width: 96.0, height: 54.0)], 640.0, 320.0);
+    expect(placed.length, 10);
+    expect(placed[0].text, '设计令牌');
+    expect(placed[0].x, closeTo(320, 1e-9));
+    expect(placed[0].y, closeTo(160, 1e-9));
+    expect(placed[0].fontSize, closeTo(48, 1e-9));
+    expect(placed[0].rotated, false);
+    expect(placed[1].text, '多端一致');
+    expect(placed[1].x, closeTo(318.7899723173482, 1e-9));
+    expect(placed[1].y, closeTo(105.2832468838476, 1e-9));
+    expect(placed[1].fontSize, closeTo(44.66946766702908, 1e-9));
+    expect(placed[1].rotated, false);
+    expect(placed[2].text, '无障碍');
+    expect(placed[2].x, closeTo(309.8119413228986, 1e-9));
+    expect(placed[2].y, closeTo(212.16122769550807, 1e-9));
+    expect(placed[2].fontSize, closeTo(40.62742412032046, 1e-9));
+    expect(placed[2].rotated, false);
+    expect(placed[3].text, '主题定制');
+    expect(placed[3].x, closeTo(459.3704053439161, 1e-9));
+    expect(placed[3].y, closeTo(213.26857025348818, 1e-9));
+    expect(placed[3].fontSize, closeTo(38.55515902020237, 1e-9));
+    expect(placed[3].rotated, false);
+    expect(placed[4].text, '暗色模式');
+    expect(placed[4].x, closeTo(198.58391723563753, 1e-9));
+    expect(placed[4].y, closeTo(164.4396765071006, 1e-9));
+    expect(placed[4].fontSize, closeTo(35.91160190958257, 1e-9));
+    expect(placed[4].rotated, true);
+    expect(placed[5].text, '组件库');
+    expect(placed[5].x, closeTo(474.1244179903161, 1e-9));
+    expect(placed[5].y, closeTo(152.47533066017857, 1e-9));
+    expect(placed[5].fontSize, closeTo(34.260489926430324, 1e-9));
+    expect(placed[5].rotated, false);
+    expect(placed[6].text, '覆盖矩阵');
+    expect(placed[6].x, closeTo(479.3297089489002, 1e-9));
+    expect(placed[6].y, closeTo(111.5456237598478, 1e-9));
+    expect(placed[6].fontSize, closeTo(31.02938903535328, 1e-9));
+    expect(placed[6].rotated, false);
+    expect(placed[7].text, '小程序');
+    expect(placed[7].x, closeTo(354.78305859193415, 1e-9));
+    expect(placed[7].y, closeTo(253.6508761607068, 1e-9));
+    expect(placed[7].fontSize, closeTo(28.908055859299036, 1e-9));
+    expect(placed[7].rotated, false);
+    expect(placed[8].text, '图表');
+    expect(placed[8].x, closeTo(149.58127350379775, 1e-9));
+    expect(placed[8].y, closeTo(182.15830812456863, 1e-9));
+    expect(placed[8].fontSize, closeTo(26.47919399771719, 1e-9));
+    expect(placed[8].rotated, false);
+    expect(placed[9].text, '动效');
+    expect(placed[9].x, closeTo(228.8717691882244, 1e-9));
+    expect(placed[9].y, closeTo(202.63415751810908, 1e-9));
+    expect(placed[9].fontSize, closeTo(12, 1e-9));
+    expect(placed[9].rotated, true);
+    expect(wordOverflow(<IWordItem>[const IWordItem(text: '设计令牌', value: 96.0), const IWordItem(text: '多端一致', value: 84.0), const IWordItem(text: '无障碍', value: 71.0), const IWordItem(text: '主题定制', value: 65.0), const IWordItem(text: '暗色模式', value: 58.0), const IWordItem(text: '组件库', value: 54.0), const IWordItem(text: '覆盖矩阵', value: 47.0), const IWordItem(text: '小程序', value: 43.0), const IWordItem(text: '图表', value: 39.0), const IWordItem(text: '动效', value: 28.0)], placed), 0);
+    expect(wordFontSize(96.0, 12.0, 96.0), closeTo(48, 1e-9));
+    expect(wordFontSize(12.0, 12.0, 96.0), closeTo(12, 1e-9));
+    expect(wordFontSize(54.0, 12.0, 96.0), closeTo(37.45584412271572, 1e-9));
+    expect(wordFontSize(5.0, 5.0, 5.0), closeTo(30, 1e-9));
+    expect(wordTone(0, 10), IWordTone.strong);
+    expect(wordTone(1, 10), IWordTone.strong);
+    expect(wordTone(2, 10), IWordTone.base);
+    expect(wordTone(5, 10), IWordTone.base);
+    expect(wordTone(6, 10), IWordTone.muted);
+    expect(wordTone(9, 10), IWordTone.muted);
+    expect(wordTone(0, 0), IWordTone.base);
   });
 
   test('外链白名单的放行与拒绝清单与 Web 端一致', () {

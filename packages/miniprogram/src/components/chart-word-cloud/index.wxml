@@ -1,0 +1,27 @@
+<view class="i-chart i-wordcloud">
+  <view wx:if="{{title}}" class="i-chart__title">{{title}}</view>
+  <canvas class="i-wordcloud__canvas" type="2d" style="width:{{width}}px;height:{{height}}px" />
+
+  <!--
+    放不下的词要说出来。读者看到词少了，得知道是「数据里就这些」
+    还是「画布太小放不下」——这两者的结论完全不同。
+  -->
+  <view wx:if="{{dropped}}" class="i-wordcloud__note">
+    画布放不下 {{dropped}} 个权重较低的词，可调大尺寸或在下方数据表里查看全部
+  </view>
+
+  <!--
+    词云的字号差别本身就不精确，读者要拿确切数值只能靠表。
+    因此这张表不是无障碍的补丁，它是这个图的正式读法之一。
+  -->
+  <view class="i-chart__table i-chart__table--flat">
+    <view class="i-chart__table-row i-chart__table-head">
+      <text class="i-chart__table-cell">词</text>
+      <text class="i-chart__table-cell">权重</text>
+    </view>
+    <view wx:for="{{rows}}" wx:key="text" class="i-chart__table-row">
+      <text class="i-chart__table-cell">{{item.text}}</text>
+      <text class="i-chart__table-cell">{{item.value}}</text>
+    </view>
+  </view>
+</view>
