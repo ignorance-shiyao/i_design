@@ -13,8 +13,7 @@ const coarse = ref('')
   <article>
     <h1>TimeSelect 时间下拉</h1>
     <p class="i-lead">
-      在若干个固定时间点里挑一个。与 TimePicker 的分工：能选任意时刻的用 TimePicker，
-      只在整点或半点里挑的用这个——用三列滚轮去选「上午九点半」既慢又容易滑过头。
+      在若干个固定时间点里挑一个。与 TimePicker 的分工：能选任意时刻的用 TimePicker，只在整点或半点里挑的用这个——用三列滚轮去选「上午九点半」既慢又容易滑过头。
     </p>
 
     <DemoBlock

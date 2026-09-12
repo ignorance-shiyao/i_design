@@ -51,9 +51,7 @@ const picked = ref<string | number | null>(null)
   <article>
     <h1>ConfigProvider 全局配置</h1>
     <p class="i-lead">
-      包住一棵子树，里面的组件就用这里给的文案字典与默认尺寸。
-      组件里那些用户看得见的固定字——「暂无数据」「加载中…」「共 12 条」——
-      不再写死在各端各处。
+      包住一棵子树，里面的组件就用这里给的文案字典与默认尺寸。组件里那些用户看得见的固定字——「暂无数据」「加载中…」「共 12 条」——不再写死在各端各处。
     </p>
 
     <DemoBlock
@@ -100,8 +98,7 @@ const picked = ref<string | number | null>(null)
               <IButton size="sm">气泡确认</IButton>
             </IPopconfirm>
             <ITypography :ellipsis="2" expandable>
-              可展开的多行省略：展开与收起两个字也来自字典，换语言时不会剩下一个中文按钮。
-              这段文字要足够长才会被截断，因此再补上一句凑够两行以上的篇幅。
+              可展开的多行省略：展开与收起两个字也来自字典，换语言时不会剩下一个中文按钮。这段文字要足够长才会被截断，因此再补上一句凑够两行以上的篇幅。
             </ITypography>
             <IEmpty size="sm" type="search" />
           </div>
@@ -136,24 +133,18 @@ const picked = ref<string | number | null>(null)
 
     <h2>为什么用上下文而不是全局单例</h2>
     <p>
-      同一个页面里可能嵌着一块另一种语言的内容——英文合同原文旁边配中文说明。
-      单例表达不了「这一块用另一份字典」。嵌套时内层覆盖外层，这正是上下文天然的行为。
+      同一个页面里可能嵌着一块另一种语言的内容——英文合同原文旁边配中文说明。单例表达不了「这一块用另一份字典」。嵌套时内层覆盖外层，这正是上下文天然的行为。
     </p>
     <p>
-      组件自己传了属性就以自己的为准：<code>placeholder</code>、<code>emptyText</code>
-      这些仍然优先于字典。字典是兜底，不是强制。
+      组件自己传了属性就以自己的为准：<code>placeholder</code>、<code>emptyText</code>这些仍然优先于字典。字典是兜底，不是强制。
     </p>
     <p>
-      这个组件不额外包一层元素：配置是纯粹的上下文，多出来的 <code>div</code>
-      会打断 flex / grid 的父子关系，接上去才发现布局塌了。
+      这个组件不额外包一层元素：配置是纯粹的上下文，多出来的 <code>div</code>会打断 flex / grid 的父子关系，接上去才发现布局塌了。
     </p>
 
     <h2>各端差异</h2>
     <p>
-      Vue 与 React 用上下文、Flutter 用 <code>InheritedWidget</code>，三者都支持嵌套覆盖。
-      小程序没有上下文机制，配置落在模块级的 <code>setLocale()</code>，
-      代价是表达不了「页面里这一块换另一种语言」——需要局部覆盖时给那几个组件单独传属性。
-      这是平台限制，不是取舍。
+      Vue 与 React 用上下文、Flutter 用 <code>InheritedWidget</code>，三者都支持嵌套覆盖。小程序没有上下文机制，配置落在模块级的 <code>setLocale()</code>，代价是表达不了「页面里这一块换另一种语言」——需要局部覆盖时给那几个组件单独传属性。这是平台限制，不是取舍。
     </p>
 
     <h2>API</h2>

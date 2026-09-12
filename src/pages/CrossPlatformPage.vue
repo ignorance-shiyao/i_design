@@ -46,9 +46,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
   <article>
     <h1>跨端支持</h1>
     <p class="i-lead">
-      一套设计体系，同时落在 Web、小程序、移动端与 Flutter 上。与框架无关的部分——
-      令牌、图标、交互规则——只存在一份，各端只写渲染适配。所以「改一次颜色，处处生效」
-      不是口号，而是构建的结果。
+      一套设计体系，同时落在 Web、小程序、移动端与 Flutter 上。与框架无关的部分——令牌、图标、交互规则——只存在一份，各端只写渲染适配。所以「改一次颜色，处处生效」不是口号，而是构建的结果。
     </p>
 
     <h2>支持的端</h2>
@@ -71,9 +69,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
 
     <h2>同一个用法，各端怎么写</h2>
     <p>
-      下面三个片段里出现的每一个属性名，都由
-      <code>scripts/check-snippets.mjs</code> 与那一端的真实实现核对过——文档写错的用法，
-      比没有文档更浪费时间，所以这件事交给构建来保证，而不是靠记得更新。
+      下面三个片段里出现的每一个属性名，都由<code>scripts/check-snippets.mjs</code> 与那一端的真实实现核对过——文档写错的用法，比没有文档更浪费时间，所以这件事交给构建来保证，而不是靠记得更新。
     </p>
 
     <h3>Button 按钮</h3>
@@ -87,8 +83,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
 
     <h2>覆盖矩阵</h2>
     <p>
-      每个组件在各端的可用情况。这张表由构建时扫描各端源码生成，而不是人工维护——
-      手写的清单会在补完第一个端的当天就写上「已支持」。
+      每个组件在各端的可用情况。这张表由构建时扫描各端源码生成，而不是人工维护——手写的清单会在补完第一个端的当天就写上「已支持」。
     </p>
     <div class="cp-matrix">
       <table class="i-table">
@@ -124,15 +119,13 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
     </div>
 
     <p>
-      举个具体的：分页要显示哪些页码、省略号断在哪里，是一段与框架毫无关系的计算。
-      它只写一次，各端引用同一份。
+      举个具体的：分页要显示哪些页码、省略号断在哪里，是一段与框架毫无关系的计算。它只写一次，各端引用同一份。
     </p>
     <CodeBlock :code="sharedLogicSnippet" lang="ts" />
 
     <h2>怎么保证它们真的一致</h2>
     <p>
-      「共享」如果只靠自觉，迟早会分叉：某一端顺手改了个值，别处没人知道。
-      因此一致性由脚本核验，跑在 CI 里，任何一项不通过就构建失败。
+      「共享」如果只靠自觉，迟早会分叉：某一端顺手改了个值，别处没人知道。因此一致性由脚本核验，跑在 CI 里，任何一项不通过就构建失败。
     </p>
     <ul class="cp-checks">
       <li><strong>令牌逐值比对</strong>：CSS、WXSS、JSON、Dart 四种产物的每个令牌值必须相等（Dart 颜色是 0xAARRGGBB，会先换算再比）。</li>

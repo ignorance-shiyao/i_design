@@ -33,8 +33,7 @@ const accordion = ref<string[]>(['what'])
   <article>
     <h1>Collapse 折叠面板</h1>
     <p class="i-lead">
-      把次要或冗长的内容折起来，让页面先呈现结构。默认展开哪一项要慎重——
-      默认收起意味着用户可能永远看不到里面的内容。
+      把次要或冗长的内容折起来，让页面先呈现结构。默认展开哪一项要慎重——默认收起意味着用户可能永远看不到里面的内容。
     </p>
 
     <DemoBlock
@@ -85,8 +84,7 @@ const accordion = ref<string[]>(['what'])
       </tbody>
     </table>
     <p>
-      <code>CollapseItem</code>：<code>{ name: string; title: string; content?: string; disabled?: boolean }</code>；
-      每项对应一个与 <code>name</code> 同名的插槽。
+      <code>CollapseItem</code>：<code>{ name: string; title: string; content?: string; disabled?: boolean }</code>；每项对应一个与 <code>name</code> 同名的插槽。
     </p>
   </article>
 </template>

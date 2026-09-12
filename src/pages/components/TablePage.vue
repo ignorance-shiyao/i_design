@@ -150,11 +150,7 @@ const tablePgCode = [':columns="columns"', ':data="data"']
 
     <h2>各端差异</h2>
     <p>
-      Web 与小程序端自己算窗口，只渲染看得见的那几行；Flutter 端交给能按需建子项的列表。
-      三端共同的一条：列宽必须算死了同时喂给表头与每一行——让每一行各自去量内容宽度的话，
-      滚起来列会左右跳，表头也对不上。所以 Web 端的滚动容器是表格外层而不是
-      <code>tbody</code>：给 <code>tbody</code> 加 <code>overflow</code> 会让它脱离表格布局，
-      列宽随即变成各行各算各的。
+      Web 与小程序端自己算窗口，只渲染看得见的那几行；Flutter 端交给能按需建子项的列表。三端共同的一条：列宽必须算死了同时喂给表头与每一行——让每一行各自去量内容宽度的话，滚起来列会左右跳，表头也对不上。所以 Web 端的滚动容器是表格外层而不是<code>tbody</code>：给 <code>tbody</code> 加 <code>overflow</code> 会让它脱离表格布局，列宽随即变成各行各算各的。
     </p>
 
     <h2>API</h2>
@@ -186,8 +182,7 @@ const tablePgCode = [':columns="columns"', ':data="data"']
 
     <h3>插槽</h3>
     <p>
-      每列提供一个以 <code>key</code> 命名的插槽，作用域参数为
-      <code>{ row, value, index }</code>。
+      每列提供一个以 <code>key</code> 命名的插槽，作用域参数为<code>{ row, value, index }</code>。
     </p>
   </article>
 </template>

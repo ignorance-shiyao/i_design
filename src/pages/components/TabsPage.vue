@@ -60,8 +60,7 @@ const card = ref('members')
 
     <h2>键盘操作</h2>
     <p>
-      遵循 WAI-ARIA 的 tabs 模式：页签组内只有选中项参与 Tab 键序列
-      （<code>tabindex="0"</code>，其余为 <code>-1</code>），进入后用方向键切换。
+      遵循 WAI-ARIA 的 tabs 模式：页签组内只有选中项参与 Tab 键序列（<code>tabindex="0"</code>，其余为 <code>-1</code>），进入后用方向键切换。
     </p>
     <table class="i-table">
       <thead><tr><th>按键</th><th>行为</th></tr></thead>

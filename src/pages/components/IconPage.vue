@@ -25,8 +25,7 @@ async function copyName(name: string) {
   <article>
     <h1>Icon 图标</h1>
     <p class="i-lead">
-      24×24 网格、2px 描边的内联 SVG 图标。用 <code>currentColor</code> 着色，
-      因此图标天然跟随文字颜色与主题——不用为深色模式准备第二套资源。
+      24×24 网格、2px 描边的内联 SVG 图标。用 <code>currentColor</code> 着色，因此图标天然跟随文字颜色与主题——不用为深色模式准备第二套资源。
     </p>
 
     <DemoBlock
@@ -100,9 +99,7 @@ async function copyName(name: string) {
 
     <h2>为什么不用图标字体</h2>
     <p>
-      图标字体（iconfont 一类）需要额外的字体文件与外链请求，且只能整体着色、无法做半色调或局部动画；
-      字体加载失败时还会退化成方块。内联 SVG 没有额外请求，能跟随
-      <code>currentColor</code>、参与 CSS 过渡，也便于按需 tree-shaking。
+      图标字体（iconfont 一类）需要额外的字体文件与外链请求，且只能整体着色、无法做半色调或局部动画；字体加载失败时还会退化成方块。内联 SVG 没有额外请求，能跟随<code>currentColor</code>、参与 CSS 过渡，也便于按需 tree-shaking。
     </p>
   </article>
 </template>

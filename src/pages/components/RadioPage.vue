@@ -13,8 +13,7 @@ const vertical = ref('auto')
   <article>
     <h1>Radio 单选框</h1>
     <p class="i-lead">
-      从一组互斥选项中选择一个。选项超过 5 个时改用 Select——单选框的优势是把所有选项一次摊开，
-      选项一多这个优势就不存在了。
+      从一组互斥选项中选择一个。选项超过 5 个时改用 Select——单选框的优势是把所有选项一次摊开，选项一多这个优势就不存在了。
     </p>
 
     <DemoBlock
@@ -84,8 +83,7 @@ const vertical = ref('auto')
 
     <h2>无障碍</h2>
     <p>
-      组件保留原生 <code>&lt;input type="radio"&gt;</code>（仅视觉隐藏），同组共享 <code>name</code>，
-      因此浏览器原生的方向键切换、表单提交与读屏播报均可正常工作。
+      组件保留原生 <code>&lt;input type="radio"&gt;</code>（仅视觉隐藏），同组共享 <code>name</code>，因此浏览器原生的方向键切换、表单提交与读屏播报均可正常工作。
     </p>
   </article>
 </template>

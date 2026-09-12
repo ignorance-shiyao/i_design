@@ -10,8 +10,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
   <article>
     <h1>Badge 徽标</h1>
     <p class="i-lead">
-      标记数量或状态。徽标是在拉用户的注意力，因此同一屏里出现太多就等于一个都没有——
-      优先只给真正需要处理的东西加。
+      标记数量或状态。徽标是在拉用户的注意力，因此同一屏里出现太多就等于一个都没有——优先只给真正需要处理的东西加。
     </p>
 
     <DemoBlock

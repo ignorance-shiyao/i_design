@@ -120,19 +120,13 @@ async function tellDone() {
 
     <h2>命令式确认框</h2>
     <p>
-      「删除吗？」这种一次性的询问不值得在页面里养一个 <code>visible</code>：
-      状态的生命周期只有那三秒，却要占一个 ref、一段模板和一个回调。
-      <code>confirm</code> 把它折成一次 <code>await</code>。
+      「删除吗？」这种一次性的询问不值得在页面里养一个 <code>visible</code>：状态的生命周期只有那三秒，却要占一个 ref、一段模板和一个回调。<code>confirm</code> 把它折成一次 <code>await</code>。
     </p>
     <p>
-      取消走 reject 而不是 <code>resolve(false)</code>：<code>await</code> 之后那几行就是
-      「用户同意了才做的事」，不必再缩进一层 <code>if</code>。不想处理拒绝时
-      <code>.catch(() =&gt; {})</code> 一笔带过。
+      取消走 reject 而不是 <code>resolve(false)</code>：<code>await</code> 之后那几行就是「用户同意了才做的事」，不必再缩进一层 <code>if</code>。不想处理拒绝时<code>.catch(() =&gt; {})</code> 一笔带过。
     </p>
     <p>
-      按钮顺序是取消在左、确认在右——对话框是一条从左读到右的句子，确认是句尾的动作。
-      反过来放的话，视线读完正文落在右边，右边却是「取消」，最容易点到的位置放的是放弃操作。
-      破坏性操作把主按钮换成危险色，并且默认不允许点遮罩关闭：那一下太容易误触，而它旁边就是「确定」。
+      按钮顺序是取消在左、确认在右——对话框是一条从左读到右的句子，确认是句尾的动作。反过来放的话，视线读完正文落在右边，右边却是「取消」，最容易点到的位置放的是放弃操作。破坏性操作把主按钮换成危险色，并且默认不允许点遮罩关闭：那一下太容易误触，而它旁边就是「确定」。
     </p>
 
     <DemoBlock
@@ -176,8 +170,7 @@ await confirm.alert({ title: '已提交' })"
 
     <h2>无障碍</h2>
     <p>
-      面板渲染为 <code>role="dialog" aria-modal="true"</code>，打开时自动获得焦点并锁定页面滚动，
-      关闭后把焦点交还给触发元素。<code>Esc</code> 始终可关闭。
+      面板渲染为 <code>role="dialog" aria-modal="true"</code>，打开时自动获得焦点并锁定页面滚动，关闭后把焦点交还给触发元素。<code>Esc</code> 始终可关闭。
     </p>
   </article>
 </template>

@@ -8,8 +8,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
   <article>
     <h1>Message 全局提示</h1>
     <p class="i-lead">
-      操作结果的轻量反馈：不打断流程、不需要用户确认、几秒后自行消失。
-      需要用户读完并做决定的信息，请用 Alert 或 Modal。
+      操作结果的轻量反馈：不打断流程、不需要用户确认、几秒后自行消失。需要用户读完并做决定的信息，请用 Alert 或 Modal。
     </p>
 
     <DemoBlock
@@ -68,8 +67,7 @@ handle.close()"
 
     <h2>无障碍</h2>
     <p>
-      消息容器带 <code>role="status" aria-live="polite"</code>：读屏软件会在当前朗读结束后播报新消息，
-      既不抢焦点，也不会漏掉反馈。
+      消息容器带 <code>role="status" aria-live="polite"</code>：读屏软件会在当前朗读结束后播报新消息，既不抢焦点，也不会漏掉反馈。
     </p>
   </article>
 </template>

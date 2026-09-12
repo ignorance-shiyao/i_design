@@ -20,8 +20,7 @@ const indeterminate = computed(() => group.value.length > 0 && group.value.lengt
   <article>
     <h1>Checkbox 多选框</h1>
     <p class="i-lead">
-      从一组选项中选择任意多个。单独使用时表示一个开关式的确认项（如「记住我」），
-      成组使用时表示筛选或批量选择。
+      从一组选项中选择任意多个。单独使用时表示一个开关式的确认项（如「记住我」），成组使用时表示筛选或批量选择。
     </p>
 
     <DemoBlock

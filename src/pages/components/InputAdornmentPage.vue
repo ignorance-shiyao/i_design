@@ -14,8 +14,7 @@ const price = ref<number | null>(null)
   <article>
     <h1>InputAdornment 输入前后缀</h1>
     <p class="i-lead">
-      把 <code>https://</code>、<code>.com</code>、<code>元</code> 这类固定不变的部分从输入框里挪出来。
-      它们不是用户要填的内容，留在框里既占位置，又会连同输入一起被提交。
+      把 <code>https://</code>、<code>.com</code>、<code>元</code> 这类固定不变的部分从输入框里挪出来。它们不是用户要填的内容，留在框里既占位置，又会连同输入一起被提交。
     </p>
 
     <DemoBlock

@@ -36,8 +36,7 @@ function onReject(file: File, reason: string) {
   <article>
     <h1>Upload 上传</h1>
     <p class="i-lead">
-      把本地文件交给服务端。上传是少数「一定会失败」的交互——网络、体积、格式、权限都可能出问题，
-      所以失败态和重试比成功态更值得设计。
+      把本地文件交给服务端。上传是少数「一定会失败」的交互——网络、体积、格式、权限都可能出问题，所以失败态和重试比成功态更值得设计。
     </p>
 
     <DemoBlock
@@ -97,9 +96,7 @@ function onReject(file: File, reason: string) {
 
     <h2>校验</h2>
     <p>
-      浏览器原生的 <code>accept</code> 只过滤文件选择框，<strong>拖拽进来的文件不受它约束</strong>，
-      因此组件对类型、体积、数量做了二次校验。被拒的文件通过 <code>reject</code>
-      事件抛出而非静默丢弃——用户需要知道为什么少了一个文件。
+      浏览器原生的 <code>accept</code> 只过滤文件选择框，<strong>拖拽进来的文件不受它约束</strong>，因此组件对类型、体积、数量做了二次校验。被拒的文件通过 <code>reject</code>事件抛出而非静默丢弃——用户需要知道为什么少了一个文件。
     </p>
 
     <h2>API</h2>

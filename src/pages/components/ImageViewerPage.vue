@@ -24,9 +24,7 @@ function openAt(index: number) {
   <article>
     <h1>ImageViewer 图片预览</h1>
     <p class="i-lead">
-      全屏看大图：缩放、旋转、翻页。它与 Image 共用同一套预览实现，
-      单独成件是因为「点开看大图」的入口未必是一张 Image——
-      列表页、聊天记录、上传回显都可能只有一个按钮或一块缩略图。
+      全屏看大图：缩放、旋转、翻页。它与 Image 共用同一套预览实现，单独成件是因为「点开看大图」的入口未必是一张 Image——列表页、聊天记录、上传回显都可能只有一个按钮或一块缩略图。
     </p>
 
     <DemoBlock
@@ -86,9 +84,7 @@ function openAt(index: number) {
 
     <h2>与 Image 的关系</h2>
     <p>
-      <code>IImage</code> 的 <code>preview</code> 就是内部挂了一个 <code>IImageViewer</code>。
-      缩放边界、旋转归一化、翻页规则都在 <code>logic/image</code> 里，各端共用同一份——
-      写在组件里的话，一端能缩到 10 倍、另一端 3 倍就到头，同一份设计稿在两端上体验不同。
+      <code>IImage</code> 的 <code>preview</code> 就是内部挂了一个 <code>IImageViewer</code>。缩放边界、旋转归一化、翻页规则都在 <code>logic/image</code> 里，各端共用同一份——写在组件里的话，一端能缩到 10 倍、另一端 3 倍就到头，同一份设计稿在两端上体验不同。
     </p>
   </article>
 </template>

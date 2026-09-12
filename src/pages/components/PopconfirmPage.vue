@@ -10,8 +10,7 @@ import { message } from '@/components/message'
   <article>
     <h1>Popconfirm 气泡确认</h1>
     <p class="i-lead">
-      就地确认一个轻量操作。与 Modal 的分界：影响范围小、能一句话说清、用户不需要额外信息就能决定的，
-      用气泡；需要用户读完一段说明或核对数据的，用对话框。
+      就地确认一个轻量操作。与 Modal 的分界：影响范围小、能一句话说清、用户不需要额外信息就能决定的，用气泡；需要用户读完一段说明或核对数据的，用对话框。
     </p>
 
     <DemoBlock
@@ -97,8 +96,7 @@ import { message } from '@/components/message'
 
     <h2>无障碍</h2>
     <p>
-      气泡是 <code>role="dialog"</code>，打开后焦点移入第一个按钮，因此 Tab 可在两个按钮间移动、
-      <code>Esc</code> 可关闭。点击气泡之外的任意位置也会关闭且不触发确认——误触的代价必须是「什么都没发生」。
+      气泡是 <code>role="dialog"</code>，打开后焦点移入第一个按钮，因此 Tab 可在两个按钮间移动、<code>Esc</code> 可关闭。点击气泡之外的任意位置也会关闭且不触发确认——误触的代价必须是「什么都没发生」。
     </p>
   </article>
 </template>

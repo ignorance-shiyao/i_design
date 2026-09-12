@@ -18,8 +18,7 @@ const desc = ref('')
   <article>
     <h1>Drawer 抽屉</h1>
     <p class="i-lead">
-      从屏幕边缘滑出的面板。与 Modal 的取舍：需要保留主页面上下文、或内容较长需要滚动时用抽屉，
-      需要用户立刻二选一时用对话框。
+      从屏幕边缘滑出的面板。与 Modal 的取舍：需要保留主页面上下文、或内容较长需要滚动时用抽屉，需要用户立刻二选一时用对话框。
     </p>
 
     <DemoBlock
@@ -83,8 +82,7 @@ const desc = ref('')
       </tbody>
     </table>
     <p>
-      与 Modal 一致：<code>role="dialog" aria-modal="true"</code>，打开时聚焦面板并锁定页面滚动，
-      关闭后把焦点交还触发元素，<code>Esc</code> 始终可关闭。
+      与 Modal 一致：<code>role="dialog" aria-modal="true"</code>，打开时聚焦面板并锁定页面滚动，关闭后把焦点交还触发元素，<code>Esc</code> 始终可关闭。
     </p>
   </article>
 </template>
