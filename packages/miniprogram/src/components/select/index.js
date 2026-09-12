@@ -1,4 +1,5 @@
 import { collapseTags, shouldVirtualize, toggleValue, virtualWindow } from '@i-design/common'
+import { getLocale } from '../../config'
 
 /**
  * Select —— 选项禁用、多选取值、标签折叠与虚拟窗口的规则都来自公共层，
@@ -14,7 +15,8 @@ Component({
   properties: {
     value: { type: null, value: '' },
     options: { type: Array, value: [] },
-    placeholder: { type: String, value: '请选择' },
+    /** 不传时用字典里的「请选择」，由 config.js 决定是哪种语言 */
+    placeholder: { type: String, value: '' },
     size: { type: String, value: 'md' },
     disabled: { type: Boolean, value: false },
     clearable: { type: Boolean, value: false },
@@ -27,6 +29,9 @@ Component({
     emptyText: { type: String, value: '无匹配选项' }
   },
   data: {
+    /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+    placeholderText: '',
+    emptyLabel: '',
     open: false,
     label: '',
     hasValue: false,
@@ -51,7 +56,15 @@ Component({
       if (multiple) return Array.isArray(value) ? value : []
       return value === '' || value === null || value === undefined ? [] : [value]
     },
+    syncLocale() {
+      const locale = getLocale()
+      this.setData({
+        placeholderText: this.data.placeholder || locale.placeholder,
+        emptyLabel: this.data.emptyText || locale.noMatch
+      })
+    },
     refresh() {
+      this.syncLocale()
       const { options, multiple, maxTagCount } = this.data
       const values = this.values()
       const picked = values.map((v) => options.find((o) => o.value === v)).filter(Boolean)

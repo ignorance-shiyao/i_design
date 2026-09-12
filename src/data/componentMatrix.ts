@@ -429,6 +429,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IConfigProvider",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IContextCards",
     "ends": {
       "vue-next": true,

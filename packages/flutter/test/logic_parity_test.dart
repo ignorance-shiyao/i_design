@@ -36,6 +36,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/locale.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1076,6 +1077,66 @@ void main() {
     expect(clockOfMinutes(545), '09:05');
     expect(clockOfMinutes(1439), '23:59');
     expect(clockOfMinutes(1440), '00:00');
+  });
+
+  test('文案字典的两份译文与局部覆盖规则与 Web 端一致', () {
+    expect(zhCN.name, 'zh-CN');
+    expect(zhCN.empty, '暂无数据');
+    expect(zhCN.emptyContent, '暂无内容');
+    expect(zhCN.loading, '加载中…');
+    expect(zhCN.loadMore, '加载更多');
+    expect(zhCN.loadFailed, '加载失败，点击重试');
+    expect(zhCN.noMore, '没有更多了');
+    expect(zhCN.placeholder, '请选择');
+    expect(zhCN.selectAll, '全选');
+    expect(zhCN.search, '搜索');
+    expect(zhCN.noMatch, '无匹配选项');
+    expect(zhCN.clear, '清除');
+    expect(zhCN.confirm, '确定');
+    expect(zhCN.cancel, '取消');
+    expect(zhCN.acknowledge, '知道了');
+    expect(zhCN.expand, '展开');
+    expect(zhCN.collapse, '收起');
+    expect(zhCN.required, '此项必填');
+    expect(zhCN.invalidFormat, '格式不正确');
+    expect(enUS.name, 'en-US');
+    expect(enUS.empty, 'No data');
+    expect(enUS.emptyContent, 'Nothing here yet');
+    expect(enUS.loading, 'Loading…');
+    expect(enUS.loadMore, 'Load more');
+    expect(enUS.loadFailed, 'Failed to load, tap to retry');
+    expect(enUS.noMore, 'No more items');
+    expect(enUS.placeholder, 'Select');
+    expect(enUS.selectAll, 'Select all');
+    expect(enUS.search, 'Search');
+    expect(enUS.noMatch, 'No matches');
+    expect(enUS.clear, 'Clear');
+    expect(enUS.confirm, 'OK');
+    expect(enUS.cancel, 'Cancel');
+    expect(enUS.acknowledge, 'Got it');
+    expect(enUS.expand, 'Expand');
+    expect(enUS.collapse, 'Collapse');
+    expect(enUS.required, 'This field is required');
+    expect(enUS.invalidFormat, 'Invalid format');
+    expect(zhCN.totalText(12), '共 12 条');
+    expect(enUS.totalText(1), '1 item');
+    expect(enUS.totalText(3), '3 items');
+    expect(zhCN.rangeText(11, 20, 95), '第 11-20 条 / 共 95 条');
+    expect(enUS.rangeText(11, 20, 95), '11-20 of 95');
+    expect(zhCN.emptyPresets[IEmptyReason.empty]!.title, '暂无数据');
+    expect(enUS.emptyPresets[IEmptyReason.empty]!.title, 'No data');
+    expect(zhCN.emptyPresets[IEmptyReason.search]!.title, '没有匹配结果');
+    expect(enUS.emptyPresets[IEmptyReason.search]!.title, 'No matches');
+    expect(zhCN.emptyPresets[IEmptyReason.error]!.title, '加载失败');
+    expect(enUS.emptyPresets[IEmptyReason.error]!.title, 'Failed to load');
+    expect(zhCN.emptyPresets[IEmptyReason.permission]!.title, '无访问权限');
+    expect(enUS.emptyPresets[IEmptyReason.permission]!.title, 'No access');
+    expect(zhCN.copyWith(empty: '这个筛选条件下没有工单').empty, '这个筛选条件下没有工单');
+    expect(zhCN.copyWith(empty: '这个筛选条件下没有工单').confirm, '确定');
+    expect(enUS.copyWith(confirm: 'Go').confirm, 'Go');
+    expect(enUS.copyWith(confirm: 'Go').cancel, 'Cancel');
+    expect(zhCN.copyWith(empty: '这个筛选条件下没有工单').emptyPresets[IEmptyReason.empty]!.title, '这个筛选条件下没有工单');
+    expect(zhCN.copyWith(empty: '这个筛选条件下没有工单').emptyPresets[IEmptyReason.search]!.title, '没有匹配结果');
   });
 
   test('文本截断的判定方向与亚像素容差与 Web 端一致', () {

@@ -93,6 +93,10 @@ const { isTextOverflowing } = await bundle(
   'packages/common/src/logic/overflow.ts',
   'overflow'
 )
+const { resolveLocale, zhCN: zhCNLocale, enUS: enUSLocale } = await bundle(
+  'packages/common/src/logic/locale.ts',
+  'locale'
+)
 const {
   splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
 } = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
@@ -1218,6 +1222,40 @@ const countdownMiscExpectations = [
 ]
 
 /*
+ * 文案字典：两份字典的每一句都要对得上，否则换个端同一个界面会说两种话；
+ * 以及「局部覆盖，缺的沿用原值」——抄漏一个键不该在界面上开天窗。
+ */
+const localeKeys = [
+  'name', 'empty', 'emptyContent', 'loading', 'loadMore', 'loadFailed', 'noMore',
+  'placeholder', 'selectAll', 'search', 'noMatch', 'clear',
+  'confirm', 'cancel', 'acknowledge', 'expand', 'collapse', 'required', 'invalidFormat'
+]
+const dartString = (text) => `'${text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\$/g, '\\$')}'`
+const localeExpectations = [
+  ...localeKeys.map((key) => `    expect(zhCN.${key}, ${dartString(zhCNLocale[key])});`),
+  ...localeKeys.map((key) => `    expect(enUS.${key}, ${dartString(enUSLocale[key])});`),
+  `    expect(zhCN.totalText(12), ${dartString(zhCNLocale.totalText(12))});`,
+  `    expect(enUS.totalText(1), ${dartString(enUSLocale.totalText(1))});`,
+  `    expect(enUS.totalText(3), ${dartString(enUSLocale.totalText(3))});`,
+  `    expect(zhCN.rangeText(11, 20, 95), ${dartString(zhCNLocale.rangeText(11, 20, 95))});`,
+  `    expect(enUS.rangeText(11, 20, 95), ${dartString(enUSLocale.rangeText(11, 20, 95))});`,
+  ...['empty', 'search', 'error', 'permission'].flatMap((reason) => [
+    `    expect(zhCN.emptyPresets[IEmptyReason.${reason}]!.title, ${dartString(zhCNLocale.emptyPresets[reason].title)});`,
+    `    expect(enUS.emptyPresets[IEmptyReason.${reason}]!.title, ${dartString(enUSLocale.emptyPresets[reason].title)});`
+  ]),
+  // 局部覆盖：改掉的是改掉的，没提的沿用原值
+  `    expect(zhCN.copyWith(empty: '这个筛选条件下没有工单').empty, '这个筛选条件下没有工单');`,
+  `    expect(zhCN.copyWith(empty: '这个筛选条件下没有工单').confirm, ${dartString(resolveLocale({ empty: 'x' }).confirm)});`,
+  `    expect(enUS.copyWith(confirm: 'Go').confirm, 'Go');`,
+  `    expect(enUS.copyWith(confirm: 'Go').cancel, ${dartString(resolveLocale({ confirm: 'Go' }, enUSLocale).cancel)});`,
+  // 改 empty 会顺带改掉空态那一句标题——它们说的是同一件事
+  `    expect(zhCN.copyWith(empty: '这个筛选条件下没有工单').emptyPresets[IEmptyReason.empty]!.title, ` +
+    `${dartString(resolveLocale({ empty: '这个筛选条件下没有工单' }).emptyPresets.empty.title)});`,
+  `    expect(zhCN.copyWith(empty: '这个筛选条件下没有工单').emptyPresets[IEmptyReason.search]!.title, ` +
+    `${dartString(resolveLocale({ empty: '这个筛选条件下没有工单' }).emptyPresets.search.title)});`
+]
+
+/*
  * 文本截断：单行看宽度、多行看高度，以及那 1px 的亚像素容差。
  * 方向写反的话提示一次都不会出现，而且不报错——只是「这个功能好像没做」。
  */
@@ -1625,6 +1663,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/locale.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1946,6 +1985,10 @@ ${rangeExpectations.join('\n')}
 ${timeSelectExpectations.join('\n')}
 ${clockExpectations.join('\n')}
 ${clockBackExpectations.join('\n')}
+  });
+
+  test('文案字典的两份译文与局部覆盖规则与 Web 端一致', () {
+${localeExpectations.join('\n')}
   });
 
   test('文本截断的判定方向与亚像素容差与 Web 端一致', () {

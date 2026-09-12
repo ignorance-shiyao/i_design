@@ -2,6 +2,8 @@
  * 页码序列计算：始终保留首尾页，中间窗口跟随当前页滑动，
  * 断开处以 'left' / 'right' 占位。各端只负责把它渲染成按钮。
  */
+
+import { zhCN, type Locale } from './locale'
 export type PageItem = number | 'left' | 'right'
 
 export function buildPages(
@@ -37,9 +39,14 @@ export function clampPage(page: number, pageCount: number) {
   return Math.min(Math.max(1, page), Math.max(1, pageCount))
 }
 
-export function rangeText(current: number, pageSize: number, total: number) {
-  if (!total) return '共 0 条'
+export function rangeText(
+  current: number,
+  pageSize: number,
+  total: number,
+  locale: Locale = zhCN
+) {
+  if (!total) return locale.totalText(0)
   const from = (current - 1) * pageSize + 1
   const to = Math.min(current * pageSize, total)
-  return `第 ${from}-${to} 条 / 共 ${total} 条`
+  return locale.rangeText(from, to, total)
 }

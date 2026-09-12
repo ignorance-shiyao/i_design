@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ILoading from './ILoading.vue'
 import { loadHint, rafThrottle, shouldLoadMore, type LoadStatus } from '@i-design/common'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -64,7 +65,8 @@ onBeforeUnmount(() => {
 
 watch(() => props.status, check)
 
-const hint = computed(() => loadHint(props.status, props.empty))
+const { locale } = useConfig()
+const hint = computed(() => loadHint(props.status, props.empty, locale.value))
 </script>
 
 <template>

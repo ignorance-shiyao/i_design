@@ -11,6 +11,7 @@ import {
   type OptionLike
 } from '@i-design/common'
 import { Icon } from './Icon'
+import { useConfig } from './ConfigProvider'
 
 export interface SelectOption extends OptionLike {
   label: string
@@ -40,7 +41,7 @@ const OPTION_FALLBACK_HEIGHT = 36
 export function Select({
   value = null,
   options,
-  placeholder = '请选择',
+  placeholder = '',
   size = 'md',
   disabled = false,
   invalid = false,
@@ -49,6 +50,10 @@ export function Select({
   maxTagCount = 0,
   onChange
 }: SelectProps) {
+  const { locale } = useConfig()
+  /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+  const placeholderText = placeholder || locale.placeholder
+
   const root = useRef<HTMLDivElement | null>(null)
   const menu = useRef<HTMLUListElement | null>(null)
   const [open, setOpen] = useState(false)
@@ -222,7 +227,7 @@ export function Select({
           </span>
         ) : (
           <span className="i-select__label">
-            {multiple ? placeholder : (selected?.label ?? placeholder)}
+            {multiple ? placeholderText : (selected?.label ?? placeholderText)}
           </span>
         )}
 
@@ -274,7 +279,7 @@ export function Select({
             </li>
           ))}
           {virtual && <li className="i-select__spacer" style={{ height: win.paddingBottom }} />}
-          {!options.length && <li className="i-select__empty">暂无数据</li>}
+          {!options.length && <li className="i-select__empty">{locale.empty}</li>}
         </ul>
       )}
     </div>

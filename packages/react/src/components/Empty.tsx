@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { emptyIllustrations } from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 
 export interface EmptyProps {
   type?: 'empty' | 'search' | 'error' | 'permission'
@@ -11,12 +12,6 @@ export interface EmptyProps {
   children?: ReactNode
 }
 
-const presets: Record<string, { title: string; description: string }> = {
-  empty: { title: '暂无数据', description: '这里还没有内容，创建第一条试试。' },
-  search: { title: '没有匹配结果', description: '换个关键词，或减少筛选条件。' },
-  error: { title: '加载失败', description: '请检查网络后重试。' },
-  permission: { title: '无访问权限', description: '请联系管理员申请该资源的访问权限。' }
-}
 
 export function Empty({
   type = 'empty',
@@ -26,6 +21,10 @@ export function Empty({
   illustration,
   children
 }: EmptyProps) {
+  /* 四种成因的默认文案跟着字典走，换语言时空态不会是唯一还在说中文的地方 */
+  const { locale } = useConfig()
+  const preset = locale.emptyPresets[type]
+
   const art = emptyIllustrations[type]
   return (
     <div className={`i-empty i-empty--${size}`}>
@@ -40,8 +39,8 @@ export function Empty({
           decoding="async"
         />
       )}
-      <p className="i-empty__title">{title || presets[type].title}</p>
-      <p className="i-empty__desc">{description || presets[type].description}</p>
+      <p className="i-empty__title">{title || preset.title}</p>
+      <p className="i-empty__desc">{description || preset.description}</p>
       {children && <div className="i-empty__action">{children}</div>}
     </div>
   )

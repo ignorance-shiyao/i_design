@@ -3,6 +3,7 @@
  * 但排序规则（三态循环与比较）来自公共层，与 Web 端逐字相同。
  */
 import { nextSortOrder, rafThrottle, shouldVirtualize, sortRows, virtualWindow } from '@i-design/common'
+import { getLocale } from '../../config'
 
 Component({
   options: { addGlobalClass: true },
@@ -13,7 +14,7 @@ Component({
     size: { type: String, value: 'md' },
     striped: { type: Boolean, value: false },
     loading: { type: Boolean, value: false },
-    emptyText: { type: String, value: '暂无数据' },
+    emptyText: { type: String, value: '' },
     /**
      * 表体高度（px）。给了才能虚拟化——没有可视高度就算不出该渲染哪几行。
      * 不给时整张表平铺，由页面滚动。
@@ -25,6 +26,8 @@ Component({
   data: {
     rows: [],
     visible: [],
+    emptyLabel: '',
+    loadingLabel: '',
     total: 0,
     virtual: false,
     paddingTop: 0,
@@ -49,6 +52,12 @@ Component({
   },
   methods: {
     applySort() {
+      /* 传了就用传的，没传才回落到字典 */
+      const locale = getLocale()
+      this.setData({
+        emptyLabel: this.data.emptyText || locale.empty,
+        loadingLabel: locale.loading
+      })
       const { data, rowKey, sortKey, sortOrder } = this.data
       const sorted = sortRows(data, sortKey, sortOrder)
       // WXML 的 wx:key 需要稳定字符串

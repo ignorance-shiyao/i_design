@@ -58,6 +58,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/components/SelectInputPage.vue')
       },
       { path: 'input-otp', component: () => import('@/pages/components/InputOtpPage.vue') },
+      { path: 'config-provider', component: () => import('@/pages/components/ConfigProviderPage.vue') },
       { path: 'time-select', component: () => import('@/pages/components/TimeSelectPage.vue') },
       { path: 'scrollbar', component: () => import('@/pages/components/ScrollbarPage.vue') },
       { path: 'qrcode', component: () => import('@/pages/components/QrcodePage.vue') },

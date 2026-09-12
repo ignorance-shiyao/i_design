@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { rangeText as rangeTextOf } from '@i-design/common'
 import IIcon from './IIcon.vue'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -49,12 +51,10 @@ const items = computed<(number | 'left' | 'right')[]>(() => {
   return result
 })
 
-const rangeText = computed(() => {
-  if (!props.total) return '共 0 条'
-  const from = (current.value - 1) * props.pageSize + 1
-  const to = Math.min(current.value * props.pageSize, props.total)
-  return `第 ${from}-${to} 条 / 共 ${props.total} 条`
-})
+const { locale } = useConfig()
+
+/* 整句交给字典：各语言的语序本来就不同，拼模板串换不了语言 */
+const rangeText = computed(() => rangeTextOf(current.value, props.pageSize, props.total, locale.value))
 
 function go(page: number) {
   if (props.disabled) return

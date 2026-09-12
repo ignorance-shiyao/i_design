@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import IIcon from './IIcon.vue'
+import { useConfig } from './useConfig'
 import {
   collapseTags,
   rafThrottle,
@@ -23,6 +24,7 @@ const props = withDefaults(
   defineProps<{
     modelValue?: SelectModel
     options: SelectOption[]
+    /** 不传时用字典里的「请选择」，由 ConfigProvider 决定是哪种语言 */
     placeholder?: string
     size?: 'sm' | 'md' | 'lg'
     disabled?: boolean
@@ -35,7 +37,7 @@ const props = withDefaults(
   }>(),
   {
     modelValue: null,
-    placeholder: '请选择',
+    placeholder: '',
     size: 'md',
     disabled: false,
     invalid: false,
@@ -49,6 +51,10 @@ const emit = defineEmits<{
   'update:modelValue': [SelectModel]
   change: [SelectModel]
 }>()
+
+const { locale } = useConfig()
+/* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
+const placeholderText = computed(() => props.placeholder || locale.value.placeholder)
 
 const root = ref<HTMLElement | null>(null)
 const menu = ref<HTMLElement | null>(null)
@@ -264,7 +270,7 @@ onBeforeUnmount(() => {
         </span>
         <span v-if="tags.rest" class="i-select__tag i-select__tag--rest">+{{ tags.rest }}</span>
       </span>
-      <span v-else class="i-select__label">{{ multiple ? placeholder : label || placeholder }}</span>
+      <span v-else class="i-select__label">{{ multiple ? placeholderText : label || placeholderText }}</span>
 
       <span
         v-if="clearable && hasValue && !disabled"
@@ -311,7 +317,7 @@ onBeforeUnmount(() => {
         class="i-select__spacer"
         :style="{ height: `${window_.paddingBottom}px` }"
       />
-      <li v-if="!options.length" class="i-select__empty">暂无数据</li>
+      <li v-if="!options.length" class="i-select__empty">{{ locale.empty }}</li>
     </ul>
   </div>
 </template>

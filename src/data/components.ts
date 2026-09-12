@@ -25,7 +25,8 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'Divider', cn: '分割线', to: '/components/divider', desc: '分隔内容区块', status: 'ready' },
       { name: 'Link', cn: '链接', to: '/components/link', desc: '跳转到另一个地址', status: 'ready' },
       { name: 'StickyTool', cn: '侧边工具条', to: '/components/sticky-tool', desc: '贴边的一组快捷入口', status: 'ready' },
-      { name: 'Scrollbar', cn: '滚动条', to: '/components/scrollbar', desc: '不占布局的自绘滚动条', status: 'ready' }
+      { name: 'Scrollbar', cn: '滚动条', to: '/components/scrollbar', desc: '不占布局的自绘滚动条', status: 'ready' },
+      { name: 'ConfigProvider', cn: '全局配置', to: '/components/config-provider', desc: '下发文案字典与默认尺寸', status: 'ready' }
     ]
   },
   {
