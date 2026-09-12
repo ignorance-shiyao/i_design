@@ -3,7 +3,8 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { rafThrottle, shouldVirtualize, virtualWindow } from '@i-design/common'
 
 export type TableRow = Record<string, any>
 
@@ -30,6 +31,11 @@ const props = withDefaults(
     selectable?: boolean
     /** 已选行的 rowKey 值 */
     selected?: (string | number)[]
+    /**
+     * 表体高度，如 `360px`。给了之后表头吸顶、表体自己滚，行多时只渲染看得见的那几行。
+     * 不给时整张表平铺，由外层页面滚动。
+     */
+    height?: string
   }>(),
   {
     rowKey: 'id',
@@ -38,11 +44,14 @@ const props = withDefaults(
     loading: false,
     emptyText: '暂无数据',
     selectable: false,
-    selected: () => []
+    selected: () => [],
+    height: ''
   }
 )
 
 const emit = defineEmits<{ (e: 'update:selected', a0: (string | number)[]): void }>()
+
+const wrap = ref<HTMLElement | null>(null)
 
 const keyOf = (row: TableRow) => row[props.rowKey] as string | number
 const isChecked = (row: TableRow) => props.selected.includes(keyOf(row))
@@ -117,10 +126,64 @@ function ariaSort(column: TableColumn) {
   if (sortKey.value !== column.key || !sortOrder.value) return 'none'
   return sortOrder.value === 'asc' ? 'ascending' : 'descending'
 }
+
+/* ----------------------------------------------------------- 虚拟滚动 */
+
+/*
+ * 只有给了 height 才虚拟化：没有可视高度就算不出该渲染哪几行，
+ * 拿一个猜的高度去算会把行定位到看不见的地方，比不虚拟化更糟。
+ *
+ * 撑开上下空白用的是两行 <tr>，而不是给 tbody 加 padding——
+ * 表格的行高由浏览器统一分配，给 tbody 加内边距会被它重新算进去，
+ * 于是空出来的高度和算出来的对不上，越往下偏得越多。
+ */
+const ROW_FALLBACK_HEIGHT = 44
+const rowHeight = ref(ROW_FALLBACK_HEIGHT)
+const scrollTop = ref(0)
+const viewportHeight = ref(0)
+
+const virtual = computed(() => Boolean(props.height) && shouldVirtualize(sortedData.value.length))
+const window_ = computed(() =>
+  virtualWindow(scrollTop.value, viewportHeight.value, rowHeight.value, sortedData.value.length)
+)
+const visibleRowsData = computed(() => {
+  if (!virtual.value) return sortedData.value.map((row, index) => ({ row, index }))
+  const out: { row: TableRow; index: number }[] = []
+  for (let i = window_.value.start; i <= window_.value.end; i++) {
+    out.push({ row: sortedData.value[i], index: i })
+  }
+  return out
+})
+
+/* 滚动事件远多于帧，而每次都要读一次布局 */
+const onScroll = rafThrottle(() => {
+  if (wrap.value) scrollTop.value = wrap.value.scrollTop
+})
+onBeforeUnmount(() => onScroll.cancel())
+
+function measure() {
+  const el = wrap.value
+  if (!el) return
+  viewportHeight.value = el.clientHeight
+  const first = el.querySelector<HTMLElement>('tbody tr:not(.i-table-c__spacer)')
+  if (first && first.offsetHeight > 0) rowHeight.value = first.offsetHeight
+}
+
+watch(
+  () => [props.height, sortedData.value.length],
+  () => nextTick(measure),
+  { immediate: true }
+)
 </script>
 
 <template>
-  <div class="i-table-wrap">
+  <div
+    ref="wrap"
+    class="i-table-wrap"
+    :class="{ 'is-scrollable': !!height }"
+    :style="{ height: height || undefined }"
+    @scroll.passive="onScroll"
+  >
     <table class="i-table-c" :class="[`i-table-c--${size}`, { 'is-striped': striped }]">
       <thead>
         <tr>
@@ -159,9 +222,16 @@ function ariaSort(column: TableColumn) {
         <tr v-else-if="!sortedData.length">
           <td :colspan="columns.length + (selectable ? 1 : 0)" class="i-table-c__state">{{ emptyText }}</td>
         </tr>
+        <template v-else>
+        <!-- 上下两行空白替代没渲染的那些行，滚动条长度才和真实行数相称 -->
+        <tr v-if="virtual" class="i-table-c__spacer" aria-hidden="true">
+          <td
+            :colspan="columns.length + (selectable ? 1 : 0)"
+            :style="{ height: `${window_.paddingTop}px` }"
+          />
+        </tr>
         <tr
-          v-for="(row, index) in sortedData"
-          v-else
+          v-for="{ row, index } in visibleRowsData"
           :key="row[rowKey] ?? index"
           :class="{ 'is-selected': selectable && isChecked(row) }"
         >
@@ -185,6 +255,13 @@ function ariaSort(column: TableColumn) {
             </slot>
           </td>
         </tr>
+        <tr v-if="virtual" class="i-table-c__spacer" aria-hidden="true">
+          <td
+            :colspan="columns.length + (selectable ? 1 : 0)"
+            :style="{ height: `${window_.paddingBottom}px` }"
+          />
+        </tr>
+        </template>
       </tbody>
     </table>
   </div>
