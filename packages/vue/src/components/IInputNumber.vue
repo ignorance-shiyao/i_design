@@ -3,6 +3,7 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
+import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
 import IIcon from './IIcon.vue'
 import { clampNumber, roundTo, stepValue } from '@i-design/common'
@@ -28,13 +29,22 @@ const props = withDefaults(
     max: Number.POSITIVE_INFINITY,
     step: 1,
     precision: 0,
-    size: 'md',
     disabled: false,
     invalid: false,
     placeholder: '',
     hideStep: false
   }
 )
+
+/*
+ * 尺寸跟随 ConfigProvider，但组件自己传了就以自己的为准。
+ * 与文案字典同一条规则：全局配置是兜底，不是强制。
+ *
+ * 所以 size 不能写进 withDefaults——写了就分不清「没传」与「传了 md」，
+ * 而这两者在这里的行为不同。下面这个同名计算属性在模板里会盖住那个属性。
+ */
+const { size: configSize } = useConfig()
+const size = computed(() => props.size ?? configSize.value)
 
 const emit = defineEmits<{ (e: 'input', a0: number | null): void; (e: 'change', a0: number | null): void }>()
 

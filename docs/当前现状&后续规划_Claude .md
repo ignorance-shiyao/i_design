@@ -342,12 +342,18 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
     `<IButton variant="primary" disabled>提交</IButton>`；
     Select 里选「缺陷」触发器文字随之改变；亮暗色与 390px 窄屏各截图核对，无横向溢出
 
-- [ ] **D2 · 全局参数面板补「尺寸」联动**（P1）
-  - 现状：ConfigProvider 已经能下发 `size`，但组件还没读它
-  - 落点：表单类组件的 `size` 默认值改为读 `useConfig().size`，
-    组件自己传了仍然优先（与文案字典同一条规则：字典是兜底不是强制）
-  - 验收：把 ConfigProvider 的 size 设为 `lg`，页面上没显式传 size 的输入框、
-    按钮、选择器一起变大；显式传了 `sm` 的那个不变
+- [x] **D2 · ConfigProvider 的尺寸联动**（P1，已完成）
+  - 落地：Button / Input / InputNumber / Select / SelectInput / DatePicker / RangeInput
+    七个表单类组件的 `size` 改为「自己传了以自己为准，没传则跟随 ConfigProvider」，
+    Vue 与 React 两端同步
+  - 关键改动是**把 `md` 从默认值里拿掉**：写在 `withDefaults` / 解构默认值上，
+    就分不清「没传」与「传了 md」，而这两者在这里的行为不同
+  - React 端另有一处坑：`size ?? useConfig().size` 会让 hook 在传了 size 时不执行，
+    调用顺序在两次渲染间不一致。useConfig 必须无条件调用
+  - 文档页补了一段可切换的演示
+  - 实测（浏览器量高度）：lg / md / sm 三档下，没写 size 的输入框、选择器、按钮
+    分别是 42 / 34 / 28 px，而显式写了 `size="sm"` 的按钮始终 28 px
+  - 未覆盖：小程序与移动端两套实现暂未接入全局尺寸，各自仍用自己的默认值
 
 - [ ] **D3 · 文案字典接到其余组件**（P1）
   - 现状：已接 Select / Table / Empty / Pagination / InfiniteScroll / Loading /

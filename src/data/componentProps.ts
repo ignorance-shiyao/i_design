@@ -82,7 +82,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   ],
   IButton: [
     {"name":"variant","type":"'primary' | 'secondary' | 'text' | 'danger'","doc":"视觉层级：主按钮 / 次按钮 / 文字按钮 / 危险操作","defaultText":"'secondary'","control":{"kind":"enum","options":["primary","secondary","text","danger"]}},
-    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md","lg"]}},
+    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":null,"control":{"kind":"enum","options":["sm","md","lg"]}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"loading","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"block","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
@@ -319,7 +319,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   IDatePicker: [
     {"name":"modelValue","type":"string | null","doc":"YYYY-MM-DD 字符串；空值用 null 表示","defaultText":"null","control":null},
     {"name":"placeholder","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
-    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md","lg"]}},
+    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":null,"control":{"kind":"enum","options":["sm","md","lg"]}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"invalid","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"clearable","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
@@ -421,7 +421,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   IInput: [
     {"name":"modelValue","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"placeholder","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
-    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md","lg"]}},
+    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":null,"control":{"kind":"enum","options":["sm","md","lg"]}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"invalid","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"type","type":"string","doc":"","defaultText":"'text'","control":{"kind":"string"}},
@@ -436,7 +436,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"max","type":"number","doc":"","defaultText":"Number.POSITIVE_INFINITY","control":{"kind":"number"}},
     {"name":"step","type":"number","doc":"","defaultText":"1","control":{"kind":"number"}},
     {"name":"precision","type":"number","doc":"小数位；步进与失焦时都按它取整","defaultText":"0","control":{"kind":"number"}},
-    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md","lg"]}},
+    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":null,"control":{"kind":"enum","options":["sm","md","lg"]}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"invalid","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"placeholder","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
@@ -586,7 +586,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   IRangeInput: [
     {"name":"placeholders","type":"[string, string]","doc":"","defaultText":"() => ['开始', '结束']","control":null},
     {"name":"separator","type":"string","doc":"","defaultText":"'—'","control":{"kind":"string"}},
-    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md","lg"]}},
+    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":null,"control":{"kind":"enum","options":["sm","md","lg"]}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"invalid","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"autoOrder","type":"boolean","doc":"失焦时若起大于止就自动对调。 只在失焦时做，不在输入过程中做——用户把 100 改成 10 的中途， 数值会短暂小于起点，这时对调会把他刚敲的字搬到另一个框里。","defaultText":"true","control":{"kind":"boolean"}},
@@ -635,7 +635,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"modelValue","type":"SelectModel","doc":"","defaultText":"null","control":null},
     {"name":"options","type":"SelectOption[]","doc":"","defaultText":null,"control":null},
     {"name":"placeholder","type":"string","doc":"不传时用字典里的「请选择」，由 ConfigProvider 决定是哪种语言","defaultText":"''","control":{"kind":"string"}},
-    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md","lg"]}},
+    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":null,"control":{"kind":"enum","options":["sm","md","lg"]}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"invalid","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"clearable","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
@@ -645,7 +645,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   ISelectInput: [
     {"name":"value","type":"string","doc":"单选时显示的文案；多选请用 tags 插槽","defaultText":"''","control":{"kind":"string"}},
     {"name":"placeholder","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
-    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md","lg"]}},
+    {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":null,"control":{"kind":"enum","options":["sm","md","lg"]}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"invalid","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"clearable","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},

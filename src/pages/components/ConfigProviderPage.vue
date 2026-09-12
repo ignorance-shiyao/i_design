@@ -11,6 +11,7 @@ import IDatePicker from '@/components/IDatePicker.vue'
 import IPopconfirm from '@/components/IPopconfirm.vue'
 import IButton from '@/components/IButton.vue'
 import ITypography from '@/components/ITypography.vue'
+import IInput from '@/components/IInput.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 
 const lang = ref<'zh' | 'en'>('zh')
@@ -22,6 +23,13 @@ const base = ref<Locale>(zhCN)
 function onLang(value: string | number) {
   base.value = value === 'en' ? enUS : zhCN
 }
+
+const size = ref<'sm' | 'md' | 'lg'>('lg')
+const sizes = [
+  { label: 'sm', value: 'sm' },
+  { label: 'md', value: 'md' },
+  { label: 'lg', value: 'lg' }
+]
 
 const page = ref(2)
 const picked = ref<string | number | null>(null)
@@ -35,6 +43,30 @@ const picked = ref<string | number | null>(null)
       组件里那些用户看得见的固定字——「暂无数据」「加载中…」「共 12 条」——
       不再写死在各端各处。
     </p>
+
+    <DemoBlock
+      title="统一尺寸"
+      description="没有自己写 size 的表单控件跟随这里的设置；写了的以自己的为准——全局配置是兜底，不是强制。"
+      lang="vue"
+      code='<IConfigProvider size="lg">
+  <IInput placeholder="跟随全局" />
+  <ISelect :options="options" />
+  <IButton>跟随全局</IButton>
+  <IButton size="sm">我自己定了 sm</IButton>
+</IConfigProvider>'
+    >
+      <div class="cfg-size">
+        <ISegmented :model-value="size" :options="sizes" @update:model-value="size = $event as 'sm' | 'md' | 'lg'" />
+        <IConfigProvider :size="size">
+          <div class="cfg-size__row">
+            <IInput placeholder="跟随全局" />
+            <ISelect :options="[{ label: '需求', value: 'requirement' }]" />
+            <IButton>跟随全局</IButton>
+            <IButton size="sm">我自己定了 sm</IButton>
+          </div>
+        </IConfigProvider>
+      </div>
+    </DemoBlock>
 
     <DemoBlock
       title="换一种语言"
@@ -135,6 +167,21 @@ const picked = ref<string | number | null>(null)
     </table>
   </article>
 </template>
+
+<style scoped>
+.cfg-size {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-5);
+  align-items: flex-start;
+}
+.cfg-size__row {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  flex-wrap: wrap;
+}
+</style>
 
 <style scoped>
 .cp-demo {
