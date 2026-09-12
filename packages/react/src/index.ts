@@ -48,6 +48,7 @@ export { CheckboxGroup, Checkbox, type CheckboxGroupProps, type CheckboxProps } 
 export { Collapse, type CollapseItem, type CollapseProps } from './components/Collapse'
 export { ColorPicker, type ColorPickerProps } from './components/ColorPicker'
 export { Comment, type CommentProps } from './components/Comment'
+export { confirm, type ConfirmBoxOptions, type PromptOptions } from './components/ConfirmLayer'
 export { ContextCards, type ContextCardsProps } from './components/ContextCards'
 export { Countdown, type CountdownProps } from './components/Countdown'
 export { DatePicker, type DatePickerProps } from './components/DatePicker'

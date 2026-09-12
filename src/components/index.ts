@@ -236,12 +236,14 @@ export {
 }
 
 export { message } from './message'
+export { confirm } from './confirm'
 export type { SelectOption } from './ISelect.vue'
 export type { TableColumn, TableRow } from './ITable.vue'
 export type { TabItem } from './ITabs.vue'
 export type { BreadcrumbItem } from './IBreadcrumb.vue'
 export type { StepItem } from './ISteps.vue'
 export type { MessageOptions, MessageType } from './message'
+export type { ConfirmBoxOptions, PromptOptions } from './confirm'
 export type { FormRule } from './validate'
 export type { IconName } from './icons'
 export type { ChatSource } from './IChatSources.vue'

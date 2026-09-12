@@ -85,6 +85,10 @@ const { toggleValue, collapseTags } = await bundle(
   'packages/common/src/logic/multiselect.ts',
   'multiselect'
 )
+const { confirmActions, validatePromptValue, isConfirmed } = await bundle(
+  'packages/common/src/logic/confirm.ts',
+  'confirm'
+)
 const {
   splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
 } = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
@@ -1210,6 +1214,61 @@ const countdownMiscExpectations = [
 ]
 
 /*
+ * 确认框：按钮顺序（取消在左、确认在右）、alert 只有一个按钮、
+ * 以及「关掉不算同意」这三条。写歪了没人会在构建时发现，
+ * 但一次误触就执行了删除。
+ */
+const kindNames = { confirm: 'IConfirmKind.confirm', alert: 'IConfirmKind.alert', prompt: 'IConfirmKind.prompt' }
+const actionCases = [
+  ['confirm', {}], ['alert', {}], ['prompt', {}],
+  ['confirm', { danger: true }],
+  ['confirm', { confirmText: '删除', cancelText: '再想想', danger: true }],
+  ['alert', { confirmText: '知道了' }],
+]
+const actionExpectations = actionCases.flatMap(([kind, opts]) => {
+  const args = [
+    kindNames[kind],
+    opts.confirmText ? `confirmText: '${opts.confirmText}'` : null,
+    opts.cancelText ? `cancelText: '${opts.cancelText}'` : null,
+    opts.danger ? 'danger: true' : null
+  ].filter(Boolean).join(', ')
+  const out = confirmActions(kind, opts)
+  return [
+    `    expect(confirmActions(${args}).length, ${out.length});`,
+    ...out.flatMap((a, i) => [
+      `    expect(confirmActions(${args})[${i}].role, IConfirmRole.${a.role});`,
+      `    expect(confirmActions(${args})[${i}].text, '${a.text}');`,
+      `    expect(confirmActions(${args})[${i}].primary, ${a.primary});`,
+      `    expect(confirmActions(${args})[${i}].danger, ${a.danger});`
+    ])
+  ]
+})
+
+const confirmedCases = [
+  ['confirm', 'confirm'], ['confirm', 'cancel'], ['confirm', 'close'],
+  ['alert', 'confirm'], ['alert', 'close'],
+  ['prompt', 'confirm'], ['prompt', 'close'],
+]
+const confirmedExpectations = confirmedCases.map(([kind, role]) =>
+  `    expect(isConfirmed(${kindNames[kind]}, IConfirmRole.${role}), ${isConfirmed(kind, role)});`)
+
+const promptCases = [
+  ['', { required: true }], ['  ', { required: true }], ['x', { required: true }],
+  ['', {}], ['abc', { pattern: /^\d+$/ }], ['123', { pattern: /^\d+$/ }],
+  ['', { required: true, requiredMessage: '请填写名称' }],
+]
+const promptExpectations = promptCases.map(([value, rules]) => {
+  const args = [
+    `'${value}'`,
+    rules.required ? 'required: true' : null,
+    rules.pattern ? `pattern: RegExp(r'${rules.pattern.source}')` : null,
+    rules.requiredMessage ? `requiredMessage: '${rules.requiredMessage}'` : null
+  ].filter(Boolean).join(', ')
+  const out = validatePromptValue(value, rules)
+  return `    expect(validatePromptValue(${args}), ${out === null ? 'null' : `'${out}'`});`
+})
+
+/*
  * 多选：追加在末尾（按点击先后）与「折叠时至少留一个」这两条，
  * 各端一旦写歪，同一份选择在两端读出来就不一样。
  */
@@ -1540,6 +1599,7 @@ import 'package:i_design/src/logic/time_select.dart';
 import 'package:i_design/src/logic/scrollbar.dart';
 import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
+import 'package:i_design/src/logic/confirm.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1861,6 +1921,12 @@ ${rangeExpectations.join('\n')}
 ${timeSelectExpectations.join('\n')}
 ${clockExpectations.join('\n')}
 ${clockBackExpectations.join('\n')}
+  });
+
+  test('确认框的按钮编排、关闭语义与输入校验与 Web 端一致', () {
+${actionExpectations.join('\n')}
+${confirmedExpectations.join('\n')}
+${promptExpectations.join('\n')}
   });
 
   test('多选的追加顺序与标签折叠与 Web 端一致', () {

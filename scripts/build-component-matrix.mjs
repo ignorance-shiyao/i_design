@@ -45,8 +45,9 @@ const vueDir = 'src/components'
 const components = readdirSync(vueDir)
   .filter((f) => f.endsWith('.vue') && !f.startsWith('_'))
   .map((f) => f.replace('.vue', ''))
-  // IMessageList 是 message() 的内部宿主，不作为对外组件统计
-  .filter((name) => name !== 'IMessageList')
+  // IMessageList 与 IConfirmLayer 是 message() / confirm() 的内部宿主，
+  // 页面里不直接用它们，因此不作为对外组件统计
+  .filter((name) => name !== 'IMessageList' && name !== 'IConfirmLayer')
   .sort()
 
 const rows = components.map((name) => {
