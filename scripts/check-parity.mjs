@@ -147,7 +147,14 @@ for (const file of readdirSync(vue2Dir).filter((f) => f.endsWith('.vue'))) {
   const end = src.lastIndexOf('</template>')
   const tpl = start >= 0 && end > start ? src.slice(start, end) : ''
   if (/\bmodelValue\b/.test(src)) vue2Issues.push(`${file}: 残留 modelValue`)
-  if (/\s+as\s+[A-Z]/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 断言`)
+  /*
+   * 断言的类型名不一定大写：`as string` / `as number` / `as any` 在 Vue 3 的模板里
+   * 同样常见（站点的 Playground 里就有 `values[meta.name] as string`）。
+   * 只认大写开头的话，这几种会一路漏到 Vue 2 的构建里才炸。
+   */
+  if (/\s+as\s+(?:[A-Z][\w$]*|string|number|boolean|any|unknown|never|const)\b/.test(tpl)) {
+    vue2Issues.push(`${file}: 模板含 TS 断言`)
+  }
   if (/[\w)\]]!(?!=)/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 非空断言`)
   if (/\([^)]*:\s*[A-Za-z_][^)]*\)\s*=>/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 参数类型`)
   if (/<Teleport/i.test(tpl)) vue2Issues.push(`${file}: 使用了 Teleport`)
