@@ -122,6 +122,8 @@ export const componentCategories: ComponentCategory[] = [
       { name: 'ChartSankey', cn: '桑基图', to: '/components/chart', desc: '流向与分流', status: 'ready' },
       { name: 'ChartTreemap', cn: '矩形树图', to: '/components/chart', desc: '层级占比', status: 'ready' },
       { name: 'ChartZoom', cn: '区间缩放', to: '/components/chart', desc: '长序列里挑一段看', status: 'ready' },
+      { name: 'ChartGantt', cn: '甘特图', to: '/components/chart', desc: '排期、依赖与逾期', status: 'ready' },
+      { name: 'ChartWordCloud', cn: '词云', to: '/components/chart', desc: '词频按字号编码', status: 'ready' },
       { name: 'Sparkline', cn: '迷你图', to: '/components/data-display', desc: '嵌在文字里的趋势', status: 'ready' }
     ]
   },

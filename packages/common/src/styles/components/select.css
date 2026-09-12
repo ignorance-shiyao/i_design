@@ -117,7 +117,7 @@
   padding: 0 var(--i-spacing-1);
   border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-sm);
-  background: var(--i-color-fill);
+  background: var(--i-color-bg-muted);
   color: var(--i-color-text);
   font-size: var(--i-font-size-sm);
   line-height: 1.7;

@@ -1,0 +1,114 @@
+/* IChartGantt —— 由 Vue / React / mobile 各端共享 */
+.i-gantt__frame {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  overflow: hidden;
+}
+
+/* 任务名固定在左侧：横向滚动时跟着走的话，滚出去就对不上是哪一行了 */
+.i-gantt__names {
+  flex: none;
+  border-right: 1px solid var(--i-color-hairline);
+  background: var(--i-color-bg-elevated);
+}
+.i-gantt__names-head {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--i-spacing-3);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-gantt__name {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--i-spacing-3);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background var(--i-motion-fast) var(--i-motion-easing-out);
+}
+.i-gantt__name.is-active { background: var(--i-color-brand-subtle); }
+
+.i-gantt__scroll { flex: 1; overflow-x: auto; }
+.i-gantt__svg { display: block; }
+
+.i-gantt__today {
+  stroke: var(--i-color-brand);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.i-chart__tick.is-current { fill: var(--i-color-brand); font-weight: var(--i-font-weight-medium); }
+
+/* 依赖线是辅助信息，压在数据之下的层次 */
+.i-gantt__link {
+  fill: none;
+  stroke: var(--i-color-text-tertiary);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.i-gantt__track { fill: var(--i-color-brand-subtle); }
+.i-gantt__progress { fill: var(--i-color-brand); }
+.i-gantt__milestone { fill: var(--i-color-text); }
+
+/*
+ * 逾期用图标之外的第二条线索：底色换成警示色的淡底，同时数据表里写明「已逾期」。
+ * 颜色不作为唯一线索——灰度打印与色觉障碍下同样读得出来。
+ */
+.i-gantt__bar.is-overdue .i-gantt__track {
+  fill: color-mix(in srgb, var(--i-color-danger) 14%, transparent);
+}
+.i-gantt__bar.is-overdue .i-gantt__progress { fill: var(--i-color-danger); }
+
+.i-gantt__bar { cursor: default; transition: opacity var(--i-motion-fast) var(--i-motion-easing-out); }
+.i-gantt__bar.is-active .i-gantt__track { fill: color-mix(in srgb, var(--i-color-brand) 28%, transparent); }
+
+.i-gantt__swatch {
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.i-gantt__swatch.is-track { background: var(--i-color-brand-subtle); }
+.i-gantt__swatch.is-progress { background: var(--i-color-brand); }
+.i-gantt__swatch.is-overdue { background: var(--i-color-danger); }
+.i-gantt__swatch.is-milestone {
+  width: 10px;
+  height: 10px;
+  border-radius: 1px;
+  background: var(--i-color-text);
+  transform: rotate(45deg);
+}
+
+/* 数据有环时的提示：图标 + 文字 + 淡底，四边等宽发丝线 */
+.i-gantt__warn {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  margin: 0 0 var(--i-spacing-3);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+}
+.i-gantt__warn-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--i-radius-full);
+  font-weight: var(--i-font-weight-bold);
+  color: var(--i-color-danger);
+  background: color-mix(in srgb, var(--i-color-danger) 12%, transparent);
+}
+
+/* 小程序端用 canvas 绘制；display:block 去掉行内元素的基线空隙 */
+.i-gantt { width: 100%; }
+.i-gantt__canvas { display: block; }

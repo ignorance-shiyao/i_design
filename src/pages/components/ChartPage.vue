@@ -18,6 +18,8 @@ import IChartWaterfall from '@/components/IChartWaterfall.vue'
 import IChartZoom from '@/components/IChartZoom.vue'
 import IChartSankey from '@/components/IChartSankey.vue'
 import IChartTreemap from '@/components/IChartTreemap.vue'
+import IChartGantt from '@/components/IChartGantt.vue'
+import IChartWordCloud from '@/components/IChartWordCloud.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { sliceByWindow } from '@i-design/common'
 
@@ -150,6 +152,29 @@ const boxGroups = [
 ]
 
 /* 增减归因：期初到期末之间发生了什么 */
+/*
+ * 排期与词频都写死日期/数值，不用「今天」推算——
+ * 文档里的图每天长得不一样，读者会以为是自己看错了。
+ */
+const ganttToday = '2026-03-25'
+const ganttTasks = [
+  { id: 'research', name: '用户调研', start: '2026-03-04', end: '2026-03-12', progress: 1 },
+  { id: 'spec', name: '交互定稿', start: '2026-03-11', end: '2026-03-20', progress: 0.6, deps: ['research'] },
+  { id: 'visual', name: '视觉走查', start: '2026-03-16', end: '2026-03-24', progress: 0.4, deps: ['research'] },
+  { id: 'build', name: '组件开发', start: '2026-03-18', end: '2026-04-08', progress: 0.25, deps: ['spec'] },
+  { id: 'qa', name: '多端回归', start: '2026-04-06', end: '2026-04-15', progress: 0, deps: ['build', 'visual'] },
+  { id: 'ship', name: '发布', start: '2026-04-17', end: '2026-04-17', milestone: true, deps: ['qa'] }
+]
+
+const cloudWords = [
+  { text: '设计令牌', value: 96 }, { text: '多端一致', value: 84 }, { text: '无障碍', value: 71 },
+  { text: '主题定制', value: 65 }, { text: '暗色模式', value: 58 }, { text: '组件库', value: 54 },
+  { text: '覆盖矩阵', value: 47 }, { text: '小程序', value: 43 }, { text: '图表', value: 39 },
+  { text: '表单校验', value: 35 }, { text: '虚拟滚动', value: 31 }, { text: '动效', value: 28 },
+  { text: '响应式', value: 25 }, { text: '国际化', value: 22 }, { text: '骨架屏', value: 19 },
+  { text: '文档站', value: 17 }, { text: '黄金测试', value: 14 }, { text: '色阶推导', value: 12 }
+]
+
 const waterfallItems = [
   { label: '期初库存', value: 1200 },
   { label: '到货', value: 480 },
@@ -395,6 +420,34 @@ const waterfallItems = [
       code='<IChartWaterfall :items="waterfallItems" title="库存变动" unit=" 件" />'
     >
       <IChartWaterfall :items="waterfallItems" title="本月库存变动" unit=" 件" />
+    </DemoBlock>
+
+    <h2>排期</h2>
+    <p>
+      甘特图回答的是「谁挡着谁、现在落后了没有」。因此依赖线与今天这条竖线是它的主体，
+      横条只是把工期画出来而已。
+    </p>
+    <DemoBlock
+      title="甘特图"
+      description="进度用同色更深的一层叠在计划轨道上，只靠长度表示完成度，不另起一种颜色——另起颜色会让读者去猜那是什么状态。逾期换成警示色的同时，数据表里写明「已逾期」，颜色不作为唯一线索。里程碑是零工期的时点，画成菱形；画成一天宽的横条会被当成一天的工作量。"
+      lang="vue"
+      code='<IChartGantt :tasks="ganttTasks" title="版本排期" />'
+    >
+      <IChartGantt :tasks="ganttTasks" :today="ganttToday" title="v2 版本排期" />
+    </DemoBlock>
+
+    <h2>词频</h2>
+    <p>
+      词云的编码是字号，不是颜色。它适合快速看出「哪几个词压倒性地多」，
+      要拿确切数值仍然得看表——因此数据表是它的正式读法之一，而不是无障碍的补丁。
+    </p>
+    <DemoBlock
+      title="词云"
+      description="字号按权重开平方后映射：人读到的「大小」接近面积，而面积随字号平方增长，直接线性给字号会让权重差 4 倍的两个词看起来差 16 倍。词按权重从大到小沿螺线往外放，最大的那个因此一定在正中；放不下的词直接丢掉并注明数量，硬塞出来的叠字是两个词都读不出来。"
+      lang="vue"
+      code='<IChartWordCloud :words="cloudWords" title="文档搜索热词" />'
+    >
+      <IChartWordCloud :words="cloudWords" title="文档站搜索热词" />
     </DemoBlock>
 
     <h2>色彩规则</h2>

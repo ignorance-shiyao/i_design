@@ -1,0 +1,32 @@
+/* IChartWordCloud —— 由 Vue / React / mobile 各端共享 */
+.i-wordcloud__word {
+  cursor: default;
+  transition: opacity var(--i-motion-fast) var(--i-motion-easing-out);
+}
+
+/*
+ * 三档颜色只强化「大小」这一个已有的编码，不承担独立含义——
+ * 因此色觉障碍下不丢信息，灰度打印也读得出来。
+ * 品牌色只给最大的那几个词：它作为大字达到 3:1，落到小字上就不够了。
+ */
+.i-wordcloud__word.is-strong { fill: var(--i-color-brand); }
+.i-wordcloud__word.is-base { fill: var(--i-color-text); }
+.i-wordcloud__word.is-muted { fill: var(--i-color-text-secondary); }
+
+/* 悬停只压暗其余的词，被指的那个保持原样：改被指者的样式会让人以为它变了 */
+.i-chart__svg:hover .i-wordcloud__word { opacity: 0.45; }
+.i-chart__svg:hover .i-wordcloud__word.is-active { opacity: 1; }
+
+.i-wordcloud__note {
+  margin: var(--i-spacing-2) 0 0;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .i-wordcloud__word { transition: none; }
+}
+
+/* 小程序端用 canvas 绘制；display:block 去掉行内元素的基线空隙 */
+.i-wordcloud { width: 100%; }
+.i-wordcloud__canvas { display: block; max-width: 100%; }

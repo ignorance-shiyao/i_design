@@ -54,6 +54,7 @@
 @import './components/footer.css';
 @import './components/form-item.css';
 @import './components/form.css';
+@import './components/gantt.css';
 @import './components/grid.css';
 @import './components/icon.css';
 @import './components/image-viewer.css';
@@ -128,6 +129,7 @@
 @import './components/upload.css';
 @import './components/virtual.css';
 @import './components/watermark.css';
+@import './components/wordcloud.css';
 
 /* 工具层排在最后：它要能盖过组件自己的 transition，见 build-styles-index.mjs */
 @import './glass.css';

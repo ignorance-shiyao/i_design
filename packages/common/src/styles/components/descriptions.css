@@ -17,7 +17,7 @@
 
 .i-desc__body {
   display: grid;
-  grid-template-columns: repeat(var(--i-desc-column), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--i-desc-column, 3), minmax(0, 1fr));
   gap: var(--i-spacing-4) var(--i-spacing-6);
   margin: 0;
   padding: var(--i-spacing-5);

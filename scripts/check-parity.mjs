@@ -247,6 +247,35 @@ const unexported = readdirSync('src/components')
 check('src/components 的组件都已在 index.ts 导出', unexported.length === 0,
   unexported.length ? `未导出：${unexported.join(', ')}` : `已核对 ${readdirSync('src/components').filter((f) => f.endsWith('.vue')).length} 个`)
 
+/* ---------- 9. 组件样式引用的令牌都有定义 ---------- */
+/*
+ * 写错一个令牌名（把 --i-color-text-tertiary 写成 --i-color-text-muted）不会报任何错：
+ * CSS 遇到未定义的变量就当这条声明不存在，于是那条线的 stroke 变成 none——
+ * 元素还在、几何还对、快照里数得出个数，只是看不见。
+ * 构建、类型检查、乃至「有没有渲染出这个元素」的测试全都发现不了。
+ */
+const tokenFiles = ['tokens.css', 'tokens.responsive.css', 'tokens.mobile.css']
+const defined = new Set()
+for (const f of tokenFiles) {
+  const path = join('packages/common/src/styles', f)
+  if (!existsSync(path)) continue
+  for (const m of readFileSync(path, 'utf8').matchAll(/^\s*(--i-[\w-]+)\s*:/gm)) defined.add(m[1])
+}
+const tokenStyleRoot = 'packages/common/src/styles/components'
+const unknownTokens = []
+for (const f of readdirSync(tokenStyleRoot).filter((f) => f.endsWith('.css'))) {
+  const css = readFileSync(join(tokenStyleRoot, f), 'utf8')
+  // 组件样式里自定义的局部变量（自己声明、自己用）不算引用外部令牌
+  const local = new Set([...css.matchAll(/^\s*(--i-[\w-]+)\s*:/gm)].map((m) => m[1]))
+  // 带回退值的算数：--i-file-color、--i-grid-columns 这类由组件在运行时用内联样式注入，
+  // 它们本来就不在令牌表里，但必须写出回退值，否则注入失败时同样是「看不见」。
+  for (const m of css.matchAll(/var\(\s*(--i-[\w-]+)\s*(,)?/g)) {
+    if (!defined.has(m[1]) && !local.has(m[1]) && !m[2]) unknownTokens.push(`${f} → ${m[1]}`)
+  }
+}
+check('组件样式引用的令牌要么有定义、要么写了回退值', unknownTokens.length === 0,
+  unknownTokens.length ? [...new Set(unknownTokens)].slice(0, 5).join('; ') : `已核对 ${defined.size} 个令牌`)
+
 /* ---------- 报告 ---------- */
 console.log('跨端一致性校验\n')
 for (const line of ok) console.log(`  通过  ${line}`)
