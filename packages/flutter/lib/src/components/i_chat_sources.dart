@@ -7,6 +7,9 @@ class IChatSource {
   const IChatSource({required this.title, this.url, this.origin});
 
   final String title;
+  /// 来源地址。这一端目前只存不开——真要接 url_launcher 时，
+  /// **先过 `safeHref`**：这个字段来自模型与工具输出，属于不可信内容，
+  /// 而 url_launcher 会把任意 scheme 直接交给操作系统，没有浏览器兜底。
   final String? url;
 
   /// 来源站点或文件名

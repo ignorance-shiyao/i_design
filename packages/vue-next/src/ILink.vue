@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { safeHref } from '@i-design/common'
 import IIcon from './IIcon.vue'
 import type { IconName } from './icons'
 
@@ -27,6 +28,12 @@ const props = withDefaults(
   }
 )
 
+/*
+ * 地址过一道白名单。组件不知道 href 是谁给的——在 AI 产品里它常常来自模型输出，
+ * 过不了就退化成不可点的文本，而不是渲染出一个点了会出事的链接。
+ */
+const url = computed(() => safeHref(props.href))
+
 const emit = defineEmits<{ click: [MouseEvent] }>()
 
 /*
@@ -53,7 +60,7 @@ function onClick(event: MouseEvent) {
 
 <template>
   <component
-    :is="href && !disabled ? 'a' : 'button'"
+    :is="url && !disabled ? 'a' : 'button'"
     class="i-link"
     :class="[
       `i-link--${theme}`,
@@ -61,8 +68,8 @@ function onClick(event: MouseEvent) {
       `i-link--underline-${underline}`,
       { 'is-disabled': disabled }
     ]"
-    :href="href && !disabled ? href : undefined"
-    :target="href ? target : undefined"
+    :href="url && !disabled ? url : undefined"
+    :target="url ? target : undefined"
     :rel="href ? rel : undefined"
     :type="href && !disabled ? undefined : 'button'"
     :disabled="!href && disabled ? true : undefined"

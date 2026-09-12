@@ -220,7 +220,7 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
   - 验收：`npm test` 通过并接进 CI；故意把 `isTextOverflowing` 的方向写反，测试变红
   - 依赖：E2
 
-- [ ] **E7 · 外链地址加协议白名单**（P2，来自已关闭的 PR #3）
+- [x] **E7 · 外链地址加协议白名单**（来自已关闭的 PR #3，已完成）
   - 现状：`IChatSources` 与 `IContextCards` 把数据里的 `url` / `href` 直接绑到
     `<a href>` 上，**代码里没有任何协议检查**。今天没被利用是因为两处都带了
     `target="_blank"`，而 Chromium 会拒绝把 `javascript:` 导航到新上下文——
@@ -231,8 +231,11 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
   - 落点：`packages/common/src/logic/` 加 `safeHref(href)`，只放行
     `http(s)://`、站内相对路径与锚点；协议相对（`//evil.com`）、
     `javascript:`、`data:`、含控制字符的一律返回 undefined。各端绑定前过一道
-  - 验收：传 `javascript:alert(1)` 时链接退化成纯文本而不是可点的 `<a>`；
-    补 golden 断言把白名单规则钉在各端
+  - 落地：`logic/href.ts` 的 `safeHref`，接进 Link / ChatSources / ContextCards
+    三端；Flutter 端目前只存不开链接，在 `IChatSource.url` 上留了注释，
+    接 `url_launcher` 时必须先过这道白名单——那一端没有浏览器兜底
+  - 实测：喂 `javascript:alert(1)` 时 Link 退化成 `<button>` 且不带 href、文字保留，
+    正常地址照常渲染成 `<a>`；golden test +18 条把白名单钉在各端
 
 - [ ] **E6 · 无障碍自动检查**（P2）
   - 落点：Playwright + axe，遍历文档站路由，亮暗两态各跑一遍

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { chunkLength, chunkPreview, fileTypeOf, type ContextChunk } from '@i-design/common'
+import { chunkLength, chunkPreview, fileTypeOf, type ContextChunk, safeHref } from '@i-design/common'
 import { Icon } from './Icon'
 
 export interface ContextCardsProps {
@@ -57,8 +57,8 @@ export function ContextCards({
             {chunk.source && type && (
               <a
                 className="i-chunk__source"
-                href={chunk.href || undefined}
-                target={chunk.href ? '_blank' : undefined}
+                href={safeHref(chunk.href)}
+                target={safeHref(chunk.href) ? '_blank' : undefined}
                 rel="noreferrer"
                 style={
                   { '--i-file-color': `var(--i-chart-${type.slot || 1})` } as React.CSSProperties
@@ -66,7 +66,7 @@ export function ContextCards({
               >
                 <Icon className="i-chunk__source-icon" name={type.icon} size={13} />
                 {chunk.source}
-                {chunk.href && <Icon name="external-link" size={11} />}
+                {safeHref(chunk.href) && <Icon name="external-link" size={11} />}
               </a>
             )}
           </article>

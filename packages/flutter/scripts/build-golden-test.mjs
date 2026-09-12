@@ -93,6 +93,7 @@ const { isTextOverflowing } = await bundle(
   'packages/common/src/logic/overflow.ts',
   'overflow'
 )
+const { safeHref } = await bundle('packages/common/src/logic/href.ts', 'href')
 const { resolveLocale, zhCN: zhCNLocale, enUS: enUSLocale } = await bundle(
   'packages/common/src/logic/locale.ts',
   'locale'
@@ -1222,6 +1223,24 @@ const countdownMiscExpectations = [
 ]
 
 /*
+ * 外链白名单：放行与拒绝的清单两端必须逐条一致。
+ * 少拒一种，那一端就多一个可点的恶意链接；多拒一种，合法链接在那一端点不开。
+ */
+const TAB = String.fromCharCode(9)
+const hrefCases = [
+  'https://a.com/x', 'http://a.com', '/docs/a', '#top', './a', '../a', 'a/b',
+  'mailto:a@b.c', 'tel:123', 'javascript:alert(1)', 'JavaScript:alert(1)',
+  'java' + TAB + 'script:alert(1)', 'data:text/html,x', '//evil.com',
+  'vbscript:m', String.raw`\\evil.com`, '  javascript:alert(1)  ', ''
+]
+const hrefExpectations = hrefCases.map((value) => {
+  const out = safeHref(value)
+  const literal = JSON.stringify(value).replace(/'/g, String.raw`\'`)
+  const arg = `'${literal.slice(1, -1).replace(/\\"/g, '"')}'`
+  return `    expect(safeHref(${arg}), ${out === undefined ? 'null' : arg});`
+})
+
+/*
  * 文案字典：两份字典的每一句都要对得上，否则换个端同一个界面会说两种话；
  * 以及「局部覆盖，缺的沿用原值」——抄漏一个键不该在界面上开天窗。
  */
@@ -1664,6 +1683,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/locale.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
@@ -1986,6 +2006,10 @@ ${rangeExpectations.join('\n')}
 ${timeSelectExpectations.join('\n')}
 ${clockExpectations.join('\n')}
 ${clockBackExpectations.join('\n')}
+  });
+
+  test('外链白名单的放行与拒绝清单与 Web 端一致', () {
+${hrefExpectations.join('\n')}
   });
 
   test('文案字典的两份译文与局部覆盖规则与 Web 端一致', () {
