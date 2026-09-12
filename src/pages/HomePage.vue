@@ -686,7 +686,8 @@ h1 span {
 }
 .sample-text-link {
   font-size: var(--i-font-size-xs);
-  color: var(--i-color-brand);
+  /* 小字用 brand-text：品牌色在白底上只有 3.86:1 */
+  color: var(--i-color-brand-text);
 }
 .sample-controls label {
   display: block;

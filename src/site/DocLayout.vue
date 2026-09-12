@@ -103,6 +103,21 @@ watch(() => route.path, () => {
   max-height: calc(100vh - 88px - var(--i-spacing-6));
   overflow-y: auto;
   overscroll-behavior: contain;
+  /*
+   * 上下边缘渐隐。
+   *
+   * 侧栏内容 3177px、可视只有 788px，边缘处永远有一行被切成两半——
+   * 一条被拦腰截断的文字读起来像「这一项就叫 ConfigProvide」，
+   * 而不是「下面还有」。渐隐把截断变成一个明确的信号：这里还没到头。
+   * mask 只影响绘制，不改布局，滚动与点击都不受影响。
+   */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--i-spacing-4),
+    #000 calc(100% - var(--i-spacing-5)),
+    transparent 100%
+  );
   padding-right: 20px;
   border-right: 1px solid var(--i-color-hairline);
 }
@@ -146,7 +161,8 @@ watch(() => route.path, () => {
 /* 用 exact-active：否则父路径（如 /components 总览）在所有子页都会被标记为选中 */
 .doc-layout__side a.router-link-exact-active {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  /* 淡底上的字用 brand-text 那一档：填充色写在同色淡底上只有 3.37:1 */
+  color: var(--i-color-brand-text);
   font-weight: 500;
 }
 /*

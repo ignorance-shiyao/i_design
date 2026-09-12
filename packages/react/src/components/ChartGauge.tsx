@@ -31,7 +31,14 @@ export function ChartGauge({
     .sort((a, b) => a.value - b.value)
     .filter((t) => value >= t.value)
     .pop()
-  const color = hit ? `var(--i-color-${hit.status})` : 'var(--i-color-brand)'
+  const status = hit?.status ?? 'brand'
+  /** 弧线用填充色 */
+  const color = `var(--i-color-${status})`
+  /*
+   * 中间那个数字用 `-text` 那一档：填充色是给「一大块色」定的，
+   * 24px 的数字写在白底上只有 2.3:1，一眼看过去有颜色，读具体数值却要眯眼。
+   */
+  const textColor = `var(--i-color-${status}-text)`
 
   return (
     <figure className={['i-chart', 'i-chart--gauge', className].filter(Boolean).join(' ')}>
@@ -44,7 +51,7 @@ export function ChartGauge({
           )}
         </svg>
         <div className="i-chart__gauge-label">
-          <strong style={{ color }}>
+          <strong style={{ color: textColor }}>
             {value}
             {unit}
           </strong>

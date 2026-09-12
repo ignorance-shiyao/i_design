@@ -18,11 +18,23 @@
     box-shadow var(--i-motion-fast) var(--i-motion-easing);
 }
 .i-select__trigger:hover:not(:disabled) { border-color: var(--i-color-brand); }
-.i-select__trigger:focus-visible,
+/*
+ * 展开态：边框转成品牌色，外面套一圈淡色——这是「它现在开着」。
+ */
 .i-select.is-open .i-select__trigger {
-  outline: none;
   border-color: var(--i-color-brand);
   box-shadow: 0 0 0 2px var(--i-color-brand-subtle);
+}
+/*
+ * 聚焦态另给一个真正的焦点环，不能只换边框色。
+ *
+ * 原先这里写的是 `outline: none` 加换边框——对键盘用户来说，
+ * 一像素的边框换色是全站最弱的一种提示，而且与「展开」长得一模一样，
+ * 分不出是「焦点停在这」还是「下拉已经打开」。
+ */
+.i-select__trigger:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
 }
 .i-select__trigger:disabled {
   background: var(--i-color-bg-muted);

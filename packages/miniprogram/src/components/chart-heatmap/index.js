@@ -4,7 +4,7 @@
  * 用 view 而不是 canvas 画：格子里的数字要能被读屏读到，
  * 画进 canvas 就只剩一张图片。单色阶而不是彩虹——彩虹会让读者以为颜色代表类别。
  */
-import { formatTick, heatLevel } from '@i-design/common'
+import { contrastText, formatTick, heatLevel } from '@i-design/common'
 
 const SEQ = ['#eef3ff', '#adc4ff', '#7ea1ff', '#5e7ce0', '#3a4da3']
 
@@ -34,8 +34,12 @@ Component({
             return {
               text: formatTick(value),
               background: SEQ[level],
-              // 深色格子换反色文字，任何一格都读得出来
-              color: level >= 3 ? '#ffffff' : '#252b3a'
+              /*
+               * 文字色按这一格的实际底色算，而不是按档位硬判。
+               * 按档位判断的前提是「档位越高底色越深」，暗色主题的色阶方向是反的——
+               * 浅色格子上写浅色字，数字基本看不见。
+               */
+              color: contrastText(SEQ[level])
             }
           })
         }))

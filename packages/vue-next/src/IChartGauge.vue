@@ -23,13 +23,25 @@ const stroke = computed(() => Math.max(8, props.size * 0.09))
 const arc = computed(() => gaugeArc(percent.value, props.size / 2, stroke.value))
 
 /** 命中的最高阈值决定颜色；没有阈值时用品牌色 */
-const color = computed(() => {
+const status = computed(() => {
   const hit = [...props.thresholds]
     .sort((a, b) => a.value - b.value)
     .filter((t) => props.value >= t.value)
     .pop()
-  return hit ? `var(--i-color-${hit.status})` : 'var(--i-color-brand)'
+  return hit?.status ?? 'brand'
 })
+
+/** 弧线用填充色 */
+const color = computed(() => `var(--i-color-${status.value})`)
+
+/*
+ * 中间那个数字用 `-text` 那一档，不跟弧线共用一个颜色。
+ *
+ * 填充色是给「一大块色」定的，24px 的数字写在白底上只有 2.3:1——
+ * 一眼看过去是有颜色的，读到具体数值却要眯眼。弧线与数字本来就承担不同的任务，
+ * 颜色也就不该是同一个。
+ */
+const textColor = computed(() => `var(--i-color-${status.value}-text)`)
 </script>
 
 <template>
@@ -42,7 +54,7 @@ const color = computed(() => {
         <path v-if="arc.value" :d="arc.value" fill="none" :stroke="color" :stroke-width="stroke" stroke-linecap="round" />
       </svg>
       <div class="i-chart__gauge-label">
-        <strong :style="{ color }">{{ value }}{{ unit }}</strong>
+        <strong :style="{ color: textColor }">{{ value }}{{ unit }}</strong>
         <span>{{ min }} – {{ max }}{{ unit }}</span>
       </div>
     </div>

@@ -145,7 +145,8 @@ const links = [
   background: var(--i-color-bg-subtle);
 }
 .header__nav a.router-link-active {
-  color: var(--i-color-brand);
+  /* 淡底上的字用 brand-text 那一档：填充色写在同色淡底上只有 3.37:1 */
+  color: var(--i-color-brand-text);
   background: var(--i-color-brand-subtle);
 }
 .header__actions {

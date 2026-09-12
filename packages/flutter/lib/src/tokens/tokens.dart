@@ -16,10 +16,10 @@ class IDesignTokensLight {
   static const colorBgInverse = Color(0xFF141822);
   static const colorText = Color(0xFF252B3A);
   static const colorTextSecondary = Color(0xFF575D6C);
-  static const colorTextTertiary = Color(0xFF8A8E99);
+  static const colorTextTertiary = Color(0xFF6B7080);
   static const colorTextInverse = Color(0xFFFFFFFF);
   static const colorOnMedia = Color(0xFFFFFFFF);
-  static const colorTextLink = Color(0xFF5E7CE0);
+  static const colorTextLink = Color(0xFF4A63C4);
   static const colorBorder = Color(0xFFDFE1E6);
   static const colorBorderStrong = Color(0xFFC3C6CD);
   static const colorHairline = Color(0x14141822);
@@ -32,6 +32,10 @@ class IDesignTokensLight {
   static const colorDangerSubtle = Color(0xFFFDECEE);
   static const colorInfo = Color(0xFF5E7CE0);
   static const colorInfoSubtle = Color(0xFFEEF3FF);
+  static const colorSuccessText = Color(0xFF15705A);
+  static const colorWarningText = Color(0xFF8A5014);
+  static const colorDangerText = Color(0xFFB3352F);
+  static const colorBrandText = Color(0xFF4A63C4);
   static const colorGlass = Color(0xB8FFFFFF);
   static const colorGlassSubtle = Color(0x8CFFFFFF);
   static const colorGlassBorder = Color(0x1A141822);
@@ -49,7 +53,7 @@ class IDesignTokensLight {
   static const tokFn = Color(0xFF2563A8);
   static const tokKlass = Color(0xFF0F766E);
   static const tokProp = Color(0xFF2563A8);
-  static const tokTag = Color(0xFFD6336C);
+  static const tokTag = Color(0xFFC2255C);
   static const tokAttr = Color(0xFFB45309);
   static const tokDirective = Color(0xFF7048E8);
   static const tokPunct = Color(0xFF7C8496);
@@ -148,6 +152,10 @@ class IDesignTokensDark {
   static const colorDangerSubtle = Color(0x29F66F6A);
   static const colorInfo = Color(0xFFADC4FF);
   static const colorInfoSubtle = Color(0x295E7CE0);
+  static const colorSuccessText = Color(0xFF3AC295);
+  static const colorWarningText = Color(0xFFFA9841);
+  static const colorDangerText = Color(0xFFF66F6A);
+  static const colorBrandText = Color(0xFFADC4FF);
   static const colorGlass = Color(0xB8222837);
   static const colorGlassSubtle = Color(0x991B202C);
   static const colorGlassBorder = Color(0x24FFFFFF);

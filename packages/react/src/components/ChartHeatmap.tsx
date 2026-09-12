@@ -20,8 +20,12 @@ export function ChartHeatmap({ matrix, rows, columns, title = '', unit = '', cla
 
   const colorOf = (value: number) => `var(--i-chart-seq-${heatLevel(value, min, max, 5) + 1})`
   // 深色格子上用反色文字，任何一格的数字都读得出来
-  const textOf = (value: number) =>
-    heatLevel(value, min, max, 5) >= 3 ? 'var(--i-color-text-inverse)' : 'var(--i-color-text)'
+  /*
+   * 格子里的字用与底色配套的 `-ink` 令牌，而不是按档位硬判：
+   * 按档位判断的前提是「档位越高底色越深」，而暗色主题的色阶方向是反的——
+   * 浅蓝格子上写浅色字只有 1.57:1，数字基本看不见。
+   */
+  const textOf = (value: number) => `var(--i-chart-seq-${heatLevel(value, min, max, 5) + 1}-ink)`
 
   return (
     <figure className={['i-chart', className].filter(Boolean).join(' ')}>

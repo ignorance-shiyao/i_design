@@ -34,14 +34,30 @@ export const palette: Record<string, Palette> = {
     30: '#eef0f5',
     40: '#dfe1e6',
     50: '#c3c6cd',
-    60: '#8a8e99',
+    /*
+     * 60 档是「第三级文字」。原先是 #8a8e99，在白底上只有 3.28:1——
+     * 全站的辅助说明、计数、页脚都用它，也就是说整套界面里字最小的那一批
+     * 恰恰是最难读的一批（axe 在六个页面上数出 156 处）。
+     * 压到 #6b7080 得到 4.94:1（在浅灰底 #f7f8fa 上也有 4.64），
+     * 视觉上仍明显比正文轻，但读得清楚。取值以「在两种底色上都过 4.5」为准，
+     * 只看白底的话，浅灰卡片里的说明文字会差一点点过不去。
+     */
+    60: '#6b7080',
     70: '#575d6c',
     80: '#252b3a',
     90: '#141822'
   },
-  success: { 10: '#e8f8f0', 50: '#3ac295', 70: '#26996f' },
-  warning: { 10: '#fff4e6', 50: '#fa9841', 70: '#c9762c' },
-  danger: { 10: '#fdecee', 50: '#f66f6a', 70: '#cc4b46' },
+  /*
+   * 每个语义色多一档 80：**专门给「写在同色淡底上的字」用**。
+   *
+   * 50 档是填充与图标的颜色，拿它写字在淡底上只有 2.0-3.2:1——
+   * 状态标签、徽标这类「淡底色块 + 文字」的组合里，颜色看得见、字读不出来。
+   * 70 档是给描边与图标用的，仍然不够（3.2）。80 档只做一件事：
+   * 在对应的 10 档底色上稳定过 4.5:1。
+   */
+  success: { 10: '#e8f8f0', 50: '#3ac295', 70: '#26996f', 80: '#15705a' },
+  warning: { 10: '#fff4e6', 50: '#fa9841', 70: '#c9762c', 80: '#8a5014' },
+  danger: { 10: '#fdecee', 50: '#f66f6a', 70: '#cc4b46', 80: '#b3352f' },
   info: { 10: '#eef3ff', 50: '#5e7ce0', 70: '#3a4da3' }
 }
 
@@ -234,7 +250,12 @@ export const lightTheme: Record<string, string> = {
    * 深色的点压在深色照片上，直接消失。
    */
   'color-on-media': '#ffffff',
-  'color-text-link': palette.brand[50],
+  /*
+   * 链接用 60 档而不是品牌色本身：品牌色在白底上只有 3.86:1，
+   * 而链接是正文里最需要读准的那几个字——认错一个链接要多跳一次页面。
+   * 60 档 5.42:1，与品牌色仍是同一个色相，不影响「这是品牌蓝」的印象。
+   */
+  'color-text-link': palette.brand[60],
 
   'color-border': palette.gray[40],
   'color-border-strong': palette.gray[50],
@@ -249,6 +270,18 @@ export const lightTheme: Record<string, string> = {
   'color-danger-subtle': palette.danger[10],
   'color-info': palette.info[50],
   'color-info-subtle': palette.info[10],
+
+  /*
+   * 「写在同色淡底上的字」专用。
+   *
+   * 状态标签、徽标这类组合是「淡底色块 + 文字」，而填充色拿来写字在淡底上
+   * 只有 2.0-3.2:1——颜色看得见，字读不出来。这四个令牌只在这一种位置用，
+   * 换主题色时也跟着一起推导，不必每处再手挑一个深一点的颜色。
+   */
+  'color-success-text': palette.success[80],
+  'color-warning-text': palette.warning[80],
+  'color-danger-text': palette.danger[80],
+  'color-brand-text': palette.brand[60],
 
   /* 玻璃面：半透明的表面色 + 一条比表面更亮的内高光 */
   'color-glass': 'rgba(255, 255, 255, 0.72)',
@@ -298,6 +331,16 @@ export const darkTheme: Record<string, string> = {
   'color-info-subtle': 'rgba(94, 124, 224, 0.16)',
 
   /*
+   * 暗色下的淡底是半透明色叠在深底上，本身就压得很暗，
+   * 填充色写上去已经有 4.5-5.6:1——这里不必再换一档，
+   * 换了反而会比周围的正文还亮，状态看起来像被强调了两次。
+   */
+  'color-success-text': palette.success[50],
+  'color-warning-text': palette.warning[50],
+  'color-danger-text': palette.danger[50],
+  'color-brand-text': palette.brand[30],
+
+  /*
    * 暗色的玻璃要比亮色更不透明。深色背景本来就缺少明暗差，
    * 再透下去，面与背后的内容会糊成同一层，边界完全消失。
    */
@@ -323,7 +366,8 @@ export const syntaxLight: Record<string, string> = {
   'tok-fn': '#2563a8',
   'tok-klass': '#0f766e',
   'tok-prop': '#2563a8',
-  'tok-tag': '#d6336c',
+  /* 标签名在代码底色上要过 4.5：#d6336c 差一点（4.47），压深一档 */
+  'tok-tag': '#c2255c',
   'tok-attr': '#b45309',
   'tok-directive': '#7048e8',
   'tok-punct': '#7c8496'

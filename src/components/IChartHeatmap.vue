@@ -27,8 +27,16 @@ const active = ref<{ r: number; c: number } | null>(null)
 const colorOf = (value: number) => `var(--i-chart-seq-${heatLevel(value, min.value, max.value, 5) + 1})`
 
 // 深色格子上用反色文字，浅色格子上用正常文字，保证任何一格的数字都读得出来
+/*
+ * 格子里的字用与底色配套的 `-ink` 令牌，而不是按档位硬判。
+ *
+ * 按档位判断的前提是「档位越高底色越深」，而暗色主题的色阶方向是反的——
+ * 于是浅蓝格子上写浅色字，实测只有 1.57:1，数字基本看不见。
+ * `-ink` 是生成令牌时用 contrastText 按每一档的实际颜色算出来的，
+ * 底色换了它跟着换，不存在对不上的可能。
+ */
 const textOf = (value: number) =>
-  heatLevel(value, min.value, max.value, 5) >= 3 ? 'var(--i-color-text-inverse)' : 'var(--i-color-text)'
+  `var(--i-chart-seq-${heatLevel(value, min.value, max.value, 5) + 1}-ink)`
 </script>
 
 <template>

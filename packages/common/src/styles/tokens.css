@@ -11,10 +11,10 @@
   --i-color-bg-inverse: #141822;
   --i-color-text: #252b3a;
   --i-color-text-secondary: #575d6c;
-  --i-color-text-tertiary: #8a8e99;
+  --i-color-text-tertiary: #6b7080;
   --i-color-text-inverse: #ffffff;
   --i-color-on-media: #ffffff;
-  --i-color-text-link: #5e7ce0;
+  --i-color-text-link: #4a63c4;
   --i-color-border: #dfe1e6;
   --i-color-border-strong: #c3c6cd;
   --i-color-hairline: rgba(20, 24, 34, 0.08);
@@ -27,6 +27,10 @@
   --i-color-danger-subtle: #fdecee;
   --i-color-info: #5e7ce0;
   --i-color-info-subtle: #eef3ff;
+  --i-color-success-text: #15705a;
+  --i-color-warning-text: #8a5014;
+  --i-color-danger-text: #b3352f;
+  --i-color-brand-text: #4a63c4;
   --i-color-glass: rgba(255, 255, 255, 0.72);
   --i-color-glass-subtle: rgba(255, 255, 255, 0.55);
   --i-color-glass-border: rgba(20, 24, 34, 0.1);
@@ -44,7 +48,7 @@
   --i-tok-fn: #2563a8;
   --i-tok-klass: #0f766e;
   --i-tok-prop: #2563a8;
-  --i-tok-tag: #d6336c;
+  --i-tok-tag: #c2255c;
   --i-tok-attr: #b45309;
   --i-tok-directive: #7048e8;
   --i-tok-punct: #7c8496;
@@ -165,6 +169,10 @@
   --i-color-danger-subtle: rgba(246, 111, 106, 0.16);
   --i-color-info: #adc4ff;
   --i-color-info-subtle: rgba(94, 124, 224, 0.16);
+  --i-color-success-text: #3ac295;
+  --i-color-warning-text: #fa9841;
+  --i-color-danger-text: #f66f6a;
+  --i-color-brand-text: #adc4ff;
   --i-color-glass: rgba(34, 40, 55, 0.72);
   --i-color-glass-subtle: rgba(27, 32, 44, 0.6);
   --i-color-glass-border: rgba(255, 255, 255, 0.14);

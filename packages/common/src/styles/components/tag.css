@@ -10,7 +10,14 @@
 }
 .i-tag.is-round { border-radius: var(--i-radius-full); padding: 0 var(--i-spacing-3); }
 .i-tag--default { background: var(--i-color-bg-muted); color: var(--i-color-text-secondary); }
-.i-tag--brand { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
-.i-tag--success { background: var(--i-color-success-subtle); color: var(--i-color-success); }
-.i-tag--warning { background: var(--i-color-warning-subtle); color: var(--i-color-warning); }
-.i-tag--danger { background: var(--i-color-danger-subtle); color: var(--i-color-danger); }
+/*
+ * 文字用 `-text` 那一档，不是填充色。
+ *
+ * 标签是「淡底色块 + 文字」，而填充色写在同色淡底上只有 2.0-3.2:1——
+ * 颜色看得见，字读不出来（一个「可用」标签在全景页出现了近百次）。
+ * `-text` 档专为这种位置定，在对应淡底上稳定过 4.5:1。
+ */
+.i-tag--brand { background: var(--i-color-brand-subtle); color: var(--i-color-brand-text); }
+.i-tag--success { background: var(--i-color-success-subtle); color: var(--i-color-success-text); }
+.i-tag--warning { background: var(--i-color-warning-subtle); color: var(--i-color-warning-text); }
+.i-tag--danger { background: var(--i-color-danger-subtle); color: var(--i-color-danger-text); }

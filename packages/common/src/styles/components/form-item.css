@@ -10,7 +10,8 @@
   text-align: right;
 }
 .i-form-item.is-top .i-form-item__label { padding-top: 0; text-align: left; }
-.i-form-item__required { color: var(--i-color-danger); margin-right: 2px; }
+/* 必填星号用 danger-text：填充色在白底上只有 2.83:1，而它是「这项必须填」的唯一标记 */
+.i-form-item__required { color: var(--i-color-danger-text); margin-right: 2px; }
 .i-form-item__spacer { flex: none; }
 
 .i-form-item__control { flex: 1; min-width: 0; }

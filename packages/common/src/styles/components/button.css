@@ -48,7 +48,11 @@
 
 .i-button--text {
   background: transparent;
-  color: var(--i-color-brand);
+  /*
+   * 文字按钮没有底色兜着，字就是它的全部——用 brand-text 那一档。
+   * 品牌色本身在白底上只有 3.86:1，而这是个要点的按钮，不是装饰。
+   */
+  color: var(--i-color-brand-text);
   padding-left: var(--i-spacing-2);
   padding-right: var(--i-spacing-2);
 }

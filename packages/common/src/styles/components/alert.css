@@ -1,4 +1,11 @@
-/* IAlert —— 由 Vue / React / mobile 各端共享 */
+/*
+ * IAlert —— 由 Vue / React / mobile 各端共享。
+ *
+ * 类型只用「图标 + 淡底色块 + 文字标签」表达，不用彩色左边线：
+ * 加粗加深的边线是这套体系里明确禁掉的写法，而这里原先还留着
+ * `border-left-color`——没有 border-width，画不出任何东西，
+ * 只会让下一个人以为那套写法还在用。
+ */
 .i-alert {
   display: flex;
   align-items: flex-start;
@@ -29,7 +36,7 @@
     background var(--i-motion-fast) var(--i-motion-easing);
 }
 .i-alert__close:hover { color: var(--i-color-text); background: var(--i-color-hairline); }
-.i-alert--info { background: var(--i-color-info-subtle); border-left-color: var(--i-color-info); }
-.i-alert--success { background: var(--i-color-success-subtle); border-left-color: var(--i-color-success); }
-.i-alert--warning { background: var(--i-color-warning-subtle); border-left-color: var(--i-color-warning); }
-.i-alert--danger { background: var(--i-color-danger-subtle); border-left-color: var(--i-color-danger); }
+.i-alert--info { background: var(--i-color-info-subtle); }
+.i-alert--success { background: var(--i-color-success-subtle); }
+.i-alert--warning { background: var(--i-color-warning-subtle); }
+.i-alert--danger { background: var(--i-color-danger-subtle); }

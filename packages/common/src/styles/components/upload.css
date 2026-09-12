@@ -15,8 +15,13 @@
   transition: border-color var(--i-motion-fast) var(--i-motion-easing),
     background var(--i-motion-fast) var(--i-motion-easing);
 }
-.i-upload__zone:hover,
-.i-upload__zone:focus-visible { border-color: var(--i-color-brand); }
+.i-upload__zone:hover { border-color: var(--i-color-brand); }
+/* 聚焦给真正的焦点环：只换边框色的话，键盘用户看不出焦点停在哪 */
+.i-upload__zone:focus-visible {
+  border-color: var(--i-color-brand);
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+}
 .i-upload__zone.is-dragging {
   border-color: var(--i-color-brand);
   background: var(--i-color-brand-subtle);

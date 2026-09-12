@@ -40,8 +40,19 @@
   transform: translateY(-50%);
   transition: box-shadow var(--i-motion-fast) var(--i-motion-easing);
 }
-.i-slider__handle:focus-visible,
+/* 悬停：一圈淡色光晕，表示「可以拖」 */
 .i-slider:hover .i-slider__handle { box-shadow: 0 0 0 4px var(--i-color-ring); }
+/*
+ * 聚焦要与悬停区分开。
+ *
+ * 原先两者共用同一圈光晕，于是键盘 Tab 过去和鼠标扫过去看起来一样——
+ * 用键盘的人无法确认焦点到底在不在这个滑块上，而这正是他要拖动的东西。
+ */
+.i-slider__handle:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--i-color-ring);
+}
 
 /* 刻度点 */
 .i-slider__mark {
