@@ -151,7 +151,10 @@ function buildTypes(dirs) {
       },
       // 公共包的 .webp 声明必须一起进来：各包都经 @i-design/common 间接引到它，
       // 不带上的话 tsc 会报「找不到模块 './assets/illustrations/...'」
-      include: ['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.vue', '../common/src/assets.d.ts']
+      include: ['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.vue', '../common/src/assets.d.ts'],
+      // 测试不是发布产物的一部分：带上它，使用方的 node_modules 里会多出
+      // 一份 .d.ts，还把 vitest 变成了隐性依赖
+      exclude: ['src/**/*.test.ts', 'src/**/*.test.tsx']
     }, null, 2))
     try {
       execFileSync('npx', ['vue-tsc', '-p', tsconfig], { cwd: root, stdio: 'pipe' })

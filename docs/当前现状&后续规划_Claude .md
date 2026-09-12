@@ -130,8 +130,8 @@ RecommendCard（建议卡）、ContextCards（上下文卡）、DiffTable（差�
 Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致性的主要保险**，
 新增共享逻辑时务必同步加断言，否则 Dart 端可以悄悄写出另一套算法。
 
-**缺口**：共享业务逻辑还没有统一的 TS 单元测试入口（已有 F0 的 Node 目录回归测试，不能替代业务逻辑测试）、
-没有无障碍自动检查。任务见 E 组。
+**已补（E5）**：`npm test` 覆盖共享逻辑里已经出过 bug 的那几处，并在 CI 上单列一步。
+**缺口**：没有无障碍自动检查。任务见 E 组。
 
 ### 1.7 已知的坑与债
 
@@ -264,13 +264,19 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
     以及站点上展示它们的页面。要么统一成同一口径，要么在页面上写清楚两者量的是什么
   - 验收：跨端支持页与组件全景页的数字能互相解释
 
-- [ ] **E5 · TS 侧逻辑测试**（P1）
-  - 目标：`packages/common/src/logic/*` 有能直接跑的断言，不必绕道 Dart golden test
-  - 落点：引入 vitest，按模块写；**优先补那些已经出过 bug 的**：
-    `qrcode`（格式信息位序）、`countdown`（取整与并位）、`virtual`（底部空白算法）、
-    `overflow`（判定方向）、`locale`（局部覆盖）
-  - 验收：`npm test` 通过并接进 CI；故意把 `isTextOverflowing` 的方向写反，测试变红
-  - 依赖：E2
+- [x] **E5 · TS 侧逻辑测试**（P1，已完成）
+  - 落地：引入 vitest，`npm test`（`packages/common/src/logic/logic.test.ts`，27 条），
+    已作为一个独立 step 接进 `ci.yml`
+  - 为什么需要它：这一层此前只有 Flutter 的 golden test 在兜，而那份文件是**生成的**，
+    期望值来自 TS 实现本身——它只能保证「Dart 端与 TS 端算得一样」，
+    保证不了「TS 端算得对」。TS 侧写错了，golden 会跟着一起错
+  - 覆盖按「已经出过 bug」挑，不按「重要」挑：countdown 并位、virtual 底部撑开、
+    overflow 判定方向、locale 局部覆盖、qrcode 版本与定位图形，另加 avatar 与 href
+  - `vitest.config.ts` 限定只收各包源码里的测试：`scripts/` 下那份 node:test 写的
+    目录回归测试仍由 `check:catalog` 跑，两套跑法撞在一起会平白失败
+  - 测试不进发布产物（`build-packages.mjs` 的类型编译排除 `*.test.ts`），
+    否则使用方的 node_modules 里会多出一份声明，还把 vitest 变成隐性依赖
+  - 实测：把 `isTextOverflowing` 的方向写反 → 2 条测试变红；还原后 27 条全过
 
 - [x] **E7 · 外链地址加协议白名单**（来自已关闭的 PR #3，已完成）
   - 现状：`IChatSources` 与 `IContextCards` 把数据里的 `url` / `href` 直接绑到
@@ -559,7 +565,7 @@ PR 描述里应该已经写清楚了。
 2. ~~**E2**：让质量检查在 PR 上生效，与部署分离~~（已完成）
 3. ~~**E1**：包能装出去，这个项目才配叫组件库~~（已完成；Vue 2.7 的缺口转入 **E9**）
 4. ~~**D1**：参数 playground，示例站从「能看」变成「能试」~~（已完成，先接了四页；其余页面按需接入）
-5. **E5**（1 天）：逻辑测试，把回归挡在 PR 上；E3 已完成
+5. ~~**E5**：逻辑测试，把回归挡在 PR 上~~（已完成；E3 亦已完成）
 6. **B1–B5**（按批推进）：AI 交互这条线的缺口最大，也最能体现这套库的差异点
 7. **A3–A6 / C 组**：按需求密度推进；A1 / A2 已完成
 

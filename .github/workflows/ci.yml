@@ -35,6 +35,9 @@ jobs:
       - name: 类型检查
         run: npm run typecheck
 
+      - name: 共享逻辑单元测试
+        run: npm test
+
       - name: 文档站构建
         run: npm run build
 

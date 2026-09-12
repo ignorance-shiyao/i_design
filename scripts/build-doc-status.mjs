@@ -13,7 +13,10 @@ const result = await build({
 const { componentMatrix, frameworkStats, icons, motion } = await import(
   `data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`
 )
-const modules = readdirSync('packages/common/src/logic').filter((f) => f.endsWith('.ts')).sort()
+// 测试文件不是共享逻辑模块，算进来会让「共享逻辑 N 个」这个数字虚高
+const modules = readdirSync('packages/common/src/logic')
+  .filter((f) => f.endsWith('.ts') && !f.endsWith('.test.ts'))
+  .sort()
 const golden = (readFileSync('packages/flutter/test/logic_parity_test.dart', 'utf8').match(/\bexpect\(/g) ?? []).length
 const files = readdirSync('src/components').filter((f) => f.endsWith('.vue') && !f.startsWith('_') && !['IMessageList.vue', 'IConfirmLayer.vue'].includes(f))
 assert.deepEqual(componentMatrix.map((r) => `${r.name}.vue`).sort(), files.sort(), '先运行 npm run build:matrix')

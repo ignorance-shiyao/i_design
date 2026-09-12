@@ -9,6 +9,8 @@
     "build": "npm run build:catalog && npm run build:tokens && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "build:tokens": "node packages/common/scripts/build-tokens.mjs",
     "check:parity": "npm run check:docs && npm run check:catalog && npm run build:tokens && npm run build:styles && npm run build:vue-next && npm run build:vue2 && npm run build:react-index && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:mobile-index && npm run build:stats && npm run build:matrix && npm run build:props && npm run check:snippets && npm run check:scoped-css && npm run check:props",
     "build:styles:mp": "node packages/miniprogram/scripts/build-styles.mjs",
@@ -54,6 +56,7 @@
     "react-dom": "^19.2.8",
     "typescript": "^5.7.3",
     "vite": "^6.0.11",
+    "vitest": "^5.0.0",
     "vue-tsc": "^2.2.0",
     "vue2": "npm:vue@^2.7.16"
   },
