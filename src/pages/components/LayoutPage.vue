@@ -186,6 +186,32 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
         <ITypography mono copyable>sk-live-8f21c0d4e75b</ITypography>
       </div>
     </DemoBlock>
+    <DemoBlock
+      title="截断才给提示"
+      description="鼠标停在下面两行上看看：截断的那行会浮出完整内容，没截断的那行什么都不会出现。没截断也挂提示的话，鼠标扫过一列短文案会一路冒浮层，而浮层里的字与正文一模一样。"
+      code='<ITypography ellipsis ellipsis-tooltip>一段可能放不下的文字</ITypography>
+<ITypography :ellipsis="2" ellipsis-tooltip>多行截断同理</ITypography>'
+    >
+      <div class="stack tip-demo">
+        <ITypography ellipsis ellipsis-tooltip>
+          单行截断：这条工作项的标题很长，长到一行放不下，鼠标停上来才会浮出完整内容。
+        </ITypography>
+        <ITypography ellipsis ellipsis-tooltip>短标题，放得下</ITypography>
+        <ITypography :ellipsis="2" ellipsis-tooltip>
+          多行截断：判定要看高度而不是宽度——多行截断永远不会横向溢出，
+          拿宽度去判断的话条件永远不成立，提示一次都不会出现，而且不报错，
+          只是看起来像「这个功能好像没做」。
+        </ITypography>
+      </div>
+    </DemoBlock>
+
+    <p class="tip-note">
+      各端差异：判定规则（单行看宽度、多行看高度，留 1px 亚像素容差）是共享的一份，
+      但量法各按各端的能力——Web 端读布局值并挂 ResizeObserver，容器变宽后提示会自己撤掉；
+      Flutter 端用 TextPainter 实地排一次版；小程序端没有 hover，那一端保持纯截断，
+      需要读全文时给展开入口，而不是做一个手指碰不到的浮层。
+    </p>
+
     <h2>Affix 固钉</h2>
     <p>
       吸住时元素脱离文档流，因此外层要撑出一块等高的占位。不占位的话，
@@ -388,6 +414,8 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
   text-align: center;
 }
 .clamp-demo { max-width: 460px; }
+.tip-demo { max-width: 360px; }
+.tip-note { color: var(--i-color-text-secondary); }
 
 .layout-demo {
   height: 260px;

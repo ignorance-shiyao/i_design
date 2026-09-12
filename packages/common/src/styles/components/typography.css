@@ -72,3 +72,17 @@
   outline-offset: 2px;
   border-radius: var(--i-radius-sm);
 }
+
+/*
+ * 套了提示层时，让那两层壳在布局上透明。
+ *
+ * ITooltip 的外壳是 inline-flex，照原样嵌进来会把文字收缩到内容宽度——
+ * 容器再窄也不换行、也不截断，于是「溢出才提示」永远不触发。
+ * 这里把它压回块级并允许收缩（min-width 默认是 auto，flex 子项撑不小）。
+ */
+.i-typo > .i-tooltip,
+.i-typo > .i-tooltip > .i-tooltip__trigger {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}

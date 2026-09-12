@@ -22,6 +22,7 @@ class ITypography extends StatelessWidget {
     this.del = false,
     this.mono = false,
     this.maxLines,
+    this.ellipsisTooltip = false,
     this.textAlign,
   });
 
@@ -38,6 +39,13 @@ class ITypography extends StatelessWidget {
 
   /// 超出后省略；对应 Web 端的 ellipsis
   final int? maxLines;
+
+  /// 截断时把完整内容放进长按提示。
+  ///
+  /// 这一端用 LayoutBuilder + TextPainter 实地量一次，而不是照搬 Web 端的
+  /// scrollWidth 比较——那两个值在 Flutter 里没有对应物。判定方向仍是同一条：
+  /// 单行看宽度、多行看高度。
+  final bool ellipsisTooltip;
   final TextAlign? textAlign;
 
   @override
@@ -64,7 +72,7 @@ class ITypography extends StatelessWidget {
       ITypoTone.danger => c.danger,
     };
 
-    return Text(
+    final content = Text(
       text,
       textAlign: textAlign,
       maxLines: maxLines,
@@ -81,6 +89,24 @@ class ITypography extends StatelessWidget {
             ? TextDecoration.lineThrough
             : (underline ? TextDecoration.underline : TextDecoration.none),
       ),
+    );
+
+    if (!ellipsisTooltip || maxLines == null) return content;
+
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        final painter = TextPainter(
+          text: TextSpan(text: text, style: content.style),
+          maxLines: maxLines,
+          textAlign: textAlign,
+          textDirection: Directionality.of(context),
+        )..layout(maxWidth: constraints.maxWidth);
+
+        // 只有真的截断了才挂提示：没截断也挂的话，长按任意一行都会冒出一个
+        // 与正文一字不差的浮层
+        if (!painter.didExceedMaxLines) return content;
+        return Tooltip(message: text, child: content);
+      },
     );
   }
 }

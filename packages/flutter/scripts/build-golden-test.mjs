@@ -89,6 +89,10 @@ const { confirmActions, validatePromptValue, isConfirmed } = await bundle(
   'packages/common/src/logic/confirm.ts',
   'confirm'
 )
+const { isTextOverflowing } = await bundle(
+  'packages/common/src/logic/overflow.ts',
+  'overflow'
+)
 const {
   splitSides, moveKeys, checkedAfterMove, headerState, toggleAll, filterItems: filterTransfer
 } = await bundle('packages/common/src/logic/transfer.ts', 'transfer')
@@ -1214,6 +1218,26 @@ const countdownMiscExpectations = [
 ]
 
 /*
+ * 文本截断：单行看宽度、多行看高度，以及那 1px 的亚像素容差。
+ * 方向写反的话提示一次都不会出现，而且不报错——只是「这个功能好像没做」。
+ */
+const overflowCases = [
+  [{ scrollWidth: 200, clientWidth: 100, scrollHeight: 20, clientHeight: 20 }, false],
+  [{ scrollWidth: 200, clientWidth: 100, scrollHeight: 20, clientHeight: 20 }, true],
+  [{ scrollWidth: 100, clientWidth: 100, scrollHeight: 60, clientHeight: 40 }, true],
+  [{ scrollWidth: 100, clientWidth: 100, scrollHeight: 60, clientHeight: 40 }, false],
+  [{ scrollWidth: 100.5, clientWidth: 100, scrollHeight: 20, clientHeight: 20 }, false],
+  [{ scrollWidth: 101.5, clientWidth: 100, scrollHeight: 20, clientHeight: 20 }, false],
+  [{ scrollWidth: 100, clientWidth: 100, scrollHeight: 40.5, clientHeight: 40 }, true],
+]
+const overflowExpectations = overflowCases.map(([m, multiline]) => {
+  const metrics = `const OverflowMetrics(scrollWidth: ${m.scrollWidth.toFixed(1)}, ` +
+    `clientWidth: ${m.clientWidth.toFixed(1)}, scrollHeight: ${m.scrollHeight.toFixed(1)}, ` +
+    `clientHeight: ${m.clientHeight.toFixed(1)})`
+  return `    expect(isTextOverflowing(${metrics}, ${multiline}), ${isTextOverflowing(m, multiline)});`
+})
+
+/*
  * 确认框：按钮顺序（取消在左、确认在右）、alert 只有一个按钮、
  * 以及「关掉不算同意」这三条。写歪了没人会在构建时发现，
  * 但一次误触就执行了删除。
@@ -1600,6 +1624,7 @@ import 'package:i_design/src/logic/scrollbar.dart';
 import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
+import 'package:i_design/src/logic/overflow.dart';
 
 void _expectQr(String text, QrEcLevel level, int version, int mask, String rows) {
   final m = qrMatrix(text, level);
@@ -1921,6 +1946,10 @@ ${rangeExpectations.join('\n')}
 ${timeSelectExpectations.join('\n')}
 ${clockExpectations.join('\n')}
 ${clockBackExpectations.join('\n')}
+  });
+
+  test('文本截断的判定方向与亚像素容差与 Web 端一致', () {
+${overflowExpectations.join('\n')}
   });
 
   test('确认框的按钮编排、关闭语义与输入校验与 Web 端一致', () {
