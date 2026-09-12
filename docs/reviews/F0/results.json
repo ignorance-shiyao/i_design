@@ -1,0 +1,32 @@
+[
+  {
+    "theme": "light",
+    "planned": [
+      "悬浮操作按钮",
+      "会话列表"
+    ],
+    "corrected": 14,
+    "links": [
+      "TimePicker",
+      "Transfer"
+    ],
+    "pageErrors": []
+  },
+  {
+    "theme": "dark",
+    "planned": [
+      "悬浮操作按钮",
+      "会话列表"
+    ],
+    "corrected": 14,
+    "links": [
+      "TimePicker",
+      "Transfer"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "390×844",
+    "horizontalOverflow": false
+  }
+]

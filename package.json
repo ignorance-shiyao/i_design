@@ -6,11 +6,11 @@
   "description": "Ignorance Design — 一套面向企业中后台产品的设计体系与组件库",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:tokens && vue-tsc --noEmit && vite build",
+    "build": "npm run build:catalog && npm run build:tokens && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
     "build:tokens": "node packages/common/scripts/build-tokens.mjs",
-    "check:parity": "npm run build:tokens && npm run build:styles && npm run build:vue-next && npm run build:vue2 && npm run build:react-index && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:mobile-index && npm run build:stats && npm run build:matrix && npm run check:snippets && npm run check:scoped-css",
+    "check:parity": "npm run check:catalog && npm run build:tokens && npm run build:styles && npm run build:vue-next && npm run build:vue2 && npm run build:react-index && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:mobile-index && npm run build:stats && npm run build:matrix && npm run check:snippets && npm run check:scoped-css",
     "build:styles:mp": "node packages/miniprogram/scripts/build-styles.mjs",
     "build:react-demo": "vite build --config packages/react/vite.config.ts",
     "build:styles": "node scripts/build-styles-index.mjs",
@@ -25,7 +25,10 @@
     "check:flutter": "npm run build:flutter && node packages/flutter/scripts/validate.mjs",
     "check:scoped-css": "node scripts/check-scoped-css.mjs",
     "build:mobile-index": "node scripts/build-mobile-index.mjs",
-    "build:vue2": "node packages/vue/scripts/convert.mjs && node packages/vue/scripts/build-index.mjs"
+    "build:vue2": "node packages/vue/scripts/convert.mjs && node packages/vue/scripts/build-index.mjs",
+    "build:catalog": "node scripts/build-component-inventory.mjs",
+    "check:catalog": "node scripts/check-catalog.mjs && node --test scripts/check-catalog.test.mjs",
+    "predev": "npm run build:catalog"
   },
   "dependencies": {
     "three": "^0.186.0",

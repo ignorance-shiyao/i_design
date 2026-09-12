@@ -142,14 +142,13 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
   那个分支早没了；而 PR 上不跑任何检查。→ E2
 - **两个覆盖数字对不上**：矩阵按文件数（五端各 117），frameworkStats 按导出名
   （117/118/116/119/110）。两者量的不是一回事，但站点上并排显示会让人以为哪个错了。→ E4
-- **站上的「组件全景」在说假话**：`src/data/componentCatalog.ts` 里有 15 项标着
-  `planned`，其中 **13 项早就做完了**（页面框架、可拖拽分栏、时间选择、穿梭框、
-  自动完成、提及、颜色选择、图片预览、走马灯、日历、新手引导、水印、吸顶）。
-  真正还缺的只有悬浮操作按钮（Web 端）与会话列表。
-  选型的人看到的是「这里没有」，于是走了。→ **F0**
-- **两份目录并存且不同步**：`componentCatalog.ts`（组件全景页，94 项，
-  带 `excluded` 状态）与 `components.ts`（组件总览页，101 项）各记一份，
-  已经漂开了。→ F0
+- **组件目录状态已校准（F0）**：全景页原先 13 个已实现组件误标 `planned`，
+  二维码误标 `excluded`，现均按源码清单显示 `ready`；仅 Web 悬浮操作按钮与会话列表
+  保留 `planned`。总览页的时间选择器、穿梭框同步恢复可用并链接到现有示例。
+- **两份目录共用实现状态**：保留全景页的场景说明与总览页的文档入口，
+  `componentInventory.ts` 按 Web / 移动 Vue 源目录生成，`componentStatus.ts` 统一推导状态。
+  `check:catalog` 检查清单新鲜度、错误状态与有效入口，已接入 `check:parity`；
+  状态仅代表示例源码存在，包可安装性与跨端覆盖仍分别见 E1 与覆盖矩阵。
 - **文档过期**：`HANDOVER.md` 写的开发分支 `claude/devui-design-reference-exzjpm`
   已不存在；`ROADMAP.md` 有 32 个未勾选项，其中近一半实际已完成。→ F1
 - **跨端 API 差异查不出来**：`check:parity` 只比「组件在不在」，比不到「属性一不一样」。
@@ -345,16 +344,14 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
 
 ### F 文档与目录校准（P0）
 
-- [ ] **F0 · 修掉「组件全景」页的假信息**（P0，最便宜也最亏的一项）
-  - 现状：`componentCatalog.ts` 里 15 项标 `planned`，13 项实际已完成
-    （见 1.7）。这是**线上站点在对选型的人说假话**
-  - 落点：`src/data/componentCatalog.ts` 逐项核对状态
-  - 根治：两份目录（`componentCatalog.ts` / `components.ts`）合成一份，
-    或让「做没做完」这一位从**文件是否存在**推出来，别再手填——
-    这个仓库里所有手填的清单最后都过期了，而且过期了没人发现
-  - 验收：组件全景页上标 `planned` 的，`src/components/` 里确实没有对应文件；
-    加一条检查把这件事钉死，让它下次自己失败
-  - 依赖：无。**建议第一个做**
+- [x] **F0 · 修掉「组件全景」页的假信息**（P0，最便宜也最亏的一项）
+  - 已完成：13 项误标规划的组件与误标不做的二维码恢复可用；总览的 TimePicker / Transfer
+    恢复现有文档入口，移除图标说明中过期的手填数量。
+  - 根治：两页保留不同编辑用途，`ready` / `planned` 都由按目录生成的源码清单推导；
+    组合 API、命令式宿主与移动专有组件显式识别，移动 IFab 不会冒充 Web FloatButton。
+  - 验收：`npm run check:catalog` 已接入 `check:parity`，包含陈旧清单、错误状态、
+    错误排除、无效链接及组合宿主缺失的回归验证；界面证据见 `docs/reviews/F0/README.md`。
+  - 边界：只校准目录状态及对应入口，不代表 E1 包发布或 E4 覆盖口径已完成。
 
 - [ ] **F1 · 把 HANDOVER 与 ROADMAP 校准到现状**（P0）
   - `HANDOVER.md`：开发分支名 `claude/devui-design-reference-exzjpm` 已失效
