@@ -2,7 +2,7 @@ name: Deploy docs site to GitHub Pages
 
 on:
   push:
-    branches: [main, claude/devui-design-reference-exzjpm]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

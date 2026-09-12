@@ -3,8 +3,9 @@
 给接手实现的人/工具。目标是让你**不需要读完全部代码**就能安全地加东西：
 读完本文,你应当知道每一类改动该落在哪个文件、哪些文件不能手改、以及怎么证明改对了。
 
-仓库:`ignorance-shiyao/i_design` · 开发分支 `claude/devui-design-reference-exzjpm`
-本文对应版本:commit `1da31a5` 之后。
+仓库:`ignorance-shiyao/i_design`,唯一基准分支是 `main`。
+
+当前现状与任务台账见 `docs/当前现状&后续规划_Claude .md`,本文只讲「怎么改」。
 
 ---
 
