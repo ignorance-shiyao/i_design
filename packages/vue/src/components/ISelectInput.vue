@@ -18,6 +18,8 @@ import { useConfig } from './useConfig'
  */
 const props = withDefaults(
   defineProps<{
+    /** 无障碍名。不传时退到占位文字——没有名字的组合框读屏只会念「组合框」 */
+    ariaLabel?: string
     /** 单选时显示的文案；多选请用 tags 插槽 */
     value?: string
     placeholder?: string
@@ -103,6 +105,7 @@ function onKeydown(event: KeyboardEvent) {
       }
     ]"
     role="combobox"
+    :aria-label="ariaLabel || placeholderText"
     :aria-expanded="String(open)"
     aria-haspopup="listbox"
     :aria-disabled="disabled || undefined"

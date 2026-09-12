@@ -41,6 +41,18 @@ const view = ref(parseISO(typeof props.value === 'string' ? props.value : props.
 const focused = ref<string>(toISO(view.value))
 
 const cells = computed(() => buildCalendar(view.value, props.weekStart))
+/*
+ * 按周切成七个一组。
+ *
+ * role="gridcell" 必须有 role="row" 的父节点，否则读屏读不出「第几行第几列」，
+ * 也就退化成一串孤立的按钮。行容器用 display: contents，
+ * 布局仍是原来那个七列网格，只多了一层语义。
+ */
+const weeks = computed(() => {
+  const out: (typeof cells.value)[] = []
+  for (let i = 0; i < cells.value.length; i += 7) out.push(cells.value.slice(i, i + 7))
+  return out
+})
 const marksByDate = computed(() => groupMarks(props.marks))
 const labels = computed(() => weekdayLabels(props.weekStart))
 
@@ -117,44 +129,48 @@ const cellClass = (iso: string, outside: boolean, today: boolean) => ({
       用键盘的人要按四十几下才能穿过这个月。
     -->
     <div class="i-calendar__grid" role="grid" tabindex="0" @keydown="onKeydown">
-      <span v-for="label in labels" :key="label" class="i-calendar__weekday" role="columnheader">
-        {{ label }}
-      </span>
-
-      <button
-        v-for="cell in cells"
-        :key="cell.iso"
-        class="i-calendar__cell"
-        :class="cellClass(cell.iso, cell.outside, cell.today)"
-        type="button"
-        role="gridcell"
-        :tabindex="-1"
-        :aria-selected="String(isRangeEdge(cell.iso, range) !== null)"
-        :aria-current="cell.today ? 'date' : undefined"
-        :disabled="!!disabled(cell.iso)"
-        @click="pick(cell.iso)"
-      >
-        <span class="i-calendar__day">{{ cell.day }}</span>
-        <!--
-          标记用「图标色点 + 文字」而不是给整格换底色：
-          换底色会和「选中」「今天」这两种状态抢同一个视觉通道，
-          三者叠在一起时读者分不出哪个是哪个。
-        -->
-        <span v-if="marksByDate.get(cell.iso)?.length" class="i-calendar__marks">
-          <span
-            v-for="(mark, i) in marksByDate.get(cell.iso)!.slice(0, 2)"
-            :key="i"
-            class="i-calendar__mark"
-            :class="`is-${mark.type ?? 'brand'}`"
-            :title="mark.label"
-          >
-            {{ mark.label }}
-          </span>
-          <span v-if="marksByDate.get(cell.iso)!.length > 2" class="i-calendar__more">
-            +{{ marksByDate.get(cell.iso)!.length - 2 }}
-          </span>
+      <div class="i-calendar__row" role="row">
+        <span v-for="label in labels" :key="label" class="i-calendar__weekday" role="columnheader">
+          {{ label }}
         </span>
-      </button>
+      </div>
+
+      <div v-for="(week, wi) in weeks" :key="wi" class="i-calendar__row" role="row">
+        <button
+          v-for="cell in week"
+          :key="cell.iso"
+          class="i-calendar__cell"
+          :class="cellClass(cell.iso, cell.outside, cell.today)"
+          type="button"
+          role="gridcell"
+          :tabindex="-1"
+          :aria-selected="String(isRangeEdge(cell.iso, range) !== null)"
+          :aria-current="cell.today ? 'date' : undefined"
+          :disabled="!!disabled(cell.iso)"
+          @click="pick(cell.iso)"
+        >
+          <span class="i-calendar__day">{{ cell.day }}</span>
+          <!--
+            标记用「图标色点 + 文字」而不是给整格换底色：
+            换底色会和「选中」「今天」这两种状态抢同一个视觉通道，
+            三者叠在一起时读者分不出哪个是哪个。
+          -->
+          <span v-if="marksByDate.get(cell.iso)?.length" class="i-calendar__marks">
+            <span
+              v-for="(mark, i) in marksByDate.get(cell.iso)!.slice(0, 2)"
+              :key="i"
+              class="i-calendar__mark"
+              :class="`is-${mark.type ?? 'brand'}`"
+              :title="mark.label"
+            >
+              {{ mark.label }}
+            </span>
+            <span v-if="marksByDate.get(cell.iso)!.length > 2" class="i-calendar__more">
+              +{{ marksByDate.get(cell.iso)!.length - 2 }}
+            </span>
+          </span>
+        </button>
+      </div>
     </div>
   </div>
 </template>

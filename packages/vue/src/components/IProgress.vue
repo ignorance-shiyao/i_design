@@ -4,6 +4,7 @@
 -->
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -18,6 +19,8 @@ const props = withDefaults(
     showText?: boolean
     /** 自定义文字，留空则显示百分比 */
     text?: string
+    /** 无障碍名。不传时用字典里的「加载中」——读屏遇到没有名字的进度条只会念「进度条」 */
+    ariaLabel?: string
     /** 环形直径 */
     width?: number
   }>(),
@@ -29,9 +32,13 @@ const props = withDefaults(
     indeterminate: false,
     showText: true,
     text: '',
+    ariaLabel: '',
     width: 96
   }
 )
+
+/* 进度条没有名字时，读屏只会念「进度条」，听不出这是在加载什么 */
+const { locale } = useConfig()
 
 const clamped = computed(() => Math.min(100, Math.max(0, props.percent)))
 const label = computed(() => props.text || `${Math.round(clamped.value)}%`)
@@ -49,6 +56,7 @@ const dashOffset = computed(() => circumference.value * (1 - clamped.value / 100
     class="i-progress i-progress--circle"
     :class="[`i-progress--${status}`, `i-progress--${size}`]"
     role="progressbar"
+    :aria-label="ariaLabel || locale.loading"
     :aria-valuenow="indeterminate ? undefined : clamped"
     aria-valuemin="0"
     aria-valuemax="100"
@@ -79,6 +87,7 @@ const dashOffset = computed(() => circumference.value * (1 - clamped.value / 100
     class="i-progress"
     :class="[`i-progress--${status}`, `i-progress--${size}`, { 'is-indeterminate': indeterminate }]"
     role="progressbar"
+    :aria-label="ariaLabel || locale.loading"
     :aria-valuenow="indeterminate ? undefined : clamped"
     aria-valuemin="0"
     aria-valuemax="100"

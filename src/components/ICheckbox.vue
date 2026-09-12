@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, ref, watchEffect } from 'vue'
 import IIcon from './IIcon.vue'
 import { checkboxGroupKey } from './context'
 
@@ -37,6 +37,12 @@ function toggle() {
     emit('change', next)
   }
 }
+
+/* 半选是 DOM 属性，模板绑不上，只能挂 ref 同步 */
+const input = ref<HTMLInputElement | null>(null)
+watchEffect(() => {
+  if (input.value) input.value.indeterminate = props.indeterminate
+})
 </script>
 
 <template>
@@ -44,12 +50,17 @@ function toggle() {
     class="i-checkbox"
     :class="{ 'is-checked': checked, 'is-disabled': disabled, 'is-indeterminate': indeterminate }"
   >
+    <!--
+      半选态走原生的 indeterminate 属性，而不是 aria-checked="mixed"：
+      原生 checkbox 的半选是一个 DOM 属性，读屏据此播报「部分选中」；
+      只写 aria 的话，属性与状态对不上，读屏播报的仍是「未选中」。
+    -->
     <input
+      ref="input"
       class="i-checkbox__input"
       type="checkbox"
       :checked="checked"
       :disabled="disabled"
-      :aria-checked="indeterminate ? 'mixed' : checked"
       @change="toggle"
     />
     <span class="i-checkbox__mark" aria-hidden="true">

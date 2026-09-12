@@ -10,6 +10,8 @@ export interface RateProps {
   disabled?: boolean
   /** 右侧文案，如「4.5 分」 */
   text?: string
+  /** 整组的无障碍名，如「服务评分」 */
+  ariaLabel?: string
   size?: number
   onChange?: (value: number) => void
   className?: string
@@ -22,6 +24,7 @@ export function Rate({
   readOnly = false,
   disabled = false,
   text = '',
+  ariaLabel = '',
   size = 18,
   onChange,
   className = ''
@@ -41,16 +44,16 @@ export function Rate({
   return (
     <div
       className={['i-rate', disabled ? 'is-disabled' : '', className].filter(Boolean).join(' ')}
-      role="slider"
-      aria-valuemin={0}
-      aria-valuemax={count}
-      aria-valuenow={value}
+      role="radiogroup"
+      aria-label={ariaLabel || '评分'}
       onMouseLeave={() => setHover(0)}
     >
       {Array.from({ length: count }, (_, i) => i + 1).map((index) => (
         <button
           key={index}
           type="button"
+          role="radio"
+          aria-checked={Math.ceil(value) === index}
           className={[
             'i-rate__item',
             shown >= index ? 'is-on' : '',

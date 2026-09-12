@@ -96,7 +96,9 @@ export function Scrollbar({
         .join(' ')}
       style={{ height, maxHeight }}
     >
-      <div ref={view} className="i-scrollbar__view" style={{ maxHeight }} onScroll={onScroll}>
+      <div ref={view} className="i-scrollbar__view"
+        /* 可滚动区域要能用键盘滚：不给 tabindex，只用键盘的人进不到这块内容里 */
+        tabIndex={0} style={{ maxHeight }} onScroll={onScroll}>
         {children}
       </div>
 

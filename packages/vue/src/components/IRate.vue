@@ -16,6 +16,8 @@ const props = withDefaults(
     disabled?: boolean
     /** 右侧文案，如「4.5 分」 */
     text?: string
+    /** 整组的无障碍名，如「服务评分」 */
+    ariaLabel?: string
     size?: number
   }>(),
   {
@@ -25,6 +27,7 @@ const props = withDefaults(
     readonly: false,
     disabled: false,
     text: '',
+    ariaLabel: '',
     size: 18
   }
 )
@@ -59,19 +62,24 @@ function pick(index: number, event: MouseEvent) {
 </script>
 
 <template>
+  <!--
+    不用 role="slider"：滑块里套按钮属于嵌套交互，读屏会同时报出一个滑块和
+    若干按钮，用户不知道该操作哪个。评分本质是「若干选项里选一个」，
+    radiogroup 才是它的语义。
+  -->
   <div
     class="i-rate"
     :class="{ 'is-disabled': disabled }"
-    role="slider"
-    :aria-valuemin="0"
-    :aria-valuemax="count"
-    :aria-valuenow="value"
+    role="radiogroup"
+    :aria-label="ariaLabel || '评分'"
     @mouseleave="hover = 0"
   >
     <button
       v-for="index in count"
       :key="index"
       type="button"
+      role="radio"
+      :aria-checked="String(Math.ceil(value) === index ? 'true' : 'false')"
       class="i-rate__item"
       :class="{ 'is-on': shown >= index, 'is-readonly': !interactive }"
       :disabled="disabled"

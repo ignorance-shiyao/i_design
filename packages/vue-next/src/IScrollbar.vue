@@ -102,9 +102,11 @@ function onTrackDown(event: PointerEvent) {
     :class="{ 'is-dragging': dragging, 'is-always': always }"
     :style="{ height: height || undefined, maxHeight: maxHeight || undefined }"
   >
+    <!-- 可滚动区域要能用键盘滚：不给 tabindex，只用键盘的人根本进不到这块内容里 -->
     <div
       ref="view"
       class="i-scrollbar__view"
+      tabindex="0"
       :style="{ maxHeight: maxHeight || undefined }"
       @scroll.passive="onScroll"
     >

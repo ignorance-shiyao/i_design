@@ -19,6 +19,8 @@ export interface SelectInputProps {
   onOpenChange?: (open: boolean) => void
   onClear?: () => void
   tags?: ReactNode
+  /** 无障碍名。不传时退到占位文字——没有名字的组合框读屏只会念「组合框」 */
+  ariaLabel?: string
   className?: string
 }
 
@@ -40,6 +42,7 @@ export function SelectInput({
   onOpenChange,
   onClear,
   tags,
+  ariaLabel = '',
   className = ''
 }: SelectInputProps) {
   /*
@@ -101,6 +104,7 @@ export function SelectInput({
     <div
       className={classes}
       role="combobox"
+      aria-label={ariaLabel || placeholderText}
       aria-expanded={open}
       aria-haspopup="listbox"
       aria-disabled={disabled || undefined}

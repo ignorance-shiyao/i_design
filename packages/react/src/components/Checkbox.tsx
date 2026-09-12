@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from 'react'
+import { createContext, useContext, type ReactNode, useEffect, useRef } from 'react'
 import { Icon } from './Icon'
 
 interface CheckboxGroupContext {
@@ -63,6 +63,11 @@ export function Checkbox({
   indeterminate = false,
   children
 }: CheckboxProps) {
+  const input = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (input.current) input.current.indeterminate = indeterminate
+  }, [indeterminate])
+
   const group = useContext(Ctx)
   const inGroup = group && value !== undefined
   const isChecked = inGroup ? group.value.includes(value) : checked
@@ -86,12 +91,17 @@ export function Checkbox({
         .filter(Boolean)
         .join(' ')}
     >
+      {/*
+        半选态走原生的 indeterminate 属性，而不是 aria-checked="mixed"：
+        原生 checkbox 的半选是一个 DOM 属性，读屏据此播报「部分选中」；
+        只写 aria 的话，属性与状态对不上，读屏播报的仍是「未选中」。
+      */}
       <input
+        ref={input}
         className="i-checkbox__input"
         type="checkbox"
         checked={isChecked}
         disabled={isDisabled}
-        aria-checked={indeterminate ? 'mixed' : isChecked}
         onChange={toggle}
       />
       <span className="i-checkbox__mark" aria-hidden="true">

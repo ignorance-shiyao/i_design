@@ -42,6 +42,11 @@
   padding: var(--i-spacing-2);
 }
 .i-calendar__grid:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+/*
+ * 行容器只为语义存在（gridcell 需要 row 父节点），布局仍由外层的七列网格负责。
+ * display: contents 让它在布局上「不存在」，同时保留在无障碍树里。
+ */
+.i-calendar__row { display: contents; }
 .i-calendar__weekday {
   padding: var(--i-spacing-2) 0;
   text-align: center;

@@ -41,6 +41,13 @@ jobs:
       - name: 文档站构建
         run: npm run build
 
+      # axe 要真浏览器，装一个 chromium；只装这一个，装全套要多花两分钟
+      - name: 准备浏览器
+        run: npx playwright install --with-deps chromium
+
+      - name: 无障碍检查
+        run: npm run check:a11y
+
       # 包的入口只在使用方的项目里才会暴露问题，仓库内的 alias 与 paths 看不见，
       # 所以必须在 CI 里真构建一次并核对入口
       - name: 发布产物构建与入口核对

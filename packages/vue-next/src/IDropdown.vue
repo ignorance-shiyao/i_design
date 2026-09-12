@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useId } from 'vue'
+import { computed, ref, useId, onMounted } from 'vue'
 import { firstMenuActive, moveMenuActive, type Placement } from '@i-design/common'
 import { useOverlayPosition } from './overlayPosition'
 import IIcon from './IIcon.vue'
@@ -33,6 +33,17 @@ const emit = defineEmits<{ select: [key: string] }>()
 const visible = ref(false)
 const active = ref(-1)
 const triggerEl = ref<HTMLElement>()
+
+/*
+ * 触发器里如果本来就有按钮（绝大多数用法），这层包装就不能再挂
+ * aria-haspopup / aria-expanded——那会被读成「按钮里套着一个按钮」，
+ * 而属性挂在不可交互的 span 上本身也是无效的。
+ * 只有在调用方塞进来的是纯文本时，这层才顶上去充当触发器的语义。
+ */
+const triggerIsInteractive = ref(true)
+onMounted(() => {
+  triggerIsInteractive.value = !!triggerEl.value?.querySelector('button, a[href], [role="button"], input, select, textarea')
+})
 const popupEl = ref<HTMLElement>()
 const id = `i-dropdown-${useId()}`
 
@@ -130,8 +141,8 @@ const style = computed(() => ({ left: `${pos.value.x}px`, top: `${pos.value.y}px
   <span
     ref="triggerEl"
     class="i-overlay-trigger"
-    :aria-haspopup="'menu'"
-    :aria-expanded="visible"
+    :aria-haspopup="triggerIsInteractive ? undefined : 'menu'"
+    :aria-expanded="triggerIsInteractive ? undefined : visible"
     :aria-controls="visible ? id : undefined"
     @click="visible ? close() : open()"
     @keydown="onKeydown"

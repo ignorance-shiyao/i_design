@@ -559,6 +559,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"indeterminate","type":"boolean","doc":"不知道还剩多少：显示来回滑动的一小段","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"showText","type":"boolean","doc":"","defaultText":"true","control":{"kind":"boolean"}},
     {"name":"text","type":"string","doc":"自定义文字，留空则显示百分比","defaultText":"''","control":{"kind":"string"}},
+    {"name":"ariaLabel","type":"string","doc":"无障碍名。不传时用字典里的「加载中」——读屏遇到没有名字的进度条只会念「进度条」","defaultText":"''","control":{"kind":"string"}},
     {"name":"width","type":"number","doc":"环形直径","defaultText":"96","control":{"kind":"number"}},
   ],
   IPromptInput: [
@@ -607,6 +608,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"readonly","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"text","type":"string","doc":"右侧文案，如「4.5 分」","defaultText":"''","control":{"kind":"string"}},
+    {"name":"ariaLabel","type":"string","doc":"整组的无障碍名，如「服务评分」","defaultText":"''","control":{"kind":"string"}},
     {"name":"size","type":"number","doc":"","defaultText":"18","control":{"kind":"number"}},
   ],
   IRecommendCard: [
@@ -651,6 +653,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"maxTagCount","type":"number","doc":"多选时最多完整显示几个标签，其余折成「+N」。0 表示全部显示","defaultText":"0","control":{"kind":"number"}},
   ],
   ISelectInput: [
+    {"name":"ariaLabel","type":"string","doc":"无障碍名。不传时退到占位文字——没有名字的组合框读屏只会念「组合框」","defaultText":null,"control":{"kind":"string"}},
     {"name":"value","type":"string","doc":"单选时显示的文案；多选请用 tags 插槽","defaultText":"''","control":{"kind":"string"}},
     {"name":"placeholder","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","defaultText":null,"control":{"kind":"enum","options":["sm","md","lg"]}},
