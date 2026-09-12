@@ -74,6 +74,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IDrawer.vue",
   "src/components/IDropdown.vue",
   "src/components/IEmpty.vue",
+  "src/components/IFloatButton.vue",
   "src/components/IFlow.vue",
   "src/components/IForm.vue",
   "src/components/IFormItem.vue",

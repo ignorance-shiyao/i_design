@@ -36,6 +36,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
 import 'package:i_design/src/logic/wordcloud.dart';
@@ -1217,6 +1218,22 @@ void main() {
     expect(safeHref('\\\\evil.com'), null);
     expect(safeHref('  javascript:alert(1)  '), null);
     expect(safeHref(''), null);
+  });
+
+  test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {
+    expect(floatActionOffset(0), 56);
+    expect(floatActionOffset(1), 108);
+    expect(floatActionOffset(2), 160);
+    expect(floatActionOffset(3), 212);
+    expect(floatActionShift(0), 60);
+    expect(floatActionShift(1), 112);
+    expect(floatActionShift(2), 164);
+    expect(floatActionShift(3), 216);
+    expect(floatActionDelay(0, 1), 0);
+    expect(floatActionDelay(0, 3), 0);
+    expect(floatActionDelay(1, 3), 50);
+    expect(floatActionDelay(2, 3), 100);
+    expect(floatActionDelay(3, 4), 113);
   });
 
   test('文案字典的两份译文与局部覆盖规则与 Web 端一致', () {

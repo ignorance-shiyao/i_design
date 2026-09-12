@@ -94,6 +94,10 @@ const { isTextOverflowing } = await bundle(
   'overflow'
 )
 const { safeHref } = await bundle('packages/common/src/logic/href.ts', 'href')
+const { floatActionOffset, floatActionShift, floatActionDelay } = await bundle(
+  'packages/common/src/logic/float.ts',
+  'float'
+)
 const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
@@ -1334,6 +1338,18 @@ const hrefExpectations = hrefCases.map((value) => {
 })
 
 /*
+ * 悬浮按钮展开后的几何：各端自己写间距的话，同一个组件会错开几像素——
+ * 这种偏差没人会当成 bug 报，只会觉得「有点糙」。
+ */
+const floatExpectations = [
+  ...[0, 1, 2, 3].map((i) => `    expect(floatActionOffset(${i}), ${floatActionOffset(i)});`),
+  ...[0, 1, 2, 3].map((i) => `    expect(floatActionShift(${i}), ${floatActionShift(i)});`),
+  ...[[0, 1], [0, 3], [1, 3], [2, 3], [3, 4]].map(
+    ([i, n]) => `    expect(floatActionDelay(${i}, ${n}), ${floatActionDelay(i, n)});`
+  )
+]
+
+/*
  * 文案字典：两份字典的每一句都要对得上，否则换个端同一个界面会说两种话；
  * 以及「局部覆盖，缺的沿用原值」——抄漏一个键不该在界面上开天窗。
  */
@@ -1776,6 +1792,7 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
 import 'package:i_design/src/logic/wordcloud.dart';
@@ -2122,6 +2139,10 @@ ${toneExpectations.join('\n')}
 
   test('外链白名单的放行与拒绝清单与 Web 端一致', () {
 ${hrefExpectations.join('\n')}
+  });
+
+  test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {
+${floatExpectations.join('\n')}
   });
 
   test('文案字典的两份译文与局部覆盖规则与 Web 端一致', () {

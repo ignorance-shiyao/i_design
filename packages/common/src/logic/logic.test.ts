@@ -21,6 +21,7 @@ import { resolveLocale, zhCN, enUS } from './locale'
 import { qrMatrix, qrVersionFor } from './qrcode'
 import { avatarSizePx, initialsOf, tintOf } from './avatar'
 import { safeHref } from './href'
+import { floatActionDelay, floatActionOffset, floatActionShift } from './float'
 
 describe('countdown', () => {
   it('不显示毫秒时向上取整到秒：剩 1.4 秒给 2 秒', () => {
@@ -185,6 +186,26 @@ describe('avatar', () => {
 
   it('同一个姓名任何时候都得到同一个底色', () => {
     expect(tintOf('林岚')).toBe(tintOf('林岚'))
+  })
+})
+
+describe('float', () => {
+  it('动作从主按钮往外依次排开，间距不靠魔数', () => {
+    expect(floatActionOffset(0)).toBe(56)
+    expect(floatActionOffset(1) - floatActionOffset(0)).toBe(52)
+    expect(floatActionOffset(2) - floatActionOffset(1)).toBe(52)
+  })
+
+  it('底边对齐的位移比圆心距多出半个直径之差', () => {
+    // 直接拿圆心距当位移，整排动作会统一偏低 4px——肉眼看不出，量一下就跑出来了
+    expect(floatActionShift(0) - floatActionOffset(0)).toBe(4)
+  })
+
+  it('依次弹出，总时长压在 150ms 内', () => {
+    expect(floatActionDelay(0, 3)).toBe(0)
+    expect(floatActionDelay(2, 3)).toBeLessThanOrEqual(150)
+    // 只有一个动作时没有「依次」可言
+    expect(floatActionDelay(0, 1)).toBe(0)
   })
 })
 

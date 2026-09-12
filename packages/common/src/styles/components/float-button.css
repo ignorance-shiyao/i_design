@@ -1,0 +1,138 @@
+/* IFloatButton —— 由 Vue / React / 小程序各端共享 */
+.i-float {
+  position: fixed;
+  z-index: var(--i-z-sticky);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.i-float--bottom-left {
+  align-items: flex-start;
+}
+
+.i-float__main {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  height: 48px;
+  min-width: 48px;
+  padding: 0 var(--i-spacing-5);
+  border: none;
+  border-radius: var(--i-radius-full);
+  /* 纯色：渐变在不同直径的圆上观感会变，主题换色后也更难保证对比度 */
+  background: var(--i-color-brand);
+  /*
+   * 不写死白色：主题色换成浅色（比如明黄）时白字会低到看不清。
+   * --i-color-text-on-brand 由主题配置按对比度推导，与主按钮同一条规则。
+   */
+  color: var(--i-color-text-on-brand, #fff);
+  box-shadow: var(--i-shadow-lg);
+  cursor: pointer;
+  transition:
+    background var(--i-motion-base) var(--i-motion-easing),
+    transform var(--i-motion-base) var(--i-motion-easing-spring);
+}
+.i-float__main--round {
+  width: 48px;
+  padding: 0;
+  justify-content: center;
+}
+.i-float__main:hover {
+  /* 与主按钮同一种提亮方式，而不是换一个色号——换色号在自定义主题下会走样 */
+  filter: brightness(1.06);
+}
+.i-float__main:active {
+  transform: scale(0.94);
+}
+.i-float__main:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+}
+/* 展开后主按钮的图标转成叉，表示「再点一次收起」 */
+.i-float.is-expanded .i-float__main {
+  transform: rotate(45deg);
+}
+.i-float.is-expanded .i-float__main:active {
+  transform: rotate(45deg) scale(0.94);
+}
+.i-float__text {
+  font-size: var(--i-font-size-sm);
+  font-weight: var(--i-font-weight-medium);
+}
+
+.i-float__actions {
+  position: absolute;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.i-float__item {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  opacity: 0;
+  /* 收起时不能接收点击：位置仍在，只是看不见 */
+  pointer-events: none;
+  transition:
+    opacity var(--i-motion-base) var(--i-motion-easing),
+    transform var(--i-motion-base) var(--i-motion-easing-spring);
+}
+.i-float--bottom-left .i-float__item {
+  right: auto;
+  left: 0;
+  flex-direction: row-reverse;
+}
+.i-float.is-expanded .i-float__item {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.i-float__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text);
+  box-shadow: var(--i-shadow-md);
+  cursor: pointer;
+}
+.i-float__action:hover {
+  border-color: var(--i-color-border-strong);
+}
+.i-float__action:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+}
+.i-float__initial {
+  font-size: var(--i-font-size-sm);
+}
+
+/*
+ * 文字标签常驻，不靠悬停才出现：一排只有图标的圆点谁也认不出来，
+ * 而触屏上根本没有悬停这一步。
+ */
+.i-float__label {
+  padding: var(--i-spacing-1) var(--i-spacing-3);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-sm);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .i-float__main,
+  .i-float__item {
+    transition-duration: 1ms;
+    transition-delay: 0ms !important;
+  }
+}

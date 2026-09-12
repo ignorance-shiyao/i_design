@@ -63,6 +63,10 @@ const routes: RouteRecordRaw[] = [
       { path: 'scrollbar', component: () => import('@/pages/components/ScrollbarPage.vue') },
       { path: 'qrcode', component: () => import('@/pages/components/QrcodePage.vue') },
       {
+        path: 'float-button',
+        component: () => import('@/pages/components/FloatButtonPage.vue')
+      },
+      {
         path: 'sticky-tool',
         component: () => import('@/pages/components/StickyToolPage.vue')
       },

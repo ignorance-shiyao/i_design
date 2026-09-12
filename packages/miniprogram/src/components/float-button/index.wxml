@@ -1,0 +1,24 @@
+<view
+  class="i-float i-float--{{placement}} {{expanded ? 'is-expanded' : ''}}"
+  style="bottom:{{offset}}px;{{placement === 'bottom-left' ? 'left' : 'right'}}:{{offset}}px"
+>
+  <view wx:if="{{items.length}}" class="i-float__actions" hidden="{{!expanded}}">
+    <view
+      wx:for="{{items}}"
+      wx:key="key"
+      class="i-float__item"
+      style="transform:translateY(-{{item.offset}}px);transition-delay:{{item.delay}}ms"
+    >
+      <text class="i-float__label">{{item.label}}</text>
+      <view class="i-float__action" data-key="{{item.key}}" bindtap="choose">
+        <view wx:if="{{item.icon}}" class="i-icon i-icon--{{item.icon}}" style="width:18px;height:18px" />
+        <text wx:else class="i-float__initial">{{item.initial}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="i-float__main {{text ? '' : 'i-float__main--round'}}" bindtap="toggle">
+    <view class="i-icon i-icon--{{icon}}" style="width:22px;height:22px" />
+    <text wx:if="{{text}}" class="i-float__text">{{text}}</text>
+  </view>
+</view>

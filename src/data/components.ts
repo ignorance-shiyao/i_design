@@ -27,6 +27,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'Divider', cn: '分割线', to: '/components/divider', desc: '分隔内容区块' },
       { name: 'Link', cn: '链接', to: '/components/link', desc: '跳转到另一个地址' },
       { name: 'StickyTool', cn: '侧边工具条', to: '/components/sticky-tool', desc: '贴边的一组快捷入口' },
+      { name: 'FloatButton', cn: '悬浮操作按钮', to: '/components/float-button', desc: '页面角落的主操作入口' },
       { name: 'Scrollbar', cn: '滚动条', to: '/components/scrollbar', desc: '不占布局的自绘滚动条' },
       { name: 'ConfigProvider', cn: '全局配置', to: '/components/config-provider', desc: '下发文案字典与默认尺寸' }
     ]

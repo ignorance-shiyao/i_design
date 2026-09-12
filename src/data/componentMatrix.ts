@@ -549,6 +549,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IFloatButton",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IFlow",
     "ends": {
       "vue-next": true,

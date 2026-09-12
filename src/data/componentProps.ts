@@ -366,6 +366,14 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"description","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"size","type":"'sm' | 'md'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md"]}},
   ],
+  IFloatButton: [
+    {"name":"icon","type":"IconName","doc":"","defaultText":"'plus'","control":null},
+    {"name":"text","type":"string","doc":"带文字时按钮拉长；只有图标时收成正圆","defaultText":"''","control":{"kind":"string"}},
+    {"name":"actions","type":"FloatAction[]","doc":"展开后的次级动作。为空时按钮只发 click","defaultText":"() => []","control":null},
+    {"name":"placement","type":"'bottom-right' | 'bottom-left'","doc":"","defaultText":"'bottom-right'","control":{"kind":"enum","options":["bottom-right","bottom-left"]}},
+    {"name":"offset","type":"number","doc":"距视口边缘的距离","defaultText":"24","control":{"kind":"number"}},
+    {"name":"open","type":"boolean","doc":"受控展开态；不传则组件自己管","defaultText":"undefined","control":{"kind":"boolean"}},
+  ],
   IFlow: [
     {"name":"nodes","type":"FlowNode[]","doc":"","defaultText":null,"control":null},
     {"name":"edges","type":"FlowEdge[]","doc":"","defaultText":null,"control":null},

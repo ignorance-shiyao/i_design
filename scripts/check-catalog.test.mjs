@@ -33,7 +33,7 @@ test('F0 已落地组件、移动专有项和组合能力按真实源码呈现',
     'IMentions', 'IColorPicker', 'IImageViewer', 'ICarousel', 'ICalendar', 'ITour', 'IWatermark', 'ISticky', 'IQrcode']) {
     assert.equal(catalog.find((i) => i.api === api)?.status, 'ready', api)
   }
-  assert.deepEqual(catalog.filter((i) => i.status === 'planned').map((i) => i.api), ['IFloatButton', 'IChatList'])
+  assert.deepEqual(catalog.filter((i) => i.status === 'planned').map((i) => i.api), ['IChatList'])
   for (const api of ['ICell', 'INavBar', 'IToast', 'IRow / ICol', 'IAvatar / IAvatarGroup', 'message()', 'notification', 'Confirm', 'Marquee', 'Minimap', 'Snapshot']) {
     assert.equal(implementationStatus(api), 'ready', api)
   }
@@ -47,11 +47,12 @@ test('F0 已落地组件、移动专有项和组合能力按真实源码呈现',
 
 test('新增规划组件时，陈旧清单失败；生成后目录状态自动更新', async (t) => {
   const root = fixture(t)
-  writeFileSync(join(root, 'src/components/IFloatButton.vue'), '<template><button /></template>')
+  // 用当前仍是 planned 的那一项：IFloatButton 已经实现，拿它试不出「新增」这条路径
+  writeFileSync(join(root, 'src/components/IChatList.vue'), '<template><ul /></template>')
   await assert.rejects(checkCatalog(root), /组件源码清单过期/)
   writeFileSync(join(root, inventoryFile), inventorySource(root))
   const { componentCatalog } = await loadData(root)
-  assert.equal(componentCatalog.flatMap((g) => g.items).find((i) => i.api === 'IFloatButton').status, 'ready')
+  assert.equal(componentCatalog.flatMap((g) => g.items).find((i) => i.api === 'IChatList').status, 'ready')
   await checkCatalog(root)
 })
 
@@ -66,10 +67,13 @@ test('删除组合组件的一部分或命令式宿主后，不能继续显示�
   assert.equal(implementationStatus('message()'), 'planned')
 })
 
-test('移动端 IFab 不会把 Web FloatButton 标成可用', async (t) => {
+test('移动专有组件不会把同类的 Web 组件顶成可用', async (t) => {
   const { implementationStatus } = await loadData(fixture(t))
+  // IFab 与 IFloatButton 现在各自都有实现，两边都该是 ready
   assert.equal(implementationStatus('IFab'), 'ready')
-  assert.equal(implementationStatus('IFloatButton'), 'planned')
+  assert.equal(implementationStatus('IFloatButton'), 'ready')
+  // 移动端的会话列表不能让 Web 端的 IChatList 显示为可用
+  assert.equal(implementationStatus('IChatList'), 'planned')
 })
 
 test('手填错误状态、已实现却标不做、空链接均会失败', async (t) => {
