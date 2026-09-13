@@ -55,3 +55,12 @@
   color: var(--i-color-text-tertiary);
   cursor: not-allowed;
 }
+
+/*
+ * 触发器贴着视口底缘时改成向上开。
+ * 不这么做的话，面板整个掉到屏幕外——内容还在，但够不着。
+ */
+.i-time-select.is-up .i-time-select__panel {
+  top: auto;
+  bottom: calc(100% + var(--i-spacing-1));
+}

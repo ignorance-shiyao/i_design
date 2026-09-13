@@ -140,7 +140,7 @@ const { clampNumber, roundTo, stepValue, ratioOf, valueFromRatio } = await bundl
   'number'
 )
 const {
-  resolveOverlay, moveMenuActive, firstMenuActive,
+  resolveOverlay, moveMenuActive, firstMenuActive, shouldFlipUp,
   tourHole, tourNext, tourPrev, tourScrollTo, tourNeedsScroll
 } = await bundle('packages/common/src/logic/overlay.ts', 'overlay')
 const {
@@ -1791,6 +1791,19 @@ const thinkingExpectations = [
   `    expect(toggleThinkingStep(${dartStepKeys(['b', 'c'])}, 'b'), ${dartStepKeys(toggleThinkingStep(['b', 'c'], 'b'))});`
 ]
 
+/*
+ * 贴着触发器的面板往哪边开：实测过视口 520 时下拉掉出 65px、日期面板掉出 212px，
+ * 两端必须给出同一个答案，否则同一个表单在一端能选、在另一端点空。
+ */
+const flipCases = [
+  [400, 32, 160, 720], [400, 32, 160, 520], [100, 32, 600, 300],
+  [400, 32, 280, 720], [0, 32, 100, 200], [650, 32, 60, 720]
+]
+const flipExpectations = flipCases.map(
+  ([y, h, ph, vh]) =>
+    `    expect(shouldFlipUp(${y}, ${h}, ${ph}, ${vh}), ${shouldFlipUp({ y, height: h }, ph, vh)});`
+)
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -2363,6 +2376,10 @@ ${chipSummaryExpectations.join('\n')}
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
     final steps = ${dartThinkSteps};
 ${thinkingExpectations.join('\n')}
+  });
+
+  test('贴着触发器的面板往哪边开与 Web 端一致', () {
+${flipExpectations.join('\n')}
   });
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {

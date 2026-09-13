@@ -5,6 +5,7 @@ import {
   moveActive,
   rafThrottle,
   scrollToRow,
+  shouldFlipUp,
   shouldVirtualize,
   toggleValue,
   virtualWindow,
@@ -74,6 +75,11 @@ export function Select({
   const root = useRef<HTMLDivElement | null>(null)
   const menu = useRef<HTMLUListElement | null>(null)
   const [open, setOpen] = useState(false)
+  /*
+   * 面板往上还是往下开。它贴着触发器用绝对定位，触发器一靠近视口底缘，
+   * 整块面板就掉到屏幕外——选项还在，但够不着。判断走公共层，各端结论一致。
+   */
+  const [flipUp, setFlipUp] = useState(false)
   const [active, setActive] = useState(-1)
 
   const values = useMemo<(string | number)[]>(() => {
@@ -150,6 +156,17 @@ export function Select({
     return () => document.removeEventListener('click', onClickOutside)
   }, [open])
 
+  /* 量一次当前位置决定方向。开的时候量，不跟着滚动实时翻——半途翻向会让人点空 */
+  useLayoutEffect(() => {
+    if (!open) {
+      setFlipUp(false)
+      return
+    }
+    const trigger = root.current?.getBoundingClientRect()
+    const panel = menu.current?.getBoundingClientRect()
+    if (trigger && panel) setFlipUp(shouldFlipUp(trigger, panel.height, window.innerHeight))
+  }, [open])
+
   const toggle = () => {
     if (disabled) return
     if (!open) setActive(multiple ? options.findIndex((o) => isSelected(o)) : indexOfValue(options, value))
@@ -205,7 +222,8 @@ export function Select({
         `i-select--${resolvedSize}`,
         open ? 'is-open' : '',
         disabled ? 'is-disabled' : '',
-        multiple ? 'is-multiple' : ''
+        multiple ? 'is-multiple' : '',
+        flipUp ? 'is-up' : ''
       ]
         .filter(Boolean)
         .join(' ')}

@@ -383,10 +383,27 @@ PR #3 里唯一值得留的 `safeSourceHref` 已落成 E7。
   - 做法：每修好一批跑 `node scripts/check-a11y.mjs --update` 把基线缩小
   - 验收：基线降到 0 后，把检查从「只挡新增」改成「一项都不许有」
 
-- [ ] **E8 · 浮层定位复用审计**（P2，迁自旧 ROADMAP 长期项）
-  - 现状：Tooltip / Popconfirm / Popover / Dropdown 已使用统一定位适配，AutoComplete / TimePicker 也调用共享算法。
-  - 范围：逐端核对 Select / DatePicker / Cascader 等所有浮层，记录 DOM 测量与位置计算的分工。
-  - 验收：列明审计对象与结论；发现重复位置算法时归入 common，右缘/底缘翻转与滚动跟随实测通过。
+- [x] **E8 · 浮层定位复用审计**（P2，迁自旧 ROADMAP 长期项）
+  - 审计对象与结论（按「谁在算位置」分两类）：
+    - **传送到 body + 共享 `resolveOverlay`**：Tooltip、Popconfirm、Popover、
+      Dropdown、AutoComplete（默认态）、TimePicker、ColorPicker、Tour，
+      以及经由 Popover 的 Cascader 与 TreeSelect。右缘/底缘翻转与箭头回位都在那一层
+    - **只用 CSS 绝对定位、贴着触发器排**：Select、DatePicker、TimeSelect、
+      Mentions、AutoComplete 的 inline 态。它们不翻转
+  - 第二类里发现真 bug，且是实测出来的：把触发器推到视口底缘附近打开，
+    视口 520px 时下拉掉出屏幕 65px、日期面板 212px、时间列表 149px——
+    选项还在，但够不着。`overlay.ts` 的文件注释还写着「Select 共用同一份规则」，
+    实际上它从来没调过
+  - 没有一律改成传送到 body：那会让这几个组件进 Vue 2 的人工实现名单
+    （2.7 没有 Teleport），多三份手写文件的长期成本，换来的只是同一件事的另一种做法。
+    改为在公共层加 `shouldFlipUp()`，只回答「翻不翻」这一个布尔值——
+    横向位置本来就由 CSS 的 `left: 0; right: 0` 管着，不需要再算一遍
+  - 开的时候量一次就定下来，不跟着滚动实时翻：半途翻向会让人点空
+  - 五端齐备（Vue 3 / Vue 2 自动转换 / React / 小程序按 `selectorQuery` 异步量 / Flutter 逻辑就位），
+    golden 断言 1222 → 1228，单元测试 +4
+  - 仍未解决且已知：这几个面板在 `overflow: hidden` 的父级里会被裁掉。
+    这是绝对定位的固有限制，AutoComplete 的 inline 态早已把它写进样式注释；
+    真要根治只能走传送，代价见上
 
 ### D 示例站与参数配置（P0/P1）
 

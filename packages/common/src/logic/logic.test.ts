@@ -18,6 +18,7 @@ import { countdownParts, countdownInterval, formatCountdown } from './countdown'
 import { virtualWindow, scrollToRow, shouldVirtualize } from './virtual'
 import { isTextOverflowing, OVERFLOW_EPSILON } from './overflow'
 import { resolveLocale, zhCN, enUS } from './locale'
+import { shouldFlipUp } from './overlay'
 import { contrastRatio, hexToRgb, readableOn, rgbToOklch } from './palette'
 import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
 import { qrMatrix, qrVersionFor } from './qrcode'
@@ -531,5 +532,26 @@ describe('有颜色的字要读得出来', () => {
     for (const key of ['color-brand-text', 'color-text-link', 'color-danger-text']) {
       expect(contrastRatio(tokens[key], '#ffffff')).toBeGreaterThanOrEqual(4.5)
     }
+  })
+})
+
+describe('贴着触发器的面板往哪边开', () => {
+  const trigger = { y: 400, height: 32 }
+
+  it('下方放得下就往下开', () => {
+    expect(shouldFlipUp(trigger, 160, 720)).toBe(false)
+  })
+
+  it('下方放不下、上方放得下就翻上去', () => {
+    // 实测过：视口 520 时下拉掉出 65px、日期面板掉出 212px——选项还在，但够不着
+    expect(shouldFlipUp(trigger, 160, 520)).toBe(true)
+  })
+
+  it('两边都放不下时不翻：翻上去只是把问题换个方向', () => {
+    expect(shouldFlipUp({ y: 100, height: 32 }, 600, 300)).toBe(false)
+  })
+
+  it('正好卡在边上算放得下，不为了几个像素翻一次', () => {
+    expect(shouldFlipUp(trigger, 280, 720)).toBe(false)
   })
 })

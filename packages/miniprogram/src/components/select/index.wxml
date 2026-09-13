@@ -1,4 +1,4 @@
-<view class="i-select i-select--{{size}} {{open ? 'is-open' : ''}} {{disabled ? 'is-disabled' : ''}} {{multiple ? 'is-multiple' : ''}}">
+<view class="i-select i-select--{{size}} {{open ? 'is-open' : ''}} {{flipUp ? 'is-up' : ''}} {{disabled ? 'is-disabled' : ''}} {{multiple ? 'is-multiple' : ''}}">
   <view class="i-select__trigger" bindtap="onToggle">
     <view wx:if="{{multiple && hasValue}}" class="i-select__tags">
       <view wx:for="{{tags}}" wx:key="value" class="i-select__tag">

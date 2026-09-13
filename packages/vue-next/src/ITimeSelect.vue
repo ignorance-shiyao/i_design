@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import ISelectInput from './ISelectInput.vue'
-import { timeSelectOptions } from '@i-design/common'
+import { shouldFlipUp, timeSelectOptions } from '@i-design/common'
 
 /**
  * 固定间隔的时间下拉。
@@ -42,6 +42,23 @@ const model = defineModel<string>({ default: '' })
 const emit = defineEmits<{ change: [string] }>()
 
 const open = ref(false)
+const root = ref<HTMLElement | null>(null)
+const panel = ref<HTMLElement | null>(null)
+/* 面板贴着触发器绝对定位：触发器靠近视口底缘时整列时间会掉到屏幕外 */
+const flipUp = ref(false)
+
+/* 量一次当前位置决定方向。开的时候量，不跟着滚动实时翻——半途翻向会让人点空 */
+watch(open, (value) => {
+  if (!value) {
+    flipUp.value = false
+    return
+  }
+  nextTick(() => {
+    const trigger = root.value?.getBoundingClientRect()
+    const box = panel.value?.getBoundingClientRect()
+    if (trigger && box) flipUp.value = shouldFlipUp(trigger, box.height, window.innerHeight)
+  })
+})
 
 const options = computed(() =>
   timeSelectOptions({
@@ -61,7 +78,7 @@ function pick(value: string) {
 </script>
 
 <template>
-  <div class="i-time-select">
+  <div ref="root" class="i-time-select" :class="{ 'is-up': flipUp }">
     <!-- 外壳复用 ISelectInput：聚焦态、清除键、箭头都该与其他选择器一致 -->
     <ISelectInput
       v-model:open="open"
@@ -73,7 +90,7 @@ function pick(value: string) {
       @clear="pick('')"
     />
 
-    <div v-if="open" class="i-time-select__panel" role="listbox">
+    <div v-if="open" ref="panel" class="i-time-select__panel" role="listbox">
       <button
         v-for="option in options"
         :key="option.value"

@@ -78,6 +78,14 @@
   border-radius: var(--i-radius-md);
   box-shadow: var(--i-shadow-md);
 }
+/*
+ * 触发器贴着视口底缘时改成向上开。
+ * 不这么做的话，面板整个掉到屏幕外——选项还在，但够不着。
+ */
+.i-select.is-up .i-select__menu {
+  top: auto;
+  bottom: calc(100% + var(--i-spacing-1));
+}
 .i-select__option {
   padding: var(--i-spacing-2) var(--i-spacing-3);
   border-radius: var(--i-radius-sm);

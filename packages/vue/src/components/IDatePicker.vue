@@ -3,7 +3,7 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import IIcon from './IIcon.vue'
 import {
   addDays,
@@ -16,6 +16,7 @@ import {
   toISO,
   weekdayLabels
 } from './date'
+import { shouldFlipUp } from '@i-design/common'
 import { useConfig } from './useConfig'
 
 const props = withDefaults(
@@ -66,6 +67,12 @@ const placeholderText = computed(() => props.placeholder || locale.value.datePla
 const emit = defineEmits<{ (e: 'input', a0: string | null): void; (e: 'change', a0: string | null): void }>()
 
 const root = ref<HTMLElement | null>(null)
+const panel = ref<HTMLElement | null>(null)
+/*
+ * 面板往上还是往下开：它贴着触发器用绝对定位，触发器一靠近视口底缘，
+ * 整块日历就掉到屏幕外。判断放在公共层，几个同类面板给出的结论才一致。
+ */
+const flipUp = ref(false)
 const open = ref(false)
 
 const selected = computed(() => parseISO(props.value))
@@ -92,10 +99,17 @@ function openPanel() {
   const base = selected.value ?? new Date()
   viewDate.value = startOfMonth(base)
   cursor.value = base
+  /* 量一次当前位置决定方向。开的时候量，不跟着滚动实时翻——半途翻向会让人点空 */
+  nextTick(() => {
+    const trigger = root.value?.getBoundingClientRect()
+    const box = panel.value?.getBoundingClientRect()
+    if (trigger && box) flipUp.value = shouldFlipUp(trigger, box.height, window.innerHeight)
+  })
 }
 
 function close() {
   open.value = false
+  flipUp.value = false
 }
 
 function pick(date: Date) {
@@ -173,7 +187,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
 </script>
 
 <template>
-  <div ref="root" class="i-date" :class="[`i-date--${size}`, { 'is-open': open }]">
+  <div ref="root" class="i-date" :class="[`i-date--${size}`, { 'is-open': open, 'is-up': flipUp }]">
     <button
       class="i-date__trigger"
       :class="{ 'is-invalid': invalid, 'is-placeholder': !selected }"
@@ -197,7 +211,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
       </span>
     </button>
 
-    <div v-show="open" class="i-date__panel" role="dialog" :aria-label="title">
+    <div v-show="open" ref="panel" class="i-date__panel" role="dialog" :aria-label="title">
       <header class="i-date__head">
         <button type="button" class="i-date__nav" aria-label="上一月" @click="shiftMonth(-1)">
           <IIcon name="chevron-left" :size="15" />

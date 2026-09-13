@@ -1,4 +1,4 @@
-import { collapseTags, shouldVirtualize, toggleValue, virtualWindow } from '@i-design/common'
+import { collapseTags, shouldFlipUp, shouldVirtualize, toggleValue, virtualWindow } from '@i-design/common'
 import { getLocale } from '../../config'
 
 /**
@@ -33,6 +33,7 @@ Component({
     placeholderText: '',
     emptyLabel: '',
     open: false,
+    flipUp: false,
     label: '',
     hasValue: false,
     tags: [],
@@ -121,11 +122,35 @@ Component({
     onToggle() {
       if (this.data.disabled) return
       const open = !this.data.open
-      this.setData({ open })
+      this.setData({ open, flipUp: open ? this.data.flipUp : false })
       if (open) {
         this.window()
         this.measure()
+        this.place()
       }
+    },
+
+    /*
+     * 面板往上还是往下开。它贴着触发器排布，触发器一靠近屏幕底缘，
+     * 整块面板就掉出可视区——选项还在，但够不着。
+     * 判断走公共层；这一端量位置只能异步查询，因此开的时候量一次就定下来。
+     */
+    place() {
+      const query = this.createSelectorQuery()
+      query.select('.i-select').boundingClientRect()
+      query.select('.i-select__menu').boundingClientRect()
+      query.selectViewport().boundingClientRect()
+      query.exec((res) => {
+        const [trigger, menu, viewport] = res || []
+        if (!trigger || !menu || !viewport) return
+        this.setData({
+          flipUp: shouldFlipUp(
+            { y: trigger.top, height: trigger.height },
+            menu.height,
+            viewport.height
+          )
+        })
+      })
     },
     onScroll(e) {
       this.setData({ scrollTop: e.detail.scrollTop }, () => this.window())

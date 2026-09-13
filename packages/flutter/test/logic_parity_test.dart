@@ -1342,6 +1342,15 @@ void main() {
     expect(toggleThinkingStep(<String>['b', 'c'], 'b'), <String>['c']);
   });
 
+  test('贴着触发器的面板往哪边开与 Web 端一致', () {
+    expect(shouldFlipUp(400, 32, 160, 720), false);
+    expect(shouldFlipUp(400, 32, 160, 520), true);
+    expect(shouldFlipUp(100, 32, 600, 300), false);
+    expect(shouldFlipUp(400, 32, 280, 720), false);
+    expect(shouldFlipUp(0, 32, 100, 200), false);
+    expect(shouldFlipUp(650, 32, 60, 720), true);
+  });
+
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
     expect(shouldShowElapsed(0), false);
     expect(shouldShowElapsed(2999), false);

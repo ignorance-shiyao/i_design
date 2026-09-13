@@ -143,6 +143,33 @@ export function resolveOverlay(options: OverlayOptions): OverlayPosition {
  * 菜单项的键盘移动，跳过禁用项与分隔线。
  * 到边界后回绕：菜单与 Select 不同，它是一个封闭的短列表，回绕比停住更符合预期。
  */
+/**
+ * 贴着触发器展开的面板该往上还是往下。
+ *
+ * 这一条是给**不传送到 body、只用 CSS 绝对定位**的那几个面板用的：
+ * 下拉选择、日期面板、时间列表。它们贴在触发器下方，而一旦触发器靠近视口底缘，
+ * 面板就整个掉到屏幕外——选项还在，但够不着。实测过：视口 520px 时
+ * 下拉掉出 65px、日期面板掉出 212px。
+ *
+ * 与 `resolveOverlay` 的分工：那一个算的是传送到 body 之后的绝对落点，
+ * 这一个只回答「翻不翻」这一个布尔值，因为面板的横向位置由 CSS 的
+ * `left: 0; right: 0` 管着，不需要再算一遍。
+ *
+ * 上方同样放不下时不翻：两边都放不下的话，翻上去只是把问题换个方向，
+ * 而向下展开至少符合读者对下拉的预期。
+ */
+export function shouldFlipUp(
+  trigger: Pick<Rect, 'y' | 'height'>,
+  popupHeight: number,
+  viewportHeight: number,
+  padding = 8
+): boolean {
+  const below = viewportHeight - (trigger.y + trigger.height) - padding
+  const above = trigger.y - padding
+  if (popupHeight <= below) return false
+  return above > below
+}
+
 export interface MenuItemLike {
   disabled?: boolean
   /** 分隔线不可聚焦 */

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   addDays,
   addMonths,
@@ -6,6 +6,7 @@ import {
   formatDate,
   isSameDay,
   parseISO,
+  shouldFlipUp,
   startOfMonth,
   toISO,
   weekdayLabels
@@ -58,6 +59,23 @@ export function DatePicker({
   const placeholderText = placeholder || locale.datePlaceholder
   const root = useRef<HTMLDivElement | null>(null)
   const [open, setOpen] = useState(false)
+  const panel = useRef<HTMLDivElement | null>(null)
+  /*
+   * 面板往上还是往下开：它贴着触发器用绝对定位，触发器一靠近视口底缘，
+   * 整块日历就掉到屏幕外。判断走公共层，各端结论一致。
+   */
+  const [flipUp, setFlipUp] = useState(false)
+
+  /* 量一次当前位置决定方向。开的时候量，不跟着滚动实时翻——半途翻向会让人点空 */
+  useLayoutEffect(() => {
+    if (!open) {
+      setFlipUp(false)
+      return
+    }
+    const trigger = root.current?.getBoundingClientRect()
+    const box = panel.current?.getBoundingClientRect()
+    if (trigger && box) setFlipUp(shouldFlipUp(trigger, box.height, window.innerHeight))
+  }, [open])
   const selected = useMemo(() => parseISO(value), [value])
   const [viewDate, setViewDate] = useState(() => startOfMonth(selected ?? new Date()))
   // 焦点日期与选中值分离：方向键浏览时不立刻改值
@@ -130,7 +148,9 @@ export function DatePicker({
   const title = `${viewDate.getFullYear()} 年 ${viewDate.getMonth() + 1} 月`
 
   return (
-    <div ref={root} className={['i-date', `i-date--${resolvedSize}`, open ? 'is-open' : ''].filter(Boolean).join(' ')}>
+    <div ref={root} className={['i-date', `i-date--${resolvedSize}`, open ? 'is-open' : '', flipUp ? 'is-up' : '']
+        .filter(Boolean)
+        .join(' ')}>
       <button
         className={['i-date__trigger', invalid ? 'is-invalid' : '', !selected ? 'is-placeholder' : '']
           .filter(Boolean)
@@ -157,7 +177,7 @@ export function DatePicker({
       </button>
 
       {open && (
-        <div className="i-date__panel" role="dialog" aria-label={title}>
+        <div ref={panel} className="i-date__panel" role="dialog" aria-label={title}>
           <header className="i-date__head">
             <button type="button" className="i-date__nav" aria-label="上一月" onClick={() => setViewDate(addMonths(viewDate, -1))}>
               <Icon name="chevron-left" size={15} />

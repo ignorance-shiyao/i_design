@@ -1,4 +1,4 @@
-<view class="i-date i-date--{{size}} {{open ? 'is-open' : ''}} {{disabled ? 'is-disabled' : ''}}">
+<view class="i-date i-date--{{size}} {{open ? 'is-open' : ''}} {{flipUp ? 'is-up' : ''}} {{disabled ? 'is-disabled' : ''}}">
   <view class="i-date__trigger" bindtap="onToggle">
     <view class="i-date__calendar i-icon i-icon--calendar" style="width:15px;height:15px" />
     <text class="i-date__value {{display ? '' : 'is-placeholder'}}">{{display || placeholder}}</text>

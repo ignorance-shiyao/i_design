@@ -6,6 +6,7 @@ import {
   collapseTags,
   rafThrottle,
   scrollToRow,
+  shouldFlipUp,
   shouldVirtualize,
   toggleValue,
   virtualWindow
@@ -75,6 +76,13 @@ const placeholderText = computed(() => props.placeholder || locale.value.placeho
 const root = ref<HTMLElement | null>(null)
 const menu = ref<HTMLElement | null>(null)
 const open = ref(false)
+/*
+ * 面板往上还是往下开。
+ *
+ * 它贴着触发器用绝对定位，因此触发器一靠近视口底缘，整块面板就掉到屏幕外——
+ * 选项还在，但够不着。判断放在公共层，几个同类面板给出的结论才一致。
+ */
+const flipUp = ref(false)
 /** 键盘高亮项索引；-1 表示无高亮 */
 const activeIndex = ref(-1)
 
@@ -161,6 +169,7 @@ function toggle() {
     activeIndex.value = props.options.findIndex((o) => isSelected(o))
     nextTick(() => {
       measure()
+      placeMenu()
       revealActive()
     })
   } else {
@@ -168,9 +177,18 @@ function toggle() {
   }
 }
 
+/** 量一次当前位置决定方向。开的时候量，不跟着滚动实时翻——半途翻向会让人点空 */
+function placeMenu() {
+  const trigger = root.value?.getBoundingClientRect()
+  const panel = menu.value?.getBoundingClientRect()
+  if (!trigger || !panel) return
+  flipUp.value = shouldFlipUp(trigger, panel.height, window.innerHeight)
+}
+
 function close() {
   open.value = false
   activeIndex.value = -1
+  flipUp.value = false
 }
 
 function emitValue(next: SelectModel) {
@@ -258,7 +276,7 @@ onBeforeUnmount(() => {
     class="i-select"
     :class="[
       `i-select--${size}`,
-      { 'is-open': open, 'is-disabled': disabled, 'is-multiple': multiple }
+      { 'is-open': open, 'is-disabled': disabled, 'is-multiple': multiple, 'is-up': flipUp }
     ]"
   >
     <button

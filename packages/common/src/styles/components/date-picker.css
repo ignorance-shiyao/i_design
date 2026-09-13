@@ -133,3 +133,12 @@
   cursor: pointer;
 }
 .i-date__action:hover { background: var(--i-color-brand-subtle); }
+
+/*
+ * 触发器贴着视口底缘时改成向上开。
+ * 不这么做的话，面板整个掉到屏幕外——内容还在，但够不着。
+ */
+.i-date.is-up .i-date__panel {
+  top: auto;
+  bottom: calc(100% + var(--i-spacing-1));
+}
