@@ -131,7 +131,7 @@ const anchors = [
 <style scoped>
 .nav-demo { display: flex; gap: var(--i-spacing-6); flex-wrap: wrap; }
 .nav-demo__side {
-  width: 220px;
+  width: min(220px, 100%);
   padding: var(--i-spacing-2);
   border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-lg);

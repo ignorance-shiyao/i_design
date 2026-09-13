@@ -116,7 +116,7 @@ async function copyName(name: string) {
 .search { max-width: 280px; margin-bottom: var(--i-spacing-5); }
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(112px, 100%), 1fr));
   gap: var(--i-spacing-2);
 }
 .cell {

@@ -83,6 +83,8 @@ const invalid = ref<RangeValue>(['900', '100'])
   display: flex;
   flex-direction: column;
   gap: var(--i-spacing-3);
+  /* min-width 归零，否则这个 flex 容器会撑到内容宽度，把 max-width 架空 */
+  min-width: 0;
   max-width: 360px;
 }
 .demo-value {

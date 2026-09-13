@@ -48,6 +48,10 @@ jobs:
       - name: 无障碍检查
         run: npm run check:a11y
 
+      # 窄屏溢出在桌面上完全看不出来，只能靠真浏览器量
+      - name: 窄屏自适应检查
+        run: npm run check:responsive
+
       # 包的入口只在使用方的项目里才会暴露问题，仓库内的 alias 与 paths 看不见，
       # 所以必须在 CI 里真构建一次并核对入口
       - name: 发布产物构建与入口核对

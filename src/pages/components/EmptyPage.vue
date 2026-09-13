@@ -62,7 +62,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
 <style scoped>
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: var(--i-spacing-4);
   width: 100%;
 }

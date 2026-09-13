@@ -10,8 +10,16 @@
   display: inline-flex;
   align-items: center;
   gap: var(--i-spacing-2);
+  /* 六格加间距有三百多宽，窄屏上装不下时整排跟着缩，而不是把页面顶宽 */
+  max-width: 100%;
 }
 .i-input-otp__cell {
+  /*
+   * 宽度可缩但有下限：36px 是手指还点得准、两位数字还看得清的那一档。
+   * 写死 44px 的话，320px 的屏幕上这一排会溢出近 40px。
+   */
+  flex: 0 1 44px;
+  min-width: 36px;
   width: 44px;
   height: 52px;
   padding: 0;

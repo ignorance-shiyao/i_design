@@ -1,6 +1,25 @@
 /* IFormItem —— 由 Vue / React / mobile 各端共享 */
 .i-form-item { display: flex; gap: var(--i-spacing-3); }
 .i-form-item.is-top { flex-direction: column; gap: var(--i-spacing-2); }
+/*
+ * 窄到放不下「标签 + 控件」并排时，左标签自动改成上标签。
+ *
+ * 不这么做的话，标签那一列不缩、控件被压成几十像素，或者整行把页面顶宽
+ * （实测 320px 下溢出 21px）。标签在上是手机上的常规做法，也是这两种排法里
+ * 唯一在窄屏上仍然读得出「这一格填什么」的。
+ */
+@media (max-width: 480px) {
+  .i-form-item.is-left {
+    flex-direction: column;
+    gap: var(--i-spacing-2);
+  }
+  .i-form-item.is-left .i-form-item__label {
+    padding-top: 0;
+    text-align: left;
+  }
+  /* 上下排布时那个用来对齐控件的占位列没有意义了 */
+  .i-form-item.is-left .i-form-item__spacer { display: none; }
+}
 
 .i-form-item__label {
   flex: none;

@@ -26,6 +26,16 @@
 .i-typo.is-underline { text-decoration: underline; }
 .i-typo.is-delete { text-decoration: line-through; color: var(--i-color-text-tertiary); }
 .i-typo.is-mono { font-family: var(--i-font-family-mono); }
+/*
+ * 长到没有断点的一串（文件路径、URL、长 token）也要能折。
+ *
+ * 默认只在空格处换行，于是「packages/common/src/tokens/index.ts」这种整串
+ * 会把版面顶宽——实测 320px 下布局页横向溢出 15px，而溢出的是一行说明文字。
+ * anywhere 而不是 break-word：后者在 flex 子项里算 min-content 时不生效。
+ */
+.i-typo__body { overflow-wrap: anywhere; }
+/* 截断那两档要的是「不折行再省略」，别让上面这条把它们破坏掉 */
+.i-typo.is-ellipsis .i-typo__body { overflow-wrap: normal; }
 
 /* 单行省略 */
 .i-typo.is-ellipsis {

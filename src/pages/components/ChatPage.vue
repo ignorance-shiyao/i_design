@@ -762,8 +762,8 @@ function createSession() {
 .selact-demo { display: flex; flex-direction: column; gap: var(--i-spacing-2); max-width: 560px; }
 .selact-demo__text { margin: 0; line-height: 1.8; }
 .tune-demo { max-width: 460px; }
-.chatlist-demo { max-width: 300px; }
-.screen-demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--i-spacing-3); width: 100%; }
+.chatlist-demo { width: min(300px, 100%); }
+.screen-demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: var(--i-spacing-3); width: 100%; }
 .chat {
   display: flex;
   flex-direction: column;

@@ -186,7 +186,7 @@ function reset() {
 .pg__controls {
   display: grid;
   /* 一行放不下时自动折成一列，窄屏上控件不会被挤扁 */
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
   gap: var(--i-spacing-4) var(--i-spacing-6);
   padding: var(--i-spacing-5) var(--i-spacing-6);
   border-bottom: 1px solid var(--i-color-hairline);

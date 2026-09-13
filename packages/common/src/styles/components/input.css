@@ -1,6 +1,11 @@
 /* IInput —— 由 Vue / React / mobile 各端共享 */
 .i-input {
   width: 100%;
+  /*
+   * 输入框自带一个约二十个字符的固有宽度，放进 flex / grid 里不归零就不肯缩，
+   * 于是 320px 的屏幕上「左标签 + 输入框」这一行会把页面顶宽。
+   */
+  min-width: 0;
   font-family: inherit;
   font-size: var(--i-font-size-md);
   color: var(--i-color-text);

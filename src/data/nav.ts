@@ -112,3 +112,38 @@ export const docNav: NavGroup[] = [
     items: [{ to: '/components/chat', label: 'AI 会话与智能体' }]
   }
 ]
+
+/** 文档页在导航里的相邻项，连同它所属的分组名 */
+export interface NavNeighbour extends NavItem {
+  group: string
+}
+
+/**
+ * 把分组压平成一条顺序。
+ *
+ * 「上一页 / 下一页」走的是读者在侧栏里看到的那个顺序，跨组也连着走：
+ * 一组的最后一页的下一页，就是下一组的第一页。按组切断的话，读到组尾会
+ * 突然没有下一页，而侧栏里明明还有内容。
+ */
+export const flatNav: NavNeighbour[] = docNav.flatMap((group) =>
+  group.items.map((item) => ({ ...item, group: group.title }))
+)
+
+/**
+ * 当前路径的上一页与下一页。
+ *
+ * 到头就没有，不绕回另一端：文档是有序的，从最后一页跳回第一页不是「下一页」，
+ * 那是另一件事，而读者按下去只会以为自己点错了。
+ * 路径不在导航里（比如首页）时两边都没有，调用方据此整块不渲染。
+ */
+export function docNeighbours(path: string): {
+  prev: NavNeighbour | null
+  next: NavNeighbour | null
+} {
+  const index = flatNav.findIndex((item) => item.to === path)
+  if (index < 0) return { prev: null, next: null }
+  return {
+    prev: index > 0 ? flatNav[index - 1] : null,
+    next: index < flatNav.length - 1 ? flatNav[index + 1] : null
+  }
+}

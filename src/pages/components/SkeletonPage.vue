@@ -90,7 +90,7 @@ const loading = ref(true)
 <style scoped>
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: var(--i-spacing-6);
   width: 100%;
 }

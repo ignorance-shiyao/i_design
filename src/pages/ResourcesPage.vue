@@ -104,7 +104,7 @@ npm run build   # 类型检查 + 生产构建</code></pre>
 <style scoped>
 .resources {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: var(--i-spacing-5);
   margin-top: var(--i-spacing-6);
 }
@@ -139,7 +139,7 @@ ol { color: var(--i-color-text-secondary); padding-left: var(--i-spacing-5); }
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr));
   gap: var(--i-spacing-4);
   margin-top: var(--i-spacing-5);
 }

@@ -44,7 +44,7 @@ import ITag from "@/components/ITag.vue";
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
   gap: var(--i-spacing-4);
   margin-top: var(--i-spacing-5);
 }

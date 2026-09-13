@@ -36,6 +36,7 @@
     "build:packages": "node scripts/build-packages.mjs && node scripts/check-package-exports.mjs",
     "check:props": "node --test scripts/lib/parse-props.test.mjs && node scripts/check-props.mjs",
     "check:a11y": "node scripts/check-a11y.mjs",
+    "check:responsive": "node scripts/check-responsive.mjs",
     "build:props": "node scripts/build-component-props.mjs",
     "check:cjk": "node --test scripts/check-cjk-wrap.test.mjs && node scripts/check-cjk-wrap.mjs",
     "check:whennot": "node --test scripts/check-when-not.test.mjs && node scripts/check-when-not.mjs"

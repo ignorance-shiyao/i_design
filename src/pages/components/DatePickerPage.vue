@@ -128,6 +128,6 @@ const noWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6
 </template>
 
 <style scoped>
-.w { width: 240px; }
+.w { width: min(240px, 100%); }
 .hint { font-size: var(--i-font-size-sm); color: var(--i-color-text-tertiary); }
 </style>

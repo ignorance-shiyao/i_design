@@ -98,6 +98,9 @@ function onComplete(value: string) {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--i-spacing-3);
+  /* 不归零的话这个纵向 flex 容器会撑到最宽那一行的内容宽度，OTP 那排就不缩了 */
+  min-width: 0;
+  width: 100%;
 }
 .otp-demo__value {
   font-family: var(--i-font-family-mono);

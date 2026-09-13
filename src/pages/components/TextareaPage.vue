@@ -67,6 +67,6 @@ const fixed = ref('')
 </template>
 
 <style scoped>
-.w { width: 360px; max-width: 100%; }
+.w { width: min(360px, 100%); }
 .stack { display: grid; gap: var(--i-spacing-4); }
 </style>

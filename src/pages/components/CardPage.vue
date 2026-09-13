@@ -62,5 +62,5 @@ import DemoBlock from '@/site/DemoBlock.vue'
 </template>
 
 <style scoped>
-.w { width: 320px; }
+.w { width: min(320px, 100%); }
 </style>

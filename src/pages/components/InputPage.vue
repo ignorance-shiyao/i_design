@@ -64,5 +64,5 @@ const invalid = ref('非法输入')
 </template>
 
 <style scoped>
-.w { width: 240px; }
+.w { width: min(240px, 100%); }
 </style>

@@ -48,7 +48,7 @@ const tone: Record<CatalogStatus, 'success' | 'warning' | 'default'> = {
 }
 .cat-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   gap: var(--i-spacing-3);
   margin: var(--i-spacing-4) 0 0;
   padding: 0;

@@ -141,7 +141,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
 <style scoped>
 .cp-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
   gap: var(--i-spacing-4);
   margin: var(--i-spacing-5) 0 var(--i-spacing-8);
 }
@@ -200,7 +200,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
 .cp-no { color: var(--i-color-text-tertiary); }
 .cp-layers {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: var(--i-spacing-4);
   margin: var(--i-spacing-5) 0;
 }

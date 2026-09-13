@@ -15,11 +15,24 @@
    */
   width: fit-content;
   align-self: flex-start;
+  /*
+   * 装不下时横向滚动，而不是把父容器顶破。
+   *
+   * fit-content 的意思是「收到内容宽度」，它同时也意味着「绝不缩小」——
+   * 选项一多、屏幕一窄，这一排就直接捅出容器把整页顶宽了（实测 390px 下
+   * 按钮页横向溢出 73px）。不换行是有意的：滑块靠 transform 在一条轴上移动，
+   * 折成两行之后那个位移就没有意义了。
+   */
+  max-width: 100%;
+  overflow-x: auto;
+  /* 滚动条会把 2px 的内边距挤掉，让滑块看起来贴边；这里让它不占位 */
+  scrollbar-width: none;
   padding: 2px;
   border-radius: var(--i-radius-md);
   background: var(--i-color-bg-muted);
   font-size: var(--i-font-size-sm);
 }
+.i-segmented::-webkit-scrollbar { display: none; }
 .i-segmented--lg { font-size: var(--i-font-size-md); }
 .i-segmented.is-block { display: flex; width: 100%; align-self: stretch; }
 

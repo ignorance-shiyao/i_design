@@ -79,7 +79,7 @@ const coarse = ref('')
 <style scoped>
 .ts-field {
   /* 组件本身跟随容器宽度（表单里它该和别的字段一样宽），演示里给它一个表单字段的宽度 */
-  width: 180px;
+  width: min(180px, 100%);
 }
 .ts-demo {
   display: flex;

@@ -69,7 +69,7 @@
  */
 .i-finetune__row {
   display: grid;
-  grid-template-columns: minmax(140px, auto) minmax(0, 1fr) minmax(56px, auto);
+  grid-template-columns: minmax(min(140px, 40%), auto) minmax(0, 1fr) minmax(56px, auto);
   align-items: center;
   gap: var(--i-spacing-2);
   /* 每行留同样的高度：控件本身高矮不一，不兜底的话行距会一格宽一格窄 */
