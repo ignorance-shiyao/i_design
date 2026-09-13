@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 import { Loading } from './Loading'
 
@@ -31,6 +32,8 @@ export function ChatToolCall({
   defaultOpen = false,
   className = ''
 }: ChatToolCallProps) {
+  /* 入参 / 错误 / 结果这三个词也要跟着字典走 */
+  const { locale } = useConfig()
   // 失败的调用默认展开：这时用户要看的正是出了什么错
   const [open, setOpen] = useState(defaultOpen || status === 'error')
 
@@ -55,19 +58,19 @@ export function ChatToolCall({
         <div className="i-chat-tool__body">
           {args !== undefined && (
             <div className="i-chat-tool__section">
-              <span className="i-chat-tool__label">入参</span>
+              <span className="i-chat-tool__label">{locale.toolInput}</span>
               <pre className="i-chat-tool__code">{format(args)}</pre>
             </div>
           )}
           {error ? (
             <div className="i-chat-tool__section">
-              <span className="i-chat-tool__label">错误</span>
+              <span className="i-chat-tool__label">{locale.toolError}</span>
               <p className="i-chat-tool__error">{error}</p>
             </div>
           ) : (
             result !== undefined && (
               <div className="i-chat-tool__section">
-                <span className="i-chat-tool__label">结果</span>
+                <span className="i-chat-tool__label">{locale.toolResult}</span>
                 <pre className="i-chat-tool__code">{format(result)}</pre>
               </div>
             )

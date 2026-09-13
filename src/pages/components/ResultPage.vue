@@ -77,6 +77,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
       </IResult>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>结果只是一句「已保存」时——用 message 飘一下，整页的结果页会打断流程。</li>
+      <li>错误可以就地修复时——留在原页面并指出哪一项有问题，跳到结果页等于把用户填的东西藏起来了。</li>
+      <li>结果页上没有下一步可去时——补一个明确的去处，否则用户只能按浏览器的后退。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

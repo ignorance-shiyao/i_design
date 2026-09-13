@@ -19,9 +19,7 @@ function onComplete(value: string) {
   <article>
     <h1>InputOtp 验证码输入</h1>
     <p class="i-lead">
-      分格填写一次性验证码。分格的意义在于「要填几位」和「填到第几位」都不必靠数，
-      代价是粘贴、删除、自动填充这三件事都得自己处理——
-      它们的规则在公共层，各端共用同一份。
+      分格填写一次性验证码。分格的意义在于「要填几位」和「填到第几位」都不必靠数，代价是粘贴、删除、自动填充这三件事都得自己处理——它们的规则在公共层，各端共用同一份。
     </p>
 
     <DemoBlock
@@ -66,6 +64,13 @@ function onComplete(value: string) {
       </tbody>
     </table>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>要填的不是定长验证码时——普通输入框就好，分格会把正常文本切得七零八落。</li>
+      <li>验证码可能被粘贴进来时要留意——组件支持整串粘贴，但别把格子做成只收单字符的死限制。</li>
+      <li>位数超过八位时——分格反而更难数，用一个普通输入框加格式提示。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -93,6 +98,9 @@ function onComplete(value: string) {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--i-spacing-3);
+  /* 不归零的话这个纵向 flex 容器会撑到最宽那一行的内容宽度，OTP 那排就不缩了 */
+  min-width: 0;
+  width: 100%;
 }
 .otp-demo__value {
   font-family: var(--i-font-family-mono);

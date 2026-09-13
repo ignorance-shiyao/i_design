@@ -1,0 +1,42 @@
+<view wx:if="{{open}}" class="i-cmd" bindtap="close">
+  <view class="i-cmd__panel" catchtap="noop">
+    <view class="i-cmd__field">
+      <view class="i-cmd__icon i-icon i-icon--search" style="width:16px;height:16px" />
+      <input
+        class="i-cmd__input"
+        value="{{keyword}}"
+        placeholder="{{placeholder || searchText}}"
+        confirm-type="search"
+        bindinput="onInput"
+      />
+    </view>
+
+    <scroll-view wx:if="{{rows.length}}" class="i-cmd__list" scroll-y>
+      <view
+        wx:for="{{rows}}"
+        wx:key="key"
+        class="i-cmd__item"
+        data-key="{{item.key}}"
+        bindtap="choose"
+      >
+        <view class="i-cmd__main">
+          <view class="i-cmd__label">
+            <text
+              wx:for="{{item.parts}}"
+              wx:for-item="part"
+              wx:key="index"
+              class="{{part.hit ? 'i-cmd__hit' : ''}}"
+            >{{part.text}}</text>
+          </view>
+          <text wx:if="{{item.description}}" class="i-cmd__desc">{{item.description}}</text>
+        </view>
+        <text wx:if="{{item.group}}" class="i-cmd__group">{{item.group}}</text>
+      </view>
+    </scroll-view>
+
+    <!-- 空态给的是「换个词」而不是「没有结果」：后者只是把已经看到的事实重复一遍 -->
+    <view wx:else class="i-cmd__empty">
+      <i-empty size="sm" type="search" />
+    </view>
+  </view>
+</view>

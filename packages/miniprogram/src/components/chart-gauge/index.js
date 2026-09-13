@@ -6,7 +6,14 @@ import { formatTick } from '@i-design/common'
 
 const START = Math.PI * 0.75
 const SWEEP = Math.PI * 1.5
+/* 弧线用填充色 */
 const STATUS = { success: '#3ac295', warning: '#fa9841', danger: '#f66f6a' }
+
+/*
+ * 数字用「写在浅底上的字」那一档：填充色是给一大块色定的，
+ * 24px 的数字写在白底上只有 2.3:1——一眼看过去有颜色，读具体数值却要眯眼。
+ */
+const STATUS_TEXT = { success: '#15705a', warning: '#8a5014', danger: '#b3352f' }
 
 Component({
   options: { addGlobalClass: true },
@@ -19,7 +26,7 @@ Component({
     unit: { type: String, value: '' },
     thresholds: { type: Array, value: [] }
   },
-  data: { valueText: '', rangeText: '', color: '#5e7ce0' },
+  data: { valueText: '', rangeText: '', color: '#5e7ce0', textColor: '#4a63c4' },
   observers: {
     'value, min, max, thresholds': function (value, min, max, thresholds) {
       const hit = [...thresholds]
@@ -29,7 +36,8 @@ Component({
       this.setData({
         valueText: formatTick(value),
         rangeText: `${formatTick(min)} – ${formatTick(max)}`,
-        color: hit ? STATUS[hit.status] || '#5e7ce0' : '#5e7ce0'
+        color: hit ? STATUS[hit.status] || '#5e7ce0' : '#5e7ce0',
+        textColor: hit ? STATUS_TEXT[hit.status] || '#4a63c4' : '#4a63c4'
       })
       this.draw()
     }

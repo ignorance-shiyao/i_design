@@ -32,7 +32,7 @@
   cursor: pointer;
 }
 .i-dropdown-menu__item.is-open,
-.i-dropdown-menu__item.is-filtered { color: var(--i-color-brand); }
+.i-dropdown-menu__item.is-filtered { color: var(--i-color-brand-text); }
 .i-dropdown-menu__label {
   overflow: hidden;
   white-space: nowrap;
@@ -68,7 +68,7 @@
   text-align: left;
   cursor: pointer;
 }
-.i-dropdown-menu__option.is-active { color: var(--i-color-brand); }
+.i-dropdown-menu__option.is-active { color: var(--i-color-brand-text); }
 
 /* 遮罩压住面板以外的内容：点它关闭，也提示「现在在选东西」 */
 .i-dropdown-menu__mask {

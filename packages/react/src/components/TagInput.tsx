@@ -7,6 +7,7 @@ import {
   splitDraft,
   splitTags
 } from '@i-design/common'
+import { useFlipMove } from './useFlipMove'
 import { Icon } from './Icon'
 
 export interface TagInputProps {
@@ -39,6 +40,7 @@ export function TagInput({
   const [draft, setDraft] = useState('')
   const [focused, setFocused] = useState(false)
   const input = useRef<HTMLInputElement>(null)
+  const root = useRef<HTMLDivElement | null>(null)
 
   const full = max > 0 && value.length >= max
   const reason = {
@@ -88,10 +90,14 @@ export function TagInput({
     commit(splitTags(text, separators))
   }
 
+  /* 删掉中间一个标签时让其余的滑过去，而不是跳过去；类名与 Vue 端同一个 */
+  useFlipMove(root, 'i-tag', value.join('|'))
+
   return (
     // 整个框可点，焦点转给里面的 input：只有 input 可点的话，
     // 标签之间那几像素的空隙点下去毫无反应，用户会以为框是死的
     <div
+      ref={root}
       className={[
         'i-taginput',
         focused ? 'is-focused' : '',
@@ -104,7 +110,8 @@ export function TagInput({
       onClick={() => input.current?.focus()}
     >
       {value.map((tag, i) => (
-        <span key={`${tag}-${i}`} className="i-taginput__tag">
+        // 补位过渡靠 data-flip-key 认人：用 `tag-下标` 的话，删掉中间一个之后全对不上
+        <span key={`${tag}-${i}`} data-flip-key={tag} className="i-taginput__tag">
           {tag}
           {!disabled && (
             <button

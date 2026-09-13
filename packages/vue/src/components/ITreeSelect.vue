@@ -44,7 +44,7 @@ const { locale } = useConfig()
 /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
 const placeholderText = computed(() => props.placeholder || locale.value.placeholder)
 
-const emit = defineEmits<{ (e: 'input', a0: key: string): void; (e: 'update:checked', a0: keys: string[]): void; (e: 'change', a0: value: string | string[]): void }>()
+const emit = defineEmits<{ (e: 'input', key: string): void; (e: 'update:checked', keys: string[]): void; (e: 'change', value: string | string[]): void }>()
 
 const entities = computed(() => flattenTree(props.data))
 const open = ref(false)

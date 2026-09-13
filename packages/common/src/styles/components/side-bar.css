@@ -33,7 +33,7 @@
 }
 .i-side-bar__item.is-active {
   background: var(--i-color-bg-elevated);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-weight: var(--i-font-weight-medium);
 }
 .i-side-bar__item:disabled {
@@ -46,8 +46,8 @@
   height: 16px;
   padding: 0 4px;
   border-radius: var(--i-radius-full);
-  background: var(--i-color-danger);
-  color: #fff;
+  background: var(--i-color-danger-solid);
+  color: var(--i-color-on-danger);
   font-size: 10px;
   line-height: 16px;
 }

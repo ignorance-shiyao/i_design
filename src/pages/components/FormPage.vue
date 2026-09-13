@@ -96,8 +96,7 @@ function reset() {
   <article>
     <h1>Form 表单</h1>
     <p class="i-lead">
-      把一组输入组织成一次提交。校验的分寸最要紧：用户还在填的时候不打断，
-      离开字段或提交时才给出反馈——错误提示是帮助，不是催促。
+      把一组输入组织成一次提交。校验的分寸最要紧：用户还在填的时候不打断，离开字段或提交时才给出反馈——错误提示是帮助，不是催促。
     </p>
 
     <DemoBlock
@@ -165,11 +164,15 @@ const rules = {
           </IFormItem>
 
           <IFormItem prop="desc" label="描述">
-            <ITextarea v-model="model.desc" :rows="3" :maxlength="200" show-count />
+            <template #default="{ id }">
+              <ITextarea :id="id" v-model="model.desc" :rows="3" :maxlength="200" show-count />
+            </template>
           </IFormItem>
 
           <IFormItem label="通知负责人">
-            <ISwitch v-model="model.notify" />
+            <template #default="{ id }">
+              <ISwitch :id="id" v-model="model.notify" />
+            </template>
           </IFormItem>
 
           <IFormItem prop="agree">
@@ -198,6 +201,13 @@ const rules = {
         <tr><td>提交时</td><td>并行校验全部字段；此后输入过程中的每次变化都会立即重新校验</td></tr>
       </tbody>
     </table>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>只有一个输入框、回车即走时——用输入框本身（搜索框、加一项），套一层表单是多余的仪式。</li>
+      <li>字段超过一屏还在增加时——拆成分步，一屏填不完的表单放弃率极高。</li>
+      <li>校验要靠一次网络往返、而用户每敲一个键就触发一次时——那是在打断人，改成失焦或提交时校验。</li>
+    </ul>
 
     <h2>API</h2>
     <h3>IForm</h3>
@@ -233,8 +243,7 @@ const rules = {
       </tbody>
     </table>
     <p>
-      默认插槽提供作用域参数 <code>{ id, invalid }</code>：把 <code>invalid</code>
-      透传给控件即可让边框转为危险色，无需在业务里重复维护错误状态。
+      默认插槽提供作用域参数 <code>{ id, invalid }</code>：把 <code>invalid</code>透传给控件即可让边框转为危险色，无需在业务里重复维护错误状态。
     </p>
 
     <h3>FormRule</h3>
@@ -250,8 +259,7 @@ const rules = {
       </tbody>
     </table>
     <p>
-      规则按声明顺序依次执行，遇到第一条不通过即停止——用户一次只需要看到一个错误。
-      非必填字段留空时会跳过其余规则，因此「选填但有格式要求」的字段可以正常留空。
+      规则按声明顺序依次执行，遇到第一条不通过即停止——用户一次只需要看到一个错误。非必填字段留空时会跳过其余规则，因此「选填但有格式要求」的字段可以正常留空。
     </p>
   </article>
 </template>

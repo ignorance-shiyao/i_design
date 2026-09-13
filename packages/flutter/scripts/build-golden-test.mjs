@@ -36,7 +36,7 @@ const { findMention, applyMention, filterMentions } = await bundle(
   'mention'
 )
 const {
-  resizePane, paneRatio, paneSize, keyboardStep
+  resizePane, paneRatio, paneSize, keyboardStep, resetPaneSize, isSplitterResetKey
 } = await bundle('packages/common/src/logic/splitter.ts', 'splitter')
 const {
   virtualWindow, scrollToRow, shouldVirtualize
@@ -94,6 +94,47 @@ const { isTextOverflowing } = await bundle(
   'overflow'
 )
 const { safeHref } = await bundle('packages/common/src/logic/href.ts', 'href')
+const { floatActionOffset, floatActionShift, floatActionDelay } = await bundle(
+  'packages/common/src/logic/float.ts',
+  'float'
+)
+const { shouldShowElapsed, elapsedParts, elapsedInterval } = await bundle(
+  'packages/common/src/logic/elapsed.ts',
+  'elapsed'
+)
+const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
+const { searchCommands, moveCommandIndex } = await bundle(
+  'packages/common/src/logic/command.ts',
+  'command'
+)
+const { toolChipStat, summarizeToolChips, toolChipIcon } = await bundle(
+  'packages/common/src/logic/toolchip.ts',
+  'toolchip'
+)
+const {
+  defaultOpenSteps, summarizeThinking, thinkingStepIcon, toggleThinkingStep
+} = await bundle('packages/common/src/logic/thinking.ts', 'thinking')
+const {
+  formatInsightValue, insightPage, insightPlot, insightTrend, scrubIndex, scrubReadout, scrubX,
+  trendIcon, trendLabel
+} = await bundle('packages/common/src/logic/insight.ts', 'insight')
+const {
+  cleanSelection, hasSelection, selectionAnchor, selectionCount, selectionExcerpt, selectionTooLong
+} = await bundle('packages/common/src/logic/selection.ts', 'selection')
+const {
+  changedKeys, clampFieldValue, fieldRatio, fineTuneSummary, formatFieldValue
+} = await bundle('packages/common/src/logic/finetune.ts', 'finetune')
+const {
+  canTakeOver, frameAge, frameStale, frameStaleText, screenAspect, screenStatusIcon, screenStatusText
+} = await bundle('packages/common/src/logic/screen.ts', 'screen')
+const {
+  filterSessions: filterChatSessions, groupKeyOf, groupSessions: groupChatSessions,
+  moveActiveSession, nextAfterDelete, sessionTitle
+} = await bundle('packages/common/src/logic/chatlist.ts', 'chatlist')
+const { alignGuides, anchorOf, groupBounds, visibleEdges, visibleNodes } = await bundle(
+  'packages/common/src/logic/flow.ts',
+  'flowalign'
+)
 const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
@@ -120,7 +161,7 @@ const { clampNumber, roundTo, stepValue, ratioOf, valueFromRatio } = await bundl
   'number'
 )
 const {
-  resolveOverlay, moveMenuActive, firstMenuActive,
+  resolveOverlay, moveMenuActive, firstMenuActive, shouldFlipUp,
   tourHole, tourNext, tourPrev, tourScrollTo, tourNeedsScroll
 } = await bundle('packages/common/src/logic/overlay.ts', 'overlay')
 const {
@@ -1334,6 +1375,18 @@ const hrefExpectations = hrefCases.map((value) => {
 })
 
 /*
+ * 悬浮按钮展开后的几何：各端自己写间距的话，同一个组件会错开几像素——
+ * 这种偏差没人会当成 bug 报，只会觉得「有点糙」。
+ */
+const floatExpectations = [
+  ...[0, 1, 2, 3].map((i) => `    expect(floatActionOffset(${i}), ${floatActionOffset(i)});`),
+  ...[0, 1, 2, 3].map((i) => `    expect(floatActionShift(${i}), ${floatActionShift(i)});`),
+  ...[[0, 1], [0, 3], [1, 3], [2, 3], [3, 4]].map(
+    ([i, n]) => `    expect(floatActionDelay(${i}, ${n}), ${floatActionDelay(i, n)});`
+  )
+]
+
+/*
  * 文案字典：两份字典的每一句都要对得上，否则换个端同一个界面会说两种话；
  * 以及「局部覆盖，缺的沿用原值」——抄漏一个键不该在界面上开天窗。
  */
@@ -1341,7 +1394,14 @@ const localeKeys = [
   'name', 'empty', 'emptyContent', 'loading', 'loadMore', 'loadFailed', 'noMore',
   'placeholder', 'datePlaceholder', 'selectAll', 'search', 'searchNode', 'noMatch', 'clear',
   'confirm', 'cancel', 'acknowledge', 'close', 'retry', 'copy', 'copied',
-  'expand', 'collapse', 'required', 'invalidFormat'
+  'expand', 'collapse', 'required', 'invalidFormat',
+  // 图表数据表、AI 交互与逐题确认：这几处以前是各端各写一遍的硬编码中文
+  'chartTableShow', 'chartTableHide', 'chartCategory', 'chartValue', 'chartPercent',
+  'chartOther', 'regenerate', 'thinking', 'toolInput', 'toolError', 'toolResult',
+  'next', 'skip', 'otherOption',
+  // 移动端专有：下拉刷新、新建与倒计时单位
+  'pullToRefresh', 'releaseToRefresh', 'refreshing', 'create',
+  'dayUnit', 'hourUnit', 'minuteUnit', 'secondUnit'
 ]
 const dartString = (text) => `'${text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\$/g, '\\$')}'`
 const localeExpectations = [
@@ -1575,6 +1635,538 @@ const ratioExpectationsSp = [[500, 1000], [0, 1000], [1200, 1000]].map(([size, t
     `    expect(paneSize(${ratio.toFixed(2)}, ${total.toFixed(1)}, gutter: 4.0),
         closeTo(${paneSize(ratio, total, 4)}, 1e-9));`))
 
+/*
+ * 复位：目标比例照样要过夹取。容器窄到五五开都违反下限时，
+ * 双击一下不能把用户送进一个拖都拖不出来的状态。
+ */
+const resetExpectations = [[0.5, 1000], [0.5, 300], [0.2, 1000], [0.9, 1000]].map(
+  ([ratio, total]) =>
+    `    expect(
+        resetPaneSize(${ratio.toFixed(2)}, ${total.toFixed(1)},
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(${resetPaneSize(ratio, total, { min: 120 }, { min: 160 }, 4)}, 1e-9));`
+).concat(
+  ['Enter', ' ', 'Spacebar', 'ArrowLeft', 'a'].map(
+    (key) => `    expect(isSplitterResetKey('${key}'), ${isSplitterResetKey(key)});`
+  )
+)
+
+/*
+ * 等待时长：从第几秒开始显示、怎么进位、下一跳等多久——三处各端都容易各写一遍，
+ * 结果是同一次等待在两端显示出不同的秒数。
+ */
+const elapsedExpectations = [
+  ...[0, 2999, 3000, 61000, 3599999].map(
+    (ms) => `    expect(shouldShowElapsed(${ms}), ${shouldShowElapsed(ms)});`
+  ),
+  ...[0, 5400, 59999, 60000, 125000, -100].flatMap((ms) => {
+    const p = elapsedParts(ms)
+    return [
+      `    expect(elapsedParts(${ms}).minutes, ${p.minutes});`,
+      `    expect(elapsedParts(${ms}).seconds, ${p.seconds});`
+    ]
+  }),
+  ...[0, 1, 500, 999, 1000, 5400].map(
+    (ms) => `    expect(elapsedInterval(${ms}), ${elapsedInterval(ms)});`
+  )
+]
+
+/*
+ * 行 diff：同一个补丁在两端必须比出同一份结果。
+ * 开头插一行时若退化成逐行对齐，后面每一行都会被标成改动——两端各错各的。
+ */
+const diffCases = [
+  ['b\nc', 'a\nb\nc'],
+  ['x\nold\ny', 'x\nnew\ny'],
+  ['a\nb', 'a\nb'],
+  ['a\nb\nc', 'c\nb\na'],
+  ['', 'a']
+]
+const lineDiffExpectations = diffCases.flatMap(([before, after], i) => {
+  const lines = diffLines(before, after)
+  const stat = diffStat(lines)
+  const dart = (t) => `'${t.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n')}'`
+  return [
+    `    // 第 ${i + 1} 组`,
+    `    expect(diffLines(${dart(before)}, ${dart(after)}).length, ${lines.length});`,
+    `    expect(diffStat(diffLines(${dart(before)}, ${dart(after)})).added, ${stat.added});`,
+    `    expect(diffStat(diffLines(${dart(before)}, ${dart(after)})).removed, ${stat.removed});`,
+    ...lines.map(
+      (line, n) =>
+        `    expect(diffLines(${dart(before)}, ${dart(after)})[${n}].kind, IDiffKind.${line.kind});`
+    )
+  ]
+})
+
+/*
+ * 命令搜索：排序错一次，用户下次就不用搜索了。
+ * 因此断言的不只是「搜到了几条」，还有第一条是谁——那才是搜索的产出。
+ */
+const cmdItems = [
+  { key: 'button', label: '按钮', description: '触发一个动作', keywords: ['button'], group: '基础' },
+  { key: 'button-group', label: '按钮组', description: '一组并排的按钮', keywords: ['button group'] },
+  { key: 'tag', label: '标签', description: '用按钮旁的小块标记状态', keywords: ['tag'] },
+  { key: 'form-validate', label: '表单 校验', keywords: ['validate'] },
+  { key: 'empty', label: '空状态', keywords: ['empty', 'placeholder'] }
+]
+const dartStr = (t) => `'${String(t).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
+const dartCmdItems = `<ICommandItem>[${cmdItems
+  .map(
+    (i) =>
+      `ICommandItem(key: ${dartStr(i.key)}, label: ${dartStr(i.label)}` +
+      (i.description ? `, description: ${dartStr(i.description)}` : '') +
+      `, keywords: <String>[${(i.keywords ?? []).map(dartStr).join(', ')}]` +
+      (i.group ? `, group: ${dartStr(i.group)}` : '') +
+      ')'
+  )
+  .join(', ')}]`
+const cmdQueries = ['按钮', 'button', '校验', 'placeholder', '', '不存在的词', '标签']
+const commandExpectations = cmdQueries.flatMap((q) => {
+  const hits = searchCommands(cmdItems, q)
+  return [
+    `    // 搜 ${q || '（空）'}`,
+    `    expect(searchCommands(items, ${dartStr(q)}).length, ${hits.length});`,
+    ...hits.map(
+      (h, i) => `    expect(searchCommands(items, ${dartStr(q)})[${i}].item.key, ${dartStr(h.item.key)});`
+    ),
+    ...(hits[0]?.ranges.length
+      ? [
+          `    expect(searchCommands(items, ${dartStr(q)})[0].ranges.first[0], ${hits[0].ranges[0][0]});`,
+          `    expect(searchCommands(items, ${dartStr(q)})[0].ranges.first[1], ${hits[0].ranges[0][1]});`
+        ]
+      : [])
+  ]
+})
+const commandLimitCount = searchCommands(cmdItems, '', 2).length
+const commandMoveExpectations = [
+  [0, 1, 3], [2, 1, 3], [0, -1, 3], [1, -1, 3], [0, 1, 0], [5, 1, 0]
+].map(([cur, delta, total]) =>
+  `    expect(moveCommandIndex(${cur}, ${delta}, ${total}), ${moveCommandIndex(cur, delta, total)});`)
+
+/*
+ * 工具芯片的统计写法：同一次调用在两端写出来的字必须逐字相同，
+ * 一端写「+13 −4」另一端写「13 增 4 删」的话，读者会以为是两件事。
+ */
+const statCases = [[13, 4], [13, 0], [0, 4], [0, 0], [1, 1], [999, 1000]]
+const chipStatExpectations = statCases.map(
+  ([a, r]) => `    expect(toolChipStat(${a}, ${r}), ${JSON.stringify(toolChipStat(a, r))});`
+)
+const chipItems = [
+  { key: 'a', label: 'App.tsx', status: 'success', added: 74, removed: 41 },
+  { key: 'b', label: 'flavors.css', status: 'error' },
+  { key: 'c', label: 'grep', status: 'running', added: 2 },
+  { key: 'd', label: 'main.ts', status: 'success', added: 0, removed: 9 }
+]
+const dartChipItems = `<IToolChipItem>[${chipItems
+  .map(
+    (i) =>
+      `IToolChipItem(key: '${i.key}', label: '${i.label}', ` +
+      `status: IToolChipStatus.${i.status}, added: ${i.added ?? 0}, removed: ${i.removed ?? 0})`
+  )
+  .join(', ')}]`
+const chipSummary = summarizeToolChips(chipItems)
+const chipSummaryExpectations = [
+  `    expect(summarizeToolChips(chips).total, ${chipSummary.total});`,
+  `    expect(summarizeToolChips(chips).running, ${chipSummary.running});`,
+  `    expect(summarizeToolChips(chips).failed, ${chipSummary.failed});`,
+  `    expect(summarizeToolChips(chips).added, ${chipSummary.added});`,
+  `    expect(summarizeToolChips(chips).removed, ${chipSummary.removed});`,
+  `    expect(summarizeToolChips(<IToolChipItem>[]).total, ${summarizeToolChips([]).total});`,
+  `    expect(summarizeToolChips(<IToolChipItem>[]).added, ${summarizeToolChips([]).added});`,
+  ...['success', 'error'].map(
+    (s) => `    expect(toolChipIcon(IToolChipStatus.${s}), ${JSON.stringify(toolChipIcon(s))});`
+  )
+]
+
+/*
+ * 洞察卡：翻页的边界行为与擦洗的取点规则两端必须一致，
+ * 否则同一份数据在一端翻得回去、在另一端翻不回去，而这不会让任何构建失败。
+ */
+const insightItem = {
+  id: 'i1',
+  title: '转化率',
+  summary: '周三回升',
+  series: [12, 9, 11, 15],
+  labels: ['周一', '周二', '周三', '周四'],
+  unit: '%'
+}
+const dartInsightItem =
+  `InsightItemData(id: 'i1', title: '转化率', summary: '周三回升', ` +
+  `series: <double>[12, 9, 11, 15], labels: <String>['周一', '周二', '周三', '周四'], unit: '%')`
+const insightExpectations = [
+  ...[[3, 2, 1], [3, 0, -1], [3, 0, 1], [0, 0, 1], [3, 1, -1]].map(
+    ([n, cur, d]) => `    expect(insightPage(${n}, ${cur}, ${d}), ${insightPage(n, cur, d)});`
+  ),
+  ...[0, 60, 160, 300, -40, 999].map(
+    (x) => `    expect(scrubIndex(${x}, 300, 4), ${scrubIndex(x, 300, 4)});`
+  ),
+  `    expect(scrubIndex(160, 300, 1), ${scrubIndex(160, 300, 1)});`,
+  ...[0, 1, 2, 3].map((i) => `    expect(scrubX(${i}, 300, 4), ${scrubX(i, 300, 4)});`),
+  ...[0, 2, 3].map((i) => {
+    const r = scrubReadout(insightItem, i)
+    return (
+      `    expect(scrubReadout(item, ${i}).label, ${JSON.stringify(r.label)});\n` +
+      `    expect(scrubReadout(item, ${i}).value, ${JSON.stringify(r.value)});`
+    )
+  }),
+  ...[[12, 15], [15, 12], [8, 8], [0, 5], [10, 30, 28]].map((series) => {
+    const t = insightTrend(series)
+    const dart = `<double>[${series.join(', ')}]`
+    return (
+      `    expect(trendLabel(insightTrend(${dart})), ${JSON.stringify(trendLabel(t))});\n` +
+      `    expect(trendIcon(insightTrend(${dart})), ${JSON.stringify(trendIcon(t))});`
+    )
+  }),
+  `    expect(trendLabel(insightTrend(<double>[])), ${JSON.stringify(trendLabel(insightTrend([])))});`,
+  ...[320, 12, 8, 400.5].map((w) => {
+    const plot = insightPlot(w)
+    return (
+      `    expect(insightPlot(${w}).inner, ${plot.inner});\n` +
+      `    expect(insightPlot(${w}).inset, ${plot.inset});`
+    )
+  }),
+  ...[12, 12.34, 0, -3.5].map(
+    (v) => `    expect(formatInsightValue(${v}), ${JSON.stringify(formatInsightValue(v))});`
+  )
+]
+
+/*
+ * 选区操作：字数上限、引文省略、动作条摆哪边必须两端一致，
+ * 否则同一段话在一端能改、在另一端只剩一句「太长了」。
+ */
+/* 选区的样例里有真换行，dartStr 不转义换行，会把字面量断成两行 */
+const dartSelStr = (v) =>
+  `'${String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n')}'`
+const selectionTexts = ['the quick\nbrown fox', '第一段\n\n\n第二段', '  改   一下  ', '   \n  ']
+/* 上限用一个小数字代入，不往生成物里塞两千个 a——断言的是规则，不是长度本身 */
+const overLimit = ['改一改这一整段话', 4]
+const selectionExpectations = [
+  ...selectionTexts.map(
+    (t) => `    expect(cleanSelection(${dartSelStr(t)}), ${dartSelStr(cleanSelection(t))});`
+  ),
+  ...selectionTexts.map(
+    (t) => `    expect(hasSelection(${dartSelStr(t)}), ${hasSelection(t)});`
+  ),
+  ...selectionTexts.map(
+    (t) => `    expect(selectionTooLong(${dartSelStr(t)}), ${selectionTooLong(t)});`
+  ),
+  ...selectionTexts.map(
+    (t) => `    expect(selectionCount(${dartSelStr(t)}), ${selectionCount(t)});`
+  ),
+  `    expect(hasSelection(${dartSelStr(overLimit[0])}, max: ${overLimit[1]}), ${hasSelection(overLimit[0], overLimit[1])});`,
+  `    expect(selectionTooLong(${dartSelStr(overLimit[0])}, max: ${overLimit[1]}), ${selectionTooLong(overLimit[0], overLimit[1])});`,
+  ...[['短句', 11], ['a'.repeat(30) + 'MIDDLE' + 'b'.repeat(30), 11]].map(
+    ([t, max]) =>
+      `    expect(selectionExcerpt(${dartSelStr(t)}, max: ${max}), ${dartSelStr(selectionExcerpt(t, max))});`
+  ),
+  ...[
+    [{ x: 200, y: 300, width: 120, height: 20 }],
+    [{ x: 200, y: 4, width: 120, height: 20 }],
+    [{ x: 940, y: 300, width: 60, height: 20 }],
+    [{ x: 0, y: 780, width: 40, height: 20 }]
+  ].map(([rect]) => {
+    const at = selectionAnchor(rect, { width: 200, height: 40 }, { width: 1000, height: 800 })
+    const dartRect = `IOverlayRect(${rect.x}, ${rect.y}, ${rect.width}, ${rect.height})`
+    const call = `selectionAnchor(${dartRect}, 200, 40, 1000, 800)`
+    return (
+      `    expect(${call}.x, ${at.x});\n` +
+      `    expect(${call}.y, ${at.y});\n` +
+      `    expect(${call}.placement, SelectionPlacement.${at.placement});`
+    )
+  })
+]
+
+/*
+ * 属性检查器：夹范围、吸步长、改动判定与显示文字必须两端一致，
+ * 否则同一个属性在一端拖出 12、在另一端敲出 12.7，保存下来就不是同一份配置。
+ */
+const tuneFields = [
+  { key: 'size', label: '字号', kind: 'number', min: 12, max: 32, step: 2, unit: 'px' },
+  { key: 'opacity', label: '不透明度', kind: 'number', min: 0, max: 1, step: 0.1 },
+  { key: 'tone', label: '语气', kind: 'select', options: [{ value: 'calm', label: '克制' }] },
+  { key: 'bold', label: '加粗', kind: 'switch' }
+]
+/* switch 是 Dart 关键字，枚举项只能叫 switchKind */
+const dartTuneKind = { number: 'number', select: 'select', switch: 'switchKind', color: 'color', text: 'text' }
+const dartTuneField = (f) =>
+  `FineTuneFieldData(key: '${f.key}', label: '${f.label}', kind: FineTuneKind.${dartTuneKind[f.kind]}` +
+  (f.min !== undefined ? `, min: ${f.min}` : '') +
+  (f.max !== undefined ? `, max: ${f.max}` : '') +
+  (f.step !== undefined ? `, step: ${f.step}` : '') +
+  (f.unit ? `, unit: '${f.unit}'` : '') +
+  (f.options
+    ? `, options: <FineTuneOption>[${f.options
+        .map((o) => `FineTuneOption(value: '${o.value}', label: '${o.label}')`)
+        .join(', ')}]`
+    : '') +
+  ')'
+const dartTuneFields = `<FineTuneFieldData>[${tuneFields.map(dartTuneField).join(', ')}]`
+const dartTuneMap = (m) =>
+  `<String, Object?>{${Object.entries(m)
+    .map(([k, v]) => `'${k}': ${typeof v === 'string' ? `'${v}'` : v}`)
+    .join(', ')}}`
+const tuneOriginal = { size: 16, opacity: 0.5, tone: 'calm', bold: false }
+const tuneCurrent = { size: 24, opacity: 0.5, tone: 'calm', bold: true }
+const finetuneExpectations = [
+  ...[12.7, 13.2, 99, -5].map(
+    (v) =>
+      `    expect(clampFieldValue(${dartTuneField(tuneFields[0])}, ${v}), ${clampFieldValue(tuneFields[0], v)});`
+  ),
+  // 浮点步长不能留下 0.30000000000000004 那样的尾巴
+  ...[0.31, 0.44, 1.4].map(
+    (v) =>
+      `    expect(clampFieldValue(${dartTuneField(tuneFields[1])}, ${v}), ${clampFieldValue(tuneFields[1], v)});`
+  ),
+  `    expect(changedKeys(${dartTuneFields}, ${dartTuneMap(tuneOriginal)}, ${dartTuneMap(tuneCurrent)}), <String>[${changedKeys(tuneFields, tuneOriginal, tuneCurrent).map((k) => `'${k}'`).join(', ')}]);`,
+  `    expect(changedKeys(${dartTuneFields}, ${dartTuneMap(tuneOriginal)}, ${dartTuneMap(tuneOriginal)}), <String>[]);`,
+  ...[0, 1, 3].map((n) => `    expect(fineTuneSummary(${n}), ${JSON.stringify(fineTuneSummary(n))});`),
+  ...[
+    [0, 16],
+    [2, 'calm'],
+    [3, true],
+    [3, false],
+    [0, null]
+  ].map(([i, v]) => {
+    const field = tuneFields[i]
+    const dartValue = v === null ? 'null' : typeof v === 'string' ? `'${v}'` : v
+    return `    expect(formatFieldValue(${dartTuneField(field)}, ${dartValue}), ${JSON.stringify(formatFieldValue(field, v === null ? undefined : v))});`
+  }),
+  ...[22, 99, 12].map(
+    (v) =>
+      `    expect(fieldRatio(${dartTuneField(tuneFields[0])}, ${v}), ${fieldRatio(tuneFields[0], v)});`
+  ),
+  `    expect(fieldRatio(${dartTuneField(tuneFields[2])}, 'calm'), ${fieldRatio(tuneFields[2], 'calm')});`
+]
+
+/*
+ * 智能体屏幕：状态文字、能不能接管、画面几秒前、多久算卡住必须两端一致。
+ * 一端 15 秒提醒、另一端一分钟才提醒的话，同一次卡死在两端是两种体验。
+ */
+const screenStates = ['connecting', 'working', 'paused', 'done', 'error']
+const screenExpectations = [
+  ...screenStates.flatMap((st) => [
+    `    expect(screenStatusText(AgentScreenState.${st}), ${JSON.stringify(screenStatusText(st))});`,
+    `    expect(screenStatusText(AgentScreenState.${st}, '正在填写收货地址'), ${JSON.stringify(screenStatusText(st, '正在填写收货地址'))});`,
+    `    expect(screenStatusIcon(AgentScreenState.${st}), ${JSON.stringify(screenStatusIcon(st))});`,
+    `    expect(canTakeOver(AgentScreenState.${st}), ${canTakeOver(st)});`
+  ]),
+  // 两秒内返回空串：每帧都挂「刚刚更新」的话，真卡住时没人注意到它变了
+  ...[[10000, 9000], [10000, 7000], [200000, 20000], [8000000, 200000]].map(
+    ([now, at]) => `    expect(frameAge(${now}, ${at}), ${JSON.stringify(frameAge(now, at))});`
+  ),
+  ...[[30000, 10000, 'working'], [20000, 10000, 'working'], [30000, 10000, 'done'], [30000, 10000, 'error']].map(
+    ([now, at, st]) =>
+      `    expect(frameStale(${now}, ${at}, AgentScreenState.${st}), ${frameStale(now, at, st)});`
+  ),
+  // 「多久没动」与「什么时候的」是两句话，混用会写出「已经 44 秒前没动了」
+  ...[[54000, 10000], [200000, 20000], [8000000, 200000]].map(
+    ([now, at]) => `    expect(frameStaleText(${now}, ${at}), ${JSON.stringify(frameStaleText(now, at))});`
+  ),
+  // Dart 端的高宽比是宽÷高的数值，Web 端是 CSS 字符串；断言各自的形式，规则一致
+  `    expect(screenAspect(1280, 800), ${1280 / 800});`,
+  `    expect(screenAspect(), ${16 / 10});`,
+  `    expect(screenAspect(0, 800), ${16 / 10});`
+]
+
+/*
+ * 会话列表：分组档位、空标题的兜底、删除之后选谁必须两端一致，
+ * 否则同一份会话在两端会分进不同的组、删一条之后跳到不同的位置。
+ *
+ * 时刻两边都按**本地墙钟**构造（JS 的 new Date(2026, 8, 13, 14) 与 Dart 的
+ * DateTime(2026, 9, 13, 14)），而不是往生成物里塞一个纪元毫秒数：
+ * 分组问的是「用户的今天」，本来就该按本地日历算，塞死毫秒数的话
+ * 这份 golden 换一个时区跑就会红，而代码并没有错。
+ */
+const chatNow = new Date(2026, 8, 13, 14, 0, 0).getTime()
+/** Dart 侧的同一个时刻，以及以它为基准的偏移写法 */
+const dartChatNow = 'DateTime(2026, 9, 13, 14).millisecondsSinceEpoch'
+const dartAgo = (ms) => (ms === 0 ? 'now' : `now - ${ms}`)
+const chatDay = 24 * 3600 * 1000
+const chatSessions = [
+  { id: 'a', title: '报销流程', updatedAt: chatNow - 3600000 },
+  { id: 'b', title: '', preview: '帮我把这段话改得更简短', updatedAt: chatNow - chatDay },
+  { id: 'c', title: '旧的讨论', updatedAt: chatNow - 30 * chatDay },
+  { id: 'd', title: '常用清单', updatedAt: chatNow - 10 * chatDay, pinned: true },
+  { id: 'e', title: '上周的图', updatedAt: chatNow - 5 * chatDay }
+]
+const dartChatSessions = `<ChatSessionData>[${chatSessions
+  .map(
+    (s) =>
+      `ChatSessionData(id: '${s.id}', updatedAt: ${dartAgo(chatNow - s.updatedAt)}` +
+      `, title: '${s.title ?? ''}', preview: '${s.preview ?? ''}'` +
+      (s.pinned ? ', pinned: true' : '') +
+      ')'
+  )
+  .join(', ')}]`
+const chatGroups = groupChatSessions(chatSessions, chatNow)
+const chatListExpectations = [
+  ...chatSessions.map(
+    (s, i) =>
+      `    expect(sessionTitle(sessions[${i}]), ${JSON.stringify(sessionTitle(s))});`
+  ),
+  `    expect(sessionTitle(ChatSessionData(id: 'x', updatedAt: 0)), ${JSON.stringify(sessionTitle({ id: 'x', updatedAt: 0 }))});`,
+  ...chatSessions.map(
+    (s, i) =>
+      `    expect(groupKeyOf(sessions[${i}], now), ChatGroupKey.${groupKeyOf(s, chatNow)});`
+  ),
+  `    expect(groupSessions(sessions, now).length, ${chatGroups.length});`,
+  ...chatGroups.flatMap((g, i) => [
+    `    expect(groupSessions(sessions, now)[${i}].key, ChatGroupKey.${g.key});`,
+    `    expect(groupSessions(sessions, now)[${i}].label, ${JSON.stringify(g.label)});`,
+    `    expect(groupSessions(sessions, now)[${i}].sessions.map((s) => s.id).toList(), <String>[${g.sessions.map((s) => `'${s.id}'`).join(', ')}]);`
+  ]),
+  ...['简短', '报销', '  '].map(
+    (q) =>
+      `    expect(filterSessions(sessions, ${JSON.stringify(q)}).map((s) => s.id).toList(), <String>[${filterChatSessions(chatSessions, q).map((s) => `'${s.id}'`).join(', ')}]);`
+  ),
+  // 删掉当前这条后选后一条，不跳回第一条
+  ...[['b', 'b'], ['e', 'e'], ['c', 'c'], ['a', 'c']].map(
+    ([del, act]) =>
+      `    expect(nextAfterDelete(groupSessions(sessions, now), '${del}', '${act}'), ${JSON.stringify(nextAfterDelete(chatGroups, del, act))});`
+  ),
+  ...[['d', 1], ['d', -1], ['c', 1], ['c', -1]].map(
+    ([id, step]) =>
+      `    expect(moveActiveSession(groupSessions(sessions, now), '${id}', ${step}), ${JSON.stringify(moveActiveSession(chatGroups, id, step))});`
+  )
+]
+
+/*
+ * 推理轨迹：默认展开哪几步必须两端一致。
+ * 一端展开出错那步、另一端全折叠的话，用户得学两遍。
+ */
+const thinkSteps = [
+  { key: 'a', title: '拆解问题', kind: 'reason', status: 'done' },
+  { key: 'b', title: '检索文档', kind: 'search', status: 'error' },
+  { key: 'c', title: '写补丁', kind: 'code', status: 'running' },
+  { key: 'd', title: '复核', kind: 'tool', status: 'done' }
+]
+const dartThinkSteps = `<IThinkingStep>[${thinkSteps
+  .map(
+    (s) =>
+      `IThinkingStep(key: '${s.key}', title: '${s.title}', ` +
+      `kind: IThinkingStepKind.${s.kind}, status: IThinkingStepStatus.${s.status})`
+  )
+  .join(', ')}]`
+const dartStepKeys = (keys) => `<String>[${keys.map((k) => `'${k}'`).join(', ')}]`
+const thinkingExpectations = [
+  `    expect(defaultOpenSteps(steps), ${dartStepKeys(defaultOpenSteps(thinkSteps))});`,
+  `    expect(defaultOpenSteps(<IThinkingStep>[]), <String>[]);`,
+  `    expect(summarizeThinking(steps).total, ${summarizeThinking(thinkSteps).total});`,
+  `    expect(summarizeThinking(steps).done, ${summarizeThinking(thinkSteps).done});`,
+  `    expect(summarizeThinking(steps).running, ${summarizeThinking(thinkSteps).running});`,
+  `    expect(summarizeThinking(steps).failed, ${summarizeThinking(thinkSteps).failed});`,
+  `    expect(summarizeThinking(steps).activeIndex, ${summarizeThinking(thinkSteps).activeIndex});`,
+  `    expect(summarizeThinking(<IThinkingStep>[]).activeIndex, ${summarizeThinking([]).activeIndex});`,
+  ...['reason', 'search', 'code', 'tool'].map(
+    (k) => `    expect(thinkingStepIcon(IThinkingStepKind.${k}), ${JSON.stringify(thinkingStepIcon(k))});`
+  ),
+  `    expect(toggleThinkingStep(${dartStepKeys(['b'])}, 'c'), ${dartStepKeys(toggleThinkingStep(['b'], 'c'))});`,
+  `    expect(toggleThinkingStep(${dartStepKeys(['b', 'c'])}, 'b'), ${dartStepKeys(toggleThinkingStep(['b', 'c'], 'b'))});`
+]
+
+/*
+ * 贴着触发器的面板往哪边开：实测过视口 520 时下拉掉出 65px、日期面板掉出 212px，
+ * 两端必须给出同一个答案，否则同一个表单在一端能选、在另一端点空。
+ */
+const flipCases = [
+  [400, 32, 160, 720], [400, 32, 160, 520], [100, 32, 600, 300],
+  [400, 32, 280, 720], [0, 32, 100, 200], [650, 32, 60, 720]
+]
+const flipExpectations = flipCases.map(
+  ([y, h, ph, vh]) =>
+    `    expect(shouldFlipUp(${y}, ${h}, ${ph}, ${vh}), ${shouldFlipUp({ y, height: h }, ph, vh)});`
+)
+
+/*
+ * 对齐辅助线：同一次拖动在两端必须吸到同一个位置、画出同样几条线，
+ * 否则同一张图在两端会被排成两个样子。
+ */
+const guideNode = (id, x, y, width = 120, height = 48) => ({ id, x, y, width, height, label: id })
+const dartGuideNode = (n) =>
+  `FlowNodeData(id: '${n.id}', label: '${n.label}', x: ${n.x}, y: ${n.y}, ` +
+  `width: ${n.width}, height: ${n.height})`
+const guideCases = [
+  [guideNode('a', 103, 200), [guideNode('b', 100, 20)]],
+  [guideNode('a', 140, 200), [guideNode('b', 100, 20)]],
+  [guideNode('a', 100, 300, 60), [guideNode('b', 70, 20, 120)]],
+  [guideNode('a', 102, 203), [guideNode('b', 100, 200)]],
+  [guideNode('a', 100, 400), [guideNode('b', 100, 20)]]
+]
+const guideExpectations = guideCases.flatMap(([moving, others], i) => {
+  const r = alignGuides(moving, others)
+  const dartOthers = `<FlowNodeData>[${others.map(dartGuideNode).join(', ')}]`
+  const call = `alignGuides(${dartGuideNode(moving)}, ${dartOthers})`
+  return [
+    `    // 第 ${i + 1} 组`,
+    `    expect(${call}.dx, ${r.dx});`,
+    `    expect(${call}.dy, ${r.dy});`,
+    `    expect(${call}.guides.length, ${r.guides.length});`,
+    ...r.guides.map(
+      (g, n) => `    expect(${call}.guides[${n}].at, ${g.at});`
+    )
+  ]
+})
+
+/*
+ * 指定锚点：同一条回边在两端必须从同一条边出去，
+ * 否则同一张图在一端绕侧面、在另一端贴着主干，看起来是两张图。
+ */
+const anchorNode = { id: 'a', x: 100, y: 200, width: 120, height: 48, label: 'a' }
+const dartAnchorNode =
+  `FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48)`
+const anchorExpectations = ['left', 'right', 'top', 'bottom'].flatMap((side) => {
+  const r = anchorOf(anchorNode, { x: 0, y: 0 }, side)
+  return [
+    `    expect(anchorOf(${dartAnchorNode}, 0, 0, '${side}').x, ${r.x});`,
+    `    expect(anchorOf(${dartAnchorNode}, 0, 0, '${side}').y, ${r.y});`,
+    `    expect(anchorOf(${dartAnchorNode}, 0, 0, '${side}').side, '${r.side}');`
+  ]
+}).concat([
+  // 不指定时仍按方位自动选
+  `    expect(anchorOf(${dartAnchorNode}, 160, 900).side, ${JSON.stringify(anchorOf(anchorNode, { x: 160, y: 900 }).side)});`
+])
+
+/*
+ * 节点分组：折起来之后剩哪些节点、哪些线，两端必须一致，
+ * 否则同一张图折一下在两端会变成两张不同的图。
+ */
+const gNodes = [
+  { id: 'a', x: 100, y: 100, width: 120, height: 48, label: 'a' },
+  { id: 'b', x: 300, y: 200, width: 120, height: 48, label: 'b' },
+  { id: 'c', x: 600, y: 100, width: 120, height: 48, label: 'c' }
+]
+const dartGNodes = `<FlowNodeData>[${gNodes
+  .map((n) => `FlowNodeData(id: '${n.id}', label: '${n.label}', x: ${n.x}, y: ${n.y}, width: ${n.width}, height: ${n.height})`)
+  .join(', ')}]`
+const gGroup = { id: 'g1', label: '审批', nodeIds: ['a', 'b'] }
+const dartGroup = (collapsed) =>
+  `FlowGroupData(id: 'g1', label: '审批', nodeIds: <String>['a', 'b'], collapsed: ${collapsed})`
+const gEdges = [
+  { from: 'a', to: 'c' },
+  { from: 'b', to: 'c' },
+  { from: 'a', to: 'b' }
+]
+const dartGEdges = `<FlowEdgeData>[${gEdges.map((e) => `FlowEdgeData(from: '${e.from}', to: '${e.to}')`).join(', ')}]`
+const box = groupBounds(gNodes, gGroup)
+const shownNodes = visibleNodes(gNodes, [{ ...gGroup, collapsed: true }])
+const shownEdges = visibleEdges(gEdges, [{ ...gGroup, collapsed: true }])
+const groupExpectations = [
+  `    final gNodes = ${dartGNodes};`,
+  `    final box = groupBounds(gNodes, ${dartGroup(false)})!;`,
+  `    expect(box.left, ${box.x});`,
+  `    expect(box.top, ${box.y});`,
+  `    expect(box.width, ${box.width});`,
+  `    expect(box.height, ${box.height});`,
+  `    expect(groupBounds(gNodes, FlowGroupData(id: 'g', label: 'x', nodeIds: <String>['zz'])), null);`,
+  `    final shown = visibleNodes(gNodes, <FlowGroupData>[${dartGroup(true)}]);`,
+  `    expect(shown.length, ${shownNodes.length});`,
+  ...shownNodes.map((n, i) => `    expect(shown[${i}].id, '${n.id}');`),
+  `    expect(shown.last.label, ${JSON.stringify(shownNodes[shownNodes.length - 1].label)});`,
+  `    final links = visibleEdges(${dartGEdges}, <FlowGroupData>[${dartGroup(true)}]);`,
+  `    expect(links.length, ${shownEdges.length});`,
+  ...shownEdges.map((e, i) => `    expect(links[${i}].from, '${e.from}');\n    expect(links[${i}].to, '${e.to}');`)
+]
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -1776,6 +2368,9 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/diff.dart';
+import 'package:i_design/src/logic/elapsed.dart';
+import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
 import 'package:i_design/src/logic/wordcloud.dart';
@@ -2124,6 +2719,76 @@ ${toneExpectations.join('\n')}
 ${hrefExpectations.join('\n')}
   });
 
+  test('行 diff 的分组、顺序与统计与 Web 端一致', () {
+${lineDiffExpectations.join('\n')}
+  });
+
+  test('命令搜索的排序、高亮区间与索引环绕与 Web 端一致', () {
+    final items = ${dartCmdItems};
+${commandExpectations.join('\n')}
+    expect(searchCommands(items, '', limit: 2).length, ${commandLimitCount});
+${commandMoveExpectations.join('\n')}
+  });
+
+  test('工具芯片的统计写法与折叠汇总与 Web 端一致', () {
+    final chips = ${dartChipItems};
+${chipStatExpectations.join('\n')}
+${chipSummaryExpectations.join('\n')}
+  });
+
+  test('洞察卡的翻页边界、擦洗取点与涨跌说法与 Web 端一致', () {
+    final item = ${dartInsightItem};
+${insightExpectations.join('\n')}
+  });
+
+  test('选区的清理、字数上限、引文省略与动作条落点与 Web 端一致', () {
+${selectionExpectations.join('\n')}
+  });
+
+  test('属性检查器的夹范围、改动判定与显示文字与 Web 端一致', () {
+${finetuneExpectations.join('\n')}
+  });
+
+  test('智能体屏幕的状态说法、接管条件与画面新鲜度与 Web 端一致', () {
+${screenExpectations.join('\n')}
+  });
+
+  test('会话列表的分组、空标题兜底与删除后落点与 Web 端一致', () {
+    // 本地墙钟，不是纪元毫秒数：分组问的是「用户的今天」
+    final now = ${dartChatNow};
+    final sessions = ${dartChatSessions};
+${chatListExpectations.join('\n')}
+  });
+
+  test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
+    final steps = ${dartThinkSteps};
+${thinkingExpectations.join('\n')}
+  });
+
+  test('贴着触发器的面板往哪边开与 Web 端一致', () {
+${flipExpectations.join('\n')}
+  });
+
+  test('对齐辅助线的吸附量与线位置与 Web 端一致', () {
+${guideExpectations.join('\n')}
+  });
+
+  test('指定锚点的落点与 Web 端一致', () {
+${anchorExpectations.join('\n')}
+  });
+
+  test('节点分组折叠后的节点与连线与 Web 端一致', () {
+${groupExpectations.join('\n')}
+  });
+
+  test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
+${elapsedExpectations.join('\n')}
+  });
+
+  test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {
+${floatExpectations.join('\n')}
+  });
+
   test('文案字典的两份译文与局部覆盖规则与 Web 端一致', () {
 ${localeExpectations.join('\n')}
   });
@@ -2203,6 +2868,7 @@ ${altExpectations.join('\n')}
 
   test('分栏夹取与键盘步长与 Web 端一致', () {
 ${paneExpectations.join('\n')}
+${resetExpectations.join('\n')}
 ${ratioExpectationsSp.join('\n')}
 ${b2_keyExpectations.join('\n')}
   });

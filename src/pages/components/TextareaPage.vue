@@ -27,7 +27,7 @@ const fixed = ref('')
       description="showCount 需配合 maxlength；超出上限时计数与边框同时转为危险色。"
       code='<ITextarea v-model="value" :maxlength="120" show-count :rows="4" />'
     >
-      <div class="w"><ITextarea v-model="counted" :maxlength="120" show-count :rows="4" /></div>
+      <div class="w"><ITextarea v-model="counted" :maxlength="120" show-count :rows="4" aria-label="字数统计示例" /></div>
     </DemoBlock>
 
     <DemoBlock
@@ -41,6 +41,13 @@ const fixed = ref('')
         <div class="w"><ITextarea disabled placeholder="已禁用" /></div>
       </div>
     </DemoBlock>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>内容是单行且不长时——用输入框，多行框会诱使人写长。</li>
+      <li>要写的是富文本或代码时——那是编辑器，多行框既不高亮也不缩进。</li>
+      <li>有字数上限时别只在超出后报错——把计数显示出来，让人边写边知道还剩多少。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">
@@ -60,6 +67,6 @@ const fixed = ref('')
 </template>
 
 <style scoped>
-.w { width: 360px; max-width: 100%; }
+.w { width: min(360px, 100%); }
 .stack { display: grid; gap: var(--i-spacing-4); }
 </style>

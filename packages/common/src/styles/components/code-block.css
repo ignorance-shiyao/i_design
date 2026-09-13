@@ -1,0 +1,144 @@
+/* ICodeBlock —— 由 Vue / React / 小程序各端共享 */
+.i-code {
+  border: 1px solid var(--i-color-code-border);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-code-bg);
+  overflow: hidden;
+}
+
+.i-code__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-2) var(--i-spacing-4);
+  border-bottom: 1px solid var(--i-color-code-border);
+  /*
+   * 标题栏文字用 text-secondary 而不是 code-muted：后者是给行号那种「在代码底色上
+   * 退到背后」的角色定的（#9AA0AE 对 #F4F5F9 只有 2.4:1），
+   * 而文件名与复制按钮是要读的字，必须过 4.5:1。
+   */
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  background: var(--i-color-code-bar);
+}
+.i-code__name {
+  font-family: var(--i-font-family-mono);
+}
+.i-code__stat {
+  display: inline-flex;
+  gap: var(--i-spacing-2);
+  /* 数字等宽：两个统计并排时不会因为位数不同而错位 */
+  font-variant-numeric: tabular-nums;
+}
+.i-code__stat-add,
+.i-code__stat-remove {
+  /*
+   * 淡底色块 + 正文色，而不是直接把字染成语义色。
+   *
+   * 语义色是给填充与图标定的，拿来写 12px 的小字在浅底上只有 2.1:1——
+   * 看得见颜色却读不出数字。淡底色块保住了「绿加红删」这条联想，
+   * 字本身仍是正文色，谁都读得出来。这也是体系里状态一贯的表达方式。
+   */
+  padding: 0 var(--i-spacing-1);
+  border-radius: var(--i-radius-sm);
+  color: var(--i-color-text);
+}
+.i-code__stat-add {
+  background: var(--i-color-success-subtle);
+}
+.i-code__stat-remove {
+  background: var(--i-color-danger-subtle);
+}
+.i-code__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  margin-left: auto;
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+.i-code__copy:hover {
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text);
+}
+.i-code__copy:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: -2px;
+}
+
+.i-code__body {
+  margin: 0;
+  padding: var(--i-spacing-4) 0;
+  overflow: auto;
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-sm);
+  line-height: 1.7;
+}
+.i-code__line {
+  display: block;
+  padding: 0 var(--i-spacing-4);
+  /* 整行底色要铺满横向滚动出去的部分，否则 diff 的色块会在滚动后断掉 */
+  min-width: max-content;
+  width: 100%;
+}
+.i-code__no {
+  display: inline-block;
+  width: 2.5em;
+  margin-right: var(--i-spacing-2);
+  /* 行号同理：比正文淡，但仍要读得出来 */
+  color: var(--i-color-text-secondary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  /* 行号不该被选中复制走：复制下来还要一行行删是最烦人的 */
+  user-select: none;
+}
+.i-code__sign {
+  display: inline-block;
+  width: 1em;
+  user-select: none;
+}
+
+/*
+ * 增删两种行用「淡底色 + 行首符号」两条线索，不只靠颜色。
+ * 只用颜色的话，色觉障碍用户与灰度打印下的 diff 完全读不出增删。
+ */
+.i-code__line--add {
+  background: color-mix(in srgb, var(--i-color-success) 12%, transparent);
+}
+.i-code__line--remove {
+  background: color-mix(in srgb, var(--i-color-danger) 12%, transparent);
+}
+
+.i-code.is-clipped .i-code__body {
+  /* 折叠时底部渐隐，提示「下面还有」；纯截断会让人以为代码就这么多 */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 2em), transparent);
+}
+
+/*
+ * token 配色直接复用既有的 `--i-tok-*` 令牌，不另起一套。
+ * 另起一套的结果是主题面板改了颜色，站点里的代码块变了、组件里的没变。
+ */
+.i-code__tok--comment { color: var(--i-tok-comment); font-style: italic; }
+.i-code__tok--keyword { color: var(--i-tok-keyword); }
+.i-code__tok--string,
+.i-code__tok--regexp { color: var(--i-tok-string); }
+.i-code__tok--number { color: var(--i-tok-number); }
+.i-code__tok--literal { color: var(--i-tok-literal); }
+.i-code__tok--fn { color: var(--i-tok-fn); }
+.i-code__tok--klass { color: var(--i-tok-klass); }
+.i-code__tok--prop,
+.i-code__tok--variable { color: var(--i-tok-prop); }
+.i-code__tok--tag,
+.i-code__tok--selector { color: var(--i-tok-tag); }
+.i-code__tok--attr,
+.i-code__tok--flag { color: var(--i-tok-attr); }
+.i-code__tok--directive,
+.i-code__tok--mustache { color: var(--i-tok-directive); }
+.i-code__tok--atrule { color: var(--i-tok-keyword); }
+.i-code__tok--punct { color: var(--i-tok-punct); }
+.i-code__tok--text { color: var(--i-color-code-text); }

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useConfig } from '@i-design/react'
 
 export interface ActionSheetAction {
   label: string
@@ -20,9 +21,12 @@ export function ActionSheet({
   open,
   title,
   actions,
-  cancelText = '取消',
+  cancelText = '',
   onClose
 }: ActionSheetProps) {
+  /* 取消文案走字典；组件自己传了以传进来的为准 */
+  const { locale } = useConfig()
+  const resolvedCancel = cancelText || locale.cancel
   // 打开时锁住页面滚动，否则背后的列表会跟着手势一起动
   useEffect(() => {
     if (!open) return
@@ -60,7 +64,7 @@ export function ActionSheet({
           </button>
         ))}
         <button className="i-action-sheet__item i-action-sheet__cancel" type="button" onClick={onClose}>
-          {cancelText}
+          {resolvedCancel}
         </button>
       </div>
     </div>

@@ -5,6 +5,7 @@ import {
   moveActive,
   rafThrottle,
   scrollToRow,
+  shouldFlipUp,
   shouldVirtualize,
   toggleValue,
   virtualWindow,
@@ -32,6 +33,13 @@ export interface SelectProps {
   multiple?: boolean
   /** 多选时最多完整显示几个标签，其余折成「+N」。0 表示全部显示 */
   maxTagCount?: number
+  /**
+   * 无障碍名。不传时用占位文案。
+   *
+   * combobox 的内容被读成「当前值」而不是「这是什么」，因此名字必须另外给：
+   * 不给的话读屏用户听到的是「组合框，北京」——北京是什么，只有看得见的人知道。
+   */
+  ariaLabel?: string
   onChange?: (value: SelectModel) => void
 }
 
@@ -42,14 +50,24 @@ export function Select({
   value = null,
   options,
   placeholder = '',
-  size = 'md',
+  size,
   disabled = false,
   invalid = false,
   clearable = false,
   multiple = false,
   maxTagCount = 0,
+  ariaLabel = '',
   onChange
 }: SelectProps) {
+  /*
+   * 尺寸跟随 ConfigProvider，但组件自己传了就以自己的为准。
+   * 与文案字典同一条规则：全局配置是兜底，不是强制——所以默认值不能写在解构上，
+   * 写了就分不清「没传」与「传了 md」，而这两者在这里的行为不同。
+   */
+  // useConfig() 必须无条件调用：写成 `size ?? useConfig().size` 的话，
+  // 传了 size 时这个 hook 就不执行，hook 调用顺序在两次渲染间不一致
+  const config = useConfig()
+  const resolvedSize = size ?? config.size
   const { locale } = useConfig()
   /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
   const placeholderText = placeholder || locale.placeholder
@@ -57,6 +75,11 @@ export function Select({
   const root = useRef<HTMLDivElement | null>(null)
   const menu = useRef<HTMLUListElement | null>(null)
   const [open, setOpen] = useState(false)
+  /*
+   * 面板往上还是往下开。它贴着触发器用绝对定位，触发器一靠近视口底缘，
+   * 整块面板就掉到屏幕外——选项还在，但够不着。判断走公共层，各端结论一致。
+   */
+  const [flipUp, setFlipUp] = useState(false)
   const [active, setActive] = useState(-1)
 
   const values = useMemo<(string | number)[]>(() => {
@@ -133,6 +156,17 @@ export function Select({
     return () => document.removeEventListener('click', onClickOutside)
   }, [open])
 
+  /* 量一次当前位置决定方向。开的时候量，不跟着滚动实时翻——半途翻向会让人点空 */
+  useLayoutEffect(() => {
+    if (!open) {
+      setFlipUp(false)
+      return
+    }
+    const trigger = root.current?.getBoundingClientRect()
+    const panel = menu.current?.getBoundingClientRect()
+    if (trigger && panel) setFlipUp(shouldFlipUp(trigger, panel.height, window.innerHeight))
+  }, [open])
+
   const toggle = () => {
     if (disabled) return
     if (!open) setActive(multiple ? options.findIndex((o) => isSelected(o)) : indexOfValue(options, value))
@@ -185,10 +219,11 @@ export function Select({
       ref={root}
       className={[
         'i-select',
-        `i-select--${size}`,
+        `i-select--${resolvedSize}`,
         open ? 'is-open' : '',
         disabled ? 'is-disabled' : '',
-        multiple ? 'is-multiple' : ''
+        multiple ? 'is-multiple' : '',
+        flipUp ? 'is-up' : ''
       ]
         .filter(Boolean)
         .join(' ')}
@@ -200,6 +235,7 @@ export function Select({
         type="button"
         role="combobox"
         aria-haspopup="listbox"
+        aria-label={ariaLabel || placeholderText}
         aria-expanded={open}
         disabled={disabled}
         onClick={toggle}

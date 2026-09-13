@@ -62,9 +62,15 @@ defineExpose({ scrollTo })
     class="i-virtual"
     :style="{ height: `${height}px` }"
     role="list"
-    :aria-rowcount="items.length"
+    tabindex="0"
     @scroll.passive="onScroll"
   >
+    <!--
+      总数与序号挂在每一项上（aria-setsize / aria-posinset），不挂在容器上：
+      容器上的 aria-rowcount 只对表格类角色有效，写在 role="list" 上是无效属性。
+      虚拟滚动尤其需要这两个——不给的话读屏会按「当前渲染了几项」播报，
+      两万行的列表被念成「第 3 项，共 12 项」。
+    -->
     <!--
       上下用两块空白撑开，而不是给容器一个固定高度再绝对定位每一行：
       撑开的写法让滚动条长度天然正确，也不必为每一行算 top，
@@ -76,6 +82,8 @@ defineExpose({ scrollTo })
       :key="row.index"
       class="i-virtual__row"
       role="listitem"
+      :aria-setsize="items.length"
+      :aria-posinset="row.index + 1"
       :style="{ height: `${itemHeight}px` }"
     >
       <slot :item="row.item" :index="row.index" />

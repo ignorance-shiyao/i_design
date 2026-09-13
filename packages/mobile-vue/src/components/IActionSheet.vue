@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onBeforeUnmount, watch } from 'vue'
+import { computed, onBeforeUnmount, watch } from 'vue'
+import { useConfig } from '@i-design/vue-next'
 
 export interface ActionSheetAction {
   label: string
@@ -15,8 +16,12 @@ const props = withDefaults(
     actions: ActionSheetAction[]
     cancelText?: string
   }>(),
-  { modelValue: false, title: '', cancelText: '取消' }
+  { modelValue: false, title: '', cancelText: '' }
 )
+
+/* 取消文案走字典；组件自己传了以传进来的为准 */
+const { locale } = useConfig()
+const cancelText = computed(() => props.cancelText || locale.value.cancel)
 
 const emit = defineEmits<{
   'update:modelValue': [boolean]

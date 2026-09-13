@@ -1,0 +1,2 @@
+@import '../../../dist/styles/agent-screen.wxss';
+@import '../../../dist/styles/icons.wxss';

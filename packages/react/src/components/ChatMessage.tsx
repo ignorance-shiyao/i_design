@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useConfig } from './ConfigProvider'
 import { Avatar } from './Avatar'
 import { Icon } from './Icon'
 
@@ -40,6 +41,8 @@ export function ChatMessage({
   className = '',
   children
 }: ChatMessageProps) {
+  /* 「重试」与「重新生成」是两件事：一个是失败后重来，一个是对结果不满意再来一次 */
+  const { locale } = useConfig()
   return (
     <article
       className={['i-chat-msg', `i-chat-msg--${role}`, error ? 'is-error' : '', className]
@@ -76,12 +79,12 @@ export function ChatMessage({
           <div className="i-chat-msg__actions">
             <button className="i-chat-msg__action" onClick={onCopy}>
               <Icon name="copy" size={12} />
-              复制
+              {locale.copy}
             </button>
             {role === 'assistant' && (
               <button className="i-chat-msg__action" onClick={onRetry}>
                 <Icon name="refresh" size={12} />
-                {error ? '重试' : '重新生成'}
+                {error ? locale.retry : locale.regenerate}
               </button>
             )}
           </div>

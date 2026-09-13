@@ -87,6 +87,7 @@ function onKeydown(event: KeyboardEvent) {
       :value="modelValue"
       :placeholder="placeholder"
       :rows="rows"
+      role="combobox"
       :aria-expanded="open"
       aria-autocomplete="list"
       @input="onInput"

@@ -1,106 +1,24 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { detectLang, highlight, normalizeLang, type Lang } from './highlight'
+/**
+ * 站点里的代码块。
+ *
+ * 只是 `ICodeBlock` 的一层薄包装：站点原先有自己的一份实现（高亮 + 复制，
+ * 另加一份 146 行的高亮器），与组件那份是两套代码——改一处另一处不会跟着变，
+ * 而且站点那份是拼 HTML 再 `v-html` 渲染的。
+ * 组件做好之后就没有第二份存在的理由了。
+ */
+import ICodeBlock from '@/components/ICodeBlock.vue'
 
-const props = withDefaults(
-  defineProps<{ code: string; lang?: string; filename?: string; copyable?: boolean }>(),
-  { lang: '', filename: '', copyable: true }
-)
-
-const source = computed(() => props.code.replace(/^\n+|\s+$/g, ''))
-const resolved = computed<Lang>(() =>
-  props.lang ? normalizeLang(props.lang) : detectLang(source.value)
-)
-const rendered = computed(() => highlight(source.value, resolved.value))
-
-const labels: Record<Lang, string> = {
-  vue: 'vue',
-  html: 'html',
-  ts: 'ts',
-  js: 'js',
-  css: 'css',
-  json: 'json',
-  bash: 'shell',
-  text: 'text'
-}
-
-const copied = ref(false)
-async function copy() {
-  try {
-    await navigator.clipboard.writeText(source.value)
-    copied.value = true
-    setTimeout(() => (copied.value = false), 1600)
-  } catch {
-    // 剪贴板不可用（无 HTTPS 或未授权）时静默失败，代码本身仍可手动选中复制
-  }
-}
+defineProps<{ code: string; lang?: string; filename?: string; copyable?: boolean }>()
 </script>
 
 <template>
-  <div class="code">
-    <div class="code__bar">
-      <span class="code__lang">{{ filename || labels[resolved] }}</span>
-      <button v-if="copyable" class="code__copy" type="button" @click="copy">
-        {{ copied ? '已复制' : '复制' }}
-      </button>
-    </div>
-    <pre class="code__body"><code v-html="rendered" /></pre>
-  </div>
+  <!-- 文档里的示例大多很短，行号反而会把注意力从代码本身引开 -->
+  <ICodeBlock
+    :code="code"
+    :lang="lang"
+    :filename="filename"
+    :copyable="copyable ?? true"
+    :line-numbers="false"
+  />
 </template>
-
-<style scoped>
-.code {
-  border: 1px solid var(--i-color-code-border);
-  border-radius: var(--i-radius-lg);
-  background: var(--i-color-code-bg);
-  overflow: hidden;
-}
-.code__bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--i-spacing-2) var(--i-spacing-3) var(--i-spacing-2) var(--i-spacing-4);
-  border-bottom: 1px solid var(--i-color-code-border);
-  background: var(--i-color-code-bar);
-}
-.code__lang {
-  font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--i-color-code-muted);
-}
-.code__copy {
-  padding: 2px var(--i-spacing-2);
-  font-family: inherit;
-  font-size: var(--i-font-size-xs);
-  color: var(--i-color-code-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--i-radius-sm);
-  cursor: pointer;
-  transition: color var(--i-motion-fast) var(--i-motion-easing),
-    border-color var(--i-motion-fast) var(--i-motion-easing);
-}
-.code__copy:hover { color: var(--i-color-code-text); border-color: var(--i-color-code-border); }
-
-.code__body {
-  margin: 0;
-  padding: var(--i-spacing-4);
-  overflow-x: auto;
-  font-family: var(--i-font-family-mono);
-  font-size: var(--i-font-size-sm);
-  line-height: 1.7;
-  color: var(--i-color-code-text);
-  tab-size: 2;
-}
-.code__body code { background: none; padding: 0; font-size: inherit; }
-
-@media (max-width: 768px) {
-  /*
-   * 代码不跟随移动端正文放大：放大后一行装不下几个字符，横向滚动反而更难读。
-   * 这里显式钉回桌面尺度。
-   */
-  .code pre { font-size: 12px; }
-}
-</style>

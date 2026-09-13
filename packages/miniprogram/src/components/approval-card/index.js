@@ -3,22 +3,36 @@
  * 「能否继续」的判断走共享的 canAdvance：填了自由输入也算已回答，
  * 否则用户写完「其他」却发现继续按钮仍是灰的。
  */
+import { getLocale } from '../../config'
+
 import { approvalProgress, canAdvance, toggleApprovalValue } from '@i-design/common'
 
 Component({
   options: { addGlobalClass: true },
   properties: {
     questions: { type: Array, value: [] },
-    confirmText: { type: String, value: '继续' },
-    skipText: { type: String, value: '跳过' },
+    confirmText: { type: String, value: '' },
+    skipText: { type: String, value: '' },
     closable: { type: Boolean, value: true }
   },
-  data: { index: 0, selected: [], custom: '', current: null, progress: '', advanceable: false, isLast: false, options: [] },
+  data: { index: 0, selected: [], custom: '', current: null, progress: '', advanceable: false, isLast: false, options: [], confirmLabel: '', skipLabel: '', nextLabel: '', otherLabel: '' },
   observers: {
     'questions, index, selected, custom': function () { this.refresh() }
   },
-  lifetimes: { attached() { this.refresh() } },
+  lifetimes: { attached() {
+      this.syncLocale()
+      this.refresh() } },
   methods: {
+    /* 「继续」「跳过」「下一题」「其他」都走字典；组件自己传了以传进来的为准 */
+    syncLocale() {
+      const locale = getLocale()
+      this.setData({
+        confirmLabel: this.data.confirmText || locale.confirm,
+        skipLabel: this.data.skipText || locale.skip,
+        nextLabel: locale.next,
+        otherLabel: locale.otherOption,
+      })
+    },
     refresh() {
       const { questions, index, selected, custom } = this.data
       const current = questions[index]

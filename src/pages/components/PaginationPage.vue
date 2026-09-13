@@ -33,8 +33,7 @@ const pagedRows = computed(() =>
   <article>
     <h1>Pagination 分页</h1>
     <p class="i-lead">
-      把长列表切成可控的片段。页码区间始终保留首尾页，中间窗口跟随当前页滑动，
-      让用户无论翻到哪里都能一步回到开头或结尾。
+      把长列表切成可控的片段。页码区间始终保留首尾页，中间窗口跟随当前页滑动，让用户无论翻到哪里都能一步回到开头或结尾。
     </p>
 
     <DemoBlock
@@ -88,6 +87,13 @@ const pagedRows = computed(() =>
         <IPagination v-model="page" :total="allRows.length" :page-size="pageSize" />
       </div>
     </DemoBlock>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>内容是连续消费的流（消息、动态）时——用无限滚动，翻页会打断阅读节奏。</li>
+      <li>总数少于两页时——不要显示分页器，它只会让人以为后面还有。</li>
+      <li>用户需要的是「最新的几条」而不是「第几页」时——给排序与筛选，页码在这里没有意义。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">

@@ -1,0 +1,41 @@
+<view class="i-screen i-screen--{{state}}">
+  <view class="i-screen__head">
+    <view class="i-screen__status">
+      <!-- 连接中与操作中用转圈，其余用图标：转圈本身就说明「还在动」 -->
+      <i-loading wx:if="{{busy}}" size="sm" />
+      <view wx:else class="i-icon i-icon--{{statusIcon}}" style="width:14px;height:14px" />
+      <text>{{status}}</text>
+    </view>
+    <!--
+      画面的时间戳是这里最要紧的一行字：不写出来，用户会把一次卡死
+      当成智能体在思考，白等好几分钟。
+    -->
+    <view wx:if="{{age}}" class="i-screen__age {{stale ? 'is-stale' : ''}}">
+      <view wx:if="{{stale}}" class="i-icon i-icon--warning-triangle" style="width:12px;height:12px" />
+      <text>{{age}}</text>
+    </view>
+    <view
+      class="i-screen__takeover {{canTakeOver ? '' : 'is-disabled'}}"
+      bindtap="takeover"
+    >
+      <view class="i-icon i-icon--user" style="width:13px;height:13px" />
+      <text>接管</text>
+    </view>
+  </view>
+
+  <view class="i-screen__frame" style="aspect-ratio:{{aspect}}">
+    <image wx:if="{{frame}}" class="i-screen__img" src="{{frame}}" mode="aspectFit" />
+    <!-- 没有画面时占位，框的大小不变——大小一变，连上的那一刻整页就跳了 -->
+    <view wx:else class="i-screen__placeholder">
+      <i-loading wx:if="{{state === 'connecting'}}" size="md" />
+      <view wx:else class="i-icon i-icon--{{statusIcon}}" style="width:20px;height:20px" />
+      <text>{{status}}</text>
+    </view>
+
+    <!-- 卡住的提醒压在画面上：用户此刻正看着画面，挤在头部那一行容易被略过 -->
+    <view wx:if="{{stale}}" class="i-screen__stale">
+      <view class="i-icon i-icon--warning-triangle" style="width:14px;height:14px" />
+      <text>{{staleText}}</text>
+    </view>
+  </view>
+</view>

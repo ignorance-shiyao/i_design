@@ -10,8 +10,7 @@ import { message } from '@/components/message'
   <article>
     <h1>Popconfirm 气泡确认</h1>
     <p class="i-lead">
-      就地确认一个轻量操作。与 Modal 的分界：影响范围小、能一句话说清、用户不需要额外信息就能决定的，
-      用气泡；需要用户读完一段说明或核对数据的，用对话框。
+      就地确认一个轻量操作。与 Modal 的分界：影响范围小、能一句话说清、用户不需要额外信息就能决定的，用气泡；需要用户读完一段说明或核对数据的，用对话框。
     </p>
 
     <DemoBlock
@@ -74,6 +73,13 @@ import { message } from '@/components/message'
       <IPopconfirm placement="right" title="出现在右侧"><IButton>右侧</IButton></IPopconfirm>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>操作不可逆且影响很大时（删除整个项目、清空数据）——用对话框，并要求用户读完后果再确认。</li>
+      <li>操作随手可撤销时——直接执行，给一个「撤销」更省事：每次都问一句会把人训练成闭眼点确定。</li>
+      <li>确认时还要填东西时——那是一个小表单，弹出框装不下，用对话框。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -97,8 +103,7 @@ import { message } from '@/components/message'
 
     <h2>无障碍</h2>
     <p>
-      气泡是 <code>role="dialog"</code>，打开后焦点移入第一个按钮，因此 Tab 可在两个按钮间移动、
-      <code>Esc</code> 可关闭。点击气泡之外的任意位置也会关闭且不触发确认——误触的代价必须是「什么都没发生」。
+      气泡是 <code>role="dialog"</code>，打开后焦点移入第一个按钮，因此 Tab 可在两个按钮间移动、<code>Esc</code> 可关闭。点击气泡之外的任意位置也会关闭且不触发确认——误触的代价必须是「什么都没发生」。
     </p>
   </article>
 </template>

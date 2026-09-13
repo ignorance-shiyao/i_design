@@ -30,7 +30,7 @@
 }
 .i-chat-suggestions__item:hover {
   border-color: var(--i-color-brand);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   transform: translateY(-1px);
 }
 @media (prefers-reduced-motion: reduce) {

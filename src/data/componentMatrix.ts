@@ -19,6 +19,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IAgentScreen",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IAgentTasks",
     "ends": {
       "vue-next": true,
@@ -319,6 +329,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IChatList",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IChatMessage",
     "ends": {
       "vue-next": true,
@@ -409,6 +429,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ICodeBlock",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ICol",
     "ends": {
       "vue-next": true,
@@ -430,6 +460,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IColorPicker",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ICommandSearch",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -549,6 +589,26 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IFineTuneCard",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": false,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IFloatButton",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IFlow",
     "ends": {
       "vue-next": true,
@@ -650,6 +710,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IInputOtp",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IInsightCards",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -929,6 +999,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ISelectionActions",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ISkeleton",
     "ends": {
       "vue-next": true,
@@ -1100,6 +1180,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "ITimeline",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IToolChips",
     "ends": {
       "vue-next": true,
       "vue": true,

@@ -11,12 +11,12 @@
   min-height: 40px;
   padding: var(--i-spacing-2) var(--i-spacing-4);
   background: var(--i-color-warning-subtle);
-  color: var(--i-color-warning);
+  color: var(--i-color-warning-text);
   font-size: var(--i-font-size-sm);
   overflow: hidden;
 }
-.i-notice-bar--info { background: var(--i-color-info-subtle); color: var(--i-color-info); }
-.i-notice-bar--danger { background: var(--i-color-danger-subtle); color: var(--i-color-danger); }
+.i-notice-bar--info { background: var(--i-color-info-subtle); color: var(--i-color-info-text); }
+.i-notice-bar--danger { background: var(--i-color-danger-subtle); color: var(--i-color-danger-text); }
 /* 必须裁切：跑马灯的文字滚出去之后会从左侧图标底下穿过 */
 .i-notice-bar__content { flex: 1; min-width: 0; overflow: hidden; }
 .i-notice-bar__text { display: block; white-space: nowrap; }

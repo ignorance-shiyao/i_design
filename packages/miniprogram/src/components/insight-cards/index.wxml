@@ -1,0 +1,45 @@
+<view class="i-insight">
+  <view class="i-insight__head">
+    <text class="i-insight__title">{{title}}</text>
+    <!--
+      涨跌同时给出图标与文字：只给箭头和红绿，色觉障碍用户与灰度打印都读不出来，
+      而且也说不清涨了多少。
+    -->
+    <view class="i-insight__trend i-insight__trend--{{direction}}">
+      <view class="i-icon i-icon--{{trendIcon}}" style="width:13px;height:13px" />
+      <text>{{trendText}}</text>
+    </view>
+  </view>
+
+  <text class="i-insight__summary">{{summary}}</text>
+
+  <view class="i-insight__plot">
+    <canvas
+      class="i-insight__canvas"
+      type="2d"
+      bindtouchstart="onScrub"
+      bindtouchmove="onScrub"
+      bindtouchend="onScrubEnd"
+    />
+    <!-- 读数用文字写在图外面：画进 canvas 的字不会跟着系统字号走 -->
+    <view class="i-insight__readout">
+      <text class="i-insight__readout-label">{{readoutLabel}}</text>
+      <text class="i-insight__readout-value">{{readoutValue}}</text>
+    </view>
+  </view>
+
+  <view class="i-insight__foot">
+    <view
+      class="i-insight__nav {{atStart ? 'is-disabled' : ''}}"
+      bindtap="go"
+      data-delta="-1"
+    >
+      <view class="i-icon i-icon--chevron-left" style="width:15px;height:15px" />
+    </view>
+    <!-- 位置用文字而不是一排点：点只说得清「有几条」，说不清「现在是第几条」 -->
+    <text class="i-insight__pager">{{pager}}</text>
+    <view class="i-insight__nav {{atEnd ? 'is-disabled' : ''}}" bindtap="go" data-delta="1">
+      <view class="i-icon i-icon--chevron-right" style="width:15px;height:15px" />
+    </view>
+  </view>
+</view>

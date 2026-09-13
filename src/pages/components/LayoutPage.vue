@@ -16,11 +16,13 @@ import IImage from '@/components/IImage.vue'
 import ISplitter from '@/components/ISplitter.vue'
 import IVirtualList from '@/components/IVirtualList.vue'
 import IColorPicker from '@/components/IColorPicker.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { solidPair } from '@i-design/common'
 
 const collapsed = ref(false)
 const split = ref(0.38)
 const brandColor = ref('#5e7ce0')
+const brandSolid = computed(() => solidPair(brandColor.value))
 /* 两万行：不虚拟化就是两万个 DOM 节点，滚动直接卡死 */
 const bigList = Array.from({ length: 20000 }, (_, i) => ({
   id: i + 1,
@@ -37,14 +39,12 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
   <article>
     <h1>布局与排版</h1>
     <p class="i-lead">
-      三个用来「把东西摆正」的基础件。它们本身没有视觉主张，作用是让间距、栅格与字号
-      只能取自令牌——一旦允许就地写数值，一个产品里很快会长出七种正文字号与十几种间距。
+      三个用来「把东西摆正」的基础件。它们本身没有视觉主张，作用是让间距、栅格与字号只能取自令牌——一旦允许就地写数值，一个产品里很快会长出七种正文字号与十几种间距。
     </p>
 
     <h2>PageHeader 页头</h2>
     <p>
-      返回、标题、副标题与右侧操作。返回键与标题同一行而不是叠在标题上方：
-      叠起来会让标题看着像副标题，而它是这一页最重要的那行字。
+      返回、标题、副标题与右侧操作。返回键与标题同一行而不是叠在标题上方：叠起来会让标题看着像副标题，而它是这一页最重要的那行字。
     </p>
     <DemoBlock
       title="页头"
@@ -68,10 +68,8 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
 
     <h2>Layout 页面骨架</h2>
     <p>
-      顶栏、侧栏、正文、底栏。它只摆位置、不管内容——页面级的结构一旦被组件塞进具体内容，
-      换一个产品就只能重写。四块都用语义标签落地（<code>header</code> / <code>aside</code> /
-      <code>main</code> / <code>footer</code>）：读屏用户靠这几个地标在页面里跳转，
-      全是 <code>div</code> 的页面对他们来说是一整块。
+      顶栏、侧栏、正文、底栏。它只摆位置、不管内容——页面级的结构一旦被组件塞进具体内容，换一个产品就只能重写。四块都用语义标签落地（<code>header</code> / <code>aside</code> /
+      <code>main</code> / <code>footer</code>）：读屏用户靠这几个地标在页面里跳转，全是 <code>div</code> 的页面对他们来说是一整块。
     </p>
 
     <DemoBlock
@@ -126,8 +124,7 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
 
     <h2>Grid 栅格</h2>
     <p>
-      24 栅格，列间距由行统一控制。窄屏（≤768px）下默认整栏铺满——中后台表单在小屏上
-      并排两列几乎不可用；确需保持并排时给列加 <code>keep</code>。
+      24 栅格，列间距由行统一控制。窄屏（≤768px）下默认整栏铺满——中后台表单在小屏上并排两列几乎不可用；确需保持并排时给列加 <code>keep</code>。
     </p>
     <DemoBlock
       title="等分与偏移"
@@ -166,8 +163,7 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
         <ITypography type="danger" strong>危险提示：该操作不可撤销</ITypography>
         <ITypography mono>packages/common/src/tokens/index.ts</ITypography>
         <ITypography :ellipsis="2" class="clamp-demo">
-          多行省略用于列表里的摘要：超过指定行数后截断并显示省略号，避免一条特别长的内容把整个列表撑开，
-          导致其余条目被挤到屏幕之外。这段文字足够长，用来演示两行之后的截断效果。
+          多行省略用于列表里的摘要：超过指定行数后截断并显示省略号，避免一条特别长的内容把整个列表撑开，导致其余条目被挤到屏幕之外。这段文字足够长，用来演示两行之后的截断效果。
         </ITypography>
       </div>
     </DemoBlock>
@@ -180,8 +176,7 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
     >
       <div class="stack">
         <ITypography :ellipsis="2" expandable class="clamp-demo">
-          可展开的多行省略：列表里默认只占两行，读者想读完整段时点「展开」即可，不必跳到详情页。
-          这段文字足够长，用来演示截断与展开的切换效果，展开之后应当完整显示，收起后重新回到两行。
+          可展开的多行省略：列表里默认只占两行，读者想读完整段时点「展开」即可，不必跳到详情页。这段文字足够长，用来演示截断与展开的切换效果，展开之后应当完整显示，收起后重新回到两行。
         </ITypography>
         <ITypography mono copyable>sk-live-8f21c0d4e75b</ITypography>
       </div>
@@ -198,28 +193,22 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
         </ITypography>
         <ITypography ellipsis ellipsis-tooltip>短标题，放得下</ITypography>
         <ITypography :ellipsis="2" ellipsis-tooltip>
-          多行截断：判定要看高度而不是宽度——多行截断永远不会横向溢出，
-          拿宽度去判断的话条件永远不成立，提示一次都不会出现，而且不报错，
-          只是看起来像「这个功能好像没做」。
+          多行截断：判定要看高度而不是宽度——多行截断永远不会横向溢出，拿宽度去判断的话条件永远不成立，提示一次都不会出现，而且不报错，只是看起来像「这个功能好像没做」。
         </ITypography>
       </div>
     </DemoBlock>
 
     <p class="tip-note">
-      各端差异：判定规则（单行看宽度、多行看高度，留 1px 亚像素容差）是共享的一份，
-      但量法各按各端的能力——Web 端读布局值并挂 ResizeObserver，容器变宽后提示会自己撤掉；
-      Flutter 端用 TextPainter 实地排一次版；小程序端没有 hover，那一端保持纯截断，
-      需要读全文时给展开入口，而不是做一个手指碰不到的浮层。
+      各端差异：判定规则（单行看宽度、多行看高度，留 1px 亚像素容差）是共享的一份，但量法各按各端的能力——Web 端读布局值并挂 ResizeObserver，容器变宽后提示会自己撤掉；
+      Flutter 端用 TextPainter 实地排一次版；小程序端没有 hover，那一端保持纯截断，需要读全文时给展开入口，而不是做一个手指碰不到的浮层。
     </p>
 
     <h2>Affix 固钉</h2>
     <p>
-      吸住时元素脱离文档流，因此外层要撑出一块等高的占位。不占位的话，
-      下面的内容会整块往上跳一次——而那一跳正好发生在用户滚动时，看起来像页面抖了一下。
+      吸住时元素脱离文档流，因此外层要撑出一块等高的占位。不占位的话，下面的内容会整块往上跳一次——而那一跳正好发生在用户滚动时，看起来像页面抖了一下。
     </p>
     <p>
-      容器底部先于元素滚出视口时，元素跟着一起走，而不是继续钉在顶上：
-      一个已经和内容无关的浮块钉在屏幕顶端，读者会以为它属于下一节。
+      容器底部先于元素滚出视口时，元素跟着一起走，而不是继续钉在顶上：一个已经和内容无关的浮块钉在屏幕顶端，读者会以为它属于下一节。
     </p>
     <DemoBlock
       title="滚动时吸在顶部"
@@ -233,17 +222,12 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
 
     <h2>BackTop 回到顶部</h2>
     <p>
-      默认滚过一屏才出现：不足一屏时用户自己往回划两下就到顶了，这时冒出一个按钮属于帮倒忙——
-      它遮住的内容比它省下的力气多。回顶动画自己按帧算，而不是
-      <code>scrollTo({ behavior: 'smooth' })</code>——后者的时长由浏览器按距离决定，
-      长页面上会滚十几秒，用户以为卡住了。这一页右下角就有一个。
+      默认滚过一屏才出现：不足一屏时用户自己往回划两下就到顶了，这时冒出一个按钮属于帮倒忙——它遮住的内容比它省下的力气多。回顶动画自己按帧算，而不是<code>scrollTo({ behavior: 'smooth' })</code>——后者的时长由浏览器按距离决定，长页面上会滚十几秒，用户以为卡住了。这一页右下角就有一个。
     </p>
 
     <h2>Watermark 水印</h2>
     <p>
-      水印拦不住有心人，但能让随手截图的人留下痕迹。它的价值全在细节：太密挡内容，
-      太疏截一小块就没有。用 SVG 平铺而不是 canvas 生成位图——高分屏上不会糊，
-      而且首屏就能带上，不存在「先看到没水印的内容」那一小段窗口，而那正是要防的场景。
+      水印拦不住有心人，但能让随手截图的人留下痕迹。它的价值全在细节：太密挡内容，太疏截一小块就没有。用 SVG 平铺而不是 canvas 生成位图——高分屏上不会糊，而且首屏就能带上，不存在「先看到没水印的内容」那一小段窗口，而那正是要防的场景。
     </p>
     <DemoBlock
       title="盖在内容上，但不吃事件"
@@ -258,16 +242,16 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
         </div>
       </IWatermark>
     </DemoBlock>
+    <p>
+      水印层被删掉或被改样式时会自动重建（<code>guard</code>，默认开）。不守的话，在开发者工具里一秒就能抹掉，这个组件也就基本没有意义了。但能力边界要说清楚：<strong>它挡的是随手删一下的人</strong>，挡不住关掉 JavaScript、改本地代码、或者截图前把页面存下来的人。真需要防的内容不该先发到浏览器里——水印是「留下痕迹」，不是访问控制。
+    </p>
 
     <h2>Image 图片</h2>
     <p>
-      加载中给骨架、失败给明文，都不留空白：空白会被当成「这里本来就没图」，
-      而那和「加载失败」的处理完全不同——前者不必管，后者该刷新或报障。
+      加载中给骨架、失败给明文，都不留空白：空白会被当成「这里本来就没图」，而那和「加载失败」的处理完全不同——前者不必管，后者该刷新或报障。
     </p>
     <p>
-      预览里翻页到头不循环。循环会让「这是最后一张」这个信息消失，
-      用户点着点着又回到第一张，分不清是翻完了还是自己看漏了。翻页后缩放旋转归零——
-      带着上一张的三倍放大翻过去，看到的是一块局部。
+      预览里翻页到头不循环。循环会让「这是最后一张」这个信息消失，用户点着点着又回到第一张，分不清是翻完了还是自己看漏了。翻页后缩放旋转归零——带着上一张的三倍放大翻过去，看到的是一块局部。
     </p>
     <DemoBlock
       title="预览、缩放、旋转与翻页"
@@ -282,18 +266,14 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
 
     <h2>Splitter 分割面板</h2>
     <p>
-      两栏的下限一起夹，而不是只夹被拖的那一栏：只夹一栏的话，把它拖到很大时
-      另一栏会被挤到零宽，里面的内容全部换行成一列单字——那时用户已经看不出
-      该往回拖多少了。
+      两栏的下限一起夹，而不是只夹被拖的那一栏：只夹一栏的话，把它拖到很大时另一栏会被挤到零宽，里面的内容全部换行成一列单字——那时用户已经看不出该往回拖多少了。
     </p>
     <p>
-      分隔条可聚焦、可用方向键拖，按住 Shift 走大步。它是个真正的控件，不是装饰线：
-      只能鼠标拖的话，用键盘操作的人永远改不了这个布局。<code>aria-valuenow</code>
-      也不是形式——读屏使用者靠它知道现在是几几开，以及自己按方向键改到了多少。
+      分隔条可聚焦、可用方向键拖，按住 Shift 走大步。它是个真正的控件，不是装饰线：只能鼠标拖的话，用键盘操作的人永远改不了这个布局。<code>aria-valuenow</code>也不是形式——读屏使用者靠它知道现在是几几开，以及自己按方向键改到了多少。
     </p>
     <DemoBlock
       title="拖动分隔条，或用方向键"
-      description="Tab 到分隔条上试试方向键。两栏最小 120px，拖到底就停住。"
+      description="Tab 到分隔条上试试方向键。两栏最小 120px，拖到底就停住。双击分隔条复位；键盘上按 Enter 或空格是同一个动作——双击对键盘使用者不存在。"
       code='<ISplitter v-model="ratio" :min-first="120" :min-second="120" />'
     >
       <ISplitter v-model="split" :min-first="120" :min-second="160" class="split-demo">
@@ -306,7 +286,7 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
         <template #second>
           <div class="split-pane">
             <strong>内容</strong>
-            <p>拖动中间那条线，或聚焦它后按左右方向键。</p>
+            <p>拖动中间那条线，或聚焦它后按左右方向键。双击复位到一半。</p>
           </div>
         </template>
       </ISplitter>
@@ -314,13 +294,10 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
 
     <h2>VirtualList 虚拟滚动</h2>
     <p>
-      万行表格不虚拟化就是万个 DOM 节点，滚动直接卡死。而虚拟化最容易写错的是
-      「上下各多渲染几行」：不多渲染，快速拖动滚动条时上下边缘会闪出空白；
-      多渲染太多，又等于没虚拟化——那些行永远来不及被看见。默认 3 行。
+      万行表格不虚拟化就是万个 DOM 节点，滚动直接卡死。而虚拟化最容易写错的是「上下各多渲染几行」：不多渲染，快速拖动滚动条时上下边缘会闪出空白；多渲染太多，又等于没虚拟化——那些行永远来不及被看见。默认 3 行。
     </p>
     <p>
-      条目少于 60 条时不虚拟化。那时它只是徒增复杂度与一次布局计算，
-      而且会平白丢掉浏览器自带的查找——Ctrl+F 找不到没渲染出来的行。
+      条目少于 60 条时不虚拟化。那时它只是徒增复杂度与一次布局计算，而且会平白丢掉浏览器自带的查找——Ctrl+F 找不到没渲染出来的行。
     </p>
     <DemoBlock
       title="两万行，只渲染看得见的那些"
@@ -342,15 +319,10 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
 
     <h2>ColorPicker 取色器</h2>
     <p>
-      色彩换算直接用 <code>logic/palette</code> 已有的 OKLCH，不引第二套——
-      同一个仓库里出现两份「什么叫更亮一点」，迟早会在某个组件上对不上。
-      取色器界面本身用 HSV：饱和度与明度这两个轴正好对应方块的两条边，
-      而 OKLCH 的轴不是矩形的，拿来画方块会有一大片取不到的颜色。
+      色彩换算直接用 <code>logic/palette</code> 已有的 OKLCH，不引第二套——同一个仓库里出现两份「什么叫更亮一点」，迟早会在某个组件上对不上。取色器界面本身用 HSV：饱和度与明度这两个轴正好对应方块的两条边，而 OKLCH 的轴不是矩形的，拿来画方块会有一大片取不到的颜色。
     </p>
     <p>
-      对比度当场说出来。用户挑的是「好看的颜色」，而好不好看和上面的字能不能读
-      是两件事——不提示的话，一个明黄的主色会一路走到线上，
-      然后才发现按钮上的白字看不见。
+      对比度当场说出来。用户挑的是「好看的颜色」，而好不好看和上面的字能不能读是两件事——不提示的话，一个明黄的主色会一路走到线上，然后才发现按钮上的白字看不见。
     </p>
     <DemoBlock
       title="取色、输入与常用色"
@@ -359,13 +331,29 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
     >
       <div class="row">
         <IColorPicker v-model="brandColor" />
-        <IButton :style="{ background: brandColor, color: '#fff', borderColor: brandColor }">
+        <!--
+          字色不写死白字：取色器能挑出任何颜色，浅色上的白字直接消失。
+          solidPair 会先试着把底色压深一点点，压不动就换成带同一色相的深字。
+        -->
+        <IButton
+          :style="{
+            background: brandSolid.solid,
+            color: brandSolid.ink,
+            borderColor: brandSolid.solid
+          }"
+        >
           用这个色的按钮
         </IButton>
       </div>
     </DemoBlock>
 
     <IBackTop />
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>页面只有一栏内容时——直接写，套一层栅格只会多出一层嵌套。</li>
+      <li>要做的是组件内部的排布时——用 Space 或 flex，栅格是页面级的骨架。</li>
+      <li>各栏宽度必须随内容变化时——栅格是等分的，那种情况用 flex 更合适。</li>
+    </ul>
   </article>
 </template>
 
@@ -409,7 +397,7 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
   padding: var(--i-spacing-3);
   border-radius: var(--i-radius-md);
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-size: var(--i-font-size-sm);
   text-align: center;
 }

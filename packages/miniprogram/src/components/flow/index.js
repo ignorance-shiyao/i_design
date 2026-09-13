@@ -10,6 +10,11 @@ import {
   NODE_W,
   anchorOf,
   boundsOf,
+  alignGuides,
+  autoLayout,
+  groupBounds,
+  visibleEdges,
+  visibleNodes,
   marqueeRect,
   minimapLayout,
   moveNodes,
@@ -41,11 +46,13 @@ Component({
     /** 选中的节点 id 数组。单选也是长度为 1 的数组——两套选中状态迟早会对不上 */
     selection: { type: Array, value: [] },
     /** 整图默认连线走向：polyline / straight / bezier；单条连线可用 edge.type 覆盖 */
-    edgeType: { type: String, value: 'polyline' }
+    edgeType: { type: String, value: 'polyline' },
+    /** 节点分组。折叠的组在画布上收成一个代表方块，点它展开 */
+    groups: { type: Array, value: [] }
   },
   data: { scaleText: '100%', marqueeMode: false, showMinimap: true },
   observers: {
-    'nodes, edges, selection, edgeType': function () { this.draw() }
+    'nodes, edges, selection, edgeType, groups': function () { this.draw() }
   },
   lifetimes: {
     attached() {
@@ -53,6 +60,7 @@ Component({
       this.drag = null
       this.resizing = null
       this.marquee = null
+      this.guides = []
       this.setup()
     }
   },
@@ -115,9 +123,19 @@ Component({
       }
     },
 
+    /** 画布上真正看得见的节点：折叠组换成了代表方块 */
+    shownNodes() {
+      return visibleNodes(this.data.nodes, this.data.groups || [])
+    },
+
+    /** 某个 id 是不是折叠组的代表方块 */
+    collapsedGroup(id) {
+      return (this.data.groups || []).find((g) => g.collapsed && g.id === id) || null
+    },
+
     hitTest(point) {
       // 从后往前找：后画的节点在上面
-      const nodes = this.data.nodes
+      const nodes = this.shownNodes()
       for (let i = nodes.length - 1; i >= 0; i--) {
         const n = nodes[i]
         const w = n.width || NODE_W
@@ -180,11 +198,35 @@ Component({
         this.triggerEvent('selectionchange', { ids: [] })
         return
       }
+      // 点代表方块就展开这个组：折叠态下它不是一个能拖的节点
+      if (this.collapsedGroup(node.id)) {
+        this.toggleGroup(node.id)
+        return
+      }
       // 点已在选中集合里的节点不清空选择，否则批量拖动第一下就把组拆了
       const current = this.data.selection || []
       const ids = current.indexOf(node.id) >= 0 ? current : [node.id]
       this.triggerEvent('selectionchange', { ids })
       this.drag = this.data.readonly ? null : { ids, from: point, base: this.geometryOf(ids) }
+    },
+
+    /** 折叠／展开一个组。组本身存在外面，组件只负责发出改动后的整份数据 */
+    toggleGroup(id) {
+      const groups = (this.data.groups || []).map((g) =>
+        g.id === id ? { ...g, collapsed: !g.collapsed } : g
+      )
+      this.triggerEvent('groupschange', { groups })
+    },
+
+    /** 选中的节点成组。少于两个节点的组没有意义，调用方应当把按钮置灰 */
+    groupSelection() {
+      const ids = this.data.selection || []
+      if (ids.length < 2) return
+      const groups = this.data.groups || []
+      const next = groups.concat([
+        { id: `group-${Date.now()}`, label: `分组 ${groups.length + 1}`, nodeIds: ids.slice() }
+      ])
+      this.triggerEvent('groupschange', { groups: next })
     },
 
     geometryOf(ids) {
@@ -212,15 +254,41 @@ Component({
       }
 
       if (this.drag) {
-        // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
+        /*
+         * 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平。
+         *
+         * 对齐优先于网格：两者都是吸附，但网格吸的是「整齐」，对齐吸的是
+         * 「和那一个对上」——后者才是用户此刻在做的事。先按网格吸的话，
+         * 节点只能落在 8 的倍数上，中间那几像素到不了，辅助线也就永远不出现。
+         */
         const delta = { x: point.x - this.drag.from.x, y: point.y - this.drag.from.y }
-        const moved = moveNodes(this.drag.base, this.drag.ids, delta)
+        const free = moveNodes(this.drag.base, this.drag.ids, delta, 0)
+        const grid = moveNodes(this.drag.base, this.drag.ids, delta)
+        const sizeOf = (id) => {
+          const found = this.drag.base.find((g) => g.id === id)
+          return { width: found && found.width, height: found && found.height }
+        }
+        const picked = new Set(this.drag.ids)
+        const anchor = free[0]
+        const aligned = anchor
+          ? alignGuides(
+              { ...anchor, label: '', ...sizeOf(anchor.id) },
+              (this.data.nodes || []).filter((n) => !picked.has(n.id)),
+              6 / this.view.scale
+            )
+          : { dx: 0, dy: 0, guides: [] }
+        this.guides = aligned.guides
+        const onX = aligned.guides.some((g) => g.orientation === 'v')
+        const onY = aligned.guides.some((g) => g.orientation === 'h')
         this.triggerEvent('move', {
-          changes: moved.map((m) => {
-            const before = this.drag.base.find((g) => g.id === m.id)
-            return { ...m, width: before && before.width, height: before && before.height }
-          })
+          changes: free.map((m, i) => ({
+            id: m.id,
+            x: onX ? m.x + aligned.dx : grid[i].x,
+            y: onY ? m.y + aligned.dy : grid[i].y,
+            ...sizeOf(m.id)
+          }))
         })
+        this.draw()
         return
       }
 
@@ -244,6 +312,26 @@ Component({
       }
       this.drag = null
       this.resizing = null
+      // 辅助线是拖动时的提示，松手就清空
+      if (this.guides && this.guides.length) {
+        this.guides = []
+        this.draw()
+      }
+    },
+
+    /**
+     * 一键排版。走的是与手动拖动同一条 move 事件，调用方那边的撤销才接得上——
+     * 一键把别人排了半天的图重排一遍却撤不回去，那是把一个便利做成了事故。
+     */
+    layout() {
+      if (this.data.readonly) return
+      const laid = autoLayout(this.data.nodes || [], this.data.edges || [])
+      this.triggerEvent('move', {
+        changes: laid.map((n) => {
+          const before = (this.data.nodes || []).find((m) => m.id === n.id)
+          return { id: n.id, x: n.x, y: n.y, width: before && before.width, height: before && before.height }
+        })
+      })
     },
 
     /** 点缩略图跳过去：大图里这是唯一比反复拖画布快的导航方式 */
@@ -293,7 +381,10 @@ Component({
       if (!this.canvas || !this.box) return
       const chrome = !options || options.chrome !== false
       const ctx = this.canvas.getContext('2d')
-      const { nodes, edges, selection, edgeType } = this.data
+      const { selection, edgeType, groups } = this.data
+      // 折叠组的成员不画，改画一个代表方块；连到成员的线跟着改指向组
+      const nodes = visibleNodes(this.data.nodes, groups || [])
+      const edges = visibleEdges(this.data.edges, groups || [])
       const { width, height } = this.box
       const picked = {}
       ;(selection || []).forEach((id) => (picked[id] = true))
@@ -304,6 +395,24 @@ Component({
       ctx.translate(this.view.x, this.view.y)
       ctx.scale(this.view.scale, this.view.scale)
 
+      // 组框画在连线下面：它是底图，压住连线会让人以为组框截断了流程
+      ;(groups || []).forEach((group) => {
+        if (group.collapsed) return
+        const box = groupBounds(this.data.nodes, group)
+        if (!box) return
+        ctx.save()
+        ctx.setLineDash([6, 4])
+        ctx.strokeStyle = '#c3c6cd'
+        ctx.lineWidth = 1
+        ctx.strokeRect(box.x, box.y, box.width, box.height)
+        ctx.setLineDash([])
+        ctx.fillStyle = '#5e7ce0'
+        ctx.font = '12px sans-serif'
+        ctx.textAlign = 'left'
+        ctx.fillText(group.label, box.x + 10, box.y + 14)
+        ctx.restore()
+      })
+
       const byId = {}
       nodes.forEach((n) => (byId[n.id] = n))
 
@@ -312,14 +421,16 @@ Component({
         const to = byId[edge.to]
         if (!from || !to) return
         const active = picked[edge.from] || picked[edge.to]
-        const a = anchorOf(from, {
-          x: to.x + (to.width || NODE_W) / 2,
-          y: to.y + (to.height || NODE_H) / 2
-        })
-        const b = anchorOf(to, {
-          x: from.x + (from.width || NODE_W) / 2,
-          y: from.y + (from.height || NODE_H) / 2
-        })
+        const a = anchorOf(
+          from,
+          { x: to.x + (to.width || NODE_W) / 2, y: to.y + (to.height || NODE_H) / 2 },
+          edge.fromSide
+        )
+        const b = anchorOf(
+          to,
+          { x: from.x + (from.width || NODE_W) / 2, y: from.y + (from.height || NODE_H) / 2 },
+          edge.toSide
+        )
 
         const kind = edge.type || edgeType
         ctx.beginPath()
@@ -376,9 +487,13 @@ Component({
         }
         ctx.fillStyle = fill
         ctx.fill()
+        // 代表方块用虚线描边：与「这是一个真节点」区分开，不靠颜色一个线索
+        const isGroup = !!this.collapsedGroup(node.id)
+        if (isGroup) ctx.setLineDash([6, 4])
         ctx.strokeStyle = picked[node.id] ? '#5e7ce0' : stroke
         ctx.lineWidth = picked[node.id] ? 2 : 1.5
         ctx.stroke()
+        ctx.setLineDash([])
 
         ctx.fillStyle = '#252b3a'
         ctx.font = '13px sans-serif'
@@ -411,6 +526,28 @@ Component({
           ctx.strokeStyle = '#5e7ce0'
           ctx.lineWidth = 1 / this.view.scale
           ctx.strokeRect(rect.x, rect.y, rect.width, rect.height)
+          ctx.setLineDash([])
+        }
+
+        /*
+         * 对齐辅助线。虚线而不是实线：实线会和真正的连线混在一起，
+         * 读者要多看一眼才知道那不是图的一部分。
+         */
+        if (this.guides && this.guides.length) {
+          ctx.setLineDash([4 / this.view.scale, 3 / this.view.scale])
+          ctx.strokeStyle = '#5e7ce0'
+          ctx.lineWidth = 1 / this.view.scale
+          for (const guide of this.guides) {
+            ctx.beginPath()
+            if (guide.orientation === 'v') {
+              ctx.moveTo(guide.at, guide.from)
+              ctx.lineTo(guide.at, guide.to)
+            } else {
+              ctx.moveTo(guide.from, guide.at)
+              ctx.lineTo(guide.to, guide.at)
+            }
+            ctx.stroke()
+          }
           ctx.setLineDash([])
         }
       }

@@ -36,6 +36,9 @@ import 'package:i_design/src/logic/countdown.dart';
 import 'package:i_design/src/logic/multiselect.dart';
 import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
+import 'package:i_design/src/logic/diff.dart';
+import 'package:i_design/src/logic/elapsed.dart';
+import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
 import 'package:i_design/src/logic/wordcloud.dart';
@@ -1219,6 +1222,437 @@ void main() {
     expect(safeHref(''), null);
   });
 
+  test('行 diff 的分组、顺序与统计与 Web 端一致', () {
+    // 第 1 组
+    expect(diffLines('b\nc', 'a\nb\nc').length, 3);
+    expect(diffStat(diffLines('b\nc', 'a\nb\nc')).added, 1);
+    expect(diffStat(diffLines('b\nc', 'a\nb\nc')).removed, 0);
+    expect(diffLines('b\nc', 'a\nb\nc')[0].kind, IDiffKind.add);
+    expect(diffLines('b\nc', 'a\nb\nc')[1].kind, IDiffKind.same);
+    expect(diffLines('b\nc', 'a\nb\nc')[2].kind, IDiffKind.same);
+    // 第 2 组
+    expect(diffLines('x\nold\ny', 'x\nnew\ny').length, 4);
+    expect(diffStat(diffLines('x\nold\ny', 'x\nnew\ny')).added, 1);
+    expect(diffStat(diffLines('x\nold\ny', 'x\nnew\ny')).removed, 1);
+    expect(diffLines('x\nold\ny', 'x\nnew\ny')[0].kind, IDiffKind.same);
+    expect(diffLines('x\nold\ny', 'x\nnew\ny')[1].kind, IDiffKind.remove);
+    expect(diffLines('x\nold\ny', 'x\nnew\ny')[2].kind, IDiffKind.add);
+    expect(diffLines('x\nold\ny', 'x\nnew\ny')[3].kind, IDiffKind.same);
+    // 第 3 组
+    expect(diffLines('a\nb', 'a\nb').length, 2);
+    expect(diffStat(diffLines('a\nb', 'a\nb')).added, 0);
+    expect(diffStat(diffLines('a\nb', 'a\nb')).removed, 0);
+    expect(diffLines('a\nb', 'a\nb')[0].kind, IDiffKind.same);
+    expect(diffLines('a\nb', 'a\nb')[1].kind, IDiffKind.same);
+    // 第 4 组
+    expect(diffLines('a\nb\nc', 'c\nb\na').length, 5);
+    expect(diffStat(diffLines('a\nb\nc', 'c\nb\na')).added, 2);
+    expect(diffStat(diffLines('a\nb\nc', 'c\nb\na')).removed, 2);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[0].kind, IDiffKind.remove);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[1].kind, IDiffKind.remove);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[2].kind, IDiffKind.same);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[3].kind, IDiffKind.add);
+    expect(diffLines('a\nb\nc', 'c\nb\na')[4].kind, IDiffKind.add);
+    // 第 5 组
+    expect(diffLines('', 'a').length, 2);
+    expect(diffStat(diffLines('', 'a')).added, 1);
+    expect(diffStat(diffLines('', 'a')).removed, 1);
+    expect(diffLines('', 'a')[0].kind, IDiffKind.remove);
+    expect(diffLines('', 'a')[1].kind, IDiffKind.add);
+  });
+
+  test('命令搜索的排序、高亮区间与索引环绕与 Web 端一致', () {
+    final items = <ICommandItem>[ICommandItem(key: 'button', label: '按钮', description: '触发一个动作', keywords: <String>['button'], group: '基础'), ICommandItem(key: 'button-group', label: '按钮组', description: '一组并排的按钮', keywords: <String>['button group']), ICommandItem(key: 'tag', label: '标签', description: '用按钮旁的小块标记状态', keywords: <String>['tag']), ICommandItem(key: 'form-validate', label: '表单 校验', keywords: <String>['validate']), ICommandItem(key: 'empty', label: '空状态', keywords: <String>['empty', 'placeholder'])];
+    // 搜 按钮
+    expect(searchCommands(items, '按钮').length, 3);
+    expect(searchCommands(items, '按钮')[0].item.key, 'button');
+    expect(searchCommands(items, '按钮')[1].item.key, 'button-group');
+    expect(searchCommands(items, '按钮')[2].item.key, 'tag');
+    expect(searchCommands(items, '按钮')[0].ranges.first[0], 0);
+    expect(searchCommands(items, '按钮')[0].ranges.first[1], 2);
+    // 搜 button
+    expect(searchCommands(items, 'button').length, 2);
+    expect(searchCommands(items, 'button')[0].item.key, 'button');
+    expect(searchCommands(items, 'button')[1].item.key, 'button-group');
+    // 搜 校验
+    expect(searchCommands(items, '校验').length, 1);
+    expect(searchCommands(items, '校验')[0].item.key, 'form-validate');
+    expect(searchCommands(items, '校验')[0].ranges.first[0], 3);
+    expect(searchCommands(items, '校验')[0].ranges.first[1], 5);
+    // 搜 placeholder
+    expect(searchCommands(items, 'placeholder').length, 1);
+    expect(searchCommands(items, 'placeholder')[0].item.key, 'empty');
+    // 搜 （空）
+    expect(searchCommands(items, '').length, 5);
+    expect(searchCommands(items, '')[0].item.key, 'button');
+    expect(searchCommands(items, '')[1].item.key, 'button-group');
+    expect(searchCommands(items, '')[2].item.key, 'tag');
+    expect(searchCommands(items, '')[3].item.key, 'form-validate');
+    expect(searchCommands(items, '')[4].item.key, 'empty');
+    // 搜 不存在的词
+    expect(searchCommands(items, '不存在的词').length, 0);
+    // 搜 标签
+    expect(searchCommands(items, '标签').length, 1);
+    expect(searchCommands(items, '标签')[0].item.key, 'tag');
+    expect(searchCommands(items, '标签')[0].ranges.first[0], 0);
+    expect(searchCommands(items, '标签')[0].ranges.first[1], 2);
+    expect(searchCommands(items, '', limit: 2).length, 2);
+    expect(moveCommandIndex(0, 1, 3), 1);
+    expect(moveCommandIndex(2, 1, 3), 0);
+    expect(moveCommandIndex(0, -1, 3), 2);
+    expect(moveCommandIndex(1, -1, 3), 0);
+    expect(moveCommandIndex(0, 1, 0), 0);
+    expect(moveCommandIndex(5, 1, 0), 0);
+  });
+
+  test('工具芯片的统计写法与折叠汇总与 Web 端一致', () {
+    final chips = <IToolChipItem>[IToolChipItem(key: 'a', label: 'App.tsx', status: IToolChipStatus.success, added: 74, removed: 41), IToolChipItem(key: 'b', label: 'flavors.css', status: IToolChipStatus.error, added: 0, removed: 0), IToolChipItem(key: 'c', label: 'grep', status: IToolChipStatus.running, added: 2, removed: 0), IToolChipItem(key: 'd', label: 'main.ts', status: IToolChipStatus.success, added: 0, removed: 9)];
+    expect(toolChipStat(13, 4), "+13 −4");
+    expect(toolChipStat(13, 0), "+13");
+    expect(toolChipStat(0, 4), "−4");
+    expect(toolChipStat(0, 0), "");
+    expect(toolChipStat(1, 1), "+1 −1");
+    expect(toolChipStat(999, 1000), "+999 −1000");
+    expect(summarizeToolChips(chips).total, 4);
+    expect(summarizeToolChips(chips).running, 1);
+    expect(summarizeToolChips(chips).failed, 1);
+    expect(summarizeToolChips(chips).added, 76);
+    expect(summarizeToolChips(chips).removed, 50);
+    expect(summarizeToolChips(<IToolChipItem>[]).total, 0);
+    expect(summarizeToolChips(<IToolChipItem>[]).added, 0);
+    expect(toolChipIcon(IToolChipStatus.success), "check-circle");
+    expect(toolChipIcon(IToolChipStatus.error), "error-circle");
+  });
+
+  test('洞察卡的翻页边界、擦洗取点与涨跌说法与 Web 端一致', () {
+    final item = InsightItemData(id: 'i1', title: '转化率', summary: '周三回升', series: <double>[12, 9, 11, 15], labels: <String>['周一', '周二', '周三', '周四'], unit: '%');
+    expect(insightPage(3, 2, 1), 2);
+    expect(insightPage(3, 0, -1), 0);
+    expect(insightPage(3, 0, 1), 1);
+    expect(insightPage(0, 0, 1), 0);
+    expect(insightPage(3, 1, -1), 0);
+    expect(scrubIndex(0, 300, 4), 0);
+    expect(scrubIndex(60, 300, 4), 1);
+    expect(scrubIndex(160, 300, 4), 2);
+    expect(scrubIndex(300, 300, 4), 3);
+    expect(scrubIndex(-40, 300, 4), 0);
+    expect(scrubIndex(999, 300, 4), 3);
+    expect(scrubIndex(160, 300, 1), 0);
+    expect(scrubX(0, 300, 4), 0);
+    expect(scrubX(1, 300, 4), 100);
+    expect(scrubX(2, 300, 4), 200);
+    expect(scrubX(3, 300, 4), 300);
+    expect(scrubReadout(item, 0).label, "周一");
+    expect(scrubReadout(item, 0).value, "12%");
+    expect(scrubReadout(item, 2).label, "周三");
+    expect(scrubReadout(item, 2).value, "11%");
+    expect(scrubReadout(item, 3).label, "周四");
+    expect(scrubReadout(item, 3).value, "15%");
+    expect(trendLabel(insightTrend(<double>[12, 15])), "上升 25%");
+    expect(trendIcon(insightTrend(<double>[12, 15])), "chevron-up");
+    expect(trendLabel(insightTrend(<double>[15, 12])), "下降 20%");
+    expect(trendIcon(insightTrend(<double>[15, 12])), "chevron-down");
+    expect(trendLabel(insightTrend(<double>[8, 8])), "持平");
+    expect(trendIcon(insightTrend(<double>[8, 8])), "minus");
+    expect(trendLabel(insightTrend(<double>[0, 5])), "上升 5");
+    expect(trendIcon(insightTrend(<double>[0, 5])), "chevron-up");
+    expect(trendLabel(insightTrend(<double>[10, 30, 28])), "上升 180%");
+    expect(trendIcon(insightTrend(<double>[10, 30, 28])), "chevron-up");
+    expect(trendLabel(insightTrend(<double>[])), "持平");
+    expect(insightPlot(320).inner, 310);
+    expect(insightPlot(320).inset, 5);
+    expect(insightPlot(12).inner, 6);
+    expect(insightPlot(12).inset, 3);
+    expect(insightPlot(8).inner, 4);
+    expect(insightPlot(8).inset, 2);
+    expect(insightPlot(400.5).inner, 390.5);
+    expect(insightPlot(400.5).inset, 5);
+    expect(formatInsightValue(12), "12");
+    expect(formatInsightValue(12.34), "12.3");
+    expect(formatInsightValue(0), "0");
+    expect(formatInsightValue(-3.5), "-3.5");
+  });
+
+  test('选区的清理、字数上限、引文省略与动作条落点与 Web 端一致', () {
+    expect(cleanSelection('the quick\nbrown fox'), 'the quick brown fox');
+    expect(cleanSelection('第一段\n\n\n第二段'), '第一段\n\n第二段');
+    expect(cleanSelection('  改   一下  '), '改 一下');
+    expect(cleanSelection('   \n  '), '');
+    expect(hasSelection('the quick\nbrown fox'), true);
+    expect(hasSelection('第一段\n\n\n第二段'), true);
+    expect(hasSelection('  改   一下  '), true);
+    expect(hasSelection('   \n  '), false);
+    expect(selectionTooLong('the quick\nbrown fox'), false);
+    expect(selectionTooLong('第一段\n\n\n第二段'), false);
+    expect(selectionTooLong('  改   一下  '), false);
+    expect(selectionTooLong('   \n  '), false);
+    expect(selectionCount('the quick\nbrown fox'), 19);
+    expect(selectionCount('第一段\n\n\n第二段'), 8);
+    expect(selectionCount('  改   一下  '), 4);
+    expect(selectionCount('   \n  '), 0);
+    expect(hasSelection('改一改这一整段话', max: 4), false);
+    expect(selectionTooLong('改一改这一整段话', max: 4), true);
+    expect(selectionExcerpt('短句', max: 11), '短句');
+    expect(selectionExcerpt('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaMIDDLEbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', max: 11), 'aaaaa…bbbbb');
+    expect(selectionAnchor(IOverlayRect(200, 300, 120, 20), 200, 40, 1000, 800).x, 160);
+    expect(selectionAnchor(IOverlayRect(200, 300, 120, 20), 200, 40, 1000, 800).y, 252);
+    expect(selectionAnchor(IOverlayRect(200, 300, 120, 20), 200, 40, 1000, 800).placement, SelectionPlacement.top);
+    expect(selectionAnchor(IOverlayRect(200, 4, 120, 20), 200, 40, 1000, 800).x, 160);
+    expect(selectionAnchor(IOverlayRect(200, 4, 120, 20), 200, 40, 1000, 800).y, 32);
+    expect(selectionAnchor(IOverlayRect(200, 4, 120, 20), 200, 40, 1000, 800).placement, SelectionPlacement.bottom);
+    expect(selectionAnchor(IOverlayRect(940, 300, 60, 20), 200, 40, 1000, 800).x, 792);
+    expect(selectionAnchor(IOverlayRect(940, 300, 60, 20), 200, 40, 1000, 800).y, 252);
+    expect(selectionAnchor(IOverlayRect(940, 300, 60, 20), 200, 40, 1000, 800).placement, SelectionPlacement.top);
+    expect(selectionAnchor(IOverlayRect(0, 780, 40, 20), 200, 40, 1000, 800).x, 8);
+    expect(selectionAnchor(IOverlayRect(0, 780, 40, 20), 200, 40, 1000, 800).y, 732);
+    expect(selectionAnchor(IOverlayRect(0, 780, 40, 20), 200, 40, 1000, 800).placement, SelectionPlacement.top);
+  });
+
+  test('属性检查器的夹范围、改动判定与显示文字与 Web 端一致', () {
+    expect(clampFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 12.7), 12);
+    expect(clampFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 13.2), 14);
+    expect(clampFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 99), 32);
+    expect(clampFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), -5), 12);
+    expect(clampFieldValue(FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), 0.31), 0.3);
+    expect(clampFieldValue(FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), 0.44), 0.4);
+    expect(clampFieldValue(FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), 1.4), 1);
+    expect(changedKeys(<FineTuneFieldData>[FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), FineTuneFieldData(key: 'tone', label: '语气', kind: FineTuneKind.select, options: <FineTuneOption>[FineTuneOption(value: 'calm', label: '克制')]), FineTuneFieldData(key: 'bold', label: '加粗', kind: FineTuneKind.switchKind)], <String, Object?>{'size': 16, 'opacity': 0.5, 'tone': 'calm', 'bold': false}, <String, Object?>{'size': 24, 'opacity': 0.5, 'tone': 'calm', 'bold': true}), <String>['size', 'bold']);
+    expect(changedKeys(<FineTuneFieldData>[FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), FineTuneFieldData(key: 'tone', label: '语气', kind: FineTuneKind.select, options: <FineTuneOption>[FineTuneOption(value: 'calm', label: '克制')]), FineTuneFieldData(key: 'bold', label: '加粗', kind: FineTuneKind.switchKind)], <String, Object?>{'size': 16, 'opacity': 0.5, 'tone': 'calm', 'bold': false}, <String, Object?>{'size': 16, 'opacity': 0.5, 'tone': 'calm', 'bold': false}), <String>[]);
+    expect(fineTuneSummary(0), "与原始结果一致");
+    expect(fineTuneSummary(1), "改了 1 项");
+    expect(fineTuneSummary(3), "改了 3 项");
+    expect(formatFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 16), "16px");
+    expect(formatFieldValue(FineTuneFieldData(key: 'tone', label: '语气', kind: FineTuneKind.select, options: <FineTuneOption>[FineTuneOption(value: 'calm', label: '克制')]), 'calm'), "克制");
+    expect(formatFieldValue(FineTuneFieldData(key: 'bold', label: '加粗', kind: FineTuneKind.switchKind), true), "开");
+    expect(formatFieldValue(FineTuneFieldData(key: 'bold', label: '加粗', kind: FineTuneKind.switchKind), false), "关");
+    expect(formatFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), null), "—");
+    expect(fieldRatio(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 22), 0.5);
+    expect(fieldRatio(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 99), 1);
+    expect(fieldRatio(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 12), 0);
+    expect(fieldRatio(FineTuneFieldData(key: 'tone', label: '语气', kind: FineTuneKind.select, options: <FineTuneOption>[FineTuneOption(value: 'calm', label: '克制')]), 'calm'), 0);
+  });
+
+  test('智能体屏幕的状态说法、接管条件与画面新鲜度与 Web 端一致', () {
+    expect(screenStatusText(AgentScreenState.connecting), "正在连接屏幕");
+    expect(screenStatusText(AgentScreenState.connecting, '正在填写收货地址'), "正在连接屏幕");
+    expect(screenStatusIcon(AgentScreenState.connecting), "refresh");
+    expect(canTakeOver(AgentScreenState.connecting), false);
+    expect(screenStatusText(AgentScreenState.working), "正在操作");
+    expect(screenStatusText(AgentScreenState.working, '正在填写收货地址'), "正在填写收货地址");
+    expect(screenStatusIcon(AgentScreenState.working), "sparkle");
+    expect(canTakeOver(AgentScreenState.working), true);
+    expect(screenStatusText(AgentScreenState.paused), "已暂停");
+    expect(screenStatusText(AgentScreenState.paused, '正在填写收货地址'), "已暂停：正在填写收货地址");
+    expect(screenStatusIcon(AgentScreenState.paused), "minus");
+    expect(canTakeOver(AgentScreenState.paused), true);
+    expect(screenStatusText(AgentScreenState.done), "已完成");
+    expect(screenStatusText(AgentScreenState.done, '正在填写收货地址'), "已完成");
+    expect(screenStatusIcon(AgentScreenState.done), "check-circle");
+    expect(canTakeOver(AgentScreenState.done), false);
+    expect(screenStatusText(AgentScreenState.error), "出错了");
+    expect(screenStatusText(AgentScreenState.error, '正在填写收货地址'), "正在填写收货地址");
+    expect(screenStatusIcon(AgentScreenState.error), "error-circle");
+    expect(canTakeOver(AgentScreenState.error), false);
+    expect(frameAge(10000, 9000), "");
+    expect(frameAge(10000, 7000), "画面 3 秒前");
+    expect(frameAge(200000, 20000), "画面 3 分钟前");
+    expect(frameAge(8000000, 200000), "画面 2 小时前");
+    expect(frameStale(30000, 10000, AgentScreenState.working), true);
+    expect(frameStale(20000, 10000, AgentScreenState.working), false);
+    expect(frameStale(30000, 10000, AgentScreenState.done), false);
+    expect(frameStale(30000, 10000, AgentScreenState.error), false);
+    expect(frameStaleText(54000, 10000), "画面已经 44 秒没动了，可能卡住了");
+    expect(frameStaleText(200000, 20000), "画面已经 3 分钟没动了，可能卡住了");
+    expect(frameStaleText(8000000, 200000), "画面已经 2 小时没动了，可能卡住了");
+    expect(screenAspect(1280, 800), 1.6);
+    expect(screenAspect(), 1.6);
+    expect(screenAspect(0, 800), 1.6);
+  });
+
+  test('会话列表的分组、空标题兜底与删除后落点与 Web 端一致', () {
+    // 本地墙钟，不是纪元毫秒数：分组问的是「用户的今天」
+    final now = DateTime(2026, 9, 13, 14).millisecondsSinceEpoch;
+    final sessions = <ChatSessionData>[ChatSessionData(id: 'a', updatedAt: now - 3600000, title: '报销流程', preview: ''), ChatSessionData(id: 'b', updatedAt: now - 86400000, title: '', preview: '帮我把这段话改得更简短'), ChatSessionData(id: 'c', updatedAt: now - 2592000000, title: '旧的讨论', preview: ''), ChatSessionData(id: 'd', updatedAt: now - 864000000, title: '常用清单', preview: '', pinned: true), ChatSessionData(id: 'e', updatedAt: now - 432000000, title: '上周的图', preview: '')];
+    expect(sessionTitle(sessions[0]), "报销流程");
+    expect(sessionTitle(sessions[1]), "帮我把这段话改得更简短");
+    expect(sessionTitle(sessions[2]), "旧的讨论");
+    expect(sessionTitle(sessions[3]), "常用清单");
+    expect(sessionTitle(sessions[4]), "上周的图");
+    expect(sessionTitle(ChatSessionData(id: 'x', updatedAt: 0)), "新会话");
+    expect(groupKeyOf(sessions[0], now), ChatGroupKey.today);
+    expect(groupKeyOf(sessions[1], now), ChatGroupKey.yesterday);
+    expect(groupKeyOf(sessions[2], now), ChatGroupKey.earlier);
+    expect(groupKeyOf(sessions[3], now), ChatGroupKey.pinned);
+    expect(groupKeyOf(sessions[4], now), ChatGroupKey.week);
+    expect(groupSessions(sessions, now).length, 5);
+    expect(groupSessions(sessions, now)[0].key, ChatGroupKey.pinned);
+    expect(groupSessions(sessions, now)[0].label, "置顶");
+    expect(groupSessions(sessions, now)[0].sessions.map((s) => s.id).toList(), <String>['d']);
+    expect(groupSessions(sessions, now)[1].key, ChatGroupKey.today);
+    expect(groupSessions(sessions, now)[1].label, "今天");
+    expect(groupSessions(sessions, now)[1].sessions.map((s) => s.id).toList(), <String>['a']);
+    expect(groupSessions(sessions, now)[2].key, ChatGroupKey.yesterday);
+    expect(groupSessions(sessions, now)[2].label, "昨天");
+    expect(groupSessions(sessions, now)[2].sessions.map((s) => s.id).toList(), <String>['b']);
+    expect(groupSessions(sessions, now)[3].key, ChatGroupKey.week);
+    expect(groupSessions(sessions, now)[3].label, "最近 7 天");
+    expect(groupSessions(sessions, now)[3].sessions.map((s) => s.id).toList(), <String>['e']);
+    expect(groupSessions(sessions, now)[4].key, ChatGroupKey.earlier);
+    expect(groupSessions(sessions, now)[4].label, "更早");
+    expect(groupSessions(sessions, now)[4].sessions.map((s) => s.id).toList(), <String>['c']);
+    expect(filterSessions(sessions, "简短").map((s) => s.id).toList(), <String>['b']);
+    expect(filterSessions(sessions, "报销").map((s) => s.id).toList(), <String>['a']);
+    expect(filterSessions(sessions, "  ").map((s) => s.id).toList(), <String>['a', 'b', 'c', 'd', 'e']);
+    expect(nextAfterDelete(groupSessions(sessions, now), 'b', 'b'), "e");
+    expect(nextAfterDelete(groupSessions(sessions, now), 'e', 'e'), "c");
+    expect(nextAfterDelete(groupSessions(sessions, now), 'c', 'c'), "e");
+    expect(nextAfterDelete(groupSessions(sessions, now), 'a', 'c'), "c");
+    expect(moveActiveSession(groupSessions(sessions, now), 'd', 1), "a");
+    expect(moveActiveSession(groupSessions(sessions, now), 'd', -1), "d");
+    expect(moveActiveSession(groupSessions(sessions, now), 'c', 1), "c");
+    expect(moveActiveSession(groupSessions(sessions, now), 'c', -1), "e");
+  });
+
+  test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
+    final steps = <IThinkingStep>[IThinkingStep(key: 'a', title: '拆解问题', kind: IThinkingStepKind.reason, status: IThinkingStepStatus.done), IThinkingStep(key: 'b', title: '检索文档', kind: IThinkingStepKind.search, status: IThinkingStepStatus.error), IThinkingStep(key: 'c', title: '写补丁', kind: IThinkingStepKind.code, status: IThinkingStepStatus.running), IThinkingStep(key: 'd', title: '复核', kind: IThinkingStepKind.tool, status: IThinkingStepStatus.done)];
+    expect(defaultOpenSteps(steps), <String>['b', 'c']);
+    expect(defaultOpenSteps(<IThinkingStep>[]), <String>[]);
+    expect(summarizeThinking(steps).total, 4);
+    expect(summarizeThinking(steps).done, 2);
+    expect(summarizeThinking(steps).running, 1);
+    expect(summarizeThinking(steps).failed, 1);
+    expect(summarizeThinking(steps).activeIndex, 2);
+    expect(summarizeThinking(<IThinkingStep>[]).activeIndex, -1);
+    expect(thinkingStepIcon(IThinkingStepKind.reason), "sparkle");
+    expect(thinkingStepIcon(IThinkingStepKind.search), "search");
+    expect(thinkingStepIcon(IThinkingStepKind.code), "code");
+    expect(thinkingStepIcon(IThinkingStepKind.tool), "layers");
+    expect(toggleThinkingStep(<String>['b'], 'c'), <String>['b', 'c']);
+    expect(toggleThinkingStep(<String>['b', 'c'], 'b'), <String>['c']);
+  });
+
+  test('贴着触发器的面板往哪边开与 Web 端一致', () {
+    expect(shouldFlipUp(400, 32, 160, 720), false);
+    expect(shouldFlipUp(400, 32, 160, 520), true);
+    expect(shouldFlipUp(100, 32, 600, 300), false);
+    expect(shouldFlipUp(400, 32, 280, 720), false);
+    expect(shouldFlipUp(0, 32, 100, 200), false);
+    expect(shouldFlipUp(650, 32, 60, 720), true);
+  });
+
+  test('对齐辅助线的吸附量与线位置与 Web 端一致', () {
+    // 第 1 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dx, -3);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dy, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides.length, 3);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[0].at, 100);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[1].at, 160);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[2].at, 220);
+    // 第 2 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 140, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dx, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 140, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dy, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 140, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides.length, 0);
+    // 第 3 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 300, width: 60, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 70, y: 20, width: 120, height: 48)]).dx, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 300, width: 60, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 70, y: 20, width: 120, height: 48)]).dy, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 300, width: 60, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 70, y: 20, width: 120, height: 48)]).guides.length, 1);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 300, width: 60, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 70, y: 20, width: 120, height: 48)]).guides[0].at, 130);
+    // 第 4 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).dx, -2);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).dy, -3);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides.length, 6);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[0].at, 100);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[1].at, 160);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[2].at, 220);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[3].at, 200);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[4].at, 224);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[5].at, 248);
+    // 第 5 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dx, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dy, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides.length, 3);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[0].at, 100);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[1].at, 160);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[2].at, 220);
+  });
+
+  test('指定锚点的落点与 Web 端一致', () {
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'left').x, 100);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'left').y, 224);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'left').side, 'left');
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'right').x, 220);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'right').y, 224);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'right').side, 'right');
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'top').x, 160);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'top').y, 200);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'top').side, 'top');
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'bottom').x, 160);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'bottom').y, 248);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'bottom').side, 'bottom');
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 160, 900).side, "bottom");
+  });
+
+  test('节点分组折叠后的节点与连线与 Web 端一致', () {
+    final gNodes = <FlowNodeData>[FlowNodeData(id: 'a', label: 'a', x: 100, y: 100, width: 120, height: 48), FlowNodeData(id: 'b', label: 'b', x: 300, y: 200, width: 120, height: 48), FlowNodeData(id: 'c', label: 'c', x: 600, y: 100, width: 120, height: 48)];
+    final box = groupBounds(gNodes, FlowGroupData(id: 'g1', label: '审批', nodeIds: <String>['a', 'b'], collapsed: false))!;
+    expect(box.left, 84);
+    expect(box.top, 66);
+    expect(box.width, 352);
+    expect(box.height, 198);
+    expect(groupBounds(gNodes, FlowGroupData(id: 'g', label: 'x', nodeIds: <String>['zz'])), null);
+    final shown = visibleNodes(gNodes, <FlowGroupData>[FlowGroupData(id: 'g1', label: '审批', nodeIds: <String>['a', 'b'], collapsed: true)]);
+    expect(shown.length, 2);
+    expect(shown[0].id, 'c');
+    expect(shown[1].id, 'g1');
+    expect(shown.last.label, "审批 · 2");
+    final links = visibleEdges(<FlowEdgeData>[FlowEdgeData(from: 'a', to: 'c'), FlowEdgeData(from: 'b', to: 'c'), FlowEdgeData(from: 'a', to: 'b')], <FlowGroupData>[FlowGroupData(id: 'g1', label: '审批', nodeIds: <String>['a', 'b'], collapsed: true)]);
+    expect(links.length, 1);
+    expect(links[0].from, 'g1');
+    expect(links[0].to, 'c');
+  });
+
+  test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
+    expect(shouldShowElapsed(0), false);
+    expect(shouldShowElapsed(2999), false);
+    expect(shouldShowElapsed(3000), true);
+    expect(shouldShowElapsed(61000), true);
+    expect(shouldShowElapsed(3599999), true);
+    expect(elapsedParts(0).minutes, 0);
+    expect(elapsedParts(0).seconds, 0);
+    expect(elapsedParts(5400).minutes, 0);
+    expect(elapsedParts(5400).seconds, 5);
+    expect(elapsedParts(59999).minutes, 0);
+    expect(elapsedParts(59999).seconds, 59);
+    expect(elapsedParts(60000).minutes, 1);
+    expect(elapsedParts(60000).seconds, 0);
+    expect(elapsedParts(125000).minutes, 2);
+    expect(elapsedParts(125000).seconds, 5);
+    expect(elapsedParts(-100).minutes, 0);
+    expect(elapsedParts(-100).seconds, 0);
+    expect(elapsedInterval(0), 1000);
+    expect(elapsedInterval(1), 999);
+    expect(elapsedInterval(500), 500);
+    expect(elapsedInterval(999), 1);
+    expect(elapsedInterval(1000), 1000);
+    expect(elapsedInterval(5400), 600);
+  });
+
+  test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {
+    expect(floatActionOffset(0), 56);
+    expect(floatActionOffset(1), 108);
+    expect(floatActionOffset(2), 160);
+    expect(floatActionOffset(3), 212);
+    expect(floatActionShift(0), 60);
+    expect(floatActionShift(1), 112);
+    expect(floatActionShift(2), 164);
+    expect(floatActionShift(3), 216);
+    expect(floatActionDelay(0, 1), 0);
+    expect(floatActionDelay(0, 3), 0);
+    expect(floatActionDelay(1, 3), 50);
+    expect(floatActionDelay(2, 3), 100);
+    expect(floatActionDelay(3, 4), 113);
+  });
+
   test('文案字典的两份译文与局部覆盖规则与 Web 端一致', () {
     expect(zhCN.name, 'zh-CN');
     expect(zhCN.empty, '暂无数据');
@@ -1245,6 +1679,28 @@ void main() {
     expect(zhCN.collapse, '收起');
     expect(zhCN.required, '此项必填');
     expect(zhCN.invalidFormat, '格式不正确');
+    expect(zhCN.chartTableShow, '查看数据表');
+    expect(zhCN.chartTableHide, '收起数据表');
+    expect(zhCN.chartCategory, '类别');
+    expect(zhCN.chartValue, '数值');
+    expect(zhCN.chartPercent, '占比');
+    expect(zhCN.chartOther, '其他');
+    expect(zhCN.regenerate, '重新生成');
+    expect(zhCN.thinking, '推理过程');
+    expect(zhCN.toolInput, '入参');
+    expect(zhCN.toolError, '错误');
+    expect(zhCN.toolResult, '结果');
+    expect(zhCN.next, '下一题');
+    expect(zhCN.skip, '跳过');
+    expect(zhCN.otherOption, '其他');
+    expect(zhCN.pullToRefresh, '下拉刷新');
+    expect(zhCN.releaseToRefresh, '松手即可刷新');
+    expect(zhCN.refreshing, '正在刷新');
+    expect(zhCN.create, '新建');
+    expect(zhCN.dayUnit, '天');
+    expect(zhCN.hourUnit, '时');
+    expect(zhCN.minuteUnit, '分');
+    expect(zhCN.secondUnit, '秒');
     expect(enUS.name, 'en-US');
     expect(enUS.empty, 'No data');
     expect(enUS.emptyContent, 'Nothing here yet');
@@ -1270,6 +1726,28 @@ void main() {
     expect(enUS.collapse, 'Collapse');
     expect(enUS.required, 'This field is required');
     expect(enUS.invalidFormat, 'Invalid format');
+    expect(enUS.chartTableShow, 'Show data table');
+    expect(enUS.chartTableHide, 'Hide data table');
+    expect(enUS.chartCategory, 'Category');
+    expect(enUS.chartValue, 'Value');
+    expect(enUS.chartPercent, 'Share');
+    expect(enUS.chartOther, 'Other');
+    expect(enUS.regenerate, 'Regenerate');
+    expect(enUS.thinking, 'Reasoning');
+    expect(enUS.toolInput, 'Input');
+    expect(enUS.toolError, 'Error');
+    expect(enUS.toolResult, 'Result');
+    expect(enUS.next, 'Next');
+    expect(enUS.skip, 'Skip');
+    expect(enUS.otherOption, 'Other');
+    expect(enUS.pullToRefresh, 'Pull to refresh');
+    expect(enUS.releaseToRefresh, 'Release to refresh');
+    expect(enUS.refreshing, 'Refreshing');
+    expect(enUS.create, 'New');
+    expect(enUS.dayUnit, 'd');
+    expect(enUS.hourUnit, 'h');
+    expect(enUS.minuteUnit, 'm');
+    expect(enUS.secondUnit, 's');
     expect(zhCN.totalText(12), '共 12 条');
     expect(enUS.totalText(1), '1 item');
     expect(enUS.totalText(3), '3 items');
@@ -1697,6 +2175,27 @@ void main() {
         resizePane(100.0, 50.0,
             firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
         closeTo(120, 1e-9));
+    expect(
+        resetPaneSize(0.50, 1000.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(498, 1e-9));
+    expect(
+        resetPaneSize(0.50, 300.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(136, 1e-9));
+    expect(
+        resetPaneSize(0.20, 1000.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(199.20000000000002, 1e-9));
+    expect(
+        resetPaneSize(0.90, 1000.0,
+            firstMin: 120.0, secondMin: 160.0, gutter: 4.0),
+        closeTo(836, 1e-9));
+    expect(isSplitterResetKey('Enter'), true);
+    expect(isSplitterResetKey(' '), true);
+    expect(isSplitterResetKey('Spacebar'), true);
+    expect(isSplitterResetKey('ArrowLeft'), false);
+    expect(isSplitterResetKey('a'), false);
     expect(paneRatio(500.0, 1000.0, gutter: 4.0),
         closeTo(0.5020080321285141, 1e-9));
     expect(paneRatio(0.0, 1000.0, gutter: 4.0),

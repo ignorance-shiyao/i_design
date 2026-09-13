@@ -13,8 +13,7 @@ const loading = ref(true)
   <article>
     <h1>Skeleton 骨架屏</h1>
     <p class="i-lead">
-      在内容到达前占住它将要出现的位置。与 Loading 的分工：区域里<strong>结构已知</strong>时用骨架屏，
-      因为它能避免内容到达时的布局跳动；结构未知或等待时间很短时用 Loading。
+      在内容到达前占住它将要出现的位置。与 Loading 的分工：区域里<strong>结构已知</strong>时用骨架屏，因为它能避免内容到达时的布局跳动；结构未知或等待时间很短时用 Loading。
     </p>
 
     <DemoBlock
@@ -63,6 +62,13 @@ const loading = ref(true)
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>加载很快时——骨架闪一下再消失，比直接出内容更晃眼。</li>
+      <li>布局与真实内容对不上时——骨架的意义就是先把位置占住，占错了内容一到就整页跳。</li>
+      <li>失败时——骨架不能一直转下去，要切到明确的失败态并给重试。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -76,8 +82,7 @@ const loading = ref(true)
 
     <h2>动效偏好</h2>
     <p>
-      骨架屏用一道微光扫过而不是整体闪烁——闪烁在长列表里会形成密集的明暗跳动。
-      系统开启「减少动效」时动画自动关闭，只保留静态占位。
+      骨架屏用一道微光扫过而不是整体闪烁——闪烁在长列表里会形成密集的明暗跳动。系统开启「减少动效」时动画自动关闭，只保留静态占位。
     </p>
   </article>
 </template>
@@ -85,7 +90,7 @@ const loading = ref(true)
 <style scoped>
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: var(--i-spacing-6);
   width: 100%;
 }

@@ -9,6 +9,9 @@ packages/*/.tokens.build.mjs
 packages/vue/node_modules
 
 # 一次性的验证脚本与截图：跑完就看，不该进仓库
+# 两种命名都盖住：只写 *.tmp.mjs 的话，随手起名 tmp-xxx.mjs 就漏出去了（出过一次）
 *.tmp.mjs
 *.tmp.png
 *.tmp.svg
+tmp-*.mjs
+tmp-*.png

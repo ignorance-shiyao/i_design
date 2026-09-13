@@ -24,10 +24,10 @@
   color: var(--i-color-text);
   pointer-events: auto;
 }
-.i-message--info .i-message__icon { color: var(--i-color-info); }
-.i-message--success .i-message__icon { color: var(--i-color-success); }
-.i-message--warning .i-message__icon { color: var(--i-color-warning); }
-.i-message--danger .i-message__icon { color: var(--i-color-danger); }
+.i-message--info .i-message__icon { color: var(--i-color-info-text); }
+.i-message--success .i-message__icon { color: var(--i-color-success-text); }
+.i-message--warning .i-message__icon { color: var(--i-color-warning-text); }
+.i-message--danger .i-message__icon { color: var(--i-color-danger-text); }
 .i-message__close {
   display: grid;
   place-items: center;

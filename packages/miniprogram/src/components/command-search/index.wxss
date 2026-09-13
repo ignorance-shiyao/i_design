@@ -1,0 +1,2 @@
+@import '../../../dist/styles/command-search.wxss';
+@import '../../../dist/styles/icons.wxss';

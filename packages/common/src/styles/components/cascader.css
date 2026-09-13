@@ -40,7 +40,7 @@
  * 激活只是「路径经过这里」，选中才是结果，所以前者只加底色，后者才上品牌色。
  */
 .i-cascader__option.is-active { background: var(--i-color-bg-subtle); }
-.i-cascader__option.is-selected { color: var(--i-color-brand); font-weight: 600; }
+.i-cascader__option.is-selected { color: var(--i-color-brand-text); font-weight: 600; }
 .i-cascader__option:disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }
 .i-cascader__option:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
 .i-cascader__arrow { margin-left: auto; color: var(--i-color-text-tertiary); }

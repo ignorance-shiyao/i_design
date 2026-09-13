@@ -15,8 +15,8 @@
     border-color var(--i-motion-fast) var(--i-motion-easing);
 }
 .i-tabs--sm .i-tabs__tab { padding: var(--i-spacing-2) var(--i-spacing-3); font-size: var(--i-font-size-sm); }
-.i-tabs__tab:hover:not(.is-disabled) { color: var(--i-color-brand); }
-.i-tabs__tab.is-active { color: var(--i-color-brand); font-weight: 500; }
+.i-tabs__tab:hover:not(.is-disabled) { color: var(--i-color-brand-text); }
+.i-tabs__tab.is-active { color: var(--i-color-brand-text); font-weight: 500; }
 .i-tabs__tab.is-disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }
 
 /* line：下划线跟随选中项 */

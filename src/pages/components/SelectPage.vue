@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import ISelect, { type SelectOption } from '@/components/ISelect.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import Playground from '@/site/Playground.vue'
 import { snippets } from '@/data/snippets'
 
 const options: SelectOption[] = [
@@ -33,6 +34,9 @@ const cities: SelectOption[] = Array.from({ length: 10000 }, (_, i) => ({
   label: `编号 ${String(i + 1).padStart(5, '0')} 号仓位`,
   value: i + 1
 }))
+
+/* playground 代码片段里固定属性的写法（模板里写会和属性引号打架） */
+const selectPgCode = [':options="options"']
 </script>
 
 <template>
@@ -41,6 +45,15 @@ const cities: SelectOption[] = Array.from({ length: 10000 }, (_, i) => ({
     <p class="i-lead">
       从一组预设项中选择一个值。选项少于三个时优先考虑单选框，用户可以少一次点击。
     </p>
+
+    <h2>现场调参</h2>
+    <p>下面的控件由源码里的属性类型生成，改动即时生效，代码区给出对应写法。</p>
+    <Playground
+      name="ISelect"
+      :is="ISelect"
+      :fixed="{ options }"
+      :fixed-code="selectPgCode"
+    />
 
     <DemoBlock
       title="多端用法"
@@ -118,10 +131,15 @@ const cities: SelectOption[] = Array.from({ length: 10000 }, (_, i) => ({
     <h2>各端差异</h2>
     <p>
       长列表在 Web 与小程序端是「只渲染看得见的那十来行，上下用两块空白撑开滚动条」；
-      Flutter 端改用能按需建子项的列表面板，由框架自己决定建哪几项，结果一样。
-      多选在 Flutter 端也走这层面板而不是系统菜单——菜单点一下就收，
-      而多选需要面板留在原处连点几下。取值顺序与标签折叠的规则各端共用同一份。
+      Flutter 端改用能按需建子项的列表面板，由框架自己决定建哪几项，结果一样。多选在 Flutter 端也走这层面板而不是系统菜单——菜单点一下就收，而多选需要面板留在原处连点几下。取值顺序与标签折叠的规则各端共用同一份。
     </p>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>选项只有两三个时——用单选按钮，全部摊开比点一下再看一眼快。</li>
+      <li>选项超过几百条且没有搜索时——先加搜索或改成带检索的选择器，让人滚三屏找一项不是选择。</li>
+      <li>用户要输入的是任意值时——用输入框加建议（自动完成），下拉会把「不在列表里」的情况堵死。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">

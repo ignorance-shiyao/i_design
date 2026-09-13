@@ -27,7 +27,7 @@
     transparent 100%
   );
   background-size: 200% 100%;
-  animation: i-skeleton-shine 1.4s ease-in-out infinite;
+  animation: i-skeleton-shine var(--i-motion-skeleton) ease-in-out infinite;
 }
 @keyframes i-skeleton-shine {
   from { background-position: 180% 0; }

@@ -3,8 +3,12 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
+import { useConfig } from './useConfig'
 import { computed, onMounted, ref, watch } from 'vue'
 import { wordLayout, wordOverflow, wordTone, WORD_MAX_SIZE, type WordItem } from '@i-design/common'
+
+/* 文案走字典：图表的数据表是它的无障碍出口，按钮与表头也得跟着换语言 */
+const { locale } = useConfig()
 
 const props = withDefaults(
   defineProps<{
@@ -118,7 +122,7 @@ const dropped = computed(() => wordOverflow(props.words, placed.value))
       因此这张表不是无障碍的补丁，它是这个图的正式读法之一。
     -->
     <button class="i-chart__table-toggle" @click="showTable = !showTable">
-      {{ showTable ? '收起数据表' : '查看数据表' }}
+      {{ showTable ? locale.chartTableHide : locale.chartTableShow }}
     </button>
     <table v-if="showTable" class="i-chart__table">
       <thead>

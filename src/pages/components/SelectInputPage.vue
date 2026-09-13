@@ -30,14 +30,10 @@ function toggle(zone: string) {
   <article>
     <h1>SelectInput 选择器外壳</h1>
     <p class="i-lead">
-      长得像输入框、点开是一个面板。Select、Cascader、TreeSelect、日期范围这些控件，
-      外面那一层是同一件东西——一个可聚焦的框、里面是单行文本或一排标签、
-      右侧一个箭头与清除键。各自写一遍的结果是聚焦态、清除键位置、禁用色一个个对不齐，
-      因此它单独成件。
+      长得像输入框、点开是一个面板。Select、Cascader、TreeSelect、日期范围这些控件，外面那一层是同一件东西——一个可聚焦的框、里面是单行文本或一排标签、右侧一个箭头与清除键。各自写一遍的结果是聚焦态、清除键位置、禁用色一个个对不齐，因此它单独成件。
     </p>
     <p>
-      它只管外壳：面板内容由调用方给，选中值怎么来它不管。
-      直接用它的场合是「要做一个本体系还没有的选择器」——已有的 Select 这类请直接用成品。
+      它只管外壳：面板内容由调用方给，选中值怎么来它不管。直接用它的场合是「要做一个本体系还没有的选择器」——已有的 Select 这类请直接用成品。
     </p>
 
     <DemoBlock
@@ -130,6 +126,13 @@ function toggle(zone: string) {
       </tbody>
     </table>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>就是一个普通下拉时——直接用 Select，这一层是给自定义弹出内容用的外壳。</li>
+      <li>弹出内容需要自己管理焦点与滚动时——先确认外壳的浮层定位够用，否则两套定位会打架。</li>
+      <li>只是要一个带图标的输入框时——用输入框的前后缀。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -172,7 +175,7 @@ function toggle(zone: string) {
   background: var(--i-color-bg-subtle);
 }
 .fake-panel li.is-picked {
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   background: var(--i-color-brand-subtle);
 }
 </style>

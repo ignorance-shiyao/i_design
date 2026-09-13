@@ -50,7 +50,7 @@ const props = withDefaults(
   }
 )
 
-const emit = defineEmits<{ (e: 'update:checked', a0: keys: string[]): void; (e: 'update:expanded', a0: keys: string[]): void; (e: 'update:selected', a0: key: string): void; (e: 'select', a0: node: TreeNode): void }>()
+const emit = defineEmits<{ (e: 'update:checked', keys: string[]): void; (e: 'update:expanded', keys: string[]): void; (e: 'update:selected', key: string): void; (e: 'select', node: TreeNode): void }>()
 
 const { locale } = useConfig()
 
@@ -217,11 +217,12 @@ function highlight(label: string) {
 
         <ICheckbox
           v-if="checkable"
-          :model-value="state.checked.has(row.key)"
+          :value="state.checked.has(row.key)"
           :indeterminate="state.halfChecked.has(row.key)"
           :disabled="row.disabled"
+          :aria-label="row.node.label"
           @click.stop
-          @update:model-value="(next: boolean) => onCheck(row.key, next)"
+          @input="(next) => onCheck(row.key, next)"
         />
 
         <span class="i-tree__label">

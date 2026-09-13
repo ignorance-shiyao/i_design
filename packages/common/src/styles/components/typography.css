@@ -16,16 +16,26 @@
 
 .i-typo--secondary { color: var(--i-color-text-secondary); }
 .i-typo--tertiary { color: var(--i-color-text-tertiary); }
-.i-typo--brand { color: var(--i-color-brand); }
-.i-typo--success { color: var(--i-color-success); }
-.i-typo--warning { color: var(--i-color-warning); }
-.i-typo--danger { color: var(--i-color-danger); }
+.i-typo--brand { color: var(--i-color-brand-text); }
+.i-typo--success { color: var(--i-color-success-text); }
+.i-typo--warning { color: var(--i-color-warning-text); }
+.i-typo--danger { color: var(--i-color-danger-text); }
 
 .i-typo.is-strong { font-weight: 600; }
 .i-typo.is-italic { font-style: italic; }
 .i-typo.is-underline { text-decoration: underline; }
 .i-typo.is-delete { text-decoration: line-through; color: var(--i-color-text-tertiary); }
 .i-typo.is-mono { font-family: var(--i-font-family-mono); }
+/*
+ * 长到没有断点的一串（文件路径、URL、长 token）也要能折。
+ *
+ * 默认只在空格处换行，于是「packages/common/src/tokens/index.ts」这种整串
+ * 会把版面顶宽——实测 320px 下布局页横向溢出 15px，而溢出的是一行说明文字。
+ * anywhere 而不是 break-word：后者在 flex 子项里算 min-content 时不生效。
+ */
+.i-typo__body { overflow-wrap: anywhere; }
+/* 截断那两档要的是「不折行再省略」，别让上面这条把它们破坏掉 */
+.i-typo.is-ellipsis .i-typo__body { overflow-wrap: normal; }
 
 /* 单行省略 */
 .i-typo.is-ellipsis {
@@ -54,7 +64,7 @@
 .i-typo__copy {
   border: none;
   background: transparent;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   cursor: pointer;
   font: inherit;
   padding: 0 var(--i-spacing-1);
@@ -65,7 +75,7 @@
   vertical-align: middle;
   color: var(--i-color-text-tertiary);
 }
-.i-typo__copy:hover { color: var(--i-color-brand); }
+.i-typo__copy:hover { color: var(--i-color-brand-text); }
 .i-typo__toggle:focus-visible,
 .i-typo__copy:focus-visible {
   outline: 2px solid var(--i-color-brand);

@@ -3,9 +3,30 @@
   "version": "0.1.0",
   "description": "Ignorance Design 移动端 Vue 实现：Web 令牌 + 移动覆盖层，补充移动特有组件",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
-  "peerDependencies": { "vue": "^3.4.0" },
-  "dependencies": { "@i-design/common": "0.1.0", "@i-design/vue-next": "0.1.0" },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "dependencies": {
+    "@i-design/common": "0.1.0",
+    "@i-design/vue-next": "0.1.0"
+  },
   "license": "MIT"
 }

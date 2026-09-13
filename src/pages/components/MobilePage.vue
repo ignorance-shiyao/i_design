@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import INavBar from '@i-design/mobile-vue/src/components/INavBar.vue'
-import ITabbar from '@i-design/mobile-vue/src/components/ITabbar.vue'
-import INoticeBar from '@i-design/mobile-vue/src/components/INoticeBar.vue'
-import IPopup from '@i-design/mobile-vue/src/components/IPopup.vue'
-import IGrid from '@i-design/mobile-vue/src/components/IGrid.vue'
-import ISwipeCell from '@i-design/mobile-vue/src/components/ISwipeCell.vue'
-import ICell from '@i-design/mobile-vue/src/components/ICell.vue'
-import ISearchBar from '@i-design/mobile-vue/src/components/ISearchBar.vue'
-import ICountDown from '@i-design/mobile-vue/src/components/ICountDown.vue'
-import IStepper from '@i-design/mobile-vue/src/components/IStepper.vue'
-import IFab from '@i-design/mobile-vue/src/components/IFab.vue'
-import IFooter from '@i-design/mobile-vue/src/components/IFooter.vue'
-import ISideBar from '@i-design/mobile-vue/src/components/ISideBar.vue'
-import IPullDownRefresh from '@i-design/mobile-vue/src/components/IPullDownRefresh.vue'
-import IIndexes from '@i-design/mobile-vue/src/components/IIndexes.vue'
-import IDropdownMenu from '@i-design/mobile-vue/src/components/IDropdownMenu.vue'
-import IPicker from '@i-design/mobile-vue/src/components/IPicker.vue'
+import INavBar from '../../../packages/mobile-vue/src/components/INavBar.vue'
+import ITabbar from '../../../packages/mobile-vue/src/components/ITabbar.vue'
+import INoticeBar from '../../../packages/mobile-vue/src/components/INoticeBar.vue'
+import IPopup from '../../../packages/mobile-vue/src/components/IPopup.vue'
+import IGrid from '../../../packages/mobile-vue/src/components/IGrid.vue'
+import ISwipeCell from '../../../packages/mobile-vue/src/components/ISwipeCell.vue'
+import ICell from '../../../packages/mobile-vue/src/components/ICell.vue'
+import ISearchBar from '../../../packages/mobile-vue/src/components/ISearchBar.vue'
+import ICountDown from '../../../packages/mobile-vue/src/components/ICountDown.vue'
+import IStepper from '../../../packages/mobile-vue/src/components/IStepper.vue'
+import IFab from '../../../packages/mobile-vue/src/components/IFab.vue'
+import IFooter from '../../../packages/mobile-vue/src/components/IFooter.vue'
+import ISideBar from '../../../packages/mobile-vue/src/components/ISideBar.vue'
+import IPullDownRefresh from '../../../packages/mobile-vue/src/components/IPullDownRefresh.vue'
+import IIndexes from '../../../packages/mobile-vue/src/components/IIndexes.vue'
+import IDropdownMenu from '../../../packages/mobile-vue/src/components/IDropdownMenu.vue'
+import IPicker from '../../../packages/mobile-vue/src/components/IPicker.vue'
 import IButton from '@/components/IButton.vue'
 import IInfiniteScroll from '@/components/IInfiniteScroll.vue'
 import INumberKeypad from '@/components/INumberKeypad.vue'
@@ -191,9 +191,7 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
   <article>
     <h1>移动端形态</h1>
     <p class="i-lead">
-      有些形态只在触屏上成立：底部标签栏、从边缘滑出的浮层、左滑出操作的单元格。
-      它们与桌面端共用同一套令牌与语义色，因此同一个产品的两端看起来仍是一家的东西——
-      只是把尺度调到了手指而不是鼠标指针。
+      有些形态只在触屏上成立：底部标签栏、从边缘滑出的浮层、左滑出操作的单元格。它们与桌面端共用同一套令牌与语义色，因此同一个产品的两端看起来仍是一家的东西——只是把尺度调到了手指而不是鼠标指针。
     </p>
 
     <DemoBlock
@@ -267,14 +265,10 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
 
     <h2>步进器、悬浮按钮、侧边导航与页脚</h2>
     <p>
-      这四件都是手机上才成立的形态。步进器不是把桌面端的数字输入框放大——
-      桌面端以键盘输入为主、加减键是补充，手机上反过来：拇指点加减是主路径，
-      弹一次键盘要占掉半屏。因此加减键做到 44px，数字反而是那个补充。
+      这四件都是手机上才成立的形态。步进器不是把桌面端的数字输入框放大——桌面端以键盘输入为主、加减键是补充，手机上反过来：拇指点加减是主路径，弹一次键盘要占掉半屏。因此加减键做到 44px，数字反而是那个补充。
     </p>
     <p>
-      悬浮按钮一页只该有一个：它表达的是「这一页最主要的那件事」，
-      出现两个就等于没有主次。底部留出安全区高度，否则在全面屏上会压住手势条，
-      上滑会先被系统吃掉。
+      悬浮按钮一页只该有一个：它表达的是「这一页最主要的那件事」，出现两个就等于没有主次。底部留出安全区高度，否则在全面屏上会压住手势条，上滑会先被系统吃掉。
     </p>
 
     <DemoBlock
@@ -312,10 +306,7 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
 
     <h2>下拉刷新、索引列表与筛选条</h2>
     <p>
-      下拉刷新的三件事都在公共层：手指拉了多远换算成内容下移多少、拉到哪里算「松手就刷新」、
-      松手后停在哪。阻尼曲线特意不用平方根——那条曲线在起手那一小段会把位移放大，
-      手指才动 10px 内容已经走了 17px，人会觉得页面在自己跑。现在这条起手处正好跟手，
-      越往下越重，到上限停住。
+      下拉刷新的三件事都在公共层：手指拉了多远换算成内容下移多少、拉到哪里算「松手就刷新」、松手后停在哪。阻尼曲线特意不用平方根——那条曲线在起手那一小段会把位移放大，手指才动 10px 内容已经走了 17px，人会觉得页面在自己跑。现在这条起手处正好跟手，越往下越重，到上限停住。
     </p>
 
     <DemoBlock
@@ -368,31 +359,30 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
 
     <h2>无限滚动</h2>
     <p>
-      触发规则里最容易漏的一条是「内容还没撑满容器时直接加载」。第一页太短就没有滚动条，
-      用户再怎么划也到不了底，列表会永远停在第一页——而它只在窗口很高或每页很少时才暴露，
-      本地开发时几乎撞不上。下面这个示例第一页故意只给 3 条。
+      触发规则里最容易漏的一条是「内容还没撑满容器时直接加载」。第一页太短就没有滚动条，用户再怎么划也到不了底，列表会永远停在第一页——而它只在窗口很高或每页很少时才暴露，本地开发时几乎撞不上。下面这个示例第一页故意只给 3 条。
     </p>
     <p>
-      另一条是加载中、已加载完、出错时一律不再触发。少了它，滚动事件每帧一次，
-      同一页会连发几十个请求；接口够快的话，重复的响应互相覆盖，页面看着还是对的。
+      另一条是加载中、已加载完、出错时一律不再触发。少了它，滚动事件每帧一次，同一页会连发几十个请求；接口够快的话，重复的响应互相覆盖，页面看着还是对的。
     </p>
     <DemoBlock
       title="翻到底自动续上"
       description="底部状态区一直占位，不是加载时才插进来——插进来会把列表往上顶一下，用户正在读的那一行会跳走。"
       code='<IInfiniteScroll :status="status" :height="260" @load="loadMore" />'
     >
+      <!-- 套一层 screen：外框那一圈是「机身」，用的是近黑色，
+           内容直接贴上去的话，浅色的辅助文字会压在黑底上读不出来 -->
       <div class="phone">
+        <div class="phone__screen phone__screen--plain">
         <IInfiniteScroll :status="feedStatus" :height="260" :empty="!feed.length" @load="loadFeed">
           <ICell v-for="row in feed" :key="row" :title="row" />
         </IInfiniteScroll>
+        </div>
       </div>
     </DemoBlock>
 
     <h2>数字键盘</h2>
     <p>
-      用手机拨号盘的顺序（1 在左上）而不是计算器的顺序（7 在左上）：
-      输入金额和验证码时，用户的肌肉记忆来自拨号盘。约束（几位小数、能不能有负号、
-      最长多少位）全在公共层判定，各端不会一个能输 12.345 一个不能。
+      用手机拨号盘的顺序（1 在左上）而不是计算器的顺序（7 在左上）：输入金额和验证码时，用户的肌肉记忆来自拨号盘。约束（几位小数、能不能有负号、最长多少位）全在公共层判定，各端不会一个能输 12.345 一个不能。
     </p>
     <DemoBlock
       title="金额输入"
@@ -418,9 +408,14 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
 
     <h2>安全区</h2>
     <p>
-      标签栏与底部浮层都让出手势条区域：iPhone 的横条会盖住最下面 34px，
-      不留安全区的话，最下面一排图标点不到。导航栏同理让出状态栏。
+      标签栏与底部浮层都让出手势条区域：iPhone 的横条会盖住最下面 34px，不留安全区的话，最下面一排图标点不到。导航栏同理让出状态栏。
     </p>
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>用户主要在桌面上使用时——这些形态假设的是拇指与触摸，鼠标下它们又大又空。</li>
+      <li>手势是唯一的入口时——左滑、长按都不可见，要同时留一个看得见的按钮。</li>
+      <li>内容需要横向对比时——窄屏放不下表格，先想清楚哪一列最重要，而不是硬塞。</li>
+    </ul>
   </article>
 </template>
 
@@ -434,6 +429,9 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
   overflow: hidden;
   box-shadow: var(--i-shadow-lg);
   background: var(--i-color-text);
+}
+.phone__screen--plain {
+  height: auto;
 }
 .phone__screen {
   display: flex;
@@ -457,7 +455,7 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
 .phone__link {
   border: none;
   background: none;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-family: inherit;
   font-size: var(--i-font-size-md);
   cursor: pointer;

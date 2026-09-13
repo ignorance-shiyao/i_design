@@ -44,8 +44,8 @@
 
 .i-popconfirm__head { display: flex; gap: var(--i-spacing-2); }
 .i-popconfirm__icon { margin-top: 2px; }
-.i-popconfirm__icon.is-brand { color: var(--i-color-brand); }
-.i-popconfirm__icon.is-danger { color: var(--i-color-danger); }
+.i-popconfirm__icon.is-brand { color: var(--i-color-brand-text); }
+.i-popconfirm__icon.is-danger { color: var(--i-color-danger-text); }
 .i-popconfirm__title { font-size: var(--i-font-size-md); font-weight: 500; color: var(--i-color-text); }
 .i-popconfirm__content {
   margin-top: var(--i-spacing-1);

@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import ITree from '@/components/ITree.vue'
 import ITreeSelect from '@/components/ITreeSelect.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import Playground from '@/site/Playground.vue'
 import type { TreeNode } from '@i-design/common'
 
 const data: TreeNode[] = [
@@ -53,15 +54,26 @@ const bigTree: TreeNode[] = Array.from({ length: 20 }, (_, a) => ({
 }))
 const bigExpanded = ref<string[]>(bigTree.flatMap((a) => [a.key, ...(a.children ?? []).map((b) => b.key)]))
 const bigChecked = ref<string[]>([])
+
+/* playground 代码片段里固定属性的写法（模板里写会和属性引号打架） */
+const treePgCode = [':data="data"']
 </script>
 
 <template>
   <article>
     <h1>Tree 树形控件</h1>
     <p class="i-lead">
-      层级数据的展开与选择。父子勾选联动、半选态、禁用继承与搜索过滤都由组件负责，
-      调用方只管收结果。
+      层级数据的展开与选择。父子勾选联动、半选态、禁用继承与搜索过滤都由组件负责，调用方只管收结果。
     </p>
+
+    <h2>现场调参</h2>
+    <p>下面的控件由源码里的属性类型生成，改动即时生效，代码区给出对应写法。</p>
+    <Playground
+      name="ITree"
+      :is="ITree"
+      :fixed="{ data }"
+      :fixed-code="treePgCode"
+    />
 
     <DemoBlock
       title="单选"
@@ -116,16 +128,12 @@ const bigChecked = ref<string[]>([])
 
     <h2>各端差异</h2>
     <p>
-      Web 与小程序端自己算窗口，只渲染看得见的那十来行（小程序读不到 <code>offsetHeight</code>，
-      行高用一次测量取得，量不到才退回兜底值）；Flutter 端交给能按需建子项的列表，
-      由框架决定建哪几行，结果一样。三端都是「给了高度才虚拟化」：
-      没有可视高度就算不出该渲染哪几行。
+      Web 与小程序端自己算窗口，只渲染看得见的那十来行（小程序读不到 <code>offsetHeight</code>，行高用一次测量取得，量不到才退回兜底值）；Flutter 端交给能按需建子项的列表，由框架决定建哪几行，结果一样。三端都是「给了高度才虚拟化」：没有可视高度就算不出该渲染哪几行。
     </p>
 
     <h2>TreeSelect 树选择</h2>
     <p>
-      当层级数据只是「一个字段的候选值」时，整棵树摊在页面上太占地方。
-      树选择把同一棵树收进下拉面板，触发器上显示已选路径。
+      当层级数据只是「一个字段的候选值」时，整棵树摊在页面上太占地方。树选择把同一棵树收进下拉面板，触发器上显示已选路径。
     </p>
 
     <DemoBlock
@@ -153,6 +161,12 @@ const bigChecked = ref<string[]>([])
         </p>
       </div>
     </DemoBlock>
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>层级只有两层时——用分组列表，展开收起的开销换不来什么。</li>
+      <li>用户是来找某一项而不是理解结构时——先给搜索，让人一层层点开是最慢的找法。</li>
+      <li>节点上万且要全展开时——先虚拟化，否则一次展开就是上万个 DOM 节点。</li>
+    </ul>
   </article>
 </template>
 

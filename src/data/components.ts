@@ -27,6 +27,9 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'Divider', cn: '分割线', to: '/components/divider', desc: '分隔内容区块' },
       { name: 'Link', cn: '链接', to: '/components/link', desc: '跳转到另一个地址' },
       { name: 'StickyTool', cn: '侧边工具条', to: '/components/sticky-tool', desc: '贴边的一组快捷入口' },
+      { name: 'FloatButton', cn: '悬浮操作按钮', to: '/components/float-button', desc: '页面角落的主操作入口' },
+      { name: 'CodeBlock', cn: '代码块', to: '/components/code-block', desc: '高亮、行号与 diff 视图' },
+      { name: 'CommandSearch', cn: '命令搜索', to: '/components/command-search', desc: '搜一下就到，键盘全程可用' },
       { name: 'Scrollbar', cn: '滚动条', to: '/components/scrollbar', desc: '不占布局的自绘滚动条' },
       { name: 'ConfigProvider', cn: '全局配置', to: '/components/config-provider', desc: '下发文案字典与默认尺寸' }
     ]
@@ -147,10 +150,16 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'PromptInput', cn: '输入台', to: '/components/chat', desc: '多行输入、附件与发送' },
       { name: 'ChatThinking', cn: '思考过程', to: '/components/chat', desc: '可展开的推理步骤' },
       { name: 'ChatToolCall', cn: '工具调用', to: '/components/chat', desc: '调用了什么、拿到什么' },
+      { name: 'ToolChips', cn: '工具芯片', to: '/components/chat', desc: '一串调用压成一行行芯片' },
       { name: 'ApprovalCard', cn: '征求确认', to: '/components/chat', desc: '行动前的人类介入' },
       { name: 'AgentTasks', cn: '任务行', to: '/components/chat', desc: '任务的实时状态' },
       { name: 'RecommendCard', cn: '建议卡', to: '/components/chat', desc: '带置信度的主动建议' },
       { name: 'ContextCards', cn: '上下文卡', to: '/components/chat', desc: '检索到的片段与出处' },
+      { name: 'InsightCards', cn: '洞察卡', to: '/components/chat', desc: '一句结论配一条可擦洗的趋势线' },
+      { name: 'SelectionActions', cn: '选区操作', to: '/components/chat', desc: '选中一段文字就地交给智能体' },
+      { name: 'FineTuneCard', cn: '属性检查器', to: '/components/chat', desc: '生成之后逐项微调，改过的能退回' },
+      { name: 'AgentScreen', cn: '智能体屏幕', to: '/components/chat', desc: '看着它操作，画面几秒前一目了然' },
+      { name: 'ChatList', cn: '会话列表', to: '/components/chat', desc: '按时间分组，删一条不弹回顶部' },
       { name: 'DiffTable', cn: '差异表', to: '/components/chat', desc: '成批改动逐行采纳' }
     ]
   },

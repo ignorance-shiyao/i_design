@@ -1,4 +1,4 @@
-<view class="i-avatar-group">
+<view class="i-avatar-group" style="--i-avatar-group-size: {{chip}}px">
   <slot />
   <text wx:if="{{more > 0}}" class="i-avatar-group__more">+{{more}}</text>
 </view>

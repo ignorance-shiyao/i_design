@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import IIcon from './IIcon.vue'
 import ICheckbox from './ICheckbox.vue'
 import IInput from './IInput.vue'
+import { useConfig } from './useConfig'
 import {
   checkedAfterMove,
   filterItems,
@@ -33,6 +34,9 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{ 'update:modelValue': [string[]] }>()
+
+/* 全选那一格没有可见文字，读屏听到的只是「勾选框」——名字得从字典里取 */
+const { locale } = useConfig()
 
 const checked = ref<Record<TransferSide, string[]>>({ source: [], target: [] })
 const keyword = ref<Record<TransferSide, string>>({ source: '', target: '' })
@@ -83,6 +87,7 @@ const panes: { side: TransferSide; title: string }[] = [
             :model-value="header[pane.side].allChecked"
             :indeterminate="header[pane.side].someChecked"
             :disabled="header[pane.side].selectable === 0"
+            :aria-label="`${locale.selectAll}：${pane.title}`"
             @update:model-value="onToggleAll(pane.side)"
           />
           <span class="i-transfer__title">{{ pane.title }}</span>
@@ -106,6 +111,7 @@ const panes: { side: TransferSide; title: string }[] = [
             <ICheckbox
               :model-value="checked[pane.side].includes(item.key)"
               :disabled="item.disabled"
+              :aria-label="item.label"
               @update:model-value="onToggle(pane.side, item.key)"
             >
               {{ item.label }}

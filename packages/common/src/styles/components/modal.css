@@ -82,5 +82,5 @@
 .i-confirm__error {
   margin: var(--i-spacing-2) 0 0;
   font-size: var(--i-font-size-sm);
-  color: var(--i-color-danger);
+  color: var(--i-color-danger-text);
 }

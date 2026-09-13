@@ -1,0 +1,29 @@
+<view class="i-selact">
+  <slot />
+
+  <view
+    wx:if="{{open}}"
+    class="i-selact__bar i-selact__bar--{{placement}}"
+    style="{{style}}"
+  >
+    <!-- 说清楚为什么没有按钮：一排灰按钮不告诉用户该怎么办 -->
+    <text wx:if="{{tooLong}}" class="i-selact__hint">
+      选中了 {{count}} 字，超过 {{max}} 字就不好逐句核对了，选短一些
+    </text>
+    <block wx:else>
+      <!-- 引文回显：让用户确认按钮作用在哪一段上，而不是凭记忆 -->
+      <text class="i-selact__quote">{{excerpt}}</text>
+      <view class="i-selact__sep" />
+      <view
+        wx:for="{{shownActions}}"
+        wx:key="id"
+        class="i-selact__action {{item.disabled ? 'is-disabled' : ''}}"
+        data-index="{{index}}"
+        bindtap="run"
+      >
+        <view wx:if="{{item.icon}}" class="i-icon i-icon--{{item.icon}}" style="width:13px;height:13px" />
+        <text>{{item.label}}</text>
+      </view>
+    </block>
+  </view>
+</view>

@@ -1,0 +1,70 @@
+/* ISelectionActions —— 由 Vue / React 各端共享 */
+.i-selact { position: relative; }
+
+/*
+ * 浮条用 fixed：选区的坐标来自 getBoundingClientRect，本就是相对视口的。
+ * 换成 absolute 就得再把祖先的滚动位置加回去，多一处会算错的地方。
+ */
+.i-selact__bar {
+  position: fixed;
+  z-index: var(--i-z-dropdown);
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  max-width: min(92vw, 520px);
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  /* 四边等宽的发丝线：开在上还是开在下由位置本身说明，不靠加粗某一边 */
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  box-shadow: var(--i-shadow-md);
+}
+
+/* 引文回显：让用户确认按钮作用在哪一段上，而不是凭记忆 */
+.i-selact__quote {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-selact__sep {
+  flex: none;
+  width: 1px;
+  height: 16px;
+  background: var(--i-color-hairline);
+}
+
+.i-selact__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  flex: none;
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  color: var(--i-color-text);
+  font-family: inherit;
+  font-size: var(--i-font-size-xs);
+  cursor: pointer;
+}
+.i-selact__action:hover:not(:disabled) {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-brand-text);
+}
+.i-selact__action:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 1px;
+}
+.i-selact__action:disabled { opacity: 0.4; cursor: default; }
+/* 小程序没有 disabled 属性，同一副观感走类名 */
+.i-selact__action.is-disabled { opacity: 0.4; pointer-events: none; }
+
+/* 选区过长时说清楚该怎么办，而不是排一列点不动的灰按钮 */
+.i-selact__hint {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+}

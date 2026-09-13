@@ -43,11 +43,11 @@
 .i-sticky-tool__item:first-child { border-top: 0; }
 .i-sticky-tool__item:hover {
   background: var(--i-color-bg-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .i-sticky-tool__item.is-active {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .i-sticky-tool__item:disabled {
   color: var(--i-color-text-tertiary);

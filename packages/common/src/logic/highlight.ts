@@ -1,23 +1,21 @@
 /**
- * 轻量语法高亮。
+ * 轻量语法高亮：把代码切成词法单元。
  *
- * 不引第三方库：预览页要内联成单文件，且本环境访问不到 CDN。
- * 做法是每种语言一条合并的具名分组正则，一次扫描切出词法单元，
- * 未匹配的部分按纯文本转义输出——因此任何输入都不会破坏 HTML 结构。
+ * 不引第三方库：预览页要内联成单文件，各端也不该为了高亮各装一个几百 KB 的库。
+ * 做法是每种语言一条合并的具名分组正则，一次扫描切出词法单元。
+ *
+ * **输出的是 token 数组，不是 HTML 字符串**。原先站点里那份返回拼好的 HTML，
+ * 要靠 `v-html` 渲染——在一个专门做 AI 交互的组件库里，代码块里的内容常常来自
+ * 模型与工具的输出，那是不可信内容。返回 token 让各端自己拼节点，
+ * 这条注入路径就根本不存在；顺带小程序与 Flutter 也能用同一份切分结果。
  */
 
 export type Lang = 'vue' | 'html' | 'ts' | 'js' | 'css' | 'json' | 'bash' | 'text'
 
-const escapeMap: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-}
-
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (c) => escapeMap[c])
+/** token 类型即正则里的分组名；`text` 是未匹配到的部分 */
+export interface CodeToken {
+  type: string
+  text: string
 }
 
 /** 每条分组名即 token 类型，顺序决定优先级：注释、字符串永远排在最前 */
@@ -118,29 +116,53 @@ export function detectLang(code: string): Lang {
   return 'text'
 }
 
-/** 输出带 <span class="tok tok--类型"> 的 HTML；输入始终被转义 */
-export function highlight(code: string, lang?: Lang | string): string {
+
+/**
+ * 切分成 token。
+ *
+ * 未匹配的部分原样作为 `text` 吐出来，因此把所有 token 的 text 接起来
+ * 必然等于原文——少一个字符都说明切错了，单测里就是这么校验的。
+ */
+export function tokenize(code: string, lang?: Lang | string): CodeToken[] {
   const resolved = lang ? normalizeLang(String(lang)) : detectLang(code)
-  if (resolved === 'text') return escapeHtml(code)
+  if (resolved === 'text') return code ? [{ type: 'text', text: code }] : []
 
   const pattern = patterns[resolved]
   pattern.lastIndex = 0
 
-  let out = ''
+  const out: CodeToken[] = []
   let last = 0
+  const push = (type: string, text: string) => {
+    if (text) out.push({ type, text })
+  }
+
   for (const match of code.matchAll(pattern)) {
     const index = match.index ?? 0
     const groups = match.groups ?? {}
     const type = Object.keys(groups).find((key) => groups[key] !== undefined)
     if (!type) continue
 
-    out += escapeHtml(code.slice(last, index))
+    push('text', code.slice(last, index))
     const raw = match[0]
     // 形如 " :disabled" 的匹配带前导空白，空白不该被着色
     const lead = raw.match(/^\s+/)?.[0] ?? ''
-    out += lead + `<span class="tok tok--${type}">${escapeHtml(raw.slice(lead.length))}</span>`
+    push('text', lead)
+    push(type, raw.slice(lead.length))
     last = index + raw.length
   }
-  out += escapeHtml(code.slice(last))
+  push('text', code.slice(last))
   return out
+}
+
+/** 按行切 token，供带行号的渲染使用；换行本身不进 token */
+export function tokenizeLines(code: string, lang?: Lang | string): CodeToken[][] {
+  const lines: CodeToken[][] = [[]]
+  for (const token of tokenize(code, lang)) {
+    const parts = token.text.split('\n')
+    parts.forEach((part, i) => {
+      if (i > 0) lines.push([])
+      if (part) lines[lines.length - 1].push({ type: token.type, text: part })
+    })
+  }
+  return lines
 }

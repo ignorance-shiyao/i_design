@@ -1,0 +1,121 @@
+/* IAgentScreen —— 由 Vue / React / 小程序各端共享 */
+.i-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-3);
+  /* 四边等宽的发丝线：现在什么状态由图标与文字说，不靠加粗某一边 */
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+}
+
+/*
+ * 顶对齐而不是居中：动作文字长起来会折成两行（「正在等待页面加载」在窄卡片上
+ * 就会），居中的话图标与右侧那两个控件会浮在两行文字的中间，看着像没对齐。
+ * 状态不截断——那句话正是用户要读的东西。
+ */
+.i-screen__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--i-spacing-2);
+}
+.i-screen__status {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--i-spacing-1);
+  flex: 1;
+  min-width: 0;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+}
+.i-screen--error .i-screen__status { color: var(--i-color-danger-text); }
+.i-screen--done .i-screen__status { color: var(--i-color-success-text); }
+
+/* 画面的时间戳：静止的画面与卡住的画面长得一样，这行字是唯一的区分 */
+/* 右侧两项跟着第一行走：min-height 与状态行的行高对齐 */
+.i-screen__age {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  gap: var(--i-spacing-1);
+  flex: none;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.i-screen__age.is-stale { color: var(--i-color-warning-text); }
+
+.i-screen__takeover {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  gap: var(--i-spacing-1);
+  flex: none;
+  padding: 2px var(--i-spacing-2);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text-secondary);
+  font-family: inherit;
+  font-size: var(--i-font-size-xs);
+  cursor: pointer;
+}
+.i-screen__takeover:hover:not(:disabled) {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-brand-text);
+}
+.i-screen__takeover:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 1px;
+}
+/* 接不了管时变淡且不可点，不隐藏——按钮消失会让这一行左右跳 */
+.i-screen__takeover:disabled { opacity: 0.4; cursor: default; }
+/* 小程序没有 disabled 属性，同一副观感走类名 */
+.i-screen__takeover.is-disabled { opacity: 0.4; pointer-events: none; }
+
+.i-screen__frame {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+}
+.i-screen__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.i-screen__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  height: 100%;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}
+
+/* 卡住的提醒压在画面上：用户此刻正看着画面，挤在头部那一行容易被略过 */
+.i-screen__stale {
+  position: absolute;
+  right: var(--i-spacing-2);
+  bottom: var(--i-spacing-2);
+  left: var(--i-spacing-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--i-spacing-1);
+  margin: 0;
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border-radius: var(--i-radius-sm);
+  /* 纯色底，不用渐变：这是一个控件的底色，不是氛围 */
+  background: var(--i-color-warning-subtle);
+  color: var(--i-color-warning-text);
+  font-size: var(--i-font-size-xs);
+}

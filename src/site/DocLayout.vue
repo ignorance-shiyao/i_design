@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { docNav } from "@/data/nav";
 import IInput from "@/components/IInput.vue";
+import DocPager from "./DocPager.vue";
 const search = ref("");
 const filteredNav = computed(() =>
   docNav
@@ -77,6 +78,11 @@ watch(() => route.path, () => {
     </aside>
     <main class="doc-layout__main i-doc">
       <RouterView />
+      <!--
+        翻页放在这里而不是每个页面各写一遍：一百多个文档页，漏掉一个不会报错，
+        只会让那一页成为读者的死胡同。
+      -->
+      <DocPager />
     </main>
   </div>
 </template>
@@ -94,7 +100,7 @@ watch(() => route.path, () => {
   position: sticky;
   top: 88px;
   display: grid;
-  gap: var(--i-spacing-6);
+  gap: var(--i-spacing-4);
   align-content: start;
   /*
    * 侧栏比视口高时，仅靠 sticky 会让下半截永远够不到——粘住顶部后它不随页面滚动，
@@ -103,6 +109,22 @@ watch(() => route.path, () => {
   max-height: calc(100vh - 88px - var(--i-spacing-6));
   overflow-y: auto;
   overscroll-behavior: contain;
+  /*
+   * 下边缘渐隐。
+   *
+   * 侧栏内容 3177px、可视只有 788px，下边缘永远有一行被切成两半——
+   * 一条被拦腰截断的文字读起来像「这一项就叫 ConfigProvide」，
+   * 而不是「下面还有」。渐隐把截断变成一个明确的信号：这里还没到头。
+   * mask 只影响绘制，不改布局，滚动与点击都不受影响。
+   *
+   * 上边缘原本也渐隐，现在不了：分组标题粘在顶部，渐隐会把它一起淡掉，
+   * 看起来像这行字正在消失——而它恰恰是要一直看得见的那一行。
+   */
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--i-spacing-5)),
+    transparent 100%
+  );
   padding-right: 20px;
   border-right: 1px solid var(--i-color-hairline);
 }
@@ -121,14 +143,27 @@ watch(() => route.path, () => {
   display: grid;
   gap: var(--i-spacing-1);
 }
+/*
+ * 分组标题粘在侧栏顶部。
+ *
+ * 侧栏内容三千多像素、可视只有八百，滚到中段时屏幕上只剩一列组件名，
+ * 「我现在在哪一组」得靠往回滚才能知道。粘住之后，当前分组名始终在最上面一行。
+ *
+ * 需要一块不透明的底：下面的链接要从它身后滚过去，没有底色就会两行字叠在一起。
+ * 内边距与链接取同一档，两者左边缘才对得齐。
+ */
 .doc-layout__group-title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   font-family: var(--i-font-family-mono);
   font-size: var(--i-font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0;
   color: var(--i-color-text-secondary);
-  margin-bottom: var(--i-spacing-2);
-  padding-left: var(--i-spacing-3);
+  margin: 0 0 var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  background: var(--i-color-bg);
 }
 .doc-layout__side a {
   position: relative;
@@ -146,7 +181,8 @@ watch(() => route.path, () => {
 /* 用 exact-active：否则父路径（如 /components 总览）在所有子页都会被标记为选中 */
 .doc-layout__side a.router-link-exact-active {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  /* 淡底上的字用 brand-text 那一档：填充色写在同色淡底上只有 3.37:1 */
+  color: var(--i-color-brand-text);
   font-weight: 500;
 }
 /*

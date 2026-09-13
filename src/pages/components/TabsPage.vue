@@ -60,8 +60,7 @@ const card = ref('members')
 
     <h2>键盘操作</h2>
     <p>
-      遵循 WAI-ARIA 的 tabs 模式：页签组内只有选中项参与 Tab 键序列
-      （<code>tabindex="0"</code>，其余为 <code>-1</code>），进入后用方向键切换。
+      遵循 WAI-ARIA 的 tabs 模式：页签组内只有选中项参与 Tab 键序列（<code>tabindex="0"</code>，其余为 <code>-1</code>），进入后用方向键切换。
     </p>
     <table class="i-table">
       <thead><tr><th>按键</th><th>行为</th></tr></thead>
@@ -70,6 +69,13 @@ const card = ref('members')
         <tr><td><code>→</code> / <code>←</code></td><td>循环切换页签，自动跳过禁用项并把焦点带过去</td></tr>
       </tbody>
     </table>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>几块内容需要同时看到时——标签页一次只留一块，那种场景该并排。</li>
+      <li>标签多到要横向滚动时——改成侧边导航或二级页面，滚动的标签栏里永远有一半看不见。</li>
+      <li>内容之间是先后顺序时——那是步骤条。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">

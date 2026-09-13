@@ -69,4 +69,4 @@
   font-size: var(--i-font-size-xs);
   font-variant-numeric: tabular-nums;
 }
-.i-taginput.is-full .i-taginput__count { color: var(--i-color-warning); }
+.i-taginput.is-full .i-taginput__count { color: var(--i-color-warning-text); }

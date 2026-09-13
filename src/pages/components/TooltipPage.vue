@@ -8,8 +8,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
   <article>
     <h1>Tooltip 文字提示</h1>
     <p class="i-lead">
-      悬浮时补充一句说明。提示内容必须是「锦上添花」——关键信息不能只放在 Tooltip 里，
-      触屏用户没有悬浮态。
+      悬浮时补充一句说明。提示内容必须是「锦上添花」——关键信息不能只放在 Tooltip 里，触屏用户没有悬浮态。
     </p>
 
     <DemoBlock
@@ -42,6 +41,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
       </ITooltip>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>信息是必读的时——提示只在悬停时出现，触屏上根本摸不到。</li>
+      <li>内容里有可点的东西时——鼠标移过去的路上提示就消失了，用弹出框。</li>
+      <li>提示文字比被提示的元素还长时——那是说明文字，写在界面上。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -55,8 +61,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
 
     <h2>无障碍</h2>
     <p>
-      提示同时响应 <code>focus</code>，键盘用户 Tab 到触发元素即可看到；显示时触发元素带上
-      <code>aria-describedby</code>，读屏软件会连同提示一起播报，<code>Esc</code> 可关闭。
+      提示同时响应 <code>focus</code>，键盘用户 Tab 到触发元素即可看到；显示时触发元素带上<code>aria-describedby</code>，读屏软件会连同提示一起播报，<code>Esc</code> 可关闭。
     </p>
   </article>
 </template>

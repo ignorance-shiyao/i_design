@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
 import IIcon from './IIcon.vue'
 import ILoading from './ILoading.vue'
 import type { IconName } from './icons'
+
+/* 入参 / 错误 / 结果这三个词也要跟着字典走 */
+const { locale } = useConfig()
 
 const props = withDefaults(
   defineProps<{
@@ -48,15 +52,15 @@ function format(value: unknown) {
 
     <div v-show="open" class="i-chat-tool__body">
       <div v-if="args !== undefined" class="i-chat-tool__section">
-        <span class="i-chat-tool__label">入参</span>
+        <span class="i-chat-tool__label">{{ locale.toolInput }}</span>
         <pre class="i-chat-tool__code">{{ format(args) }}</pre>
       </div>
       <div v-if="error" class="i-chat-tool__section">
-        <span class="i-chat-tool__label">错误</span>
+        <span class="i-chat-tool__label">{{ locale.toolError }}</span>
         <p class="i-chat-tool__error">{{ error }}</p>
       </div>
       <div v-else-if="result !== undefined" class="i-chat-tool__section">
-        <span class="i-chat-tool__label">结果</span>
+        <span class="i-chat-tool__label">{{ locale.toolResult }}</span>
         <pre class="i-chat-tool__code">{{ format(result) }}</pre>
       </div>
     </div>

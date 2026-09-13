@@ -24,7 +24,7 @@ const props = withDefaults(
   { title: '待应用的改动' }
 )
 
-const emit = defineEmits<{ (e: 'apply', a0: ids: string[]): void }>()
+const emit = defineEmits<{ (e: 'apply', ids: string[]): void }>()
 
 // 默认全选：智能体给的是一整套方案，逐个勾选反而是例外
 const selected = ref<string[]>(defaultDiffSelection(props.rows))
@@ -71,9 +71,10 @@ function toggle(id: string) {
           <td>
             <ICheckbox
               v-if="row.kind !== 'unchanged'"
-              :model-value="selected.includes(row.id)"
+              :value="selected.includes(row.id)"
+              :aria-label="String(row.cells[columns[0].key] ?? row.id)"
               @click.stop
-              @update:model-value="() => toggle(row.id)"
+              @input="() => toggle(row.id)"
             />
           </td>
           <td v-for="(column, index) in columns" :key="column.key">

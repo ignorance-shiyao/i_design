@@ -8,8 +8,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
   <article>
     <h1>Avatar 头像</h1>
     <p class="i-lead">
-      代表一个用户或实体。头像的首要职责是「在一列相似的行里让人一眼认出是谁」，
-      因此可辨识度比精致度更重要。
+      代表一个用户或实体。头像的首要职责是「在一列相似的行里让人一眼认出是谁」，因此可辨识度比精致度更重要。
     </p>
 
     <DemoBlock
@@ -60,11 +59,34 @@ import DemoBlock from '@/site/DemoBlock.vue'
       </IAvatarGroup>
     </DemoBlock>
 
+    <DemoBlock
+      title="头像组的尺寸"
+      description="size 同时决定头像与 +N 圆点的大小，两者始终一样高。"
+      lang="vue"
+      code='<IAvatarGroup size="sm" :max="2" :total="7">
+  <IAvatar name="林岚" size="sm" />
+  <IAvatar name="陈序" size="sm" />
+</IAvatarGroup>'
+    >
+      <div class="avatar-group-sizes">
+        <IAvatarGroup v-for="s in (['sm', 'md', 'lg'] as const)" :key="s" :size="s" :max="2" :total="7">
+          <IAvatar name="林岚" :size="s" />
+          <IAvatar name="陈序" :size="s" />
+        </IAvatarGroup>
+      </div>
+    </DemoBlock>
+
     <h2>底色</h2>
     <p>
-      无图时的底色由姓名的字符码求和取模得到——同一个人在任何页面、任何列表里颜色都一致，
-      不需要额外存储，也不会因为排序变化而换色。
+      无图时的底色由姓名的字符码求和取模得到——同一个人在任何页面、任何列表里颜色都一致，不需要额外存储，也不会因为排序变化而换色。
     </p>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>只是想标记「谁」而不需要认出具体某个人时——一个名字比一个彩色圆圈更快读懂。</li>
+      <li>图片可能很大或来源不可控时——头像是小尺寸展示，先在服务端裁好，别让浏览器缩一张两兆的原图。</li>
+      <li>一行里要放十几个人时——用头像组，它会折叠成「+8」，而十几个圆圈排开只会把这一行撑爆。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">
@@ -84,7 +106,17 @@ import DemoBlock from '@/site/DemoBlock.vue'
       <tbody>
         <tr><td>max</td><td><code>number</code></td><td>展示的头像个数上限</td></tr>
         <tr><td>total</td><td><code>number</code></td><td>成员总数，用于计算 +N</td></tr>
+        <tr><td>size</td><td><code>sm | md | lg | number</code></td><td>与组内头像一致的尺寸档位，决定 +N 圆点的大小</td></tr>
       </tbody>
     </table>
   </article>
 </template>
+
+<style scoped>
+.avatar-group-sizes {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-5);
+  flex-wrap: wrap;
+}
+</style>

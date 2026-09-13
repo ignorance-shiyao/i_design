@@ -26,7 +26,7 @@
   font-size: var(--i-font-size-md);
   cursor: pointer;
 }
-.i-page-header__back:hover { color: var(--i-color-brand); }
+.i-page-header__back:hover { color: var(--i-color-brand-text); }
 
 /* 返回与标题之间的竖线：两段文字挨着时读起来是一句话，一条线就分开了 */
 .i-page-header__divider {

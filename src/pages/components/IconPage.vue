@@ -25,8 +25,7 @@ async function copyName(name: string) {
   <article>
     <h1>Icon 图标</h1>
     <p class="i-lead">
-      24×24 网格、2px 描边的内联 SVG 图标。用 <code>currentColor</code> 着色，
-      因此图标天然跟随文字颜色与主题——不用为深色模式准备第二套资源。
+      24×24 网格、2px 描边的内联 SVG 图标。用 <code>currentColor</code> 着色，因此图标天然跟随文字颜色与主题——不用为深色模式准备第二套资源。
     </p>
 
     <DemoBlock
@@ -42,12 +41,12 @@ async function copyName(name: string) {
         <IIcon name="check-circle" :size="20" />
         <IIcon name="check-circle" :size="28" :stroke-width="1.5" />
       </span>
-      <span class="row" style="color: var(--i-color-brand)">
+      <span class="row" style="color: var(--i-color-brand-text)">
         <IIcon name="sparkle" :size="20" />
         <IIcon name="palette" :size="20" />
         <IIcon name="layers" :size="20" />
       </span>
-      <span class="row" style="color: var(--i-color-danger)">
+      <span class="row" style="color: var(--i-color-danger-text)">
         <IIcon name="trash" :size="20" />
         <IIcon name="error-circle" :size="20" />
       </span>
@@ -86,6 +85,13 @@ async function copyName(name: string) {
     </div>
     <p v-if="!filtered.length" class="empty">没有匹配「{{ keyword }}」的图标。</p>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>图标含义不是人人都懂时——配上文字。只有放大镜、齿轮这类极少数图标可以独自成立。</li>
+      <li>想用它表达状态的强弱时——图标只有「是什么」，强弱靠颜色与文字标签。</li>
+      <li>需要插画式的表达时——图标是 24 格线性图形，撑大到 100px 会露出描边的破绽。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -100,9 +106,7 @@ async function copyName(name: string) {
 
     <h2>为什么不用图标字体</h2>
     <p>
-      图标字体（iconfont 一类）需要额外的字体文件与外链请求，且只能整体着色、无法做半色调或局部动画；
-      字体加载失败时还会退化成方块。内联 SVG 没有额外请求，能跟随
-      <code>currentColor</code>、参与 CSS 过渡，也便于按需 tree-shaking。
+      图标字体（iconfont 一类）需要额外的字体文件与外链请求，且只能整体着色、无法做半色调或局部动画；字体加载失败时还会退化成方块。内联 SVG 没有额外请求，能跟随<code>currentColor</code>、参与 CSS 过渡，也便于按需 tree-shaking。
     </p>
   </article>
 </template>
@@ -112,7 +116,7 @@ async function copyName(name: string) {
 .search { max-width: 280px; margin-bottom: var(--i-spacing-5); }
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(112px, 100%), 1fr));
   gap: var(--i-spacing-2);
 }
 .cell {
@@ -129,7 +133,7 @@ async function copyName(name: string) {
   transition: all var(--i-motion-fast) var(--i-motion-easing);
 }
 .cell:hover {
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   border-color: color-mix(in srgb, var(--i-color-brand) 40%, transparent);
   box-shadow: var(--i-shadow-md);
   transform: translateY(-2px);

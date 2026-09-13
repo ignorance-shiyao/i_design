@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react'
-import { keyboardStep, paneRatio, paneSize, resizePane } from '@i-design/common'
+import {
+  isSplitterResetKey,
+  keyboardStep,
+  paneRatio,
+  paneSize,
+  resetPaneSize,
+  resizePane
+} from '@i-design/common'
 
 export interface SplitterProps {
   first?: ReactNode
@@ -13,6 +20,8 @@ export interface SplitterProps {
   minSecond?: number
   maxFirst?: number
   gutter?: number
+  /** 双击分隔条复位到这个比例 */
+  resetTo?: number
   className?: string
 }
 
@@ -26,6 +35,7 @@ export function Splitter({
   minSecond = 120,
   maxFirst = 0,
   gutter = 4,
+  resetTo = 0.5,
   className = ''
 }: SplitterProps) {
   const root = useRef<HTMLDivElement>(null)
@@ -74,10 +84,34 @@ export function Splitter({
   }
 
   /*
+   * 双击分隔条复位。
+   *
+   * 拖歪之后想回到原样，不复位的话只能凭眼睛拖回去——而「正好一半」是拖不准的。
+   * 复位同样要过一遍夹取：容器变窄之后，五五开算出来的第一栏可能比 minFirst 还小。
+   */
+  function reset() {
+    measure()
+    const size = resetPaneSize(
+      resetTo,
+      total.current,
+      { min: minFirst, max: maxFirst || undefined },
+      { min: minSecond },
+      gutter
+    )
+    onChange?.(paneRatio(size, total.current, gutter))
+  }
+
+  /*
    * 分隔条必须能用键盘拖：它是个真正的控件，不是装饰。
    * 只能鼠标拖的话，用键盘操作的人永远改不了这个布局。
    */
   function onKeyDown(event: ReactKeyboardEvent) {
+    // 双击对键盘使用者不存在，Enter / 空格是同一个动作的键盘等价物
+    if (isSplitterResetKey(event.key)) {
+      event.preventDefault()
+      reset()
+      return
+    }
     const step = keyboardStep(event.key, event.shiftKey)
     if (!step) return
     event.preventDefault()
@@ -115,8 +149,9 @@ export function Splitter({
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={`调整分栏比例，当前 ${percent}%`}
+        aria-label={`调整分栏比例，当前 ${percent}%；双击或按 Enter 复位`}
         style={{ flexBasis: gutter }}
+        onDoubleClick={reset}
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={() => setDragging(false)}

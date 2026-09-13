@@ -4,12 +4,14 @@
  * 三列并排而不是一个长下拉：24 × 60 × 60 拉成一条列表有八万多项，
  * 滚到想要的那一刻比手打还慢。
  */
-.i-timepicker { position: relative; display: inline-block; }
+/* 最大宽度跟随容器：触发器有 140px 的下限，容器比它还窄时该让触发器缩 */
+.i-timepicker { position: relative; display: inline-block; max-width: 100%; }
 .i-timepicker__trigger {
   display: inline-flex;
   align-items: center;
   gap: var(--i-spacing-2);
-  min-width: 140px;
+  min-width: min(140px, 100%);
+  max-width: 100%;
   height: var(--i-control-height-md);
   padding: 0 var(--i-spacing-3);
   border: 1px solid var(--i-color-border);
@@ -73,7 +75,7 @@
 /* 当前项用淡底色块加字重，不用一条重边线 */
 .i-timepicker__cell.is-active {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-weight: var(--i-font-weight-medium);
 }
 .i-timepicker__cell.is-disabled { color: var(--i-color-text-tertiary); opacity: 0.45; cursor: not-allowed; }
@@ -94,8 +96,8 @@
   cursor: pointer;
 }
 .i-timepicker__now { color: var(--i-color-text-secondary); }
-.i-timepicker__now:hover { color: var(--i-color-brand); }
-.i-timepicker__done { color: var(--i-color-brand); font-weight: var(--i-font-weight-medium); }
+.i-timepicker__now:hover { color: var(--i-color-brand-text); }
+.i-timepicker__done { color: var(--i-color-brand-text); font-weight: var(--i-font-weight-medium); }
 
 /*
  * 小程序没有 Teleport，面板只能就地绝对定位。

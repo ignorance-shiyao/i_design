@@ -225,3 +225,23 @@ double tourScrollTo(Rect rect, double viewportHeight, double scrollTop) {
 /// 目标此刻是否已经完整可见。可见就不滚，省掉一次没必要的跳动。
 bool tourNeedsScroll(Rect rect, double viewportHeight, {double padding = 24}) =>
     rect.top < padding || rect.top + rect.height > viewportHeight - padding;
+
+/// 贴着触发器展开的面板该往上还是往下（对应 logic/overlay.ts 的 shouldFlipUp）。
+///
+/// 给那些不浮到顶层、只贴着触发器排布的面板用：下拉选择、日期面板、时间列表。
+/// 触发器一靠近视口底缘，面板就整个掉到屏幕外——内容还在，但够不着。
+///
+/// 上方同样放不下时不翻：两边都放不下的话，翻上去只是把问题换个方向，
+/// 而向下展开至少符合读者对下拉的预期。
+bool shouldFlipUp(
+  double triggerY,
+  double triggerHeight,
+  double popupHeight,
+  double viewportHeight, {
+  double padding = 8,
+}) {
+  final below = viewportHeight - (triggerY + triggerHeight) - padding;
+  final above = triggerY - padding;
+  if (popupHeight <= below) return false;
+  return above > below;
+}

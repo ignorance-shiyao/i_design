@@ -1,5 +1,8 @@
 # i_design 交接文档
 
+> 新接手的人先读 [`交接说明.md`](./交接说明.md)：怎么干活、什么算干完。
+> 本文是目录地图与生成物清单，属于查阅用。
+
 给接手实现的人/工具。目标是让你**不需要读完全部代码**就能安全地加东西：
 读完本文,你应当知道每一类改动该落在哪个文件、哪些文件不能手改、以及怎么证明改对了。
 
@@ -68,6 +71,8 @@ scripts/                    跨端构建与校验脚本
 | `packages/mobile-{vue,react}/src/index.ts` | `build-mobile-index.mjs` |
 | `packages/flutter/test/logic_parity_test.dart` | `packages/flutter/scripts/build-golden-test.mjs` |
 | `docs/SOURCE_STATUS.md` | `scripts/build-doc-status.mjs`（`npm run build:docs`） |
+| `packages/*/dist/**`(发布产物) | `scripts/build-packages.mjs`（`npm run build:packages`） |
+| `src/data/componentProps.ts` | `scripts/build-component-props.mjs`（`npm run build:props`） |
 | `packages/react/src/index.ts` | `build-react-index.mjs` |
 | `packages/flutter/lib/i_design.dart` | `build-barrel.mjs` |
 | `packages/miniprogram/src/components/*/index.json`、`index.wxss` | `scaffold.mjs` |

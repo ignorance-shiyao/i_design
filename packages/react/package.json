@@ -3,9 +3,27 @@
   "version": "0.1.0",
   "description": "Ignorance Design 的 React 实现：复用 @i-design/common 的令牌、样式与交互逻辑",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
-  "peerDependencies": { "react": ">=18", "react-dom": ">=18" },
-  "dependencies": { "@i-design/common": "0.1.0" },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "@i-design/common": "0.1.0"
+  },
   "license": "MIT"
 }

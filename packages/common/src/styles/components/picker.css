@@ -19,7 +19,7 @@
   font-size: var(--i-font-size-md);
   cursor: pointer;
 }
-.i-picker__action.is-primary { color: var(--i-color-brand); }
+.i-picker__action.is-primary { color: var(--i-color-brand-text); }
 
 .i-picker__body { position: relative; display: flex; overflow: hidden; }
 .i-picker__wheel {

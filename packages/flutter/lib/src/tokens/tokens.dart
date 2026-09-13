@@ -16,10 +16,10 @@ class IDesignTokensLight {
   static const colorBgInverse = Color(0xFF141822);
   static const colorText = Color(0xFF252B3A);
   static const colorTextSecondary = Color(0xFF575D6C);
-  static const colorTextTertiary = Color(0xFF8A8E99);
+  static const colorTextTertiary = Color(0xFF6B7080);
   static const colorTextInverse = Color(0xFFFFFFFF);
   static const colorOnMedia = Color(0xFFFFFFFF);
-  static const colorTextLink = Color(0xFF5E7CE0);
+  static const colorTextLink = Color(0xFF4A63C4);
   static const colorBorder = Color(0xFFDFE1E6);
   static const colorBorderStrong = Color(0xFFC3C6CD);
   static const colorHairline = Color(0x14141822);
@@ -32,6 +32,21 @@ class IDesignTokensLight {
   static const colorDangerSubtle = Color(0xFFFDECEE);
   static const colorInfo = Color(0xFF5E7CE0);
   static const colorInfoSubtle = Color(0xFFEEF3FF);
+  static const colorBrandSolid = Color(0xFF5370D2);
+  static const colorOnBrand = Color(0xFFFFFFFF);
+  static const colorSuccessSolid = Color(0xFF3AC295);
+  static const colorOnSuccess = Color(0xFF1B4032);
+  static const colorWarningSolid = Color(0xFFFA9841);
+  static const colorOnWarning = Color(0xFF4B311D);
+  static const colorDangerSolid = Color(0xFFF66F6A);
+  static const colorOnDanger = Color(0xFF492826);
+  static const colorInfoSolid = Color(0xFF5370D2);
+  static const colorOnInfo = Color(0xFFFFFFFF);
+  static const colorSuccessText = Color(0xFF15705A);
+  static const colorWarningText = Color(0xFF8A5014);
+  static const colorDangerText = Color(0xFFB3352F);
+  static const colorBrandText = Color(0xFF4A63C4);
+  static const colorInfoText = Color(0xFF3A4DA3);
   static const colorGlass = Color(0xB8FFFFFF);
   static const colorGlassSubtle = Color(0x8CFFFFFF);
   static const colorGlassBorder = Color(0x1A141822);
@@ -41,7 +56,7 @@ class IDesignTokensLight {
   static const colorCodeBorder = Color(0xFFE6E8F0);
   static const colorCodeText = Color(0xFF2B3245);
   static const colorCodeMuted = Color(0xFF9AA0AE);
-  static const tokComment = Color(0xFF9AA0AE);
+  static const tokComment = Color(0xFF6A707F);
   static const tokKeyword = Color(0xFF7048E8);
   static const tokString = Color(0xFF0F766E);
   static const tokNumber = Color(0xFFB45309);
@@ -49,7 +64,7 @@ class IDesignTokensLight {
   static const tokFn = Color(0xFF2563A8);
   static const tokKlass = Color(0xFF0F766E);
   static const tokProp = Color(0xFF2563A8);
-  static const tokTag = Color(0xFFD6336C);
+  static const tokTag = Color(0xFFC2255C);
   static const tokAttr = Color(0xFFB45309);
   static const tokDirective = Color(0xFF7048E8);
   static const tokPunct = Color(0xFF7C8496);
@@ -62,21 +77,34 @@ class IDesignTokensLight {
   static const chart6 = Color(0xFF1F86B8);
   static const chart7 = Color(0xFFB08A1E);
   static const chart8 = Color(0xFFC2413D);
+  static const chart1Ink = Color(0xFF0D142D);
+  static const chart2Ink = Color(0xFF180300);
+  static const chart3Ink = Color(0xFF000F05);
+  static const chart4Ink = Color(0xFFFFFFFF);
+  static const chart5Ink = Color(0xFF270B17);
+  static const chart6Ink = Color(0xFF001424);
+  static const chart7Ink = Color(0xFF332707);
+  static const chart8Ink = Color(0xFFFFFFFF);
   static const chartSeq1 = Color(0xFFEEF3FF);
   static const chartSeq2 = Color(0xFFADC4FF);
   static const chartSeq3 = Color(0xFF7EA1FF);
   static const chartSeq4 = Color(0xFF5E7CE0);
   static const chartSeq5 = Color(0xFF3A4DA3);
-  static const chartSeq1Ink = Color(0xFF1D2129);
-  static const chartSeq2Ink = Color(0xFF1D2129);
-  static const chartSeq3Ink = Color(0xFF1D2129);
-  static const chartSeq4Ink = Color(0xFFFFFFFF);
+  static const chartSeq1Ink = Color(0xFF343841);
+  static const chartSeq2Ink = Color(0xFF2D3752);
+  static const chartSeq3Ink = Color(0xFF2C3752);
+  static const chartSeq4Ink = Color(0xFF0D142D);
   static const chartSeq5Ink = Color(0xFFFFFFFF);
   static const chartDiv1 = Color(0xFFC2413D);
   static const chartDiv2 = Color(0xFFE8A09E);
   static const chartDiv3 = Color(0xFFDFE1E6);
   static const chartDiv4 = Color(0xFF8FB0E8);
   static const chartDiv5 = Color(0xFF3A4DA3);
+  static const chartDiv1Ink = Color(0xFFFFFFFF);
+  static const chartDiv2Ink = Color(0xFF4F2D2D);
+  static const chartDiv3Ink = Color(0xFF36383C);
+  static const chartDiv4Ink = Color(0xFF293852);
+  static const chartDiv5Ink = Color(0xFFFFFFFF);
 
   static const double fontSizeXs = 12.0;
   static const double fontSizeSm = 13.0;
@@ -114,6 +142,7 @@ class IDesignTokensLight {
   static const motionFast = Duration(milliseconds: 120);
   static const motionBase = Duration(milliseconds: 200);
   static const motionSlow = Duration(milliseconds: 320);
+  static const motionSkeleton = Duration(milliseconds: 1400);
 }
 
 /// Ignorance Design 暗色令牌
@@ -147,6 +176,21 @@ class IDesignTokensDark {
   static const colorDangerSubtle = Color(0x29F66F6A);
   static const colorInfo = Color(0xFFADC4FF);
   static const colorInfoSubtle = Color(0x295E7CE0);
+  static const colorBrandSolid = Color(0xFF7EA1FF);
+  static const colorOnBrand = Color(0xFF2C3752);
+  static const colorSuccessSolid = Color(0xFF3AC295);
+  static const colorOnSuccess = Color(0xFF1B4032);
+  static const colorWarningSolid = Color(0xFFFA9841);
+  static const colorOnWarning = Color(0xFF4B311D);
+  static const colorDangerSolid = Color(0xFFF66F6A);
+  static const colorOnDanger = Color(0xFF492826);
+  static const colorInfoSolid = Color(0xFFADC4FF);
+  static const colorOnInfo = Color(0xFF2D3752);
+  static const colorSuccessText = Color(0xFF3AC295);
+  static const colorWarningText = Color(0xFFFA9841);
+  static const colorDangerText = Color(0xFFF66F6A);
+  static const colorBrandText = Color(0xFFADC4FF);
+  static const colorInfoText = Color(0xFFADC4FF);
   static const colorGlass = Color(0xB8222837);
   static const colorGlassSubtle = Color(0x991B202C);
   static const colorGlassBorder = Color(0x24FFFFFF);
@@ -168,7 +212,7 @@ class IDesignTokensDark {
   static const tokAttr = Color(0xFFFFB86B);
   static const tokDirective = Color(0xFFB197FC);
   static const tokPunct = Color(0xFFB2BDD1);
-  static const colorTextOnBrand = Color(0xFF1D2129);
+  static const colorTextOnBrand = Color(0xFF2C3752);
   static const chart1 = Color(0xFF5E7CE0);
   static const chart2 = Color(0xFFB7622A);
   static const chart3 = Color(0xFF0F8A68);
@@ -177,21 +221,34 @@ class IDesignTokensDark {
   static const chart6 = Color(0xFF1F86B8);
   static const chart7 = Color(0xFFB08A1E);
   static const chart8 = Color(0xFFC2413D);
+  static const chart1Ink = Color(0xFF0D142D);
+  static const chart2Ink = Color(0xFF180300);
+  static const chart3Ink = Color(0xFF000F05);
+  static const chart4Ink = Color(0xFFFFFFFF);
+  static const chart5Ink = Color(0xFF270B17);
+  static const chart6Ink = Color(0xFF001424);
+  static const chart7Ink = Color(0xFF332707);
+  static const chart8Ink = Color(0xFFFFFFFF);
   static const chartSeq1 = Color(0xFFEEF3FF);
   static const chartSeq2 = Color(0xFFADC4FF);
   static const chartSeq3 = Color(0xFF7EA1FF);
   static const chartSeq4 = Color(0xFF5E7CE0);
   static const chartSeq5 = Color(0xFF3A4DA3);
-  static const chartSeq1Ink = Color(0xFF1D2129);
-  static const chartSeq2Ink = Color(0xFF1D2129);
-  static const chartSeq3Ink = Color(0xFF1D2129);
-  static const chartSeq4Ink = Color(0xFFFFFFFF);
+  static const chartSeq1Ink = Color(0xFF343841);
+  static const chartSeq2Ink = Color(0xFF2D3752);
+  static const chartSeq3Ink = Color(0xFF2C3752);
+  static const chartSeq4Ink = Color(0xFF0D142D);
   static const chartSeq5Ink = Color(0xFFFFFFFF);
   static const chartDiv1 = Color(0xFFDE3C3B);
   static const chartDiv2 = Color(0xFF8F4A48);
   static const chartDiv3 = Color(0xFF3A3F4D);
   static const chartDiv4 = Color(0xFF3F5599);
   static const chartDiv5 = Color(0xFF5671F5);
+  static const chartDiv1Ink = Color(0xFF190101);
+  static const chartDiv2Ink = Color(0xFFFFFFFF);
+  static const chartDiv3Ink = Color(0xFFFFFFFF);
+  static const chartDiv4Ink = Color(0xFFFFFFFF);
+  static const chartDiv5Ink = Color(0xFF090F27);
 
   static const double fontSizeXs = 12.0;
   static const double fontSizeSm = 13.0;
@@ -229,6 +286,7 @@ class IDesignTokensDark {
   static const motionFast = Duration(milliseconds: 120);
   static const motionBase = Duration(milliseconds: 200);
   static const motionSlow = Duration(milliseconds: 320);
+  static const motionSkeleton = Duration(milliseconds: 1400);
 }
 
 /// 直接可用的 ThemeData，颜色与 Web 端逐值一致

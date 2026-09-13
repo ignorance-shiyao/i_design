@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../logic/upload.dart';
 import '../theme/i_theme.dart';
 import '../logic/file.dart';
+import '../logic/mention.dart';
 import '../tokens/tokens.dart';
+import 'i_config_provider.dart';
 import 'i_icon.dart';
 
 @immutable
@@ -22,7 +24,7 @@ class IPromptInput extends StatefulWidget {
   const IPromptInput({
     super.key,
     required this.controller,
-    this.placeholder = '问点什么…',
+    this.placeholder = '',
     this.enabled = true,
     this.generating = false,
     this.maxLength = 0,
@@ -33,9 +35,15 @@ class IPromptInput extends StatefulWidget {
     this.onAttach,
     this.onRemoveAttachment,
     this.tools,
+    this.mentions = const [],
+    this.commands = const [],
+    this.onPick,
   });
 
   final TextEditingController controller;
+
+  /// 占位。不传走字典里的那一句——写死中文的话，换成英文字典后
+  /// 这一块会是整个界面里唯一还说中文的地方
   final String placeholder;
   final bool enabled;
 
@@ -51,6 +59,15 @@ class IPromptInput extends StatefulWidget {
 
   /// 附件按钮之后的自定义工具，如模型选择
   final Widget? tools;
+
+  /// 打 `@` 时可引用的来源；不给就不弹
+  final List<IMentionOption> mentions;
+
+  /// 打 `/` 时可用的命令；不给就不弹
+  final List<IMentionOption> commands;
+
+  /// 选中了一个候选项。symbol 区分是 @ 还是 /
+  final void Function(IMentionOption option, String symbol)? onPick;
 
   @override
   State<IPromptInput> createState() => _IPromptInputState();
@@ -73,7 +90,41 @@ class _IPromptInputState extends State<IPromptInput> {
     super.dispose();
   }
 
-  void _onText() => setState(() {});
+  IMentionTrigger? _trigger;
+
+  void _onText() {
+    final symbols = <String>[
+      if (widget.mentions.isNotEmpty) '@',
+      if (widget.commands.isNotEmpty) '/',
+    ];
+    if (symbols.isNotEmpty) {
+      final sel = widget.controller.selection;
+      final caret = sel.isValid ? sel.baseOffset : widget.controller.text.length;
+      _trigger = findMention(widget.controller.text, caret, symbols: symbols);
+    }
+    setState(() {});
+  }
+
+  List<IMentionOption> get _options {
+    final trigger = _trigger;
+    if (trigger == null) return const [];
+    return filterMentions(trigger.symbol == '/' ? widget.commands : widget.mentions, trigger.query);
+  }
+
+  void _pick(IMentionOption option) {
+    final trigger = _trigger;
+    if (trigger == null) return;
+    final sel = widget.controller.selection;
+    final caret = sel.isValid ? sel.baseOffset : widget.controller.text.length;
+    final next = applyMention(widget.controller.text, trigger, option.label, caret);
+    _trigger = null;
+    widget.controller.value = TextEditingValue(
+      text: next.text,
+      selection: TextSelection.collapsed(offset: next.caret),
+    );
+    widget.onPick?.call(option, trigger.symbol);
+  }
+
 
   int get _length => widget.controller.text.length;
   bool get _over => widget.maxLength > 0 && _length > widget.maxLength;
@@ -88,8 +139,10 @@ class _IPromptInputState extends State<IPromptInput> {
   @override
   Widget build(BuildContext context) {
     final c = iColorsOf(context);
+    final locale = IConfigProvider.localeOf(context);
+    final options = _options;
 
-    return Container(
+    final box = Container(
       decoration: BoxDecoration(
         color: widget.enabled ? c.bg : c.bgMuted,
         border: Border.all(color: _focus.hasFocus ? c.brand : c.borderStrong),
@@ -147,7 +200,7 @@ class _IPromptInputState extends State<IPromptInput> {
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
-                  hintText: widget.placeholder,
+                  hintText: widget.placeholder.isEmpty ? locale.promptPlaceholder : widget.placeholder,
                   hintStyle: TextStyle(color: c.textTertiary),
                 ),
               ),
@@ -177,7 +230,7 @@ class _IPromptInputState extends State<IPromptInput> {
                         IIcon('plus', size: 14, color: c.textTertiary),
                         const SizedBox(width: IDesignTokensLight.spacing1),
                         Text(
-                          '附件',
+                          locale.attach,
                           style: TextStyle(
                             color: c.textTertiary,
                             fontSize: IDesignTokensLight.fontSizeXs,
@@ -228,6 +281,72 @@ class _IPromptInputState extends State<IPromptInput> {
             ),
         ],
       ),
+    );
+
+    if (options.isEmpty) return box;
+
+    /*
+     * 候选面板排在输入台上方而不是下方：输入台多半贴着屏幕底部，
+     * 往下弹会被软键盘顶掉。用 Column 而不是 Overlay：
+     * 这一端的输入台通常就固定在底部，浮层反而要自己管跟随与消失。
+     */
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          constraints: const BoxConstraints(maxHeight: 240),
+          margin: const EdgeInsets.only(bottom: IDesignTokensLight.spacing2),
+          padding: const EdgeInsets.all(IDesignTokensLight.spacing2),
+          decoration: BoxDecoration(
+            color: c.bgElevated,
+            border: Border.all(color: c.hairline),
+            borderRadius: BorderRadius.circular(IDesignTokensLight.radiusLg),
+          ),
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              for (final option in options)
+                InkWell(
+                  onTap: () => _pick(option),
+                  borderRadius: BorderRadius.circular(IDesignTokensLight.radiusMd),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: IDesignTokensLight.spacing3,
+                      vertical: IDesignTokensLight.spacing2,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${_trigger!.symbol}${option.label}',
+                          style: TextStyle(
+                            color: c.text,
+                            fontSize: IDesignTokensLight.fontSizeSm,
+                          ),
+                        ),
+                        if (option.desc.isNotEmpty) ...[
+                          const SizedBox(width: IDesignTokensLight.spacing2),
+                          Expanded(
+                            child: Text(
+                              option.desc,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: c.textSecondary,
+                                fontSize: IDesignTokensLight.fontSizeXs,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        box,
+      ],
     );
   }
 }
@@ -286,7 +405,12 @@ class _FileChip extends StatelessWidget {
             const SizedBox(width: IDesignTokensLight.spacing2),
             InkWell(
               onTap: onRemove,
-              child: IIcon('close', size: 12, color: c.textTertiary, semanticLabel: '移除附件'),
+              child: IIcon(
+                'close',
+                size: 12,
+                color: c.textTertiary,
+                semanticLabel: IConfigProvider.localeOf(context).removeAttachmentText(file.name),
+              ),
             ),
           ],
         ],
@@ -328,7 +452,9 @@ class _SendButton extends StatelessWidget {
             generating ? 'close' : 'arrow-right',
             size: generating ? 14 : 16,
             color: c.bg,
-            semanticLabel: generating ? '停止生成' : '发送',
+            semanticLabel: generating
+                ? IConfigProvider.localeOf(context).stopGenerating
+                : IConfigProvider.localeOf(context).send,
           ),
         ),
       ),

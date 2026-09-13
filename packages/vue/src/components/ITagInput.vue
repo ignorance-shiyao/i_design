@@ -111,18 +111,21 @@ function drop(index: number) {
     :class="{ 'is-focused': focused, 'is-disabled': disabled, 'is-full': full }"
     @click="input?.focus()"
   >
-    <span v-for="(tag, i) in value" :key="`${tag}-${i}`" class="i-taginput__tag">
-      {{ tag }}
-      <button
-        v-if="!disabled"
-        class="i-taginput__remove"
-        :aria-label="`移除 ${tag}`"
-        type="button"
-        @click.stop="drop(i)"
-      >
-        <IIcon name="close" :size="11" />
-      </button>
-    </span>
+    <!-- 删掉中间一个标签时，后面的标签平滑补位，而不是整排瞬移 -->
+    <TransitionGroup name="i-tag">
+      <span v-for="(tag, i) in value" :key="`${tag}-${i}`" class="i-taginput__tag">
+        {{ tag }}
+        <button
+          v-if="!disabled"
+          class="i-taginput__remove"
+          :aria-label="`移除 ${tag}`"
+          type="button"
+          @click.stop="drop(i)"
+        >
+          <IIcon name="close" :size="11" />
+        </button>
+      </span>
+    </TransitionGroup>
 
     <input
       ref="input"

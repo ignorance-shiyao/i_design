@@ -20,8 +20,24 @@ const props = withDefaults(
     precision?: number
     disabled?: boolean
     marks?: SliderMark[]
+    /**
+     * 无障碍名。
+     *
+     * 滑块只播报数值，不播报这是什么值：读屏用户听到的是「滑块，40」，
+     * 40 是音量还是亮度，只有看得见的人知道。
+     */
+    ariaLabel?: string
   }>(),
-  { value: 0, min: 0, max: 100, step: 1, precision: 0, disabled: false, marks: () => [] }
+  {
+    value: 0,
+    min: 0,
+    max: 100,
+    step: 1,
+    precision: 0,
+    disabled: false,
+    marks: () => [],
+    ariaLabel: ''
+  }
 )
 
 const emit = defineEmits<{ (e: 'input', a0: number): void; (e: 'change', a0: number): void }>()
@@ -121,6 +137,7 @@ function onKeydown(event: KeyboardEvent) {
       <div
         class="i-slider__handle"
         role="slider"
+        :aria-label="ariaLabel || undefined"
         :tabindex="disabled ? -1 : 0"
         :aria-valuemin="min"
         :aria-valuemax="max"

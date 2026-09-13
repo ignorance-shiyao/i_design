@@ -62,7 +62,7 @@ export function VirtualList<T>({
       className={['i-virtual', className].filter(Boolean).join(' ')}
       style={{ height }}
       role="list"
-      aria-rowcount={items.length}
+      tabIndex={0}
       onScroll={onScroll}
     >
       {/*

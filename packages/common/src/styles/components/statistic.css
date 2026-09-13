@@ -20,9 +20,9 @@
   line-height: 1.2;
 }
 .i-statistic--sm .i-statistic__value { font-size: var(--i-font-size-2xl); }
-.i-statistic--brand .i-statistic__value { color: var(--i-color-brand); }
-.i-statistic--success .i-statistic__value { color: var(--i-color-success); }
-.i-statistic--danger .i-statistic__value { color: var(--i-color-danger); }
+.i-statistic--brand .i-statistic__value { color: var(--i-color-brand-text); }
+.i-statistic--success .i-statistic__value { color: var(--i-color-success-text); }
+.i-statistic--danger .i-statistic__value { color: var(--i-color-danger-text); }
 
 .i-statistic__affix {
   font-size: var(--i-font-size-lg);
@@ -38,5 +38,5 @@
   color: var(--i-color-text-tertiary);
 }
 .i-statistic__trend { display: inline-flex; align-items: center; gap: 2px; }
-.i-statistic__trend.is-up { color: var(--i-color-success); }
-.i-statistic__trend.is-down { color: var(--i-color-danger); }
+.i-statistic__trend.is-up { color: var(--i-color-success-text); }
+.i-statistic__trend.is-down { color: var(--i-color-danger-text); }

@@ -1,4 +1,4 @@
-<view class="i-time-select">
+<view class="i-time-select {{flipUp ? 'is-up' : ''}}">
   <view
     class="i-select-input {{open ? 'is-open' : ''}} {{disabled ? 'is-disabled' : ''}} {{invalid ? 'is-invalid' : ''}}"
     bindtap="onToggle"

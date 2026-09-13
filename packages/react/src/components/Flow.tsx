@@ -13,6 +13,11 @@ import {
   edgeMidpoint,
   edgePath,
   flatten,
+  alignGuides,
+  autoLayout,
+  groupBounds,
+  visibleEdges,
+  visibleNodes,
   marqueeRect,
   minimapLayout,
   moveNodes,
@@ -23,6 +28,8 @@ import {
   viewFromMinimap,
   type FlowEdge,
   type FlowEdgeType,
+  type FlowGroup,
+  type FlowGuide,
   type FlowNode,
   type FlowResizeHandle
 } from '@i-design/common'
@@ -56,6 +63,14 @@ export interface FlowProps {
   edgeType?: FlowEdgeType
   /** 导出文件名，不含扩展名 */
   exportName?: string
+  /**
+   * 分组。框选之后成组，组可整体折叠。
+   *
+   * 组不改节点的坐标，只是在它们外面画一个框——分组是「这几个是一回事」，
+   * 不是「把它们搬到一起」。
+   */
+  groups?: FlowGroup[]
+  onGroupsChange?: (groups: FlowGroup[]) => void
   className?: string
 }
 
@@ -69,6 +84,8 @@ export function Flow({
   onMove,
   edgeType = 'polyline',
   exportName = 'flow',
+  groups = [],
+  onGroupsChange,
   className = ''
 }: FlowProps) {
   const root = useRef<HTMLDivElement>(null)
@@ -80,9 +97,23 @@ export function Flow({
   const [panning, setPanning] = useState(false)
   const [marquee, setMarquee] = useState<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null)
   const [marqueeMode, setMarqueeMode] = useState(false)
+  /* 拖动时的对齐辅助线。松手就清空——它是拖动过程中的提示，不是图的一部分 */
+  const [guides, setGuides] = useState<FlowGuide[]>([])
   const [showMinimap, setShowMinimap] = useState(true)
 
-  const byId = new Map(nodes.map((n) => [n.id, n]))
+  /*
+   * 画布上真正画出来的节点与连线。折叠组的成员换成一个代表方块，
+   * 连到组内的线改指向它——只把成员藏起来的话，那些线会指向空气。
+   */
+  const shownNodes = visibleNodes(nodes, groups)
+  const shownEdges = visibleEdges(edges, groups)
+  /** 没折叠的组才画框：折叠之后那个代表方块本身就是它 */
+  const shownGroups = groups
+    .filter((g) => !g.collapsed)
+    .map((g) => ({ group: g, box: groupBounds(nodes, g) }))
+    .filter((g): g is { group: FlowGroup; box: NonNullable<typeof g.box> } => !!g.box)
+
+  const byId = new Map(shownNodes.map((n) => [n.id, n]))
   const selectedSet = new Set(selection)
   const sizeOf = (node: FlowNode) => ({ w: node.width ?? NODE_W, h: node.height ?? NODE_H })
 
@@ -192,6 +223,16 @@ export function Flow({
   }
 
   function onNodeDown(event: PointerEvent<SVGGElement>, node: FlowNode) {
+    /*
+     * 折叠组的代表方块：点它就是展开。
+     * 折起来之后组框连同它的折叠按钮都没了，代表方块是唯一还在画布上的那个入口——
+     * 没有这一条，折叠是个单向操作。
+     */
+    if (groups.some((g) => g.collapsed && g.id === node.id)) {
+      event.stopPropagation()
+      toggleGroup(node.id)
+      return
+    }
     event.stopPropagation()
     // 加选：Shift / Cmd 点击往选中集合里增删，不加修饰键则重置为这一个
     const additive = event.shiftKey || event.metaKey || event.ctrlKey
@@ -248,12 +289,49 @@ export function Flow({
     if (drag.current) {
       const point = toCanvas(event)
       const delta = { x: point.x - drag.current.from.x, y: point.y - drag.current.from.y }
-      // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
       const base = editBefore.current ?? []
-      const moved = moveNodes(base.map((g) => ({ ...g, label: '' })) as FlowNode[], drag.current.ids, delta)
-      editAfter.current = moved.map((m) => {
-        const before = base.find((g) => g.id === m.id)
-        return { ...m, width: before?.width, height: before?.height }
+      const asNodes = base.map((g) => ({ ...g, label: '' })) as FlowNode[]
+      // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
+      const free = moveNodes(asNodes, drag.current.ids, delta, 0)
+      const grid = moveNodes(asNodes, drag.current.ids, delta)
+
+      /* 只取尺寸。连 x/y 一起取回来的话，对齐算的就是拖动前的位置，永远是「已经对齐」 */
+      const sizeOf = (id: string) => {
+        const found = base.find((g) => g.id === id)
+        return { width: found?.width, height: found?.height }
+      }
+
+      /*
+       * 对齐优先于网格。
+       *
+       * 两者都是吸附，但网格吸的是「整齐」，对齐吸的是「和那一个对上」——
+       * 后者才是用户此刻在做的事。先按网格吸的话，节点只能落在 8 的倍数上，
+       * 于是要么正好对齐、要么差 8 像素，中间那几像素根本到不了，辅助线也就永远不出现。
+       *
+       * 阈值按缩放换算：缩到 50% 时屏幕上的 6px 是画布上的 12px。
+       */
+      const anchorId = drag.current.ids[0]
+      const anchor = free.find((m) => m.id === anchorId)
+      const picked = new Set(drag.current.ids)
+      const aligned = anchor
+        ? alignGuides(
+            { ...anchor, label: '', ...sizeOf(anchorId) } as FlowNode,
+            nodes.filter((n) => !picked.has(n.id)),
+            6 / view.scale
+          )
+        : { dx: 0, dy: 0, guides: [] as FlowGuide[] }
+      setGuides(aligned.guides)
+
+      const onX = aligned.guides.some((g) => g.orientation === 'v')
+      const onY = aligned.guides.some((g) => g.orientation === 'h')
+      editAfter.current = free.map((m) => {
+        const snapped = grid.find((g) => g.id === m.id)!
+        return {
+          id: m.id,
+          x: onX ? m.x + aligned.dx : snapped.x,
+          y: onY ? m.y + aligned.dy : snapped.y,
+          ...sizeOf(m.id)
+        }
       })
       onMove?.(editAfter.current)
       return
@@ -279,7 +357,45 @@ export function Flow({
     commitEdit()
     drag.current = null
     resize.current = null
+    setGuides([])
   }
+
+  /**
+   * 一键排版。
+   *
+   * 走的是与手动拖动同一条 onMove，因此能被撤销——一键把别人排了半天的图重排一遍，
+   * 却撤不回去，那是把一个便利做成了事故。
+   */
+  const layout = () => {
+    if (readOnly) return
+    editBefore.current = geometryOf(nodes.map((n) => n.id))
+    const laid = autoLayout(nodes, edges)
+    editAfter.current = laid.map((n) => {
+      const before = nodes.find((m) => m.id === n.id)
+      return { id: n.id, x: n.x, y: n.y, width: before?.width, height: before?.height }
+    })
+    onMove?.(editAfter.current)
+    commitEdit()
+  }
+
+  /**
+   * 把当前选中的节点成一组。至少要两个——一个节点的「组」除了多一个框什么也没说。
+   */
+  const groupSelection = () => {
+    if (readOnly || selection.length < 2) return
+    onGroupsChange?.([
+      ...groups,
+      {
+        id: `g-${Date.now().toString(36)}`,
+        label: `分组 ${groups.length + 1}`,
+        nodeIds: [...selection]
+      }
+    ])
+  }
+
+  /** 折叠 / 展开一个组 */
+  const toggleGroup = (id: string) =>
+    onGroupsChange?.(groups.map((g) => (g.id === id ? { ...g, collapsed: !g.collapsed } : g)))
 
   const zoom = (delta: number) =>
     setView((v) => ({ ...v, scale: Math.min(2, Math.max(0.4, v.scale + delta)) }))
@@ -323,6 +439,8 @@ export function Flow({
     clone.querySelector('.i-flow__scene')?.removeAttribute('transform')
     clone.querySelector('.i-flow__marquee')?.remove()
     clone.querySelectorAll('.i-flow__handle').forEach((el) => el.remove())
+    // 辅助线是拖动时的提示，不该出现在导出的图里
+    clone.querySelectorAll('.i-flow__guide').forEach((el) => el.remove())
 
     const style = document.createElementNS('http://www.w3.org/2000/svg', 'style')
     style.textContent = `${snapshotStyle(flatten())}\n${flowCss()}`
@@ -423,16 +541,53 @@ export function Flow({
         </defs>
 
         <g className="i-flow__scene" transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
-          {edges.map((edge) => {
+          {/*
+            组框画在连线与节点之下：它是背景，压在上面会盖住线的走向。
+          */}
+          {shownGroups.map(({ group, box }) => (
+            <g key={group.id} className="i-flow__group">
+              <rect
+                className="i-flow__group-box"
+                x={box.x}
+                y={box.y}
+                width={box.width}
+                height={box.height}
+                rx={10}
+              />
+              <text className="i-flow__group-label" x={box.x + 10} y={box.y + 14}>
+                {group.label}
+              </text>
+              {!readOnly && (
+                <g
+                  className="i-flow__group-toggle"
+                  role="button"
+                  aria-label={`折叠 ${group.label}`}
+                  onPointerDown={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                    toggleGroup(group.id)
+                  }}
+                >
+                  <rect x={box.x + box.width - 26} y={box.y + 2} width={18} height={14} rx={4} />
+                  <text x={box.x + box.width - 17} y={box.y + 13} textAnchor="middle">
+                    −
+                  </text>
+                </g>
+              )}
+            </g>
+          ))}
+
+          {shownEdges.map((edge) => {
             const from = byId.get(edge.from)
             const to = byId.get(edge.to)
             if (!from || !to) return null
-            const mid = edgeMidpoint(from, to, edge.type ?? edgeType)
+            const sides = { from: edge.fromSide, to: edge.toSide }
+            const mid = edgeMidpoint(from, to, edge.type ?? edgeType, sides)
             return (
               <g key={`${edge.from}-${edge.to}`}>
                 <path
                   className={['i-flow__edge', isActive(edge) ? 'is-active' : ''].filter(Boolean).join(' ')}
-                  d={edgePath(from, to, edge.type ?? edgeType)}
+                  d={edgePath(from, to, edge.type ?? edgeType, sides)}
                   markerEnd={`url(#i-flow-arrow${isActive(edge) ? '-active' : ''})`}
                 />
                 {edge.label && (
@@ -455,13 +610,18 @@ export function Flow({
             )
           })}
 
-          {nodes.map((node) => {
+          {shownNodes.map((node) => {
             const type = node.type ?? 'process'
             const { w, h } = sizeOf(node)
             return (
               <g
                 key={node.id}
-                className={['i-flow__node', `i-flow__node--${type}`, selectedSet.has(node.id) ? 'is-selected' : '']
+                className={[
+                  'i-flow__node',
+                  `i-flow__node--${type}`,
+                  selectedSet.has(node.id) ? 'is-selected' : '',
+                  groups.some((g) => g.collapsed && g.id === node.id) ? 'is-group' : ''
+                ]
                   .filter(Boolean)
                   .join(' ')}
                 onPointerDown={(e) => onNodeDown(e, node)}
@@ -510,6 +670,21 @@ export function Flow({
               height={marqueeBox.height}
             />
           )}
+
+          {/*
+            对齐辅助线。只在拖动过程中出现，松手即消失——它是操作时的提示，
+            不是图的一部分，留在画布上会被当成一条真的连线。
+          */}
+          {guides.map((guide, index) => (
+            <line
+              key={index}
+              className="i-flow__guide"
+              x1={guide.orientation === 'v' ? guide.at : guide.from}
+              y1={guide.orientation === 'v' ? guide.from : guide.at}
+              x2={guide.orientation === 'v' ? guide.at : guide.to}
+              y2={guide.orientation === 'v' ? guide.to : guide.at}
+            />
+          ))}
         </g>
       </svg>
 
@@ -546,6 +721,18 @@ export function Flow({
 
       {!readOnly && (
         <div className="i-flow__toolbar i-flow__toolbar--history">
+          <button className="i-flow__tool" aria-label="自动布局" onClick={layout}>
+            <Icon name="layers" size={14} />
+          </button>
+          {/* 选中不足两个时禁用：一个节点的「组」除了多一个框什么也没说 */}
+          <button
+            className="i-flow__tool"
+            aria-label="选中的节点成组"
+            disabled={selection.length < 2}
+            onClick={groupSelection}
+          >
+            <Icon name="folder" size={14} />
+          </button>
           <button className="i-flow__tool" aria-label="撤销" disabled={undoStack.length === 0} onClick={undo}>
             <Icon name="undo" size={14} />
           </button>

@@ -85,7 +85,7 @@
 }
 .i-transfer__move:hover:not(:disabled) {
   border-color: var(--i-color-brand);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 /* 没勾选任何东西时按钮不可点：能点但点了没反应，比灰着更让人困惑 */
 .i-transfer__move:disabled { opacity: 0.4; cursor: not-allowed; }

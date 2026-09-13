@@ -3,6 +3,7 @@ import ITable, { type TableColumn, type TableRow } from '@/components/ITable.vue
 import ITag from '@/components/ITag.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import Playground from '@/site/Playground.vue'
 
 import { ref } from 'vue'
 
@@ -46,6 +47,9 @@ const actionColumns: TableColumn[] = [
   { key: 'owner', title: '负责人', width: '110px' },
   { key: 'action', title: '操作', width: '120px', align: 'right' }
 ]
+
+/* playground 代码片段里固定属性的写法（模板里写会和属性引号打架） */
+const tablePgCode = [':columns="columns"', ':data="data"']
 </script>
 
 <template>
@@ -54,6 +58,15 @@ const actionColumns: TableColumn[] = [
     <p class="i-lead">
       展示结构化的行列数据。列宽应按内容语义固定，避免用户在翻页时因列宽跳动而重新定位。
     </p>
+
+    <h2>现场调参</h2>
+    <p>下面的控件由源码里的属性类型生成，改动即时生效，代码区给出对应写法。</p>
+    <Playground
+      name="ITable"
+      :is="ITable"
+      :fixed="{ columns, data }"
+      :fixed-code="tablePgCode"
+    />
 
     <DemoBlock
       title="基础用法与排序"
@@ -137,12 +150,15 @@ const actionColumns: TableColumn[] = [
 
     <h2>各端差异</h2>
     <p>
-      Web 与小程序端自己算窗口，只渲染看得见的那几行；Flutter 端交给能按需建子项的列表。
-      三端共同的一条：列宽必须算死了同时喂给表头与每一行——让每一行各自去量内容宽度的话，
-      滚起来列会左右跳，表头也对不上。所以 Web 端的滚动容器是表格外层而不是
-      <code>tbody</code>：给 <code>tbody</code> 加 <code>overflow</code> 会让它脱离表格布局，
-      列宽随即变成各行各算各的。
+      Web 与小程序端自己算窗口，只渲染看得见的那几行；Flutter 端交给能按需建子项的列表。三端共同的一条：列宽必须算死了同时喂给表头与每一行——让每一行各自去量内容宽度的话，滚起来列会左右跳，表头也对不上。所以 Web 端的滚动容器是表格外层而不是<code>tbody</code>：给 <code>tbody</code> 加 <code>overflow</code> 会让它脱离表格布局，列宽随即变成各行各算各的。
     </p>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>每行的字段少、以浏览为主时——用列表或卡片，表格的横向对齐在窄屏上会全军覆没。</li>
+      <li>数据只有几条且无需对比时——直接写成描述列表。</li>
+      <li>用户真正要做的是分析时——表格给的是明细，趋势与占比该交给图表。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">
@@ -173,8 +189,7 @@ const actionColumns: TableColumn[] = [
 
     <h3>插槽</h3>
     <p>
-      每列提供一个以 <code>key</code> 命名的插槽，作用域参数为
-      <code>{ row, value, index }</code>。
+      每列提供一个以 <code>key</code> 命名的插槽，作用域参数为<code>{ row, value, index }</code>。
     </p>
   </article>
 </template>

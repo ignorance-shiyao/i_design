@@ -90,6 +90,15 @@ import ITimeSelect from './ITimeSelect.vue'
 import ITransfer from './ITransfer.vue'
 import IAffix from './IAffix.vue'
 import IBackTop from './IBackTop.vue'
+import ICodeBlock from './ICodeBlock.vue'
+import ICommandSearch from './ICommandSearch.vue'
+import IAgentScreen from './IAgentScreen.vue'
+import IChatList from './IChatList.vue'
+import IFineTuneCard from './IFineTuneCard.vue'
+import IInsightCards from './IInsightCards.vue'
+import ISelectionActions from './ISelectionActions.vue'
+import IToolChips from './IToolChips.vue'
+import IFloatButton from './IFloatButton.vue'
 import IWatermark from './IWatermark.vue'
 import IImage from './IImage.vue'
 import IImageViewer from './IImageViewer.vue'
@@ -175,6 +184,15 @@ export {
   ITransfer,
   IAffix,
   IBackTop,
+  ICodeBlock,
+  ICommandSearch,
+  IAgentScreen,
+  IChatList,
+  IFineTuneCard,
+  IInsightCards,
+  ISelectionActions,
+  IToolChips,
+  IFloatButton,
   IWatermark,
   IImage,
   IImageViewer,
@@ -241,6 +259,11 @@ export {
   IChartScatter
 }
 
+/*
+ * 配置读取器也要对外：移动端那几个组件在另一个包里，拿不到相对路径，
+ * 而它们同样需要读字典。React 端本来就导出了 useConfig，这里补齐。
+ */
+export { useConfig } from './useConfig'
 export { message } from './message'
 export { confirm } from './confirm'
 export type { SelectOption } from './ISelect.vue'

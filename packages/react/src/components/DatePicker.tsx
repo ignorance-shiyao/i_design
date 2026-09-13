@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   addDays,
   addMonths,
@@ -6,6 +6,7 @@ import {
   formatDate,
   isSameDay,
   parseISO,
+  shouldFlipUp,
   startOfMonth,
   toISO,
   weekdayLabels
@@ -34,7 +35,7 @@ export function DatePicker({
   value = null,
   onChange,
   placeholder = '',
-  size = 'md',
+  size,
   disabled = false,
   invalid = false,
   clearable = false,
@@ -44,11 +45,37 @@ export function DatePicker({
   format = 'YYYY-MM-DD',
   weekStart = 1
 }: DatePickerProps) {
+  /*
+   * 尺寸跟随 ConfigProvider，但组件自己传了就以自己的为准。
+   * 与文案字典同一条规则：全局配置是兜底，不是强制——所以默认值不能写在解构上，
+   * 写了就分不清「没传」与「传了 md」，而这两者在这里的行为不同。
+   */
+  // useConfig() 必须无条件调用：写成 `size ?? useConfig().size` 的话，
+  // 传了 size 时这个 hook 就不执行，hook 调用顺序在两次渲染间不一致
+  const config = useConfig()
+  const resolvedSize = size ?? config.size
   const { locale } = useConfig()
   /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
   const placeholderText = placeholder || locale.datePlaceholder
   const root = useRef<HTMLDivElement | null>(null)
   const [open, setOpen] = useState(false)
+  const panel = useRef<HTMLDivElement | null>(null)
+  /*
+   * 面板往上还是往下开：它贴着触发器用绝对定位，触发器一靠近视口底缘，
+   * 整块日历就掉到屏幕外。判断走公共层，各端结论一致。
+   */
+  const [flipUp, setFlipUp] = useState(false)
+
+  /* 量一次当前位置决定方向。开的时候量，不跟着滚动实时翻——半途翻向会让人点空 */
+  useLayoutEffect(() => {
+    if (!open) {
+      setFlipUp(false)
+      return
+    }
+    const trigger = root.current?.getBoundingClientRect()
+    const box = panel.current?.getBoundingClientRect()
+    if (trigger && box) setFlipUp(shouldFlipUp(trigger, box.height, window.innerHeight))
+  }, [open])
   const selected = useMemo(() => parseISO(value), [value])
   const [viewDate, setViewDate] = useState(() => startOfMonth(selected ?? new Date()))
   // 焦点日期与选中值分离：方向键浏览时不立刻改值
@@ -121,7 +148,9 @@ export function DatePicker({
   const title = `${viewDate.getFullYear()} 年 ${viewDate.getMonth() + 1} 月`
 
   return (
-    <div ref={root} className={['i-date', `i-date--${size}`, open ? 'is-open' : ''].filter(Boolean).join(' ')}>
+    <div ref={root} className={['i-date', `i-date--${resolvedSize}`, open ? 'is-open' : '', flipUp ? 'is-up' : '']
+        .filter(Boolean)
+        .join(' ')}>
       <button
         className={['i-date__trigger', invalid ? 'is-invalid' : '', !selected ? 'is-placeholder' : '']
           .filter(Boolean)
@@ -148,7 +177,7 @@ export function DatePicker({
       </button>
 
       {open && (
-        <div className="i-date__panel" role="dialog" aria-label={title}>
+        <div ref={panel} className="i-date__panel" role="dialog" aria-label={title}>
           <header className="i-date__head">
             <button type="button" className="i-date__nav" aria-label="上一月" onClick={() => setViewDate(addMonths(viewDate, -1))}>
               <Icon name="chevron-left" size={15} />

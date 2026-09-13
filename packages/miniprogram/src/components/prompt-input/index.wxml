@@ -1,4 +1,19 @@
 <view class="i-prompt {{focused ? 'is-focused' : ''}} {{disabled ? 'is-disabled' : ''}}">
+  <!-- 候选面板压在输入台上方：输入台多半贴着屏幕底部，往下弹会被键盘顶掉 -->
+  <view wx:if="{{options.length}}" class="i-prompt__panel">
+    <view
+      wx:for="{{options}}"
+      wx:key="label"
+      class="i-prompt__option"
+      data-index="{{index}}"
+      data-symbol="{{symbol}}"
+      bindtap="onPick"
+    >
+      <text class="i-prompt__option-label">{{symbol}}{{item.label}}</text>
+      <text wx:if="{{item.description}}" class="i-prompt__option-desc">{{item.description}}</text>
+    </view>
+  </view>
+
   <view wx:if="{{files.length}}" class="i-prompt__attachments">
     <view
       wx:for="{{files}}"
@@ -20,7 +35,7 @@
   <textarea
     class="i-prompt__field"
     value="{{value}}"
-    placeholder="{{placeholder}}"
+    placeholder="{{placeholderText}}"
     disabled="{{disabled}}"
     auto-height
     maxlength="{{maxLength > 0 ? maxLength : -1}}"
@@ -33,7 +48,7 @@
     <view class="i-prompt__tools">
       <view class="i-prompt__tool" bindtap="onAttach">
         <view class="i-icon i-icon--plus" style="width:14px;height:14px" />
-        <text>附件</text>
+        <text>{{attachText}}</text>
       </view>
       <slot name="tools" />
     </view>

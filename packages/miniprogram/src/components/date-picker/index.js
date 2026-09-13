@@ -11,8 +11,7 @@ import {
   parseISO,
   startOfMonth,
   toISO,
-  weekdayLabels
-} from '@i-design/common'
+  weekdayLabels, shouldFlipUp } from '@i-design/common'
 
 Component({
   options: { addGlobalClass: true },
@@ -27,7 +26,7 @@ Component({
     format: { type: String, value: 'YYYY-MM-DD' },
     weekStart: { type: Number, value: 1 }
   },
-  data: { open: false, display: '', title: '', weekdays: [], cells: [], viewISO: '' },
+  data: { open: false, flipUp: false, display: '', title: '', weekdays: [], cells: [], viewISO: '' },
   lifetimes: {
     attached() { this.refresh() }
   },
@@ -71,10 +70,36 @@ Component({
       })
     },
 
+
+    /*
+     * 面板往上还是往下开。它贴着触发器排布，触发器一靠近屏幕底缘，
+     * 整块面板就掉出可视区——内容还在，但够不着。
+     * 判断走公共层；这一端量位置只能异步查询，因此开的时候量一次就定下来。
+     */
+    place() {
+      const query = this.createSelectorQuery()
+      query.select('.i-date__trigger').boundingClientRect()
+      query.select('.i-date__panel').boundingClientRect()
+      query.selectViewport().boundingClientRect()
+      query.exec((res) => {
+        const [trigger, panel, viewport] = res || []
+        if (!trigger || !panel || !viewport) return
+        this.setData({
+          flipUp: shouldFlipUp(
+            { y: trigger.top, height: trigger.height },
+            panel.height,
+            viewport.height
+          )
+        })
+      })
+    },
+
     onToggle() {
       if (this.data.disabled) return
       if (!this.data.open) this.refresh(startOfMonth(parseISO(this.data.value) || new Date()))
-      this.setData({ open: !this.data.open })
+      const open = !this.data.open
+      this.setData({ open, flipUp: open ? this.data.flipUp : false })
+      if (open) this.place()
     },
 
     onShiftMonth(e) {

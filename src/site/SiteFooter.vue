@@ -56,7 +56,7 @@
   gap: var(--i-spacing-2) var(--i-spacing-5);
 }
 .footer__links a { color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
-.footer__links a:hover { color: var(--i-color-brand); }
+.footer__links a:hover { color: var(--i-color-brand-text); }
 .footer__bottom {
   padding: var(--i-spacing-3) var(--i-spacing-6);
   border-top: 1px solid var(--i-color-border);

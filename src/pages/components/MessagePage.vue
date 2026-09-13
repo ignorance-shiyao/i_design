@@ -8,8 +8,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
   <article>
     <h1>Message 全局提示</h1>
     <p class="i-lead">
-      操作结果的轻量反馈：不打断流程、不需要用户确认、几秒后自行消失。
-      需要用户读完并做决定的信息，请用 Alert 或 Modal。
+      操作结果的轻量反馈：不打断流程、不需要用户确认、几秒后自行消失。需要用户读完并做决定的信息，请用 Alert 或 Modal。
     </p>
 
     <DemoBlock
@@ -46,6 +45,13 @@ handle.close()"
       <IButton variant="text" @click="message.closeAll()">全部关闭</IButton>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>信息需要用户采取行动时——飘一下就没了，那种信息该用提示条或对话框。</li>
+      <li>同一个动作可能连着触发很多次时——十条一样的提示叠在屏幕顶上比不提示更糟，先合并。</li>
+      <li>错误需要用户读完并记住细节时（报错堆栈、失败原因）——用能停留的形态，而不是三秒后消失的浮层。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>方法</th><th>签名</th><th>说明</th></tr></thead>
@@ -68,8 +74,7 @@ handle.close()"
 
     <h2>无障碍</h2>
     <p>
-      消息容器带 <code>role="status" aria-live="polite"</code>：读屏软件会在当前朗读结束后播报新消息，
-      既不抢焦点，也不会漏掉反馈。
+      消息容器带 <code>role="status" aria-live="polite"</code>：读屏软件会在当前朗读结束后播报新消息，既不抢焦点，也不会漏掉反馈。
     </p>
   </article>
 </template>

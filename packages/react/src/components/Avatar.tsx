@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
-import { initialsOf, tintOf, type IconName } from '@i-design/common'
+import {
+  avatarSizePx,
+  initialsOf,
+  tintInkOf,
+  tintOf,
+  type IconName
+} from '@i-design/common'
 import { Icon } from './Icon'
 
 export interface AvatarProps {
@@ -11,8 +17,6 @@ export interface AvatarProps {
   colorful?: boolean
   className?: string
 }
-
-const sizeMap = { sm: 24, md: 32, lg: 44 }
 
 export function Avatar({
   src = '',
@@ -26,7 +30,7 @@ export function Avatar({
   const [failed, setFailed] = useState(false)
   useEffect(() => setFailed(false), [src])
 
-  const px = typeof size === 'number' ? size : sizeMap[size]
+  const px = avatarSizePx(size)
   // 取字与配色规则来自公共层：同一个人在 Vue 端和 React 端结果一致
   const initials = initialsOf(name)
   const showImage = !!src && !failed
@@ -38,7 +42,12 @@ export function Avatar({
         width: px,
         height: px,
         fontSize: Math.max(11, Math.round(px * 0.38)),
-        background: showImage ? undefined : colorful ? tintOf(name) : tintOf('')
+        background: showImage ? undefined : colorful ? tintOf(name) : tintOf(''),
+        /*
+         * 字色按底色算，不写死白字：六个底色里有一半压不住白字
+         * （绿 2.25、橙 2.18、红 2.84），写死 #fff 会让一半的头像上那两个字糊掉。
+         */
+        color: showImage ? undefined : tintInkOf(colorful ? name : '')
       }}
       title={name || undefined}
     >

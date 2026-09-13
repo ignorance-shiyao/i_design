@@ -43,6 +43,13 @@ const items: BreadcrumbItem[] = [
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>层级只有一层时——面包屑除了占一行什么也没说。</li>
+      <li>页面之间不是包含关系时（并列的几个功能页）——那是标签页或导航菜单，面包屑会让人误以为有上下级。</li>
+      <li>用户是从搜索或外链直接进来的、并不存在「上一级」时——给一个明确的去处，比给一条假的路径诚实。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>

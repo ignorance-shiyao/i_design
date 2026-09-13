@@ -13,9 +13,7 @@ const invalid = ref<RangeValue>(['900', '100'])
   <article>
     <h1>RangeInput 区间输入</h1>
     <p class="i-lead">
-      一次填一个区间的两端：价格区间、数量区间、日期区间。
-      两端共用一圈边框，因为「起」与「止」是同一个字段的两头——
-      校验、清空、聚焦态都该作为一个整体。
+      一次填一个区间的两端：价格区间、数量区间、日期区间。两端共用一圈边框，因为「起」与「止」是同一个字段的两头——校验、清空、聚焦态都该作为一个整体。
     </p>
 
     <DemoBlock
@@ -58,6 +56,13 @@ const invalid = ref<RangeValue>(['900', '100'])
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>区间的两端没有可比性时（两个独立的数）——那是两个输入框，别用一个连字符把它们绑在一起。</li>
+      <li>取值范围小且离散时——用滑块或几个预设按钮，让人敲数字更慢也更容易敲错。</li>
+      <li>用户多半只关心一端时（「不超过多少」）——给单值输入加一个比较符，比逼人填两头好。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -78,6 +83,8 @@ const invalid = ref<RangeValue>(['900', '100'])
   display: flex;
   flex-direction: column;
   gap: var(--i-spacing-3);
+  /* min-width 归零，否则这个 flex 容器会撑到内容宽度，把 max-width 架空 */
+  min-width: 0;
   max-width: 360px;
 }
 .demo-value {

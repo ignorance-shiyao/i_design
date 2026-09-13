@@ -25,12 +25,25 @@ export interface FlowNode {
  */
 export type FlowEdgeType = 'polyline' | 'straight' | 'bezier'
 
+/** 连线从节点的哪条边出入 */
+export type FlowSide = 'top' | 'right' | 'bottom' | 'left'
+
 export interface FlowEdge {
   from: string
   to: string
   label?: string
   /** 单条连线可以覆盖整图的默认走向 */
   type?: FlowEdgeType
+  /**
+   * 指定从起点的哪条边出去。不给就按两点方位自动选。
+   *
+   * 自动选在多数情况下是对的，但有两种图非指定不可：
+   * 一是回边——「驳回」应当从侧面绕回去，自动选会让它贴着主干直上直下，
+   * 和正向的线叠在一起；二是同一对节点之间的多条线，自动选会把它们全压成一条。
+   */
+  fromSide?: FlowSide
+  /** 指定进入终点的哪条边。不给就按两点方位自动选 */
+  toSide?: FlowSide
 }
 
 export const NODE_W = 132
@@ -51,9 +64,13 @@ export function centerOf(node: FlowNode) {
  * 连线端点吸附到节点边缘的中点，而不是节点中心。
  * 连到中心会让箭头钻进节点里，被节点自己的填充盖住。
  */
-export function anchorOf(node: FlowNode, toward: { x: number; y: number }) {
+export function anchorOf(node: FlowNode, toward: { x: number; y: number }, side?: FlowSide) {
   const { w, h } = sizeOf(node)
   const c = centerOf(node)
+
+  // 指定了就照办：指定的方向本身带着语义（回边走侧面、多线分开走），不该被自动判断推翻
+  if (side) return { ...pointOnSide(node, side), side }
+
   const dx = toward.x - c.x
   const dy = toward.y - c.y
 
@@ -64,15 +81,30 @@ export function anchorOf(node: FlowNode, toward: { x: number; y: number }) {
   return { x: c.x, y: dy > 0 ? node.y + h : node.y, side: dy > 0 ? 'bottom' : 'top' as const }
 }
 
+/** 指定边的中点 */
+function pointOnSide(node: FlowNode, side: FlowSide) {
+  const { w, h } = sizeOf(node)
+  const c = centerOf(node)
+  if (side === 'left') return { x: node.x, y: c.y }
+  if (side === 'right') return { x: node.x + w, y: c.y }
+  if (side === 'top') return { x: c.x, y: node.y }
+  return { x: c.x, y: node.y + h }
+}
+
 /**
  * 正交连线：先沿出边方向走一段，再拐向目标。
  *
  * 用直角折线而不是直连斜线：流程图里斜线穿过其他节点时很难辨认走向，
  * 而直角折线的每一段都平行于画布，视线可以顺着走。
  */
-export function edgePath(from: FlowNode, to: FlowNode, type: FlowEdgeType = 'polyline') {
-  const a = anchorOf(from, centerOf(to))
-  const b = anchorOf(to, centerOf(from))
+export function edgePath(
+  from: FlowNode,
+  to: FlowNode,
+  type: FlowEdgeType = 'polyline',
+  sides: { from?: FlowSide; to?: FlowSide } = {}
+) {
+  const a = anchorOf(from, centerOf(to), sides.from)
+  const b = anchorOf(to, centerOf(from), sides.to)
   const gap = 18
 
   if (type === 'straight') return `M${a.x} ${a.y} L${b.x} ${b.y}`
@@ -115,9 +147,14 @@ function offsetBySide(point: { x: number; y: number; side: string }, distance: n
  * 曲线要按三次贝塞尔在 t=0.5 处求值，而不是取两端点中点——
  * 弧度大时中点会离曲线很远，标签飘在空白处。
  */
-export function edgeMidpoint(from: FlowNode, to: FlowNode, type: FlowEdgeType = 'polyline') {
-  const a = anchorOf(from, centerOf(to))
-  const b = anchorOf(to, centerOf(from))
+export function edgeMidpoint(
+  from: FlowNode,
+  to: FlowNode,
+  type: FlowEdgeType = 'polyline',
+  sides: { from?: FlowSide; to?: FlowSide } = {}
+) {
+  const a = anchorOf(from, centerOf(to), sides.from)
+  const b = anchorOf(to, centerOf(from), sides.to)
   if (type !== 'bezier') return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
   const dist = Math.hypot(b.x - a.x, b.y - a.y)
   const push = Math.min(120, Math.max(32, dist / 2))
@@ -287,6 +324,207 @@ export function moveNodes(
   return nodes
     .filter((node) => picked.has(node.id))
     .map((node) => ({ id: node.id, x: node.x + dx, y: node.y + dy }))
+}
+
+/* ---------- 节点分组 ---------- */
+
+export interface FlowGroup {
+  id: string
+  label: string
+  /** 组内节点。不在 `nodes` 里的 id 会被忽略，组随之变小而不是崩掉 */
+  nodeIds: string[]
+  /** 折叠后组内节点收成一个方块 */
+  collapsed?: boolean
+}
+
+/** 组框的边界：包住组内所有节点，再留一圈让标题有地方放 */
+export function groupBounds(nodes: FlowNode[], group: FlowGroup, padding = 16): FlowRect | null {
+  const members = nodes.filter((n) => group.nodeIds.includes(n.id))
+  if (!members.length) return null
+  const xs = members.map((n) => n.x)
+  const ys = members.map((n) => n.y)
+  const rights = members.map((n) => n.x + (n.width ?? NODE_W))
+  const bottoms = members.map((n) => n.y + (n.height ?? NODE_H))
+  const x = Math.min(...xs) - padding
+  // 顶上多留一截给标题：标题压在第一个节点上，读者会以为那是节点自己的字
+  const y = Math.min(...ys) - padding - 18
+  return {
+    x,
+    y,
+    width: Math.max(...rights) + padding - x,
+    height: Math.max(...bottoms) + padding - y
+  }
+}
+
+/**
+ * 折叠之后画布上还剩哪些节点。
+ *
+ * 折叠组里的成员换成一个代表节点——不是把它们藏起来就完事：连到组内的线
+ * 得有个落点，否则那些线会指向空气。代表节点沿用组的 id，
+ * 于是「连到这个组」和「连到组里某一个」在渲染时是同一件事。
+ */
+export function visibleNodes(nodes: FlowNode[], groups: FlowGroup[] = []): FlowNode[] {
+  const collapsed = groups.filter((g) => g.collapsed)
+  if (!collapsed.length) return nodes
+
+  const hidden = new Set(collapsed.flatMap((g) => g.nodeIds))
+  const out = nodes.filter((n) => !hidden.has(n.id))
+  for (const group of collapsed) {
+    const box = groupBounds(nodes, group, 0)
+    if (!box) continue
+    out.push({
+      id: group.id,
+      // 折成一块的位置取组的中上部，读者视线仍落在原来那片区域
+      x: box.x,
+      y: box.y,
+      width: Math.max(NODE_W, Math.min(box.width, 220)),
+      height: NODE_H,
+      label: `${group.label} · ${group.nodeIds.length}`,
+      type: 'process'
+    })
+  }
+  return out
+}
+
+/**
+ * 折叠之后还剩哪些连线。
+ *
+ * 两件事：**端点落在被折叠成员上的线改指向组**，**两端都在同一个折叠组里的线直接去掉**——
+ * 后者画出来是一条从组连回自己的自环，除了噪声什么也不说明。
+ * 重定向之后可能出现多条一模一样的线（组内三个节点都连向外面同一个节点），去重。
+ */
+export function visibleEdges(edges: FlowEdge[], groups: FlowGroup[] = []): FlowEdge[] {
+  const collapsed = groups.filter((g) => g.collapsed)
+  if (!collapsed.length) return edges
+
+  const owner = new Map<string, string>()
+  for (const group of collapsed) for (const id of group.nodeIds) owner.set(id, group.id)
+
+  const seen = new Set<string>()
+  const out: FlowEdge[] = []
+  for (const edge of edges) {
+    const from = owner.get(edge.from) ?? edge.from
+    const to = owner.get(edge.to) ?? edge.to
+    if (from === to) continue
+    const key = `${from}->${to}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(from === edge.from && to === edge.to ? edge : { ...edge, from, to })
+  }
+  return out
+}
+
+/* ---------- 对齐辅助线 ---------- */
+
+/** 一条辅助线。`span` 是它要画多长——只盖住参与对齐的那几个节点 */
+export interface FlowGuide {
+  /** v 是竖线（左右对齐），h 是横线（上下对齐） */
+  orientation: 'v' | 'h'
+  /** 竖线的 x 或横线的 y */
+  at: number
+  /** 线的起止，沿另一根轴 */
+  from: number
+  to: number
+}
+
+/** 一个节点在某根轴上的三条对齐线：起边、中心、止边 */
+function linesOf(node: FlowNode, axis: 'x' | 'y') {
+  const start = axis === 'x' ? node.x : node.y
+  const size = (axis === 'x' ? node.width : node.height) ?? (axis === 'x' ? 120 : 48)
+  return [
+    { kind: 'start' as const, at: start },
+    { kind: 'center' as const, at: start + size / 2 },
+    { kind: 'end' as const, at: start + size }
+  ]
+}
+
+const spanOf = (node: FlowNode, axis: 'x' | 'y') => {
+  const start = axis === 'x' ? node.x : node.y
+  const size = (axis === 'x' ? node.width : node.height) ?? (axis === 'x' ? 120 : 48)
+  return [start, start + size] as const
+}
+
+/**
+ * 拖动时的对齐辅助线与吸附量。
+ *
+ * 手动把两个节点对齐是件很折磨人的事：差一两个像素看得出来，却怎么也拖不准。
+ * 辅助线把「已经对齐了」这件事说出来，吸附再把最后那一两像素替用户走完。
+ *
+ * 三条取舍：
+ *
+ * 1. **中心优先于边**。两个节点中心对齐时，即使宽度不同看起来也是齐的；
+ *    按边对齐则会在宽度不同时显得歪。所以同样距离内先吸中心。
+ * 2. **每根轴只吸一条**。同时吸左边和中心是自相矛盾的，取最近的那条。
+ * 3. **线只画到参与对齐的节点为止**，不贯穿整张画布。贯穿全画布的线在节点多的图上
+ *    会像一张网格，反而看不出是哪两个节点对齐了。
+ *
+ * 阈值用画布坐标，调用方按缩放比例换算——缩小到 50% 时，屏幕上的 6px 是画布上的 12px，
+ * 不换算的话图缩得越小越难吸上。
+ */
+export function alignGuides(
+  moving: FlowNode,
+  others: FlowNode[],
+  threshold = 6
+): { dx: number; dy: number; guides: FlowGuide[] } {
+  const guides: FlowGuide[] = []
+  let dx = 0
+  let dy = 0
+
+  for (const axis of ['x', 'y'] as const) {
+    const mine = linesOf(moving, axis)
+    let best: { delta: number; at: number; center: boolean; other: FlowNode } | null = null
+
+    for (const other of others) {
+      if (other.id === moving.id) continue
+      for (const line of linesOf(other, axis)) {
+        for (const own of mine) {
+          const delta = line.at - own.at
+          if (Math.abs(delta) > threshold) continue
+          const center = own.kind === 'center' && line.kind === 'center'
+          if (
+            !best ||
+            Math.abs(delta) < Math.abs(best.delta) ||
+            // 同样近时中心赢：宽度不同的两个节点，中心对齐才看着是齐的
+            (Math.abs(delta) === Math.abs(best.delta) && center && !best.center)
+          ) {
+            best = { delta, at: line.at, center, other }
+          }
+        }
+      }
+    }
+
+    if (!best) continue
+    if (axis === 'x') dx = best.delta
+    else dy = best.delta
+
+    /*
+     * 吸附量定下来之后，把这一位移下**所有**真正重合的线都画出来。
+     * 左边、中心、右边同时对齐时只画一条，读者会以为只有那一处齐了；
+     * 三条都画出来，「这两个节点完全对齐」才说得清楚。
+     */
+    const cross = axis === 'x' ? 'y' : 'x'
+    const [a1, a2] = spanOf(moving, cross)
+    const seen = new Set<number>()
+    for (const other of others) {
+      if (other.id === moving.id) continue
+      const [b1, b2] = spanOf(other, cross)
+      for (const line of linesOf(other, axis)) {
+        for (const own of linesOf(moving, axis)) {
+          if (line.at - own.at !== best.delta) continue
+          if (seen.has(line.at)) continue
+          seen.add(line.at)
+          guides.push({
+            orientation: axis === 'x' ? 'v' : 'h',
+            at: line.at,
+            from: Math.min(a1, b1),
+            to: Math.max(a2, b2)
+          })
+        }
+      }
+    }
+  }
+
+  return { dx, dy, guides }
 }
 
 /* ---------- 节点缩放 ---------- */

@@ -305,7 +305,7 @@ const resources = [
 }
 h1 {
   margin: 18px 0 20px;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-size: clamp(
     var(--i-font-size-5xl),
     7vw,
@@ -345,8 +345,9 @@ h1 span {
 }
 .primary-link {
   padding: 14px 24px;
-  background: var(--i-color-brand);
-  color: var(--i-color-text-on-brand);
+  /* 底色与字色成对取：品牌色原值上的白字只有 3.86，这是首屏最主要的那个入口 */
+  background: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
   border-radius: var(--i-radius-md);
 }
 .primary-link:hover {
@@ -378,7 +379,7 @@ h1 span {
   border-color: var(--i-color-brand);
 }
 .resource-link > svg {
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   flex: none;
 }
 .resource-link > svg:last-child {
@@ -458,7 +459,7 @@ h1 span {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-size: var(--i-font-size-md);
 }
 .platforms {
@@ -686,7 +687,8 @@ h1 span {
 }
 .sample-text-link {
   font-size: var(--i-font-size-xs);
-  color: var(--i-color-brand);
+  /* 小字用 brand-text：品牌色在白底上只有 3.86:1 */
+  color: var(--i-color-brand-text);
 }
 .sample-controls label {
   display: block;
@@ -745,7 +747,7 @@ h1 span {
 .type-display span {
   font-size: var(--i-font-size-3xl);
   margin-left: 20px;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .sample-type p {
   font-size: var(--i-font-size-xs);
@@ -760,7 +762,7 @@ h1 span {
   gap: 16px;
 }
 .status-icon {
-  color: var(--i-color-success);
+  color: var(--i-color-success-text);
 }
 .status-line strong {
   font-size: var(--i-font-size-md);

@@ -6,6 +6,7 @@ import {
   collapseTags,
   rafThrottle,
   scrollToRow,
+  shouldFlipUp,
   shouldVirtualize,
   toggleValue,
   virtualWindow
@@ -34,16 +35,23 @@ const props = withDefaults(
     multiple?: boolean
     /** 多选时最多完整显示几个标签，其余折成「+N」。0 表示全部显示 */
     maxTagCount?: number
+    /**
+     * 无障碍名。不传时用占位文案。
+     *
+     * combobox 的内容被读成「当前值」而不是「这是什么」，因此名字必须另外给：
+     * 不给的话读屏用户听到的是「组合框，北京」——北京是什么，只有看得见的人知道。
+     */
+    ariaLabel?: string
   }>(),
   {
     modelValue: null,
     placeholder: '',
-    size: 'md',
     disabled: false,
     invalid: false,
     clearable: false,
     multiple: false,
-    maxTagCount: 0
+    maxTagCount: 0,
+    ariaLabel: ''
   }
 )
 
@@ -52,13 +60,29 @@ const emit = defineEmits<{
   change: [SelectModel]
 }>()
 
-const { locale } = useConfig()
+const { locale, size: configSize } = useConfig()
+
+/*
+ * 尺寸跟随 ConfigProvider，但组件自己传了就以自己的为准。
+ * 与文案字典同一条规则：全局配置是兜底，不是强制。
+ *
+ * 所以 size 不能写进 withDefaults——写了就分不清「没传」与「传了 md」，
+ * 而这两者在这里的行为不同。下面这个同名计算属性在模板里会盖住那个属性。
+ */
+const size = computed(() => props.size ?? configSize.value)
 /* 传了就用传的，没传才回落到字典——组件自己的默认值不该盖过调用方 */
 const placeholderText = computed(() => props.placeholder || locale.value.placeholder)
 
 const root = ref<HTMLElement | null>(null)
 const menu = ref<HTMLElement | null>(null)
 const open = ref(false)
+/*
+ * 面板往上还是往下开。
+ *
+ * 它贴着触发器用绝对定位，因此触发器一靠近视口底缘，整块面板就掉到屏幕外——
+ * 选项还在，但够不着。判断放在公共层，几个同类面板给出的结论才一致。
+ */
+const flipUp = ref(false)
 /** 键盘高亮项索引；-1 表示无高亮 */
 const activeIndex = ref(-1)
 
@@ -145,6 +169,7 @@ function toggle() {
     activeIndex.value = props.options.findIndex((o) => isSelected(o))
     nextTick(() => {
       measure()
+      placeMenu()
       revealActive()
     })
   } else {
@@ -152,9 +177,18 @@ function toggle() {
   }
 }
 
+/** 量一次当前位置决定方向。开的时候量，不跟着滚动实时翻——半途翻向会让人点空 */
+function placeMenu() {
+  const trigger = root.value?.getBoundingClientRect()
+  const panel = menu.value?.getBoundingClientRect()
+  if (!trigger || !panel) return
+  flipUp.value = shouldFlipUp(trigger, panel.height, window.innerHeight)
+}
+
 function close() {
   open.value = false
   activeIndex.value = -1
+  flipUp.value = false
 }
 
 function emitValue(next: SelectModel) {
@@ -242,7 +276,7 @@ onBeforeUnmount(() => {
     class="i-select"
     :class="[
       `i-select--${size}`,
-      { 'is-open': open, 'is-disabled': disabled, 'is-multiple': multiple }
+      { 'is-open': open, 'is-disabled': disabled, 'is-multiple': multiple, 'is-up': flipUp }
     ]"
   >
     <button
@@ -251,6 +285,7 @@ onBeforeUnmount(() => {
       type="button"
       role="combobox"
       aria-haspopup="listbox"
+      :aria-label="ariaLabel || placeholderText"
       :aria-expanded="open"
       :disabled="disabled"
       @click="toggle"

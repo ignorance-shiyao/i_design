@@ -6,7 +6,7 @@ import {
   pullRotate,
   pullState
 } from '@i-design/common'
-import { Icon } from '@i-design/react'
+import { Icon, useConfig } from '@i-design/react'
 
 export interface PullDownRefreshProps {
   /** 由调用方持有：刷新是异步的，什么时候算完只有它知道 */
@@ -24,9 +24,16 @@ export interface PullDownRefreshProps {
 export function PullDownRefresh({
   refreshing,
   onRefresh,
-  texts = { pulling: '下拉刷新', ready: '松手即可刷新', refreshing: '正在刷新' },
+  texts,
   children
 }: PullDownRefreshProps) {
+  /* 三段提示走字典；调用方传了 texts 则以它为准 */
+  const { locale } = useConfig()
+  const resolvedTexts = texts ?? {
+    pulling: locale.pullToRefresh,
+    ready: locale.releaseToRefresh,
+    refreshing: locale.refreshing
+  }
   const [distance, setDistance] = useState(0)
   const [settling, setSettling] = useState(false)
   const startY = useRef(0)
@@ -34,7 +41,7 @@ export function PullDownRefresh({
 
   const offset = refreshing ? PULL_LOADING_HEIGHT : distance
   const state = pullState(distance, refreshing)
-  const text = state === 'refreshing' ? texts.refreshing : state === 'ready' ? texts.ready : texts.pulling
+  const text = state === 'refreshing' ? resolvedTexts.refreshing : state === 'ready' ? resolvedTexts.ready : resolvedTexts.pulling
 
   const onStart = (event: TouchEvent<HTMLDivElement>) => {
     // 只在真正到顶时接管手势：中途接管会把正常的向上滚动也吃掉

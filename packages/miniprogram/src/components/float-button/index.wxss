@@ -1,0 +1,2 @@
+@import '../../../dist/styles/float-button.wxss';
+@import '../../../dist/styles/icons.wxss';

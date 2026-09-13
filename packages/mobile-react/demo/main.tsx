@@ -1,9 +1,9 @@
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ActionSheet, Button, Cell, Input, Switch, Tag, ToastHost, toast } from '../src'
-import '@i-design/common/styles/index.css'
+import '../../common/src/styles/index.css'
 // 顺序要紧：移动覆盖层必须后于基础样式
-import '@i-design/common/styles/mobile.css'
+import '../../common/src/styles/mobile.css'
 
 function App() {
   const [sheet, setSheet] = useState(false)

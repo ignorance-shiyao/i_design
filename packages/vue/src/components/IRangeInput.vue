@@ -3,6 +3,27 @@
   差异仅在 Vue 2 的语法约束，行为保持一致。
 -->
 <script setup lang="ts">
+import { computed as _computedModel, getCurrentInstance as _modelInstance } from 'vue'
+function defineModel(nameOrOptions, maybeOptions) {
+  const named = typeof nameOrOptions === 'string'
+  const prop = named ? nameOrOptions : 'value'
+  const options = (named ? maybeOptions : nameOrOptions) ?? {}
+  const event = prop === 'value' ? 'input' : 'update:' + prop
+  const inst = _modelInstance()
+  const fallback = options.default
+  return _computedModel({
+    get() {
+      const proxy = inst.proxy
+      const v = proxy.$props[prop] !== undefined ? proxy.$props[prop] : proxy.$attrs[prop]
+      if (v !== undefined) return v
+      return typeof fallback === 'function' ? fallback() : fallback
+    },
+    set(v) { inst.proxy.$emit(event, v) }
+  })
+}
+
+import { computed } from 'vue'
+import { useConfig } from './useConfig'
 import { ref } from 'vue'
 import { orderRange, type RangeValue } from '@i-design/common'
 
@@ -23,12 +44,21 @@ const props = withDefaults(
   {
     placeholders: () => ['开始', '结束'],
     separator: '—',
-    size: 'md',
     disabled: false,
     invalid: false,
     autoOrder: true
   }
 )
+
+/*
+ * 尺寸跟随 ConfigProvider，但组件自己传了就以自己的为准。
+ * 与文案字典同一条规则：全局配置是兜底，不是强制。
+ *
+ * 所以 size 不能写进 withDefaults——写了就分不清「没传」与「传了 md」，
+ * 而这两者在这里的行为不同。下面这个同名计算属性在模板里会盖住那个属性。
+ */
+const { size: configSize } = useConfig()
+const size = computed(() => props.size ?? configSize.value)
 
 const model = defineModel<RangeValue>({ default: () => ['', ''] as RangeValue })
 const emit = defineEmits<{ (e: 'change', a0: RangeValue): void }>()

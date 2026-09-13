@@ -38,10 +38,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
 
     <h2>CheckTag 可选标签</h2>
     <p>
-      长得像标签、行为像多选框，用在「兴趣标签」「快捷筛选」这类场景——
-      比一排 Checkbox 省地方，也比 Checkbox 更适合数量不定的项。
-      选中态用填充色而不是加一圈粗边：粗边会让选中项的视觉面积变大，
-      一排标签选中几个之后，间距看起来就不匀了。
+      长得像标签、行为像多选框，用在「兴趣标签」「快捷筛选」这类场景——比一排 Checkbox 省地方，也比 Checkbox 更适合数量不定的项。选中态用填充色而不是加一圈粗边：粗边会让选中项的视觉面积变大，一排标签选中几个之后，间距看起来就不匀了。
     </p>
     <DemoBlock
       title="可选标签"
@@ -59,6 +56,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
       </div>
       <p class="check-tags__value">已选：{{ picked.join('、') || '（无）' }}</p>
     </DemoBlock>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>文字本身就够说明问题时——一圈边框并不会让它更清楚，只会更花。</li>
+      <li>用来表示可点的操作时——那是按钮或链接，标签看起来是不可点的。</li>
+      <li>一行里挂七八个标签时——先分主次，全都标出来等于什么都没标。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">

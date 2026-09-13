@@ -20,8 +20,7 @@ const indeterminate = computed(() => group.value.length > 0 && group.value.lengt
   <article>
     <h1>Checkbox 多选框</h1>
     <p class="i-lead">
-      从一组选项中选择任意多个。单独使用时表示一个开关式的确认项（如「记住我」），
-      成组使用时表示筛选或批量选择。
+      从一组选项中选择任意多个。单独使用时表示一个开关式的确认项（如「记住我」），成组使用时表示筛选或批量选择。
     </p>
 
     <DemoBlock
@@ -74,6 +73,13 @@ const indeterminate = computed(
         <span class="hint">最多选 2 人，已选 {{ limited.length }} 人</span>
       </div>
     </DemoBlock>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>选项互斥时——那是单选框。用多选框表达互斥，用户会以为可以都选。</li>
+      <li>只有一个开关语义的选项、且改完立即生效时——用 Switch：多选框暗示「要等提交」。</li>
+      <li>选项超过十来个时——用穿梭框或带搜索的多选下拉，一屏排不下的复选框谁也数不清选了几个。</li>
+    </ul>
 
     <h2>API</h2>
     <h3>ICheckboxGroup</h3>

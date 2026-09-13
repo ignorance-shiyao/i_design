@@ -19,7 +19,7 @@
   cursor: pointer;
 }
 .i-tree__row:hover { background: var(--i-color-bg-subtle); }
-.i-tree__row.is-selected { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
+.i-tree__row.is-selected { background: var(--i-color-brand-subtle); color: var(--i-color-brand-text); }
 .i-tree__row.is-disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }
 .i-tree__row.is-disabled:hover { background: none; }
 .i-tree__row:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }

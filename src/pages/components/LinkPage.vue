@@ -8,8 +8,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
   <article>
     <h1>Link 链接</h1>
     <p class="i-lead">
-      跳转到另一个地址。它与按钮的区别不是长相而是后果：链接换一个位置，按钮做一件事——
-      能被收藏、能在新标签页打开的才是链接。
+      跳转到另一个地址。它与按钮的区别不是长相而是后果：链接换一个位置，按钮做一件事——能被收藏、能在新标签页打开的才是链接。
     </p>
 
     <DemoBlock
@@ -73,6 +72,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
         <ILink disabled>不可用</ILink>
       </ISpace>
     </DemoBlock>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>点下去不离开当前地址、只是触发一个动作时——那是按钮。链接的右键菜单会给出「在新标签页打开」，而那一项在这里是坏的。</li>
+      <li>整块区域都可点时——让整块可点，一行里只有几个字能点会让人反复试。</li>
+      <li>链接文字是「点击这里」时——把目的地写进文字里，读屏用户听到的正是这几个字。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">

@@ -27,9 +27,9 @@
 
 .i-link--default { color: var(--i-color-text); }
 .i-link--brand { color: var(--i-color-text-link); }
-.i-link--success { color: var(--i-color-success); }
-.i-link--warning { color: var(--i-color-warning); }
-.i-link--danger { color: var(--i-color-danger); }
+.i-link--success { color: var(--i-color-success-text); }
+.i-link--warning { color: var(--i-color-warning-text); }
+.i-link--danger { color: var(--i-color-danger-text); }
 
 /* 下划线时机：一直有 / 仅悬停 / 从不。「从不」只适用于本身已成区块的入口 */
 .i-link--underline-hover { text-decoration: none; }

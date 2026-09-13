@@ -1,4 +1,12 @@
 <script setup lang="ts">
+/*
+ * 落在这个组件上的属性要转给里面的 <input>，而不是外面那层包装 div。
+ * 不这么做的话，`<IFormItem>` 给出的 `id` 会挂在 div 上，
+ * 而 `<label for>` 指向的是一个不可标注的元素——标签白写了。
+ * class 与 style 例外，它们仍然作用在外层。
+ */
+defineOptions({ inheritAttrs: false })
+import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
 import IIcon from './IIcon.vue'
 import { clampNumber, roundTo, stepValue } from '@i-design/common'
@@ -17,6 +25,13 @@ const props = withDefaults(
     placeholder?: string
     /** 隐藏两侧的加减按钮，只保留键盘输入 */
     hideStep?: boolean
+    /**
+     * 无障碍名。
+     *
+     * 控件旁边没有可见文字时必须给：读屏用户听到的是「编辑框，空」，
+     * 填什么全靠猜。占位文案不算名字——它一开始打字就消失了。
+     */
+    ariaLabel?: string
   }>(),
   {
     modelValue: null,
@@ -24,13 +39,23 @@ const props = withDefaults(
     max: Number.POSITIVE_INFINITY,
     step: 1,
     precision: 0,
-    size: 'md',
     disabled: false,
     invalid: false,
     placeholder: '',
-    hideStep: false
+    hideStep: false,
+    ariaLabel: ''
   }
 )
+
+/*
+ * 尺寸跟随 ConfigProvider，但组件自己传了就以自己的为准。
+ * 与文案字典同一条规则：全局配置是兜底，不是强制。
+ *
+ * 所以 size 不能写进 withDefaults——写了就分不清「没传」与「传了 md」，
+ * 而这两者在这里的行为不同。下面这个同名计算属性在模板里会盖住那个属性。
+ */
+const { size: configSize } = useConfig()
+const size = computed(() => props.size ?? configSize.value)
 
 const emit = defineEmits<{ 'update:modelValue': [number | null]; change: [number | null] }>()
 
@@ -98,9 +123,11 @@ function onKeydown(event: KeyboardEvent) {
   <div
     class="i-input-number"
     :class="[
+      $attrs.class,
       `i-input-number--${size}`,
       { 'is-focused': focused, 'is-disabled': disabled, 'is-invalid': invalid }
     ]"
+    :style="$attrs.style"
   >
     <button
       v-if="!hideStep"
@@ -114,6 +141,7 @@ function onKeydown(event: KeyboardEvent) {
     </button>
 
     <input
+      v-bind="{ ...$attrs, class: undefined, style: undefined }"
       class="i-input-number__field"
       type="number"
       inputmode="decimal"
@@ -124,6 +152,7 @@ function onKeydown(event: KeyboardEvent) {
       :max="max === Number.POSITIVE_INFINITY ? undefined : max"
       :step="step"
       role="spinbutton"
+      :aria-label="ariaLabel || undefined"
       :aria-valuenow="modelValue ?? undefined"
       @input="onInput"
       @keydown="onKeydown"

@@ -47,14 +47,12 @@ const anchors = [
   <article>
     <h1>导航与通知</h1>
     <p class="i-lead">
-      菜单负责「去哪里」，锚点负责「在这一页的哪儿」，通知负责「有件事需要你知道」。
-      三者共用同一套展开与高亮规则。
+      菜单负责「去哪里」，锚点负责「在这一页的哪儿」，通知负责「有件事需要你知道」。三者共用同一套展开与高亮规则。
     </p>
 
     <h2 id="nav-menu">导航菜单</h2>
     <p>
-      选中项的祖先分组会自动展开——从外部跳转过来时，如果不展开，
-      用户会看到选中项藏在收起的分组里，以为没跳成功。
+      选中项的祖先分组会自动展开——从外部跳转过来时，如果不展开，用户会看到选中项藏在收起的分组里，以为没跳成功。
     </p>
     <DemoBlock
       title="侧栏菜单"
@@ -76,9 +74,7 @@ const anchors = [
 
     <h2 id="nav-anchor">页内锚点</h2>
     <p>
-      长文档的章节跳转。判定线不取视口顶端，而是留出吸顶导航的高度——
-      否则标题刚滚出视野才切换，读者已经在读下一节了。滚到页面底部时直接选中最后一项，
-      因为末尾的短章节永远越不过判定线。
+      长文档的章节跳转。判定线不取视口顶端，而是留出吸顶导航的高度——否则标题刚滚出视野才切换，读者已经在读下一节了。滚到页面底部时直接选中最后一项，因为末尾的短章节永远越不过判定线。
     </p>
     <DemoBlock
       title="跟随滚动"
@@ -91,9 +87,7 @@ const anchors = [
 
     <h2 id="nav-notification">通知</h2>
     <p>
-      与 Message 的分界：一句话的结果反馈用 Message（居中、自动消失）；
-      需要用户读完、甚至去点一下的用 Notification（角落、可常驻、带操作）。
-      带操作的通知默认不自动关闭——正要去点，它消失了。
+      与 Message 的分界：一句话的结果反馈用 Message（居中、自动消失）；需要用户读完、甚至去点一下的用 Notification（角落、可常驻、带操作）。带操作的通知默认不自动关闭——正要去点，它消失了。
     </p>
     <DemoBlock
       title="四种语气"
@@ -125,13 +119,19 @@ const anchors = [
         </IButton>
       </div>
     </DemoBlock>
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>页面只有三五个、彼此并列时——一排标签就够，再加面包屑与侧边栏是自造层级。</li>
+      <li>导航项会随权限变化时——别让它在不同人眼里跳来跳去，先想好缺项时的样子。</li>
+      <li>当前位置无法在导航里标出时——那说明这个页面不属于任何一项，先把信息结构理顺。</li>
+    </ul>
   </article>
 </template>
 
 <style scoped>
 .nav-demo { display: flex; gap: var(--i-spacing-6); flex-wrap: wrap; }
 .nav-demo__side {
-  width: 220px;
+  width: min(220px, 100%);
   padding: var(--i-spacing-2);
   border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-lg);

@@ -1,4 +1,5 @@
-<view class="i-loading i-loading--{{size}}" role="status" aria-label="{{text || '加载中'}}">
+<view class="i-loading i-loading--{{size}}" role="status" aria-label="{{label}}">
   <view class="i-loading__spinner"></view>
   <text wx:if="{{text}}" class="i-loading__text">{{text}}</text>
+  <text wx:if="{{elapsedText}}" class="i-loading__elapsed">{{elapsedText}}</text>
 </view>

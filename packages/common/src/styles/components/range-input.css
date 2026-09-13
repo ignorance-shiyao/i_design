@@ -11,6 +11,12 @@
   align-items: center;
   gap: var(--i-spacing-2);
   width: 100%;
+  /*
+   * flex 项的 min-width 默认是 auto，也就是「不小于内容」。两个输入框加分隔符
+   * 的内容宽度有三百多，于是这个控件放进窄容器里不缩、直接把容器顶破。
+   * 它是一个可输入的字段，本来就该跟着容器走。
+   */
+  min-width: 0;
   height: var(--i-control-height-md);
   padding: 0 var(--i-spacing-3);
   border: 1px solid var(--i-color-border);

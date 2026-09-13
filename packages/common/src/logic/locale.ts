@@ -51,6 +51,71 @@ export interface Locale {
   required: string
   invalidFormat: string
 
+
+  /* 图表：数据表是图表的无障碍出口，它自己的按钮与表头也得跟着字典走 */
+  /** 展开数据表的按钮 */
+  chartTableShow: string
+  /** 收起数据表的按钮 */
+  chartTableHide: string
+  /** 数据表的第一列表头 */
+  chartCategory: string
+  chartValue: string
+  chartPercent: string
+  /** 系列过多时合并出来的那一项 */
+  chartOther: string
+
+  /* AI 交互 */
+  /** 重新生成。与 retry 分开：一个是失败后重来，一个是对结果不满意再来一次 */
+  regenerate: string
+  thinking: string
+  toolInput: string
+  toolError: string
+  toolResult: string
+  /** 工具芯片折叠起来的那部分：「还有 N 个」 */
+  /** 输入台的占位与三个按钮：写死中文的话，换成英文字典后这一块会是唯一还说中文的地方 */
+  promptPlaceholder: string
+  attach: string
+  send: string
+  stopGenerating: string
+  /** 移除某个附件的无障碍名。读屏用户听到的就是这一句 */
+  removeAttachmentText: (name: string) => string
+  toolMoreText: (count: number) => string
+  /** 折叠部分里失败的次数。单独说是因为「共 10 次」把「全成」与「有一次失败」说成了一样 */
+  toolFailedText: (count: number) => string
+
+  /* 上传 */
+  /**
+   * 可接受的类型与大小上限那一句。
+   *
+   * 整句交给字典而不是在组件里拼：顿号、逗号与语序都是语言相关的，
+   * 拼出来的英文会是「支持 PNG, JPG , 单个不超过 5 MB」这种半中半英的样子。
+   */
+  uploadHintText: (types: string[], maxSize: number) => string
+  /** 类型不符时的提示。读者要知道的是「该给什么」，不是「你给错了」 */
+  uploadRejectText: (types: string[]) => string
+  /** 通配 MIME 对应的类别词 */
+  fileKinds: { image: string; audio: string; video: string; text: string }
+
+  /* 逐题确认 */
+  next: string
+  skip: string
+  /** 预置选项之外的自填项 */
+  otherOption: string
+
+
+  /* 移动端专有 */
+  /** 下拉刷新的三段提示 */
+  pullToRefresh: string
+  releaseToRefresh: string
+  refreshing: string
+  /** 悬浮新建按钮的无障碍名 */
+  create: string
+  /** 倒计时的单位字，如「3 天 12 时」 */
+  dayUnit: string
+  hourUnit: string
+  minuteUnit: string
+  secondUnit: string
+
   /** 分页的「共 N 条」。用函数而不是模板串：有的语言要按数量变形 */
   totalText: (total: number) => string
   /** 分页的「第 11-20 条 / 共 95 条」。整句交给字典，各语言的语序本来就不同 */
@@ -66,6 +131,14 @@ export interface Locale {
 }
 
 export type EmptyReason = 'empty' | 'search' | 'error' | 'permission'
+
+/*
+ * 中文与西文之间留一个空格，中文与中文之间不留。
+ *
+ * 「支持 PNG」是对的，「支持 图片」里那个空格是多的——它看起来像少了个字。
+ * 拼中文句子时凡是要接一段可能是西文也可能是中文的内容，都得走这一步。
+ */
+const cjkGap = (text: string) => (/^[\u4e00-\u9fff]/.test(text) ? text : ` ${text}`)
 
 export const zhCN: Locale = {
   name: 'zh-CN',
@@ -93,6 +166,41 @@ export const zhCN: Locale = {
   collapse: '收起',
   required: '此项必填',
   invalidFormat: '格式不正确',
+  chartTableShow: '查看数据表',
+  chartTableHide: '收起数据表',
+  chartCategory: '类别',
+  chartValue: '数值',
+  chartPercent: '占比',
+  chartOther: '其他',
+  regenerate: '重新生成',
+  thinking: '推理过程',
+  toolInput: '入参',
+  toolError: '错误',
+  toolResult: '结果',
+  promptPlaceholder: '问点什么…',
+  attach: '附件',
+  send: '发送',
+  stopGenerating: '停止生成',
+  removeAttachmentText: (name) => `移除 ${name}`,
+  uploadHintText: (types, maxSize) =>
+    [types.length ? `支持${cjkGap(types.join('、'))}` : '', maxSize ? `单个不超过 ${maxSize} MB` : '']
+      .filter(Boolean)
+      .join('，'),
+  uploadRejectText: (types) => `只接受${cjkGap(types.join('、'))}`,
+  fileKinds: { image: '图片', audio: '音频', video: '视频', text: '文本' },
+  toolMoreText: (count) => `还有 ${count} 个`,
+  toolFailedText: (count) => `${count} 个失败`,
+  next: '下一题',
+  skip: '跳过',
+  otherOption: '其他',
+  pullToRefresh: '下拉刷新',
+  releaseToRefresh: '松手即可刷新',
+  refreshing: '正在刷新',
+  create: '新建',
+  dayUnit: '天',
+  hourUnit: '时',
+  minuteUnit: '分',
+  secondUnit: '秒',
   totalText: (total) => `共 ${total} 条`,
   rangeText: (from, to, total) => `第 ${from}-${to} 条 / 共 ${total} 条`,
   emptyPresets: {
@@ -129,6 +237,41 @@ export const enUS: Locale = {
   collapse: 'Collapse',
   required: 'This field is required',
   invalidFormat: 'Invalid format',
+  chartTableShow: 'Show data table',
+  chartTableHide: 'Hide data table',
+  chartCategory: 'Category',
+  chartValue: 'Value',
+  chartPercent: 'Share',
+  chartOther: 'Other',
+  regenerate: 'Regenerate',
+  thinking: 'Reasoning',
+  toolInput: 'Input',
+  toolError: 'Error',
+  toolResult: 'Result',
+  promptPlaceholder: 'Ask anything…',
+  attach: 'Attach',
+  send: 'Send',
+  stopGenerating: 'Stop generating',
+  removeAttachmentText: (name) => `Remove ${name}`,
+  uploadHintText: (types, maxSize) =>
+    [types.length ? `Accepts ${types.join(', ')}` : '', maxSize ? `up to ${maxSize} MB each` : '']
+      .filter(Boolean)
+      .join('; '),
+  uploadRejectText: (types) => `Only ${types.join(', ')} accepted`,
+  fileKinds: { image: 'images', audio: 'audio', video: 'video', text: 'text files' },
+  toolMoreText: (count) => `${count} more`,
+  toolFailedText: (count) => `${count} failed`,
+  next: 'Next',
+  skip: 'Skip',
+  otherOption: 'Other',
+  pullToRefresh: 'Pull to refresh',
+  releaseToRefresh: 'Release to refresh',
+  refreshing: 'Refreshing',
+  create: 'New',
+  dayUnit: 'd',
+  hourUnit: 'h',
+  minuteUnit: 'm',
+  secondUnit: 's',
   totalText: (total) => `${total} item${total === 1 ? '' : 's'}`,
   rangeText: (from, to, total) => `${from}-${to} of ${total}`,
   emptyPresets: {

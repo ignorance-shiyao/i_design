@@ -22,8 +22,7 @@ const noWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6
   <article>
     <h1>DatePicker 日期选择器</h1>
     <p class="i-lead">
-      选择一个日期。对外的值始终是 <code>YYYY-MM-DD</code> 字符串——可排序、可直接比较、
-      不带时区歧义；显示格式与存储格式分开，互不影响。
+      选择一个日期。对外的值始终是 <code>YYYY-MM-DD</code> 字符串——可排序、可直接比较、不带时区歧义；显示格式与存储格式分开，互不影响。
     </p>
 
     <DemoBlock
@@ -91,9 +90,15 @@ const noWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6
       </tbody>
     </table>
     <p>
-      焦点日期与选中值是两个状态：方向键浏览时只移动焦点（面板上以描边标记），
-      按下 Enter 才真正改值——避免用户翻看日历的过程被记成一次次选择。
+      焦点日期与选中值是两个状态：方向键浏览时只移动焦点（面板上以描边标记），按下 Enter 才真正改值——避免用户翻看日历的过程被记成一次次选择。
     </p>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>用户填的是一个众所周知的日期（生日、身份证上的日期）时——直接输入比翻日历快得多。</li>
+      <li>只需要年月时——整张日历的日格是噪音，用年月选择。</li>
+      <li>跨度以「最近 7 天 / 本月」这类相对区间为主时——先给快捷项，日历放在后面当补充。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">
@@ -117,14 +122,12 @@ const noWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6
 
     <h2>时区</h2>
     <p>
-      所有计算都走本地时区并以 <code>YYYY-MM-DD</code> 交换，不用
-      <code>toISOString()</code>——后者按 UTC 输出，在东八区会把当天日期整体挪成前一天。
-      日期工具从 <code>@/components/date</code> 导出，业务侧可直接复用。
+      所有计算都走本地时区并以 <code>YYYY-MM-DD</code> 交换，不用<code>toISOString()</code>——后者按 UTC 输出，在东八区会把当天日期整体挪成前一天。日期工具从 <code>@/components/date</code> 导出，业务侧可直接复用。
     </p>
   </article>
 </template>
 
 <style scoped>
-.w { width: 240px; }
+.w { width: min(240px, 100%); }
 .hint { font-size: var(--i-font-size-sm); color: var(--i-color-text-tertiary); }
 </style>

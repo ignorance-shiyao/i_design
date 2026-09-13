@@ -21,7 +21,7 @@
   text-align: left;
 }
 .i-table-c th.is-sortable { cursor: pointer; user-select: none; }
-.i-table-c th.is-sortable:hover { color: var(--i-color-brand); }
+.i-table-c th.is-sortable:hover { color: var(--i-color-brand-text); }
 .i-table-c__th { display: inline-flex; align-items: center; gap: var(--i-spacing-2); }
 .i-table-c__sorter { display: inline-flex; flex-direction: column; gap: 2px; }
 .i-table-c__sorter i {

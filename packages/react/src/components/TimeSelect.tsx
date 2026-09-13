@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { timeSelectOptions } from '@i-design/common'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { shouldFlipUp, timeSelectOptions } from '@i-design/common'
 import { SelectInput } from './SelectInput'
 
 export interface TimeSelectProps {
@@ -36,6 +36,21 @@ export function TimeSelect({
   invalid = false
 }: TimeSelectProps) {
   const [open, setOpen] = useState(false)
+  const root = useRef<HTMLDivElement | null>(null)
+  const panel = useRef<HTMLDivElement | null>(null)
+  /* 面板贴着触发器绝对定位：触发器靠近视口底缘时整列时间会掉到屏幕外 */
+  const [flipUp, setFlipUp] = useState(false)
+
+  /* 量一次当前位置决定方向。开的时候量，不跟着滚动实时翻——半途翻向会让人点空 */
+  useLayoutEffect(() => {
+    if (!open) {
+      setFlipUp(false)
+      return
+    }
+    const trigger = root.current?.getBoundingClientRect()
+    const box = panel.current?.getBoundingClientRect()
+    if (trigger && box) setFlipUp(shouldFlipUp(trigger, box.height, window.innerHeight))
+  }, [open])
   const options = useMemo(
     () => timeSelectOptions({ start, end, step, minTime, maxTime }),
     [start, end, step, minTime, maxTime]
@@ -47,7 +62,7 @@ export function TimeSelect({
   }
 
   return (
-    <div className="i-time-select">
+    <div ref={root} className={['i-time-select', flipUp ? 'is-up' : ''].filter(Boolean).join(' ')}>
       {/* 外壳复用 SelectInput：聚焦态、清除键、箭头都该与其他选择器一致 */}
       <SelectInput
         value={value}
@@ -61,7 +76,7 @@ export function TimeSelect({
       />
 
       {open && (
-        <div className="i-time-select__panel" role="listbox">
+        <div ref={panel} className="i-time-select__panel" role="listbox">
           {options.map((option) => (
             <button
               key={option.value}

@@ -12,6 +12,11 @@ import {
   flatten,
   marqueeRect,
   minimapLayout,
+  alignGuides,
+  autoLayout,
+  groupBounds,
+  visibleEdges,
+  visibleNodes,
   moveNodes,
   nodesInRect,
   resizeNode,
@@ -20,6 +25,9 @@ import {
   viewFromMinimap,
   type FlowEdge,
   type FlowEdgeType,
+  type FlowGroup,
+  type FlowGuide,
+  type FlowRect,
   type FlowNode,
   type FlowResizeHandle
 } from '@i-design/common'
@@ -37,13 +45,22 @@ const props = withDefaults(
     edgeType?: FlowEdgeType
     /** 导出文件名，不含扩展名 */
     exportName?: string
+    /**
+     * 分组。框选之后成组，组可整体折叠。
+     *
+     * 组不改节点的坐标，只是在它们外面画一个框——分组是「这几个是一回事」，
+     * 不是「把它们搬到一起」。折叠时组内节点收成一个代表方块，
+     * 连到组内的线改指向那个方块。
+     */
+    groups?: FlowGroup[]
   }>(),
   {
     height: 380,
     readonly: false,
     selection: () => [],
     edgeType: 'polyline',
-    exportName: 'flow'
+    exportName: 'flow',
+    groups: () => []
   }
 )
 
@@ -51,6 +68,8 @@ const emit = defineEmits<{
   'update:selection': [string[]]
   /** 拖动/缩放结束时抛出新几何；组件不改传入的数据，由调用方决定是否落库 */
   move: [{ id: string; x: number; y: number; width?: number; height?: number }[]]
+  /** 分组变了：新建、折叠、展开都走这一条，由调用方决定是否落库 */
+  'update:groups': [FlowGroup[]]
 }>()
 
 const MINIMAP = { width: 168, height: 112 }
@@ -58,6 +77,8 @@ const MINIMAP = { width: 168, height: 112 }
 const view = ref({ x: 0, y: 0, scale: 1 })
 const panning = ref(false)
 const dragging = ref<{ ids: string[]; from: { x: number; y: number } } | null>(null)
+/* 拖动时的对齐辅助线。松手就清空——它是拖动过程中的提示，不是图的一部分 */
+const guides = ref<FlowGuide[]>([])
 const resizing = ref<{ id: string; handle: FlowResizeHandle } | null>(null)
 const marquee = ref<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null)
 const marqueeMode = ref(false)
@@ -65,7 +86,23 @@ const showMinimap = ref(true)
 const root = ref<HTMLElement | null>(null)
 const svg = ref<SVGSVGElement | null>(null)
 
-const nodeById = computed(() => new Map(props.nodes.map((n) => [n.id, n])))
+/*
+ * 画布上真正画出来的节点与连线。
+ *
+ * 折叠组的成员换成一个代表方块，连到组内的线改指向它——只把成员藏起来的话，
+ * 那些线会指向空气。判断走公共层，各端折出来的图才是同一张。
+ */
+const shownNodes = computed(() => visibleNodes(props.nodes, props.groups))
+const shownEdges = computed(() => visibleEdges(props.edges, props.groups))
+/** 没折叠的组才画框：折叠之后那个代表方块本身就是它 */
+const shownGroups = computed(() =>
+  props.groups
+    .filter((g) => !g.collapsed)
+    .map((g) => ({ group: g, box: groupBounds(props.nodes, g) }))
+    .filter((g): g is { group: FlowGroup; box: FlowRect } => !!g.box)
+)
+
+const nodeById = computed(() => new Map(shownNodes.value.map((n) => [n.id, n])))
 const selectedSet = computed(() => new Set(props.selection))
 
 /** 屏幕坐标 → 画布坐标 */
@@ -162,6 +199,15 @@ function onKeydown(event: KeyboardEvent) {
 
 function onNodeDown(event: PointerEvent, node: FlowNode) {
   event.stopPropagation()
+  /*
+   * 折叠组的代表方块：点它就是展开。
+   * 折起来之后组框连同它的折叠按钮都没了，代表方块是唯一还在画布上的那个入口——
+   * 没有这一条，折叠是个单向操作。
+   */
+  if (props.groups.some((g) => g.collapsed && g.id === node.id)) {
+    toggleGroup(node.id)
+    return
+  }
   // 加选：Shift / Cmd 点击往选中集合里增删，不加修饰键则重置为这一个
   const additive = event.shiftKey || event.metaKey || event.ctrlKey
   let ids: string[]
@@ -222,17 +268,55 @@ function onMove(event: PointerEvent) {
   if (dragging.value) {
     const point = toCanvas(event)
     const delta = { x: point.x - dragging.value.from.x, y: point.y - dragging.value.from.y }
-    // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
     const base = editBefore ?? []
-    const moved = moveNodes(
-      base.map((g) => ({ ...g, label: '' })) as FlowNode[],
-      dragging.value.ids,
-      delta
-    )
-    editAfter = moved.map((m) => {
-      const before = base.find((g) => g.id === m.id)
-      return { ...m, width: before?.width, height: before?.height }
+    const asNodes = base.map((g) => ({ ...g, label: '' })) as FlowNode[]
+    // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
+    const free = moveNodes(asNodes, dragging.value.ids, delta, 0)
+    const grid = moveNodes(asNodes, dragging.value.ids, delta)
+
+    /* 只取尺寸。连 x/y 一起取回来的话，对齐算的就是拖动前的位置，永远是「已经对齐」 */
+    const sizeOf = (id: string) => {
+      const found = base.find((g) => g.id === id)
+      return { width: found?.width, height: found?.height }
+    }
+
+    /*
+     * 对齐优先于网格。
+     *
+     * 两者都是吸附，但网格吸的是「整齐」，对齐吸的是「和那一个对上」——
+     * 后者才是用户此刻在做的事。先按网格吸的话，节点只能落在 8 的倍数上，
+     * 于是要么正好对齐、要么差 8 像素，中间那几像素根本到不了，
+     * 辅助线也就永远不出现（实测过：拖 5px 直接跳到差 8px 的位置）。
+     *
+     * 所以按未吸附的位置算对齐：哪根轴对上了就听对齐的，没对上的那根轴再回到网格。
+     *
+     * 阈值按缩放换算：缩到 50% 时屏幕上的 6px 是画布上的 12px，
+     * 不换算的话图缩得越小越难吸上。
+     */
+    const anchorId = dragging.value.ids[0]
+    const anchor = free.find((m) => m.id === anchorId)
+    const picked = new Set(dragging.value.ids)
+    const aligned = anchor
+      ? alignGuides(
+          { ...anchor, label: '', ...sizeOf(anchorId) } as FlowNode,
+          props.nodes.filter((n) => !picked.has(n.id)),
+          6 / view.value.scale
+        )
+      : { dx: 0, dy: 0, guides: [] }
+    guides.value = aligned.guides
+
+    const onX = aligned.guides.some((g) => g.orientation === 'v')
+    const onY = aligned.guides.some((g) => g.orientation === 'h')
+    editAfter = free.map((m) => {
+      const snapped = grid.find((g) => g.id === m.id)!
+      return {
+        id: m.id,
+        x: onX ? m.x + aligned.dx : snapped.x,
+        y: onY ? m.y + aligned.dy : snapped.y,
+        ...sizeOf(m.id)
+      }
     })
+
     emit('move', editAfter)
     return
   }
@@ -258,6 +342,48 @@ function onUp() {
   commitEdit()
   dragging.value = null
   resizing.value = null
+  guides.value = []
+}
+
+/**
+ * 一键排版。
+ *
+ * 走的是与手动拖动同一条 `move` 事件，因此能被撤销——一键把别人排了半天的图
+ * 重排一遍，却撤不回去，那是把一个便利做成了事故。
+ */
+function layout() {
+  if (props.readonly) return
+  editBefore = geometryOf(props.nodes.map((n) => n.id))
+  const laid = autoLayout(props.nodes, props.edges)
+  editAfter = laid.map((n) => {
+    const before = props.nodes.find((m) => m.id === n.id)
+    return { id: n.id, x: n.x, y: n.y, width: before?.width, height: before?.height }
+  })
+  emit('move', editAfter)
+  commitEdit()
+}
+
+/**
+ * 把当前选中的节点成一组。
+ *
+ * 至少要两个：一个节点的「组」除了多一个框什么也没说。
+ * 组不改节点坐标——分组是「这几个是一回事」，不是「把它们搬到一起」。
+ */
+function groupSelection() {
+  if (props.readonly || props.selection.length < 2) return
+  const id = `g-${Date.now().toString(36)}`
+  emit('update:groups', [
+    ...props.groups,
+    { id, label: `分组 ${props.groups.length + 1}`, nodeIds: [...props.selection] }
+  ])
+}
+
+/** 折叠 / 展开一个组 */
+function toggleGroup(id: string) {
+  emit(
+    'update:groups',
+    props.groups.map((g) => (g.id === id ? { ...g, collapsed: !g.collapsed } : g))
+  )
 }
 
 function zoom(delta: number) {
@@ -326,6 +452,10 @@ function exportSvg() {
   clone.querySelector('.i-flow__scene')?.removeAttribute('transform')
   clone.querySelector('.i-flow__marquee')?.remove()
   clone.querySelectorAll('.i-flow__handle').forEach((el) => el.remove())
+  // 辅助线是拖动时的提示，不该出现在导出的图里
+  clone.querySelectorAll('.i-flow__guide').forEach((el) => el.remove())
+  // 折叠按钮是编辑器界面件，导出的图里不该有
+  clone.querySelectorAll('.i-flow__group-toggle').forEach((el) => el.remove())
 
   const style = document.createElementNS('http://www.w3.org/2000/svg', 'style')
   style.textContent = `${snapshotStyle(flatten())}\n${flowCss()}`
@@ -419,13 +549,17 @@ const marqueeBox = computed(() => (marquee.value ? marqueeRect(marquee.value.fro
 const pathOf = (edge: FlowEdge) => {
   const from = nodeById.value.get(edge.from)
   const to = nodeById.value.get(edge.to)
-  return from && to ? edgePath(from, to, edge.type ?? props.edgeType) : ''
+  return from && to
+    ? edgePath(from, to, edge.type ?? props.edgeType, { from: edge.fromSide, to: edge.toSide })
+    : ''
 }
 
 const midOf = (edge: FlowEdge) => {
   const from = nodeById.value.get(edge.from)
   const to = nodeById.value.get(edge.to)
-  return from && to ? edgeMidpoint(from, to, edge.type ?? props.edgeType) : { x: 0, y: 0 }
+  return from && to
+    ? edgeMidpoint(from, to, edge.type ?? props.edgeType, { from: edge.fromSide, to: edge.toSide })
+    : { x: 0, y: 0 }
 }
 
 /** 与选中节点相连的线加重：看清「它从哪来、到哪去」是选中节点后的第一个问题 */
@@ -462,7 +596,33 @@ const isActive = (edge: FlowEdge) =>
       </defs>
 
       <g class="i-flow__scene" :transform="transform">
-        <g v-for="edge in edges" :key="`${edge.from}-${edge.to}`">
+        <!--
+          组框画在连线与节点之下：它是背景，压在上面会盖住线的走向。
+          标题放在框外的上沿——放框内会和第一个节点挤在一起。
+        -->
+        <g v-for="{ group, box } in shownGroups" :key="group.id" class="i-flow__group">
+          <rect
+            class="i-flow__group-box"
+            :x="box.x"
+            :y="box.y"
+            :width="box.width"
+            :height="box.height"
+            rx="10"
+          />
+          <text class="i-flow__group-label" :x="box.x + 10" :y="box.y + 14">{{ group.label }}</text>
+          <g
+            v-if="!readonly"
+            class="i-flow__group-toggle"
+            role="button"
+            :aria-label="`${group.collapsed ? '展开' : '折叠'} ${group.label}`"
+            @pointerdown.stop.prevent="toggleGroup(group.id)"
+          >
+            <rect :x="box.x + box.width - 26" :y="box.y + 2" width="18" height="14" rx="4" />
+            <text :x="box.x + box.width - 17" :y="box.y + 13" text-anchor="middle">−</text>
+          </g>
+        </g>
+
+        <g v-for="edge in shownEdges" :key="`${edge.from}-${edge.to}`">
           <path
             class="i-flow__edge"
             :class="{ 'is-active': isActive(edge) }"
@@ -486,10 +646,16 @@ const isActive = (edge: FlowEdge) =>
         </g>
 
         <g
-          v-for="node in nodes"
+          v-for="node in shownNodes"
           :key="node.id"
           class="i-flow__node"
-          :class="[`i-flow__node--${shapeOf(node)}`, { 'is-selected': selectedSet.has(node.id) }]"
+          :class="[
+            `i-flow__node--${shapeOf(node)}`,
+            {
+              'is-selected': selectedSet.has(node.id),
+              'is-group': groups.some((g) => g.collapsed && g.id === node.id)
+            }
+          ]"
           @pointerdown="onNodeDown($event, node)"
         >
           <polygon v-if="shapeOf(node) === 'decision'" class="i-flow__shape" :points="diamondPoints(node)" />
@@ -534,6 +700,20 @@ const isActive = (edge: FlowEdge) =>
           :width="marqueeBox.width"
           :height="marqueeBox.height"
         />
+
+        <!--
+          对齐辅助线。只在拖动过程中出现，松手即消失——它是操作时的提示，
+          不是图的一部分，留在画布上会被当成一条真的连线。
+        -->
+        <line
+          v-for="(guide, index) in guides"
+          :key="index"
+          class="i-flow__guide"
+          :x1="guide.orientation === 'v' ? guide.at : guide.from"
+          :y1="guide.orientation === 'v' ? guide.from : guide.at"
+          :x2="guide.orientation === 'v' ? guide.at : guide.to"
+          :y2="guide.orientation === 'v' ? guide.to : guide.at"
+        />
       </g>
     </svg>
 
@@ -544,7 +724,7 @@ const isActive = (edge: FlowEdge) =>
     <div v-if="showMinimap" class="i-flow__minimap" @pointerdown="onMinimapDown">
       <svg :width="MINIMAP.width" :height="MINIMAP.height" aria-hidden="true">
         <rect
-          v-for="node in nodes"
+          v-for="node in shownNodes"
           :key="node.id"
           class="i-flow__minimap-node"
           :class="{ 'is-selected': selectedSet.has(node.id) }"
@@ -562,6 +742,18 @@ const isActive = (edge: FlowEdge) =>
     </div>
 
     <div v-if="!readonly" class="i-flow__toolbar i-flow__toolbar--history">
+      <button class="i-flow__tool" aria-label="自动布局" @click="layout">
+        <IIcon name="layers" :size="14" />
+      </button>
+      <!-- 选中不足两个时禁用：一个节点的「组」除了多一个框什么也没说 -->
+      <button
+        class="i-flow__tool"
+        aria-label="选中的节点成组"
+        :disabled="selection.length < 2"
+        @click="groupSelection"
+      >
+        <IIcon name="folder" :size="14" />
+      </button>
       <button class="i-flow__tool" aria-label="撤销" :disabled="!canUndo" @click="undo">
         <IIcon name="undo" :size="14" />
       </button>

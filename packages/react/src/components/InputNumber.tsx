@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type KeyboardEvent } from 'react'
+import { useConfig } from './ConfigProvider'
 import { clampNumber, roundTo, stepValue } from '@i-design/common'
 import { Icon } from './Icon'
 
@@ -15,6 +16,13 @@ export interface InputNumberProps {
   placeholder?: string
   /** 隐藏两侧的加减按钮 */
   hideStep?: boolean
+  /**
+   * 无障碍名。
+   *
+   * 控件旁边没有可见文字时必须给：读屏用户听到的是「编辑框，空」，
+   * 填什么全靠猜。占位文案不算名字——它一开始打字就消失了。
+   */
+  ariaLabel?: string
   onChange?: (value: number | null) => void
   className?: string
 }
@@ -25,14 +33,24 @@ export function InputNumber({
   max = Number.POSITIVE_INFINITY,
   step = 1,
   precision = 0,
-  size = 'md',
+  size,
   disabled = false,
   invalid = false,
   placeholder = '',
   hideStep = false,
+  ariaLabel = '',
   onChange,
   className = ''
 }: InputNumberProps) {
+  /*
+   * 尺寸跟随 ConfigProvider，但组件自己传了就以自己的为准。
+   * 与文案字典同一条规则：全局配置是兜底，不是强制——所以默认值不能写在解构上，
+   * 写了就分不清「没传」与「传了 md」，而这两者在这里的行为不同。
+   */
+  // useConfig() 必须无条件调用：写成 `size ?? useConfig().size` 的话，
+  // 传了 size 时这个 hook 就不执行，hook 调用顺序在两次渲染间不一致
+  const config = useConfig()
+  const resolvedSize = size ?? config.size
   const [focused, setFocused] = useState(false)
   /** 输入过程中的原始文本：中途可能是 "-" 或 "1." 这类还不能解析的中间态 */
   const [draft, setDraft] = useState<string | null>(null)
@@ -71,7 +89,7 @@ export function InputNumber({
     <div
       className={[
         'i-input-number',
-        `i-input-number--${size}`,
+        `i-input-number--${resolvedSize}`,
         focused ? 'is-focused' : '',
         disabled ? 'is-disabled' : '',
         invalid ? 'is-invalid' : '',
@@ -103,6 +121,7 @@ export function InputNumber({
         max={max === Number.POSITIVE_INFINITY ? undefined : max}
         step={step}
         role="spinbutton"
+        aria-label={ariaLabel || undefined}
         aria-valuenow={value ?? undefined}
         onChange={handleInput}
         onKeyDown={handleKeyDown}

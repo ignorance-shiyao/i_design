@@ -126,10 +126,13 @@ check(
 
 /* ---------- 5. Vue 2 端不得残留 Vue 3 专有语法 ---------- */
 /*
- * 转换器的产物必须真的能被 Vue 2.7 编译。这里静态拦下三类已经踩过的坑：
+ * 转换器的产物必须真的能被 Vue 2.7 编译。这里静态拦下已经踩过的坑：
  *   modelValue      —— Vue 2 的 v-model 走 value / input
- *   模板里的 as 断言 —— Vue 2 的模板表达式解析器不认，直接语法错
+ *   模板里的 as / ! / (x: T) => —— Vue 2 的模板表达式解析器不认，直接语法错
  *   Teleport        —— 2.7 没有，须用 _Portal.vue
+ *
+ * 根 <template> 必须吃到最后一个 </template>：组件内部还有 <template v-for>
+ * 时，非贪婪会在第一处内层闭合处截断，后面的非法表达式就查不到。
  */
 const vue2Dir = 'packages/vue/src/components'
 const vue2Issues = []
@@ -140,9 +143,20 @@ for (const file of readdirSync(vue2Dir).filter((f) => f.endsWith('.vue'))) {
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/[^\n]*/g, '')
-  const tpl = src.match(/<template>([\s\S]*?)<\/template>/)?.[1] ?? ''
+  const start = src.search(/<template>/)
+  const end = src.lastIndexOf('</template>')
+  const tpl = start >= 0 && end > start ? src.slice(start, end) : ''
   if (/\bmodelValue\b/.test(src)) vue2Issues.push(`${file}: 残留 modelValue`)
-  if (/\s+as\s+[A-Z]/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 断言`)
+  /*
+   * 断言的类型名不一定大写：`as string` / `as number` / `as any` 在 Vue 3 的模板里
+   * 同样常见（站点的 Playground 里就有 `values[meta.name] as string`）。
+   * 只认大写开头的话，这几种会一路漏到 Vue 2 的构建里才炸。
+   */
+  if (/\s+as\s+(?:[A-Z][\w$]*|string|number|boolean|any|unknown|never|const)\b/.test(tpl)) {
+    vue2Issues.push(`${file}: 模板含 TS 断言`)
+  }
+  if (/[\w)\]]!(?!=)/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 非空断言`)
+  if (/\([^)]*:\s*[A-Za-z_][^)]*\)\s*=>/.test(tpl)) vue2Issues.push(`${file}: 模板含 TS 参数类型`)
   if (/<Teleport/i.test(tpl)) vue2Issues.push(`${file}: 使用了 Teleport`)
 }
 /*
@@ -169,10 +183,19 @@ check('Vue 2 产物无 Vue 3 专有语法', vue2Issues.length === 0, vue2Issues.
 execFileSync('node_modules/.bin/esbuild',
   ['packages/common/src/logic/avatar.ts', '--bundle', '--format=esm', '--outfile=/tmp/parity-avatar.mjs'],
   { stdio: 'pipe' })
-const { avatarPalette, initialsOf, tintOf } = await import('/tmp/parity-avatar.mjs')
+const { avatarInkPalette, avatarPalette, initialsOf, tintOf } = await import('/tmp/parity-avatar.mjs')
 
 const dartAvatar = readFileSync('packages/flutter/lib/src/components/i_avatar.dart', 'utf8')
-const dartPalette = [...dartAvatar.matchAll(/Color\(0xFF([0-9A-F]{6})\)/g)].map((m) => `#${m[1].toLowerCase()}`)
+/*
+ * 按列表名分别取，不能一把 grep 所有 Color(...)：
+ * 这个文件里现在有两张表（底色与字色），混在一起比会永远通过或永远失败。
+ */
+const dartColorList = (name) => {
+  const block = dartAvatar.split(`static const ${name} = <Color>[`)[1]?.split(']')[0] ?? ''
+  return [...block.matchAll(/0xFF([0-9A-Fa-f]{6})/g)].map((m) => `#${m[1].toLowerCase()}`)
+}
+const dartPalette = dartColorList('palette')
+const dartInk = dartColorList('ink')
 /* ---------- 文件类型映射两端一致 ---------- */
 /*
  * 扩展名 → 类型的映射在 TS 与 Dart 各有一份（Dart 跑不了 TS）。
@@ -201,6 +224,17 @@ const dartPalette = [...dartAvatar.matchAll(/Color\(0xFF([0-9A-F]{6})\)/g)].map(
 check('Avatar 调色板 TS 与 Dart 一致',
   JSON.stringify(dartPalette) === JSON.stringify(avatarPalette),
   `dart ${dartPalette.length} 色 vs ts ${avatarPalette.length} 色`)
+
+/*
+ * 字色也要逐值比。它不是「白或黑」二选一：六个底色里有一半压不住白字，
+ * 各端自己判一次的话，同一个人的头像会在一端是白字、在另一端是深字。
+ */
+{
+  const tsInk = avatarInkPalette
+  check('Avatar 字色 TS 与 Dart 一致',
+    JSON.stringify(dartInk) === JSON.stringify(tsInk),
+    `dart ${dartInk.join(' ')} vs ts ${tsInk.join(' ')}`)
+}
 
 // 用 TS 实现算出期望值，作为 Flutter 端的验收基准写进报告
 const samples = ['林岚', '陈序', '苏禾', '周迟', 'Susan Wong']

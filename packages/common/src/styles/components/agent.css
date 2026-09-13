@@ -41,7 +41,7 @@
   cursor: pointer;
 }
 .i-approval__option:hover { background: var(--i-color-bg-subtle); }
-.i-approval__option.is-selected { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
+.i-approval__option.is-selected { background: var(--i-color-brand-subtle); color: var(--i-color-brand-text); }
 .i-approval__option:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
 .i-approval__hint { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); }
 
@@ -110,8 +110,8 @@
   font-size: var(--i-font-size-xs);
   font-variant-numeric: tabular-nums;
 }
-.i-task.is-completed .i-task__mark { color: var(--i-color-success); background: var(--i-color-success-subtle); }
-.i-task.is-failed .i-task__mark { color: var(--i-color-danger); background: var(--i-color-danger-subtle); }
+.i-task.is-completed .i-task__mark { color: var(--i-color-success-text); background: var(--i-color-success-subtle); }
+.i-task.is-failed .i-task__mark { color: var(--i-color-danger-text); background: var(--i-color-danger-subtle); }
 .i-task.is-running .i-task__mark,
 .i-task.is-pending .i-task__mark {
   color: var(--i-color-text-secondary);
@@ -165,8 +165,8 @@
 .i-confidence.is-high .i-confidence__bar.is-on { background: var(--i-color-success); }
 .i-confidence.is-medium .i-confidence__bar.is-on { background: var(--i-color-warning); }
 .i-confidence.is-low .i-confidence__bar.is-on { background: var(--i-color-text-tertiary); }
-.i-confidence.is-high { color: var(--i-color-success); }
-.i-confidence.is-medium { color: var(--i-color-warning); }
+.i-confidence.is-high { color: var(--i-color-success-text); }
+.i-confidence.is-medium { color: var(--i-color-warning-text); }
 .i-confidence.is-low { color: var(--i-color-text-tertiary); }
 
 /* ---------- 上下文卡：检索到的知识片段 ---------- */
@@ -239,7 +239,7 @@
   font-size: var(--i-font-size-xs);
   text-decoration: none;
 }
-.i-chunk__source:hover { border-color: var(--i-color-brand); color: var(--i-color-brand); }
+.i-chunk__source:hover { border-color: var(--i-color-brand); color: var(--i-color-brand-text); }
 .i-chunk__source-icon { color: var(--i-file-color, var(--i-color-brand)); }
 
 /* ---------- 差异表 ---------- */
@@ -289,11 +289,12 @@
   color: var(--i-color-text-tertiary);
   font-variant-numeric: tabular-nums;
 }
-.i-difftable__row.is-added .i-difftable__sign { color: var(--i-color-success); }
-.i-difftable__row.is-removed .i-difftable__sign { color: var(--i-color-danger); }
-.i-difftable__row.is-changed .i-difftable__sign { color: var(--i-color-warning); }
+.i-difftable__row.is-added .i-difftable__sign { color: var(--i-color-success-text); }
+.i-difftable__row.is-removed .i-difftable__sign { color: var(--i-color-danger-text); }
+.i-difftable__row.is-changed .i-difftable__sign { color: var(--i-color-warning-text); }
 /* 变更前的值加删除线，与新值并排，读者不必在两个表之间来回比 */
-.i-difftable__before { margin-right: var(--i-spacing-2); color: var(--i-color-text-tertiary); text-decoration: line-through; }
+/* 改动前的值压在淡黄底上，三级文字色只有 4.3——那正是要读的旧值 */
+.i-difftable__before { margin-right: var(--i-spacing-2); color: var(--i-color-text-secondary); text-decoration: line-through; }
 
 .i-difftable__foot {
   display: flex;

@@ -30,7 +30,7 @@ const props = withDefaults(
   { value: '', mode: 'vertical', openKeys: undefined, accordion: false, collapsed: false }
 )
 
-const emit = defineEmits<{ (e: 'input', a0: key: string): void; (e: 'update:openKeys', a0: keys: string[]): void; (e: 'select', a0: item: MenuItem): void }>()
+const emit = defineEmits<{ (e: 'input', key: string): void; (e: 'update:openKeys', keys: string[]): void; (e: 'select', item: MenuItem): void }>()
 
 const entities = computed(() => menuEntities(props.items))
 const inner = ref<string[]>(props.openKeys ? [...props.openKeys] : [])
@@ -126,7 +126,7 @@ function choose(item: MenuItem) {
         :disabled="item.disabled"
         @click="choose(item)"
       >
-        <IIcon v-if="item.icon" class="i-menu__icon" :name="item.icon as IconName" :size="16" />
+        <IIcon v-if="item.icon" class="i-menu__icon" :name="item.icon" :size="16" />
         <span class="i-menu__label">{{ item.label }}</span>
       </button>
     </template>

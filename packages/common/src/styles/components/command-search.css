@@ -1,0 +1,109 @@
+/* ICommandSearch —— 由 Vue / React / 小程序各端共享 */
+.i-cmd {
+  position: fixed;
+  inset: 0;
+  z-index: var(--i-z-modal);
+  display: flex;
+  justify-content: center;
+  /*
+   * 面板压在视口偏上：搜索时视线停在输入框上，再往下读结果。
+   * 垂直居中的话，结果一多面板就要往两头长，输入框会跟着上下跳。
+   */
+  padding: 10vh var(--i-spacing-4) var(--i-spacing-4);
+  background: rgba(20, 24, 34, 0.45);
+}
+.i-cmd__panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  max-height: 60vh;
+  overflow: hidden;
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg);
+  box-shadow: var(--i-shadow-xl);
+}
+
+.i-cmd__field {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-4) var(--i-spacing-5);
+  border-bottom: 1px solid var(--i-color-hairline);
+}
+.i-cmd__icon { color: var(--i-color-text-tertiary); }
+.i-cmd__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-md);
+  font-family: inherit;
+}
+.i-cmd__input::placeholder { color: var(--i-color-text-tertiary); }
+.i-cmd__kbd {
+  padding: 0 var(--i-spacing-2);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-sm);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.i-cmd__list {
+  margin: 0;
+  padding: var(--i-spacing-2);
+  overflow-y: auto;
+  list-style: none;
+}
+.i-cmd__item {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-md);
+  cursor: pointer;
+}
+/*
+ * 高亮项用淡底色块，不用左侧粗边线——状态靠色块与文字，边框保持发丝线。
+ * 键盘走到哪一条与鼠标悬停共用同一种表达，省得读者要学两套。
+ */
+.i-cmd__item.is-active { background: var(--i-color-bg-muted); }
+.i-cmd__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.i-cmd__label {
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-sm);
+}
+/* 命中的字加粗并换成品牌文字色：只加粗在中文里几乎看不出来 */
+.i-cmd__hit {
+  color: var(--i-color-brand-text);
+  font-weight: var(--i-font-weight-medium);
+}
+.i-cmd__desc {
+  overflow: hidden;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.i-cmd__group {
+  margin-left: auto;
+  flex: none;
+  padding: 0 var(--i-spacing-2);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  line-height: 1.8;
+}
+.i-cmd__item.is-active .i-cmd__group { background: var(--i-color-bg); }
+
+.i-cmd__empty { padding: var(--i-spacing-6) 0; }

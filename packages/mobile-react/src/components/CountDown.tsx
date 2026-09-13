@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useConfig } from '@i-design/react'
 import { countdownInterval, countdownParts, formatCountdown } from '@i-design/common'
 
 export interface CountDownProps {
@@ -28,6 +29,8 @@ export function CountDown({
   onChange,
   className = ''
 }: CountDownProps) {
+  /* 单位字走字典：换成英文字典后这里不该还写着「天时分秒」 */
+  const { locale } = useConfig()
   const [remaining, setRemaining] = useState(time)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const deadline = useRef(0)
@@ -65,10 +68,10 @@ export function CountDown({
   const parts = useMemo(() => {
     const p = countdownParts(remaining)
     const cells: { value: string; label: string }[] = []
-    if (format.includes('D')) cells.push({ value: String(p.days), label: '天' })
-    if (format.includes('H')) cells.push({ value: String(p.hours).padStart(2, '0'), label: '时' })
-    if (format.includes('m')) cells.push({ value: String(p.minutes).padStart(2, '0'), label: '分' })
-    if (format.includes('s')) cells.push({ value: String(p.seconds).padStart(2, '0'), label: '秒' })
+    if (format.includes('D')) cells.push({ value: String(p.days), label: locale.dayUnit })
+    if (format.includes('H')) cells.push({ value: String(p.hours).padStart(2, '0'), label: locale.hourUnit })
+    if (format.includes('m')) cells.push({ value: String(p.minutes).padStart(2, '0'), label: locale.minuteUnit })
+    if (format.includes('s')) cells.push({ value: String(p.seconds).padStart(2, '0'), label: locale.secondUnit })
     return cells
   }, [remaining, format])
 

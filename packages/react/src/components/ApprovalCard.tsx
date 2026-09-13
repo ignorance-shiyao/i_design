@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useConfig } from './ConfigProvider'
 import {
   approvalProgress,
   canAdvance,
@@ -22,12 +23,16 @@ export interface ApprovalCardProps {
 
 export function ApprovalCard({
   questions,
-  confirmText = '继续',
-  skipText = '跳过',
+  confirmText = '',
+  skipText = '',
   closable = true,
   onComplete,
   onClose
 }: ApprovalCardProps) {
+  /* 「继续」「跳过」「下一题」「其他」都走字典；组件自己传了以传进来的为准 */
+  const { locale } = useConfig()
+  const resolvedConfirm = confirmText || locale.confirm
+  const resolvedSkip = skipText || locale.skip
   const [index, setIndex] = useState(0)
   const [selected, setSelected] = useState<string[]>([])
   const [custom, setCustom] = useState('')
@@ -103,8 +108,8 @@ export function ApprovalCard({
         <input
           className="i-approval__custom"
           value={custom}
-          placeholder={current.customPlaceholder ?? '其他……'}
-          aria-label={current.customPlaceholder ?? '其他'}
+          placeholder={current.customPlaceholder ?? `${locale.otherOption}……`}
+          aria-label={current.customPlaceholder ?? locale.otherOption}
           onChange={(e) => setCustom(e.target.value)}
         />
       )}
@@ -123,7 +128,7 @@ export function ApprovalCard({
             {approvalProgress(index, total)}
             <button
               className="i-approval__nav"
-              aria-label="下一题"
+              aria-label={locale.next}
               disabled={isLast || !advanceable}
               onClick={() => commit({ values: [...selected], custom: custom.trim() || undefined })}
             >
@@ -135,7 +140,7 @@ export function ApprovalCard({
         <div className="i-approval__actions">
           {current.skippable && (
             <Button size="sm" onClick={() => commit({ skipped: true })}>
-              {skipText}
+              {resolvedSkip}
             </Button>
           )}
           <Button
@@ -144,7 +149,7 @@ export function ApprovalCard({
             disabled={!advanceable}
             onClick={() => commit({ values: [...selected], custom: custom.trim() || undefined })}
           >
-            {isLast ? confirmText : '下一题'}
+            {isLast ? resolvedConfirm : locale.next}
           </Button>
         </div>
       </footer>

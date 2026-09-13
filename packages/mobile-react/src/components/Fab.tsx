@@ -1,5 +1,5 @@
 import type { IconName } from '@i-design/common'
-import { Icon } from '@i-design/react'
+import { Icon, useConfig } from '@i-design/react'
 
 export interface FabProps {
   icon?: IconName
@@ -22,6 +22,8 @@ export function Fab({
   hidden = false,
   onClick
 }: FabProps) {
+  /* 无障碍名走字典：读屏用户听到的就是这一句 */
+  const { locale } = useConfig()
   const classes = [
     'i-fab',
     `i-fab--${placement}`,
@@ -35,7 +37,7 @@ export function Fab({
     <button
       className={classes}
       type="button"
-      aria-label={text || '新建'}
+      aria-label={text || locale.create}
       aria-hidden={hidden || undefined}
       onClick={onClick}
     >

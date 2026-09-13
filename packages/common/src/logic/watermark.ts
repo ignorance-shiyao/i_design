@@ -130,3 +130,28 @@ function escapeXml(text: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
 }
+
+/**
+ * 水印层被改动时，哪些属性算「动过手脚」。
+ *
+ * 只盯这几个：把层删掉、把它隐藏、把背景图换掉——这是从开发者工具里
+ * 抹掉水印的全部常见做法，其余属性改了也不影响它还在不在。
+ * 盯得太宽反而会被自己的样式过渡触发，陷进「改了又恢复」的循环。
+ */
+export const WATERMARK_GUARD_ATTRS = ['style', 'class', 'hidden'] as const
+
+/**
+ * 这次 DOM 变动需不需要把水印重建一遍。
+ *
+ * 「能力边界」要说清楚：这一层挡的是随手在开发者工具里删一下的人，
+ * 挡不住关掉 JavaScript、改本地代码或直接截图前把页面存下来的人。
+ * 把它当成「提高随手抹掉的成本」，不要当成访问控制——
+ * 真需要防的内容不该先发到浏览器里。
+ */
+export function watermarkTampered(
+  removed: boolean,
+  attribute: string | null
+): boolean {
+  if (removed) return true
+  return attribute !== null && (WATERMARK_GUARD_ATTRS as readonly string[]).includes(attribute)
+}

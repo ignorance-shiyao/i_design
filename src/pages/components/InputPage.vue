@@ -37,9 +37,16 @@ const invalid = ref('非法输入')
       code='<IInput v-model="value" invalid />
 <IInput disabled placeholder="禁用" />'
     >
-      <div class="w"><IInput v-model="invalid" invalid /></div>
+      <div class="w"><IInput v-model="invalid" invalid aria-label="校验失败示例" /></div>
       <div class="w"><IInput disabled placeholder="禁用" /></div>
     </DemoBlock>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>可选项是有限的一组时——用下拉或单选，让人凭记忆敲出一个合法值是把校验的活推给了用户。</li>
+      <li>要填的是多行内容时——用多行文本框，单行框里写长文看不见开头。</li>
+      <li>格式很严时（手机号、金额、日期）——给专门的组件或格式提示，别等提交后再报错。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">
@@ -57,5 +64,5 @@ const invalid = ref('非法输入')
 </template>
 
 <style scoped>
-.w { width: 240px; }
+.w { width: min(240px, 100%); }
 </style>

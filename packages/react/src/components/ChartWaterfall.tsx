@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useConfig } from './ConfigProvider'
 import {
   formatTick,
   niceTicks,
@@ -25,6 +26,8 @@ export function ChartWaterfall({
   height = 280,
   unit = ''
 }: ChartWaterfallProps) {
+  /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
+  const { locale } = useConfig()
   const [active, setActive] = useState(-1)
   const [showTable, setShowTable] = useState(false)
 
@@ -121,7 +124,7 @@ export function ChartWaterfall({
       </div>
 
       <button className="i-chart__table-toggle" onClick={() => setShowTable(!showTable)}>
-        {showTable ? '收起数据表' : '查看数据表'}
+        {showTable ? locale.chartTableHide : locale.chartTableShow}
       </button>
       {showTable && (
         <table className="i-chart__table">

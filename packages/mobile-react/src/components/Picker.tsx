@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from 'react'
+import { useConfig } from '@i-design/react'
 import { normalizeValue, resolveColumns, type PickerColumns } from '@i-design/common'
 
 export interface PickerProps {
@@ -22,13 +23,17 @@ export function Picker({
   value,
   columns,
   title = '',
-  cancelText = '取消',
-  okText = '确定',
+  cancelText = '',
+  okText = '',
   visibleCount = 5,
   onConfirm,
   onCancel,
   className = ''
 }: PickerProps) {
+  /* 取消与确定走字典；组件自己传了以传进来的为准 */
+  const { locale } = useConfig()
+  const resolvedCancel = cancelText || locale.cancel
+  const resolvedOk = okText || locale.confirm
   /*
    * 滚动期间先在内部维护草稿值，确认时才抛出去。
    * 每滚一格就回调，调用方拿到的是一串中间态；而选择器的语义本就是「滚完按确定」。
@@ -81,11 +86,11 @@ export function Picker({
     <div className={['i-picker', className].filter(Boolean).join(' ')}>
       <div className="i-picker__bar">
         <button type="button" className="i-picker__action" onClick={onCancel}>
-          {cancelText}
+          {resolvedCancel}
         </button>
         <span className="i-picker__title">{title}</span>
         <button type="button" className="i-picker__action is-primary" onClick={() => onConfirm?.(draft)}>
-          {okText}
+          {resolvedOk}
         </button>
       </div>
 

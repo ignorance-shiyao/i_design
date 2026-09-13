@@ -52,9 +52,9 @@
   width: 76px;
   border: none;
   border-radius: var(--i-radius-md);
-  background: var(--i-color-brand);
-  /* 与按钮同一条规则：主题色换成浅色时写死白字会看不清 */
-  color: var(--i-color-text-on-brand, #fff);
+  background: var(--i-color-brand-solid);
+  /* 与按钮同一条规则：底色与字色成对取，主题色换成浅色时字会自动转深 */
+  color: var(--i-color-text-on-brand, var(--i-color-on-brand));
   font-size: var(--i-font-size-md);
   cursor: pointer;
 }

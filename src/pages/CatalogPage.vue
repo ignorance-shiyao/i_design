@@ -18,8 +18,7 @@ const tone: Record<CatalogStatus, 'success' | 'warning' | 'default'> = {
   <article>
     <h1>组件全景</h1>
     <p class="i-lead">
-      按使用场景组织的完整清单。除了「现在有什么」，也写清「还缺什么」与「有意不做什么」——
-      选型时真正卡住人的，往往不是已有能力的多寡，而是不知道缺的那块是暂时没有，还是永远不会有。
+      按使用场景组织的完整清单。除了「现在有什么」，也写清「还缺什么」与「有意不做什么」——选型时真正卡住人的，往往不是已有能力的多寡，而是不知道缺的那块是暂时没有，还是永远不会有。
     </p>
 
     <section v-for="group in componentCatalog" :key="group.title" class="cat-group">
@@ -49,7 +48,7 @@ const tone: Record<CatalogStatus, 'success' | 'warning' | 'default'> = {
 }
 .cat-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   gap: var(--i-spacing-3);
   margin: var(--i-spacing-4) 0 0;
   padding: 0;

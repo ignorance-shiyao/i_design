@@ -66,7 +66,7 @@ const activeMeta = computed(() => frameworks.find((f) => f.id === active.value)!
 .fw__tab:hover { color: var(--i-color-text); }
 .fw__tab.is-active {
   background: var(--i-color-bg-elevated);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-weight: 500;
 }
 .fw__hint {

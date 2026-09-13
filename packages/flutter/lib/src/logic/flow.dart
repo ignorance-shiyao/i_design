@@ -50,7 +50,14 @@ class FlowNodeData {
 enum FlowEdgeType { polyline, straight, bezier }
 
 class FlowEdgeData {
-  const FlowEdgeData({required this.from, required this.to, this.label, this.type});
+  const FlowEdgeData({
+    required this.from,
+    required this.to,
+    this.label,
+    this.type,
+    this.fromSide,
+    this.toSide,
+  });
 
   final String from;
   final String to;
@@ -58,6 +65,15 @@ class FlowEdgeData {
 
   /// 单条连线可以覆盖整图的默认走向
   final FlowEdgeType? type;
+
+  /// 指定从起点的哪条边出去（top / right / bottom / left）。不给就按两点方位自动选。
+  ///
+  /// 自动选多数时候是对的，但回边应当从侧面绕回去，同一对节点之间的多条线
+  /// 也需要分开走——这两种情况自动选都会把线叠在一起。
+  final String? fromSide;
+
+  /// 指定进入终点的哪条边。不给就按两点方位自动选
+  final String? toSide;
 }
 
 /// 端点沿所在边的法线向外推：控制点必须在节点外侧，否则曲线会穿回节点里
@@ -82,9 +98,29 @@ double bezierPush(double ax, double ay, double bx, double by) {
 }
 
 /// 连线端点吸附到节点边缘中点，而不是中心——连到中心箭头会钻进节点里
-({double x, double y, String side}) anchorOf(FlowNodeData node, double towardX, double towardY) {
+({double x, double y, String side}) anchorOf(
+  FlowNodeData node,
+  double towardX,
+  double towardY, [
+  String? side,
+]) {
   final cx = node.x + node.width / 2;
   final cy = node.y + node.height / 2;
+
+  // 指定了就照办：指定的方向本身带着语义，不该被自动判断推翻
+  if (side != null) {
+    switch (side) {
+      case 'left':
+        return (x: node.x, y: cy, side: side);
+      case 'right':
+        return (x: node.x + node.width, y: cy, side: side);
+      case 'top':
+        return (x: cx, y: node.y, side: side);
+      default:
+        return (x: cx, y: node.y + node.height, side: side);
+    }
+  }
+
   final dx = towardX - cx;
   final dy = towardY - cy;
 
@@ -343,4 +379,223 @@ FlowView viewFromMinimap(
 Rect snapshotViewBox(List<FlowNodeData> nodes, {double padding = 24}) {
   final b = boundsOf(nodes, padding: padding);
   return Rect.fromLTWH(b.x, b.y, b.width, b.height);
+}
+
+/* ---------- 对齐辅助线（对应 logic/flow.ts 的 alignGuides） ---------- */
+
+enum IFlowGuideOrientation { vertical, horizontal }
+
+class IFlowGuide {
+  const IFlowGuide({
+    required this.orientation,
+    required this.at,
+    required this.from,
+    required this.to,
+  });
+
+  final IFlowGuideOrientation orientation;
+
+  /// 竖线的 x 或横线的 y
+  final double at;
+
+  /// 线的起止，沿另一根轴
+  final double from;
+  final double to;
+}
+
+class IFlowAlignment {
+  const IFlowAlignment({required this.dx, required this.dy, required this.guides});
+
+  final double dx;
+  final double dy;
+  final List<IFlowGuide> guides;
+}
+
+class _Line {
+  const _Line(this.kind, this.at);
+  final String kind;
+  final double at;
+}
+
+List<_Line> _linesOf(FlowNodeData node, bool horizontal) {
+  final start = horizontal ? node.x : node.y;
+  final size = horizontal ? node.width : node.height;
+  return [_Line('start', start), _Line('center', start + size / 2), _Line('end', start + size)];
+}
+
+List<double> _spanOf(FlowNodeData node, bool horizontal) {
+  final start = horizontal ? node.x : node.y;
+  final size = horizontal ? node.width : node.height;
+  return [start, start + size];
+}
+
+/// 拖动时的对齐辅助线与吸附量。
+///
+/// 手动把两个节点对齐是件很折磨人的事：差一两个像素看得出来，却怎么也拖不准。
+/// 三条取舍与 Web 端一致：中心优先于边、每根轴只吸一条、线只画到参与对齐的节点为止。
+IFlowAlignment alignGuides(
+  FlowNodeData moving,
+  List<FlowNodeData> others, {
+  double threshold = 6,
+}) {
+  final guides = <IFlowGuide>[];
+  var dx = 0.0;
+  var dy = 0.0;
+
+  for (final horizontal in [true, false]) {
+    double? bestDelta;
+    var bestCenter = false;
+
+    for (final other in others) {
+      if (other.id == moving.id) continue;
+      for (final line in _linesOf(other, horizontal)) {
+        for (final own in _linesOf(moving, horizontal)) {
+          final delta = line.at - own.at;
+          if (delta.abs() > threshold) continue;
+          final center = own.kind == 'center' && line.kind == 'center';
+          if (bestDelta == null ||
+              delta.abs() < bestDelta.abs() ||
+              // 同样近时中心赢：宽度不同的两个节点，中心对齐才看着是齐的
+              (delta.abs() == bestDelta.abs() && center && !bestCenter)) {
+            bestDelta = delta;
+            bestCenter = center;
+          }
+        }
+      }
+    }
+
+    if (bestDelta == null) continue;
+    if (horizontal) {
+      dx = bestDelta;
+    } else {
+      dy = bestDelta;
+    }
+
+    // 吸附量定下来之后，把这一位移下所有真正重合的线都画出来
+    final cross = _spanOf(moving, !horizontal);
+    final seen = <double>{};
+    for (final other in others) {
+      if (other.id == moving.id) continue;
+      final otherCross = _spanOf(other, !horizontal);
+      for (final line in _linesOf(other, horizontal)) {
+        for (final own in _linesOf(moving, horizontal)) {
+          if (line.at - own.at != bestDelta) continue;
+          if (!seen.add(line.at)) continue;
+          guides.add(IFlowGuide(
+            orientation:
+                horizontal ? IFlowGuideOrientation.vertical : IFlowGuideOrientation.horizontal,
+            at: line.at,
+            from: cross[0] < otherCross[0] ? cross[0] : otherCross[0],
+            to: cross[1] > otherCross[1] ? cross[1] : otherCross[1],
+          ));
+        }
+      }
+    }
+  }
+
+  return IFlowAlignment(dx: dx, dy: dy, guides: guides);
+}
+
+/* ---------- 节点分组（对应 logic/flow.ts） ---------- */
+
+class FlowGroupData {
+  const FlowGroupData({
+    required this.id,
+    required this.label,
+    required this.nodeIds,
+    this.collapsed = false,
+  });
+
+  final String id;
+  final String label;
+
+  /// 组内节点。不在 nodes 里的 id 会被忽略，组随之变小而不是崩掉
+  final List<String> nodeIds;
+
+  /// 折叠后组内节点收成一个方块
+  final bool collapsed;
+
+  FlowGroupData copyWith({String? id, String? label, List<String>? nodeIds, bool? collapsed}) =>
+      FlowGroupData(
+        id: id ?? this.id,
+        label: label ?? this.label,
+        nodeIds: nodeIds ?? this.nodeIds,
+        collapsed: collapsed ?? this.collapsed,
+      );
+}
+
+/// 组框的边界：包住组内所有节点，再留一圈让标题有地方放
+Rect? groupBounds(List<FlowNodeData> nodes, FlowGroupData group, {double padding = 16}) {
+  final members = [for (final n in nodes) if (group.nodeIds.contains(n.id)) n];
+  if (members.isEmpty) return null;
+  var left = double.infinity, top = double.infinity, right = -double.infinity, bottom = -double.infinity;
+  for (final n in members) {
+    if (n.x < left) left = n.x;
+    if (n.y < top) top = n.y;
+    if (n.x + n.width > right) right = n.x + n.width;
+    if (n.y + n.height > bottom) bottom = n.y + n.height;
+  }
+  final x = left - padding;
+  // 顶上多留一截给标题：标题压在第一个节点上，读者会以为那是节点自己的字
+  final y = top - padding - 18;
+  return Rect.fromLTWH(x, y, right + padding - x, bottom + padding - y);
+}
+
+/// 折叠之后画布上还剩哪些节点。
+///
+/// 折叠组的成员换成一个代表节点——连到组内的线得有个落点，
+/// 否则那些线会指向空气。代表节点沿用组的 id。
+List<FlowNodeData> visibleNodes(List<FlowNodeData> nodes, [List<FlowGroupData> groups = const []]) {
+  final collapsed = [for (final g in groups) if (g.collapsed) g];
+  if (collapsed.isEmpty) return nodes;
+
+  final hidden = <String>{for (final g in collapsed) ...g.nodeIds};
+  final out = [for (final n in nodes) if (!hidden.contains(n.id)) n];
+  for (final group in collapsed) {
+    final box = groupBounds(nodes, group, padding: 0);
+    if (box == null) continue;
+    out.add(FlowNodeData(
+      id: group.id,
+      label: '${group.label} · ${group.nodeIds.length}',
+      x: box.left,
+      y: box.top,
+      width: box.width.clamp(kFlowNodeWidth, 220),
+      height: kFlowNodeHeight,
+    ));
+  }
+  return out;
+}
+
+/// 折叠之后还剩哪些连线。
+///
+/// 端点落在被折叠成员上的线改指向组；两端都在同一个折叠组里的线直接去掉——
+/// 那画出来是一条从组连回自己的自环。重定向后可能重复，去重。
+List<FlowEdgeData> visibleEdges(List<FlowEdgeData> edges, [List<FlowGroupData> groups = const []]) {
+  final collapsed = [for (final g in groups) if (g.collapsed) g];
+  if (collapsed.isEmpty) return edges;
+
+  final owner = <String, String>{};
+  for (final g in collapsed) {
+    for (final id in g.nodeIds) owner[id] = g.id;
+  }
+
+  final seen = <String>{};
+  final out = <FlowEdgeData>[];
+  for (final edge in edges) {
+    final from = owner[edge.from] ?? edge.from;
+    final to = owner[edge.to] ?? edge.to;
+    if (from == to) continue;
+    if (!seen.add('$from->$to')) continue;
+    out.add(from == edge.from && to == edge.to
+        ? edge
+        : FlowEdgeData(
+            from: from,
+            to: to,
+            label: edge.label,
+            type: edge.type,
+            fromSide: edge.fromSide,
+            toSide: edge.toSide,
+          ));
+  }
+  return out;
 }

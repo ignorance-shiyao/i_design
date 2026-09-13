@@ -24,6 +24,8 @@ class IFlow extends StatefulWidget {
     this.onMove,
     this.edgeType = FlowEdgeType.polyline,
     this.onExport,
+    this.groups = const <FlowGroupData>[],
+    this.onGroupsChanged,
   });
 
   final List<FlowNodeData> nodes;
@@ -46,6 +48,12 @@ class IFlow extends StatefulWidget {
   /// 导出快照后拿到 PNG 字节；存盘还是分享由调用方决定
   final ValueChanged<Uint8List>? onExport;
 
+  /// 节点分组。折叠的组在画布上收成一个代表方块，点它展开
+  final List<FlowGroupData> groups;
+
+  /// 折叠／展开后抛出新的整份分组；组件不改传入的数据
+  final ValueChanged<List<FlowGroupData>>? onGroupsChanged;
+
   @override
   State<IFlow> createState() => _IFlowState();
 }
@@ -59,6 +67,8 @@ class _IFlowState extends State<IFlow> {
   final GlobalKey _boundary = GlobalKey();
   Offset _pan = Offset.zero;
   double _scale = 1;
+  /// 拖动时的对齐辅助线。松手就清空——它是操作时的提示，不是图的一部分
+  List<IFlowGuide> _guides = const [];
   Size _canvas = Size.zero;
 
   /// 一次拖动涉及的整组节点与它们按下时的几何
@@ -164,9 +174,25 @@ class _IFlowState extends State<IFlow> {
     if (mounted) setState(() => _showMinimap = true);
   }
 
+  /// 画布上真正看得见的节点：折叠组换成了代表方块
+  List<FlowNodeData> get _shownNodes => visibleNodes(widget.nodes, widget.groups);
+
+  List<FlowEdgeData> get _shownEdges => visibleEdges(widget.edges, widget.groups);
+
+  /// 某个 id 是不是折叠组的代表方块
+  bool _isCollapsedGroup(String id) =>
+      widget.groups.any((g) => g.collapsed && g.id == id);
+
+  void _toggleGroup(String id) {
+    widget.onGroupsChanged?.call([
+      for (final g in widget.groups)
+        if (g.id == id) g.copyWith(collapsed: !g.collapsed) else g,
+    ]);
+  }
+
   FlowNodeData? _hitTest(Offset point) {
     // 从后往前找：后画的节点在上面，点击应当命中它
-    for (final node in widget.nodes.reversed) {
+    for (final node in _shownNodes.reversed) {
       final rect = Rect.fromLTWH(node.x, node.y, node.width, node.height);
       if (rect.contains(point)) return node;
     }
@@ -213,6 +239,11 @@ class _IFlowState extends State<IFlow> {
                     }
                   }
                   final node = _hitTest(_toCanvas(d.localPosition));
+                  // 点代表方块就展开这个组：折叠态下它不是一个能选的节点
+                  if (node != null && _isCollapsedGroup(node.id)) {
+                    _toggleGroup(node.id);
+                    return;
+                  }
                   widget.onSelectionChanged?.call(node == null ? const [] : [node.id]);
                 },
                 onPanStart: (d) {
@@ -230,7 +261,7 @@ class _IFlowState extends State<IFlow> {
                     setState(() => _marquee = (from: point, to: point));
                     return;
                   }
-                  if (node == null || widget.readOnly) {
+                  if (node == null || widget.readOnly || _isCollapsedGroup(node.id)) {
                     _dragIds = const [];
                     return;
                   }
@@ -262,10 +293,39 @@ class _IFlowState extends State<IFlow> {
                     setState(() => _pan += d.delta);
                     return;
                   }
-                  // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
-                  widget.onMove?.call(
-                    moveNodes(_dragBase, _dragIds.toSet(), point - _dragFrom),
-                  );
+                  /*
+                   * 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平。
+                   *
+                   * 对齐优先于网格：两者都是吸附，但网格吸的是「整齐」，
+                   * 对齐吸的是「和那一个对上」——后者才是用户此刻在做的事。
+                   * 先按网格吸的话，节点只能落在 8 的倍数上，中间那几像素到不了，
+                   * 辅助线也就永远不出现。
+                   */
+                  final delta = point - _dragFrom;
+                  final free = moveNodes(_dragBase, _dragIds.toSet(), delta, grid: 0);
+                  final grid = moveNodes(_dragBase, _dragIds.toSet(), delta);
+                  final picked = _dragIds.toSet();
+                  final anchor = free.isEmpty ? null : free.first;
+                  final aligned = anchor == null
+                      ? const IFlowAlignment(dx: 0, dy: 0, guides: [])
+                      : alignGuides(
+                          anchor,
+                          [for (final n in widget.nodes) if (!picked.contains(n.id)) n],
+                          threshold: 6 / _scale,
+                        );
+                  setState(() => _guides = aligned.guides);
+
+                  final onX = aligned.guides
+                      .any((g) => g.orientation == IFlowGuideOrientation.vertical);
+                  final onY = aligned.guides
+                      .any((g) => g.orientation == IFlowGuideOrientation.horizontal);
+                  widget.onMove?.call([
+                    for (var i = 0; i < free.length; i++)
+                      free[i].copyWith(
+                        x: onX ? free[i].x + aligned.dx : grid[i].x,
+                        y: onY ? free[i].y + aligned.dy : grid[i].y,
+                      ),
+                  ]);
                 },
                 onPanEnd: (_) {
                   if (_marquee != null) {
@@ -278,14 +338,29 @@ class _IFlowState extends State<IFlow> {
                   }
                   _dragIds = const [];
                   _resizing = null;
+                  // 辅助线是拖动时的提示，松手就清空
+                  setState(() => _guides = const []);
                 },
                 child: RepaintBoundary(
                   key: _boundary,
                   child: CustomPaint(
                     size: Size.infinite,
                     painter: _FlowPainter(
-                      nodes: widget.nodes,
-                      edges: widget.edges,
+                      nodes: _shownNodes,
+                      edges: _shownEdges,
+                      groups: [
+                        for (final g in widget.groups)
+                          if (!g.collapsed) g,
+                      ],
+                      groupBoxes: {
+                        for (final g in widget.groups)
+                          if (!g.collapsed && groupBounds(widget.nodes, g) != null)
+                            g.id: groupBounds(widget.nodes, g)!,
+                      },
+                      collapsedIds: {
+                        for (final g in widget.groups)
+                          if (g.collapsed) g.id,
+                      },
                       selected: _selected,
                       edgeType: widget.edgeType,
                       pan: _pan,
@@ -295,6 +370,7 @@ class _IFlowState extends State<IFlow> {
                       handles: _resizeTarget == null
                           ? const []
                           : _handlePoints(_resizeTarget!).map((h) => h.at).toList(),
+                      guides: _guides,
                       minimap: _showMinimap ? _minimap : null,
                       minimapSize: _kMinimap,
                       minimapOrigin: const Offset(
@@ -323,6 +399,7 @@ class _IFlowState extends State<IFlow> {
                             on: _marqueeMode, colors: c),
                       _tool('minimap', '缩略图', () => setState(() => _showMinimap = !_showMinimap),
                           on: _showMinimap, colors: c),
+                      if (!widget.readOnly) _tool('layers', '自动布局', _layout),
                       if (widget.onExport != null) _tool('download', '导出快照', _export),
                       _tool('minus', '缩小', () => setState(() => _scale = (_scale - 0.2).clamp(0.4, 2.0))),
                       SizedBox(
@@ -350,6 +427,18 @@ class _IFlowState extends State<IFlow> {
   }
 
   /// 开关型按钮的按下态用淡底色块，而不是给按钮加一条重边线
+  /// 一键排版。走的是与手动拖动同一条 onMove，调用方那边的撤销才接得上
+  void _layout() {
+    final laid = autoLayout(widget.nodes, widget.edges);
+    widget.onMove?.call([
+      for (final n in laid)
+        n.copyWith(
+          width: widget.nodes.firstWhere((m) => m.id == n.id, orElse: () => n).width,
+          height: widget.nodes.firstWhere((m) => m.id == n.id, orElse: () => n).height,
+        ),
+    ]);
+  }
+
   Widget _tool(String icon, String label, VoidCallback onTap, {bool on = false, IColors? colors}) =>
       InkWell(
         onTap: onTap,
@@ -378,6 +467,9 @@ class _FlowPainter extends CustomPainter {
   const _FlowPainter({
     required this.nodes,
     required this.edges,
+    required this.groups,
+    required this.groupBoxes,
+    required this.collapsedIds,
     required this.selected,
     required this.edgeType,
     required this.pan,
@@ -385,6 +477,7 @@ class _FlowPainter extends CustomPainter {
     required this.colors,
     required this.marquee,
     required this.handles,
+    required this.guides,
     required this.minimap,
     required this.minimapSize,
     required this.minimapOrigin,
@@ -392,6 +485,13 @@ class _FlowPainter extends CustomPainter {
 
   final List<FlowNodeData> nodes;
   final List<FlowEdgeData> edges;
+
+  /// 展开着的组，按它们的框画在最底下
+  final List<FlowGroupData> groups;
+  final Map<String, Rect> groupBoxes;
+
+  /// 折叠组的 id。同名的节点是代表方块，描边用虚线
+  final Set<String> collapsedIds;
   final Set<String> selected;
   final FlowEdgeType edgeType;
   final Offset pan;
@@ -401,6 +501,7 @@ class _FlowPainter extends CustomPainter {
   /// 编辑器界面件。导出快照时它们为 null / 空，图里就不会混进工具
   final Rect? marquee;
   final List<Offset> handles;
+  final List<IFlowGuide> guides;
   final MinimapLayout? minimap;
   final Size minimapSize;
   final Offset minimapOrigin;
@@ -410,6 +511,22 @@ class _FlowPainter extends CustomPainter {
     canvas.save();
     canvas.translate(pan.dx, pan.dy);
     canvas.scale(scale);
+
+    // 组框画在连线下面：它是底图，压住连线会让人以为组框截断了流程
+    for (final group in groups) {
+      final box = groupBoxes[group.id];
+      if (box == null) continue;
+      _dashedRect(canvas, box, colors.borderStrong, 1 / scale, 6 / scale, 4 / scale);
+      _text(
+        canvas,
+        group.label,
+        // 标题居中摆在框顶：_text 以中心定位，左对齐要另算宽度，不值当
+        Offset(box.center.dx, box.top + 9),
+        colors.textSecondary,
+        12,
+        bold: false,
+      );
+    }
 
     final byId = {for (final n in nodes) n.id: n};
 
@@ -423,8 +540,8 @@ class _FlowPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = active ? 2 : 1.5;
 
-      final a = anchorOf(from, to.x + to.width / 2, to.y + to.height / 2);
-      final b = anchorOf(to, from.x + from.width / 2, from.y + from.height / 2);
+      final a = anchorOf(from, to.x + to.width / 2, to.y + to.height / 2, edge.fromSide);
+      final b = anchorOf(to, from.x + from.width / 2, from.y + from.height / 2, edge.toSide);
 
       final kind = edge.type ?? edgeType;
       final path = Path()..moveTo(a.x, a.y);
@@ -494,13 +611,25 @@ class _FlowPainter extends CustomPainter {
       }
 
       canvas.drawPath(path, Paint()..color = fill);
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = isSelected ? colors.brand : stroke
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = isSelected ? 2 : 1.5,
-      );
+      // 代表方块用虚线描边：与「这是一个真节点」区分开，不靠颜色一个线索
+      if (collapsedIds.contains(node.id)) {
+        _dashedPath(
+          canvas,
+          path,
+          isSelected ? colors.brand : stroke,
+          isSelected ? 2 : 1.5,
+          6 / scale,
+          4 / scale,
+        );
+      } else {
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = isSelected ? colors.brand : stroke
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = isSelected ? 2 : 1.5,
+        );
+      }
 
       _text(canvas, node.label, rect.center, colors.text, 13, bold: false);
     }
@@ -526,6 +655,23 @@ class _FlowPainter extends CustomPainter {
       // 淡填充加虚线描边：只描边的话看不出框盖住了哪些节点
       canvas.drawRect(marquee!, Paint()..color = colors.brand.withValues(alpha: 0.08));
       _dashedRect(canvas, marquee!, colors.brand, 1 / scale, 4 / scale, 3 / scale);
+    }
+
+    /*
+     * 对齐辅助线。虚线而不是实线：实线会和真正的连线混在一起，
+     * 读者要多看一眼才知道那不是图的一部分。
+     */
+    for (final guide in guides) {
+      final vertical = guide.orientation == IFlowGuideOrientation.vertical;
+      _dashedLine(
+        canvas,
+        vertical ? Offset(guide.at, guide.from) : Offset(guide.from, guide.at),
+        vertical ? Offset(guide.at, guide.to) : Offset(guide.to, guide.at),
+        colors.brand,
+        1 / scale,
+        4 / scale,
+        3 / scale,
+      );
     }
 
     canvas.restore();
@@ -575,12 +721,44 @@ class _FlowPainter extends CustomPainter {
   }
 
   /// Flutter 没有 strokeDasharray，虚线只能自己按段画
-  void _dashedRect(Canvas canvas, Rect rect, Color color, double width, double dash, double gap) {
+  void _dashedRect(Canvas canvas, Rect rect, Color color, double width, double dash, double gap) =>
+      _dashedPath(canvas, Path()..addRect(rect), color, width, dash, gap);
+
+  /// 任意路径的虚线描边：圆角矩形与菱形都得用同一套步进，节奏才一致
+  void _dashedPath(Canvas canvas, Path path, Color color, double width, double dash, double gap) {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = width;
-    final metrics = (Path()..addRect(rect)).computeMetrics();
+    final metrics = path.computeMetrics();
+    for (final metric in metrics) {
+      var start = 0.0;
+      while (start < metric.length) {
+        final end = start + dash < metric.length ? start + dash : metric.length;
+        canvas.drawPath(metric.extractPath(start, end), paint);
+        start = end + gap;
+      }
+    }
+  }
+
+  /// 画一段虚线。与 `_dashedRect` 同一套步进，虚线的节奏才一致
+  void _dashedLine(
+    Canvas canvas,
+    Offset from,
+    Offset to,
+    Color color,
+    double width,
+    double dash,
+    double gap,
+  ) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width;
+    final metrics = (Path()
+          ..moveTo(from.dx, from.dy)
+          ..lineTo(to.dx, to.dy))
+        .computeMetrics();
     for (final metric in metrics) {
       var start = 0.0;
       while (start < metric.length) {
@@ -646,9 +824,12 @@ class _FlowPainter extends CustomPainter {
   @override
   bool shouldRepaint(_FlowPainter old) =>
       old.nodes != nodes ||
+      old.groups != groups ||
+      old.collapsedIds != collapsedIds ||
       old.selected != selected ||
       old.marquee != marquee ||
       old.handles != handles ||
+      old.guides != guides ||
       old.minimap != minimap ||
       old.edgeType != edgeType ||
       old.pan != pan ||

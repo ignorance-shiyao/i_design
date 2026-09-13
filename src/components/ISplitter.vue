@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { keyboardStep, paneRatio, paneSize, resizePane } from '@i-design/common'
+import {
+  isSplitterResetKey,
+  keyboardStep,
+  paneRatio,
+  paneSize,
+  resetPaneSize,
+  resizePane
+} from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{
@@ -12,6 +19,8 @@ const props = withDefaults(
     minSecond?: number
     maxFirst?: number
     gutter?: number
+    /** 双击分隔条复位到这个比例 */
+    resetTo?: number
   }>(),
   {
     modelValue: 0.5,
@@ -19,7 +28,8 @@ const props = withDefaults(
     minFirst: 120,
     minSecond: 120,
     maxFirst: 0,
-    gutter: 4
+    gutter: 4,
+    resetTo: 0.5
   }
 )
 
@@ -64,10 +74,35 @@ function onMove(event: PointerEvent) {
 const onUp = () => { dragging.value = false }
 
 /*
+ * 双击分隔条复位。
+ *
+ * 拖歪之后想回到原样，不复位的话只能凭眼睛拖回去——而「正好一半」是拖不准的。
+ * 复位同样要过一遍夹取：容器变窄之后，五五开算出来的第一栏可能比 minFirst 还小，
+ * 直接写回比例会得到一个拖都拖不出来的状态。
+ */
+function reset() {
+  measure()
+  const size = resetPaneSize(
+    props.resetTo,
+    total.value,
+    { min: props.minFirst, max: props.maxFirst || undefined },
+    { min: props.minSecond },
+    props.gutter
+  )
+  emit('update:modelValue', paneRatio(size, total.value, props.gutter))
+}
+
+/*
  * 分隔条必须能用键盘拖：它是个真正的控件，不是装饰。
  * 只能鼠标拖的话，用键盘操作的人永远改不了这个布局。
  */
 function onKeydown(event: KeyboardEvent) {
+  // 双击对键盘使用者不存在，Enter / 空格是同一个动作的键盘等价物
+  if (isSplitterResetKey(event.key)) {
+    event.preventDefault()
+    reset()
+    return
+  }
   const step = keyboardStep(event.key, event.shiftKey)
   if (!step) return
   event.preventDefault()
@@ -120,12 +155,13 @@ const percent = computed(() => Math.round(props.modelValue * 100))
       :aria-valuenow="percent"
       aria-valuemin="0"
       aria-valuemax="100"
-      :aria-label="`调整分栏比例，当前 ${percent}%`"
+      :aria-label="`调整分栏比例，当前 ${percent}%；双击或按 Enter 复位`"
       :style="{ flexBasis: `${gutter}px` }"
       @pointerdown="onDown"
       @pointermove="onMove"
       @pointerup="onUp"
       @pointercancel="onUp"
+      @dblclick="reset"
       @keydown="onKeydown"
     >
       <span class="i-splitter__grip" />

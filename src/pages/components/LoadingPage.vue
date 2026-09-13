@@ -6,6 +6,7 @@ import ICard from '@/components/ICard.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 
 const areaLoading = ref(true)
+const waiting = ref(true)
 </script>
 
 <template>
@@ -27,6 +28,19 @@ const areaLoading = ref(true)
     </DemoBlock>
 
     <DemoBlock
+      title="显示已等多久"
+      description="智能体的一次调用动辄十几秒。只转圈不给数字的话，三秒和三十秒看起来一样，于是有人反复点，或者以为卡死了刷新页面——前一次的结果就此丢掉。前三秒不显示：比它更快的请求，用户来不及产生「是不是卡了」的疑问。"
+      code='<ILoading elapsed text="正在生成" />'
+    >
+      <div class="stack">
+        <IButton size="sm" @click="waiting = !waiting">
+          {{ waiting ? '停止' : '重新开始' }}
+        </IButton>
+        <ILoading :loading="waiting" elapsed text="正在生成" />
+      </div>
+    </DemoBlock>
+
+    <DemoBlock
       title="包裹内容"
       description="传入默认插槽时渲染为区域遮罩，内容仍在下方可见，加载结束不产生布局跳动。"
       code='<ILoading :loading="loading" text="正在加载工作项">
@@ -45,6 +59,13 @@ const areaLoading = ref(true)
       </div>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>页面结构已知、只是数据没回来时——用骨架屏，它顺带把布局先撑住，内容到了不会整页跳一下。</li>
+      <li>请求很快（几百毫秒内）时——转圈闪一下比不转更吵，让它延迟出现。</li>
+      <li>操作是后台进行、用户可以继续做别的事时——别用遮罩挡住整页，在局部给一个进度就够。</li>
+    </ul>
+
     <h2>API</h2>
     <table class="i-table">
       <thead><tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
@@ -58,8 +79,7 @@ const areaLoading = ref(true)
 
     <h2>动效偏好</h2>
     <p>
-      在系统开启「减少动效」时，旋转会自动替换为透明度呼吸——前庭敏感的用户不会因持续旋转而不适，
-      同时仍能看出加载正在进行。
+      在系统开启「减少动效」时，旋转会自动替换为透明度呼吸——前庭敏感的用户不会因持续旋转而不适，同时仍能看出加载正在进行。
     </p>
   </article>
 </template>

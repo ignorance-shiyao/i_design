@@ -48,3 +48,126 @@
 @media (prefers-reduced-motion: reduce) {
   .i-chat-thinking__pulse { animation: none; }
 }
+
+/*
+ * 分步轨迹。
+ *
+ * 左边一条细竖线把几步串起来，说明它们是一条按顺序走的路径而不是并列的清单。
+ * 这条线是结构，不是状态标记——每一步的状态在图标与文字上，不在线上。
+ */
+.i-chat-thinking__progress {
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.i-chat-thinking__steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.i-chat-thinking__step {
+  position: relative;
+}
+/*
+ * 竖线画在图标那一列的正下方，而不是给列表加一条左边框：
+ * 边框在容器边上，图标要靠负边距挪过去压住它，一改内边距就错位。
+ */
+.i-chat-thinking__step::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  /*
+   * 用 border 那一档而不是 hairline：hairline 是 8% 的黑，压在 bg-subtle 上
+   * 几乎看不见，而这条线是要读出来的——它说明这几步是一条按顺序走的路径。
+   */
+  background: var(--i-color-border);
+}
+/*
+ * 线从第一个图标起、到最后一个图标止（图标中心在 18px 处）。
+ * 两头各多伸一截的话，看着像上面还有一步、下面还有一步没画出来。
+ */
+.i-chat-thinking__step:first-child::before {
+  top: 18px;
+}
+.i-chat-thinking__step:last-child::before {
+  bottom: auto;
+  height: 18px;
+}
+/* 只有一步时两条规则都命中，那就根本不需要线 */
+.i-chat-thinking__step:first-child:last-child::before {
+  display: none;
+}
+.i-chat-thinking__step-head {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  /* 行高留够，两个图标之间才看得见那条串起来的线；挤到 4px 等于没画 */
+  padding: var(--i-spacing-2) 0;
+  border: none;
+  background: none;
+  color: var(--i-color-text-secondary);
+  font-family: inherit;
+  font-size: var(--i-font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+/* 没有细节可看的那几步不该显得能点：光标与悬停都跟着关掉 */
+.i-chat-thinking__step-head:disabled {
+  cursor: default;
+}
+.i-chat-thinking__step-head:not(:disabled):hover {
+  color: var(--i-color-text);
+}
+.i-chat-thinking__step-head:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+  border-radius: var(--i-radius-sm);
+}
+
+/* 状态落在图标那一格：形状 + 淡底色块，颜色只是第三条线索 */
+.i-chat-thinking__step-icon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--i-radius-full);
+  /* 与面板同色，把竖线在这一格盖掉：图标压在路径上，标的就是「走到这一步」 */
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-tertiary);
+}
+.i-chat-thinking__step--running .i-chat-thinking__step-icon {
+  color: var(--i-color-brand-text);
+  background: var(--i-color-brand-subtle);
+}
+.i-chat-thinking__step--error .i-chat-thinking__step-icon {
+  color: var(--i-color-danger-text);
+  background: var(--i-color-danger-subtle);
+}
+.i-chat-thinking__step-title {
+  flex: 1;
+  min-width: 0;
+}
+.i-chat-thinking__step-arrow {
+  flex: none;
+  color: var(--i-color-text-tertiary);
+  transition: transform var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-chat-thinking__step-head[aria-expanded='true'] .i-chat-thinking__step-arrow {
+  transform: rotate(90deg);
+}
+.i-chat-thinking__step-detail {
+  position: relative;
+  margin: 0 0 var(--i-spacing-2);
+  /* 与标题左对齐：图标 20 + 间距 8 */
+  padding-left: calc(20px + var(--i-spacing-2));
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}

@@ -9,15 +9,24 @@
 
 | 端 | 覆盖矩阵（源组件文件口径） | frameworkStats（导出名口径） |
 | --- | ---: | ---: |
-| vue-next | 119 | 119 |
-| vue | 119 | 120 |
-| react | 119 | 118 |
-| miniprogram | 119 | 121 |
-| flutter | 119 | 112 |
+| vue-next | 128 | 128 |
+| vue | 128 | 129 |
+| react | 128 | 128 |
+| miniprogram | 127 | 130 |
+| flutter | 128 | 121 |
 
-两列口径不同，不能互当总数。移动专有组件不进入 Web 覆盖矩阵。
-golden 文件包含 **1040** 条 expect；构建脚本生成断言，不执行 Dart SDK 测试。
-共享 SVG 图标定义 **52** 项；共享逻辑模块 **48** 个。
+两列口径不同，不能互当总数：矩阵数的是各端的源组件文件，frameworkStats 数的是
+使用方能 import 到的名字。差额逐项如下——能一一对上，两个数字才都可信。
+移动专有组件不进入 Web 覆盖矩阵。
+
+| 端 | 导出里有、矩阵里没有 | 矩阵里有、导出里没有 | 说明 |
+| --- | --- | --- | --- |
+| vue-next | — | — | — |
+| vue | IConfirmLayer | — | IConfirmLayer — confirm() 的宿主。Vue 2.7 没有 Teleport，宿主要由使用方自己放进模板，所以只有那一端对外导出 |
+| react | — | — | — |
+
+golden 文件包含 **1451** 条 expect；构建脚本生成断言，不执行 Dart SDK 测试。
+共享 SVG 图标定义 **53** 项；共享逻辑模块 **60** 个。
 
 ## 共享逻辑目录
 
@@ -28,16 +37,24 @@ golden 文件包含 **1040** 条 expect；构建脚本生成断言，不执行 D
 - [calendar.ts](../packages/common/src/logic/calendar.ts)
 - [carousel.ts](../packages/common/src/logic/carousel.ts)
 - [chart.ts](../packages/common/src/logic/chart.ts)
+- [chatlist.ts](../packages/common/src/logic/chatlist.ts)
 - [color.ts](../packages/common/src/logic/color.ts)
+- [command.ts](../packages/common/src/logic/command.ts)
 - [confirm.ts](../packages/common/src/logic/confirm.ts)
 - [countdown.ts](../packages/common/src/logic/countdown.ts)
 - [date.ts](../packages/common/src/logic/date.ts)
+- [diff.ts](../packages/common/src/logic/diff.ts)
+- [elapsed.ts](../packages/common/src/logic/elapsed.ts)
 - [file.ts](../packages/common/src/logic/file.ts)
+- [finetune.ts](../packages/common/src/logic/finetune.ts)
+- [float.ts](../packages/common/src/logic/float.ts)
 - [flow.ts](../packages/common/src/logic/flow.ts)
 - [gantt.ts](../packages/common/src/logic/gantt.ts)
+- [highlight.ts](../packages/common/src/logic/highlight.ts)
 - [href.ts](../packages/common/src/logic/href.ts)
 - [image.ts](../packages/common/src/logic/image.ts)
 - [indexes.ts](../packages/common/src/logic/indexes.ts)
+- [insight.ts](../packages/common/src/logic/insight.ts)
 - [keypad.ts](../packages/common/src/logic/keypad.ts)
 - [locale.ts](../packages/common/src/logic/locale.ts)
 - [mention.ts](../packages/common/src/logic/mention.ts)
@@ -54,14 +71,18 @@ golden 文件包含 **1040** 条 expect；构建脚本生成断言，不执行 D
 - [qrcode.ts](../packages/common/src/logic/qrcode.ts)
 - [range.ts](../packages/common/src/logic/range.ts)
 - [schedule.ts](../packages/common/src/logic/schedule.ts)
+- [screen.ts](../packages/common/src/logic/screen.ts)
 - [scroll.ts](../packages/common/src/logic/scroll.ts)
 - [select.ts](../packages/common/src/logic/select.ts)
+- [selection.ts](../packages/common/src/logic/selection.ts)
 - [splitter.ts](../packages/common/src/logic/splitter.ts)
 - [table.ts](../packages/common/src/logic/table.ts)
 - [taginput.ts](../packages/common/src/logic/taginput.ts)
 - [theme.ts](../packages/common/src/logic/theme.ts)
+- [thinking.ts](../packages/common/src/logic/thinking.ts)
 - [time.ts](../packages/common/src/logic/time.ts)
 - [toast.ts](../packages/common/src/logic/toast.ts)
+- [toolchip.ts](../packages/common/src/logic/toolchip.ts)
 - [transfer.ts](../packages/common/src/logic/transfer.ts)
 - [tree.ts](../packages/common/src/logic/tree.ts)
 - [upload.ts](../packages/common/src/logic/upload.ts)

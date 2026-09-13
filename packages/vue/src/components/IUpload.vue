@@ -6,7 +6,15 @@
 import { computed, ref, watch } from 'vue'
 import IIcon from './IIcon.vue'
 import IButton from './IButton.vue'
-import { fileTypeOf, formatSize, matchAccept, nextUid, type UploadFile } from './upload'
+import {
+  describeAccept,
+  fileTypeOf,
+  formatSize,
+  matchAccept,
+  nextUid,
+  type UploadFile
+} from './upload'
+import { useConfig } from './useConfig'
 
 const props = withDefaults(
   defineProps<{
@@ -39,6 +47,13 @@ const props = withDefaults(
     request: undefined
   }
 )
+
+/* 可接受的类型说成人话：accept 是给浏览器看的，`image/*` 读者学不到任何事 */
+const { locale } = useConfig()
+const acceptWords = computed(() => {
+  const { exts, kinds } = describeAccept(props.accept)
+  return [...exts, ...kinds.map((kind) => locale.value.fileKinds[kind])]
+})
 
 const emit = defineEmits<{ (e: 'input', a0: UploadFile[]): void; (e: 'change', a0: UploadFile[]): void; (e: 'success', a0: UploadFile): void; (e: 'error', a0: UploadFile, a1: string): void; (e: 'reject', a0: File, a1: string): void }>()
 
@@ -80,7 +95,7 @@ function accepted(list: File[]) {
       continue
     }
     if (!matchAccept(file, props.accept)) {
-      emit('reject', file, `不支持的文件类型，仅接受 ${props.accept}`)
+      emit('reject', file, locale.value.uploadRejectText(acceptWords.value))
       continue
     }
     if (props.maxSize > 0 && file.size > props.maxSize * 1024 * 1024) {
@@ -182,7 +197,7 @@ defineExpose({ openPicker })
         <span class="i-upload__link">点击选择</span>或将文件拖到此处
       </p>
       <p v-if="tip || accept || maxSize" class="i-upload__tip">
-        {{ tip || `${accept ? `支持 ${accept}` : ''}${accept && maxSize ? '，' : ''}${maxSize ? `单个不超过 ${maxSize} MB` : ''}` }}
+        {{ tip || locale.uploadHintText(acceptWords, maxSize) }}
       </p>
     </div>
 

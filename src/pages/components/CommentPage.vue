@@ -8,8 +8,7 @@ import DemoBlock from '@/site/DemoBlock.vue'
   <article>
     <h1>Comment 评论</h1>
     <p class="i-lead">
-      展示一条讨论记录：谁、什么时候、说了什么。回复用缩进表达从属关系，
-      不用加粗的竖线——那在这套体系里是留给状态与类型的暗示，会被读成别的意思。
+      展示一条讨论记录：谁、什么时候、说了什么。回复用缩进表达从属关系，不用加粗的竖线——那在这套体系里是留给状态与类型的暗示，会被读成别的意思。
     </p>
 
     <DemoBlock
@@ -61,6 +60,13 @@ import DemoBlock from '@/site/DemoBlock.vue'
         </template>
       </IComment>
     </DemoBlock>
+
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>只是要展示一段引用或一条通知时——用引用块或提示条，评论的头像与时间会让人以为有人在等回复。</li>
+      <li>讨论长到需要分页、搜索、@ 提醒时——那是一个讨论区功能，不是一个展示组件。</li>
+      <li>内容来自不可信来源且未经处理时——评论正文按纯文本渲染，别自行拼 HTML。</li>
+    </ul>
 
     <h2>API</h2>
     <table class="i-table">

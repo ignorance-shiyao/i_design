@@ -13,8 +13,7 @@ const vertical = ref('auto')
   <article>
     <h1>Radio 单选框</h1>
     <p class="i-lead">
-      从一组互斥选项中选择一个。选项超过 5 个时改用 Select——单选框的优势是把所有选项一次摊开，
-      选项一多这个优势就不存在了。
+      从一组互斥选项中选择一个。选项超过 5 个时改用 Select——单选框的优势是把所有选项一次摊开，选项一多这个优势就不存在了。
     </p>
 
     <DemoBlock
@@ -61,6 +60,13 @@ const vertical = ref('auto')
       </IRadioGroup>
     </DemoBlock>
 
+    <h2>什么时候不该用它</h2>
+    <ul>
+      <li>选项超过五六个时——用下拉，一排单选按钮会把版面撑开且难以扫读。</li>
+      <li>选项可以多选时——那是多选框。</li>
+      <li>两个选项且是开关语义、改完立即生效时——用 Switch，「开 / 关」两个单选按钮是绕远路。</li>
+    </ul>
+
     <h2>API</h2>
     <h3>IRadioGroup</h3>
     <table class="i-table">
@@ -84,8 +90,7 @@ const vertical = ref('auto')
 
     <h2>无障碍</h2>
     <p>
-      组件保留原生 <code>&lt;input type="radio"&gt;</code>（仅视觉隐藏），同组共享 <code>name</code>，
-      因此浏览器原生的方向键切换、表单提交与读屏播报均可正常工作。
+      组件保留原生 <code>&lt;input type="radio"&gt;</code>（仅视觉隐藏），同组共享 <code>name</code>，因此浏览器原生的方向键切换、表单提交与读屏播报均可正常工作。
     </p>
   </article>
 </template>

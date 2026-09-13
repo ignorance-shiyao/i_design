@@ -3,13 +3,26 @@
   "version": "0.1.0",
   "description": "Ignorance Design 的 Vue 2 实现（Vue 2.7 组合式 API），复用公共层令牌、样式与逻辑",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
   "peerDependencies": {
     "vue": "^2.7.0"
   },
   "dependencies": {
-    "@i-design/common": "file:../common"
+    "@i-design/common": "0.1.0"
   },
   "license": "MIT",
   "devDependencies": {
