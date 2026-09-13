@@ -6,7 +6,7 @@
 import { computed, ref, watch } from 'vue'
 import IIcon from './IIcon.vue'
 import type { IconName } from './icons'
-import { avatarSizePx } from '@i-design/common'
+import { avatarPalette, avatarSizePx, tintInkOf, tintOf } from '@i-design/common'
 
 const props = withDefaults(
   defineProps<{
@@ -39,13 +39,14 @@ const initials = computed(() => {
     .join('')
 })
 
-const palette = ['#5e7ce0', '#3ac295', '#fa9841', '#f66f6a', '#7048e8', '#0f766e']
-const tint = computed(() => {
-  if (!props.colorful || !props.name) return palette[0]
-  // 字符码求和取模：稳定、无需存储，同名同色
-  const sum = [...props.name].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
-  return palette[sum % palette.length]
-})
+/* 底色与字色都走公共层：这里再抄一份调色板，两端迟早会给同一个人不同的颜色 */
+const tint = computed(() => (props.colorful && props.name ? tintOf(props.name) : avatarPalette[0]))
+/*
+ * 字色按底色算，不写死白字。
+ * 六个底色里有一半压不住白字（绿 2.25、橙 2.18、红 2.84），
+ * 写死 #fff 的话，一半的头像上那两个字是糊的。
+ */
+const ink = computed(() => tintInkOf(props.colorful && props.name ? props.name : ''))
 
 const showImage = computed(() => !!props.src && !failed.value)
 </script>
@@ -58,7 +59,8 @@ const showImage = computed(() => !!props.src && !failed.value)
       width: `${px}px`,
       height: `${px}px`,
       fontSize: `${Math.max(11, Math.round(px * 0.38))}px`,
-      background: showImage ? undefined : tint
+      background: showImage ? undefined : tint,
+      color: showImage ? undefined : ink
     }"
     :title="name || undefined"
   >

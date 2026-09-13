@@ -211,7 +211,11 @@ const groups = [
       <div class="stack">
         <ICarousel v-model="slide" :items="slides" :interval="3000" :height="200">
           <template v-for="(s, i) in slides" #[s.key]="{ item }" :key="s.key">
-            <div class="slide" :style="{ background: `var(--i-chart-${i + 1})` }">{{ item.label }}</div>
+            <!-- 字色跟着底色走：分类色里有一半压不住白字 -->
+            <div
+              class="slide"
+              :style="{ background: `var(--i-chart-${i + 1})`, color: `var(--i-chart-${i + 1}-ink)` }"
+            >{{ item.label }}</div>
           </template>
         </ICarousel>
         <span class="hint">当前第 {{ slide + 1 }} 张</span>
@@ -334,7 +338,6 @@ const groups = [
   display: grid;
   place-items: center;
   height: 100%;
-  color: var(--i-color-on-media);
   font-size: var(--i-font-size-lg);
 }
 .slide--plain { background: var(--i-color-bg-subtle); color: var(--i-color-text-secondary); }

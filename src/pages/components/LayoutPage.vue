@@ -16,11 +16,13 @@ import IImage from '@/components/IImage.vue'
 import ISplitter from '@/components/ISplitter.vue'
 import IVirtualList from '@/components/IVirtualList.vue'
 import IColorPicker from '@/components/IColorPicker.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { solidPair } from '@i-design/common'
 
 const collapsed = ref(false)
 const split = ref(0.38)
 const brandColor = ref('#5e7ce0')
+const brandSolid = computed(() => solidPair(brandColor.value))
 /* 两万行：不虚拟化就是两万个 DOM 节点，滚动直接卡死 */
 const bigList = Array.from({ length: 20000 }, (_, i) => ({
   id: i + 1,
@@ -329,7 +331,17 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
     >
       <div class="row">
         <IColorPicker v-model="brandColor" />
-        <IButton :style="{ background: brandColor, color: '#fff', borderColor: brandColor }">
+        <!--
+          字色不写死白字：取色器能挑出任何颜色，浅色上的白字直接消失。
+          solidPair 会先试着把底色压深一点点，压不动就换成带同一色相的深字。
+        -->
+        <IButton
+          :style="{
+            background: brandSolid.solid,
+            color: brandSolid.ink,
+            borderColor: brandSolid.solid
+          }"
+        >
           用这个色的按钮
         </IButton>
       </div>

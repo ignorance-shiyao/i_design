@@ -12,10 +12,15 @@
  * （比如页面该有 region 划分），一并算失败会让这个检查很快被当成噪声关掉。
  *
  * ── 基线 ──
- * 首次接入时存量问题不少（多数是文档站自己的对比度与示例里没写标签的控件）。
+ * 首次接入时存量 119 项（多数是文档站自己的对比度与示例里没写标签的控件）。
  * 一次性清零不现实，而一个「反正是红的」的检查等于没有检查。
- * 所以记一份基线：**只有新增的问题才算失败**，基线里的旧问题照常列出来提醒，
- * 但不挡住构建。修好之后跑一次 --update 把基线缩小——它只能变小，不会变大。
+ * 所以先记一份基线：只有新增的问题算失败，旧问题照常列出来提醒。
+ *
+ * **基线现在是空的**：119 → 84 → 49 → 33 → 0，分四轮清完。
+ * 于是这个检查升级成「一项都不许有」——基线为空时任何一条 serious / critical
+ * 都会让它失败。这一条不要再往回退：基线一旦重新长出东西，它就又变回
+ * 「反正是红的」那种检查，而那种检查迟早会被当成噪声关掉。
+ * 真有必须暂缓的情况，在基线里写上那一条并在提交信息里说清为什么。
  *
  * 用法：
  *   node scripts/check-a11y.mjs            # 自己起开发服务器
@@ -135,11 +140,24 @@ const added = current.filter((k) => !baseline.includes(k))
 const fixed = baseline.filter((k) => !current.includes(k))
 
 if (added.length) {
-  console.error('无障碍检查未通过——出现了基线之外的新问题：')
+  const clean = baseline.length === 0
+  console.error(
+    clean
+      ? '无障碍检查未通过——存量已经清零，这几条是新出现的：'
+      : '无障碍检查未通过——出现了基线之外的新问题：'
+  )
   for (const line of added) console.error(`  - ${line}`)
-  console.error('\n修掉它们；确认是误报再动基线（node scripts/check-a11y.mjs --update）。')
+  console.error(
+    clean
+      ? '\n修掉它们。基线是空的，别往里加——一旦重新长出东西，这个检查就又变回「反正是红的」。'
+      : '\n修掉它们；确认是误报再动基线（node scripts/check-a11y.mjs --update）。'
+  )
   process.exit(1)
 }
-console.log(`无障碍检查通过：${scanned} 个页面（亮暗两态），无新增问题`)
+console.log(
+  baseline.length === 0
+    ? `无障碍检查通过：${scanned} 个页面（亮暗两态），零 serious / critical`
+    : `无障碍检查通过：${scanned} 个页面（亮暗两态），无新增问题`
+)
 if (current.length) console.log(`  存量 ${current.length} 项待清理，见 ${BASELINE}`)
 if (fixed.length) console.log(`  已修好 ${fixed.length} 项，跑 --update 把基线缩小`)

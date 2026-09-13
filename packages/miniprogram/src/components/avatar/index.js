@@ -5,7 +5,7 @@
  * 同一个人在 Web、小程序、React 上得到完全相同的缩写与底色，
  * 这正是把逻辑抽出来的价值——没有第二处规则可以走偏。
  */
-import { avatarSizePx, initialsOf, tintOf } from '@i-design/common'
+import { avatarSizePx, initialsOf, tintInkOf, tintOf } from '@i-design/common'
 
 Component({
   options: { addGlobalClass: true },
@@ -25,6 +25,8 @@ Component({
         fontSize: Math.max(11, Math.round(px * 0.38)),
         initials: initialsOf(name),
         tint: colorful ? tintOf(name) : tintOf(''),
+        // 字色按底色算，不写死白字：六个底色里有一半压不住白字
+        ink: tintInkOf(colorful ? name : ''),
         showImage: !!src && !this.data._failed
       })
     }

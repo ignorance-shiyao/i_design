@@ -21,7 +21,7 @@ import { resolveLocale, zhCN, enUS } from './locale'
 import { shouldFlipUp } from './overlay'
 import { alignGuides, anchorOf, edgePath } from './flow'
 import { describeAccept } from './upload'
-import { contrastRatio, hexToRgb, readableOn, rgbToOklch } from './palette'
+import { contrastRatio, hexToRgb, readableOn, rgbToOklch, solidPair } from './palette'
 import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
 import { qrMatrix, qrVersionFor } from './qrcode'
 import { avatarSizePx, initialsOf, tintOf } from './avatar'
@@ -694,5 +694,48 @@ describe('连线锚点可以指定', () => {
     const manual = edgePath(from, to, 'polyline', { from: 'right', to: 'right' })
     expect(manual).not.toBe(auto)
     expect(manual.startsWith('M120 24')).toBe(true)
+  })
+})
+
+describe('实心块与压在它上面的字', () => {
+  it('够读就原样用白字', () => {
+    const pair = solidPair('#3a4da3')
+    expect(pair).toEqual({ solid: '#3a4da3', ink: '#ffffff' })
+  })
+
+  it('差一点就把底色压深一点点，仍用白字', () => {
+    // 品牌蓝白字 3.86，压掉 ΔL 0.04 就够——压完还是同一个蓝，识别色不受影响
+    const pair = solidPair('#5e7ce0')
+    expect(pair.ink).toBe('#ffffff')
+    expect(pair.solid).not.toBe('#5e7ce0')
+    expect(contrastRatio(pair.solid, pair.ink)).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('压不动就换深字，而不是把橙色一路压成棕色', () => {
+    // 警告橙要压掉 ΔL 0.19 才轮得到白字，那时它已经不是这套体系的颜色了
+    const pair = solidPair('#fa9841')
+    expect(pair.solid).toBe('#fa9841')
+    expect(pair.ink).not.toBe('#ffffff')
+    expect(contrastRatio(pair.solid, pair.ink)).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('深字带着同一色相，不是纯黑', () => {
+    // 纯黑压在彩色块上显得脏
+    expect(solidPair('#3ac295').ink).not.toBe('#000000')
+    expect(solidPair('#3ac295').ink).not.toBe('#1d2129')
+  })
+
+  it('四个语义色都能凑够 4.5', () => {
+    for (const fill of ['#5e7ce0', '#3ac295', '#fa9841', '#f66f6a']) {
+      const pair = solidPair(fill)
+      expect(contrastRatio(pair.solid, pair.ink)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('主题面板换色时这一对跟着推导', () => {
+    const tokens = resolveThemeTokens({ ...DEFAULT_THEME_CONFIG, brand: '#ffd43b' }, 'light')
+    // 明黄这种浅主题上，白字怎么压都不够——该转深字，而不是硬顶着白字
+    expect(contrastRatio(tokens['color-brand-solid'], tokens['color-on-brand'])).toBeGreaterThanOrEqual(4.5)
+    expect(tokens['color-on-brand']).not.toBe('#ffffff')
   })
 })

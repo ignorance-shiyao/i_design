@@ -11,7 +11,7 @@
  *   3. 组件层：由各框架的组件消费语义层，不出现硬编码值。
  */
 
-import { contrastText } from '../logic/palette'
+import { solidPair } from '../logic/palette'
 
 export type Palette = Record<string, string>
 
@@ -278,6 +278,29 @@ export const lightTheme: Record<string, string> = {
    * 只有 2.0-3.2:1——颜色看得见，字读不出来。这四个令牌只在这一种位置用，
    * 换主题色时也跟着一起推导，不必每处再手挑一个深一点的颜色。
    */
+
+  /*
+   * 实心块与压在它上面的字。
+   *
+   * 「深色底一律白字」只在底色真的够深时成立。这四个语义色实际是：
+   * 品牌蓝白字 3.86、危险红 2.84、成功绿 2.25、警告橙 2.18——
+   * 后三个上的白字连图形的 3:1 下限都到不了，那不是「白字更好看」，是字没印上去。
+   *
+   * `solidPair` 先试着把底色压深一点点（色相不动、有预算），压得动就仍用白字；
+   * 压不动就换带同一色相的深字。品牌蓝只要 ΔL 0.04，压完还是同一个蓝；
+   * 成功绿与警告橙要压掉 0.19 才轮得到白字，那时已经是墨绿和棕色了。
+   */
+  'color-brand-solid': solidPair(palette.brand[50]).solid,
+  'color-on-brand': solidPair(palette.brand[50]).ink,
+  'color-success-solid': solidPair(palette.success[50]).solid,
+  'color-on-success': solidPair(palette.success[50]).ink,
+  'color-warning-solid': solidPair(palette.warning[50]).solid,
+  'color-on-warning': solidPair(palette.warning[50]).ink,
+  'color-danger-solid': solidPair(palette.danger[50]).solid,
+  'color-on-danger': solidPair(palette.danger[50]).ink,
+  'color-info-solid': solidPair(palette.info[50]).solid,
+  'color-on-info': solidPair(palette.info[50]).ink,
+
   'color-success-text': palette.success[80],
   'color-warning-text': palette.warning[80],
   'color-danger-text': palette.danger[80],
@@ -336,6 +359,19 @@ export const darkTheme: Record<string, string> = {
    * 填充色写上去已经有 4.5-5.6:1——这里不必再换一档，
    * 换了反而会比周围的正文还亮，状态看起来像被强调了两次。
    */
+
+  /* 同上，按暗色主题各自的填充色推导。暗色下品牌色本身就浅，压它上面的是深字 */
+  'color-brand-solid': solidPair(palette.brand[40]).solid,
+  'color-on-brand': solidPair(palette.brand[40]).ink,
+  'color-success-solid': solidPair(palette.success[50]).solid,
+  'color-on-success': solidPair(palette.success[50]).ink,
+  'color-warning-solid': solidPair(palette.warning[50]).solid,
+  'color-on-warning': solidPair(palette.warning[50]).ink,
+  'color-danger-solid': solidPair(palette.danger[50]).solid,
+  'color-on-danger': solidPair(palette.danger[50]).ink,
+  'color-info-solid': solidPair(palette.brand[30]).solid,
+  'color-on-info': solidPair(palette.brand[30]).ink,
+
   'color-success-text': palette.success[50],
   'color-warning-text': palette.warning[50],
   'color-danger-text': palette.danger[50],
@@ -448,7 +484,16 @@ export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, strin
   const shadows = theme === 'dark' ? shadowDark : shadow
   const gradients = theme === 'dark' ? gradientDark : gradient
 
-  const out: Record<string, string> = { ...semantic, ...syntax, 'color-text-on-brand': contrastText(semantic['color-brand']) }
+  /*
+   * `color-text-on-brand` 与 `color-on-brand` 是同一件事，给成同一个值：
+   * 两处不一致的话，同一个主题色下按钮的字与徽标的字会一深一浅。
+   * 用 solidPair 而不是 contrastText——后者的门槛是图形的 3:1，按钮上的字要 4.5。
+   */
+  const out: Record<string, string> = {
+    ...semantic,
+    ...syntax,
+    'color-text-on-brand': solidPair(semantic['color-brand']).ink
+  }
   Object.entries(fontSize).forEach(([k, v]) => (out[`font-size-${k}`] = v))
   Object.entries(fontWeight).forEach(([k, v]) => (out[`font-weight-${k}`] = v))
   Object.entries(lineHeight).forEach(([k, v]) => (out[`line-height-${k}`] = v))
@@ -462,11 +507,33 @@ export function flatten(theme: 'light' | 'dark' = 'light'): Record<string, strin
   Object.entries(gradients).forEach(([k, v]) => (out[`gradient-${k}`] = v))
   Object.entries(controlHeight).forEach(([k, v]) => (out[`control-height-${k}`] = v))
   chartCategorical.forEach((v, i) => (out[`chart-${i + 1}`] = v))
+  /*
+   * 压在分类色块上的字。
+   *
+   * 分类色是给数据标记定的，门槛是图形的 3:1；可一旦往色块里写字——
+   * 图例、段内标签、轮播底色上的标题——门槛就变成 4.5。第 1 档就是品牌蓝，
+   * 白字只有 3.86。预算给 0：分类色是身份，压深一档就成了另一个系列的颜色。
+   */
+  chartCategorical.forEach(
+    (v, i) => (out[`chart-${i + 1}-ink`] = solidPair(v, { budget: 0 }).ink)
+  )
   chartSequential.forEach((v, i) => (out[`chart-seq-${i + 1}`] = v))
-  // 深色档上的文字必须翻成浅色，否则最深的两档（#5e7ce0 / #3a4da3）上的深字读不出来
-  chartSequential.forEach((v, i) => (out[`chart-seq-${i + 1}-ink`] = contrastText(v)))
+  /*
+   * 色阶格子里的数字要读得出来。
+   *
+   * 用 `solidPair` 而不是 `contrastText`：后者的门槛是图形的 3:1，
+   * 而这里是热力图格子里的数值——第 4 档 #5e7ce0 上的白字只有 3.86，
+   * 数字看得见形状却读不准。预算给 0：色阶编码的是量级，
+   * 压深某一档就等于改了数据的含义，所以只许换字色，不许动底色。
+   */
+  chartSequential.forEach(
+    (v, i) => (out[`chart-seq-${i + 1}-ink`] = solidPair(v, { budget: 0 }).ink)
+  )
   const diverging = theme === 'dark' ? chartDivergingDark : chartDiverging
   diverging.forEach((v, i) => (out[`chart-div-${i + 1}`] = v))
+  diverging.forEach(
+    (v, i) => (out[`chart-div-${i + 1}-ink`] = solidPair(v, { budget: 0 }).ink)
+  )
   return out
 }
 

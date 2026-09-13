@@ -30,10 +30,11 @@
 .i-checkbox:hover:not(.is-disabled) .i-checkbox__mark { border-color: var(--i-color-brand); }
 .i-checkbox.is-checked .i-checkbox__mark,
 .i-checkbox.is-indeterminate .i-checkbox__mark {
-  background: var(--i-color-brand);
-  border-color: var(--i-color-brand);
+  background: var(--i-color-brand-solid);
+  border-color: var(--i-color-brand-solid);
 }
-.i-checkbox__mark { display: grid; place-items: center; color: #fff; }
+/* 勾与半选横线压在品牌填充上，字色与按钮同一对，不另写死白色 */
+.i-checkbox__mark { display: grid; place-items: center; color: var(--i-color-on-brand); }
 .i-checkbox__dash { width: 8px; height: 2px; border-radius: 1px; background: currentColor; }
 .i-checkbox.is-disabled .i-checkbox__mark { background: var(--i-color-bg-muted); }
 .i-checkbox.is-disabled.is-checked .i-checkbox__mark,

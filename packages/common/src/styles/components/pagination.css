@@ -40,9 +40,9 @@
 }
 .i-pagination__item:disabled { opacity: 0.45; cursor: not-allowed; }
 .i-pagination__item.is-active {
-  background: var(--i-color-brand);
-  border-color: var(--i-color-brand);
-  color: #fff;
+  background: var(--i-color-brand-solid);
+  border-color: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
 }
 .i-pagination__ellipsis { border-color: transparent; letter-spacing: 1px; }
 .i-pagination__ellipsis:hover:not(:disabled) { border-color: transparent; }

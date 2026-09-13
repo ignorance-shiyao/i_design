@@ -183,10 +183,19 @@ check('Vue 2 产物无 Vue 3 专有语法', vue2Issues.length === 0, vue2Issues.
 execFileSync('node_modules/.bin/esbuild',
   ['packages/common/src/logic/avatar.ts', '--bundle', '--format=esm', '--outfile=/tmp/parity-avatar.mjs'],
   { stdio: 'pipe' })
-const { avatarPalette, initialsOf, tintOf } = await import('/tmp/parity-avatar.mjs')
+const { avatarInkPalette, avatarPalette, initialsOf, tintOf } = await import('/tmp/parity-avatar.mjs')
 
 const dartAvatar = readFileSync('packages/flutter/lib/src/components/i_avatar.dart', 'utf8')
-const dartPalette = [...dartAvatar.matchAll(/Color\(0xFF([0-9A-F]{6})\)/g)].map((m) => `#${m[1].toLowerCase()}`)
+/*
+ * 按列表名分别取，不能一把 grep 所有 Color(...)：
+ * 这个文件里现在有两张表（底色与字色），混在一起比会永远通过或永远失败。
+ */
+const dartColorList = (name) => {
+  const block = dartAvatar.split(`static const ${name} = <Color>[`)[1]?.split(']')[0] ?? ''
+  return [...block.matchAll(/0xFF([0-9A-Fa-f]{6})/g)].map((m) => `#${m[1].toLowerCase()}`)
+}
+const dartPalette = dartColorList('palette')
+const dartInk = dartColorList('ink')
 /* ---------- 文件类型映射两端一致 ---------- */
 /*
  * 扩展名 → 类型的映射在 TS 与 Dart 各有一份（Dart 跑不了 TS）。
@@ -215,6 +224,17 @@ const dartPalette = [...dartAvatar.matchAll(/Color\(0xFF([0-9A-F]{6})\)/g)].map(
 check('Avatar 调色板 TS 与 Dart 一致',
   JSON.stringify(dartPalette) === JSON.stringify(avatarPalette),
   `dart ${dartPalette.length} 色 vs ts ${avatarPalette.length} 色`)
+
+/*
+ * 字色也要逐值比。它不是「白或黑」二选一：六个底色里有一半压不住白字，
+ * 各端自己判一次的话，同一个人的头像会在一端是白字、在另一端是深字。
+ */
+{
+  const tsInk = avatarInkPalette
+  check('Avatar 字色 TS 与 Dart 一致',
+    JSON.stringify(dartInk) === JSON.stringify(tsInk),
+    `dart ${dartInk.join(' ')} vs ts ${tsInk.join(' ')}`)
+}
 
 // 用 TS 实现算出期望值，作为 Flutter 端的验收基准写进报告
 const samples = ['林岚', '陈序', '苏禾', '周迟', 'Susan Wong']

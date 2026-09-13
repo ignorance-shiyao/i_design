@@ -4,7 +4,11 @@
   place-items: center;
   overflow: hidden;
   flex: none;
-  color: #fff;
+  /*
+   * 字色由组件按底色算（见 logic/avatar.ts 的 tintInkOf），这里只兜一个底：
+   * 六个底色里有一半压不住白字，写死 #fff 会让一半的头像上那两个字糊掉。
+   */
+  color: var(--i-color-on-brand);
   font-weight: 500;
   line-height: 1;
   user-select: none;

@@ -21,7 +21,15 @@ import {
   shadowDark as shadowDarkTokens,
   spacing as spacingTokens
 } from '../tokens'
-import { brandRamp, hexToRgb, oklchToRgb, readableOn, rgbToHex, rgbToOklch } from './palette'
+import {
+  brandRamp,
+  hexToRgb,
+  oklchToRgb,
+  readableOn,
+  rgbToHex,
+  rgbToOklch,
+  solidPair
+} from './palette'
 
 export type ThemeMode = 'light' | 'dark'
 /** 三档预设 + 自定义。自定义档下读各自的 *Custom 字段，预设档下按倍率算 */
@@ -424,7 +432,20 @@ export function resolveThemeTokens(
   out['color-brand-subtle'] = ramp.subtle
   out['shadow-brand'] = scaleShadow(ramp.shadow, resolveShadowFactor(config))
   out['gradient-brand'] = ramp.gradient
-  out['color-text-on-brand'] = ramp.onBrand
+  /*
+   * 承载文字的那一块实心色，与压在它上面的字色，成对推导。
+   *
+   * `ramp.onBrand` 走的是 3:1 的图形门槛——那是给图标与描边定的。
+   * 按钮上的字是要读的，得按 4.5:1 来：`solidPair` 先试着把底色压深一点点
+   * （色相不动、有预算），压得动就仍用白字；压不动就换带同一色相的深字。
+   * 换成明黄那类浅主题时，这一对会自己转成深字，而不是硬顶着白字。
+   */
+  const brandSolid = solidPair(ramp.brand)
+  out['color-brand-solid'] = brandSolid.solid
+  out['color-on-brand'] = brandSolid.ink
+  out['color-text-on-brand'] = brandSolid.ink
+  out['color-info-solid'] = brandSolid.solid
+  out['color-on-info'] = brandSolid.ink
   /*
    * 「有颜色的字」不能直接用填充色：品牌蓝在白底上只有 3.86:1，
    * 而链接是正文里最需要读准的那几个字。按淡底算一档读得出来的——
@@ -444,6 +465,9 @@ export function resolveThemeTokens(
     out[`color-${key}`] = semantic.brand
     out[`color-${key}-subtle`] = semantic.subtle
     out[`color-${key}-text`] = readableOn(semantic.brand, semantic.subtle)
+    const pair = solidPair(semantic.brand)
+    out[`color-${key}-solid`] = pair.solid
+    out[`color-on-${key}`] = pair.ink
   }
 
   Object.assign(out, tintNeutrals(config.brand, config.neutralTint, mode))

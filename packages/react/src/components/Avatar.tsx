@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
-import { avatarSizePx, initialsOf, tintOf, type IconName } from '@i-design/common'
+import {
+  avatarSizePx,
+  initialsOf,
+  tintInkOf,
+  tintOf,
+  type IconName
+} from '@i-design/common'
 import { Icon } from './Icon'
 
 export interface AvatarProps {
@@ -36,7 +42,12 @@ export function Avatar({
         width: px,
         height: px,
         fontSize: Math.max(11, Math.round(px * 0.38)),
-        background: showImage ? undefined : colorful ? tintOf(name) : tintOf('')
+        background: showImage ? undefined : colorful ? tintOf(name) : tintOf(''),
+        /*
+         * 字色按底色算，不写死白字：六个底色里有一半压不住白字
+         * （绿 2.25、橙 2.18、红 2.84），写死 #fff 会让一半的头像上那两个字糊掉。
+         */
+        color: showImage ? undefined : tintInkOf(colorful ? name : '')
       }}
       title={name || undefined}
     >

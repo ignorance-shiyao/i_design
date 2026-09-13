@@ -8,7 +8,8 @@
   height: 18px;
   padding: 0 5px;
   border-radius: var(--i-radius-full);
-  color: #fff;
+  /* 兜底：具体哪一种语义色配哪种字色由下面几条按色给 */
+  color: var(--i-color-on-danger);
   font-size: var(--i-font-size-xs);
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -26,7 +27,11 @@
   height: 8px;
   padding: 0;
 }
-.i-badge--brand { background: var(--i-color-brand); }
-.i-badge--success { background: var(--i-color-success); }
-.i-badge--warning { background: var(--i-color-warning); }
-.i-badge--danger { background: var(--i-color-danger); }
+/*
+ * 徽标里的数字是要读的，因此底色与字色成对取。
+ * 绿、橙、红上的白字分别只有 2.25 / 2.18 / 2.84——那不是「白字更好看」，是数字没印上去。
+ */
+.i-badge--brand { background: var(--i-color-brand-solid); color: var(--i-color-on-brand); }
+.i-badge--success { background: var(--i-color-success-solid); color: var(--i-color-on-success); }
+.i-badge--warning { background: var(--i-color-warning-solid); color: var(--i-color-on-warning); }
+.i-badge--danger { background: var(--i-color-danger-solid); color: var(--i-color-on-danger); }

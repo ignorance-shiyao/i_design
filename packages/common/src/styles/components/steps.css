@@ -50,15 +50,15 @@
 .i-step.is-finish .i-step__title { color: var(--i-color-text-secondary); }
 
 .i-step.is-process .i-step__icon {
-  background: var(--i-color-brand);
-  border-color: var(--i-color-brand);
-  color: #fff;
+  background: var(--i-color-brand-solid);
+  border-color: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
 }
 .i-step.is-process .i-step__title { color: var(--i-color-text); }
 
 .i-step.is-error .i-step__icon {
-  background: var(--i-color-danger);
-  border-color: var(--i-color-danger);
-  color: #fff;
+  background: var(--i-color-danger-solid);
+  border-color: var(--i-color-danger-solid);
+  color: var(--i-color-on-danger);
 }
 .i-step.is-error .i-step__title { color: var(--i-color-danger-text); }

@@ -37,8 +37,8 @@
   font-size: var(--i-font-size-md);
   cursor: pointer;
 }
-.i-swipe-cell__action--danger { background: var(--i-color-danger); color: #fff; }
-.i-swipe-cell__action--brand { background: var(--i-color-brand); color: #fff; }
+.i-swipe-cell__action--danger { background: var(--i-color-danger-solid); color: var(--i-color-on-danger); }
+.i-swipe-cell__action--brand { background: var(--i-color-brand-solid); color: var(--i-color-on-brand); }
 
 @media (prefers-reduced-motion: reduce) {
   .i-swipe-cell__content { transition: none; }

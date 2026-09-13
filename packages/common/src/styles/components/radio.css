@@ -52,9 +52,9 @@
 }
 .i-radio--button:hover:not(.is-disabled) { color: var(--i-color-brand-text); border-color: var(--i-color-brand); }
 .i-radio--button.is-checked {
-  background: var(--i-color-brand);
-  border-color: var(--i-color-brand);
-  color: #fff;
+  background: var(--i-color-brand-solid);
+  border-color: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
 }
 .i-radio--button.is-disabled { background: var(--i-color-bg-muted); }
 .i-radio--button:focus-within { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }

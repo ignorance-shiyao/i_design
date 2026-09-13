@@ -345,8 +345,9 @@ h1 span {
 }
 .primary-link {
   padding: 14px 24px;
-  background: var(--i-color-brand);
-  color: var(--i-color-text-on-brand);
+  /* 底色与字色成对取：品牌色原值上的白字只有 3.86，这是首屏最主要的那个入口 */
+  background: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
   border-radius: var(--i-radius-md);
 }
 .primary-link:hover {

@@ -132,8 +132,8 @@
   height: 32px;
   border: none;
   border-radius: var(--i-radius-full);
-  background: var(--i-color-brand);
-  color: var(--i-color-text-inverse);
+  background: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
   cursor: pointer;
   transition: background var(--i-motion-fast) var(--i-motion-easing),
     opacity var(--i-motion-fast) var(--i-motion-easing);

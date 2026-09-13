@@ -59,8 +59,8 @@
   line-height: 1;
 }
 .i-indexes__letter.is-active {
-  background: var(--i-color-brand);
-  color: var(--i-color-text-on-brand);
+  background: var(--i-color-brand-solid);
+  color: var(--i-color-text-on-brand, var(--i-color-on-brand));
 }
 
 /* 滑动时在屏幕中央提示当前字母：手指压住索引条，那个字母自己被挡住了 */
