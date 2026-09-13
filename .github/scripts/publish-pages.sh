@@ -24,12 +24,29 @@ case "$TARGET" in
   *..*) echo "TARGET 含有 ..，拒绝：$TARGET" >&2; exit 1 ;;
 esac
 
+#
+# 带凭据的远端地址。
+#
+# actions/checkout 把 token 注入的是**它自己 checkout 出来那个仓库**的 local
+# config（http.extraheader），另起一个 clone 拿不到，推的时候就是
+# `could not read Username`。所以这里显式拼一个带 token 的地址。
+# GITHUB_TOKEN 在日志里会被 Actions 掩成 ***，不会泄漏。
+#
+# 本地跑（没有 GITHUB_TOKEN）时退回 origin 原样的地址，方便拿本地裸仓库试。
+if [ -n "${GITHUB_TOKEN:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+  REMOTE="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+else
+  REMOTE="$(git remote get-url origin)"
+fi
+
 work="$(mktemp -d)"
 # gh-pages 可能还不存在（第一次跑）：那就开一个空的孤儿分支
-if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
-  git clone --depth 1 --branch "$BRANCH" "$(git remote get-url origin)" "$work"
+if git ls-remote --exit-code --heads "$REMOTE" "$BRANCH" >/dev/null 2>&1; then
+  had_branch=1
+  git clone --depth 1 --branch "$BRANCH" "$REMOTE" "$work"
 else
-  git clone --depth 1 "$(git remote get-url origin)" "$work"
+  had_branch=
+  git clone --depth 1 "$REMOTE" "$work"
   git -C "$work" checkout --orphan "$BRANCH"
   git -C "$work" rm -rf . >/dev/null 2>&1 || true
 fi
@@ -70,13 +87,18 @@ if git diff --cached --quiet; then
 fi
 git commit -m "发布 $TARGET（来自 ${GITHUB_SHA:-本地}）"
 
-# 并发保护已经交给 workflow 的 concurrency 组，这里只兜一次网络抖动
+# 并发保护已经交给 workflow 的 concurrency 组，这里只兜一次网络抖动。
+# 分支本来就不存在时不要去 pull——那只会刷出一串 "couldn't find remote ref"，
+# 把真正的失败原因埋在噪声里
 for attempt in 1 2 3; do
-  if git push origin "$BRANCH"; then
+  if git push "$REMOTE" "HEAD:$BRANCH"; then
     exit 0
   fi
-  echo "推送失败，第 $attempt 次重试前先同步远端"
-  git pull --rebase origin "$BRANCH" || true
+  echo "推送失败（第 $attempt 次）"
+  if [ -n "$had_branch" ]; then
+    echo "先同步远端再重试"
+    git pull --rebase "$REMOTE" "$BRANCH" || true
+  fi
   sleep $((attempt * 3))
 done
 echo "推送 $BRANCH 失败" >&2

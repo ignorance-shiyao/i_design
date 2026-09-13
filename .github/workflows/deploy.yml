@@ -33,4 +33,5 @@ jobs:
       - name: 发布到 gh-pages 根目录
         env:
           TARGET: .
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash .github/scripts/publish-pages.sh

@@ -52,6 +52,7 @@ jobs:
         if: github.event_name != 'delete'
         env:
           TARGET: ${{ steps.slug.outputs.dir }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash .github/scripts/publish-pages.sh
 
       - name: 分支已删除，清掉它的预览
@@ -59,6 +60,7 @@ jobs:
         env:
           TARGET: ${{ steps.slug.outputs.dir }}
           REMOVE: '1'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash .github/scripts/publish-pages.sh
 
       - name: 写出预览地址
