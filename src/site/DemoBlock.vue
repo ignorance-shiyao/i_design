@@ -43,7 +43,7 @@ const showCode = ref(false);
 <style scoped>
 .demo {
   border: 1px solid var(--i-color-hairline);
-  border-radius: var(--i-radius-md);
+  border-radius: var(--i-radius-xl);
   /* 不能裁剪：Select、DatePicker 等浮层会溢出示例区，裁掉就看不全了 */
   overflow: visible;
   margin-bottom: var(--i-spacing-6);
@@ -56,9 +56,12 @@ const showCode = ref(false);
 }
 .demo__head {
   padding: var(--i-spacing-5) var(--i-spacing-6) 0;
+  border-radius: var(--i-radius-xl) var(--i-radius-xl) 0 0;
 }
 .demo__title {
   font-size: var(--i-font-size-md);
+  font-weight: var(--i-font-weight-medium);
+  margin: 0;
   letter-spacing: 0;
 }
 .demo__desc {
@@ -76,12 +79,15 @@ const showCode = ref(false);
   padding: var(--i-spacing-8) var(--i-spacing-6);
   /* 极淡的点阵底纹，把示例区与说明区分开又不抢眼 */
   background: var(--i-color-bg-elevated);
+  border-radius: inherit;
 }
 .demo__foot {
   border-top: 1px solid var(--i-color-hairline);
   padding: var(--i-spacing-2) var(--i-spacing-4);
   display: flex;
   justify-content: flex-end;
+  background: var(--i-color-bg-subtle);
+  border-radius: 0 0 var(--i-radius-xl) var(--i-radius-xl);
 }
 .demo__toggle {
   display: inline-flex;

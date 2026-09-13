@@ -163,11 +163,11 @@ const links = [
 .header__logo {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--i-radius-md);
-  background: var(--i-color-brand);
-  color: #fff;
+  width: var(--i-spacing-8);
+  height: var(--i-spacing-8);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
   font-family: var(--i-font-family-mono);
   font-weight: 600;
   box-shadow: none;
