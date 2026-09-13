@@ -118,6 +118,9 @@ const {
   formatInsightValue, insightPage, insightPlot, insightTrend, scrubIndex, scrubReadout, scrubX,
   trendIcon, trendLabel
 } = await bundle('packages/common/src/logic/insight.ts', 'insight')
+const {
+  cleanSelection, hasSelection, selectionAnchor, selectionCount, selectionExcerpt, selectionTooLong
+} = await bundle('packages/common/src/logic/selection.ts', 'selection')
 const { alignGuides, anchorOf, groupBounds, visibleEdges, visibleNodes } = await bundle(
   'packages/common/src/logic/flow.ts',
   'flowalign'
@@ -1818,6 +1821,52 @@ const insightExpectations = [
 ]
 
 /*
+ * 选区操作：字数上限、引文省略、动作条摆哪边必须两端一致，
+ * 否则同一段话在一端能改、在另一端只剩一句「太长了」。
+ */
+/* 选区的样例里有真换行，dartStr 不转义换行，会把字面量断成两行 */
+const dartSelStr = (v) =>
+  `'${String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n')}'`
+const selectionTexts = ['the quick\nbrown fox', '第一段\n\n\n第二段', '  改   一下  ', '   \n  ']
+/* 上限用一个小数字代入，不往生成物里塞两千个 a——断言的是规则，不是长度本身 */
+const overLimit = ['改一改这一整段话', 4]
+const selectionExpectations = [
+  ...selectionTexts.map(
+    (t) => `    expect(cleanSelection(${dartSelStr(t)}), ${dartSelStr(cleanSelection(t))});`
+  ),
+  ...selectionTexts.map(
+    (t) => `    expect(hasSelection(${dartSelStr(t)}), ${hasSelection(t)});`
+  ),
+  ...selectionTexts.map(
+    (t) => `    expect(selectionTooLong(${dartSelStr(t)}), ${selectionTooLong(t)});`
+  ),
+  ...selectionTexts.map(
+    (t) => `    expect(selectionCount(${dartSelStr(t)}), ${selectionCount(t)});`
+  ),
+  `    expect(hasSelection(${dartSelStr(overLimit[0])}, max: ${overLimit[1]}), ${hasSelection(overLimit[0], overLimit[1])});`,
+  `    expect(selectionTooLong(${dartSelStr(overLimit[0])}, max: ${overLimit[1]}), ${selectionTooLong(overLimit[0], overLimit[1])});`,
+  ...[['短句', 11], ['a'.repeat(30) + 'MIDDLE' + 'b'.repeat(30), 11]].map(
+    ([t, max]) =>
+      `    expect(selectionExcerpt(${dartSelStr(t)}, max: ${max}), ${dartSelStr(selectionExcerpt(t, max))});`
+  ),
+  ...[
+    [{ x: 200, y: 300, width: 120, height: 20 }],
+    [{ x: 200, y: 4, width: 120, height: 20 }],
+    [{ x: 940, y: 300, width: 60, height: 20 }],
+    [{ x: 0, y: 780, width: 40, height: 20 }]
+  ].map(([rect]) => {
+    const at = selectionAnchor(rect, { width: 200, height: 40 }, { width: 1000, height: 800 })
+    const dartRect = `IOverlayRect(${rect.x}, ${rect.y}, ${rect.width}, ${rect.height})`
+    const call = `selectionAnchor(${dartRect}, 200, 40, 1000, 800)`
+    return (
+      `    expect(${call}.x, ${at.x});\n` +
+      `    expect(${call}.y, ${at.y});\n` +
+      `    expect(${call}.placement, SelectionPlacement.${at.placement});`
+    )
+  })
+]
+
+/*
  * 推理轨迹：默认展开哪几步必须两端一致。
  * 一端展开出错那步、另一端全折叠的话，用户得学两遍。
  */
@@ -2526,6 +2575,10 @@ ${chipSummaryExpectations.join('\n')}
   test('洞察卡的翻页边界、擦洗取点与涨跌说法与 Web 端一致', () {
     final item = ${dartInsightItem};
 ${insightExpectations.join('\n')}
+  });
+
+  test('选区的清理、字数上限、引文省略与动作条落点与 Web 端一致', () {
+${selectionExpectations.join('\n')}
   });
 
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {

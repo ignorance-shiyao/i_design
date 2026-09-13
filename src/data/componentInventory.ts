@@ -117,6 +117,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ISegmented.vue",
   "src/components/ISelect.vue",
   "src/components/ISelectInput.vue",
+  "src/components/ISelectionActions.vue",
   "src/components/ISkeleton.vue",
   "src/components/ISlider.vue",
   "src/components/ISpace.vue",

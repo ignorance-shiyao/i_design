@@ -37,6 +37,14 @@ import {
   trendLabel,
   type InsightItem
 } from './insight'
+import {
+  cleanSelection,
+  hasSelection,
+  selectionAnchor,
+  selectionCount,
+  selectionExcerpt,
+  selectionTooLong
+} from './selection'
 import { describeAccept } from './upload'
 import { contrastRatio, hexToRgb, readableOn, rgbToOklch, solidPair } from './palette'
 import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
@@ -870,5 +878,68 @@ describe('洞察卡的留边', () => {
 
   it('图很窄时留边跟着缩，不会把曲线挤没', () => {
     expect(insightPlot(12)).toEqual({ inner: 6, inset: 3 })
+  })
+})
+
+describe('选区操作', () => {
+  it('折行处的换行换成空格而不是删掉', () => {
+    // 删掉换行会把「the quick\nbrown」粘成「quickbrown」
+    expect(cleanSelection('the quick\nbrown fox')).toBe('the quick brown fox')
+  })
+
+  it('段落之间的空行保留：那是作者的分段，不是多余空白', () => {
+    expect(cleanSelection('第一段\n\n\n第二段')).toBe('第一段\n\n第二段')
+  })
+
+  it('只选中空白不算选区，否则手一抖就冒出一排按钮', () => {
+    expect(hasSelection('   \n  ')).toBe(false)
+    expect(hasSelection('改一下')).toBe(true)
+  })
+
+  it('太长的选区不给动作，但与「没选」分开说', () => {
+    const long = 'a'.repeat(2001)
+    expect(hasSelection(long)).toBe(false)
+    expect(selectionTooLong(long)).toBe(true)
+    expect(selectionTooLong('短的')).toBe(false)
+  })
+
+  it('字数按清理后的长度数，不数 DOM 里的缩进空格', () => {
+    expect(selectionCount('  改   一下  ')).toBe(4)
+  })
+
+  it('引文从中间省略，掐尾会让好几段不同的选区看起来一样', () => {
+    const excerpt = selectionExcerpt('a'.repeat(30) + 'MIDDLE' + 'b'.repeat(30), 11)
+    expect(excerpt).toBe('aaaaa…bbbbb')
+    expect(selectionExcerpt('短句', 11)).toBe('短句')
+  })
+
+  it('动作条默认开在选区上方——刚划过的那片正被手遮着', () => {
+    const at = selectionAnchor(
+      { x: 200, y: 300, width: 120, height: 20 },
+      { width: 200, height: 40 },
+      { width: 1000, height: 800 }
+    )
+    expect(at.placement).toBe('top')
+    expect(at.y).toBe(252)
+    expect(at.x).toBe(160)
+  })
+
+  it('上方放不下才翻到下方', () => {
+    const at = selectionAnchor(
+      { x: 200, y: 4, width: 120, height: 20 },
+      { width: 200, height: 40 },
+      { width: 1000, height: 800 }
+    )
+    expect(at.placement).toBe('bottom')
+    expect(at.y).toBe(32)
+  })
+
+  it('贴着右边缘时横向夹回视口，不让动作条一半在屏幕外', () => {
+    const at = selectionAnchor(
+      { x: 940, y: 300, width: 60, height: 20 },
+      { width: 200, height: 40 },
+      { width: 1000, height: 800 }
+    )
+    expect(at.x).toBe(792)
   })
 })

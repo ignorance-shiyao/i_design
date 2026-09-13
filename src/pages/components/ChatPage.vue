@@ -6,6 +6,7 @@ import IChatThinking from '@/components/IChatThinking.vue'
 import IChatToolCall from '@/components/IChatToolCall.vue'
 import IToolChips from '@/components/IToolChips.vue'
 import IInsightCards from '@/components/IInsightCards.vue'
+import ISelectionActions from '@/components/ISelectionActions.vue'
 import IChatSources from '@/components/IChatSources.vue'
 import IChatSuggestions from '@/components/IChatSuggestions.vue'
 import IPromptInput from '@/components/IPromptInput.vue'
@@ -248,6 +249,17 @@ const insights: InsightItem[] = [
   }
 ]
 const insightIndex = ref(0)
+
+/* 选区动作。id 由调用方分派，组件不关心「改写」到底怎么改 */
+const selectionActions = [
+  { id: 'rewrite', label: '改写', icon: 'sparkle' as const },
+  { id: 'shorten', label: '缩短', icon: 'minus' as const },
+  { id: 'explain', label: '解释', icon: 'help-circle' as const }
+]
+const lastSelection = ref('')
+function onSelectionAction(payload: { action: { label: string }; text: string }) {
+  lastSelection.value = `${payload.action.label}：${payload.text}`
+}
 </script>
 
 <template>
@@ -392,6 +404,31 @@ const insightIndex = ref(0)
     >
       <div class="insight-demo">
         <IInsightCards :items="insights" v-model:index="insightIndex" />
+      </div>
+    </DemoBlock>
+
+    <h2>选区操作</h2>
+    <p>
+      浮条跟着选区走，而不是放在页面角上：选中一段话之后再把视线挪到别处去找入口，中途很容易碰一下页面把选区清掉，那时用户得重选一遍，而他并不知道自己做错了什么。动作条不代替选择，只承接选择——它不改选区、不阻止继续拖选，按 Esc 或点别处就消失。
+    </p>
+    <p>
+      各端的差别在「怎么选」而不在「选中之后怎么办」。Web 与 Flutter 走系统自己的选字行为（长按起选、拖手柄改范围、双击选词），这个库只替换选完之后弹出来的那排动作——自己造一套选择手柄必然与系统不一致，而用户对选字的肌肉记忆来自系统。小程序没有任何接口能读回用户划到了哪几个字，所以那一端按段落选：长按一段就把整段交给动作条。
+    </p>
+    <DemoBlock
+      title="选中下面这段话试试"
+      description="选区的清理、字数上限、引文省略与动作条摆哪边都走公共层：超过上限时给的是一句「选短一些」，而不是一排点不动的灰按钮。"
+      lang="vue"
+      code='<ISelectionActions :actions="actions" @select="onSelect">
+  <p>可以被选中的正文……</p>
+</ISelectionActions>'
+    >
+      <div class="selact-demo">
+        <ISelectionActions :actions="selectionActions" @select="onSelectionAction">
+          <p class="selact-demo__text">
+            智能体在第三步调用了检索工具，拿回四段文档，其中两段与问题无关。它没有说明为什么舍弃那两段，直接进入了下一步。如果这一步的取舍标准能写出来，读者复核起来会快得多。
+          </p>
+        </ISelectionActions>
+        <p v-if="lastSelection" class="hint">收到：{{ lastSelection }}</p>
       </div>
     </DemoBlock>
 
@@ -562,6 +599,7 @@ const insightIndex = ref(0)
         <tr><td>IChatToolCall</td><td>name、summary、status、args、result、error</td><td>—</td></tr>
         <tr><td>IToolChips</td><td>items、max、expanded</td><td>select、update:expanded</td></tr>
         <tr><td>IInsightCards</td><td>items、index</td><td>update:index</td></tr>
+        <tr><td>ISelectionActions</td><td>actions、max</td><td>select</td></tr>
         <tr><td>IChatSources</td><td>sources</td><td>—</td></tr>
         <tr><td>IChatSuggestions</td><td>items、title</td><td>select</td></tr>
         <tr><td>IPromptInput</td><td>modelValue、generating、maxLength、attachments、hint、submitOnEnter、mentions、commands</td><td>submit、stop、attach、removeAttachment、pick</td></tr>
@@ -584,6 +622,8 @@ const insightIndex = ref(0)
 <style scoped>
 /* 洞察卡不该撑满整行：那句结论一行放不到 80 个字才读得顺 */
 .insight-demo { max-width: 420px; }
+.selact-demo { display: flex; flex-direction: column; gap: var(--i-spacing-2); max-width: 560px; }
+.selact-demo__text { margin: 0; line-height: 1.8; }
 .chat {
   display: flex;
   flex-direction: column;

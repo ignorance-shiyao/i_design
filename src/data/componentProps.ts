@@ -690,6 +690,10 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"filterable","type":"boolean","doc":"允许在框内输入，用于可搜索的选择器","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"modelValue","type":"unknown","doc":"","defaultText":null,"control":null},
   ],
+  ISelectionActions: [
+    {"name":"actions","type":"SelectionAction[]","doc":"可选中的范围。留空则监听整个文档","defaultText":null,"control":null},
+    {"name":"max","type":"number","doc":"选区上限；超过就只提示、不给动作","defaultText":"2000","control":{"kind":"number"}},
+  ],
   ISkeleton: [
     {"name":"loading","type":"boolean","doc":"加载完成后渲染默认插槽；为 true 时显示骨架","defaultText":"true","control":{"kind":"boolean"}},
     {"name":"variant","type":"'text' | 'paragraph' | 'card' | 'list' | 'avatar'","doc":"预设版式，省得每处都手写行数","defaultText":"'paragraph'","control":{"kind":"enum","options":["text","paragraph","card","list","avatar"]}},

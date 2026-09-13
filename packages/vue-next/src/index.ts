@@ -93,6 +93,7 @@ import IBackTop from './IBackTop.vue'
 import ICodeBlock from './ICodeBlock.vue'
 import ICommandSearch from './ICommandSearch.vue'
 import IInsightCards from './IInsightCards.vue'
+import ISelectionActions from './ISelectionActions.vue'
 import IToolChips from './IToolChips.vue'
 import IFloatButton from './IFloatButton.vue'
 import IWatermark from './IWatermark.vue'
@@ -183,6 +184,7 @@ export {
   ICodeBlock,
   ICommandSearch,
   IInsightCards,
+  ISelectionActions,
   IToolChips,
   IFloatButton,
   IWatermark,

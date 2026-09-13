@@ -1373,6 +1373,41 @@ void main() {
     expect(formatInsightValue(-3.5), "-3.5");
   });
 
+  test('选区的清理、字数上限、引文省略与动作条落点与 Web 端一致', () {
+    expect(cleanSelection('the quick\nbrown fox'), 'the quick brown fox');
+    expect(cleanSelection('第一段\n\n\n第二段'), '第一段\n\n第二段');
+    expect(cleanSelection('  改   一下  '), '改 一下');
+    expect(cleanSelection('   \n  '), '');
+    expect(hasSelection('the quick\nbrown fox'), true);
+    expect(hasSelection('第一段\n\n\n第二段'), true);
+    expect(hasSelection('  改   一下  '), true);
+    expect(hasSelection('   \n  '), false);
+    expect(selectionTooLong('the quick\nbrown fox'), false);
+    expect(selectionTooLong('第一段\n\n\n第二段'), false);
+    expect(selectionTooLong('  改   一下  '), false);
+    expect(selectionTooLong('   \n  '), false);
+    expect(selectionCount('the quick\nbrown fox'), 19);
+    expect(selectionCount('第一段\n\n\n第二段'), 8);
+    expect(selectionCount('  改   一下  '), 4);
+    expect(selectionCount('   \n  '), 0);
+    expect(hasSelection('改一改这一整段话', max: 4), false);
+    expect(selectionTooLong('改一改这一整段话', max: 4), true);
+    expect(selectionExcerpt('短句', max: 11), '短句');
+    expect(selectionExcerpt('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaMIDDLEbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', max: 11), 'aaaaa…bbbbb');
+    expect(selectionAnchor(IOverlayRect(200, 300, 120, 20), 200, 40, 1000, 800).x, 160);
+    expect(selectionAnchor(IOverlayRect(200, 300, 120, 20), 200, 40, 1000, 800).y, 252);
+    expect(selectionAnchor(IOverlayRect(200, 300, 120, 20), 200, 40, 1000, 800).placement, SelectionPlacement.top);
+    expect(selectionAnchor(IOverlayRect(200, 4, 120, 20), 200, 40, 1000, 800).x, 160);
+    expect(selectionAnchor(IOverlayRect(200, 4, 120, 20), 200, 40, 1000, 800).y, 32);
+    expect(selectionAnchor(IOverlayRect(200, 4, 120, 20), 200, 40, 1000, 800).placement, SelectionPlacement.bottom);
+    expect(selectionAnchor(IOverlayRect(940, 300, 60, 20), 200, 40, 1000, 800).x, 792);
+    expect(selectionAnchor(IOverlayRect(940, 300, 60, 20), 200, 40, 1000, 800).y, 252);
+    expect(selectionAnchor(IOverlayRect(940, 300, 60, 20), 200, 40, 1000, 800).placement, SelectionPlacement.top);
+    expect(selectionAnchor(IOverlayRect(0, 780, 40, 20), 200, 40, 1000, 800).x, 8);
+    expect(selectionAnchor(IOverlayRect(0, 780, 40, 20), 200, 40, 1000, 800).y, 732);
+    expect(selectionAnchor(IOverlayRect(0, 780, 40, 20), 200, 40, 1000, 800).placement, SelectionPlacement.top);
+  });
+
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
     final steps = <IThinkingStep>[IThinkingStep(key: 'a', title: '拆解问题', kind: IThinkingStepKind.reason, status: IThinkingStepStatus.done), IThinkingStep(key: 'b', title: '检索文档', kind: IThinkingStepKind.search, status: IThinkingStepStatus.error), IThinkingStep(key: 'c', title: '写补丁', kind: IThinkingStepKind.code, status: IThinkingStepStatus.running), IThinkingStep(key: 'd', title: '复核', kind: IThinkingStepKind.tool, status: IThinkingStepStatus.done)];
     expect(defaultOpenSteps(steps), <String>['b', 'c']);
