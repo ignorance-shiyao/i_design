@@ -16,6 +16,13 @@
     >
       <view class="i-icon i-icon--marquee" style="width:14px;height:14px" />
     </view>
+    <view
+      wx:if="{{!readonly}}"
+      class="i-flow__tool {{selection.length < 2 ? 'is-disabled' : ''}}"
+      bindtap="groupSelection"
+    >
+      <view class="i-icon i-icon--folder" style="width:14px;height:14px" />
+    </view>
     <view wx:if="{{!readonly}}" class="i-flow__tool" bindtap="layout">
       <view class="i-icon i-icon--layers" style="width:14px;height:14px" />
     </view>

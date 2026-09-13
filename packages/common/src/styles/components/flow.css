@@ -83,6 +83,8 @@
 /* 无可撤销时按钮变淡且不可点：不隐藏——工具栏宽度跳变比一个灰按钮更扰人 */
 .i-flow__tool:disabled { opacity: 0.35; cursor: default; }
 .i-flow__tool:disabled:hover { background: none; color: var(--i-color-text-secondary); }
+/* 小程序没有 disabled 属性，同一副观感走类名 */
+.i-flow__tool.is-disabled { opacity: 0.35; pointer-events: none; }
 /* 画布获得焦点时给出提示：快捷键只在它聚焦时生效，用户得知道自己在不在这儿 */
 .i-flow:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
 .i-flow__zoom {
@@ -160,4 +162,44 @@
   stroke-width: 1;
   stroke-dasharray: 4 3;
   pointer-events: none;
+}
+
+/*
+ * 分组框。
+ *
+ * 虚线加极淡的底：它是「这几个是一回事」的说明，不是一个容器。
+ * 实线框会被读成节点的边界，淡底则让它退到连线后面去。
+ */
+.i-flow__group-box {
+  fill: var(--i-color-brand-subtle);
+  stroke: var(--i-color-border);
+  stroke-dasharray: 6 4;
+  stroke-width: 1;
+}
+.i-flow__group-label {
+  fill: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+}
+.i-flow__group-toggle {
+  cursor: pointer;
+}
+.i-flow__group-toggle rect {
+  fill: var(--i-color-bg-elevated);
+  stroke: var(--i-color-border);
+}
+.i-flow__group-toggle text {
+  fill: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+}
+.i-flow__group-toggle:hover rect {
+  stroke: var(--i-color-brand);
+}
+
+/*
+ * 折叠组的代表方块：虚线描边，和真正的节点区分开。
+ * 不区分的话，读者会把它当成一个普通节点，然后找不到组里那几个到哪去了。
+ */
+.i-flow__node.is-group .i-flow__shape {
+  stroke-dasharray: 6 4;
+  fill: var(--i-color-brand-subtle);
 }

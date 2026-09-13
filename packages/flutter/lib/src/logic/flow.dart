@@ -495,3 +495,107 @@ IFlowAlignment alignGuides(
 
   return IFlowAlignment(dx: dx, dy: dy, guides: guides);
 }
+
+/* ---------- 节点分组（对应 logic/flow.ts） ---------- */
+
+class FlowGroupData {
+  const FlowGroupData({
+    required this.id,
+    required this.label,
+    required this.nodeIds,
+    this.collapsed = false,
+  });
+
+  final String id;
+  final String label;
+
+  /// 组内节点。不在 nodes 里的 id 会被忽略，组随之变小而不是崩掉
+  final List<String> nodeIds;
+
+  /// 折叠后组内节点收成一个方块
+  final bool collapsed;
+
+  FlowGroupData copyWith({String? id, String? label, List<String>? nodeIds, bool? collapsed}) =>
+      FlowGroupData(
+        id: id ?? this.id,
+        label: label ?? this.label,
+        nodeIds: nodeIds ?? this.nodeIds,
+        collapsed: collapsed ?? this.collapsed,
+      );
+}
+
+/// 组框的边界：包住组内所有节点，再留一圈让标题有地方放
+Rect? groupBounds(List<FlowNodeData> nodes, FlowGroupData group, {double padding = 16}) {
+  final members = [for (final n in nodes) if (group.nodeIds.contains(n.id)) n];
+  if (members.isEmpty) return null;
+  var left = double.infinity, top = double.infinity, right = -double.infinity, bottom = -double.infinity;
+  for (final n in members) {
+    if (n.x < left) left = n.x;
+    if (n.y < top) top = n.y;
+    if (n.x + n.width > right) right = n.x + n.width;
+    if (n.y + n.height > bottom) bottom = n.y + n.height;
+  }
+  final x = left - padding;
+  // 顶上多留一截给标题：标题压在第一个节点上，读者会以为那是节点自己的字
+  final y = top - padding - 18;
+  return Rect.fromLTWH(x, y, right + padding - x, bottom + padding - y);
+}
+
+/// 折叠之后画布上还剩哪些节点。
+///
+/// 折叠组的成员换成一个代表节点——连到组内的线得有个落点，
+/// 否则那些线会指向空气。代表节点沿用组的 id。
+List<FlowNodeData> visibleNodes(List<FlowNodeData> nodes, [List<FlowGroupData> groups = const []]) {
+  final collapsed = [for (final g in groups) if (g.collapsed) g];
+  if (collapsed.isEmpty) return nodes;
+
+  final hidden = <String>{for (final g in collapsed) ...g.nodeIds};
+  final out = [for (final n in nodes) if (!hidden.contains(n.id)) n];
+  for (final group in collapsed) {
+    final box = groupBounds(nodes, group, padding: 0);
+    if (box == null) continue;
+    out.add(FlowNodeData(
+      id: group.id,
+      label: '${group.label} · ${group.nodeIds.length}',
+      x: box.left,
+      y: box.top,
+      width: box.width.clamp(kFlowNodeWidth, 220),
+      height: kFlowNodeHeight,
+    ));
+  }
+  return out;
+}
+
+/// 折叠之后还剩哪些连线。
+///
+/// 端点落在被折叠成员上的线改指向组；两端都在同一个折叠组里的线直接去掉——
+/// 那画出来是一条从组连回自己的自环。重定向后可能重复，去重。
+List<FlowEdgeData> visibleEdges(List<FlowEdgeData> edges, [List<FlowGroupData> groups = const []]) {
+  final collapsed = [for (final g in groups) if (g.collapsed) g];
+  if (collapsed.isEmpty) return edges;
+
+  final owner = <String, String>{};
+  for (final g in collapsed) {
+    for (final id in g.nodeIds) owner[id] = g.id;
+  }
+
+  final seen = <String>{};
+  final out = <FlowEdgeData>[];
+  for (final edge in edges) {
+    final from = owner[edge.from] ?? edge.from;
+    final to = owner[edge.to] ?? edge.to;
+    if (from == to) continue;
+    if (!seen.add('$from->$to')) continue;
+    out.add(from == edge.from && to == edge.to
+        ? edge
+        : FlowEdgeData(
+            from: from,
+            to: to,
+            label: edge.label,
+            type: edge.type,
+            fromSide: edge.fromSide,
+            toSide: edge.toSide,
+          ));
+  }
+  return out;
+}

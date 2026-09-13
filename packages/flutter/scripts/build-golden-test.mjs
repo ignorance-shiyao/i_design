@@ -114,7 +114,10 @@ const { toolChipStat, summarizeToolChips, toolChipIcon } = await bundle(
 const {
   defaultOpenSteps, summarizeThinking, thinkingStepIcon, toggleThinkingStep
 } = await bundle('packages/common/src/logic/thinking.ts', 'thinking')
-const { alignGuides, anchorOf } = await bundle('packages/common/src/logic/flow.ts', 'flowalign')
+const { alignGuides, anchorOf, groupBounds, visibleEdges, visibleNodes } = await bundle(
+  'packages/common/src/logic/flow.ts',
+  'flowalign'
+)
 const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
@@ -1854,6 +1857,47 @@ const anchorExpectations = ['left', 'right', 'top', 'bottom'].flatMap((side) => 
   `    expect(anchorOf(${dartAnchorNode}, 160, 900).side, ${JSON.stringify(anchorOf(anchorNode, { x: 160, y: 900 }).side)});`
 ])
 
+/*
+ * 节点分组：折起来之后剩哪些节点、哪些线，两端必须一致，
+ * 否则同一张图折一下在两端会变成两张不同的图。
+ */
+const gNodes = [
+  { id: 'a', x: 100, y: 100, width: 120, height: 48, label: 'a' },
+  { id: 'b', x: 300, y: 200, width: 120, height: 48, label: 'b' },
+  { id: 'c', x: 600, y: 100, width: 120, height: 48, label: 'c' }
+]
+const dartGNodes = `<FlowNodeData>[${gNodes
+  .map((n) => `FlowNodeData(id: '${n.id}', label: '${n.label}', x: ${n.x}, y: ${n.y}, width: ${n.width}, height: ${n.height})`)
+  .join(', ')}]`
+const gGroup = { id: 'g1', label: '审批', nodeIds: ['a', 'b'] }
+const dartGroup = (collapsed) =>
+  `FlowGroupData(id: 'g1', label: '审批', nodeIds: <String>['a', 'b'], collapsed: ${collapsed})`
+const gEdges = [
+  { from: 'a', to: 'c' },
+  { from: 'b', to: 'c' },
+  { from: 'a', to: 'b' }
+]
+const dartGEdges = `<FlowEdgeData>[${gEdges.map((e) => `FlowEdgeData(from: '${e.from}', to: '${e.to}')`).join(', ')}]`
+const box = groupBounds(gNodes, gGroup)
+const shownNodes = visibleNodes(gNodes, [{ ...gGroup, collapsed: true }])
+const shownEdges = visibleEdges(gEdges, [{ ...gGroup, collapsed: true }])
+const groupExpectations = [
+  `    final gNodes = ${dartGNodes};`,
+  `    final box = groupBounds(gNodes, ${dartGroup(false)})!;`,
+  `    expect(box.left, ${box.x});`,
+  `    expect(box.top, ${box.y});`,
+  `    expect(box.width, ${box.width});`,
+  `    expect(box.height, ${box.height});`,
+  `    expect(groupBounds(gNodes, FlowGroupData(id: 'g', label: 'x', nodeIds: <String>['zz'])), null);`,
+  `    final shown = visibleNodes(gNodes, <FlowGroupData>[${dartGroup(true)}]);`,
+  `    expect(shown.length, ${shownNodes.length});`,
+  ...shownNodes.map((n, i) => `    expect(shown[${i}].id, '${n.id}');`),
+  `    expect(shown.last.label, ${JSON.stringify(shownNodes[shownNodes.length - 1].label)});`,
+  `    final links = visibleEdges(${dartGEdges}, <FlowGroupData>[${dartGroup(true)}]);`,
+  `    expect(links.length, ${shownEdges.length});`,
+  ...shownEdges.map((e, i) => `    expect(links[${i}].from, '${e.from}');\n    expect(links[${i}].to, '${e.to}');`)
+]
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -2438,6 +2482,10 @@ ${guideExpectations.join('\n')}
 
   test('指定锚点的落点与 Web 端一致', () {
 ${anchorExpectations.join('\n')}
+  });
+
+  test('节点分组折叠后的节点与连线与 Web 端一致', () {
+${groupExpectations.join('\n')}
   });
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {

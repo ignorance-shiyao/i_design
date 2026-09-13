@@ -15,6 +15,9 @@ import {
   flatten,
   alignGuides,
   autoLayout,
+  groupBounds,
+  visibleEdges,
+  visibleNodes,
   marqueeRect,
   minimapLayout,
   moveNodes,
@@ -25,6 +28,7 @@ import {
   viewFromMinimap,
   type FlowEdge,
   type FlowEdgeType,
+  type FlowGroup,
   type FlowGuide,
   type FlowNode,
   type FlowResizeHandle
@@ -59,6 +63,14 @@ export interface FlowProps {
   edgeType?: FlowEdgeType
   /** 导出文件名，不含扩展名 */
   exportName?: string
+  /**
+   * 分组。框选之后成组，组可整体折叠。
+   *
+   * 组不改节点的坐标，只是在它们外面画一个框——分组是「这几个是一回事」，
+   * 不是「把它们搬到一起」。
+   */
+  groups?: FlowGroup[]
+  onGroupsChange?: (groups: FlowGroup[]) => void
   className?: string
 }
 
@@ -72,6 +84,8 @@ export function Flow({
   onMove,
   edgeType = 'polyline',
   exportName = 'flow',
+  groups = [],
+  onGroupsChange,
   className = ''
 }: FlowProps) {
   const root = useRef<HTMLDivElement>(null)
@@ -87,7 +101,19 @@ export function Flow({
   const [guides, setGuides] = useState<FlowGuide[]>([])
   const [showMinimap, setShowMinimap] = useState(true)
 
-  const byId = new Map(nodes.map((n) => [n.id, n]))
+  /*
+   * 画布上真正画出来的节点与连线。折叠组的成员换成一个代表方块，
+   * 连到组内的线改指向它——只把成员藏起来的话，那些线会指向空气。
+   */
+  const shownNodes = visibleNodes(nodes, groups)
+  const shownEdges = visibleEdges(edges, groups)
+  /** 没折叠的组才画框：折叠之后那个代表方块本身就是它 */
+  const shownGroups = groups
+    .filter((g) => !g.collapsed)
+    .map((g) => ({ group: g, box: groupBounds(nodes, g) }))
+    .filter((g): g is { group: FlowGroup; box: NonNullable<typeof g.box> } => !!g.box)
+
+  const byId = new Map(shownNodes.map((n) => [n.id, n]))
   const selectedSet = new Set(selection)
   const sizeOf = (node: FlowNode) => ({ w: node.width ?? NODE_W, h: node.height ?? NODE_H })
 
@@ -197,6 +223,16 @@ export function Flow({
   }
 
   function onNodeDown(event: PointerEvent<SVGGElement>, node: FlowNode) {
+    /*
+     * 折叠组的代表方块：点它就是展开。
+     * 折起来之后组框连同它的折叠按钮都没了，代表方块是唯一还在画布上的那个入口——
+     * 没有这一条，折叠是个单向操作。
+     */
+    if (groups.some((g) => g.collapsed && g.id === node.id)) {
+      event.stopPropagation()
+      toggleGroup(node.id)
+      return
+    }
     event.stopPropagation()
     // 加选：Shift / Cmd 点击往选中集合里增删，不加修饰键则重置为这一个
     const additive = event.shiftKey || event.metaKey || event.ctrlKey
@@ -342,6 +378,25 @@ export function Flow({
     commitEdit()
   }
 
+  /**
+   * 把当前选中的节点成一组。至少要两个——一个节点的「组」除了多一个框什么也没说。
+   */
+  const groupSelection = () => {
+    if (readOnly || selection.length < 2) return
+    onGroupsChange?.([
+      ...groups,
+      {
+        id: `g-${Date.now().toString(36)}`,
+        label: `分组 ${groups.length + 1}`,
+        nodeIds: [...selection]
+      }
+    ])
+  }
+
+  /** 折叠 / 展开一个组 */
+  const toggleGroup = (id: string) =>
+    onGroupsChange?.(groups.map((g) => (g.id === id ? { ...g, collapsed: !g.collapsed } : g)))
+
   const zoom = (delta: number) =>
     setView((v) => ({ ...v, scale: Math.min(2, Math.max(0.4, v.scale + delta)) }))
 
@@ -486,7 +541,43 @@ export function Flow({
         </defs>
 
         <g className="i-flow__scene" transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
-          {edges.map((edge) => {
+          {/*
+            组框画在连线与节点之下：它是背景，压在上面会盖住线的走向。
+          */}
+          {shownGroups.map(({ group, box }) => (
+            <g key={group.id} className="i-flow__group">
+              <rect
+                className="i-flow__group-box"
+                x={box.x}
+                y={box.y}
+                width={box.width}
+                height={box.height}
+                rx={10}
+              />
+              <text className="i-flow__group-label" x={box.x + 10} y={box.y + 14}>
+                {group.label}
+              </text>
+              {!readOnly && (
+                <g
+                  className="i-flow__group-toggle"
+                  role="button"
+                  aria-label={`折叠 ${group.label}`}
+                  onPointerDown={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                    toggleGroup(group.id)
+                  }}
+                >
+                  <rect x={box.x + box.width - 26} y={box.y + 2} width={18} height={14} rx={4} />
+                  <text x={box.x + box.width - 17} y={box.y + 13} textAnchor="middle">
+                    −
+                  </text>
+                </g>
+              )}
+            </g>
+          ))}
+
+          {shownEdges.map((edge) => {
             const from = byId.get(edge.from)
             const to = byId.get(edge.to)
             if (!from || !to) return null
@@ -519,13 +610,18 @@ export function Flow({
             )
           })}
 
-          {nodes.map((node) => {
+          {shownNodes.map((node) => {
             const type = node.type ?? 'process'
             const { w, h } = sizeOf(node)
             return (
               <g
                 key={node.id}
-                className={['i-flow__node', `i-flow__node--${type}`, selectedSet.has(node.id) ? 'is-selected' : '']
+                className={[
+                  'i-flow__node',
+                  `i-flow__node--${type}`,
+                  selectedSet.has(node.id) ? 'is-selected' : '',
+                  groups.some((g) => g.collapsed && g.id === node.id) ? 'is-group' : ''
+                ]
                   .filter(Boolean)
                   .join(' ')}
                 onPointerDown={(e) => onNodeDown(e, node)}
@@ -627,6 +723,15 @@ export function Flow({
         <div className="i-flow__toolbar i-flow__toolbar--history">
           <button className="i-flow__tool" aria-label="自动布局" onClick={layout}>
             <Icon name="layers" size={14} />
+          </button>
+          {/* 选中不足两个时禁用：一个节点的「组」除了多一个框什么也没说 */}
+          <button
+            className="i-flow__tool"
+            aria-label="选中的节点成组"
+            disabled={selection.length < 2}
+            onClick={groupSelection}
+          >
+            <Icon name="folder" size={14} />
           </button>
           <button className="i-flow__tool" aria-label="撤销" disabled={undoStack.length === 0} onClick={undo}>
             <Icon name="undo" size={14} />

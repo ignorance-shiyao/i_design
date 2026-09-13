@@ -1403,6 +1403,25 @@ void main() {
     expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 160, 900).side, "bottom");
   });
 
+  test('节点分组折叠后的节点与连线与 Web 端一致', () {
+    final gNodes = <FlowNodeData>[FlowNodeData(id: 'a', label: 'a', x: 100, y: 100, width: 120, height: 48), FlowNodeData(id: 'b', label: 'b', x: 300, y: 200, width: 120, height: 48), FlowNodeData(id: 'c', label: 'c', x: 600, y: 100, width: 120, height: 48)];
+    final box = groupBounds(gNodes, FlowGroupData(id: 'g1', label: '审批', nodeIds: <String>['a', 'b'], collapsed: false))!;
+    expect(box.left, 84);
+    expect(box.top, 66);
+    expect(box.width, 352);
+    expect(box.height, 198);
+    expect(groupBounds(gNodes, FlowGroupData(id: 'g', label: 'x', nodeIds: <String>['zz'])), null);
+    final shown = visibleNodes(gNodes, <FlowGroupData>[FlowGroupData(id: 'g1', label: '审批', nodeIds: <String>['a', 'b'], collapsed: true)]);
+    expect(shown.length, 2);
+    expect(shown[0].id, 'c');
+    expect(shown[1].id, 'g1');
+    expect(shown.last.label, "审批 · 2");
+    final links = visibleEdges(<FlowEdgeData>[FlowEdgeData(from: 'a', to: 'c'), FlowEdgeData(from: 'b', to: 'c'), FlowEdgeData(from: 'a', to: 'b')], <FlowGroupData>[FlowGroupData(id: 'g1', label: '审批', nodeIds: <String>['a', 'b'], collapsed: true)]);
+    expect(links.length, 1);
+    expect(links[0].from, 'g1');
+    expect(links[0].to, 'c');
+  });
+
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
     expect(shouldShowElapsed(0), false);
     expect(shouldShowElapsed(2999), false);

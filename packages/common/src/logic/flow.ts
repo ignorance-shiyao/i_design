@@ -326,6 +326,94 @@ export function moveNodes(
     .map((node) => ({ id: node.id, x: node.x + dx, y: node.y + dy }))
 }
 
+/* ---------- 节点分组 ---------- */
+
+export interface FlowGroup {
+  id: string
+  label: string
+  /** 组内节点。不在 `nodes` 里的 id 会被忽略，组随之变小而不是崩掉 */
+  nodeIds: string[]
+  /** 折叠后组内节点收成一个方块 */
+  collapsed?: boolean
+}
+
+/** 组框的边界：包住组内所有节点，再留一圈让标题有地方放 */
+export function groupBounds(nodes: FlowNode[], group: FlowGroup, padding = 16): FlowRect | null {
+  const members = nodes.filter((n) => group.nodeIds.includes(n.id))
+  if (!members.length) return null
+  const xs = members.map((n) => n.x)
+  const ys = members.map((n) => n.y)
+  const rights = members.map((n) => n.x + (n.width ?? NODE_W))
+  const bottoms = members.map((n) => n.y + (n.height ?? NODE_H))
+  const x = Math.min(...xs) - padding
+  // 顶上多留一截给标题：标题压在第一个节点上，读者会以为那是节点自己的字
+  const y = Math.min(...ys) - padding - 18
+  return {
+    x,
+    y,
+    width: Math.max(...rights) + padding - x,
+    height: Math.max(...bottoms) + padding - y
+  }
+}
+
+/**
+ * 折叠之后画布上还剩哪些节点。
+ *
+ * 折叠组里的成员换成一个代表节点——不是把它们藏起来就完事：连到组内的线
+ * 得有个落点，否则那些线会指向空气。代表节点沿用组的 id，
+ * 于是「连到这个组」和「连到组里某一个」在渲染时是同一件事。
+ */
+export function visibleNodes(nodes: FlowNode[], groups: FlowGroup[] = []): FlowNode[] {
+  const collapsed = groups.filter((g) => g.collapsed)
+  if (!collapsed.length) return nodes
+
+  const hidden = new Set(collapsed.flatMap((g) => g.nodeIds))
+  const out = nodes.filter((n) => !hidden.has(n.id))
+  for (const group of collapsed) {
+    const box = groupBounds(nodes, group, 0)
+    if (!box) continue
+    out.push({
+      id: group.id,
+      // 折成一块的位置取组的中上部，读者视线仍落在原来那片区域
+      x: box.x,
+      y: box.y,
+      width: Math.max(NODE_W, Math.min(box.width, 220)),
+      height: NODE_H,
+      label: `${group.label} · ${group.nodeIds.length}`,
+      type: 'process'
+    })
+  }
+  return out
+}
+
+/**
+ * 折叠之后还剩哪些连线。
+ *
+ * 两件事：**端点落在被折叠成员上的线改指向组**，**两端都在同一个折叠组里的线直接去掉**——
+ * 后者画出来是一条从组连回自己的自环，除了噪声什么也不说明。
+ * 重定向之后可能出现多条一模一样的线（组内三个节点都连向外面同一个节点），去重。
+ */
+export function visibleEdges(edges: FlowEdge[], groups: FlowGroup[] = []): FlowEdge[] {
+  const collapsed = groups.filter((g) => g.collapsed)
+  if (!collapsed.length) return edges
+
+  const owner = new Map<string, string>()
+  for (const group of collapsed) for (const id of group.nodeIds) owner.set(id, group.id)
+
+  const seen = new Set<string>()
+  const out: FlowEdge[] = []
+  for (const edge of edges) {
+    const from = owner.get(edge.from) ?? edge.from
+    const to = owner.get(edge.to) ?? edge.to
+    if (from === to) continue
+    const key = `${from}->${to}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(from === edge.from && to === edge.to ? edge : { ...edge, from, to })
+  }
+  return out
+}
+
 /* ---------- 对齐辅助线 ---------- */
 
 /** 一条辅助线。`span` 是它要画多长——只盖住参与对齐的那几个节点 */

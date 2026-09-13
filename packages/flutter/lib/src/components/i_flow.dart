@@ -24,6 +24,8 @@ class IFlow extends StatefulWidget {
     this.onMove,
     this.edgeType = FlowEdgeType.polyline,
     this.onExport,
+    this.groups = const <FlowGroupData>[],
+    this.onGroupsChanged,
   });
 
   final List<FlowNodeData> nodes;
@@ -45,6 +47,12 @@ class IFlow extends StatefulWidget {
 
   /// 导出快照后拿到 PNG 字节；存盘还是分享由调用方决定
   final ValueChanged<Uint8List>? onExport;
+
+  /// 节点分组。折叠的组在画布上收成一个代表方块，点它展开
+  final List<FlowGroupData> groups;
+
+  /// 折叠／展开后抛出新的整份分组；组件不改传入的数据
+  final ValueChanged<List<FlowGroupData>>? onGroupsChanged;
 
   @override
   State<IFlow> createState() => _IFlowState();
@@ -166,9 +174,25 @@ class _IFlowState extends State<IFlow> {
     if (mounted) setState(() => _showMinimap = true);
   }
 
+  /// 画布上真正看得见的节点：折叠组换成了代表方块
+  List<FlowNodeData> get _shownNodes => visibleNodes(widget.nodes, widget.groups);
+
+  List<FlowEdgeData> get _shownEdges => visibleEdges(widget.edges, widget.groups);
+
+  /// 某个 id 是不是折叠组的代表方块
+  bool _isCollapsedGroup(String id) =>
+      widget.groups.any((g) => g.collapsed && g.id == id);
+
+  void _toggleGroup(String id) {
+    widget.onGroupsChanged?.call([
+      for (final g in widget.groups)
+        if (g.id == id) g.copyWith(collapsed: !g.collapsed) else g,
+    ]);
+  }
+
   FlowNodeData? _hitTest(Offset point) {
     // 从后往前找：后画的节点在上面，点击应当命中它
-    for (final node in widget.nodes.reversed) {
+    for (final node in _shownNodes.reversed) {
       final rect = Rect.fromLTWH(node.x, node.y, node.width, node.height);
       if (rect.contains(point)) return node;
     }
@@ -215,6 +239,11 @@ class _IFlowState extends State<IFlow> {
                     }
                   }
                   final node = _hitTest(_toCanvas(d.localPosition));
+                  // 点代表方块就展开这个组：折叠态下它不是一个能选的节点
+                  if (node != null && _isCollapsedGroup(node.id)) {
+                    _toggleGroup(node.id);
+                    return;
+                  }
                   widget.onSelectionChanged?.call(node == null ? const [] : [node.id]);
                 },
                 onPanStart: (d) {
@@ -232,7 +261,7 @@ class _IFlowState extends State<IFlow> {
                     setState(() => _marquee = (from: point, to: point));
                     return;
                   }
-                  if (node == null || widget.readOnly) {
+                  if (node == null || widget.readOnly || _isCollapsedGroup(node.id)) {
                     _dragIds = const [];
                     return;
                   }
@@ -317,8 +346,21 @@ class _IFlowState extends State<IFlow> {
                   child: CustomPaint(
                     size: Size.infinite,
                     painter: _FlowPainter(
-                      nodes: widget.nodes,
-                      edges: widget.edges,
+                      nodes: _shownNodes,
+                      edges: _shownEdges,
+                      groups: [
+                        for (final g in widget.groups)
+                          if (!g.collapsed) g,
+                      ],
+                      groupBoxes: {
+                        for (final g in widget.groups)
+                          if (!g.collapsed && groupBounds(widget.nodes, g) != null)
+                            g.id: groupBounds(widget.nodes, g)!,
+                      },
+                      collapsedIds: {
+                        for (final g in widget.groups)
+                          if (g.collapsed) g.id,
+                      },
                       selected: _selected,
                       edgeType: widget.edgeType,
                       pan: _pan,
@@ -425,6 +467,9 @@ class _FlowPainter extends CustomPainter {
   const _FlowPainter({
     required this.nodes,
     required this.edges,
+    required this.groups,
+    required this.groupBoxes,
+    required this.collapsedIds,
     required this.selected,
     required this.edgeType,
     required this.pan,
@@ -440,6 +485,13 @@ class _FlowPainter extends CustomPainter {
 
   final List<FlowNodeData> nodes;
   final List<FlowEdgeData> edges;
+
+  /// 展开着的组，按它们的框画在最底下
+  final List<FlowGroupData> groups;
+  final Map<String, Rect> groupBoxes;
+
+  /// 折叠组的 id。同名的节点是代表方块，描边用虚线
+  final Set<String> collapsedIds;
   final Set<String> selected;
   final FlowEdgeType edgeType;
   final Offset pan;
@@ -459,6 +511,22 @@ class _FlowPainter extends CustomPainter {
     canvas.save();
     canvas.translate(pan.dx, pan.dy);
     canvas.scale(scale);
+
+    // 组框画在连线下面：它是底图，压住连线会让人以为组框截断了流程
+    for (final group in groups) {
+      final box = groupBoxes[group.id];
+      if (box == null) continue;
+      _dashedRect(canvas, box, colors.borderStrong, 1 / scale, 6 / scale, 4 / scale);
+      _text(
+        canvas,
+        group.label,
+        // 标题居中摆在框顶：_text 以中心定位，左对齐要另算宽度，不值当
+        Offset(box.center.dx, box.top + 9),
+        colors.textSecondary,
+        12,
+        bold: false,
+      );
+    }
 
     final byId = {for (final n in nodes) n.id: n};
 
@@ -543,13 +611,25 @@ class _FlowPainter extends CustomPainter {
       }
 
       canvas.drawPath(path, Paint()..color = fill);
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = isSelected ? colors.brand : stroke
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = isSelected ? 2 : 1.5,
-      );
+      // 代表方块用虚线描边：与「这是一个真节点」区分开，不靠颜色一个线索
+      if (collapsedIds.contains(node.id)) {
+        _dashedPath(
+          canvas,
+          path,
+          isSelected ? colors.brand : stroke,
+          isSelected ? 2 : 1.5,
+          6 / scale,
+          4 / scale,
+        );
+      } else {
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = isSelected ? colors.brand : stroke
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = isSelected ? 2 : 1.5,
+        );
+      }
 
       _text(canvas, node.label, rect.center, colors.text, 13, bold: false);
     }
@@ -641,12 +721,16 @@ class _FlowPainter extends CustomPainter {
   }
 
   /// Flutter 没有 strokeDasharray，虚线只能自己按段画
-  void _dashedRect(Canvas canvas, Rect rect, Color color, double width, double dash, double gap) {
+  void _dashedRect(Canvas canvas, Rect rect, Color color, double width, double dash, double gap) =>
+      _dashedPath(canvas, Path()..addRect(rect), color, width, dash, gap);
+
+  /// 任意路径的虚线描边：圆角矩形与菱形都得用同一套步进，节奏才一致
+  void _dashedPath(Canvas canvas, Path path, Color color, double width, double dash, double gap) {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = width;
-    final metrics = (Path()..addRect(rect)).computeMetrics();
+    final metrics = path.computeMetrics();
     for (final metric in metrics) {
       var start = 0.0;
       while (start < metric.length) {
@@ -740,6 +824,8 @@ class _FlowPainter extends CustomPainter {
   @override
   bool shouldRepaint(_FlowPainter old) =>
       old.nodes != nodes ||
+      old.groups != groups ||
+      old.collapsedIds != collapsedIds ||
       old.selected != selected ||
       old.marquee != marquee ||
       old.handles != handles ||

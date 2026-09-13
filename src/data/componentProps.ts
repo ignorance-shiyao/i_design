@@ -399,6 +399,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"selection","type":"string[]","doc":"选中的节点。单选也是长度为 1 的数组——两套选中状态迟早会对不上","defaultText":"() => []","control":null},
     {"name":"edgeType","type":"FlowEdgeType","doc":"整图默认连线走向；单条连线可用 edge.type 覆盖","defaultText":"'polyline'","control":null},
     {"name":"exportName","type":"string","doc":"导出文件名，不含扩展名","defaultText":"'flow'","control":{"kind":"string"}},
+    {"name":"groups","type":"FlowGroup[]","doc":"分组。框选之后成组，组可整体折叠。 组不改节点的坐标，只是在它们外面画一个框——分组是「这几个是一回事」， 不是「把它们搬到一起」。折叠时组内节点收成一个代表方块， 连到组内的线改指向那个方块。","defaultText":"() => []","control":null},
   ],
   IForm: [
     {"name":"model","type":"Record<string, any>","doc":"表单数据对象，FormItem 通过 prop 读写其中的字段","defaultText":null,"control":null},

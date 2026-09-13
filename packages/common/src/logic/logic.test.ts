@@ -19,7 +19,14 @@ import { virtualWindow, scrollToRow, shouldVirtualize } from './virtual'
 import { isTextOverflowing, OVERFLOW_EPSILON } from './overflow'
 import { resolveLocale, zhCN, enUS } from './locale'
 import { shouldFlipUp } from './overlay'
-import { alignGuides, anchorOf, edgePath } from './flow'
+import {
+  alignGuides,
+  anchorOf,
+  edgePath,
+  groupBounds,
+  visibleEdges,
+  visibleNodes
+} from './flow'
 import { describeAccept } from './upload'
 import { contrastRatio, hexToRgb, readableOn, rgbToOklch, solidPair } from './palette'
 import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
@@ -737,5 +744,50 @@ describe('实心块与压在它上面的字', () => {
     // 明黄这种浅主题上，白字怎么压都不够——该转深字，而不是硬顶着白字
     expect(contrastRatio(tokens['color-brand-solid'], tokens['color-on-brand'])).toBeGreaterThanOrEqual(4.5)
     expect(tokens['color-on-brand']).not.toBe('#ffffff')
+  })
+})
+
+describe('节点分组', () => {
+  const node = (id: string, x: number, y: number) => ({ id, x, y, width: 120, height: 48, label: id })
+  const nodes = [node('a', 100, 100), node('b', 300, 200), node('c', 600, 100)]
+  const group = { id: 'g1', label: '审批', nodeIds: ['a', 'b'] }
+
+  it('组框包住所有成员，顶上留一截给标题', () => {
+    // 标题压在第一个节点上，读者会以为那是节点自己的字
+    const box = groupBounds(nodes, group)
+    expect(box).toEqual({ x: 84, y: 66, width: 352, height: 198 })
+  })
+
+  it('成员全不在图里时不画框，而不是画一个零宽的框', () => {
+    expect(groupBounds(nodes, { id: 'g', label: 'x', nodeIds: ['zz'] })).toBe(null)
+  })
+
+  it('没折叠时画布内容一个不少', () => {
+    expect(visibleNodes(nodes, [group])).toBe(nodes)
+    expect(visibleEdges([{ from: 'a', to: 'c' }], [group])).toEqual([{ from: 'a', to: 'c' }])
+  })
+
+  it('折叠后成员换成一个代表节点，沿用组的 id', () => {
+    const shown = visibleNodes(nodes, [{ ...group, collapsed: true }])
+    expect(shown.map((n) => n.id)).toEqual(['c', 'g1'])
+    expect(shown.find((n) => n.id === 'g1')!.label).toBe('审批 · 2')
+  })
+
+  it('连到组内的线改指向组，否则那条线会指向空气', () => {
+    const edges = visibleEdges([{ from: 'a', to: 'c' }], [{ ...group, collapsed: true }])
+    expect(edges).toEqual([{ from: 'g1', to: 'c' }])
+  })
+
+  it('两端都在同一个折叠组里的线直接去掉', () => {
+    // 画出来是一条从组连回自己的自环，除了噪声什么也不说明
+    expect(visibleEdges([{ from: 'a', to: 'b' }], [{ ...group, collapsed: true }])).toEqual([])
+  })
+
+  it('重定向后出现的重复连线只留一条', () => {
+    const edges = visibleEdges(
+      [{ from: 'a', to: 'c' }, { from: 'b', to: 'c' }],
+      [{ ...group, collapsed: true }]
+    )
+    expect(edges).toEqual([{ from: 'g1', to: 'c' }])
   })
 })

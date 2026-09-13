@@ -5,7 +5,7 @@ import IButton from '@/components/IButton.vue'
 import ISpace from '@/components/ISpace.vue'
 import ISegmented from '@/components/ISegmented.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
-import { autoLayout, type FlowEdge, type FlowNode } from '@i-design/common'
+import { autoLayout, type FlowEdge, type FlowGroup, type FlowNode } from '@i-design/common'
 
 const edges: FlowEdge[] = [
   { from: 'start', to: 'fill' },
@@ -31,6 +31,7 @@ const initial: Omit<FlowNode, 'x' | 'y'>[] = [
 
 const nodes = ref<FlowNode[]>(autoLayout(initial, edges, { gapY: 92, gapX: 190 }))
 const selection = ref<string[]>([])
+const groups = ref<FlowGroup[]>([])
 
 /*
  * 一次操作可能动到多个节点（框选后批量拖动），因此收到的是一组几何而不是一个。
@@ -84,6 +85,7 @@ const edgeTypes = [
         </ISpace>
         <IFlow
           v-model:selection="selection"
+          v-model:groups="groups"
           :nodes="nodes"
           :edges="edges"
           :edge-type="edgeType"
@@ -109,6 +111,14 @@ const edgeTypes = [
     </p>
     <p>
       拖动组里任意一个节点，整组一起走。位移量整体吸附一次网格，而不是各自吸附——逐个吸附会把组内原本的相对间距抹平：两个相距 12px 的节点各自对齐到 8 格后会变成 8px 或 16px，一次批量移动就把手工排好的版毁了。撤销也按「一次操作」记：批量拖动的十个节点撤销一次全退回去，按十次才回到原处的撤销和没有撤销差不多。
+    </p>
+
+    <h2>节点分组</h2>
+    <p>
+      选中两个以上的节点，点工具条上的成组按钮，它们外面会出现一个虚线框与一行标题。组不改节点坐标，只是在它们外面画一个框——分组说的是「这几个是一回事」，不是「把它们搬到一起」，动坐标会把手工排好的版打乱。少于两个节点时按钮置灰：一个节点的「组」除了多一个框什么也没说。
+    </p>
+    <p>
+      点标题左边的折叠按钮，组内节点收成一个代表方块，方块上写着组名与成员数。连到组内的线跟着改指向这个方块，而不是随成员一起消失——否则那几条线会指向空气。两端都在同一个折叠组里的线直接去掉，它画出来是一条从组连回自己的自环；重定向之后重复的线也会合并成一条。代表方块用虚线描边，与真节点区分开，再点一下它就展开。
     </p>
 
     <h2>改尺寸</h2>
@@ -146,6 +156,10 @@ const edgeTypes = [
         <tr>
           <td><code>selection</code></td>
           <td>选中的节点 id 数组，支持 v-model。单选也是长度为 1 的数组——两套选中状态迟早会对不上</td>
+        </tr>
+        <tr>
+          <td><code>groups</code></td>
+          <td>分组数组，支持 v-model：id、标题、成员 id 与是否折叠。折叠后组内节点收成一个代表方块</td>
         </tr>
         <tr><td><code>readonly</code></td><td>只读：仍可平移缩放与选中，但不能拖动或缩放节点</td></tr>
         <tr><td><code>export-name</code></td><td>导出 SVG 的文件名（不含扩展名）</td></tr>
