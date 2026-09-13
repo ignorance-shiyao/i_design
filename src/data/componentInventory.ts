@@ -88,6 +88,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IInputAdornment.vue",
   "src/components/IInputNumber.vue",
   "src/components/IInputOtp.vue",
+  "src/components/IInsightCards.vue",
   "src/components/ILayout.vue",
   "src/components/ILink.vue",
   "src/components/IList.vue",

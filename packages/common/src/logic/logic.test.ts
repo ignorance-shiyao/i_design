@@ -27,6 +27,16 @@ import {
   visibleEdges,
   visibleNodes
 } from './flow'
+import {
+  insightPage,
+  insightPlot,
+  insightTrend,
+  scrubIndex,
+  scrubReadout,
+  scrubX,
+  trendLabel,
+  type InsightItem
+} from './insight'
 import { describeAccept } from './upload'
 import { contrastRatio, hexToRgb, readableOn, rgbToOklch, solidPair } from './palette'
 import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
@@ -789,5 +799,76 @@ describe('节点分组', () => {
       [{ ...group, collapsed: true }]
     )
     expect(edges).toEqual([{ from: 'g1', to: 'c' }])
+  })
+})
+
+describe('洞察卡', () => {
+  const item: InsightItem = {
+    id: 'i1',
+    title: '转化率',
+    summary: '下单转化在周三回升',
+    series: [12, 9, 11, 15],
+    labels: ['周一', '周二', '周三', '周四'],
+    unit: '%'
+  }
+
+  it('翻到头就停住，不绕回第一条', () => {
+    // 绕回去会让人以为还有新的，实际是又看了一遍第一条
+    expect(insightPage(3, 2, 1)).toBe(2)
+    expect(insightPage(3, 0, -1)).toBe(0)
+    expect(insightPage(3, 0, 1)).toBe(1)
+  })
+
+  it('擦洗按最近的点判定，不按落在第几段', () => {
+    // 按段判定时，手指过了中点读数还停在左边那个点上，看着慢一拍
+    expect(scrubIndex(0, 300, 4)).toBe(0)
+    expect(scrubIndex(160, 300, 4)).toBe(2)
+    expect(scrubIndex(300, 300, 4)).toBe(3)
+  })
+
+  it('擦洗位置越界时夹住，不给出不存在的下标', () => {
+    expect(scrubIndex(-40, 300, 4)).toBe(0)
+    expect(scrubIndex(999, 300, 4)).toBe(3)
+  })
+
+  it('scrubX 与 scrubIndex 互为逆运算，标记才落在点上', () => {
+    for (let i = 0; i < item.series.length; i++) {
+      expect(scrubIndex(scrubX(i, 300, 4), 300, 4)).toBe(i)
+    }
+  })
+
+  it('读数带单位；没有标签时不编一个「第几个」出来', () => {
+    expect(scrubReadout(item, 2)).toEqual({ label: '周三', value: '11%' })
+    expect(scrubReadout({ ...item, labels: undefined }, 2).label).toBe('')
+  })
+
+  it('涨跌比首尾而不是最后两个点', () => {
+    // 整体上升、末尾抖一下的曲线，比最后两点会显示成下跌
+    const trend = insightTrend([10, 30, 28])
+    expect(trend.direction).toBe('up')
+    expect(trend.delta).toBe(18)
+  })
+
+  it('首个点为 0 时没有百分比可言，给 null 而不是 Infinity', () => {
+    const trend = insightTrend([0, 5])
+    expect(trend.percent).toBeNull()
+    expect(trendLabel(trend)).toBe('上升 5')
+  })
+
+  it('涨跌有文字说明，不只靠箭头与红绿', () => {
+    expect(trendLabel(insightTrend([12, 15]))).toBe('上升 25%')
+    expect(trendLabel(insightTrend([8, 8]))).toBe('持平')
+    expect(trendLabel(insightTrend([]))).toBe('持平')
+  })
+})
+
+describe('洞察卡的留边', () => {
+  it('曲线往里缩一个半径多一点，首尾的标记圆才是整圆', () => {
+    // 画在正边上时圆有一半在画布外，看着像最后一个点没画完
+    expect(insightPlot(320)).toEqual({ inner: 310, inset: 5 })
+  })
+
+  it('图很窄时留边跟着缩，不会把曲线挤没', () => {
+    expect(insightPlot(12)).toEqual({ inner: 6, inset: 3 })
   })
 })

@@ -92,6 +92,7 @@ import IAffix from './IAffix.vue'
 import IBackTop from './IBackTop.vue'
 import ICodeBlock from './ICodeBlock.vue'
 import ICommandSearch from './ICommandSearch.vue'
+import IInsightCards from './IInsightCards.vue'
 import IToolChips from './IToolChips.vue'
 import IFloatButton from './IFloatButton.vue'
 import IWatermark from './IWatermark.vue'
@@ -181,6 +182,7 @@ export {
   IBackTop,
   ICodeBlock,
   ICommandSearch,
+  IInsightCards,
   IToolChips,
   IFloatButton,
   IWatermark,

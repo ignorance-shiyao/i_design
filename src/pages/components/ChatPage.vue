@@ -5,13 +5,14 @@ import IChatTyping from '@/components/IChatTyping.vue'
 import IChatThinking from '@/components/IChatThinking.vue'
 import IChatToolCall from '@/components/IChatToolCall.vue'
 import IToolChips from '@/components/IToolChips.vue'
+import IInsightCards from '@/components/IInsightCards.vue'
 import IChatSources from '@/components/IChatSources.vue'
 import IChatSuggestions from '@/components/IChatSuggestions.vue'
 import IPromptInput from '@/components/IPromptInput.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
 import { snippets } from '@/data/snippets'
-import type { AgentTask, ApprovalQuestion, ContextChunk, DiffRow } from '@i-design/common'
+import type { AgentTask, ApprovalQuestion, ContextChunk, DiffRow, InsightItem } from '@i-design/common'
 import IApprovalCard from '@/components/IApprovalCard.vue'
 import IAgentTasks from '@/components/IAgentTasks.vue'
 import IRecommendCard from '@/components/IRecommendCard.vue'
@@ -218,6 +219,35 @@ const chips = [
   { key: 'f', label: 'README.md', status: 'success' as const, added: 8 }
 ]
 const chipsExpanded = ref(false)
+
+/* 一组洞察。序列短是有意的：洞察卡看的是一段时间的走向，不是完整的时序图 */
+const insights: InsightItem[] = [
+  {
+    id: 'conv',
+    title: '下单转化率',
+    summary: '周二跌到谷底后连续两天回升，周四已高于周一。谷底与一次结算超时告警同一天。',
+    series: [12, 9, 11, 15],
+    labels: ['周一', '周二', '周三', '周四'],
+    unit: '%'
+  },
+  {
+    id: 'ttfb',
+    title: '首字节时延',
+    summary: '中位数稳定在 120ms 上下，波动来自周三的一次灰度发布，已回落。',
+    series: [118, 121, 164, 119, 117],
+    labels: ['周一', '周二', '周三', '周四', '周五'],
+    unit: 'ms'
+  },
+  {
+    id: 'retry',
+    title: '重试次数',
+    summary: '整周持平。重试集中在同一个下游接口，值得单独看它的超时设置。',
+    series: [34, 34, 34, 34],
+    labels: ['周一', '周二', '周三', '周四'],
+    unit: '次'
+  }
+]
+const insightIndex = ref(0)
 </script>
 
 <template>
@@ -348,6 +378,21 @@ const chipsExpanded = ref(false)
       code='<IToolChips :items="chips" :max="4" v-model:expanded="expanded" @select="onSelect" />'
     >
       <IToolChips :items="chips" :max="4" v-model:expanded="chipsExpanded" />
+    </DemoBlock>
+
+    <h2>洞察卡</h2>
+    <p>
+      结论在上、图在下：洞察卡的主角是那句话，图是它的依据。反过来排，读者会先自己解读曲线，等读到结论时已经有了一个判断——两者不一致时他信自己那个，这张卡就白做了。趋势线可以擦洗：一句「周三回升」不给具体数字，读者无从判断这个回升是 2% 还是 20%。指针横向划过即可读数，键盘用左右键，Home / End 跳到两端。
+    </p>
+    <DemoBlock
+      title="翻页与擦洗"
+      description="左右翻到下一条洞察，到头就停住而不绕回第一条——绕回去会让人以为还有新的。涨跌同时给出图标与文字，颜色不是唯一线索。"
+      lang="vue"
+      code='<IInsightCards :items="insights" v-model:index="insightIndex" />'
+    >
+      <div class="insight-demo">
+        <IInsightCards :items="insights" v-model:index="insightIndex" />
+      </div>
     </DemoBlock>
 
     <h2>来源与追问</h2>
@@ -516,6 +561,7 @@ const chipsExpanded = ref(false)
         <tr><td>IChatThinking</td><td>label、duration、pending、defaultOpen、steps</td><td>—</td></tr>
         <tr><td>IChatToolCall</td><td>name、summary、status、args、result、error</td><td>—</td></tr>
         <tr><td>IToolChips</td><td>items、max、expanded</td><td>select、update:expanded</td></tr>
+        <tr><td>IInsightCards</td><td>items、index</td><td>update:index</td></tr>
         <tr><td>IChatSources</td><td>sources</td><td>—</td></tr>
         <tr><td>IChatSuggestions</td><td>items、title</td><td>select</td></tr>
         <tr><td>IPromptInput</td><td>modelValue、generating、maxLength、attachments、hint、submitOnEnter、mentions、commands</td><td>submit、stop、attach、removeAttachment、pick</td></tr>
@@ -536,6 +582,8 @@ const chipsExpanded = ref(false)
 </template>
 
 <style scoped>
+/* 洞察卡不该撑满整行：那句结论一行放不到 80 个字才读得顺 */
+.insight-demo { max-width: 420px; }
 .chat {
   display: flex;
   flex-direction: column;

@@ -1,0 +1,2 @@
+@import '../../../dist/styles/insight-cards.wxss';
+@import '../../../dist/styles/icons.wxss';

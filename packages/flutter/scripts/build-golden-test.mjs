@@ -114,6 +114,10 @@ const { toolChipStat, summarizeToolChips, toolChipIcon } = await bundle(
 const {
   defaultOpenSteps, summarizeThinking, thinkingStepIcon, toggleThinkingStep
 } = await bundle('packages/common/src/logic/thinking.ts', 'thinking')
+const {
+  formatInsightValue, insightPage, insightPlot, insightTrend, scrubIndex, scrubReadout, scrubX,
+  trendIcon, trendLabel
+} = await bundle('packages/common/src/logic/insight.ts', 'insight')
 const { alignGuides, anchorOf, groupBounds, visibleEdges, visibleNodes } = await bundle(
   'packages/common/src/logic/flow.ts',
   'flowalign'
@@ -1762,6 +1766,58 @@ const chipSummaryExpectations = [
 ]
 
 /*
+ * 洞察卡：翻页的边界行为与擦洗的取点规则两端必须一致，
+ * 否则同一份数据在一端翻得回去、在另一端翻不回去，而这不会让任何构建失败。
+ */
+const insightItem = {
+  id: 'i1',
+  title: '转化率',
+  summary: '周三回升',
+  series: [12, 9, 11, 15],
+  labels: ['周一', '周二', '周三', '周四'],
+  unit: '%'
+}
+const dartInsightItem =
+  `InsightItemData(id: 'i1', title: '转化率', summary: '周三回升', ` +
+  `series: <double>[12, 9, 11, 15], labels: <String>['周一', '周二', '周三', '周四'], unit: '%')`
+const insightExpectations = [
+  ...[[3, 2, 1], [3, 0, -1], [3, 0, 1], [0, 0, 1], [3, 1, -1]].map(
+    ([n, cur, d]) => `    expect(insightPage(${n}, ${cur}, ${d}), ${insightPage(n, cur, d)});`
+  ),
+  ...[0, 60, 160, 300, -40, 999].map(
+    (x) => `    expect(scrubIndex(${x}, 300, 4), ${scrubIndex(x, 300, 4)});`
+  ),
+  `    expect(scrubIndex(160, 300, 1), ${scrubIndex(160, 300, 1)});`,
+  ...[0, 1, 2, 3].map((i) => `    expect(scrubX(${i}, 300, 4), ${scrubX(i, 300, 4)});`),
+  ...[0, 2, 3].map((i) => {
+    const r = scrubReadout(insightItem, i)
+    return (
+      `    expect(scrubReadout(item, ${i}).label, ${JSON.stringify(r.label)});\n` +
+      `    expect(scrubReadout(item, ${i}).value, ${JSON.stringify(r.value)});`
+    )
+  }),
+  ...[[12, 15], [15, 12], [8, 8], [0, 5], [10, 30, 28]].map((series) => {
+    const t = insightTrend(series)
+    const dart = `<double>[${series.join(', ')}]`
+    return (
+      `    expect(trendLabel(insightTrend(${dart})), ${JSON.stringify(trendLabel(t))});\n` +
+      `    expect(trendIcon(insightTrend(${dart})), ${JSON.stringify(trendIcon(t))});`
+    )
+  }),
+  `    expect(trendLabel(insightTrend(<double>[])), ${JSON.stringify(trendLabel(insightTrend([])))});`,
+  ...[320, 12, 8, 400.5].map((w) => {
+    const plot = insightPlot(w)
+    return (
+      `    expect(insightPlot(${w}).inner, ${plot.inner});\n` +
+      `    expect(insightPlot(${w}).inset, ${plot.inset});`
+    )
+  }),
+  ...[12, 12.34, 0, -3.5].map(
+    (v) => `    expect(formatInsightValue(${v}), ${JSON.stringify(formatInsightValue(v))});`
+  )
+]
+
+/*
  * 推理轨迹：默认展开哪几步必须两端一致。
  * 一端展开出错那步、另一端全折叠的话，用户得学两遍。
  */
@@ -2465,6 +2521,11 @@ ${commandMoveExpectations.join('\n')}
     final chips = ${dartChipItems};
 ${chipStatExpectations.join('\n')}
 ${chipSummaryExpectations.join('\n')}
+  });
+
+  test('洞察卡的翻页边界、擦洗取点与涨跌说法与 Web 端一致', () {
+    final item = ${dartInsightItem};
+${insightExpectations.join('\n')}
   });
 
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {

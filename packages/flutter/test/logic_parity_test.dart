@@ -1324,6 +1324,55 @@ void main() {
     expect(toolChipIcon(IToolChipStatus.error), "error-circle");
   });
 
+  test('洞察卡的翻页边界、擦洗取点与涨跌说法与 Web 端一致', () {
+    final item = InsightItemData(id: 'i1', title: '转化率', summary: '周三回升', series: <double>[12, 9, 11, 15], labels: <String>['周一', '周二', '周三', '周四'], unit: '%');
+    expect(insightPage(3, 2, 1), 2);
+    expect(insightPage(3, 0, -1), 0);
+    expect(insightPage(3, 0, 1), 1);
+    expect(insightPage(0, 0, 1), 0);
+    expect(insightPage(3, 1, -1), 0);
+    expect(scrubIndex(0, 300, 4), 0);
+    expect(scrubIndex(60, 300, 4), 1);
+    expect(scrubIndex(160, 300, 4), 2);
+    expect(scrubIndex(300, 300, 4), 3);
+    expect(scrubIndex(-40, 300, 4), 0);
+    expect(scrubIndex(999, 300, 4), 3);
+    expect(scrubIndex(160, 300, 1), 0);
+    expect(scrubX(0, 300, 4), 0);
+    expect(scrubX(1, 300, 4), 100);
+    expect(scrubX(2, 300, 4), 200);
+    expect(scrubX(3, 300, 4), 300);
+    expect(scrubReadout(item, 0).label, "周一");
+    expect(scrubReadout(item, 0).value, "12%");
+    expect(scrubReadout(item, 2).label, "周三");
+    expect(scrubReadout(item, 2).value, "11%");
+    expect(scrubReadout(item, 3).label, "周四");
+    expect(scrubReadout(item, 3).value, "15%");
+    expect(trendLabel(insightTrend(<double>[12, 15])), "上升 25%");
+    expect(trendIcon(insightTrend(<double>[12, 15])), "chevron-up");
+    expect(trendLabel(insightTrend(<double>[15, 12])), "下降 20%");
+    expect(trendIcon(insightTrend(<double>[15, 12])), "chevron-down");
+    expect(trendLabel(insightTrend(<double>[8, 8])), "持平");
+    expect(trendIcon(insightTrend(<double>[8, 8])), "minus");
+    expect(trendLabel(insightTrend(<double>[0, 5])), "上升 5");
+    expect(trendIcon(insightTrend(<double>[0, 5])), "chevron-up");
+    expect(trendLabel(insightTrend(<double>[10, 30, 28])), "上升 180%");
+    expect(trendIcon(insightTrend(<double>[10, 30, 28])), "chevron-up");
+    expect(trendLabel(insightTrend(<double>[])), "持平");
+    expect(insightPlot(320).inner, 310);
+    expect(insightPlot(320).inset, 5);
+    expect(insightPlot(12).inner, 6);
+    expect(insightPlot(12).inset, 3);
+    expect(insightPlot(8).inner, 4);
+    expect(insightPlot(8).inset, 2);
+    expect(insightPlot(400.5).inner, 390.5);
+    expect(insightPlot(400.5).inset, 5);
+    expect(formatInsightValue(12), "12");
+    expect(formatInsightValue(12.34), "12.3");
+    expect(formatInsightValue(0), "0");
+    expect(formatInsightValue(-3.5), "-3.5");
+  });
+
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
     final steps = <IThinkingStep>[IThinkingStep(key: 'a', title: '拆解问题', kind: IThinkingStepKind.reason, status: IThinkingStepStatus.done), IThinkingStep(key: 'b', title: '检索文档', kind: IThinkingStepKind.search, status: IThinkingStepStatus.error), IThinkingStep(key: 'c', title: '写补丁', kind: IThinkingStepKind.code, status: IThinkingStepStatus.running), IThinkingStep(key: 'd', title: '复核', kind: IThinkingStepKind.tool, status: IThinkingStepStatus.done)];
     expect(defaultOpenSteps(steps), <String>['b', 'c']);

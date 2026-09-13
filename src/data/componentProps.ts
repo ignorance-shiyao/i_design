@@ -478,6 +478,10 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"invalid","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"modelValue","type":"unknown","doc":"","defaultText":null,"control":null},
   ],
+  IInsightCards: [
+    {"name":"items","type":"InsightItem[]","doc":"","defaultText":null,"control":null},
+    {"name":"index","type":"number","doc":"当前是第几条（用 v-model:index 控制）","defaultText":"0","control":{"kind":"number"}},
+  ],
   ILayout: [
     {"name":"asidePlacement","type":"'left' | 'right'","doc":"侧栏在哪一边","defaultText":"'left'","control":{"kind":"enum","options":["left","right"]}},
     {"name":"collapsed","type":"boolean","doc":"侧栏收起，只留图标宽度。不整个藏掉——入口消失比变窄更难找回来","defaultText":"false","control":{"kind":"boolean"}},
