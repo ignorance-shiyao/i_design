@@ -128,7 +128,7 @@ watch(() => route.fullPath, () => (mobileNavOpen.value = false))
 .mnav__link.is-primary { color: var(--i-color-text); font-weight: 500; }
 .mnav__link.router-link-exact-active {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-weight: 500;
 }
 

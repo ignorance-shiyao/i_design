@@ -183,3 +183,29 @@ export function contrastRatio(a: string, b: string): number {
 export function contrastText(background: string): string {
   return contrastRatio(background, '#ffffff') >= 3 ? '#ffffff' : '#1d2129'
 }
+
+/**
+ * 把一个颜色调到「在指定底色上读得出来」为止，色相与彩度不动。
+ *
+ * 用途是那几个 `*-text` 令牌：状态标签、链接、计数这类「有颜色的字」。
+ * 填充色拿来写字几乎一定不够——品牌蓝 #5e7ce0 在白底上只有 3.86:1，
+ * 而这些恰恰是正文里最需要读准的几个字。
+ *
+ * 只动明度是有意的：换一个色相就不再是「同一个颜色的深一档」，
+ * 用户在主题面板里挑的那个蓝会在链接上变成另一种颜色。
+ *
+ * 浅底往深里走、深底往浅里走，两端都可能走到头——走到头仍不够时返回最接近的那档，
+ * 而不是硬塞一个黑或白：那会让某些主题色下的链接看起来根本不是链接。
+ */
+export function readableOn(color: string, background: string, min = 4.5): string {
+  const { l, c, h } = rgbToOklch(hexToRgb(color))
+  const towardDark = luminance(background) > 0.35
+  let candidate = color
+  for (let i = 0; i <= 50; i++) {
+    const next = clamp01(towardDark ? l - i * 0.02 : l + i * 0.02)
+    candidate = rgbToHex(oklchToRgb({ l: next, c, h }))
+    if (contrastRatio(candidate, background) >= min) break
+    if (next === 0 || next === 1) break
+  }
+  return candidate
+}

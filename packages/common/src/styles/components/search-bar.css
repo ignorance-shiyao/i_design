@@ -52,7 +52,7 @@
 .i-search-bar__cancel {
   min-height: 44px;
   padding: 0 var(--i-spacing-1);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-size: var(--i-font-size-md);
   white-space: nowrap;
 }

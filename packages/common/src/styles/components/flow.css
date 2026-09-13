@@ -77,7 +77,7 @@
   color: var(--i-color-text-secondary);
   cursor: pointer;
 }
-.i-flow__tool:hover { background: var(--i-color-bg-subtle); color: var(--i-color-brand); }
+.i-flow__tool:hover { background: var(--i-color-bg-subtle); color: var(--i-color-brand-text); }
 /* 撤销组放左下：与右下的缩放分开，两组按钮的职责本就不同，挨在一起容易误点 */
 .i-flow__toolbar--history { right: auto; left: var(--i-spacing-3); }
 /* 无可撤销时按钮变淡且不可点：不隐藏——工具栏宽度跳变比一个灰按钮更扰人 */
@@ -98,7 +98,7 @@
 /* 工具条上的开关型按钮：按下态用淡底色块，而不是给按钮加一条重边线 */
 .i-flow__tool.is-on {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 
 /*

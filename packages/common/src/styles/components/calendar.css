@@ -106,8 +106,9 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.i-calendar__mark.is-brand { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
-.i-calendar__mark.is-success { background: var(--i-color-success-subtle); color: var(--i-color-success); }
-.i-calendar__mark.is-warning { background: var(--i-color-warning-subtle); color: var(--i-color-warning); }
-.i-calendar__mark.is-danger { background: var(--i-color-danger-subtle); color: var(--i-color-danger); }
-.i-calendar__more { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-xs); }
+.i-calendar__mark.is-brand { background: var(--i-color-brand-subtle); color: var(--i-color-brand-text); }
+.i-calendar__mark.is-success { background: var(--i-color-success-subtle); color: var(--i-color-success-text); }
+.i-calendar__mark.is-warning { background: var(--i-color-warning-subtle); color: var(--i-color-warning-text); }
+.i-calendar__mark.is-danger { background: var(--i-color-danger-subtle); color: var(--i-color-danger-text); }
+/* 「+1」压在淡蓝底上，三级文字色只有 4.3；它是告诉人「这天还有事」的唯一线索 */
+.i-calendar__more { color: var(--i-color-text-secondary); font-size: var(--i-font-size-xs); }

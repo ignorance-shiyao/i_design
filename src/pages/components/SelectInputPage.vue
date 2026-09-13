@@ -175,7 +175,7 @@ function toggle(zone: string) {
   background: var(--i-color-bg-subtle);
 }
 .fake-panel li.is-picked {
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   background: var(--i-color-brand-subtle);
 }
 </style>

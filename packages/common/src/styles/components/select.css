@@ -85,7 +85,7 @@
   cursor: pointer;
 }
 .i-select__option.is-active { background: var(--i-color-bg-subtle); }
-.i-select__option.is-selected { color: var(--i-color-brand); font-weight: 500; }
+.i-select__option.is-selected { color: var(--i-color-brand-text); font-weight: 500; }
 .i-select__option.is-disabled {
   color: var(--i-color-text-tertiary);
   cursor: not-allowed;

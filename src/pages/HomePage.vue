@@ -305,7 +305,7 @@ const resources = [
 }
 h1 {
   margin: 18px 0 20px;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-size: clamp(
     var(--i-font-size-5xl),
     7vw,
@@ -378,7 +378,7 @@ h1 span {
   border-color: var(--i-color-brand);
 }
 .resource-link > svg {
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   flex: none;
 }
 .resource-link > svg:last-child {
@@ -458,7 +458,7 @@ h1 span {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-size: var(--i-font-size-md);
 }
 .platforms {
@@ -746,7 +746,7 @@ h1 span {
 .type-display span {
   font-size: var(--i-font-size-3xl);
   margin-left: 20px;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .sample-type p {
   font-size: var(--i-font-size-xs);
@@ -761,7 +761,7 @@ h1 span {
   gap: 16px;
 }
 .status-icon {
-  color: var(--i-color-success);
+  color: var(--i-color-success-text);
 }
 .status-line strong {
   font-size: var(--i-font-size-md);

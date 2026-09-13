@@ -17,7 +17,7 @@
     color var(--i-motion-fast) var(--i-motion-easing);
 }
 .i-rate__item:hover:not(.is-readonly) { transform: scale(1.15); }
-.i-rate__item.is-on { color: var(--i-color-warning); }
+.i-rate__item.is-on { color: var(--i-color-warning-text); }
 .i-rate.is-disabled .i-rate__item,
 .i-rate__item.is-readonly { cursor: default; }
 .i-rate.is-disabled { opacity: 0.6; }
@@ -28,7 +28,7 @@
   inset: 0;
   width: 50%;
   overflow: hidden;
-  color: var(--i-color-warning);
+  color: var(--i-color-warning-text);
 }
 .i-rate__text {
   margin-left: var(--i-spacing-2);

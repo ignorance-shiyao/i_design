@@ -40,7 +40,7 @@
 /* 命中的片段加重，而不是换个颜色：颜色在灰度打印与色觉障碍下会失效 */
 .i-autocomplete__option .is-hit {
   font-weight: var(--i-font-weight-medium);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 
 /*

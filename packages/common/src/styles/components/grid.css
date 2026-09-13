@@ -35,6 +35,6 @@
   height: 40px;
   border-radius: var(--i-radius-lg);
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .i-grid__text { text-align: center; line-height: 1.4; }

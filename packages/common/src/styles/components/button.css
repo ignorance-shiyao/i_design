@@ -43,7 +43,7 @@
 }
 .i-button--secondary:hover:not(:disabled) {
   border-color: var(--i-color-brand);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 
 .i-button--text {

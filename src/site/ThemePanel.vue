@@ -854,7 +854,7 @@ onBeforeUnmount(() => window.clearTimeout(copyTimer));
 }
 .tp__rail-item.is-active {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 
 .tp__panes {
@@ -984,15 +984,15 @@ onBeforeUnmount(() => window.clearTimeout(copyTimer));
   margin-top: 2px;
 }
 .tp__contrast.is-ok {
-  color: var(--i-color-success);
+  color: var(--i-color-success-text);
   background: var(--i-color-success-subtle);
 }
 .tp__contrast.is-warn {
-  color: var(--i-color-warning);
+  color: var(--i-color-warning-text);
   background: var(--i-color-warning-subtle);
 }
 .tp__contrast.is-bad {
-  color: var(--i-color-danger);
+  color: var(--i-color-danger-text);
   background: var(--i-color-danger-subtle);
 }
 

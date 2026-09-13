@@ -20,6 +20,6 @@
   gap: var(--i-spacing-2);
 }
 .i-breadcrumb__link { color: var(--i-color-text-secondary); }
-.i-breadcrumb__link:hover { color: var(--i-color-brand); }
+.i-breadcrumb__link:hover { color: var(--i-color-brand-text); }
 .i-breadcrumb__current { color: var(--i-color-text); font-weight: 500; }
 .i-breadcrumb__sep { display: inline-flex; color: var(--i-color-text-tertiary); }

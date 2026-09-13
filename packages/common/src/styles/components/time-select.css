@@ -45,7 +45,7 @@
 .i-time-select__option:hover:not(:disabled) { background: var(--i-color-bg-subtle); }
 .i-time-select__option.is-active {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 /*
  * 不可选的时间点仍然占位、只是变灰——直接过滤掉的话，列表长度会随另一端的取值

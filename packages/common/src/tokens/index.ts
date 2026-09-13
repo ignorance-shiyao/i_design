@@ -282,6 +282,7 @@ export const lightTheme: Record<string, string> = {
   'color-warning-text': palette.warning[80],
   'color-danger-text': palette.danger[80],
   'color-brand-text': palette.brand[60],
+  'color-info-text': palette.info[70],
 
   /* 玻璃面：半透明的表面色 + 一条比表面更亮的内高光 */
   'color-glass': 'rgba(255, 255, 255, 0.72)',
@@ -339,6 +340,7 @@ export const darkTheme: Record<string, string> = {
   'color-warning-text': palette.warning[50],
   'color-danger-text': palette.danger[50],
   'color-brand-text': palette.brand[30],
+  'color-info-text': palette.brand[30],
 
   /*
    * 暗色的玻璃要比亮色更不透明。深色背景本来就缺少明暗差，
@@ -358,7 +360,13 @@ export const darkTheme: Record<string, string> = {
 
 /** 语法高亮 token 色，亮暗各一套 */
 export const syntaxLight: Record<string, string> = {
-  'tok-comment': '#9aa0ae',
+  /*
+   * 注释色。原先 #9aa0ae 在代码底色 #fbfbfd 上只有 2.4:1——
+   * 注释是代码里解释「为什么」的那几行，恰恰最该读得出来。
+   * 压到 #6a707f 得到 4.8:1（在深一点的代码底 #f4f5f9 上也有 4.55），
+   * 仍明显比代码本身轻。
+   */
+  'tok-comment': '#6a707f',
   'tok-keyword': '#7048e8',
   'tok-string': '#0f766e',
   'tok-number': '#b45309',

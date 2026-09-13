@@ -35,7 +35,7 @@
   box-shadow: inset 0 1px 0 var(--i-color-hairline);
 }
 .i-action-sheet__item:active { background: var(--i-color-bg-subtle); }
-.i-action-sheet__item.is-danger { color: var(--i-color-danger); }
+.i-action-sheet__item.is-danger { color: var(--i-color-danger-text); }
 .i-action-sheet__item.is-disabled { color: var(--i-color-text-tertiary); }
 /* 取消项与操作项之间留出间隙，避免误触 */
 .i-action-sheet__cancel {

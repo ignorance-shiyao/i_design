@@ -44,7 +44,7 @@
 .i-step.is-finish .i-step__icon {
   background: var(--i-color-brand-subtle);
   border-color: var(--i-color-brand);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .i-step.is-finish .i-step__line { background: var(--i-color-brand); }
 .i-step.is-finish .i-step__title { color: var(--i-color-text-secondary); }
@@ -61,4 +61,4 @@
   border-color: var(--i-color-danger);
   color: #fff;
 }
-.i-step.is-error .i-step__title { color: var(--i-color-danger); }
+.i-step.is-error .i-step__title { color: var(--i-color-danger-text); }

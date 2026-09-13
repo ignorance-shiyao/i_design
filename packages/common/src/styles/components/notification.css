@@ -34,10 +34,10 @@
   height: 32px;
   border-radius: var(--i-radius-md);
 }
-.i-notification--info .i-notification__icon { color: var(--i-color-info); background: var(--i-color-info-subtle); }
-.i-notification--success .i-notification__icon { color: var(--i-color-success); background: var(--i-color-success-subtle); }
-.i-notification--warning .i-notification__icon { color: var(--i-color-warning); background: var(--i-color-warning-subtle); }
-.i-notification--danger .i-notification__icon { color: var(--i-color-danger); background: var(--i-color-danger-subtle); }
+.i-notification--info .i-notification__icon { color: var(--i-color-info-text); background: var(--i-color-info-subtle); }
+.i-notification--success .i-notification__icon { color: var(--i-color-success-text); background: var(--i-color-success-subtle); }
+.i-notification--warning .i-notification__icon { color: var(--i-color-warning-text); background: var(--i-color-warning-subtle); }
+.i-notification--danger .i-notification__icon { color: var(--i-color-danger-text); background: var(--i-color-danger-subtle); }
 
 .i-notification__body { flex: 1; min-width: 0; }
 .i-notification__title { font-size: var(--i-font-size-md); font-weight: 500; color: var(--i-color-text); }

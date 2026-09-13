@@ -50,7 +50,7 @@
   background: var(--i-color-bg);
   transition: all var(--i-motion-fast) var(--i-motion-easing);
 }
-.i-radio--button:hover:not(.is-disabled) { color: var(--i-color-brand); border-color: var(--i-color-brand); }
+.i-radio--button:hover:not(.is-disabled) { color: var(--i-color-brand-text); border-color: var(--i-color-brand); }
 .i-radio--button.is-checked {
   background: var(--i-color-brand);
   border-color: var(--i-color-brand);

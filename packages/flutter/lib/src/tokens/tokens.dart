@@ -36,6 +36,7 @@ class IDesignTokensLight {
   static const colorWarningText = Color(0xFF8A5014);
   static const colorDangerText = Color(0xFFB3352F);
   static const colorBrandText = Color(0xFF4A63C4);
+  static const colorInfoText = Color(0xFF3A4DA3);
   static const colorGlass = Color(0xB8FFFFFF);
   static const colorGlassSubtle = Color(0x8CFFFFFF);
   static const colorGlassBorder = Color(0x1A141822);
@@ -45,7 +46,7 @@ class IDesignTokensLight {
   static const colorCodeBorder = Color(0xFFE6E8F0);
   static const colorCodeText = Color(0xFF2B3245);
   static const colorCodeMuted = Color(0xFF9AA0AE);
-  static const tokComment = Color(0xFF9AA0AE);
+  static const tokComment = Color(0xFF6A707F);
   static const tokKeyword = Color(0xFF7048E8);
   static const tokString = Color(0xFF0F766E);
   static const tokNumber = Color(0xFFB45309);
@@ -156,6 +157,7 @@ class IDesignTokensDark {
   static const colorWarningText = Color(0xFFFA9841);
   static const colorDangerText = Color(0xFFF66F6A);
   static const colorBrandText = Color(0xFFADC4FF);
+  static const colorInfoText = Color(0xFFADC4FF);
   static const colorGlass = Color(0xB8222837);
   static const colorGlassSubtle = Color(0x991B202C);
   static const colorGlassBorder = Color(0x24FFFFFF);

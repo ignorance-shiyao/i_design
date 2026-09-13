@@ -72,7 +72,7 @@
   cursor: pointer;
   transition: background var(--i-motion-fast) var(--i-motion-easing);
 }
-.i-date__nav:hover { background: var(--i-color-bg-subtle); color: var(--i-color-brand); }
+.i-date__nav:hover { background: var(--i-color-bg-subtle); color: var(--i-color-brand-text); }
 
 .i-date__week,
 .i-date__grid {
@@ -99,9 +99,9 @@
   transition: background var(--i-motion-fast) var(--i-motion-easing),
     color var(--i-motion-fast) var(--i-motion-easing);
 }
-.i-date__cell:hover:not(:disabled) { background: var(--i-color-brand-subtle); color: var(--i-color-brand); }
+.i-date__cell:hover:not(:disabled) { background: var(--i-color-brand-subtle); color: var(--i-color-brand-text); }
 .i-date__cell.is-outside { color: var(--i-color-text-tertiary); }
-.i-date__cell.is-today { font-weight: 600; color: var(--i-color-brand); }
+.i-date__cell.is-today { font-weight: 600; color: var(--i-color-brand-text); }
 .i-date__cell.is-cursor { box-shadow: inset 0 0 0 1px var(--i-color-brand); }
 .i-date__cell.is-selected {
   background: var(--i-color-brand);
@@ -129,7 +129,7 @@
   background: none;
   font-family: inherit;
   font-size: var(--i-font-size-sm);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   cursor: pointer;
 }
 .i-date__action:hover { background: var(--i-color-brand-subtle); }

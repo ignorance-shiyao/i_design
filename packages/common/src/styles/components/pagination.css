@@ -36,7 +36,7 @@
 }
 .i-pagination__item:hover:not(:disabled) {
   border-color: var(--i-color-brand);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .i-pagination__item:disabled { opacity: 0.45; cursor: not-allowed; }
 .i-pagination__item.is-active {

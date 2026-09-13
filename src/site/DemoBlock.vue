@@ -99,7 +99,7 @@ const showCode = ref(false);
     background var(--i-motion-fast) var(--i-motion-easing);
 }
 .demo__toggle:hover {
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   background: var(--i-color-brand-subtle);
 }
 .demo__code {

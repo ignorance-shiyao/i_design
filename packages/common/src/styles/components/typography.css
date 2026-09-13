@@ -16,10 +16,10 @@
 
 .i-typo--secondary { color: var(--i-color-text-secondary); }
 .i-typo--tertiary { color: var(--i-color-text-tertiary); }
-.i-typo--brand { color: var(--i-color-brand); }
-.i-typo--success { color: var(--i-color-success); }
-.i-typo--warning { color: var(--i-color-warning); }
-.i-typo--danger { color: var(--i-color-danger); }
+.i-typo--brand { color: var(--i-color-brand-text); }
+.i-typo--success { color: var(--i-color-success-text); }
+.i-typo--warning { color: var(--i-color-warning-text); }
+.i-typo--danger { color: var(--i-color-danger-text); }
 
 .i-typo.is-strong { font-weight: 600; }
 .i-typo.is-italic { font-style: italic; }
@@ -54,7 +54,7 @@
 .i-typo__copy {
   border: none;
   background: transparent;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   cursor: pointer;
   font: inherit;
   padding: 0 var(--i-spacing-1);
@@ -65,7 +65,7 @@
   vertical-align: middle;
   color: var(--i-color-text-tertiary);
 }
-.i-typo__copy:hover { color: var(--i-color-brand); }
+.i-typo__copy:hover { color: var(--i-color-brand-text); }
 .i-typo__toggle:focus-visible,
 .i-typo__copy:focus-visible {
   outline: 2px solid var(--i-color-brand);

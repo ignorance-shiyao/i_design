@@ -276,7 +276,8 @@ const groups = [
       description="吸住后必须有底色：透明的话，滚过它下面的内容会从字缝里透出来。"
       code='<ISticky><h4>分组标题</h4></ISticky>'
     >
-      <div class="sticky-demo">
+      <!-- 会滚动的区域要能用键盘进去：只用键盘的人否则滚不动它 -->
+      <div class="sticky-demo" tabindex="0" role="group" aria-label="吸顶示例的滚动区域">
         <div v-for="group in groups" :key="group.title">
           <ISticky>
             <div class="sticky-head">{{ group.title }}</div>

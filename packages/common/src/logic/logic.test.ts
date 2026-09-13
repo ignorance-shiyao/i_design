@@ -18,6 +18,8 @@ import { countdownParts, countdownInterval, formatCountdown } from './countdown'
 import { virtualWindow, scrollToRow, shouldVirtualize } from './virtual'
 import { isTextOverflowing, OVERFLOW_EPSILON } from './overflow'
 import { resolveLocale, zhCN, enUS } from './locale'
+import { contrastRatio, hexToRgb, readableOn, rgbToOklch } from './palette'
+import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
 import { qrMatrix, qrVersionFor } from './qrcode'
 import { avatarSizePx, initialsOf, tintOf } from './avatar'
 import { safeHref } from './href'
@@ -493,5 +495,41 @@ describe('推理轨迹', () => {
     expect(toggleThinkingStep(open, 'c')).toEqual(['b', 'c'])
     expect(toggleThinkingStep(open, 'b')).toEqual([])
     expect(open).toEqual(['b'])
+  })
+})
+
+describe('有颜色的字要读得出来', () => {
+  it('填充色调到在自己的淡底上过 4.5', () => {
+    // 品牌蓝直接拿来写字，在白底上只有 3.86——而链接是最需要读准的那几个字
+    const text = readableOn('#5e7ce0', '#eef3ff')
+    expect(contrastRatio(text, '#eef3ff')).toBeGreaterThanOrEqual(4.5)
+    // 淡底过了，白底自然也过
+    expect(contrastRatio(text, '#ffffff')).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('色相不变：用户挑的那个颜色不能在链接上变成另一种', () => {
+    const before = rgbToOklch(hexToRgb('#f66f6a'))
+    const after = rgbToOklch(hexToRgb(readableOn('#f66f6a', '#fdecee')))
+    expect(Math.abs(after.h - before.h)).toBeLessThan(2)
+  })
+
+  it('深底上往浅里走，而不是一律加深', () => {
+    const text = readableOn('#5e7ce0', '#222837')
+    expect(contrastRatio(text, '#222837')).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('已经够读的颜色原样返回', () => {
+    expect(readableOn('#15705a', '#e8f8f0')).toBe('#15705a')
+  })
+
+  it('主题面板换色时，四个 *-text 令牌跟着一起推导', () => {
+    // 以前没有这几条：换成红色主题，填充变红而链接还是深蓝的
+    const tokens = resolveThemeTokens(
+      { ...DEFAULT_THEME_CONFIG, brand: '#d64f8d', danger: '#c2413d' },
+      'light'
+    )
+    for (const key of ['color-brand-text', 'color-text-link', 'color-danger-text']) {
+      expect(contrastRatio(tokens[key], '#ffffff')).toBeGreaterThanOrEqual(4.5)
+    }
   })
 })

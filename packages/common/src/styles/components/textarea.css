@@ -37,4 +37,4 @@
   color: var(--i-color-text-tertiary);
   pointer-events: none;
 }
-.i-textarea__count.is-over { color: var(--i-color-danger); }
+.i-textarea__count.is-over { color: var(--i-color-danger-text); }

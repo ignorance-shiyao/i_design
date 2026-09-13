@@ -39,7 +39,7 @@
   border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-md);
   background: var(--i-color-danger-subtle);
-  color: var(--i-color-danger);
+  color: var(--i-color-danger-text);
   font-size: var(--i-font-size-xs);
   text-align: center;
 }

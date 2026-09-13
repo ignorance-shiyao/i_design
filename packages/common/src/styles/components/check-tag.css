@@ -38,7 +38,7 @@
 .i-check-tag.is-checked {
   background: var(--i-color-brand-subtle);
   border-color: transparent;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 /* 选中项的悬停：在原有底色上再深一档，仍然是「选中」的样子 */
 .i-check-tag.is-checked:hover:not(.is-disabled) {

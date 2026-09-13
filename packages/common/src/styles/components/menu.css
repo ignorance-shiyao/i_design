@@ -28,7 +28,7 @@
 /* 选中态：底色 + 文字色 + 字重，不加边线标记 */
 .i-menu__item.is-active {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-weight: 500;
 }
 .i-menu__item.is-disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }

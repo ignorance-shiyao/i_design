@@ -30,7 +30,7 @@
   color: var(--i-color-text-tertiary);
   transition: transform var(--i-motion-base) var(--i-motion-easing);
 }
-.i-collapse__item.is-open .i-collapse__arrow { transform: rotate(90deg); color: var(--i-color-brand); }
+.i-collapse__item.is-open .i-collapse__arrow { transform: rotate(90deg); color: var(--i-color-brand-text); }
 .i-collapse__title { flex: 1; }
 
 /*

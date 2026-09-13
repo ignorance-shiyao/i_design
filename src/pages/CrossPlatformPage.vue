@@ -196,7 +196,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
 }
 .cp-matrix { overflow-x: auto; margin: var(--i-spacing-4) 0 var(--i-spacing-8); }
 .cp-cell { text-align: center; }
-.cp-yes { color: var(--i-color-success); font-weight: 600; }
+.cp-yes { color: var(--i-color-success-text); font-weight: 600; }
 .cp-no { color: var(--i-color-text-tertiary); }
 .cp-layers {
   display: grid;
@@ -220,7 +220,7 @@ const sharedLayers: { icon: IconName; title: string; detail: string; covers: str
   height: 36px;
   border-radius: var(--i-radius-md);
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .cp-layer__title { margin: 0; font-size: var(--i-font-size-md); }
 .cp-layer__detail {

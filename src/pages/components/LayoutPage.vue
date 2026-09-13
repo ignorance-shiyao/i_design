@@ -385,7 +385,7 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
   padding: var(--i-spacing-3);
   border-radius: var(--i-radius-md);
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-size: var(--i-font-size-sm);
   text-align: center;
 }

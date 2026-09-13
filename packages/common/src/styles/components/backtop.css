@@ -20,7 +20,7 @@
   box-shadow: var(--i-shadow-md);
   cursor: pointer;
 }
-.i-backtop:hover { color: var(--i-color-brand); border-color: var(--i-color-brand); }
+.i-backtop:hover { color: var(--i-color-brand-text); border-color: var(--i-color-brand); }
 .i-backtop:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
 
 /* 淡入淡出加一点位移：直接闪现会让人怀疑自己点到了什么 */

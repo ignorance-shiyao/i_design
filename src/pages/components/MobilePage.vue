@@ -369,10 +369,14 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
       description="底部状态区一直占位，不是加载时才插进来——插进来会把列表往上顶一下，用户正在读的那一行会跳走。"
       code='<IInfiniteScroll :status="status" :height="260" @load="loadMore" />'
     >
+      <!-- 套一层 screen：外框那一圈是「机身」，用的是近黑色，
+           内容直接贴上去的话，浅色的辅助文字会压在黑底上读不出来 -->
       <div class="phone">
+        <div class="phone__screen phone__screen--plain">
         <IInfiniteScroll :status="feedStatus" :height="260" :empty="!feed.length" @load="loadFeed">
           <ICell v-for="row in feed" :key="row" :title="row" />
         </IInfiniteScroll>
+        </div>
       </div>
     </DemoBlock>
 
@@ -426,6 +430,9 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
   box-shadow: var(--i-shadow-lg);
   background: var(--i-color-text);
 }
+.phone__screen--plain {
+  height: auto;
+}
 .phone__screen {
   display: flex;
   flex-direction: column;
@@ -448,7 +455,7 @@ function onSwipe(action: { text: string }, index: number, rowIndex: number) {
 .phone__link {
   border: none;
   background: none;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-family: inherit;
   font-size: var(--i-font-size-md);
   cursor: pointer;

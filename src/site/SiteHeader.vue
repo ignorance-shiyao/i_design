@@ -211,7 +211,7 @@ const links = [
 }
 .header__icon:hover {
   border-color: var(--i-color-brand);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .header__icon--menu {
   display: none;
@@ -235,7 +235,7 @@ const links = [
 }
 .header__search:hover {
   border-color: var(--i-color-brand);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .header__search-kbd {
   padding: 0 var(--i-spacing-1);

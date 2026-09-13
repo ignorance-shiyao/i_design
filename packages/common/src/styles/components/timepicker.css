@@ -73,7 +73,7 @@
 /* 当前项用淡底色块加字重，不用一条重边线 */
 .i-timepicker__cell.is-active {
   background: var(--i-color-brand-subtle);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-weight: var(--i-font-weight-medium);
 }
 .i-timepicker__cell.is-disabled { color: var(--i-color-text-tertiary); opacity: 0.45; cursor: not-allowed; }
@@ -94,8 +94,8 @@
   cursor: pointer;
 }
 .i-timepicker__now { color: var(--i-color-text-secondary); }
-.i-timepicker__now:hover { color: var(--i-color-brand); }
-.i-timepicker__done { color: var(--i-color-brand); font-weight: var(--i-font-weight-medium); }
+.i-timepicker__now:hover { color: var(--i-color-brand-text); }
+.i-timepicker__done { color: var(--i-color-brand-text); font-weight: var(--i-font-weight-medium); }
 
 /*
  * 小程序没有 Teleport，面板只能就地绝对定位。

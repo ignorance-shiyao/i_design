@@ -55,6 +55,21 @@ a {
 }
 a:hover { color: var(--i-color-brand-hover); }
 
+/*
+ * 夹在正文里的链接一律带下划线。
+ *
+ * 颜色不能是唯一线索：色觉障碍用户在一整段文字里分不出哪几个字是链接，
+ * 灰度打印同样分不出。独立成块的入口——导航项、卡片、按钮式链接——不在此列，
+ * 它们的位置与形状本身就说明了可点，所以这条规则只管段落、列表项与表格单元格里的。
+ *
+ * `.i-link` 例外：它有自己的下划线时机（一直 / 悬停 / 从不），由调用方决定。
+ */
+:where(p, li, td, dd) a:not(.i-link) {
+  text-decoration: underline;
+  /* 下划线压着汉字的下缘会糊成一团，往下挪一点 */
+  text-underline-offset: 0.18em;
+}
+
 /* 正文里的行内代码 */
 code {
   font-family: var(--i-font-family-mono);

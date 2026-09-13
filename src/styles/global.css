@@ -107,7 +107,7 @@
   font-size: var(--i-font-size-xs);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .i-eyebrow::before {
   content: "";

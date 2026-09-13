@@ -62,7 +62,7 @@
 .i-dropdown__item:hover:not(:disabled),
 .i-dropdown__item.is-active { background: var(--i-color-bg-subtle); }
 .i-dropdown__item:disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }
-.i-dropdown__item.is-danger { color: var(--i-color-danger); }
+.i-dropdown__item.is-danger { color: var(--i-color-danger-text); }
 .i-dropdown__item:focus-visible {
   outline: 2px solid var(--i-color-brand);
   outline-offset: -2px;

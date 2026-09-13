@@ -37,7 +37,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .i-tabbar__item:active { background: var(--i-color-bg-subtle); }
-.i-tabbar__item.is-active { color: var(--i-color-brand); }
+.i-tabbar__item.is-active { color: var(--i-color-brand-text); }
 .i-tabbar__icon { position: relative; display: inline-flex; }
 /* 角标：贴在图标右上角，数字多时向左延展而不是撑开图标 */
 .i-tabbar__badge {

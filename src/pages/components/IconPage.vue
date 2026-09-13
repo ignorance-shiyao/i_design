@@ -41,12 +41,12 @@ async function copyName(name: string) {
         <IIcon name="check-circle" :size="20" />
         <IIcon name="check-circle" :size="28" :stroke-width="1.5" />
       </span>
-      <span class="row" style="color: var(--i-color-brand)">
+      <span class="row" style="color: var(--i-color-brand-text)">
         <IIcon name="sparkle" :size="20" />
         <IIcon name="palette" :size="20" />
         <IIcon name="layers" :size="20" />
       </span>
-      <span class="row" style="color: var(--i-color-danger)">
+      <span class="row" style="color: var(--i-color-danger-text)">
         <IIcon name="trash" :size="20" />
         <IIcon name="error-circle" :size="20" />
       </span>
@@ -133,7 +133,7 @@ async function copyName(name: string) {
   transition: all var(--i-motion-fast) var(--i-motion-easing);
 }
 .cell:hover {
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   border-color: color-mix(in srgb, var(--i-color-brand) 40%, transparent);
   box-shadow: var(--i-shadow-md);
   transform: translateY(-2px);

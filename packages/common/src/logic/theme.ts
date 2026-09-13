@@ -21,7 +21,7 @@ import {
   shadowDark as shadowDarkTokens,
   spacing as spacingTokens
 } from '../tokens'
-import { brandRamp, hexToRgb, oklchToRgb, rgbToHex, rgbToOklch } from './palette'
+import { brandRamp, hexToRgb, oklchToRgb, readableOn, rgbToHex, rgbToOklch } from './palette'
 
 export type ThemeMode = 'light' | 'dark'
 /** 三档预设 + 自定义。自定义档下读各自的 *Custom 字段，预设档下按倍率算 */
@@ -425,14 +425,25 @@ export function resolveThemeTokens(
   out['shadow-brand'] = scaleShadow(ramp.shadow, resolveShadowFactor(config))
   out['gradient-brand'] = ramp.gradient
   out['color-text-on-brand'] = ramp.onBrand
-  out['color-text-link'] = ramp.brand
+  /*
+   * 「有颜色的字」不能直接用填充色：品牌蓝在白底上只有 3.86:1，
+   * 而链接是正文里最需要读准的那几个字。按淡底算一档读得出来的——
+   * 淡底过了，白底自然也过。
+   *
+   * 这一步以前没有：面板换了主题色，填充跟着变，而 `*-text` 那几个令牌
+   * 还留着编译时按原品牌色推导出的值——换成红色主题，链接仍是深蓝的。
+   */
+  out['color-brand-text'] = readableOn(ramp.brand, ramp.subtle)
+  out['color-text-link'] = out['color-brand-text']
   out['color-info'] = ramp.brand
   out['color-info-subtle'] = ramp.subtle
+  out['color-info-text'] = out['color-brand-text']
 
   for (const key of SEMANTIC_COLOR_KEYS) {
     const semantic = brandRamp(config[key], mode)
     out[`color-${key}`] = semantic.brand
     out[`color-${key}-subtle`] = semantic.subtle
+    out[`color-${key}-text`] = readableOn(semantic.brand, semantic.subtle)
   }
 
   Object.assign(out, tintNeutrals(config.brand, config.neutralTint, mode))

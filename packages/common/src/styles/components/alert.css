@@ -15,10 +15,10 @@
   font-size: var(--i-font-size-md);
 }
 .i-alert__icon { margin-top: 3px; }
-.i-alert--info .i-alert__icon { color: var(--i-color-info); }
-.i-alert--success .i-alert__icon { color: var(--i-color-success); }
-.i-alert--warning .i-alert__icon { color: var(--i-color-warning); }
-.i-alert--danger .i-alert__icon { color: var(--i-color-danger); }
+.i-alert--info .i-alert__icon { color: var(--i-color-info-text); }
+.i-alert--success .i-alert__icon { color: var(--i-color-success-text); }
+.i-alert--warning .i-alert__icon { color: var(--i-color-warning-text); }
+.i-alert--danger .i-alert__icon { color: var(--i-color-danger-text); }
 .i-alert__content { flex: 1; }
 .i-alert__title { display: block; margin-bottom: var(--i-spacing-1); color: var(--i-color-text); }
 .i-alert__desc { color: var(--i-color-text-secondary); }

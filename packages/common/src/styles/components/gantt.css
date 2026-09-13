@@ -105,7 +105,7 @@
   place-items: center;
   border-radius: var(--i-radius-full);
   font-weight: var(--i-font-weight-bold);
-  color: var(--i-color-danger);
+  color: var(--i-color-danger-text);
   background: color-mix(in srgb, var(--i-color-danger) 12%, transparent);
 }
 

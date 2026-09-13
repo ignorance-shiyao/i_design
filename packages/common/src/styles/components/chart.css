@@ -123,7 +123,7 @@
   cursor: pointer;
   text-decoration: underline;
 }
-.i-chart__table-toggle:hover { color: var(--i-color-brand); }
+.i-chart__table-toggle:hover { color: var(--i-color-brand-text); }
 .i-chart__table { width: 100%; margin-top: var(--i-spacing-3); border-collapse: collapse; }
 .i-chart__table th,
 .i-chart__table td {
@@ -563,7 +563,7 @@
   text-decoration: underline;
   cursor: pointer;
 }
-.i-zoom__reset:hover { color: var(--i-color-brand); }
+.i-zoom__reset:hover { color: var(--i-color-brand-text); }
 
 /*
  * 桑基图：节点是「身份」，用分类色；缎带继承来源节点的颜色，

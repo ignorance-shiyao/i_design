@@ -90,7 +90,8 @@ const percent = (v?: number) => `${Math.round((v ?? 0) * 100)}%`
         </div>
       </div>
 
-      <div class="i-gantt__scroll">
+      <!-- 会滚动的区域要能用键盘进去：只用键盘的人否则滚不动它 -->
+      <div class="i-gantt__scroll" tabindex="0" role="group" :aria-label="title || '甘特图'">
         <svg
           class="i-gantt__svg"
           :width="chartW"

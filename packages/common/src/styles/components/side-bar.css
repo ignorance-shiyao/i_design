@@ -33,7 +33,7 @@
 }
 .i-side-bar__item.is-active {
   background: var(--i-color-bg-elevated);
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
   font-weight: var(--i-font-weight-medium);
 }
 .i-side-bar__item:disabled {

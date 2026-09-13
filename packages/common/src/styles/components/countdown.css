@@ -48,9 +48,9 @@
   line-height: 1.2;
 }
 .i-countdown--sm .i-countdown__value { font-size: var(--i-font-size-2xl); }
-.i-countdown--brand .i-countdown__value { color: var(--i-color-brand); }
-.i-countdown--success .i-countdown__value { color: var(--i-color-success); }
-.i-countdown--danger .i-countdown__value { color: var(--i-color-danger); }
+.i-countdown--brand .i-countdown__value { color: var(--i-color-brand-text); }
+.i-countdown--success .i-countdown__value { color: var(--i-color-success-text); }
+.i-countdown--danger .i-countdown__value { color: var(--i-color-danger-text); }
 
 .i-countdown__affix {
   font-size: var(--i-font-size-lg);

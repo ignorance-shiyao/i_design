@@ -100,7 +100,7 @@ const stageTransform = computed(() =>
   font-size: var(--i-font-size-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--i-color-brand);
+  color: var(--i-color-brand-text);
 }
 .cube__cn {
   font-size: var(--i-font-size-2xl);

@@ -52,7 +52,7 @@
   padding: var(--i-spacing-3) var(--i-spacing-4);
   border-radius: var(--i-radius-lg);
   background: var(--i-color-danger-subtle);
-  color: var(--i-color-danger);
+  color: var(--i-color-danger-text);
 }
 
 /* 流式输出时跟在文字末尾的光标 */
