@@ -16,6 +16,9 @@
     >
       <view class="i-icon i-icon--marquee" style="width:14px;height:14px" />
     </view>
+    <view wx:if="{{!readonly}}" class="i-flow__tool" bindtap="layout">
+      <view class="i-icon i-icon--layers" style="width:14px;height:14px" />
+    </view>
     <view class="i-flow__tool {{showMinimap ? 'is-on' : ''}}" bindtap="toggleMinimap">
       <view class="i-icon i-icon--minimap" style="width:14px;height:14px" />
     </view>

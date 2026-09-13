@@ -357,6 +357,7 @@ class _IFlowState extends State<IFlow> {
                             on: _marqueeMode, colors: c),
                       _tool('minimap', '缩略图', () => setState(() => _showMinimap = !_showMinimap),
                           on: _showMinimap, colors: c),
+                      if (!widget.readOnly) _tool('layers', '自动布局', _layout),
                       if (widget.onExport != null) _tool('download', '导出快照', _export),
                       _tool('minus', '缩小', () => setState(() => _scale = (_scale - 0.2).clamp(0.4, 2.0))),
                       SizedBox(
@@ -384,6 +385,18 @@ class _IFlowState extends State<IFlow> {
   }
 
   /// 开关型按钮的按下态用淡底色块，而不是给按钮加一条重边线
+  /// 一键排版。走的是与手动拖动同一条 onMove，调用方那边的撤销才接得上
+  void _layout() {
+    final laid = autoLayout(widget.nodes, widget.edges);
+    widget.onMove?.call([
+      for (final n in laid)
+        n.copyWith(
+          width: widget.nodes.firstWhere((m) => m.id == n.id, orElse: () => n).width,
+          height: widget.nodes.firstWhere((m) => m.id == n.id, orElse: () => n).height,
+        ),
+    ]);
+  }
+
   Widget _tool(String icon, String label, VoidCallback onTap, {bool on = false, IColors? colors}) =>
       InkWell(
         onTap: onTap,

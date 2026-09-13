@@ -13,6 +13,7 @@ import {
   marqueeRect,
   minimapLayout,
   alignGuides,
+  autoLayout,
   moveNodes,
   nodesInRect,
   resizeNode,
@@ -301,6 +302,24 @@ function onUp() {
   dragging.value = null
   resizing.value = null
   guides.value = []
+}
+
+/**
+ * 一键排版。
+ *
+ * 走的是与手动拖动同一条 `move` 事件，因此能被撤销——一键把别人排了半天的图
+ * 重排一遍，却撤不回去，那是把一个便利做成了事故。
+ */
+function layout() {
+  if (props.readonly) return
+  editBefore = geometryOf(props.nodes.map((n) => n.id))
+  const laid = autoLayout(props.nodes, props.edges)
+  editAfter = laid.map((n) => {
+    const before = props.nodes.find((m) => m.id === n.id)
+    return { id: n.id, x: n.x, y: n.y, width: before?.width, height: before?.height }
+  })
+  emit('move', editAfter)
+  commitEdit()
 }
 
 function zoom(delta: number) {
@@ -621,6 +640,9 @@ const isActive = (edge: FlowEdge) =>
     </div>
 
     <div v-if="!readonly" class="i-flow__toolbar i-flow__toolbar--history">
+      <button class="i-flow__tool" aria-label="自动布局" @click="layout">
+        <IIcon name="layers" :size="14" />
+      </button>
       <button class="i-flow__tool" aria-label="撤销" :disabled="!canUndo" @click="undo">
         <IIcon name="undo" :size="14" />
       </button>

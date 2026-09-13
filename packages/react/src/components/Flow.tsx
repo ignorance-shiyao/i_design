@@ -14,6 +14,7 @@ import {
   edgePath,
   flatten,
   alignGuides,
+  autoLayout,
   marqueeRect,
   minimapLayout,
   moveNodes,
@@ -323,6 +324,24 @@ export function Flow({
     setGuides([])
   }
 
+  /**
+   * 一键排版。
+   *
+   * 走的是与手动拖动同一条 onMove，因此能被撤销——一键把别人排了半天的图重排一遍，
+   * 却撤不回去，那是把一个便利做成了事故。
+   */
+  const layout = () => {
+    if (readonly) return
+    editBefore.current = geometryOf(nodes.map((n) => n.id))
+    const laid = autoLayout(nodes, edges)
+    editAfter.current = laid.map((n) => {
+      const before = nodes.find((m) => m.id === n.id)
+      return { id: n.id, x: n.x, y: n.y, width: before?.width, height: before?.height }
+    })
+    onMove?.(editAfter.current)
+    commitEdit()
+  }
+
   const zoom = (delta: number) =>
     setView((v) => ({ ...v, scale: Math.min(2, Math.max(0.4, v.scale + delta)) }))
 
@@ -605,6 +624,9 @@ export function Flow({
 
       {!readOnly && (
         <div className="i-flow__toolbar i-flow__toolbar--history">
+          <button className="i-flow__tool" aria-label="自动布局" onClick={layout}>
+            <Icon name="layers" size={14} />
+          </button>
           <button className="i-flow__tool" aria-label="撤销" disabled={undoStack.length === 0} onClick={undo}>
             <Icon name="undo" size={14} />
           </button>

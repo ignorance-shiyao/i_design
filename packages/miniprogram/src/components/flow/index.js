@@ -11,6 +11,7 @@ import {
   anchorOf,
   boundsOf,
   alignGuides,
+  autoLayout,
   marqueeRect,
   minimapLayout,
   moveNodes,
@@ -277,6 +278,21 @@ Component({
         this.guides = []
         this.draw()
       }
+    },
+
+    /**
+     * 一键排版。走的是与手动拖动同一条 move 事件，调用方那边的撤销才接得上——
+     * 一键把别人排了半天的图重排一遍却撤不回去，那是把一个便利做成了事故。
+     */
+    layout() {
+      if (this.data.readonly) return
+      const laid = autoLayout(this.data.nodes || [], this.data.edges || [])
+      this.triggerEvent('move', {
+        changes: laid.map((n) => {
+          const before = (this.data.nodes || []).find((m) => m.id === n.id)
+          return { id: n.id, x: n.x, y: n.y, width: before && before.width, height: before && before.height }
+        })
+      })
     },
 
     /** 点缩略图跳过去：大图里这是唯一比反复拖画布快的导航方式 */
