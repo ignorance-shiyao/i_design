@@ -11,8 +11,15 @@ const props = withDefaults(
     disabled?: boolean
     /** 半选态，仅影响视觉，常用于「全选」父项 */
     indeterminate?: boolean
+    /**
+     * 无障碍名。
+     *
+     * 勾选框旁边没有可见文字时必须给（表头的全选、表格行首的那一列）：
+     * 读屏用户听到的是「勾选框，未选中」，选的是哪一行全靠猜。
+     */
+    ariaLabel?: string
   }>(),
-  { modelValue: false, value: undefined, disabled: false, indeterminate: false }
+  { modelValue: false, value: undefined, disabled: false, indeterminate: false, ariaLabel: '' }
 )
 
 const emit = defineEmits<{ 'update:modelValue': [boolean]; change: [boolean] }>()
@@ -61,6 +68,7 @@ watchEffect(() => {
       type="checkbox"
       :checked="checked"
       :disabled="disabled"
+      :aria-label="ariaLabel || undefined"
       @change="toggle"
     />
     <span class="i-checkbox__mark" aria-hidden="true">

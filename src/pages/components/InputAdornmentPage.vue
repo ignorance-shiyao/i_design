@@ -52,7 +52,7 @@ const price = ref<number | null>(null)
     >
       <div class="demo-field">
         <IInputAdornment prepend="￥" append="元/月">
-          <IInputNumber v-model="price" :min="0" />
+          <IInputNumber v-model="price" :min="0" aria-label="单价" />
         </IInputAdornment>
       </div>
     </DemoBlock>

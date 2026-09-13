@@ -263,6 +263,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"value","type":"string | number","doc":"置于 CheckboxGroup 内时作为该项的值","defaultText":"undefined","control":null},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"indeterminate","type":"boolean","doc":"半选态，仅影响视觉，常用于「全选」父项","defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"ariaLabel","type":"string","doc":"无障碍名。 勾选框旁边没有可见文字时必须给（表头的全选、表格行首的那一列）： 读屏用户听到的是「勾选框，未选中」，选的是哪一行全靠猜。","defaultText":"''","control":{"kind":"string"}},
   ],
   ICheckboxGroup: [
     {"name":"modelValue","type":"(string | number)[]","doc":"","defaultText":"() => []","control":null},
@@ -465,6 +466,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"invalid","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"placeholder","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"hideStep","type":"boolean","doc":"隐藏两侧的加减按钮，只保留键盘输入","defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"ariaLabel","type":"string","doc":"无障碍名。 控件旁边没有可见文字时必须给：读屏用户听到的是「编辑框，空」， 填什么全靠猜。占位文案不算名字——它一开始打字就消失了。","defaultText":"''","control":{"kind":"string"}},
   ],
   IInputOtp: [
     {"name":"length","type":"number","doc":"","defaultText":"6","control":{"kind":"number"}},
@@ -670,6 +672,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"clearable","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"multiple","type":"boolean","doc":"多选。值变成数组，触发器里改成一排标签","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"maxTagCount","type":"number","doc":"多选时最多完整显示几个标签，其余折成「+N」。0 表示全部显示","defaultText":"0","control":{"kind":"number"}},
+    {"name":"ariaLabel","type":"string","doc":"无障碍名。不传时用占位文案。 combobox 的内容被读成「当前值」而不是「这是什么」，因此名字必须另外给： 不给的话读屏用户听到的是「组合框，北京」——北京是什么，只有看得见的人知道。","defaultText":"''","control":{"kind":"string"}},
   ],
   ISelectInput: [
     {"name":"ariaLabel","type":"string","doc":"无障碍名。不传时退到占位文字——没有名字的组合框读屏只会念「组合框」","defaultText":null,"control":{"kind":"string"}},
@@ -696,6 +699,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"precision","type":"number","doc":"","defaultText":"0","control":{"kind":"number"}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"marks","type":"SliderMark[]","doc":"","defaultText":"() => []","control":null},
+    {"name":"ariaLabel","type":"string","doc":"无障碍名。 滑块只播报数值，不播报这是什么值：读屏用户听到的是「滑块，40」， 40 是音量还是亮度，只有看得见的人知道。","defaultText":"''","control":{"kind":"string"}},
   ],
   ISpace: [
     {"name":"direction","type":"'horizontal' | 'vertical'","doc":"","defaultText":"'horizontal'","control":{"kind":"enum","options":["horizontal","vertical"]}},
@@ -752,6 +756,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   ISwitch: [
     {"name":"modelValue","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"disabled","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"ariaLabel","type":"string","doc":"无障碍名。 开关本身只是一个圆点，读屏用户听到的是「开关，未选中」——开的是什么全靠猜。 旁边有可见文字时，用 `<label>` 包起来或指向它即可；没有时必须给这个属性。","defaultText":"''","control":{"kind":"string"}},
   ],
   ITable: [
     {"name":"columns","type":"TableColumn[]","doc":"","defaultText":null,"control":null},
@@ -792,6 +797,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"invalid","type":"boolean","doc":"","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"showCount","type":"boolean","doc":"显示 已输入/上限 计数，需配合 maxlength","defaultText":"false","control":{"kind":"boolean"}},
     {"name":"resize","type":"'none' | 'vertical' | 'both'","doc":"","defaultText":"'vertical'","control":{"kind":"enum","options":["none","vertical","both"]}},
+    {"name":"ariaLabel","type":"string","doc":"无障碍名。 控件旁边没有可见文字时必须给：读屏用户听到的是「编辑框，空」， 填什么全靠猜。占位文案不算名字——它一开始打字就消失了。","defaultText":"''","control":{"kind":"string"}},
   ],
   ITimePicker: [
     {"name":"modelValue","type":"string","doc":"HH:mm 或 HH:mm:ss；空串表示未选","defaultText":"''","control":{"kind":"string"}},

@@ -85,15 +85,15 @@ const rows = [
     >
       <div class="stack">
         <div class="row">
-          <IInputNumber v-model="count" :min="0" :max="99" />
+          <IInputNumber v-model="count" :min="0" :max="99" aria-label="数量" />
           <span class="hint">整数，0 – 99</span>
         </div>
         <div class="row">
-          <IInputNumber v-model="price" :step="0.1" :precision="2" :min="0" />
+          <IInputNumber v-model="price" :step="0.1" :precision="2" :min="0" aria-label="单价" />
           <span class="hint">两位小数，步进 0.1</span>
         </div>
         <div class="row">
-          <IInputNumber v-model="count" hide-step size="sm" />
+          <IInputNumber v-model="count" hide-step size="sm" aria-label="数量（无步进按钮）" />
           <span class="hint">隐藏步进按钮</span>
         </div>
       </div>
@@ -108,11 +108,11 @@ const rows = [
     >
       <div class="stack">
         <div class="slider-row">
-          <ISlider v-model="volume" />
+          <ISlider v-model="volume" aria-label="音量" />
           <span class="hint">{{ volume }}</span>
         </div>
         <div class="slider-row">
-          <ISlider v-model="threshold" :step="10" :marks="marks" />
+          <ISlider v-model="threshold" :step="10" :marks="marks" aria-label="阈值" />
           <span class="hint">{{ threshold }}</span>
         </div>
       </div>

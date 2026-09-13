@@ -164,11 +164,15 @@ const rules = {
           </IFormItem>
 
           <IFormItem prop="desc" label="描述">
-            <ITextarea v-model="model.desc" :rows="3" :maxlength="200" show-count />
+            <template #default="{ id }">
+              <ITextarea :id="id" v-model="model.desc" :rows="3" :maxlength="200" show-count />
+            </template>
           </IFormItem>
 
           <IFormItem label="通知负责人">
-            <ISwitch v-model="model.notify" />
+            <template #default="{ id }">
+              <ISwitch :id="id" v-model="model.notify" />
+            </template>
           </IFormItem>
 
           <IFormItem prop="agree">

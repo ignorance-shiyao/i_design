@@ -14,6 +14,13 @@ export interface SliderProps {
   precision?: number
   disabled?: boolean
   marks?: SliderMark[]
+  /**
+   * 无障碍名。
+   *
+   * 滑块只播报数值，不播报这是什么值：读屏用户听到的是「滑块，40」，
+   * 40 是音量还是亮度，只有看得见的人知道。
+   */
+  ariaLabel?: string
   onChange?: (value: number) => void
   className?: string
 }
@@ -26,6 +33,7 @@ export function Slider({
   precision = 0,
   disabled = false,
   marks = [],
+  ariaLabel = '',
   onChange,
   className = ''
 }: SliderProps) {
@@ -101,6 +109,7 @@ export function Slider({
         <div
           className="i-slider__handle"
           role="slider"
+        aria-label={ariaLabel || undefined}
           tabIndex={disabled ? -1 : 0}
           aria-valuemin={min}
           aria-valuemax={max}

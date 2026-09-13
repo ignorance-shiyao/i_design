@@ -220,6 +220,7 @@ function highlight(label: string) {
           :value="state.checked.has(row.key)"
           :indeterminate="state.halfChecked.has(row.key)"
           :disabled="row.disabled"
+          :aria-label="row.node.label"
           @click.stop
           @input="(next) => onCheck(row.key, next)"
         />

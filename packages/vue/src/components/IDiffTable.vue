@@ -72,6 +72,7 @@ function toggle(id: string) {
             <ICheckbox
               v-if="row.kind !== 'unchanged'"
               :value="selected.includes(row.id)"
+              :aria-label="String(row.cells[columns[0].key] ?? row.id)"
               @click.stop
               @input="() => toggle(row.id)"
             />

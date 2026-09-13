@@ -13,13 +13,13 @@ const off = ref(false)
     <p class="i-lead">在两个互斥状态间切换，且立即生效。若变更需要提交后才生效，请改用复选框。</p>
 
     <DemoBlock title="基础用法" code='<ISwitch v-model="value" />'>
-      <ISwitch v-model="on" />
-      <ISwitch v-model="off" />
+      <ISwitch v-model="on" aria-label="开启状态示例" />
+      <ISwitch v-model="off" aria-label="关闭状态示例" />
     </DemoBlock>
 
     <DemoBlock title="禁用" code='<ISwitch :model-value="true" disabled />'>
-      <ISwitch :model-value="true" disabled />
-      <ISwitch :model-value="false" disabled />
+      <ISwitch :model-value="true" disabled aria-label="禁用且开启" />
+      <ISwitch :model-value="false" disabled aria-label="禁用且关闭" />
     </DemoBlock>
 
     <h2>什么时候不该用它</h2>

@@ -27,7 +27,7 @@ const fixed = ref('')
       description="showCount 需配合 maxlength；超出上限时计数与边框同时转为危险色。"
       code='<ITextarea v-model="value" :maxlength="120" show-count :rows="4" />'
     >
-      <div class="w"><ITextarea v-model="counted" :maxlength="120" show-count :rows="4" /></div>
+      <div class="w"><ITextarea v-model="counted" :maxlength="120" show-count :rows="4" aria-label="字数统计示例" /></div>
     </DemoBlock>
 
     <DemoBlock

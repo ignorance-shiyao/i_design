@@ -16,6 +16,13 @@ export interface InputNumberProps {
   placeholder?: string
   /** 隐藏两侧的加减按钮 */
   hideStep?: boolean
+  /**
+   * 无障碍名。
+   *
+   * 控件旁边没有可见文字时必须给：读屏用户听到的是「编辑框，空」，
+   * 填什么全靠猜。占位文案不算名字——它一开始打字就消失了。
+   */
+  ariaLabel?: string
   onChange?: (value: number | null) => void
   className?: string
 }
@@ -31,6 +38,7 @@ export function InputNumber({
   invalid = false,
   placeholder = '',
   hideStep = false,
+  ariaLabel = '',
   onChange,
   className = ''
 }: InputNumberProps) {
@@ -113,6 +121,7 @@ export function InputNumber({
         max={max === Number.POSITIVE_INFINITY ? undefined : max}
         step={step}
         role="spinbutton"
+        aria-label={ariaLabel || undefined}
         aria-valuenow={value ?? undefined}
         onChange={handleInput}
         onKeyDown={handleKeyDown}

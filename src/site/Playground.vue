@@ -122,28 +122,37 @@ function reset() {
           <code>{{ meta.name }}</code>
           <span v-if="meta.doc" class="pg__doc">{{ meta.doc }}</span>
         </div>
+        <!--
+          每个控件都带上属性名作无障碍名：这一排控件左边虽然写着属性名，
+          但那是一个独立的 div，读屏不会把它和控件关联起来，
+          听到的只是一串「开关，未选中」「编辑框，空」。
+        -->
         <div class="pg__control">
           <ISwitch
             v-if="meta.control?.kind === 'boolean'"
             :model-value="values[meta.name] === true"
+            :aria-label="meta.name"
             @update:model-value="values[meta.name] = $event"
           />
           <ISegmented
             v-else-if="meta.control?.kind === 'enum'"
             :model-value="values[meta.name] as string"
             :options="meta.control.options.map((o) => ({ label: o, value: o }))"
+            :aria-label="meta.name"
             @update:model-value="values[meta.name] = $event"
           />
           <IInputNumber
             v-else-if="meta.control?.kind === 'number'"
             :model-value="(values[meta.name] as number) ?? 0"
             size="sm"
+            :aria-label="meta.name"
             @update:model-value="values[meta.name] = $event"
           />
           <IInput
             v-else
             :model-value="(values[meta.name] as string) ?? ''"
             size="sm"
+            :aria-label="meta.name"
             @update:model-value="values[meta.name] = $event"
           />
         </div>

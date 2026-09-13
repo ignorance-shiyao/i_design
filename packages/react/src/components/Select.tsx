@@ -32,6 +32,13 @@ export interface SelectProps {
   multiple?: boolean
   /** 多选时最多完整显示几个标签，其余折成「+N」。0 表示全部显示 */
   maxTagCount?: number
+  /**
+   * 无障碍名。不传时用占位文案。
+   *
+   * combobox 的内容被读成「当前值」而不是「这是什么」，因此名字必须另外给：
+   * 不给的话读屏用户听到的是「组合框，北京」——北京是什么，只有看得见的人知道。
+   */
+  ariaLabel?: string
   onChange?: (value: SelectModel) => void
 }
 
@@ -48,6 +55,7 @@ export function Select({
   clearable = false,
   multiple = false,
   maxTagCount = 0,
+  ariaLabel = '',
   onChange
 }: SelectProps) {
   /*
@@ -209,6 +217,7 @@ export function Select({
         type="button"
         role="combobox"
         aria-haspopup="listbox"
+        aria-label={ariaLabel || placeholderText}
         aria-expanded={open}
         disabled={disabled}
         onClick={toggle}

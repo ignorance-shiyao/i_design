@@ -52,6 +52,13 @@ export interface CheckboxProps {
   disabled?: boolean
   /** 半选态，仅影响视觉，常用于「全选」父项 */
   indeterminate?: boolean
+  /**
+   * 无障碍名。
+   *
+   * 勾选框旁边没有可见文字时必须给（表头的全选、表格行首的那一列）：
+   * 读屏用户听到的是「勾选框，未选中」，选的是哪一行全靠猜。
+   */
+  ariaLabel?: string
   children?: ReactNode
 }
 
@@ -61,6 +68,7 @@ export function Checkbox({
   onChange,
   disabled = false,
   indeterminate = false,
+  ariaLabel = '',
   children
 }: CheckboxProps) {
   const input = useRef<HTMLInputElement>(null)
@@ -102,6 +110,7 @@ export function Checkbox({
         type="checkbox"
         checked={isChecked}
         disabled={isDisabled}
+        aria-label={ariaLabel || undefined}
         onChange={toggle}
       />
       <span className="i-checkbox__mark" aria-hidden="true">

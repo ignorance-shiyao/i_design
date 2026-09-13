@@ -37,7 +37,7 @@ const invalid = ref('非法输入')
       code='<IInput v-model="value" invalid />
 <IInput disabled placeholder="禁用" />'
     >
-      <div class="w"><IInput v-model="invalid" invalid /></div>
+      <div class="w"><IInput v-model="invalid" invalid aria-label="校验失败示例" /></div>
       <div class="w"><IInput disabled placeholder="禁用" /></div>
     </DemoBlock>
 
