@@ -1,954 +1,780 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import IIcon from "@/components/IIcon.vue";
-import IButton from "@/components/IButton.vue";
-import IInput from "@/components/IInput.vue";
-import ISwitch from "@/components/ISwitch.vue";
-import ITag from "@/components/ITag.vue";
-import CodeBlock from "@/site/CodeBlock.vue";
 import { heroIllustrations } from "@i-design/common";
 import { useTheme } from "@/composables/useTheme";
-
+import ShowcaseDesk from "@/site/ShowcaseDesk.vue";
 const { theme } = useTheme();
 const illustration = computed(() =>
   theme.value === "dark" ? heroIllustrations.dark : heroIllustrations.light
 );
-const baseUrl = import.meta.env.BASE_URL;
-const name = ref("Design something good");
-const notifications = ref(true);
-const copied = ref(false);
 const command = "git clone https://github.com/ignorance-shiyao/i_design.git";
+const copyStatus = ref("");
 async function copyCommand() {
   try {
     await navigator.clipboard.writeText(command);
-    copied.value = true;
+    copyStatus.value = "已复制，粘贴到终端开始使用";
   } catch {
-    copied.value = false;
+    copyStatus.value = "复制未成功，请选中命令手动复制";
   }
 }
-const platforms = [
+const collections = [
   {
-    title: "桌面端",
-    en: "DESKTOP",
-    icon: "layout",
-    description: "为复杂业务提供清晰、稳定的操作体验。",
-    tags: ["Vue 3", "Vue 2", "React"],
+    no: "01",
+    title: "界面的每一个细节",
+    en: "COMPONENTS",
+    desc: "从输入、导航到反馈，为日常操作建立清晰的秩序。",
     to: "/components",
-    kind: "desktop",
+    tags: ["Button", "Form", "Table"],
+    kind: "controls",
   },
   {
-    title: "移动端",
-    en: "MOBILE",
-    icon: "layers",
-    description: "统一视觉语言，适配移动设备的交互节奏。",
-    tags: ["Mobile Vue", "Mobile React", "Flutter"],
-    to: "/components/mobile",
-    kind: "mobile",
+    no: "02",
+    title: "让数据清晰可见",
+    en: "DATA & CHARTS",
+    desc: "趋势、构成与关联，用恰当的图形回答业务问题。",
+    to: "/components/chart",
+    tags: ["Chart", "Sankey", "Gantt"],
+    kind: "charts",
   },
   {
-    title: "小程序",
-    en: "MINI PROGRAM",
-    icon: "grid",
-    description: "让轻量业务也拥有完整、一致的产品体验。",
-    tags: ["微信小程序", "共享令牌"],
-    to: "/design/cross-platform",
-    kind: "mini",
+    no: "03",
+    title: "把复杂流程展开",
+    en: "FLOW & LOGIC",
+    desc: "连接节点、查看状态，让业务过程有迹可循。",
+    to: "/components/flow",
+    tags: ["Canvas", "Minimap", "Snapshot"],
+    kind: "flow",
+  },
+  {
+    no: "04",
+    title: "与智能协同工作",
+    en: "AI INTERACTIONS",
+    desc: "对话、工具调用与行动确认，让人始终掌握进程。",
+    to: "/components/chat",
+    tags: ["Chat", "Approval", "Agent"],
+    kind: "ai",
   },
 ];
-const resources = [
-  {
-    icon: "palette",
-    title: "设计令牌",
-    desc: "色彩、字体、间距与动效，从同一套规范出发。",
-    to: "/design/tokens",
-  },
-  {
-    icon: "code",
-    title: "跨端实现",
-    desc: "查看不同技术栈的组件实现与使用方式。",
-    to: "/design/cross-platform",
-  },
-  {
-    icon: "layers",
-    title: "设计资源",
-    desc: "把图标与插画带进你的下一件作品。",
-    to: "/resources",
-  },
-] as const;
+const platforms = [
+  { name: "Vue 3", detail: "组合式开发" },
+  { name: "React", detail: "声明式交互" },
+  { name: "Vue 2", detail: "存量系统接入" },
+  { name: "Mobile", detail: "触摸优先体验" },
+  { name: "小程序", detail: "轻量业务入口" },
+  { name: "Flutter", detail: "原生应用体验" },
+];
 </script>
-
 <template>
   <main class="design-home">
-    <section class="design-hero">
-      <div class="hero-art" aria-hidden="true">
-        <img
-          :src="`${baseUrl}images/component-sculpture.png`"
-          alt=""
-          width="1672"
-          height="941"
-          fetchpriority="high"
-        />
-      </div>
-      <div class="i-container hero-content">
-        <span class="hero-kicker">开源 · 多端 · 企业级设计体系</span>
-        <h1>i-design<span>让设计与实现，自然一致。</span></h1>
-        <p>从设计语言到业务界面，为设计师与开发者提供共同的起点。</p>
-        <div class="hero-actions">
-          <RouterLink class="primary-link" to="/components"
-            >开始使用 <IIcon name="arrow-right" :size="18"
-          /></RouterLink>
-          <RouterLink class="secondary-link" to="/design/values"
-            >了解设计体系 <IIcon name="chevron-right" :size="18"
-          /></RouterLink>
-        </div>
-      </div>
-      <nav class="i-container hero-resources" aria-label="设计体系资源">
-        <RouterLink
-          v-for="item in resources"
-          :key="item.to"
-          :to="item.to"
-          class="resource-link"
-        >
-          <IIcon :name="item.icon" :size="22" />
-          <div>
-            <h2>{{ item.title }}</h2>
-            <p>{{ item.desc }}</p>
-          </div>
-          <IIcon name="arrow-right" :size="18" />
-        </RouterLink>
-      </nav>
-    </section>
-
-    <section class="i-container home-section">
-      <div class="section-heading">
+    <section class="i-container design-hero" aria-labelledby="home-title">
+      <div class="hero-heading">
         <div>
-          <span class="section-label">面向不同平台</span>
-          <h2>熟悉的技术栈，一致的体验</h2>
-        </div>
-        <RouterLink to="/design/cross-platform"
-          >查看跨端支持 <IIcon name="arrow-right" :size="16"
-        /></RouterLink>
-      </div>
-      <div class="platforms">
-        <article
-          v-for="platform in platforms"
-          :key="platform.kind"
-          class="platform"
-        >
-          <div
-            class="platform__visual"
-            :class="platform.kind"
-            aria-hidden="true"
+          <span class="eyebrow"
+            ><IIcon name="sparkle" :size="14" /> 为想法，赋予界面</span
           >
-            <div v-if="platform.kind === 'desktop'" class="device-desktop">
-              <div class="device-bar"><i /><i /><i /></div>
-              <div class="device-body">
-                <aside />
-                <div><b /><span /><span /><span /></div>
-              </div>
-            </div>
-            <div v-else-if="platform.kind === 'mobile'" class="device-mobile">
-              <i /><b /><span /><span />
-              <div />
-              <span />
-            </div>
-            <div v-else class="device-mini">
-              <div />
-              <i /><b /><span />
-            </div>
-          </div>
-          <div class="platform__body">
-            <span class="section-label">{{ platform.en }}</span>
-            <h3>{{ platform.title }}</h3>
-            <p>{{ platform.description }}</p>
-            <div class="platform__tags">
-              <span v-for="tag in platform.tags" :key="tag">{{ tag }}</span>
-            </div>
-            <RouterLink :to="platform.to"
-              >探索组件 <IIcon name="arrow-right" :size="16"
+          <h1 id="home-title">让复杂，<br /><span>成为简洁。</span></h1>
+        </div>
+        <div class="hero-intro">
+          <p>
+            从一个组件，到一整个产品。<br />i-design
+            让设计语言与业务体验自然相连。
+          </p>
+          <div class="hero-actions">
+            <RouterLink class="primary-link" to="/components"
+              >探索组件 <IIcon name="arrow-right" :size="18" /></RouterLink
+            ><RouterLink class="text-link" to="/design/values"
+              >了解设计体系 <IIcon name="chevron-right" :size="16"
             /></RouterLink>
           </div>
-        </article>
+          <span class="hero-note">开源设计体系 · 多端实现 · 自由定制</span>
+        </div>
+      </div>
+      <ShowcaseDesk />
+      <div class="platform-strip">
+        <span>同一种设计语言<br /><strong>在你熟悉的平台</strong></span
+        ><RouterLink
+          v-for="platform in platforms"
+          :key="platform.name"
+          :to="
+            platform.name === 'Mobile'
+              ? '/components/mobile'
+              : '/design/cross-platform'
+          "
+          ><strong>{{ platform.name }}</strong
+          ><span>{{ platform.detail }}</span></RouterLink
+        >
       </div>
     </section>
-
-    <section class="showcase-section">
-      <div class="i-container showcase">
-        <div class="showcase-copy">
-          <span class="section-label">从规范，到细节</span>
-          <h2>好的体验，<br />藏在每一次交互里。</h2>
-          <p>
-            清晰的层级，恰当的反馈。用真实组件搭建界面，让设计意图直接成为可操作的体验。
-          </p>
-          <RouterLink to="/components/button"
-            >浏览组件文档 <IIcon name="arrow-right" :size="18" /></RouterLink
-          ><img
-            :src="illustration.src"
-            :srcset="illustration.srcset"
-            width="240"
-            height="160"
-            alt="小白与十五的设计世界"
-            loading="lazy"
-          />
+    <section
+      class="i-container home-section"
+      aria-labelledby="collections-title"
+    >
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">THE COLLECTION</span>
+          <h2 id="collections-title">好的界面，从这里生长。</h2>
         </div>
-        <div class="component-gallery">
-          <div class="sample sample-controls">
-            <span class="sample-label">交互 / INTERACTION</span>
-            <div class="sample-buttons">
-              <IButton variant="primary" @click="name = '从一个好想法开始'"
-                >开始创作<IIcon name="arrow-right" :size="16" /></IButton
-              ><RouterLink to="/components/button" class="sample-text-link"
-                >更多按钮</RouterLink
-              >
-            </div>
-            <label for="sample-name">作品名称</label
-            ><IInput
-              id="sample-name"
-              v-model="name"
-              placeholder="输入作品名称"
-            />
-            <div class="sample-switch">
-              <span>接收更新通知</span
-              ><ISwitch v-model="notifications" aria-label="接收更新通知" />
-            </div>
-          </div>
-          <RouterLink class="sample sample-colors" to="/design/tokens"
-            ><span class="sample-label">色彩 / COLOR</span>
-            <div class="color-swatch"><i /><i /><i /><i /><i /></div>
-            <strong>品牌，从一个颜色开始。</strong
-            ><span class="sample-note"
-              >探索语义令牌 <IIcon name="arrow-right" :size="14" /></span
-          ></RouterLink>
-          <div class="sample sample-type">
-            <span class="sample-label">字体 / TYPOGRAPHY</span>
-            <div class="type-display">Aa<span>字</span></div>
-            <p>清晰可读，主次分明。</p>
-          </div>
-          <div class="sample sample-status">
-            <span class="sample-label">反馈 / FEEDBACK</span>
-            <div class="status-line">
-              <span class="status-icon"
-                ><IIcon name="check-circle" :size="22"
-              /></span>
-              <div>
-                <strong>每一步，都有回应</strong>
-                <p>用明确的状态传递进展</p>
+        <RouterLink class="text-link" to="/components"
+          >浏览全部组件 <IIcon name="arrow-right" :size="16"
+        /></RouterLink>
+      </div>
+      <div class="collections">
+        <RouterLink
+          v-for="item in collections"
+          :key="item.no"
+          :to="item.to"
+          class="collection"
+        >
+          <div
+            class="collection__art"
+            :class="`collection__art--${item.kind}`"
+            aria-hidden="true"
+          >
+            <template v-if="item.kind === 'controls'"
+              ><div class="art-button">
+                Create something <IIcon name="plus" :size="16" />
               </div>
-            </div>
-            <div class="status-tags">
-              <ITag type="brand">进行中</ITag><ITag type="success">已完成</ITag
-              ><ITag type="warning">待确认</ITag>
-            </div>
+              <div class="art-field">
+                <IIcon name="search" :size="16" /> 一个好想法… <span>⌘ K</span>
+              </div>
+              <div class="art-chips">
+                <span><IIcon name="check" :size="12" /> 已完成</span
+                ><span>设计系统</span><i /></div
+            ></template>
+            <template v-else-if="item.kind === 'charts'"
+              ><div class="art-chart">
+                <i
+                  v-for="(height, index) in [36, 56, 44, 76, 60, 88, 72, 100]"
+                  :key="index"
+                  :style="{ height: `${height}%` }"
+                />
+              </div>
+              <span class="art-caption"
+                >让每一个变化，都有依据。</span
+              ></template
+            >
+            <template v-else-if="item.kind === 'flow'"
+              ><div class="art-node">
+                <IIcon name="file" :size="16" /> 提交申请
+                <IIcon name="check-circle" :size="14" />
+              </div>
+              <div class="art-connector" />
+              <div class="art-node art-node--active">
+                <IIcon name="user" :size="16" /> 审批节点 <span>处理中</span>
+              </div></template
+            >
+            <template v-else
+              ><div class="art-ai">
+                <IIcon name="sparkle" :size="24" /><span
+                  >每一个想法，都值得回应。</span
+                >
+              </div>
+              <div class="art-tool">
+                <IIcon name="check-circle" :size="14" /> 已检索相关资料
+                <span>查看来源</span>
+              </div>
+              <div class="art-field">
+                接下来，一起做些什么？<IIcon
+                  name="arrow-right"
+                  :size="16"
+                /></div
+            ></template>
           </div>
+          <div class="collection__meta">
+            <span>{{ item.no }} / {{ item.en }}</span
+            ><IIcon name="arrow-right" :size="18" />
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.desc }}</p>
+          <div class="collection__tags">
+            <span v-for="tag in item.tags" :key="tag">{{ tag }}</span>
+          </div>
+        </RouterLink>
+      </div>
+    </section>
+    <section class="system-section">
+      <div class="i-container system-grid">
+        <div class="system-copy">
+          <span class="eyebrow">A SYSTEM THAT FEELS LIKE YOU</span>
+          <h2>有自己的风格，<br />也有共同的秩序。</h2>
+          <p>
+            色彩、密度、圆角与动效彼此呼应。切换明暗，调整主题，让整套界面保持一致。
+          </p>
+          <RouterLink class="text-link" to="/design/tokens"
+            >探索设计令牌 <IIcon name="arrow-right" :size="16"
+          /></RouterLink>
+        </div>
+        <div class="system-specimen">
+          <div class="specimen-type">
+            <span>TYPE / 01</span><strong>Aa<span>字</span></strong>
+            <p>清晰，始于可读。</p>
+          </div>
+          <div class="specimen-palette">
+            <span>COLOR / 02</span>
+            <div><i /><i /><i /><i /><i /></div>
+            <p>不同语义，同样鲜明。</p>
+          </div>
+          <RouterLink class="specimen-mascot" to="/resources"
+            ><img
+              :src="illustration.src"
+              :srcset="illustration.srcset"
+              alt="小白与十五的设计世界"
+              width="360"
+              height="240"
+              loading="lazy" /><span
+              >给严谨的界面，一点温度。<IIcon
+                name="arrow-right"
+                :size="16" /></span
+          ></RouterLink>
         </div>
       </div>
     </section>
-
-    <section class="i-container home-section start-section">
-      <div>
-        <span class="section-label">一起构建</span>
-        <h2>从这里，开始下一件作品。</h2>
-        <p>
-          克隆源码，运行文档站，探索适合你的组件。<br />当前通过仓库使用，暂未发布到
-          npm。
-        </p>
-        <a
-          class="secondary-link"
+    <section class="i-container start-section">
+      <span class="eyebrow">MAKE IT YOURS</span>
+      <h2>下一个好产品，<br />从你的想法开始。</h2>
+      <div class="start-actions">
+        <RouterLink class="primary-link" to="/design/cross-platform"
+          >开始构建 <IIcon name="arrow-right" :size="18" /></RouterLink
+        ><a
+          class="text-link"
           href="https://github.com/ignorance-shiyao/i_design"
           target="_blank"
           rel="noreferrer"
-          >访问 GitHub <IIcon name="arrow-right" :size="16"
+          >GitHub <IIcon name="external-link" :size="16"
         /></a>
       </div>
-      <div class="start-code">
-        <div class="start-code__bar">
-          <span>Terminal</span
-          ><button @click="copyCommand">
-            {{ copied ? "已复制克隆命令" : "复制克隆命令"
-            }}<IIcon name="copy" :size="14" />
-          </button>
-        </div>
-        <CodeBlock
-          :copyable="false"
-          lang="bash"
-          :code="`${command}\ncd i_design\nnpm install\nnpm run dev`"
-        />
+      <div class="start-command">
+        <code>{{ command }}</code
+        ><button type="button" aria-label="复制克隆命令" @click="copyCommand">
+          <IIcon name="copy" :size="16" />
+        </button>
       </div>
+      <p role="status" class="copy-status">{{ copyStatus }}</p>
     </section>
   </main>
 </template>
-
 <style scoped>
 .design-home {
-  --home-radius: var(--i-radius-lg);
+  --home-radius: var(--i-radius-xl);
 }
 .design-hero {
-  position: relative;
-  overflow: hidden;
-  background: var(--i-color-bg-subtle);
+  padding-top: var(--i-spacing-20);
 }
-.hero-content {
-  position: relative;
-  z-index: 1;
-  padding-top: 132px;
-  padding-bottom: 76px;
-  pointer-events: none;
+.hero-heading {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: end;
+  gap: var(--i-spacing-12);
+  margin-bottom: var(--i-spacing-12);
 }
-.hero-content a {
-  pointer-events: auto;
-}
-.hero-kicker,
-.section-label {
-  font-size: var(--i-font-size-xs);
-  letter-spacing: 0.08em;
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
   color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  letter-spacing: 0.12em;
+  font-family: var(--i-font-family-mono);
 }
 h1 {
-  margin: 18px 0 20px;
-  color: var(--i-color-brand-text);
   font-size: clamp(
-    var(--i-font-size-5xl),
-    7vw,
-    calc(var(--i-font-size-5xl) * 1.8)
+    var(--i-font-size-4xl),
+    5.9vw,
+    calc(var(--i-font-size-5xl) * 1.4)
   );
-  line-height: 1;
-  letter-spacing: -0.055em;
-  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: -0.065em;
+  font-weight: var(--i-font-weight-medium);
+  margin-top: var(--i-spacing-5);
 }
 h1 span {
-  display: block;
-  margin-top: 24px;
-  color: var(--i-color-text);
-  font-size: clamp(var(--i-font-size-2xl), 2.7vw, var(--i-font-size-3xl));
-  line-height: 1.4;
-  font-weight: 500;
-  letter-spacing: -0.035em;
+  color: var(--i-color-brand-text);
 }
-.hero-content > p {
-  max-width: 420px;
-  color: var(--i-color-text-secondary);
+.hero-intro {
+  padding-bottom: var(--i-spacing-2);
+}
+.hero-intro p {
   font-size: var(--i-font-size-lg);
-  line-height: 1.9;
+  line-height: var(--i-line-height-loose);
+  color: var(--i-color-text-secondary);
 }
-.hero-actions {
+.hero-actions,
+.start-actions {
   display: flex;
-  gap: 24px;
-  margin-top: 32px;
   align-items: center;
-}
-.primary-link,
-.secondary-link {
-  display: inline-flex;
-  gap: 16px;
-  align-items: center;
-  font-size: var(--i-font-size-md);
+  flex-wrap: wrap;
+  gap: var(--i-spacing-6);
+  margin-top: var(--i-spacing-6);
 }
 .primary-link {
-  padding: 14px 24px;
-  /* 底色与字色成对取：品牌色原值上的白字只有 3.86，这是首屏最主要的那个入口 */
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--i-spacing-5);
+  padding: var(--i-spacing-3) var(--i-spacing-5);
+  border-radius: var(--i-radius-full);
   background: var(--i-color-brand-solid);
   color: var(--i-color-on-brand);
-  border-radius: var(--i-radius-md);
+  font-size: var(--i-font-size-md);
 }
 .primary-link:hover {
-  background: var(--i-color-brand-active);
+  box-shadow: 0 0 0 var(--i-spacing-1) var(--i-color-ring);
 }
-.secondary-link {
-  color: var(--i-color-text);
-}
-.hero-resources {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  padding-bottom: 40px;
-}
-.resource-link {
-  padding: 26px 24px;
-  display: flex;
-  gap: 18px;
+.text-link {
+  display: inline-flex;
   align-items: center;
-  background: var(--i-color-bg-elevated);
-  border-radius: var(--home-radius);
+  gap: var(--i-spacing-2);
+  font-size: var(--i-font-size-md);
   color: var(--i-color-text);
-  border: 1px solid var(--i-color-hairline);
-  transition: border-color 0.2s;
 }
-.resource-link:hover {
-  border-color: var(--i-color-brand);
-}
-.resource-link > svg {
+.text-link:hover {
   color: var(--i-color-brand-text);
-  flex: none;
 }
-.resource-link > svg:last-child {
-  margin-left: auto;
-  color: var(--i-color-text-secondary);
-}
-.resource-link h2 {
-  font-size: var(--i-font-size-lg);
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-.resource-link p {
+.hero-note {
+  display: block;
+  margin-top: var(--i-spacing-5);
   font-size: var(--i-font-size-xs);
-  line-height: 1.7;
   color: var(--i-color-text-secondary);
 }
-.hero-art {
-  position: absolute;
-  inset: 0 0 90px;
-  overflow: hidden;
+.platform-strip {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(6, 1fr);
+  gap: var(--i-spacing-4);
+  padding: var(--i-spacing-8) 0;
+  border-bottom: 1px solid var(--i-color-hairline);
 }
-.hero-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+.platform-strip > span {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+  line-height: var(--i-line-height-loose);
 }
-.hero-art::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    var(--i-color-bg-subtle) 0%,
-    transparent 56%
-  );
+.platform-strip > span strong {
+  font-weight: var(--i-font-weight-medium);
+  color: var(--i-color-text);
 }
-/*
- * 暗色下压低这张图的亮度，免得它比正文还抢眼。
- *
- * 不能写成 :global([data-theme="dark"]) .hero-art——作用域编译会把后代部分
- * 整个丢掉，只留下 [data-theme=dark]{opacity:.16}，于是整个 <html> 在暗色下
- * 都变成 16% 不透明度：全站文字与卡片一起发灰，而且不会有任何报错。
- * 祖先选择器本来就不需要 :global，作用域只会把属性加在末尾的选择器上。
- */
-[data-theme="dark"] .hero-art {
-  opacity: 0.16;
+.platform-strip a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--i-spacing-1);
+  color: var(--i-color-text);
 }
-[data-theme="dark"] .hero-art::after {
-  background: linear-gradient(
-    90deg,
-    var(--i-color-bg-subtle) 42%,
-    transparent 100%
-  );
+.platform-strip a strong {
+  font-weight: var(--i-font-weight-medium);
+  font-size: var(--i-font-size-lg);
+}
+.platform-strip a span {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+}
+.platform-strip a:hover strong {
+  color: var(--i-color-brand-text);
 }
 .home-section {
-  padding-top: 80px;
-  padding-bottom: 80px;
+  padding-top: var(--i-spacing-24);
+  padding-bottom: var(--i-spacing-24);
 }
 .section-heading {
   display: flex;
   justify-content: space-between;
   align-items: end;
-  gap: 24px;
-  margin-bottom: 36px;
+  gap: var(--i-spacing-6);
+  margin-bottom: var(--i-spacing-10);
 }
-.section-heading h2,
-.start-section h2 {
-  font-size: var(--i-font-size-3xl);
-  font-weight: 500;
-  letter-spacing: -0.035em;
-  margin-top: 12px;
+h2 {
+  font-size: clamp(var(--i-font-size-2xl), 3vw, var(--i-font-size-4xl));
+  font-weight: var(--i-font-weight-medium);
+  letter-spacing: -0.045em;
+  line-height: 1.4;
+  margin-top: var(--i-spacing-4);
 }
-.section-heading > a,
-.platform__body > a,
-.showcase-copy > a {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--i-color-brand-text);
-  font-size: var(--i-font-size-md);
-}
-.platforms {
+.collections {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--i-spacing-12) var(--i-spacing-8);
 }
-.platform {
-  border: 1px solid var(--i-color-border);
-  border-radius: var(--home-radius);
-  overflow: hidden;
-}
-.platform__visual {
-  height: 210px;
-  background: var(--i-color-bg-subtle);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-.platform__body {
-  padding: 28px;
-}
-.platform__body h3 {
-  font-size: var(--i-font-size-2xl);
-  margin: 10px 0;
-  font-weight: 500;
-}
-.platform__body p {
-  font-size: var(--i-font-size-md);
-  color: var(--i-color-text-secondary);
-  line-height: 1.8;
-}
-.platform__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 24px 0 28px;
-}
-.platform__tags span {
-  font-size: var(--i-font-size-xs);
-  background: var(--i-color-bg-subtle);
-  padding: 4px 10px;
-  border-radius: var(--i-radius-sm);
-  color: var(--i-color-text-secondary);
-}
-.device-desktop {
-  width: 218px;
-  height: 142px;
-  transform: perspective(650px) rotateY(-16deg) rotateX(12deg);
-  background: var(--i-color-bg-elevated);
-  border: 1px solid var(--i-color-border);
-  border-radius: 8px;
-  box-shadow: 10px 12px 0 var(--i-color-border),
-    18px 20px 24px var(--i-color-hairline);
-  padding: 12px;
-}
-.device-bar {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 12px;
-}
-.device-bar i {
-  width: 4px;
-  height: 4px;
-  background: var(--i-color-border-strong);
-  border-radius: 50%;
-}
-.device-body {
-  display: flex;
-  gap: 12px;
-  height: 95px;
-}
-.device-body aside {
-  width: 35px;
-  background: var(--i-color-bg-muted);
-  border-radius: 3px;
-}
-.device-body > div {
-  flex: 1;
-}
-.device-body b {
+.collection {
   display: block;
-  height: 34px;
-  background: var(--i-color-brand);
-  border-radius: 3px;
-  margin-bottom: 10px;
-}
-.device-body span {
-  display: block;
-  height: 8px;
-  margin-top: 6px;
-  background: var(--i-color-brand-subtle);
-}
-.device-mobile {
-  width: 90px;
-  height: 170px;
-  padding: 12px 9px;
-  border: 3px solid var(--i-color-border);
-  border-radius: 16px;
-  background: var(--i-color-bg-elevated);
-  transform: rotate(-14deg);
-  box-shadow: 8px 10px 0 var(--i-color-bg-muted);
-}
-.device-mobile i {
-  display: block;
-  width: 24px;
-  height: 4px;
-  background: var(--i-color-border-strong);
-  border-radius: 9px;
-  margin: 0 auto 14px;
-}
-.device-mobile b {
-  display: block;
-  height: 44px;
-  background: var(--i-color-brand);
-  border-radius: 5px;
-}
-.device-mobile span {
-  display: block;
-  height: 7px;
-  background: var(--i-color-bg-muted);
-  margin: 8px 0;
-}
-.device-mobile > div {
-  height: 25px;
-  background: var(--i-color-brand-subtle);
-  border-radius: 4px;
-}
-.device-mini {
-  width: 144px;
-  height: 144px;
-  border: 1px solid var(--i-color-border);
-  border-radius: 30px;
-  background: var(--i-color-bg-elevated);
-  transform: rotate(-12deg);
-  box-shadow: 10px 12px 0 var(--i-color-bg-muted);
-  padding: 27px;
-  position: relative;
-}
-.device-mini > div {
-  width: 54px;
-  height: 54px;
-  border: 14px solid var(--i-color-brand);
-  border-radius: 18px;
-}
-.device-mini i {
-  position: absolute;
-  top: 36px;
-  right: 24px;
-  width: 14px;
-  height: 14px;
-  background: var(--i-color-brand-subtle);
-  border-radius: 50%;
-}
-.device-mini b,
-.device-mini span {
-  display: block;
-  height: 6px;
-  width: 86px;
-  margin-top: 12px;
-  background: var(--i-color-bg-muted);
-}
-.device-mini span {
-  width: 55px;
-  margin-top: 6px;
-}
-.showcase-section {
-  background: var(--i-color-bg-subtle);
-  padding: 80px 0;
-}
-.showcase {
-  display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
-  gap: 80px;
-  align-items: center;
-}
-.showcase-copy h2 {
-  font-size: var(--i-font-size-3xl);
-  font-weight: 500;
-  line-height: 1.5;
-  letter-spacing: -0.035em;
-  margin: 18px 0;
-}
-.showcase-copy p {
-  color: var(--i-color-text-secondary);
-  line-height: 1.9;
-  font-size: var(--i-font-size-lg);
-  max-width: 350px;
-  margin-bottom: 26px;
-}
-.showcase-copy img {
-  display: block;
-  object-fit: contain;
-  margin-top: 24px;
-}
-.component-gallery {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.sample {
   min-width: 0;
-  padding: 24px;
-  border: 1px solid var(--i-color-hairline);
-  background: var(--i-color-bg-elevated);
-  border-radius: var(--home-radius);
   color: var(--i-color-text);
 }
-.sample-label {
-  display: block;
-  font-size: var(--i-font-size-xs);
-  letter-spacing: 0.08em;
-  color: var(--i-color-text-secondary);
-  margin-bottom: 24px;
+.collection__art {
+  min-height: calc(var(--i-spacing-24) * 2.6);
+  padding: var(--i-spacing-10);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--home-radius);
+  background: var(--i-color-bg-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-.sample-controls {
-  grid-row: span 2;
+.collection:hover .collection__art {
+  border-color: var(--i-color-border-strong);
+  box-shadow: var(--i-shadow-sm);
 }
-.sample-buttons {
+.collection__meta {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 28px;
-}
-.sample-text-link {
-  font-size: var(--i-font-size-xs);
-  /* 小字用 brand-text：品牌色在白底上只有 3.86:1 */
-  color: var(--i-color-brand-text);
-}
-.sample-controls label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: var(--i-font-size-sm);
-}
-.sample-switch {
-  display: flex;
   justify-content: space-between;
-  gap: 8px;
-  align-items: center;
-  font-size: var(--i-font-size-xs);
-  margin-top: 24px;
+  margin-top: var(--i-spacing-5);
+  color: var(--i-color-text-secondary);
+  font: var(--i-font-size-xs) var(--i-font-family-mono);
+  letter-spacing: 0.08em;
 }
-.color-swatch {
+.collection h3 {
+  font-size: var(--i-font-size-2xl);
+  font-weight: var(--i-font-weight-medium);
+  margin: var(--i-spacing-2) 0;
+  letter-spacing: -0.03em;
+}
+.collection p {
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-md);
+  line-height: var(--i-line-height-loose);
+}
+.collection__tags {
   display: flex;
-  margin-bottom: 20px;
-  height: 44px;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+  margin-top: var(--i-spacing-4);
 }
-.color-swatch i {
-  flex: 1;
-  background: var(--i-color-brand);
+.collection__tags span {
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  background: var(--i-color-bg-subtle);
+  border-radius: var(--i-radius-sm);
+  font: var(--i-font-size-xs) var(--i-font-family-mono);
+  color: var(--i-color-text-secondary);
 }
-.color-swatch i:nth-child(1) {
-  background: var(--i-color-brand-subtle);
-}
-.color-swatch i:nth-child(2) {
-  background: var(--i-color-ring);
-}
-.color-swatch i:nth-child(3) {
-  background: var(--i-color-brand-hover);
-}
-.color-swatch i:nth-child(5) {
-  background: var(--i-color-brand-active);
-}
-.sample-colors strong {
+.art-button,
+.art-field,
+.art-node,
+.art-tool {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  border-radius: var(--i-radius-lg);
   font-size: var(--i-font-size-sm);
-  font-weight: 500;
 }
-.sample-note {
+.art-button {
+  background: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
+  padding: var(--i-spacing-3) var(--i-spacing-5);
+  align-self: flex-start;
+  margin-left: 12%;
+}
+.art-field {
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text-secondary);
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border: 1px solid var(--i-color-border);
+  width: 88%;
+  margin-top: var(--i-spacing-4);
+}
+.art-field span,
+.art-field > svg:last-child {
+  margin-left: auto;
+}
+.art-chips {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 12px;
+  gap: var(--i-spacing-3);
+  margin-top: var(--i-spacing-4);
   font-size: var(--i-font-size-xs);
-  color: var(--i-color-text-secondary);
 }
-.sample-type .sample-label {
-  margin-bottom: 8px;
-}
-.type-display {
-  font-size: var(--i-font-size-4xl);
-  font-weight: 500;
-  letter-spacing: -0.06em;
-}
-.type-display span {
-  font-size: var(--i-font-size-3xl);
-  margin-left: 20px;
-  color: var(--i-color-brand-text);
-}
-.sample-type p {
-  font-size: var(--i-font-size-xs);
-  color: var(--i-color-text-secondary);
-}
-.sample-status {
-  grid-column: 1 / -1;
-}
-.status-line {
-  display: flex;
+.art-chips span {
+  display: inline-flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--i-spacing-1);
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
 }
-.status-icon {
+.art-chips span:first-child {
+  background: var(--i-color-success-subtle);
   color: var(--i-color-success-text);
 }
-.status-line strong {
-  font-size: var(--i-font-size-md);
-  font-weight: 500;
+.art-chips i {
+  width: var(--i-spacing-8);
+  height: var(--i-spacing-5);
+  background: var(--i-color-brand-solid);
+  border-radius: var(--i-radius-full);
+  position: relative;
 }
-.status-line p {
-  font-size: var(--i-font-size-xs);
-  color: var(--i-color-text-secondary);
-  margin-top: 4px;
+.art-chips i::after {
+  content: "";
+  position: absolute;
+  right: var(--i-spacing-1);
+  top: var(--i-spacing-1);
+  width: var(--i-spacing-3);
+  height: var(--i-spacing-3);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-on-brand);
 }
-.status-tags {
+.collection__art--charts {
+  background: var(--i-color-brand-subtle);
+}
+.art-chart {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 20px;
+  align-items: end;
+  gap: var(--i-spacing-3);
+  height: calc(var(--i-spacing-24) * 1.4);
+  width: 85%;
+  border-bottom: 1px solid var(--i-color-border-strong);
 }
-.start-section {
+.art-chart i {
+  flex: 1;
+  background: var(--i-color-brand);
+  border-radius: var(--i-radius-sm) var(--i-radius-sm) 0 0;
+}
+.art-chart i:nth-child(2n) {
+  background: var(--i-color-brand-solid);
+}
+.art-caption {
+  margin-top: var(--i-spacing-4);
+  color: var(--i-color-brand-text);
+  font-size: var(--i-font-size-xs);
+}
+.art-node {
+  width: 80%;
+  padding: var(--i-spacing-4);
+  border: 1px solid var(--i-color-border);
+  background: var(--i-color-bg-elevated);
+}
+.art-node > :last-child {
+  margin-left: auto;
+}
+.art-node > svg:last-child {
+  color: var(--i-color-success-text);
+}
+.art-node--active {
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand-text);
+}
+.art-node span {
+  font-size: var(--i-font-size-xs);
+}
+.art-connector {
+  width: 1px;
+  height: var(--i-spacing-8);
+  background: var(--i-color-border-strong);
+}
+.art-ai {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-md);
+}
+.art-ai > svg {
+  color: var(--i-color-brand-text);
+}
+.art-tool {
+  padding: var(--i-spacing-3);
+  background: var(--i-color-success-subtle);
+  color: var(--i-color-success-text);
+  margin-top: var(--i-spacing-4);
+  font-size: var(--i-font-size-xs);
+}
+.art-tool span {
+  margin-left: var(--i-spacing-6);
+}
+.system-section {
+  background: var(--i-color-bg-subtle);
+  padding: var(--i-spacing-20) 0;
+}
+.system-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1fr;
+  align-items: center;
+  gap: var(--i-spacing-20);
+}
+.system-copy p {
+  max-width: 32ch;
+  margin: var(--i-spacing-6) 0;
+  line-height: var(--i-line-height-loose);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-lg);
+}
+.system-specimen {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: center;
+  gap: var(--i-spacing-4);
 }
-.start-section p {
-  color: var(--i-color-text-secondary);
-  font-size: var(--i-font-size-md);
-  line-height: 1.9;
-  margin: 22px 0;
-}
-.start-code {
-  min-width: 0;
-  border: 1px solid var(--i-color-border);
+.specimen-type,
+.specimen-palette {
+  padding: var(--i-spacing-5);
+  background: var(--i-color-bg-elevated);
+  border: 1px solid var(--i-color-hairline);
   border-radius: var(--home-radius);
-  overflow: hidden;
 }
-.start-code__bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  background: var(--i-color-bg-subtle);
+.specimen-type > span,
+.specimen-palette > span {
+  color: var(--i-color-text-secondary);
+  font: var(--i-font-size-xs) var(--i-font-family-mono);
+}
+.specimen-type strong {
+  display: block;
+  font-size: var(--i-font-size-5xl);
+  font-weight: var(--i-font-weight-medium);
+  letter-spacing: -0.06em;
+  margin: var(--i-spacing-4) 0;
+}
+.specimen-type strong span {
+  font-size: var(--i-font-size-3xl);
+  margin-left: var(--i-spacing-2);
+  color: var(--i-color-brand-text);
+}
+.specimen-type p,
+.specimen-palette p {
   font-size: var(--i-font-size-xs);
   color: var(--i-color-text-secondary);
 }
-.start-code__bar button {
+.specimen-palette > div {
   display: flex;
-  gap: 8px;
+  height: var(--i-spacing-16);
+  gap: var(--i-spacing-1);
+  margin: var(--i-spacing-5) 0;
+}
+.specimen-palette i {
+  flex: 1;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-brand);
+}
+.specimen-palette i:nth-child(2) {
+  background: var(--i-color-brand-active);
+}
+.specimen-palette i:nth-child(3) {
+  background: var(--i-color-success);
+}
+.specimen-palette i:nth-child(4) {
+  background: var(--i-color-warning);
+}
+.specimen-palette i:nth-child(5) {
+  background: var(--i-color-danger);
+}
+.specimen-mascot {
+  grid-column: 1 / -1;
+  display: flex;
   align-items: center;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--home-radius);
+  background: var(--i-color-bg-elevated);
+  overflow: hidden;
+  padding: var(--i-spacing-3);
+}
+.specimen-mascot img {
+  width: 48%;
+  height: auto;
+}
+.specimen-mascot > span {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-4);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+}
+.start-section {
+  text-align: center;
+  padding-top: var(--i-spacing-24);
+  padding-bottom: var(--i-spacing-16);
+}
+.start-section h2 {
+  font-size: clamp(var(--i-font-size-3xl), 4vw, var(--i-font-size-5xl));
+}
+.start-actions {
+  justify-content: center;
+}
+.start-command {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  width: fit-content;
+  max-width: 100%;
+  margin: var(--i-spacing-8) auto 0;
+  background: var(--i-color-bg-subtle);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+}
+.start-command code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: left;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+}
+.start-command button {
+  flex: none;
+  padding: var(--i-spacing-2);
   background: none;
   border: 0;
   color: var(--i-color-text-secondary);
   cursor: pointer;
-  font: inherit;
 }
-.start-code :deep(.code) {
-  border: 0;
-  margin: 0;
-  box-shadow: none;
-  border-radius: 0;
+.copy-status {
+  min-height: var(--i-spacing-6);
+  margin-top: var(--i-spacing-2);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
 }
-
-@media (max-width: 1100px) {
-  .hero-art img {
-    object-position: 60% center;
+@media (max-width: 900px) {
+  .design-hero {
+    padding-top: var(--i-spacing-12);
   }
-  .hero-content {
-    padding-top: 100px;
+  .hero-heading {
+    gap: var(--i-spacing-6);
   }
-  .resource-link {
-    padding: 20px;
+  .hero-actions {
+    gap: var(--i-spacing-4);
   }
-  .resource-link > svg:first-child {
-    display: none;
+  .platform-strip {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--i-spacing-5);
   }
-  .showcase {
-    gap: 36px;
+  .platform-strip > span {
+    grid-column: 1 / -1;
   }
-  .platform__body {
-    padding: 22px;
+  .system-grid {
+    gap: var(--i-spacing-8);
+  }
+  .collection__art {
+    padding: var(--i-spacing-5);
   }
 }
-@media (max-width: 800px) {
-  .hero-content {
-    padding-top: 64px;
-    padding-bottom: 52px;
-  }
-  .hero-art {
-    opacity: 0.32;
-    bottom: 200px;
-  }
-  .hero-art img {
-    object-position: 55% center;
-  }
-  .hero-resources,
-  .platforms {
+@media (max-width: 640px) {
+  .hero-heading,
+  .system-grid {
     grid-template-columns: 1fr;
   }
-  .hero-resources {
-    gap: 10px;
+  h1 {
+    font-size: clamp(var(--i-font-size-4xl), 12vw, var(--i-font-size-5xl));
   }
-  .resource-link {
-    padding: 18px 22px;
-  }
-  .resource-link > svg:first-child {
-    display: block;
-  }
-  .resource-link h2 {
-    margin-bottom: 4px;
-  }
-  .home-section {
-    padding-top: 48px;
-    padding-bottom: 48px;
+  .collections {
+    grid-template-columns: 1fr;
+    gap: var(--i-spacing-10);
   }
   .section-heading {
     align-items: start;
     flex-direction: column;
-    gap: 16px;
   }
-  .section-heading h2,
-  .start-section h2 {
-    font-size: var(--i-font-size-2xl);
+  .home-section {
+    padding-top: var(--i-spacing-16);
+    padding-bottom: var(--i-spacing-16);
   }
-  .showcase,
+  .system-section {
+    padding: var(--i-spacing-12) 0;
+  }
+  .system-copy p {
+    max-width: none;
+  }
+  .specimen-type,
+  .specimen-palette {
+    padding: var(--i-spacing-3);
+  }
   .start-section {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-  .showcase-section {
-    padding: 48px 0;
-  }
-  .showcase-copy img {
-    display: none;
-  }
-  .showcase-copy h2 {
-    font-size: var(--i-font-size-3xl);
-  }
-  .platform {
-    display: grid;
-    grid-template-columns: 0.7fr 1fr;
-  }
-  .platform__visual {
-    height: 100%;
-    min-height: 220px;
-  }
-  .platform__tags {
-    margin: 16px 0;
-  }
-}
-@media (max-width: 480px) {
-  h1 {
-    font-size: var(--i-font-size-5xl);
-  }
-  .hero-actions {
-    gap: 16px;
-  }
-  .primary-link {
-    padding: 12px 18px;
-  }
-  .hero-content > p {
-    font-size: var(--i-font-size-md);
-  }
-  .platform {
-    display: block;
-  }
-  .platform__visual {
-    height: 180px;
-    min-height: 0;
-  }
-  .component-gallery {
-    grid-template-columns: 1fr;
-  }
-  .sample-controls {
-    grid-row: auto;
-  }
-  .sample-status {
-    grid-column: auto;
-  }
-  .sample {
-    padding: 22px;
-  }
-  .sample-type {
-    display: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .resource-link {
-    transition: none;
+    padding-top: var(--i-spacing-16);
   }
 }
 </style>

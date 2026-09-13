@@ -7,7 +7,7 @@
  * 改了页头高度而忘了改侧栏，表现是菜单顶上多出或少掉一截白，没人会想到是这里。
  */
 :root {
-  --doc-header-h: 64px;
+  --doc-header-h: 72px;
 }
 
 /* 文档站通用排版 */
@@ -158,4 +158,11 @@
 :root[data-motion="off"] .i-reveal {
   opacity: 1;
   transform: none;
+}
+
+/* 文档站交互焦点：同一焦点环覆盖原生按钮、链接与表单。 */
+:where(.design-home, .component-library, .header)
+  :where(a, button, input):focus-visible {
+  outline: 2px solid var(--i-color-brand-text);
+  outline-offset: 3px;
 }
