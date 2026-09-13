@@ -83,6 +83,19 @@ export interface Locale {
   /** 折叠部分里失败的次数。单独说是因为「共 10 次」把「全成」与「有一次失败」说成了一样 */
   toolFailedText: (count: number) => string
 
+  /* 上传 */
+  /**
+   * 可接受的类型与大小上限那一句。
+   *
+   * 整句交给字典而不是在组件里拼：顿号、逗号与语序都是语言相关的，
+   * 拼出来的英文会是「支持 PNG, JPG , 单个不超过 5 MB」这种半中半英的样子。
+   */
+  uploadHintText: (types: string[], maxSize: number) => string
+  /** 类型不符时的提示。读者要知道的是「该给什么」，不是「你给错了」 */
+  uploadRejectText: (types: string[]) => string
+  /** 通配 MIME 对应的类别词 */
+  fileKinds: { image: string; audio: string; video: string; text: string }
+
   /* 逐题确认 */
   next: string
   skip: string
@@ -118,6 +131,14 @@ export interface Locale {
 }
 
 export type EmptyReason = 'empty' | 'search' | 'error' | 'permission'
+
+/*
+ * 中文与西文之间留一个空格，中文与中文之间不留。
+ *
+ * 「支持 PNG」是对的，「支持 图片」里那个空格是多的——它看起来像少了个字。
+ * 拼中文句子时凡是要接一段可能是西文也可能是中文的内容，都得走这一步。
+ */
+const cjkGap = (text: string) => (/^[\u4e00-\u9fff]/.test(text) ? text : ` ${text}`)
 
 export const zhCN: Locale = {
   name: 'zh-CN',
@@ -161,6 +182,12 @@ export const zhCN: Locale = {
   send: '发送',
   stopGenerating: '停止生成',
   removeAttachmentText: (name) => `移除 ${name}`,
+  uploadHintText: (types, maxSize) =>
+    [types.length ? `支持${cjkGap(types.join('、'))}` : '', maxSize ? `单个不超过 ${maxSize} MB` : '']
+      .filter(Boolean)
+      .join('，'),
+  uploadRejectText: (types) => `只接受${cjkGap(types.join('、'))}`,
+  fileKinds: { image: '图片', audio: '音频', video: '视频', text: '文本' },
   toolMoreText: (count) => `还有 ${count} 个`,
   toolFailedText: (count) => `${count} 个失败`,
   next: '下一题',
@@ -226,6 +253,12 @@ export const enUS: Locale = {
   send: 'Send',
   stopGenerating: 'Stop generating',
   removeAttachmentText: (name) => `Remove ${name}`,
+  uploadHintText: (types, maxSize) =>
+    [types.length ? `Accepts ${types.join(', ')}` : '', maxSize ? `up to ${maxSize} MB each` : '']
+      .filter(Boolean)
+      .join('; '),
+  uploadRejectText: (types) => `Only ${types.join(', ')} accepted`,
+  fileKinds: { image: 'images', audio: 'audio', video: 'video', text: 'text files' },
   toolMoreText: (count) => `${count} more`,
   toolFailedText: (count) => `${count} failed`,
   next: 'Next',

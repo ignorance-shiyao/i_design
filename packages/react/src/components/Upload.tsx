@@ -1,5 +1,13 @@
-import { useCallback, useRef, useState } from 'react'
-import { fileTypeOf, formatSize, matchAccept, nextUid, type UploadFile } from '@i-design/common'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import {
+  describeAccept,
+  fileTypeOf,
+  formatSize,
+  matchAccept,
+  nextUid,
+  type UploadFile
+} from '@i-design/common'
+import { useConfig } from './ConfigProvider'
 import { Icon } from './Icon'
 import { Button } from './Button'
 
@@ -37,6 +45,12 @@ export function Upload({
   onReject
 }: UploadProps) {
   const input = useRef<HTMLInputElement | null>(null)
+  /* 可接受的类型说成人话：accept 是给浏览器看的，`image/*` 读者学不到任何事 */
+  const { locale } = useConfig()
+  const acceptWords = useMemo(() => {
+    const { exts, kinds } = describeAccept(accept)
+    return [...exts, ...kinds.map((kind) => locale.fileKinds[kind])]
+  }, [accept, locale])
   const [dragging, setDragging] = useState(false)
 
   /**
@@ -93,7 +107,7 @@ export function Upload({
         }
         // 浏览器原生 accept 只过滤文件选择框，拖拽进来的文件不受约束，必须二次校验
         if (!matchAccept(file, accept)) {
-          onReject?.(file, `不支持的文件类型，仅接受 ${accept}`)
+          onReject?.(file, locale.uploadRejectText(acceptWords))
           continue
         }
         if (maxSize > 0 && file.size > maxSize * 1024 * 1024) {
@@ -115,7 +129,7 @@ export function Upload({
       update([...latest.current, ...items])
       items.forEach(start)
     },
-    [accept, maxCount, maxSize, onReject, request, start, update]
+    [accept, acceptWords, locale, maxCount, maxSize, onReject, request, start, update]
   )
 
   const openPicker = () => {
@@ -125,7 +139,7 @@ export function Upload({
 
   const autoTip =
     tip ||
-    `${accept ? `支持 ${accept}` : ''}${accept && maxSize ? '，' : ''}${maxSize ? `单个不超过 ${maxSize} MB` : ''}`
+    locale.uploadHintText(acceptWords, maxSize)
 
   return (
     <div className={['i-upload', disabled ? 'is-disabled' : ''].filter(Boolean).join(' ')}>

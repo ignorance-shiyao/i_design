@@ -331,7 +331,7 @@ export function Flow({
    * 却撤不回去，那是把一个便利做成了事故。
    */
   const layout = () => {
-    if (readonly) return
+    if (readOnly) return
     editBefore.current = geometryOf(nodes.map((n) => n.id))
     const laid = autoLayout(nodes, edges)
     editAfter.current = laid.map((n) => {

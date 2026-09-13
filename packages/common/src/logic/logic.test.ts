@@ -20,6 +20,7 @@ import { isTextOverflowing, OVERFLOW_EPSILON } from './overflow'
 import { resolveLocale, zhCN, enUS } from './locale'
 import { shouldFlipUp } from './overlay'
 import { alignGuides } from './flow'
+import { describeAccept } from './upload'
 import { contrastRatio, hexToRgb, readableOn, rgbToOklch } from './palette'
 import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
 import { qrMatrix, qrVersionFor } from './qrcode'
@@ -611,5 +612,55 @@ describe('拖动时的对齐辅助线', () => {
   it('不跟自己对齐', () => {
     const self = node('a', 100, 100)
     expect(alignGuides(self, [self]).guides).toEqual([])
+  })
+})
+
+describe('把 accept 说成人话', () => {
+  it('扩展名转成大写的格式名', () => {
+    expect(describeAccept('.png,.jpg')).toEqual({ exts: ['PNG', 'JPG'], kinds: [] })
+  })
+
+  it('通配 MIME 归成类别，词由字典给', () => {
+    // `image/*` 直接印在界面上，读者从里面学不到任何事
+    expect(describeAccept('image/*')).toEqual({ exts: [], kinds: ['image'] })
+  })
+
+  it('类别覆盖到的扩展名不再单列', () => {
+    // 「PNG、JPG、图片」是在重复，直接说「图片」就够
+    expect(describeAccept('.png,.jpg,image/*')).toEqual({ exts: [], kinds: ['image'] })
+  })
+
+  it('类别覆盖不到的仍要列出来', () => {
+    expect(describeAccept('.pdf,image/*')).toEqual({ exts: ['PDF'], kinds: ['image'] })
+  })
+
+  it('说不清的通配类别就不翻译，免得编一个词', () => {
+    expect(describeAccept('application/*')).toEqual({ exts: [], kinds: [] })
+  })
+
+  it('空的 accept 就什么都不说', () => {
+    expect(describeAccept('')).toEqual({ exts: [], kinds: [] })
+  })
+
+  it('重复的写法只说一遍', () => {
+    expect(describeAccept('.png, .PNG , .png').exts).toEqual(['PNG'])
+  })
+})
+
+describe('中文与西文之间的空格', () => {
+  it('接西文时留一个空格', () => {
+    expect(zhCN.uploadHintText(['PNG', 'JPG'], 5)).toBe('支持 PNG、JPG，单个不超过 5 MB')
+  })
+
+  it('接中文时不留：「支持 图片」里那个空格看起来像少了个字', () => {
+    expect(zhCN.uploadHintText(['图片'], 5)).toBe('支持图片，单个不超过 5 MB')
+  })
+
+  it('没有类型限制时只说大小', () => {
+    expect(zhCN.uploadHintText([], 5)).toBe('单个不超过 5 MB')
+  })
+
+  it('两样都没有就什么都不说', () => {
+    expect(zhCN.uploadHintText([], 0)).toBe('')
   })
 })
