@@ -11,26 +11,22 @@
  * 只收 serious 与 critical。axe 的 minor / moderate 里有大量「建议」性质的条目
  * （比如页面该有 region 划分），一并算失败会让这个检查很快被当成噪声关掉。
  *
- * ── 基线 ──
- * 首次接入时存量 119 项（多数是文档站自己的对比度与示例里没写标签的控件）。
- * 一次性清零不现实，而一个「反正是红的」的检查等于没有检查。
- * 所以先记一份基线：只有新增的问题算失败，旧问题照常列出来提醒。
+ * ── 零容忍 ──
+ * 接入时有 119 项存量，靠一份基线文件挡着逐轮清：119 → 84 → 49 → 33 → 0，
+ * 四轮清完之后基线一直是空的，于是这里直接写死成「一项都不许有」。
  *
- * **基线现在是空的**：119 → 84 → 49 → 33 → 0，分四轮清完。
- * 于是这个检查升级成「一项都不许有」——基线为空时任何一条 serious / critical
- * 都会让它失败。这一条不要再往回退：基线一旦重新长出东西，它就又变回
- * 「反正是红的」那种检查，而那种检查迟早会被当成噪声关掉。
- * 真有必须暂缓的情况，在基线里写上那一条并在提交信息里说清为什么。
+ * 不要再退回「记一份基线、只看新增」那种做法。基线一旦重新长出东西，
+ * 这个检查就又变回「反正是红的」，而那种检查迟早会被当成噪声关掉。
+ * 真有必须暂缓的，在这个文件里显式列出来并写清为什么，别开一个外部清单。
  *
  * 用法：
  *   node scripts/check-a11y.mjs            # 自己起开发服务器
  *   node scripts/check-a11y.mjs --base=... # 复用已经起好的地址
- *   node scripts/check-a11y.mjs --update   # 重写基线（修完之后跑）
  */
 import { spawn } from 'node:child_process'
 import { chromium } from 'playwright'
 import AxeBuilder from '@axe-core/playwright'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 
 /**
  * 从路由表里抽出所有可直接访问的路径，避免这里再手写一份清单。
@@ -125,39 +121,14 @@ try {
  * data-v 哈希与 nth-child，改一行无关的代码就会变，那样的基线每次都要重记，
  * 很快就没人愿意维护了。
  */
-const BASELINE = 'docs/a11y-baseline.json'
 const key = (p) => p.split('\n')[0].replace(/：.*/, '')
-const current = [...new Set(problems.map(key))].sort()
-
-if (process.argv.includes('--update')) {
-  writeFileSync(BASELINE, JSON.stringify(current, null, 2) + '\n')
-  console.log(`基线已更新：${current.length} 项存量问题（${scanned} 个页面）`)
-  process.exit(0)
-}
-
-const baseline = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : []
-const added = current.filter((k) => !baseline.includes(k))
-const fixed = baseline.filter((k) => !current.includes(k))
+const added = [...new Set(problems.map(key))].sort()
 
 if (added.length) {
-  const clean = baseline.length === 0
-  console.error(
-    clean
-      ? '无障碍检查未通过——存量已经清零，这几条是新出现的：'
-      : '无障碍检查未通过——出现了基线之外的新问题：'
-  )
+  console.error('无障碍检查未通过——存量早已清零，这几条是新出现的：')
   for (const line of added) console.error(`  - ${line}`)
-  console.error(
-    clean
-      ? '\n修掉它们。基线是空的，别往里加——一旦重新长出东西，这个检查就又变回「反正是红的」。'
-      : '\n修掉它们；确认是误报再动基线（node scripts/check-a11y.mjs --update）。'
-  )
+  console.error('\n修掉它们。这里是零容忍，别开一个「先记下来以后再说」的清单——' +
+    '那样这个检查很快就又变回「反正是红的」。')
   process.exit(1)
 }
-console.log(
-  baseline.length === 0
-    ? `无障碍检查通过：${scanned} 个页面（亮暗两态），零 serious / critical`
-    : `无障碍检查通过：${scanned} 个页面（亮暗两态），无新增问题`
-)
-if (current.length) console.log(`  存量 ${current.length} 项待清理，见 ${BASELINE}`)
-if (fixed.length) console.log(`  已修好 ${fixed.length} 项，跑 --update 把基线缩小`)
+console.log(`无障碍检查通过：${scanned} 个页面（亮暗两态），零 serious / critical`)
