@@ -118,6 +118,11 @@ npm run check:parity   # 目录、文档快照、跨端与生成物等检查链
 npm run typecheck
 npm run build
 node scripts/check-theme-readability.mjs
+
+# 下面三项要真浏览器，CI 里单列，本地改了界面也该跑
+npm run check:a11y        # 基线为空，任何一条 serious / critical 都算失败
+npm run check:responsive  # 390 / 320 两个宽度，整页能左右拖就算失败
+npm run check:motion      # 系统的减少动效与面板开关都要真的把动效关掉
 ```
 
 核心 `scripts/check-parity.mjs` 检查令牌数量及逐值一致、Dart 类型、样式隔离与入口覆盖、
@@ -188,7 +193,31 @@ export const SCATTER_MAX_SERIES = 3
 
 ---
 
-## 9. 一次改动的完整例子
+## 9. 文档站怎么发布
+
+站点发在 `gh-pages` 分支上，Pages 的构建来源是 **Deploy from a branch → `gh-pages` / (root)**。
+
+| 推送 | 发到哪 | 地址 |
+| --- | --- | --- |
+| `main` | 根目录 | `https://<owner>.github.io/i_design/` |
+| 其他分支 | `preview/<分支名>/` | `…/i_design/preview/<分支名>/` |
+| 分支被删除 | 自动清掉对应的预览目录 | —— |
+
+分支名里的 `/` 会换成 `-`（`claude/foo` → `preview/claude-foo/`）。
+
+两个工作流（`deploy.yml` 与 `preview.yml`）共用 `.github/scripts/publish-pages.sh`，
+共用一个 `concurrency` 组——它们推的是同一个分支，同时推会撞车。
+
+**发根目录时会特意保留 `preview/`**：直接清空再拷贝的话，main 一推就把所有分支的
+预览全删了。这条在脚本里有注释，改它之前先想清楚。
+
+子目录之所以能直接用，是因为 `vite.config.ts` 里 `base` 是相对路径（`./`）——
+同一份构建产物放到任何路径下都能跑，不必为每个分支重新构建。改成绝对路径的话，
+预览会全部白屏。
+
+---
+
+## 10. 一次改动的完整例子
 
 想加 Dropdown,推荐顺序:
 

@@ -1,22 +1,23 @@
 name: Deploy docs site to GitHub Pages
 
+# main 发到站点根目录；其余分支的预览由 preview.yml 发到 preview/<分支> 下。
+# 两个工作流推的是同一个 gh-pages 分支，互不覆盖——见下面 publish 那一步。
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# 同一时间只保留一次部署，新的推送取消排队中的旧任务
+# 两个工作流共用一个组：它们都往 gh-pages 推，同时推会撞车。
+# 不取消排队中的任务——被取消的那次预览就永远不会发出去了。
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: gh-pages-publish
+  cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -28,17 +29,8 @@ jobs:
       # 各项校验由 ci.yml 承担（PR 与 push 到 main 都会跑），这里只管把站点构建出来，
       # 免得同一批检查在同一次推送上跑两遍
       - run: npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: 发布到 gh-pages 根目录
+        env:
+          TARGET: .
+        run: bash .github/scripts/publish-pages.sh
