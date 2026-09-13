@@ -19,7 +19,7 @@ import { virtualWindow, scrollToRow, shouldVirtualize } from './virtual'
 import { isTextOverflowing, OVERFLOW_EPSILON } from './overflow'
 import { resolveLocale, zhCN, enUS } from './locale'
 import { shouldFlipUp } from './overlay'
-import { alignGuides } from './flow'
+import { alignGuides, anchorOf, edgePath } from './flow'
 import { describeAccept } from './upload'
 import { contrastRatio, hexToRgb, readableOn, rgbToOklch } from './palette'
 import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
@@ -662,5 +662,37 @@ describe('中文与西文之间的空格', () => {
 
   it('两样都没有就什么都不说', () => {
     expect(zhCN.uploadHintText([], 0)).toBe('')
+  })
+})
+
+describe('连线锚点可以指定', () => {
+  const node = (id: string, x: number, y: number) => ({ id, x, y, width: 120, height: 48, label: id })
+
+  it('不指定时按两点方位自动选', () => {
+    // 目标在正下方，就从下边出去
+    expect(anchorOf(node('a', 0, 0), { x: 60, y: 400 }).side).toBe('bottom')
+  })
+
+  it('指定了就照办，哪怕方位上说不该走那边', () => {
+    // 回边要从侧面绕回去，自动选会让它贴着主干直上直下，和正向的线叠在一起
+    const a = anchorOf(node('a', 0, 0), { x: 60, y: 400 }, 'right')
+    expect(a.side).toBe('right')
+    expect([a.x, a.y]).toEqual([120, 24])
+  })
+
+  it('四条边各落在自己那条边的中点上', () => {
+    const n = node('a', 100, 200)
+    expect(anchorOf(n, { x: 0, y: 0 }, 'left')).toEqual({ x: 100, y: 224, side: 'left' })
+    expect(anchorOf(n, { x: 0, y: 0 }, 'top')).toEqual({ x: 160, y: 200, side: 'top' })
+    expect(anchorOf(n, { x: 0, y: 0 }, 'bottom')).toEqual({ x: 160, y: 248, side: 'bottom' })
+  })
+
+  it('指定锚点后连线路径与端点跟着变', () => {
+    const from = node('a', 0, 0)
+    const to = node('b', 0, 300)
+    const auto = edgePath(from, to, 'polyline')
+    const manual = edgePath(from, to, 'polyline', { from: 'right', to: 'right' })
+    expect(manual).not.toBe(auto)
+    expect(manual.startsWith('M120 24')).toBe(true)
   })
 })

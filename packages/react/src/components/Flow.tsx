@@ -490,12 +490,13 @@ export function Flow({
             const from = byId.get(edge.from)
             const to = byId.get(edge.to)
             if (!from || !to) return null
-            const mid = edgeMidpoint(from, to, edge.type ?? edgeType)
+            const sides = { from: edge.fromSide, to: edge.toSide }
+            const mid = edgeMidpoint(from, to, edge.type ?? edgeType, sides)
             return (
               <g key={`${edge.from}-${edge.to}`}>
                 <path
                   className={['i-flow__edge', isActive(edge) ? 'is-active' : ''].filter(Boolean).join(' ')}
-                  d={edgePath(from, to, edge.type ?? edgeType)}
+                  d={edgePath(from, to, edge.type ?? edgeType, sides)}
                   markerEnd={`url(#i-flow-arrow${isActive(edge) ? '-active' : ''})`}
                 />
                 {edge.label && (

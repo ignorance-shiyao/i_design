@@ -50,7 +50,14 @@ class FlowNodeData {
 enum FlowEdgeType { polyline, straight, bezier }
 
 class FlowEdgeData {
-  const FlowEdgeData({required this.from, required this.to, this.label, this.type});
+  const FlowEdgeData({
+    required this.from,
+    required this.to,
+    this.label,
+    this.type,
+    this.fromSide,
+    this.toSide,
+  });
 
   final String from;
   final String to;
@@ -58,6 +65,15 @@ class FlowEdgeData {
 
   /// 单条连线可以覆盖整图的默认走向
   final FlowEdgeType? type;
+
+  /// 指定从起点的哪条边出去（top / right / bottom / left）。不给就按两点方位自动选。
+  ///
+  /// 自动选多数时候是对的，但回边应当从侧面绕回去，同一对节点之间的多条线
+  /// 也需要分开走——这两种情况自动选都会把线叠在一起。
+  final String? fromSide;
+
+  /// 指定进入终点的哪条边。不给就按两点方位自动选
+  final String? toSide;
 }
 
 /// 端点沿所在边的法线向外推：控制点必须在节点外侧，否则曲线会穿回节点里
@@ -82,9 +98,29 @@ double bezierPush(double ax, double ay, double bx, double by) {
 }
 
 /// 连线端点吸附到节点边缘中点，而不是中心——连到中心箭头会钻进节点里
-({double x, double y, String side}) anchorOf(FlowNodeData node, double towardX, double towardY) {
+({double x, double y, String side}) anchorOf(
+  FlowNodeData node,
+  double towardX,
+  double towardY, [
+  String? side,
+]) {
   final cx = node.x + node.width / 2;
   final cy = node.y + node.height / 2;
+
+  // 指定了就照办：指定的方向本身带着语义，不该被自动判断推翻
+  if (side != null) {
+    switch (side) {
+      case 'left':
+        return (x: node.x, y: cy, side: side);
+      case 'right':
+        return (x: node.x + node.width, y: cy, side: side);
+      case 'top':
+        return (x: cx, y: node.y, side: side);
+      default:
+        return (x: cx, y: node.y + node.height, side: side);
+    }
+  }
+
   final dx = towardX - cx;
   final dy = towardY - cy;
 

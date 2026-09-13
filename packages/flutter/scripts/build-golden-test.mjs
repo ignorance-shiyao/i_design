@@ -114,7 +114,7 @@ const { toolChipStat, summarizeToolChips, toolChipIcon } = await bundle(
 const {
   defaultOpenSteps, summarizeThinking, thinkingStepIcon, toggleThinkingStep
 } = await bundle('packages/common/src/logic/thinking.ts', 'thinking')
-const { alignGuides } = await bundle('packages/common/src/logic/flow.ts', 'flowalign')
+const { alignGuides, anchorOf } = await bundle('packages/common/src/logic/flow.ts', 'flowalign')
 const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
@@ -1835,6 +1835,25 @@ const guideExpectations = guideCases.flatMap(([moving, others], i) => {
   ]
 })
 
+/*
+ * 指定锚点：同一条回边在两端必须从同一条边出去，
+ * 否则同一张图在一端绕侧面、在另一端贴着主干，看起来是两张图。
+ */
+const anchorNode = { id: 'a', x: 100, y: 200, width: 120, height: 48, label: 'a' }
+const dartAnchorNode =
+  `FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48)`
+const anchorExpectations = ['left', 'right', 'top', 'bottom'].flatMap((side) => {
+  const r = anchorOf(anchorNode, { x: 0, y: 0 }, side)
+  return [
+    `    expect(anchorOf(${dartAnchorNode}, 0, 0, '${side}').x, ${r.x});`,
+    `    expect(anchorOf(${dartAnchorNode}, 0, 0, '${side}').y, ${r.y});`,
+    `    expect(anchorOf(${dartAnchorNode}, 0, 0, '${side}').side, '${r.side}');`
+  ]
+}).concat([
+  // 不指定时仍按方位自动选
+  `    expect(anchorOf(${dartAnchorNode}, 160, 900).side, ${JSON.stringify(anchorOf(anchorNode, { x: 160, y: 900 }).side)});`
+])
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -2415,6 +2434,10 @@ ${flipExpectations.join('\n')}
 
   test('对齐辅助线的吸附量与线位置与 Web 端一致', () {
 ${guideExpectations.join('\n')}
+  });
+
+  test('指定锚点的落点与 Web 端一致', () {
+${anchorExpectations.join('\n')}
   });
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {

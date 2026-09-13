@@ -12,7 +12,11 @@ const edges: FlowEdge[] = [
   { from: 'fill', to: 'review' },
   { from: 'review', to: 'approve', label: '通过' },
   { from: 'review', to: 'reject', label: '驳回' },
-  { from: 'reject', to: 'fill' },
+  /*
+   * 回边指定从右侧绕回去。自动选会让它贴着主干直上直下，
+   * 和「填写材料 → 主管审批」那条正向线叠在一起，两条线分不出哪条是哪条。
+   */
+  { from: 'reject', to: 'fill', fromSide: 'right', toSide: 'right' },
   { from: 'approve', to: 'done' }
 ]
 
@@ -88,6 +92,11 @@ const edgeTypes = [
         />
       </div>
     </DemoBlock>
+
+    <h2>从哪条边出线</h2>
+    <p>
+      默认按两点方位自动选一条边，多数时候是对的。但有两种图非指定不可：回边——「驳回 → 重新填写」应当从侧面绕回去，自动选会让它贴着主干直上直下，和正向的线叠在一起；以及同一对节点之间的多条线，自动选会把它们全压成一条。给这条连线加 <code>fromSide</code> / <code>toSide</code> 即可，上面那张图的回边用的就是 <code>fromSide: 'right'</code>。
+    </p>
 
     <h2>自动布局</h2>
     <p>

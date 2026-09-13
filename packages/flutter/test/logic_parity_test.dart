@@ -1387,6 +1387,22 @@ void main() {
     expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[2].at, 220);
   });
 
+  test('指定锚点的落点与 Web 端一致', () {
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'left').x, 100);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'left').y, 224);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'left').side, 'left');
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'right').x, 220);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'right').y, 224);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'right').side, 'right');
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'top').x, 160);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'top').y, 200);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'top').side, 'top');
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'bottom').x, 160);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'bottom').y, 248);
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 0, 0, 'bottom').side, 'bottom');
+    expect(anchorOf(FlowNodeData(id: 'a', label: 'a', x: 100, y: 200, width: 120, height: 48), 160, 900).side, "bottom");
+  });
+
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
     expect(shouldShowElapsed(0), false);
     expect(shouldShowElapsed(2999), false);

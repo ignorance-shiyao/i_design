@@ -483,13 +483,17 @@ const marqueeBox = computed(() => (marquee.value ? marqueeRect(marquee.value.fro
 const pathOf = (edge: FlowEdge) => {
   const from = nodeById.value.get(edge.from)
   const to = nodeById.value.get(edge.to)
-  return from && to ? edgePath(from, to, edge.type ?? props.edgeType) : ''
+  return from && to
+    ? edgePath(from, to, edge.type ?? props.edgeType, { from: edge.fromSide, to: edge.toSide })
+    : ''
 }
 
 const midOf = (edge: FlowEdge) => {
   const from = nodeById.value.get(edge.from)
   const to = nodeById.value.get(edge.to)
-  return from && to ? edgeMidpoint(from, to, edge.type ?? props.edgeType) : { x: 0, y: 0 }
+  return from && to
+    ? edgeMidpoint(from, to, edge.type ?? props.edgeType, { from: edge.fromSide, to: edge.toSide })
+    : { x: 0, y: 0 }
 }
 
 /** 与选中节点相连的线加重：看清「它从哪来、到哪去」是选中节点后的第一个问题 */

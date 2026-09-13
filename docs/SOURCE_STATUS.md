@@ -25,7 +25,7 @@
 | vue | IConfirmLayer | — | IConfirmLayer — confirm() 的宿主。Vue 2.7 没有 Teleport，宿主要由使用方自己放进模板，所以只有那一端对外导出 |
 | react | — | — | — |
 
-golden 文件包含 **1256** 条 expect；构建脚本生成断言，不执行 Dart SDK 测试。
+golden 文件包含 **1269** 条 expect；构建脚本生成断言，不执行 Dart SDK 测试。
 共享 SVG 图标定义 **52** 项；共享逻辑模块 **55** 个。
 
 ## 共享逻辑目录

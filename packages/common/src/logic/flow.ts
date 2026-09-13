@@ -25,12 +25,25 @@ export interface FlowNode {
  */
 export type FlowEdgeType = 'polyline' | 'straight' | 'bezier'
 
+/** 连线从节点的哪条边出入 */
+export type FlowSide = 'top' | 'right' | 'bottom' | 'left'
+
 export interface FlowEdge {
   from: string
   to: string
   label?: string
   /** 单条连线可以覆盖整图的默认走向 */
   type?: FlowEdgeType
+  /**
+   * 指定从起点的哪条边出去。不给就按两点方位自动选。
+   *
+   * 自动选在多数情况下是对的，但有两种图非指定不可：
+   * 一是回边——「驳回」应当从侧面绕回去，自动选会让它贴着主干直上直下，
+   * 和正向的线叠在一起；二是同一对节点之间的多条线，自动选会把它们全压成一条。
+   */
+  fromSide?: FlowSide
+  /** 指定进入终点的哪条边。不给就按两点方位自动选 */
+  toSide?: FlowSide
 }
 
 export const NODE_W = 132
@@ -51,9 +64,13 @@ export function centerOf(node: FlowNode) {
  * 连线端点吸附到节点边缘的中点，而不是节点中心。
  * 连到中心会让箭头钻进节点里，被节点自己的填充盖住。
  */
-export function anchorOf(node: FlowNode, toward: { x: number; y: number }) {
+export function anchorOf(node: FlowNode, toward: { x: number; y: number }, side?: FlowSide) {
   const { w, h } = sizeOf(node)
   const c = centerOf(node)
+
+  // 指定了就照办：指定的方向本身带着语义（回边走侧面、多线分开走），不该被自动判断推翻
+  if (side) return { ...pointOnSide(node, side), side }
+
   const dx = toward.x - c.x
   const dy = toward.y - c.y
 
@@ -64,15 +81,30 @@ export function anchorOf(node: FlowNode, toward: { x: number; y: number }) {
   return { x: c.x, y: dy > 0 ? node.y + h : node.y, side: dy > 0 ? 'bottom' : 'top' as const }
 }
 
+/** 指定边的中点 */
+function pointOnSide(node: FlowNode, side: FlowSide) {
+  const { w, h } = sizeOf(node)
+  const c = centerOf(node)
+  if (side === 'left') return { x: node.x, y: c.y }
+  if (side === 'right') return { x: node.x + w, y: c.y }
+  if (side === 'top') return { x: c.x, y: node.y }
+  return { x: c.x, y: node.y + h }
+}
+
 /**
  * 正交连线：先沿出边方向走一段，再拐向目标。
  *
  * 用直角折线而不是直连斜线：流程图里斜线穿过其他节点时很难辨认走向，
  * 而直角折线的每一段都平行于画布，视线可以顺着走。
  */
-export function edgePath(from: FlowNode, to: FlowNode, type: FlowEdgeType = 'polyline') {
-  const a = anchorOf(from, centerOf(to))
-  const b = anchorOf(to, centerOf(from))
+export function edgePath(
+  from: FlowNode,
+  to: FlowNode,
+  type: FlowEdgeType = 'polyline',
+  sides: { from?: FlowSide; to?: FlowSide } = {}
+) {
+  const a = anchorOf(from, centerOf(to), sides.from)
+  const b = anchorOf(to, centerOf(from), sides.to)
   const gap = 18
 
   if (type === 'straight') return `M${a.x} ${a.y} L${b.x} ${b.y}`
@@ -115,9 +147,14 @@ function offsetBySide(point: { x: number; y: number; side: string }, distance: n
  * 曲线要按三次贝塞尔在 t=0.5 处求值，而不是取两端点中点——
  * 弧度大时中点会离曲线很远，标签飘在空白处。
  */
-export function edgeMidpoint(from: FlowNode, to: FlowNode, type: FlowEdgeType = 'polyline') {
-  const a = anchorOf(from, centerOf(to))
-  const b = anchorOf(to, centerOf(from))
+export function edgeMidpoint(
+  from: FlowNode,
+  to: FlowNode,
+  type: FlowEdgeType = 'polyline',
+  sides: { from?: FlowSide; to?: FlowSide } = {}
+) {
+  const a = anchorOf(from, centerOf(to), sides.from)
+  const b = anchorOf(to, centerOf(from), sides.to)
   if (type !== 'bezier') return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
   const dist = Math.hypot(b.x - a.x, b.y - a.y)
   const push = Math.min(120, Math.max(32, dist / 2))

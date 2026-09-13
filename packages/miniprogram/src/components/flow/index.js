@@ -361,14 +361,16 @@ Component({
         const to = byId[edge.to]
         if (!from || !to) return
         const active = picked[edge.from] || picked[edge.to]
-        const a = anchorOf(from, {
-          x: to.x + (to.width || NODE_W) / 2,
-          y: to.y + (to.height || NODE_H) / 2
-        })
-        const b = anchorOf(to, {
-          x: from.x + (from.width || NODE_W) / 2,
-          y: from.y + (from.height || NODE_H) / 2
-        })
+        const a = anchorOf(
+          from,
+          { x: to.x + (to.width || NODE_W) / 2, y: to.y + (to.height || NODE_H) / 2 },
+          edge.fromSide
+        )
+        const b = anchorOf(
+          to,
+          { x: from.x + (from.width || NODE_W) / 2, y: from.y + (from.height || NODE_H) / 2 },
+          edge.toSide
+        )
 
         const kind = edge.type || edgeType
         ctx.beginPath()

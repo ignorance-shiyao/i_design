@@ -472,8 +472,8 @@ class _FlowPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = active ? 2 : 1.5;
 
-      final a = anchorOf(from, to.x + to.width / 2, to.y + to.height / 2);
-      final b = anchorOf(to, from.x + from.width / 2, from.y + from.height / 2);
+      final a = anchorOf(from, to.x + to.width / 2, to.y + to.height / 2, edge.fromSide);
+      final b = anchorOf(to, from.x + from.width / 2, from.y + from.height / 2, edge.toSide);
 
       final kind = edge.type ?? edgeType;
       final path = Path()..moveTo(a.x, a.y);
