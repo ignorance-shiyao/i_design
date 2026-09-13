@@ -95,8 +95,8 @@ color: #fff;
 `--i-chart-seq-N-ink`——那里预算为 0：色阶编码的是量级、分类色是身份，
 压深任何一档都等于改了数据的含义。
 
-`docs/a11y-baseline.json` 现在是空的，`npm run check:a11y` 会让任何一条
-serious / critical 失败。别往基线里加东西。
+`npm run check:a11y` 是零容忍的：任何一条 serious / critical 都算失败。
+别去加「先记下来以后再说」的清单——那样这个检查很快就又变回「反正是红的」。
 
 ### 图标不用 emoji
 
@@ -109,7 +109,8 @@ serious / critical 失败。别往基线里加东西。
 - 组件样式**只引用语义令牌**（`var(--i-color-*)` / `var(--i-radius-*)`），
   不写死色值与尺寸——否则主题配置面板一调就会露馅。
 - 「清单类」文件一律按目录生成（导出清单、覆盖矩阵、小程序四件套），
-  手写必然会漏，且漏掉不会让构建失败。生成物见 `docs/HANDOVER.md`。
+  手写必然会漏，且漏掉不会让构建失败。哪些文件是生成的，看 `package.json`
+  里 `build:*` 那几条脚本各自写到哪儿。
 
 ## 交付约定
 
@@ -122,5 +123,7 @@ serious / critical 失败。别往基线里加东西。
   说「多端」「各端」即可。读者关心的是「我的技术栈支持吗」，不是总数。
   覆盖矩阵页面里的具体数字是查询结果，不算宣传语，可以保留。
 
-详细的目录地图与生成物清单见 `docs/HANDOVER.md`；
-怎么干活、什么算干完见 `docs/交接说明.md`。
+改动的验收标准：`npm run check:parity`、`typecheck`、`test`、`build` 全绿，
+外加三项要真浏览器的——`check:a11y`（零容忍）、`check:responsive`
+（390 / 320 两个宽度不许横向溢出）、`check:motion`（系统的减少动效与主题面板
+开关都要真的把动效关掉）。改了界面就用 Playwright 真跑一遍并**量**出来。

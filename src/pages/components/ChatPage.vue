@@ -206,8 +206,8 @@ const diffRows: DiffRow[] = [
 const sourceOptions = [
   { label: 'pagination.ts', description: 'packages/common/src/logic', keywords: ['分页'] },
   { label: 'table.ts', description: 'packages/common/src/logic', keywords: ['表格'] },
-  { label: '设计令牌', description: 'docs/design/tokens', keywords: ['token'] },
-  { label: '覆盖矩阵', description: 'docs/SOURCE_STATUS.md', keywords: ['matrix'] }
+  { label: '设计令牌', description: 'packages/common/src/tokens', keywords: ['token'] },
+  { label: '覆盖矩阵', description: 'src/data/componentMatrix.ts', keywords: ['matrix'] }
 ]
 const commandOptions = [
   { label: 'explain', description: '解释选中的这段代码' },

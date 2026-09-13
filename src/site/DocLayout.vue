@@ -196,9 +196,18 @@ watch(() => route.path, () => {
   z-index: 1;
   font-family: var(--i-font-family-mono);
   font-size: var(--i-font-size-xs);
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0;
-  color: var(--i-color-text-secondary);
+  /*
+   * 分组名用主题色那一档。此前是次级灰，与下面的链接（同样是次级灰）只差一个字号，
+   * 扫过去分不出哪一行是「组」哪一行是「项」，粘顶之后这个问题更明显——
+   * 屏幕最上面那行字得让人一眼认出它是层级标题，而不是又一个能点的入口。
+   *
+   * 用 brand-text 而不是 brand：填充色那一档写在页面底色上只有 3.37:1，
+   * 小字达不到 4.5。brand-text 就是为「有颜色的字」准备的那一档。
+   */
+  color: var(--i-color-brand-text);
   margin: 0 0 var(--i-spacing-2);
   padding: var(--i-spacing-2) var(--i-spacing-3);
   background: var(--i-color-bg);

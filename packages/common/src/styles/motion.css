@@ -250,6 +250,40 @@
 .i-stagger > *:nth-child(n + 8) { --i-reveal-delay: 350ms; }
 
 /* ---------- 减少动效 ---------- */
+
+/*
+ * 系统级「减少动效」的通配兜底。
+ *
+ * 下面那一组按类名列举的规则只管得住这个文件里的进场、视差与按压——
+ * 组件库有七十多个样式文件带过渡，它们一条也管不到。于是系统里开了
+ * 「减少动效」的用户，按钮、输入框、侧栏链接照旧以 0.12s 过渡（实测过）。
+ *
+ * 这不是偏好问题，是可访问性问题：前庭敏感的用户会因此眩晕，而系统设置
+ * 正是这类用户唯一会去开的地方——多数人并不知道站里还另有一个开关。
+ * 主题面板那个 data-motion 开关一直是通配的，两者的覆盖面本就该一致。
+ *
+ * 与面板开关同一套写法：时长压到接近 0 而不是 `transition: none`，
+ * 过渡与动画的结束事件仍会触发，依赖 transitionend / animationend 收尾的
+ * 浮层不会卡在半路上。
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * 上面压的是「变化有多快」，下面这一组管的是「终态本身就不该出现」——
+ * 视差倾斜、立方体的旋转、悬停时抬起的位移，把时长压到 0 只会让它们
+ * 瞬间跳到终态，该消失的位移一点没少。两组都要有。
+ */
 @media (prefers-reduced-motion: reduce) {
   .i-reveal,
   .i-reveal.is-in,
