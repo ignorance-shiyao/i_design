@@ -594,7 +594,7 @@ export const componentMatrix: ComponentRow[] = [
       "vue-next": true,
       "vue": true,
       "react": true,
-      "miniprogram": false,
+      "miniprogram": true,
       "flutter": true
     }
   },

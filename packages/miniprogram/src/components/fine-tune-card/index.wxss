@@ -1,0 +1,2 @@
+@import '../../../dist/styles/fine-tune-card.wxss';
+@import '../../../dist/styles/icons.wxss';

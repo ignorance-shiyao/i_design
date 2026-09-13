@@ -8,7 +8,8 @@
 
 仓库:`ignorance-shiyao/i_design`,唯一基准分支是 `main`。
 
-当前现状与任务台账见 `docs/当前现状&后续规划_Claude .md`,本文只讲「怎么改」。
+当前规模见按源码生成的 `docs/SOURCE_STATUS.md`;怎么干活、什么算干完见 `docs/交接说明.md`。
+本文只讲「改哪里」。
 
 ---
 
@@ -53,7 +54,7 @@ scripts/                    跨端构建与校验脚本
 
 共享逻辑模块按目录列在 [SOURCE_STATUS.md](SOURCE_STATUS.md)，不在这里手写清单。
 业务算法进 `packages/common/src/logic/`，由各端复用；目录扫描等构建工具留在 `scripts/`。
-文件存在只证明实现入口存在，行为仍需按主台账的验收条件验证。
+文件存在只证明实现入口存在，行为仍需按 `docs/交接说明.md` 第三节的验收条件验证。
 
 ---
 
@@ -103,7 +104,7 @@ React 端 17 个组件实现了却从未导出;移动端三个组件样式没进
 7. **Flutter**:`packages/flutter/lib/src/components/i_foo.dart`,逻辑用 `lib/src/logic/` 的 Dart 版
    (与 TS 版同名同算法,有 golden test 兜底)。
 8. 补文档页、路由与目录的稳定标识，运行 `npm run build:catalog` 和 `npm run build:docs`。
-9. 跑第 5 节的校验，按主台账验收后更新任务状态，全绿再提交。
+9. 跑第 5 节的校验，对照 `docs/交接说明.md` 第三节逐条验收，全绿再提交。
 
 **移动专有形态**(NavBar / Tabbar / Popup / SwipeCell / Picker 这类)只放 `mobile-vue` 与 `mobile-react`,
 不进 Web 各端矩阵。
@@ -165,10 +166,13 @@ export const SCATTER_MAX_SERIES = 3
 
 ## 7. 待办
 
-唯一待办入口是 **`docs/当前现状&后续规划_Claude .md` 第 2 节**。
-`ROADMAP.md` 保留历史理由和旧项去向，不再维护未勾选清单。
-F0 已实现源码驱动的目录状态；F1 完成后继续按主台账推进 E1 / E2 等交付短板。
-每项独立分支、独立 PR，具体门槛见主台账第 4 节。
+原先那份任务台账（`当前现状&后续规划_Claude .md` 与 `ROADMAP.md`）上的条目
+已经全部完成，两份文档随之删掉了——留着一份全是勾的清单，下一个人还得逐条
+读完才知道它没有信息量。需要翻历史的话在 git log 里，删除那一次的提交信息
+写清了当时的收尾状态。
+
+新的待办直接开 issue 或在 PR 里说明。每项独立分支、独立 PR，
+门槛见 `docs/交接说明.md` 第三节。
 
 ## 8. 几个容易踩的坑
 
