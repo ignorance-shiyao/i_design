@@ -24,9 +24,6 @@ case "$TARGET" in
   *..*) echo "TARGET 含有 ..，拒绝：$TARGET" >&2; exit 1 ;;
 esac
 
-git config user.name "github-actions[bot]"
-git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
 work="$(mktemp -d)"
 # gh-pages 可能还不存在（第一次跑）：那就开一个空的孤儿分支
 if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
@@ -58,6 +55,12 @@ fi
 
 # Jekyll 会吞掉下划线开头的目录，而 vite 的产物里有 _headers 之类
 touch "$work/.nojekyll"
+
+# 身份要配在**克隆出来的那个仓库**里：提交发生在 $work，不在 checkout 目录。
+# 配错地方在本机看不出来（本机多半有全局身份兜着），到了干净的 runner 上
+# 直接是 `empty ident name` 然后退出 128——这里就这么红过一次。
+git -C "$work" config user.name "github-actions[bot]"
+git -C "$work" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
 cd "$work"
 git add -A
