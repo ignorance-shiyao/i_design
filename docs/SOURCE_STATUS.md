@@ -2,7 +2,7 @@
 
 <!-- 由 scripts/build-doc-status.mjs 生成，请勿手改。 -->
 
-运行 `npm run build:docs` 更新；`npm run check:docs` 检查陈旧快照及旧任务去向。
+运行 `npm run build:docs` 更新；`npm run check:docs` 检查快照是否陈旧。
 数字是源码与生成物的统计，不代表包已发布，也不代表实机验收完成。
 
 ## 当前规模
@@ -12,7 +12,7 @@
 | vue-next | 128 | 128 |
 | vue | 128 | 129 |
 | react | 128 | 128 |
-| miniprogram | 127 | 130 |
+| miniprogram | 128 | 130 |
 | flutter | 128 | 121 |
 
 两列口径不同，不能互当总数：矩阵数的是各端的源组件文件，frameworkStats 数的是
@@ -91,27 +91,4 @@ golden 文件包含 **1457** 条 expect；构建脚本生成断言，不执行 D
 - [watermark.ts](../packages/common/src/logic/watermark.ts)
 - [wordcloud.ts](../packages/common/src/logic/wordcloud.ts)
 
-## F1 已校准项的源码证据
-
-以下用于防止历史完成记录引用不存在的实现；关键词只提供代码锚点，不是完整行为测试。
-Splitter 双击复位、水印节点恢复、动效全覆盖等要求单独保留在主台账。
-
-| 原项 | 源码 |
-| --- | --- |
-| 动效曲线 | [packages/common/src/tokens/index.ts](../packages/common/src/tokens/index.ts) |
-| 图片预览 | [src/components/IImageViewer.vue](../src/components/IImageViewer.vue) |
-| 日历 | [src/components/ICalendar.vue](../src/components/ICalendar.vue) |
-| 颜色选择 | [src/components/IColorPicker.vue](../src/components/IColorPicker.vue) |
-| 页面框架 | [src/components/ILayout.vue](../src/components/ILayout.vue) |
-| 吸顶与返回顶部 | [src/components/ISticky.vue](../src/components/ISticky.vue) |
-| 吸顶与返回顶部 | [src/components/IBackTop.vue](../src/components/IBackTop.vue) |
-| 索引栏（IndexBar 的现有实现） | [packages/mobile-vue/src/components/IIndexes.vue](../packages/mobile-vue/src/components/IIndexes.vue) |
-| 索引栏（React） | [packages/mobile-react/src/components/Indexes.tsx](../packages/mobile-react/src/components/Indexes.tsx) |
-| 下拉刷新（PullRefresh 的现有实现） | [packages/mobile-vue/src/components/IPullDownRefresh.vue](../packages/mobile-vue/src/components/IPullDownRefresh.vue) |
-| 下拉刷新（React） | [packages/mobile-react/src/components/PullDownRefresh.tsx](../packages/mobile-react/src/components/PullDownRefresh.tsx) |
-| 甘特图 | [src/components/IChartGantt.vue](../src/components/IChartGantt.vue) |
-| 词云 | [src/components/IChartWordCloud.vue](../src/components/IChartWordCloud.vue) |
-| 提及（与第 9 批重复） | [src/components/IMentions.vue](../src/components/IMentions.vue) |
-
 当前动效曲线：`--i-motion-easing`、`--i-motion-easing-out`、`--i-motion-easing-in`、`--i-motion-easing-spring`。
-曲线已定义不代表 Tree、列表、按压及所有动效开关均已接入，剩余范围见 A3。
