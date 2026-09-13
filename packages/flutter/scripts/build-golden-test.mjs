@@ -124,6 +124,7 @@ const {
 const {
   changedKeys, clampFieldValue, fieldRatio, fineTuneSummary, formatFieldValue
 } = await bundle('packages/common/src/logic/finetune.ts', 'finetune')
+const { dedentCode } = await bundle('packages/common/src/logic/highlight.ts', 'highlight')
 const {
   canTakeOver, frameAge, frameStale, frameStaleText, screenAspect, screenStatusIcon, screenStatusText
 } = await bundle('packages/common/src/logic/screen.ts', 'screen')
@@ -2031,6 +2032,22 @@ const chatListExpectations = [
 ]
 
 /*
+ * 代码块的缩进归一：同一段示例在两端缩进不一样的话，读者照着抄下来的东西
+ * 就不是同一段代码。裁法必须逐字一致。
+ */
+const dedentCases = [
+  '      <div>\n        <span />\n      </div>',
+  '\n\n  <p />\n  \n',
+  '    a\n\n    b',
+  'a  \nb',
+  '\n   \n  \n',
+  '<IButton>提交</IButton>'
+]
+const dedentExpectations = dedentCases.map(
+  (c) => `    expect(dedentCode(${dartSelStr(c)}), ${dartSelStr(dedentCode(c))});`
+)
+
+/*
  * 推理轨迹：默认展开哪几步必须两端一致。
  * 一端展开出错那步、另一端全折叠的话，用户得学两遍。
  */
@@ -2758,6 +2775,10 @@ ${screenExpectations.join('\n')}
     final now = ${dartChatNow};
     final sessions = ${dartChatSessions};
 ${chatListExpectations.join('\n')}
+  });
+
+  test('代码块的缩进归一与 Web 端一致', () {
+${dedentExpectations.join('\n')}
   });
 
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {

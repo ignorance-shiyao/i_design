@@ -16,6 +16,7 @@ import { computed, ref } from 'vue'
 import { useConfig } from './useConfig'
 import IIcon from './IIcon.vue'
 import {
+  dedentCode,
   diffLines as buildDiff,
   diffStat,
   tokenizeLines,
@@ -57,7 +58,11 @@ const emit = defineEmits<{ (e: 'copy'): void }>()
 const { locale } = useConfig()
 
 /* 首尾空行去掉：模板字符串写出来的代码几乎总是带着它们，留着白占两行 */
-const source = computed(() => props.code.replace(/^\n+|\s+$/g, ''))
+/*
+ * 归一缩进：文档页的示例都写在模板内部，本身带着页面那几层缩进，
+ * 原样渲染出来读者照着抄下来还得先手工对齐一遍。
+ */
+const source = computed(() => dedentCode(props.code))
 
 const isDiff = computed(() => props.before !== '')
 const diff = computed<DiffLine[]>(() =>
@@ -109,9 +114,12 @@ const label = computed(() => props.filename || props.lang || 'text')
     </div>
 
     <!-- 代码区会横向/纵向滚动：不给 tabindex，只用键盘的人进不去也滚不动 -->
-    <pre class="i-code__body" tabindex="0" :style="clipped ? { maxHeight: `calc(${maxLines} * 1.7em)` } : undefined"><code>
-      <template v-if="isDiff">
-        <span
+    <!--
+      从这里到 </pre> 之间不能有任何多余空白：pre 会把模板里的换行与缩进
+      原样渲染出来。此前每个 </span> 都另起一行，于是每一行代码后面都跟着
+      一个换行加八个空格——在页面上表现为行距凭空翻倍、代码块上下各空出一截。
+    -->
+    <pre class="i-code__body" tabindex="0" :style="clipped ? { maxHeight: `calc(${maxLines} * 1.7em)` } : undefined"><code><template v-if="isDiff"><span
           v-for="(line, index) in diff"
           :key="index"
           class="i-code__line"
@@ -125,20 +133,13 @@ const label = computed(() => props.filename || props.lang || 'text')
           v-for="(token, ti) in diffTokens[index]"
           :key="ti"
           :class="`i-code__tok i-code__tok--${token.type}`"
-        >{{ token.text }}</span>
-        </span>
-      </template>
-      <template v-else>
-        <span v-for="(line, index) in lines" :key="index" class="i-code__line"><span
+        >{{ token.text }}</span></span></template><template v-else><span v-for="(line, index) in lines" :key="index" class="i-code__line"><span
           v-if="lineNumbers"
           class="i-code__no"
         >{{ index + 1 }}</span><span
           v-for="(token, ti) in line"
           :key="ti"
           :class="`i-code__tok i-code__tok--${token.type}`"
-        >{{ token.text }}</span>
-        </span>
-      </template>
-    </code></pre>
+        >{{ token.text }}</span></span></template></code></pre>
   </div>
 </template>

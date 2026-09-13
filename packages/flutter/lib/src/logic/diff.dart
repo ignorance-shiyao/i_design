@@ -73,3 +73,35 @@ List<IDiffLine> diffLines(String before, String after) {
       added: lines.where((l) => l.kind == IDiffKind.add).length,
       removed: lines.where((l) => l.kind == IDiffKind.remove).length,
     );
+
+
+/// 去掉整段代码共有的那层缩进，并掐掉首尾的空行（对应 logic/highlight.ts 的 dedentCode）。
+///
+/// 文档里的示例都写在模板内部，本身带着页面的缩进，原样渲染出来读者照着抄
+/// 还得先手工对齐一遍。按**最小的那一层缩进**裁，而不是逐行 trim：
+/// 逐行 trim 会把代码本身的层级也抹平，那就不是同一段代码了。
+///
+/// 空行不参与最小缩进的计算——空行没有缩进可言，算进去的话最小值永远是 0。
+String dedentCode(String code) {
+  final lines = code.replaceAll(RegExp(r'\r\n?'), '\n').split('\n');
+  while (lines.isNotEmpty && lines.first.trim().isEmpty) {
+    lines.removeAt(0);
+  }
+  while (lines.isNotEmpty && lines.last.trim().isEmpty) {
+    lines.removeLast();
+  }
+  if (lines.isEmpty) return '';
+
+  var indent = -1;
+  for (final line in lines) {
+    if (line.trim().isEmpty) continue;
+    final n = line.length - line.trimLeft().length;
+    if (indent < 0 || n < indent) indent = n;
+  }
+  if (indent <= 0) {
+    return lines.map((line) => line.trimRight()).join('\n');
+  }
+  return lines
+      .map((line) => (line.length >= indent ? line.substring(indent) : line).trimRight())
+      .join('\n');
+}

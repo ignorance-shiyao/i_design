@@ -92,6 +92,41 @@ const patterns: Record<Exclude<Lang, 'text'>, RegExp> = {
 patterns.js = patterns.ts
 
 /** 语言别名：文档里写 vue / html / ts / js 都能落到同一套规则 */
+/**
+ * 去掉整段代码共有的那层缩进，并掐掉首尾的空行。
+ *
+ * 文档页里的示例都写在模板内部，本身带着页面的缩进：
+ *
+ * ```
+ *       code='<IButton>提交</IButton>
+ *         <IButton>取消</IButton>'
+ * ```
+ *
+ * 原样渲染出来，第二行会凭空多出八个空格，读者照着抄下来还得先手工对齐一遍。
+ * 按**最小的那一层缩进**裁，而不是逐行 trim：逐行 trim 会把代码本身的层级
+ * 也抹平，`<template>` 里的两级缩进全贴到左边，那就不是同一段代码了。
+ *
+ * 空行不参与最小缩进的计算——空行没有缩进可言，算进去的话最小值永远是 0，
+ * 于是这个函数什么也不做。
+ */
+export function dedentCode(code: string): string {
+  const lines = code.replace(/\r\n?/g, '\n').split('\n')
+  // 首尾的空行是模板换行留下的，不是作者写的
+  while (lines.length && lines[0].trim() === '') lines.shift()
+  while (lines.length && lines[lines.length - 1].trim() === '') lines.pop()
+  if (!lines.length) return ''
+
+  let indent = Infinity
+  for (const line of lines) {
+    if (!line.trim()) continue
+    indent = Math.min(indent, line.length - line.trimStart().length)
+  }
+  if (!Number.isFinite(indent) || indent === 0) {
+    return lines.map((line) => line.trimEnd()).join('\n')
+  }
+  return lines.map((line) => line.slice(indent).trimEnd()).join('\n')
+}
+
 export function normalizeLang(lang?: string): Lang {
   const value = (lang ?? '').toLowerCase()
   if (['vue', 'template', 'html'].includes(value)) return 'vue'
