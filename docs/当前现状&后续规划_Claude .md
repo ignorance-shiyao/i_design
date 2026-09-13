@@ -13,7 +13,7 @@
 > `ROADMAP.md` 保留历史实施记录与旧项去向，当前待办只在本文第 2 节维护。本文是**现状盘点 + 任务台账**，
 > 有冲突时以本文为准。
 
-最后校准：2026-09-12，F1 基于 `main@14c82a1`。规模数字集中在按源码生成的
+最后校准：2026-09-13。规模数字集中在按源码生成的
 [SOURCE_STATUS.md](SOURCE_STATUS.md)，由 `check:docs` 检查新鲜度；本文保留现状与验收边界。
 
 ---
@@ -26,11 +26,11 @@
 
 | 线 | 含义 | 现在的成色 |
 | --- | --- | --- |
-| **A 通用组件** | 中后台日常要用的那些 | 基本齐了，剩零散补漏 |
-| **B AI 交互** | 智能体在做事时需要的形态 | 一问一答齐了，智能体工作流缺一半 |
-| **C 流程图** | 画布、节点、连线、导出 | 主干齐了，编辑体验待补 |
-| **D 示例站与参数配置** | 看得见、调得动 | 主题能调，**组件参数还不能调** |
-| **E 交付与质量** | 别人真的能装上用 | **包装不出去**，是当前最大的短板 |
+| **A 通用组件** | 中后台日常要用的那些 | 齐了 |
+| **B AI 交互** | 智能体在做事时需要的形态 | 齐了：一问一答与智能体工作流都已覆盖 |
+| **C 流程图** | 画布、节点、连线、导出 | 齐了：主干加编辑体验（对齐、锚点、分组、自动布局） |
+| **D 示例站与参数配置** | 看得见、调得动 | 主题与组件参数都能调，可搜索、可翻页 |
+| **E 交付与质量** | 别人真的能装上用 | 包能装能用；无障碍与窄屏自适应都有自动检查兜着 |
 
 ---
 
@@ -83,10 +83,13 @@ Select / Tree / Table 三个加了虚拟化与多选。
 
 ### 1.3 AI 交互组件
 
-**已有**：ChatMessage（消息气泡）、PromptInput（输入台）、ChatThinking（思考过程）、
-ChatToolCall（工具调用）、ChatSources（来源）、ChatSuggestions（追问）、
-ChatTyping（打字）、ApprovalCard（征求确认）、AgentTasks（任务行）、
-RecommendCard（建议卡）、ContextCards（上下文卡）、DiffTable（差异表）。
+**已有**：ChatMessage（消息气泡）、PromptInput（输入台，支持 `@` 引用与 `/` 命令）、
+ChatThinking（推理轨迹，分步）、ChatToolCall（工具调用）、ToolChips（工具芯片）、
+ChatSources（来源）、ChatSuggestions（追问）、ChatTyping（打字）、
+ApprovalCard（征求确认）、AgentTasks（任务行）、RecommendCard（建议卡）、
+ContextCards（上下文卡）、DiffTable（差异表）、InsightCards（洞察卡）、
+SelectionActions（选区操作）、FineTuneCard（属性检查器）、AgentScreen（智能体屏幕）、
+ChatList（会话列表）、CodeBlock（代码块）、CommandSearch（命令搜索）。
 
 **缺口**：原先列的那些（工具芯片、洞察卡、选区操作、代码块、命令搜索、
 属性检查器、智能体屏幕、会话列表，以及 Loading 的「已耗时」、
@@ -163,8 +166,14 @@ Flutter 的期望值由 TS 侧算出写进 golden test——**这是跨端一致
   源码快照及旧任务去向由 `check:docs` 检查。
 - **跨端 API 差异已能查出（E3）**：`check:props` 比对两端属性，白名单只留 5 条刻意差异。
   首次跑出的真问题是头像组的 `size` 三端缺失或空转，已修。
-- **动效尚未全覆盖**：进出场与回弹曲线已定义，Collapse / Menu 已有展开过渡；
-  Tree、列表移动、按压及 reduced-motion / 主题开关全覆盖仍待 A3。
+- **动效尚未全覆盖**：进出场与回弹曲线已定义，Collapse / Menu 已有展开过渡，
+  列表补位过渡（FLIP）在 Vue 与 React 两端都有；Tree、按压及 reduced-motion /
+  主题开关全覆盖仍待 A3。
+- **无障碍与窄屏各有一道自动检查**：`check:a11y` 的基线已清零，任何一条
+  serious / critical 都算失败；`check:responsive` 在 390 / 320 两个宽度扫全站，
+  整页能左右拖就算失败。两者都要真浏览器，接在 CI 而不是 `check:parity` 里。
+  注意别用 `npm run check:a11y | tail` 这种写法跑——管道会把失败的退出码吞掉，
+  本轮的 nested-interactive 差点因此漏过去。
 
 ### 1.8 分支现状
 
