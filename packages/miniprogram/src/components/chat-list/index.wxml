@@ -1,0 +1,46 @@
+<view class="i-chatlist">
+  <view class="i-chatlist__head">
+    <view class="i-chatlist__new" bindtap="create">
+      <view class="i-icon i-icon--plus" style="width:14px;height:14px" />
+      <text>新会话</text>
+    </view>
+  </view>
+
+  <view wx:if="{{showSearch}}" class="i-chatlist__search">
+    <input class="i-input" value="{{query}}" placeholder="搜索会话" bindinput="onQuery" />
+  </view>
+
+  <scroll-view class="i-chatlist__body" scroll-y>
+    <!-- 空组不渲染组标题：一条也没有的组标题只是在占地方 -->
+    <block wx:for="{{groups}}" wx:for-item="group" wx:key="key">
+      <view class="i-chatlist__group">{{group.label}}</view>
+      <view
+        wx:for="{{group.sessions}}"
+        wx:for-item="session"
+        wx:key="id"
+        class="i-chatlist__item {{session.id === active ? 'is-active' : ''}}"
+      >
+        <!-- 切换会话的热区是标题那一块，操作按钮各自独立，与 Web 端同一套结构 -->
+        <view class="i-chatlist__pick" data-id="{{session.id}}" bindtap="pick">
+          <view
+            wx:if="{{session.pinned}}"
+            class="i-chatlist__pin i-icon i-icon--pin"
+            style="width:12px;height:12px"
+          />
+          <text class="i-chatlist__title">{{session.title}}</text>
+        </view>
+        <view class="i-chatlist__actions">
+          <view class="i-chatlist__action" data-id="{{session.id}}" catchtap="pin">
+            <view class="i-icon i-icon--pin" style="width:12px;height:12px" />
+          </view>
+          <view class="i-chatlist__action" data-id="{{session.id}}" catchtap="remove">
+            <view class="i-icon i-icon--trash" style="width:12px;height:12px" />
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 搜不到时说清楚是搜不到，而不是让列表空着 -->
+    <i-empty wx:if="{{empty}}" description="{{emptyText}}" />
+  </scroll-view>
+</view>

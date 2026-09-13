@@ -1469,6 +1469,50 @@ void main() {
     expect(screenAspect(0, 800), 1.6);
   });
 
+  test('会话列表的分组、空标题兜底与删除后落点与 Web 端一致', () {
+    // 本地墙钟，不是纪元毫秒数：分组问的是「用户的今天」
+    final now = DateTime(2026, 9, 13, 14).millisecondsSinceEpoch;
+    final sessions = <ChatSessionData>[ChatSessionData(id: 'a', updatedAt: now - 3600000, title: '报销流程', preview: ''), ChatSessionData(id: 'b', updatedAt: now - 86400000, title: '', preview: '帮我把这段话改得更简短'), ChatSessionData(id: 'c', updatedAt: now - 2592000000, title: '旧的讨论', preview: ''), ChatSessionData(id: 'd', updatedAt: now - 864000000, title: '常用清单', preview: '', pinned: true), ChatSessionData(id: 'e', updatedAt: now - 432000000, title: '上周的图', preview: '')];
+    expect(sessionTitle(sessions[0]), "报销流程");
+    expect(sessionTitle(sessions[1]), "帮我把这段话改得更简短");
+    expect(sessionTitle(sessions[2]), "旧的讨论");
+    expect(sessionTitle(sessions[3]), "常用清单");
+    expect(sessionTitle(sessions[4]), "上周的图");
+    expect(sessionTitle(ChatSessionData(id: 'x', updatedAt: 0)), "新会话");
+    expect(groupKeyOf(sessions[0], now), ChatGroupKey.today);
+    expect(groupKeyOf(sessions[1], now), ChatGroupKey.yesterday);
+    expect(groupKeyOf(sessions[2], now), ChatGroupKey.earlier);
+    expect(groupKeyOf(sessions[3], now), ChatGroupKey.pinned);
+    expect(groupKeyOf(sessions[4], now), ChatGroupKey.week);
+    expect(groupSessions(sessions, now).length, 5);
+    expect(groupSessions(sessions, now)[0].key, ChatGroupKey.pinned);
+    expect(groupSessions(sessions, now)[0].label, "置顶");
+    expect(groupSessions(sessions, now)[0].sessions.map((s) => s.id).toList(), <String>['d']);
+    expect(groupSessions(sessions, now)[1].key, ChatGroupKey.today);
+    expect(groupSessions(sessions, now)[1].label, "今天");
+    expect(groupSessions(sessions, now)[1].sessions.map((s) => s.id).toList(), <String>['a']);
+    expect(groupSessions(sessions, now)[2].key, ChatGroupKey.yesterday);
+    expect(groupSessions(sessions, now)[2].label, "昨天");
+    expect(groupSessions(sessions, now)[2].sessions.map((s) => s.id).toList(), <String>['b']);
+    expect(groupSessions(sessions, now)[3].key, ChatGroupKey.week);
+    expect(groupSessions(sessions, now)[3].label, "最近 7 天");
+    expect(groupSessions(sessions, now)[3].sessions.map((s) => s.id).toList(), <String>['e']);
+    expect(groupSessions(sessions, now)[4].key, ChatGroupKey.earlier);
+    expect(groupSessions(sessions, now)[4].label, "更早");
+    expect(groupSessions(sessions, now)[4].sessions.map((s) => s.id).toList(), <String>['c']);
+    expect(filterSessions(sessions, "简短").map((s) => s.id).toList(), <String>['b']);
+    expect(filterSessions(sessions, "报销").map((s) => s.id).toList(), <String>['a']);
+    expect(filterSessions(sessions, "  ").map((s) => s.id).toList(), <String>['a', 'b', 'c', 'd', 'e']);
+    expect(nextAfterDelete(groupSessions(sessions, now), 'b', 'b'), "e");
+    expect(nextAfterDelete(groupSessions(sessions, now), 'e', 'e'), "c");
+    expect(nextAfterDelete(groupSessions(sessions, now), 'c', 'c'), "e");
+    expect(nextAfterDelete(groupSessions(sessions, now), 'a', 'c'), "c");
+    expect(moveActiveSession(groupSessions(sessions, now), 'd', 1), "a");
+    expect(moveActiveSession(groupSessions(sessions, now), 'd', -1), "d");
+    expect(moveActiveSession(groupSessions(sessions, now), 'c', 1), "c");
+    expect(moveActiveSession(groupSessions(sessions, now), 'c', -1), "e");
+  });
+
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
     final steps = <IThinkingStep>[IThinkingStep(key: 'a', title: '拆解问题', kind: IThinkingStepKind.reason, status: IThinkingStepStatus.done), IThinkingStep(key: 'b', title: '检索文档', kind: IThinkingStepKind.search, status: IThinkingStepStatus.error), IThinkingStep(key: 'c', title: '写补丁', kind: IThinkingStepKind.code, status: IThinkingStepStatus.running), IThinkingStep(key: 'd', title: '复核', kind: IThinkingStepKind.tool, status: IThinkingStepStatus.done)];
     expect(defaultOpenSteps(steps), <String>['b', 'c']);

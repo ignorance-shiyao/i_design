@@ -93,6 +93,7 @@ import IBackTop from './IBackTop.vue'
 import ICodeBlock from './ICodeBlock.vue'
 import ICommandSearch from './ICommandSearch.vue'
 import IAgentScreen from './IAgentScreen.vue'
+import IChatList from './IChatList.vue'
 import IFineTuneCard from './IFineTuneCard.vue'
 import IInsightCards from './IInsightCards.vue'
 import ISelectionActions from './ISelectionActions.vue'
@@ -186,6 +187,7 @@ export {
   ICodeBlock,
   ICommandSearch,
   IAgentScreen,
+  IChatList,
   IFineTuneCard,
   IInsightCards,
   ISelectionActions,

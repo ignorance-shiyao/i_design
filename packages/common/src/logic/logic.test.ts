@@ -38,6 +38,15 @@ import {
   type InsightItem
 } from './insight'
 import {
+  filterSessions,
+  groupKeyOf,
+  groupSessions,
+  moveActiveSession,
+  nextAfterDelete,
+  sessionTitle,
+  type ChatSession
+} from './chatlist'
+import {
   canTakeOver,
   frameAge,
   frameStale,
@@ -1073,5 +1082,89 @@ describe('智能体屏幕', () => {
   it('每种状态都有图标，与文字成对', () => {
     expect(screenStatusIcon('error')).toBe('error-circle')
     expect(screenStatusIcon('done')).toBe('check-circle')
+  })
+})
+
+describe('会话列表', () => {
+  /* 用固定时刻，别让测试在跨零点的那一秒变红 */
+  const now = new Date(2026, 8, 13, 14, 0, 0).getTime()
+  const day = 24 * 3600 * 1000
+  const sessions: ChatSession[] = [
+    { id: 'a', title: '报销流程', updatedAt: now - 3600_000 },
+    { id: 'b', title: '', preview: '帮我把这段话改得更简短一点，另外补一句结论', updatedAt: now - day },
+    { id: 'c', title: '旧的讨论', updatedAt: now - 30 * day },
+    { id: 'd', title: '常用清单', updatedAt: now - 10 * day, pinned: true },
+    { id: 'e', title: '上周的图', updatedAt: now - 5 * day }
+  ]
+
+  it('标题为空时用摘要顶上，都没有才叫「新会话」', () => {
+    // 直接显示空白的话，用户会以为这条会话坏了
+    expect(sessionTitle(sessions[1])).toBe('帮我把这段话改得更简短一点，另外补一句结论')
+    // 超过一行能放下的长度才截断，截断处补省略号
+    expect(sessionTitle({ id: 'y', preview: '一'.repeat(40), updatedAt: 0 })).toBe(
+      `${'一'.repeat(27)}…`
+    )
+    expect(sessionTitle({ id: 'x', updatedAt: 0 })).toBe('新会话')
+    expect(sessionTitle(sessions[0])).toBe('报销流程')
+  })
+
+  it('置顶优先于时间：置顶的意思就是「别让它沉下去」', () => {
+    // d 是 10 天前的，不置顶的话该落在「更早」
+    expect(groupKeyOf(sessions[3], now)).toBe('pinned')
+    expect(groupKeyOf(sessions[0], now)).toBe('today')
+    expect(groupKeyOf(sessions[1], now)).toBe('yesterday')
+    expect(groupKeyOf(sessions[4], now)).toBe('week')
+    expect(groupKeyOf(sessions[2], now)).toBe('earlier')
+  })
+
+  it('按天数分组而不是按 7×24 小时', () => {
+    // 昨晚 23 点的会话，今早不该因为差了几小时就掉进另一组
+    const lateLastNight = new Date(2026, 8, 6, 23, 30).getTime()
+    expect(groupKeyOf({ id: 'x', updatedAt: lateLastNight }, now)).toBe('week')
+  })
+
+  it('空组不返回：一条也没有的组标题只是在占地方', () => {
+    const groups = groupSessions(sessions, now)
+    expect(groups.map((g) => g.key)).toEqual(['pinned', 'today', 'yesterday', 'week', 'earlier'])
+    expect(groupSessions([sessions[0]], now).map((g) => g.key)).toEqual(['today'])
+  })
+
+  it('搜索同时看标题与摘要：用户记得的往往是自己说过的话', () => {
+    expect(filterSessions(sessions, '简短').map((s) => s.id)).toEqual(['b'])
+    expect(filterSessions(sessions, '报销').map((s) => s.id)).toEqual(['a'])
+    expect(filterSessions(sessions, '  ').length).toBe(5)
+  })
+
+  it('删掉当前这条后选后一条，不跳回第一条', () => {
+    // 跳回第一条最省事也最坏：用户正看着列表中段，删一条就被弹回顶部
+    const groups = groupSessions(sessions, now)
+    // 压平后是 d（置顶）、a、b、e、c
+    expect(nextAfterDelete(groups, 'b', 'b')).toBe('e')
+    // 删最后一条时退到前一条
+    expect(nextAfterDelete(groups, 'c', 'c')).toBe('e')
+    // 删的不是当前这条，选中不变
+    expect(nextAfterDelete(groups, 'a', 'c')).toBe('c')
+    expect(nextAfterDelete(groupSessions([sessions[0]], now), 'a', 'a')).toBe('')
+  })
+
+  it('「后一条」按显示顺序算，不按传入数组的顺序', () => {
+    /*
+     * 两者几乎从不一致：置顶的会话显示时被提到最前，原数组里还待在原位。
+     * 按原数组算的话，删「c」会选中数组里的下一个，而用户看到的下一个是别的。
+     */
+    const groups = groupSessions(sessions, now)
+    const flat = groups.flatMap((g) => g.sessions).map((s) => s.id)
+    expect(flat).toEqual(['d', 'a', 'b', 'e', 'c'])
+    // 原数组里 e 的后一个不存在，显示顺序里 e 的后一个是 c
+    expect(nextAfterDelete(groups, 'e', 'e')).toBe('c')
+  })
+
+  it('上下键走分组压平后的顺序，到头停住', () => {
+    const groups = groupSessions(sessions, now)
+    // 压平后是 d（置顶）、a、b、e、c
+    expect(moveActiveSession(groups, 'd', 1)).toBe('a')
+    expect(moveActiveSession(groups, 'd', -1)).toBe('d')
+    expect(moveActiveSession(groups, 'c', 1)).toBe('c')
+    expect(moveActiveSession(groups, 'c', -1)).toBe('e')
   })
 })

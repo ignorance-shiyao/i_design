@@ -25,13 +25,13 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"container","type":"string","doc":"容器选择器：容器滚出视口时元素跟着一起走","defaultText":"''","control":{"kind":"string"}},
   ],
   IAgentScreen: [
-    {"name":"state","type":"AgentScreenState","doc":"","defaultText":"'connecting'","control":null},
+    {"name":"state","type":"AgentScreenState","doc":"连接中 / 操作中 / 已暂停 / 已完成 / 出错","defaultText":"'connecting'","control":null},
     {"name":"action","type":"string","doc":"当前在做什么。有它就显示它——「工作中」三个字没有信息量","defaultText":"''","control":{"kind":"string"}},
     {"name":"frame","type":"string","doc":"当前画面的图片地址。没有时显示占位，框的大小不变","defaultText":"''","control":{"kind":"string"}},
     {"name":"updatedAt","type":"number","doc":"画面的时间戳（毫秒）。用来算「画面几秒前」","defaultText":"0","control":{"kind":"number"}},
     {"name":"frameWidth","type":"number","doc":"画面原始尺寸，用来定高宽比","defaultText":null,"control":{"kind":"number"}},
-    {"name":"frameHeight","type":"number","doc":"","defaultText":null,"control":{"kind":"number"}},
-    {"name":"title","type":"string","doc":"","defaultText":"'智能体屏幕'","control":{"kind":"string"}},
+    {"name":"frameHeight","type":"number","doc":"画面原始高度，与 frameWidth 一起定高宽比","defaultText":null,"control":{"kind":"number"}},
+    {"name":"title","type":"string","doc":"供无障碍读出的屏幕名称，不显示在界面上","defaultText":"'智能体屏幕'","control":{"kind":"string"}},
   ],
   IAgentTasks: [
     {"name":"tasks","type":"AgentTask[]","doc":"","defaultText":null,"control":null},
@@ -230,6 +230,12 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"minSpan","type":"number","doc":"窗口最少包含几个点","defaultText":"3","control":{"kind":"number"}},
     {"name":"height","type":"number","doc":"","defaultText":"48","control":{"kind":"number"}},
     {"name":"modelValue","type":"unknown","doc":"","defaultText":null,"control":null},
+  ],
+  IChatList: [
+    {"name":"sessions","type":"ChatSession[]","doc":"","defaultText":null,"control":null},
+    {"name":"active","type":"string","doc":"当前选中的会话 id（用 v-model:active 控制）","defaultText":"''","control":{"kind":"string"}},
+    {"name":"searchable","type":"boolean","doc":"会话多了才需要搜索框；少几条时那个框只是占地方","defaultText":"undefined","control":{"kind":"boolean"}},
+    {"name":"searchAfter","type":"number","doc":"超过这个条数自动显示搜索框","defaultText":"8","control":{"kind":"number"}},
   ],
   IChatMessage: [
     {"name":"role","type":"'user' | 'assistant'","doc":"","defaultText":"'assistant'","control":{"kind":"enum","options":["user","assistant"]}},

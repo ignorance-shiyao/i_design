@@ -33,7 +33,8 @@ test('F0 已落地组件、移动专有项和组合能力按真实源码呈现',
     'IMentions', 'IColorPicker', 'IImageViewer', 'ICarousel', 'ICalendar', 'ITour', 'IWatermark', 'ISticky', 'IQrcode']) {
     assert.equal(catalog.find((i) => i.api === api)?.status, 'ready', api)
   }
-  assert.deepEqual(catalog.filter((i) => i.status === 'planned').map((i) => i.api), ['IChatList'])
+  // 目录里已经没有规划中的条目了；新增一项却忘了实现时，下一条测试会兜住
+  assert.deepEqual(catalog.filter((i) => i.status === 'planned').map((i) => i.api), [])
   for (const api of ['ICell', 'INavBar', 'IToast', 'IRow / ICol', 'IAvatar / IAvatarGroup', 'message()', 'notification', 'Confirm', 'Marquee', 'Minimap', 'Snapshot']) {
     assert.equal(implementationStatus(api), 'ready', api)
   }
@@ -47,13 +48,28 @@ test('F0 已落地组件、移动专有项和组合能力按真实源码呈现',
 
 test('新增规划组件时，陈旧清单失败；生成后目录状态自动更新', async (t) => {
   const root = fixture(t)
-  // 用当前仍是 planned 的那一项：IFloatButton 已经实现，拿它试不出「新增」这条路径
-  writeFileSync(join(root, 'src/components/IChatList.vue'), '<template><ul /></template>')
+  /*
+   * 目录里已经没有规划中的条目了，所以这条路径得自己造一个：
+   * 往目录里加一项还没有源码的组件，它应当是 planned；补上源码并重新生成清单之后
+   * 自动变成 ready。拿一个已经实现的组件名来试，试不出「新增」这条路径。
+   */
+  const catalogFile = join(root, 'src/data/componentCatalog.ts')
+  const catalog = readFileSync(catalogFile, 'utf8').replace(
+    "{ label: '会话列表', api: 'IChatList'",
+    "{ label: '草稿箱', api: 'IDraftBox', note: '还没实现的示例条目' },\n      { label: '会话列表', api: 'IChatList'"
+  )
+  writeFileSync(catalogFile, catalog)
+  const planned = await loadData(root)
+  assert.equal(
+    planned.componentCatalog.flatMap((g) => g.items).find((i) => i.api === 'IDraftBox').status,
+    'planned'
+  )
+
+  writeFileSync(join(root, 'src/components/IDraftBox.vue'), '<template><ul /></template>')
   await assert.rejects(checkCatalog(root), /组件源码清单过期/)
   writeFileSync(join(root, inventoryFile), inventorySource(root))
   const { componentCatalog } = await loadData(root)
-  assert.equal(componentCatalog.flatMap((g) => g.items).find((i) => i.api === 'IChatList').status, 'ready')
-  await checkCatalog(root)
+  assert.equal(componentCatalog.flatMap((g) => g.items).find((i) => i.api === 'IDraftBox').status, 'ready')
 })
 
 test('删除组合组件的一部分或命令式宿主后，不能继续显示可用', async (t) => {
@@ -72,8 +88,8 @@ test('移动专有组件不会把同类的 Web 组件顶成可用', async (t) =>
   // IFab 与 IFloatButton 现在各自都有实现，两边都该是 ready
   assert.equal(implementationStatus('IFab'), 'ready')
   assert.equal(implementationStatus('IFloatButton'), 'ready')
-  // 移动端的会话列表不能让 Web 端的 IChatList 显示为可用
-  assert.equal(implementationStatus('IChatList'), 'planned')
+  // 两端都没有源码的名字仍然是 planned：别名表兜底的只是组合能力与命令式 API
+  assert.equal(implementationStatus('IDraftBox'), 'planned')
 })
 
 test('手填错误状态、已实现却标不做、空链接均会失败', async (t) => {

@@ -127,6 +127,10 @@ const {
 const {
   canTakeOver, frameAge, frameStale, frameStaleText, screenAspect, screenStatusIcon, screenStatusText
 } = await bundle('packages/common/src/logic/screen.ts', 'screen')
+const {
+  filterSessions: filterChatSessions, groupKeyOf, groupSessions: groupChatSessions,
+  moveActiveSession, nextAfterDelete, sessionTitle
+} = await bundle('packages/common/src/logic/chatlist.ts', 'chatlist')
 const { alignGuides, anchorOf, groupBounds, visibleEdges, visibleNodes } = await bundle(
   'packages/common/src/logic/flow.ts',
   'flowalign'
@@ -1965,6 +1969,68 @@ const screenExpectations = [
 ]
 
 /*
+ * 会话列表：分组档位、空标题的兜底、删除之后选谁必须两端一致，
+ * 否则同一份会话在两端会分进不同的组、删一条之后跳到不同的位置。
+ *
+ * 时刻两边都按**本地墙钟**构造（JS 的 new Date(2026, 8, 13, 14) 与 Dart 的
+ * DateTime(2026, 9, 13, 14)），而不是往生成物里塞一个纪元毫秒数：
+ * 分组问的是「用户的今天」，本来就该按本地日历算，塞死毫秒数的话
+ * 这份 golden 换一个时区跑就会红，而代码并没有错。
+ */
+const chatNow = new Date(2026, 8, 13, 14, 0, 0).getTime()
+/** Dart 侧的同一个时刻，以及以它为基准的偏移写法 */
+const dartChatNow = 'DateTime(2026, 9, 13, 14).millisecondsSinceEpoch'
+const dartAgo = (ms) => (ms === 0 ? 'now' : `now - ${ms}`)
+const chatDay = 24 * 3600 * 1000
+const chatSessions = [
+  { id: 'a', title: '报销流程', updatedAt: chatNow - 3600000 },
+  { id: 'b', title: '', preview: '帮我把这段话改得更简短', updatedAt: chatNow - chatDay },
+  { id: 'c', title: '旧的讨论', updatedAt: chatNow - 30 * chatDay },
+  { id: 'd', title: '常用清单', updatedAt: chatNow - 10 * chatDay, pinned: true },
+  { id: 'e', title: '上周的图', updatedAt: chatNow - 5 * chatDay }
+]
+const dartChatSessions = `<ChatSessionData>[${chatSessions
+  .map(
+    (s) =>
+      `ChatSessionData(id: '${s.id}', updatedAt: ${dartAgo(chatNow - s.updatedAt)}` +
+      `, title: '${s.title ?? ''}', preview: '${s.preview ?? ''}'` +
+      (s.pinned ? ', pinned: true' : '') +
+      ')'
+  )
+  .join(', ')}]`
+const chatGroups = groupChatSessions(chatSessions, chatNow)
+const chatListExpectations = [
+  ...chatSessions.map(
+    (s, i) =>
+      `    expect(sessionTitle(sessions[${i}]), ${JSON.stringify(sessionTitle(s))});`
+  ),
+  `    expect(sessionTitle(ChatSessionData(id: 'x', updatedAt: 0)), ${JSON.stringify(sessionTitle({ id: 'x', updatedAt: 0 }))});`,
+  ...chatSessions.map(
+    (s, i) =>
+      `    expect(groupKeyOf(sessions[${i}], now), ChatGroupKey.${groupKeyOf(s, chatNow)});`
+  ),
+  `    expect(groupSessions(sessions, now).length, ${chatGroups.length});`,
+  ...chatGroups.flatMap((g, i) => [
+    `    expect(groupSessions(sessions, now)[${i}].key, ChatGroupKey.${g.key});`,
+    `    expect(groupSessions(sessions, now)[${i}].label, ${JSON.stringify(g.label)});`,
+    `    expect(groupSessions(sessions, now)[${i}].sessions.map((s) => s.id).toList(), <String>[${g.sessions.map((s) => `'${s.id}'`).join(', ')}]);`
+  ]),
+  ...['简短', '报销', '  '].map(
+    (q) =>
+      `    expect(filterSessions(sessions, ${JSON.stringify(q)}).map((s) => s.id).toList(), <String>[${filterChatSessions(chatSessions, q).map((s) => `'${s.id}'`).join(', ')}]);`
+  ),
+  // 删掉当前这条后选后一条，不跳回第一条
+  ...[['b', 'b'], ['e', 'e'], ['c', 'c'], ['a', 'c']].map(
+    ([del, act]) =>
+      `    expect(nextAfterDelete(groupSessions(sessions, now), '${del}', '${act}'), ${JSON.stringify(nextAfterDelete(chatGroups, del, act))});`
+  ),
+  ...[['d', 1], ['d', -1], ['c', 1], ['c', -1]].map(
+    ([id, step]) =>
+      `    expect(moveActiveSession(groupSessions(sessions, now), '${id}', ${step}), ${JSON.stringify(moveActiveSession(chatGroups, id, step))});`
+  )
+]
+
+/*
  * 推理轨迹：默认展开哪几步必须两端一致。
  * 一端展开出错那步、另一端全折叠的话，用户得学两遍。
  */
@@ -2685,6 +2751,13 @@ ${finetuneExpectations.join('\n')}
 
   test('智能体屏幕的状态说法、接管条件与画面新鲜度与 Web 端一致', () {
 ${screenExpectations.join('\n')}
+  });
+
+  test('会话列表的分组、空标题兜底与删除后落点与 Web 端一致', () {
+    // 本地墙钟，不是纪元毫秒数：分组问的是「用户的今天」
+    final now = ${dartChatNow};
+    final sessions = ${dartChatSessions};
+${chatListExpectations.join('\n')}
   });
 
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {

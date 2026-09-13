@@ -93,6 +93,8 @@ const Map<String, String> kIDesignIconPaths = <String, String>{
       'M4 5h16v14H4zM12 11h6v6h-6z',
   'sparkle':
       'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z',
+  'pin':
+      'M9 4h6l-1 5 3 3v2h-4.5V21L12 22l-.5-1v-6.9H7v-2l3-3z',
   'text-size':
       'M2.5 19 7 7l4.5 12M4.2 15h5.6M14 19l3.5-9 3.5 9M15.4 16h4.2',
   'corner-radius':
@@ -168,6 +170,7 @@ const List<String> kIDesignIconNames = <String>[
   'marquee',
   'minimap',
   'sparkle',
+  'pin',
   'text-size',
   'corner-radius',
   'shadow-layer',

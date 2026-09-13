@@ -6,6 +6,7 @@ import IChatThinking from '@/components/IChatThinking.vue'
 import IChatToolCall from '@/components/IChatToolCall.vue'
 import IToolChips from '@/components/IToolChips.vue'
 import IAgentScreen from '@/components/IAgentScreen.vue'
+import IChatList from '@/components/IChatList.vue'
 import IFineTuneCard from '@/components/IFineTuneCard.vue'
 import IInsightCards from '@/components/IInsightCards.vue'
 import ISelectionActions from '@/components/ISelectionActions.vue'
@@ -18,6 +19,7 @@ import { snippets } from '@/data/snippets'
 import type {
   AgentTask,
   ApprovalQuestion,
+  ChatSession,
   ContextChunk,
   DiffRow,
   FineTuneField,
@@ -292,6 +294,32 @@ const screenStates = [
   { key: 'paused', state: 'paused' as const, action: '等待短信验证码', ago: 8000 }
 ]
 const screenNow = Date.now()
+
+/* 会话列表：几条不同时段的会话，其中一条还没起名，用来演示摘要顶上 */
+const day = 24 * 3600 * 1000
+const chatSessions = ref<ChatSession[]>([
+  { id: 's1', title: '报销流程怎么走', updatedAt: screenNow - 20 * 60 * 1000 },
+  { id: 's2', title: '', preview: '帮我把这段说明改得更简短一点，再补一句结论', updatedAt: screenNow - 3 * 3600 * 1000 },
+  { id: 's3', title: '季度数据核对', updatedAt: screenNow - day },
+  { id: 's4', title: '常用提示词', updatedAt: screenNow - 12 * day, pinned: true },
+  { id: 's5', title: '上周那张图', updatedAt: screenNow - 4 * day },
+  { id: 's6', title: '去年的迁移方案', updatedAt: screenNow - 200 * day }
+])
+const activeSession = ref('s3')
+
+function removeSession(id: string) {
+  chatSessions.value = chatSessions.value.filter((s) => s.id !== id)
+}
+function pinSession(id: string) {
+  chatSessions.value = chatSessions.value.map((s) =>
+    s.id === id ? { ...s, pinned: !s.pinned } : s
+  )
+}
+function createSession() {
+  const id = `s${Date.now()}`
+  chatSessions.value = [{ id, updatedAt: Date.now() }, ...chatSessions.value]
+  activeSession.value = id
+}
 </script>
 
 <template>
@@ -513,6 +541,31 @@ const screenNow = Date.now()
       </div>
     </DemoBlock>
 
+    <h2>会话列表</h2>
+    <p>
+      会话攒到几十条之后，列表本身就成了一个要解决的问题。按时间分成「今天」「昨天」「最近 7 天」「更早」四档就够——再细分，读者得先读组标题才知道自己在看哪一段；一条也没有的组不渲染标题，那行字只是在占地方。置顶优先于时间，置顶的意思就是「别让它沉下去」。
+    </p>
+    <p>
+      两个容易做错的地方。一是智能体还没来得及给会话起名时标题是空的，此时显示一片空白，用户会以为这条会话坏了，所以用最后一条消息的摘要顶上。二是删掉当前这条之后该选谁：跳回第一条是最省事的写法，也是最坏的——用户正在看列表中段，删一条就被弹回顶部，他得重新找位置，所以选它的后一条，没有后一条才退到前一条。
+    </p>
+    <DemoBlock
+      title="分组、搜索与删除"
+      description="搜索框超过一定条数才出现，少几条时那个框只是占地方（这里把阈值调到 4 好让它露出来）。搜索同时看标题与摘要——用户记得的往往是自己说过的那句话，而不是智能体起的标题。列表可聚焦，上下键在整份列表上走，顺序是分组压平之后的顺序。"
+      lang="vue"
+      code='<IChatList :sessions="sessions" :search-after="4" v-model:active="active" @create="create" @remove="remove" @pin="pin" />'
+    >
+      <div class="chatlist-demo">
+        <IChatList
+          :sessions="chatSessions"
+          :search-after="4"
+          v-model:active="activeSession"
+          @create="createSession"
+          @remove="removeSession"
+          @pin="pinSession"
+        />
+      </div>
+    </DemoBlock>
+
     <h2>来源与追问</h2>
     <DemoBlock
       title="来源与建议"
@@ -683,6 +736,7 @@ const screenNow = Date.now()
         <tr><td>ISelectionActions</td><td>actions、max</td><td>select</td></tr>
         <tr><td>IFineTuneCard</td><td>fields、original、values、title</td><td>update:values、reset</td></tr>
         <tr><td>IAgentScreen</td><td>state、action、frame、updated-at、frame-width、frame-height</td><td>takeover</td></tr>
+        <tr><td>IChatList</td><td>sessions、active、searchable、search-after</td><td>update:active、create、remove、pin</td></tr>
         <tr><td>IChatSources</td><td>sources</td><td>—</td></tr>
         <tr><td>IChatSuggestions</td><td>items、title</td><td>select</td></tr>
         <tr><td>IPromptInput</td><td>modelValue、generating、maxLength、attachments、hint、submitOnEnter、mentions、commands</td><td>submit、stop、attach、removeAttachment、pick</td></tr>
@@ -708,6 +762,7 @@ const screenNow = Date.now()
 .selact-demo { display: flex; flex-direction: column; gap: var(--i-spacing-2); max-width: 560px; }
 .selact-demo__text { margin: 0; line-height: 1.8; }
 .tune-demo { max-width: 460px; }
+.chatlist-demo { max-width: 300px; }
 .screen-demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--i-spacing-3); width: 100%; }
 .chat {
   display: flex;

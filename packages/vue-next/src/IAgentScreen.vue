@@ -26,6 +26,7 @@ import {
 
 const props = withDefaults(
   defineProps<{
+    /** 连接中 / 操作中 / 已暂停 / 已完成 / 出错 */
     state?: AgentScreenState
     /** 当前在做什么。有它就显示它——「工作中」三个字没有信息量 */
     action?: string
@@ -35,7 +36,9 @@ const props = withDefaults(
     updatedAt?: number
     /** 画面原始尺寸，用来定高宽比 */
     frameWidth?: number
+    /** 画面原始高度，与 frameWidth 一起定高宽比 */
     frameHeight?: number
+    /** 供无障碍读出的屏幕名称，不显示在界面上 */
     title?: string
   }>(),
   { state: 'connecting', action: '', frame: '', updatedAt: 0, title: '智能体屏幕' }

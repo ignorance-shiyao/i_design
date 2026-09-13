@@ -9,11 +9,11 @@
 
 | 端 | 覆盖矩阵（源组件文件口径） | frameworkStats（导出名口径） |
 | --- | ---: | ---: |
-| vue-next | 127 | 127 |
-| vue | 127 | 128 |
-| react | 127 | 127 |
-| miniprogram | 126 | 129 |
-| flutter | 127 | 120 |
+| vue-next | 128 | 128 |
+| vue | 128 | 129 |
+| react | 128 | 128 |
+| miniprogram | 127 | 130 |
+| flutter | 128 | 121 |
 
 两列口径不同，不能互当总数：矩阵数的是各端的源组件文件，frameworkStats 数的是
 使用方能 import 到的名字。差额逐项如下——能一一对上，两个数字才都可信。
@@ -25,8 +25,8 @@
 | vue | IConfirmLayer | — | IConfirmLayer — confirm() 的宿主。Vue 2.7 没有 Teleport，宿主要由使用方自己放进模板，所以只有那一端对外导出 |
 | react | — | — | — |
 
-golden 文件包含 **1413** 条 expect；构建脚本生成断言，不执行 Dart SDK 测试。
-共享 SVG 图标定义 **52** 项；共享逻辑模块 **59** 个。
+golden 文件包含 **1451** 条 expect；构建脚本生成断言，不执行 Dart SDK 测试。
+共享 SVG 图标定义 **53** 项；共享逻辑模块 **60** 个。
 
 ## 共享逻辑目录
 
@@ -37,6 +37,7 @@ golden 文件包含 **1413** 条 expect；构建脚本生成断言，不执行 D
 - [calendar.ts](../packages/common/src/logic/calendar.ts)
 - [carousel.ts](../packages/common/src/logic/carousel.ts)
 - [chart.ts](../packages/common/src/logic/chart.ts)
+- [chatlist.ts](../packages/common/src/logic/chatlist.ts)
 - [color.ts](../packages/common/src/logic/color.ts)
 - [command.ts](../packages/common/src/logic/command.ts)
 - [confirm.ts](../packages/common/src/logic/confirm.ts)

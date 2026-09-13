@@ -1,0 +1,156 @@
+/* IChatList —— 由 Vue / React / 小程序各端共享 */
+.i-chatlist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2);
+  /* 四边等宽的发丝线：选中哪一条由底色与标记说，不靠加粗某一边 */
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+}
+
+/* 这两层只是分组容器，给它们留出与列表一致的间距，别让按钮贴着边 */
+.i-chatlist__head,
+.i-chatlist__search {
+  display: block;
+}
+
+.i-chatlist__new {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--i-spacing-1);
+  width: 100%;
+  padding: var(--i-spacing-2);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  /* 纯色，不用渐变：同一个主题色在不同尺寸的按钮上不该呈现出不同观感 */
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text);
+  font-family: inherit;
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
+}
+.i-chatlist__new:hover {
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-brand-text);
+}
+.i-chatlist__new:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+}
+
+.i-chatlist__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  max-height: 420px;
+}
+.i-chatlist__body:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+  border-radius: var(--i-radius-sm);
+}
+
+.i-chatlist__group {
+  margin: var(--i-spacing-2) 0 var(--i-spacing-1);
+  padding: 0 var(--i-spacing-2);
+  font-size: var(--i-font-size-xs);
+  font-weight: 500;
+  color: var(--i-color-text-tertiary);
+}
+.i-chatlist__group:first-child { margin-top: 0; }
+
+.i-chatlist__item {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  padding-right: var(--i-spacing-2);
+  border-radius: var(--i-radius-sm);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-sm);
+}
+/*
+ * 切换会话的按钮就是标题本身，不是整行套一层 role="button"：
+ * 套在外面的话，行内那两个操作按钮就成了嵌套的交互控件。
+ * 它铺满整行，所以点哪儿都算点这条会话，观感与整行可点没有区别。
+ */
+.i-chatlist__pick {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  flex: 1;
+  min-width: 0;
+  padding: var(--i-spacing-2);
+  border: none;
+  border-radius: var(--i-radius-sm) 0 0 var(--i-radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.i-chatlist__pick:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: -2px;
+}
+.i-chatlist__item:hover { background: var(--i-color-bg-subtle); }
+/*
+ * 选中给的是底色加一条更重的字色，不是在左边加一道粗线：
+ * 那种线在灰度下与普通边框没区别，而「我在看哪一条」正是最需要读准的信息。
+ */
+.i-chatlist__item.is-active {
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand-text);
+  font-weight: 500;
+}
+.i-chatlist__pin { flex: none; color: var(--i-color-text-tertiary); }
+.i-chatlist__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/*
+ * 操作按钮平时透明、悬停或选中时显形：几十条会话每条都挂两个图标的话，
+ * 整列看起来全是按钮，真正要读的标题反而被挤到一边。
+ * 但它们始终占位——显形时把标题挤短，读者会以为标题变了。
+ */
+.i-chatlist__actions {
+  display: flex;
+  gap: 2px;
+  flex: none;
+  opacity: 0;
+}
+/* 触摸端没有悬停，操作按钮常驻：不常驻的话那两个按钮在手机上永远点不到 */
+@media (hover: none) {
+  .i-chatlist__actions { opacity: 1; }
+}
+.i-chatlist__item:hover .i-chatlist__actions,
+.i-chatlist__item.is-active .i-chatlist__actions,
+.i-chatlist__actions:focus-within { opacity: 1; }
+
+.i-chatlist__action {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+}
+.i-chatlist__action:hover {
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text);
+}
+/* 键盘走到时必须显形，否则焦点看着像消失了 */
+.i-chatlist__action:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 1px;
+}
