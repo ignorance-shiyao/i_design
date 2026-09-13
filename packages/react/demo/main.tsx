@@ -4,7 +4,7 @@ import {
   Alert, Avatar, AvatarGroup, Badge, Breadcrumb, Button, Card, Checkbox, CheckboxGroup,
   Collapse, DatePicker, Descriptions, Divider, Drawer, Empty, Form, FormItem, Icon, Input,
   Loading, message, Modal, Pagination, Popconfirm, Radio, RadioGroup, Result, Select,
-  Skeleton, Steps, Switch, Table, Tabs, Tag, Textarea, Tooltip, Upload
+  List, Skeleton, Steps, Switch, Table, Tabs, Tag, TagInput, Textarea, Tooltip, Upload
 } from '../src'
 import type { UploadFile } from '@i-design/common'
 import '../../common/src/styles/index.css'
@@ -28,6 +28,14 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [form] = useState(() => ({ title: '', owner: '' }))
   const [formState, setFormState] = useState(form)
+  /* 补位过渡要靠「删掉中间一项」才看得出来，因此这两处给了可删的数据 */
+  const [listItems, setListItems] = useState([
+    { title: '登录页支持短信验证码' },
+    { title: '工作项列表虚拟滚动' },
+    { title: '深色模式对比度校准' },
+    { title: '导出为 CSV' }
+  ])
+  const [tags, setTags] = useState(['需求', '缺陷', '技术债'])
 
   const rows = [
     { id: 'WI-1024', title: '登录页支持短信验证码', owner: '林岚', points: 5 },
@@ -187,6 +195,21 @@ function App() {
       <Drawer open={drawer} title="工作项详情" onClose={() => setDrawer(false)}>
         WI-1024 登录页支持短信验证码。
       </Drawer>
+
+      {/* 补位过渡：删掉中间一项，其余项要滑过去而不是跳过去 */}
+      <section data-probe="flip" style={{ display: 'grid', gap: 12 }}>
+        <h3 style={{ fontSize: 13, color: 'var(--i-color-text-tertiary)', fontFamily: 'monospace' }}>
+          List / TagInput（补位过渡）
+        </h3>
+        <List items={listItems} />
+        <Button
+          data-testid="drop-second"
+          onClick={() => setListItems((prev) => prev.filter((_, i) => i !== 1))}
+        >
+          删掉第二项
+        </Button>
+        <TagInput value={tags} onChange={setTags} />
+      </section>
     </div>
   )
 }

@@ -8,6 +8,7 @@ import {
   moveCommandIndex
 } from '@i-design/common'
 import { useConfig } from './ConfigProvider'
+import { useFlipMove } from './useFlipMove'
 import { Icon } from './Icon'
 
 export interface PromptAttachment {
@@ -74,6 +75,7 @@ export function PromptInput({
   /* 占位与按钮名都走字典：写死中文的话，换成英文字典后这一块会是唯一还说中文的地方 */
   const { locale } = useConfig()
   const field = useRef<HTMLTextAreaElement>(null)
+  const files = useRef<HTMLDivElement | null>(null)
   const [focused, setFocused] = useState(false)
   const [trigger, setTrigger] = useState<{ at: number; symbol: string; query: string } | null>(null)
   const [active, setActive] = useState(0)
@@ -95,6 +97,9 @@ export function PromptInput({
     el.style.height = 'auto'
     el.style.height = `${el.scrollHeight}px`
   }, [value])
+
+  /* 移除一个附件时让后面的平滑补位，而不是整排瞬移；类名与 Vue 端同一个 */
+  useFlipMove(files, 'i-prompt-file', attachments.map((f) => f.name).join('|'))
 
   const symbols = [...(mentions.length ? ['@'] : []), ...(commands.length ? ['/'] : [])]
   const options = trigger
@@ -212,10 +217,12 @@ export function PromptInput({
       )}
 
       {attachments.length > 0 && (
-        <div className="i-prompt__attachments">
+        <div ref={files} className="i-prompt__attachments">
           {attachments.map((file, index) => (
             <span
               key={file.name + index}
+              // 补位过渡靠这个键认人，下标会随删除整体前移，认不出来
+              data-flip-key={file.name}
               className="i-prompt__file"
               style={
                 {

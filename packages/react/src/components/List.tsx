@@ -1,3 +1,5 @@
+import { useRef } from 'react'
+import { useFlipMove } from './useFlipMove'
 import type { ReactNode } from 'react'
 
 export interface ListItem {
@@ -33,13 +35,30 @@ export function List({
   renderExtra,
   className = ''
 }: ListProps) {
+  const root = useRef<HTMLDivElement | null>(null)
+  /*
+   * 删掉中间一项时让其余项滑过去，而不是跳过去。
+   * Vue 端由 TransitionGroup 顺手给了，React 得自己做一次 FLIP；
+   * 类名用的是同一个 `i-list-move`，两端的时长与曲线因此一致。
+   */
+  useFlipMove(root, 'i-list', items.map((i) => i.title).join('|'))
+
   return (
-    <div className={['i-list', plain ? 'i-list--plain' : '', className].filter(Boolean).join(' ')}>
+    <div
+      ref={root}
+      className={['i-list', plain ? 'i-list--plain' : '', className].filter(Boolean).join(' ')}
+    >
       {header && <div className="i-list__header">{header}</div>}
 
       {items.map((item, index) => (
         <div
           key={item.title + index}
+          /*
+           * 补位过渡靠这个键认人，因此它必须在增删之间保持稳定。
+           * 不能用 `title + index`：删掉中间一项之后，后面每一项的下标都变了，
+           * 前一帧的位置就全对不上，动画等于没做。
+           */
+          data-flip-key={item.title}
           className={['i-list__item', clickable && !item.disabled ? 'is-clickable' : '']
             .filter(Boolean)
             .join(' ')}

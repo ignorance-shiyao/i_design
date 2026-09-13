@@ -6,11 +6,20 @@
  * 也看不出到底哪一项没了。-move 让它们平滑补位，删除的位置就一目了然。
  * 各端的 TransitionGroup / motion 都认这个类名后缀。
  */
-.i-list-move,
-.i-table-row-move,
-.i-tag-move,
-.i-notification-move,
-.i-prompt-file-move {
+/*
+ * 类名写两遍是为了提高特异度。
+ *
+ * 这几个组件自己的 `.i-list__item` 之类的规则里带着 `transition: background`，
+ * 而它们在 index.css 里排在本文件之后——同为一个类的特异度时后来者胜，
+ * 于是补位过渡会被整条覆盖掉，动画根本不跑（实测过：加上类之后
+ * 计算出的 transition 仍是 `background 0.12s`）。写两遍把特异度抬到 0,2,0，
+ * 比把本文件挪到末尾稳妥：样式索引是按目录生成的，顺序不该由手写清单决定。
+ */
+.i-list-move.i-list-move,
+.i-table-row-move.i-table-row-move,
+.i-tag-move.i-tag-move,
+.i-notification-move.i-notification-move,
+.i-prompt-file-move.i-prompt-file-move {
   transition: transform var(--i-motion-base) var(--i-motion-easing-out);
 }
 /*
@@ -72,11 +81,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .i-list-move,
-  .i-table-row-move,
-  .i-tag-move,
-  .i-notification-move,
-  .i-prompt-file-move { transition: none; }
+  .i-list-move.i-list-move,
+  .i-table-row-move.i-table-row-move,
+  .i-tag-move.i-tag-move,
+  .i-notification-move.i-notification-move,
+  .i-prompt-file-move.i-prompt-file-move { transition: none; }
   .i-button:active:not(:disabled),
   .i-menu__item:active:not(.is-disabled),
   .i-dropdown__item:active:not(:disabled),
