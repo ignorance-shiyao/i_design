@@ -114,6 +114,7 @@ const { toolChipStat, summarizeToolChips, toolChipIcon } = await bundle(
 const {
   defaultOpenSteps, summarizeThinking, thinkingStepIcon, toggleThinkingStep
 } = await bundle('packages/common/src/logic/thinking.ts', 'thinking')
+const { alignGuides } = await bundle('packages/common/src/logic/flow.ts', 'flowalign')
 const {
   ganttDomain, ganttBars, ganttTicks, ganttTodayX, ganttLinks, ganttCycle, daysBetween
 } = await bundle('packages/common/src/logic/gantt.ts', 'gantt')
@@ -1804,6 +1805,36 @@ const flipExpectations = flipCases.map(
     `    expect(shouldFlipUp(${y}, ${h}, ${ph}, ${vh}), ${shouldFlipUp({ y, height: h }, ph, vh)});`
 )
 
+/*
+ * 对齐辅助线：同一次拖动在两端必须吸到同一个位置、画出同样几条线，
+ * 否则同一张图在两端会被排成两个样子。
+ */
+const guideNode = (id, x, y, width = 120, height = 48) => ({ id, x, y, width, height, label: id })
+const dartGuideNode = (n) =>
+  `FlowNodeData(id: '${n.id}', label: '${n.label}', x: ${n.x}, y: ${n.y}, ` +
+  `width: ${n.width}, height: ${n.height})`
+const guideCases = [
+  [guideNode('a', 103, 200), [guideNode('b', 100, 20)]],
+  [guideNode('a', 140, 200), [guideNode('b', 100, 20)]],
+  [guideNode('a', 100, 300, 60), [guideNode('b', 70, 20, 120)]],
+  [guideNode('a', 102, 203), [guideNode('b', 100, 200)]],
+  [guideNode('a', 100, 400), [guideNode('b', 100, 20)]]
+]
+const guideExpectations = guideCases.flatMap(([moving, others], i) => {
+  const r = alignGuides(moving, others)
+  const dartOthers = `<FlowNodeData>[${others.map(dartGuideNode).join(', ')}]`
+  const call = `alignGuides(${dartGuideNode(moving)}, ${dartOthers})`
+  return [
+    `    // 第 ${i + 1} 组`,
+    `    expect(${call}.dx, ${r.dx});`,
+    `    expect(${call}.dy, ${r.dy});`,
+    `    expect(${call}.guides.length, ${r.guides.length});`,
+    ...r.guides.map(
+      (g, n) => `    expect(${call}.guides[${n}].at, ${g.at});`
+    )
+  ]
+})
+
 const b2_keyExpectations = [
   ['ArrowLeft', false], ['ArrowLeft', true], ['ArrowRight', false],
   ['ArrowRight', true], ['ArrowUp', false], ['ArrowDown', true], ['Enter', false],
@@ -2380,6 +2411,10 @@ ${thinkingExpectations.join('\n')}
 
   test('贴着触发器的面板往哪边开与 Web 端一致', () {
 ${flipExpectations.join('\n')}
+  });
+
+  test('对齐辅助线的吸附量与线位置与 Web 端一致', () {
+${guideExpectations.join('\n')}
   });
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {

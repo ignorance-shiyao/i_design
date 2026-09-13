@@ -16,6 +16,7 @@ import {
   flatten,
   marqueeRect,
   minimapLayout,
+  alignGuides,
   moveNodes,
   nodesInRect,
   resizeNode,
@@ -24,6 +25,7 @@ import {
   viewFromMinimap,
   type FlowEdge,
   type FlowEdgeType,
+  type FlowGuide,
   type FlowNode,
   type FlowResizeHandle
 } from '@i-design/common'
@@ -58,6 +60,8 @@ const MINIMAP = { width: 168, height: 112 }
 const view = ref({ x: 0, y: 0, scale: 1 })
 const panning = ref(false)
 const dragging = ref<{ ids: string[]; from: { x: number; y: number } } | null>(null)
+/* 拖动时的对齐辅助线。松手就清空——它是拖动过程中的提示，不是图的一部分 */
+const guides = ref<FlowGuide[]>([])
 const resizing = ref<{ id: string; handle: FlowResizeHandle } | null>(null)
 const marquee = ref<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null)
 const marqueeMode = ref(false)
@@ -222,17 +226,55 @@ function onMove(event: PointerEvent) {
   if (dragging.value) {
     const point = toCanvas(event)
     const delta = { x: point.x - dragging.value.from.x, y: point.y - dragging.value.from.y }
-    // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
     const base = editBefore ?? []
-    const moved = moveNodes(
-      base.map((g) => ({ ...g, label: '' })) as FlowNode[],
-      dragging.value.ids,
-      delta
-    )
-    editAfter = moved.map((m) => {
-      const before = base.find((g) => g.id === m.id)
-      return { ...m, width: before?.width, height: before?.height }
+    const asNodes = base.map((g) => ({ ...g, label: '' })) as FlowNode[]
+    // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
+    const free = moveNodes(asNodes, dragging.value.ids, delta, 0)
+    const grid = moveNodes(asNodes, dragging.value.ids, delta)
+
+    /* 只取尺寸。连 x/y 一起取回来的话，对齐算的就是拖动前的位置，永远是「已经对齐」 */
+    const sizeOf = (id: string) => {
+      const found = base.find((g) => g.id === id)
+      return { width: found?.width, height: found?.height }
+    }
+
+    /*
+     * 对齐优先于网格。
+     *
+     * 两者都是吸附，但网格吸的是「整齐」，对齐吸的是「和那一个对上」——
+     * 后者才是用户此刻在做的事。先按网格吸的话，节点只能落在 8 的倍数上，
+     * 于是要么正好对齐、要么差 8 像素，中间那几像素根本到不了，
+     * 辅助线也就永远不出现（实测过：拖 5px 直接跳到差 8px 的位置）。
+     *
+     * 所以按未吸附的位置算对齐：哪根轴对上了就听对齐的，没对上的那根轴再回到网格。
+     *
+     * 阈值按缩放换算：缩到 50% 时屏幕上的 6px 是画布上的 12px，
+     * 不换算的话图缩得越小越难吸上。
+     */
+    const anchorId = dragging.value.ids[0]
+    const anchor = free.find((m) => m.id === anchorId)
+    const picked = new Set(dragging.value.ids)
+    const aligned = anchor
+      ? alignGuides(
+          { ...anchor, label: '', ...sizeOf(anchorId) } as FlowNode,
+          props.nodes.filter((n) => !picked.has(n.id)),
+          6 / view.value.scale
+        )
+      : { dx: 0, dy: 0, guides: [] }
+    guides.value = aligned.guides
+
+    const onX = aligned.guides.some((g) => g.orientation === 'v')
+    const onY = aligned.guides.some((g) => g.orientation === 'h')
+    editAfter = free.map((m) => {
+      const snapped = grid.find((g) => g.id === m.id)!
+      return {
+        id: m.id,
+        x: onX ? m.x + aligned.dx : snapped.x,
+        y: onY ? m.y + aligned.dy : snapped.y,
+        ...sizeOf(m.id)
+      }
     })
+
     emit('move', editAfter)
     return
   }
@@ -258,6 +300,7 @@ function onUp() {
   commitEdit()
   dragging.value = null
   resizing.value = null
+  guides.value = []
 }
 
 function zoom(delta: number) {
@@ -326,6 +369,8 @@ function exportSvg() {
   clone.querySelector('.i-flow__scene')?.removeAttribute('transform')
   clone.querySelector('.i-flow__marquee')?.remove()
   clone.querySelectorAll('.i-flow__handle').forEach((el) => el.remove())
+  // 辅助线是拖动时的提示，不该出现在导出的图里
+  clone.querySelectorAll('.i-flow__guide').forEach((el) => el.remove())
 
   const style = document.createElementNS('http://www.w3.org/2000/svg', 'style')
   style.textContent = `${snapshotStyle(flatten())}\n${flowCss()}`
@@ -533,6 +578,20 @@ const isActive = (edge: FlowEdge) =>
           :y="marqueeBox.y"
           :width="marqueeBox.width"
           :height="marqueeBox.height"
+        />
+
+        <!--
+          对齐辅助线。只在拖动过程中出现，松手即消失——它是操作时的提示，
+          不是图的一部分，留在画布上会被当成一条真的连线。
+        -->
+        <line
+          v-for="(guide, index) in guides"
+          :key="index"
+          class="i-flow__guide"
+          :x1="guide.orientation === 'v' ? guide.at : guide.from"
+          :y1="guide.orientation === 'v' ? guide.from : guide.at"
+          :x2="guide.orientation === 'v' ? guide.at : guide.to"
+          :y2="guide.orientation === 'v' ? guide.to : guide.at"
         />
       </g>
     </svg>

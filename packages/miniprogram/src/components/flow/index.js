@@ -10,6 +10,7 @@ import {
   NODE_W,
   anchorOf,
   boundsOf,
+  alignGuides,
   marqueeRect,
   minimapLayout,
   moveNodes,
@@ -53,6 +54,7 @@ Component({
       this.drag = null
       this.resizing = null
       this.marquee = null
+      this.guides = []
       this.setup()
     }
   },
@@ -212,15 +214,41 @@ Component({
       }
 
       if (this.drag) {
-        // 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平
+        /*
+         * 位移量整体吸附一次：逐个吸附会把组内原本的相对间距抹平。
+         *
+         * 对齐优先于网格：两者都是吸附，但网格吸的是「整齐」，对齐吸的是
+         * 「和那一个对上」——后者才是用户此刻在做的事。先按网格吸的话，
+         * 节点只能落在 8 的倍数上，中间那几像素到不了，辅助线也就永远不出现。
+         */
         const delta = { x: point.x - this.drag.from.x, y: point.y - this.drag.from.y }
-        const moved = moveNodes(this.drag.base, this.drag.ids, delta)
+        const free = moveNodes(this.drag.base, this.drag.ids, delta, 0)
+        const grid = moveNodes(this.drag.base, this.drag.ids, delta)
+        const sizeOf = (id) => {
+          const found = this.drag.base.find((g) => g.id === id)
+          return { width: found && found.width, height: found && found.height }
+        }
+        const picked = new Set(this.drag.ids)
+        const anchor = free[0]
+        const aligned = anchor
+          ? alignGuides(
+              { ...anchor, label: '', ...sizeOf(anchor.id) },
+              (this.data.nodes || []).filter((n) => !picked.has(n.id)),
+              6 / this.view.scale
+            )
+          : { dx: 0, dy: 0, guides: [] }
+        this.guides = aligned.guides
+        const onX = aligned.guides.some((g) => g.orientation === 'v')
+        const onY = aligned.guides.some((g) => g.orientation === 'h')
         this.triggerEvent('move', {
-          changes: moved.map((m) => {
-            const before = this.drag.base.find((g) => g.id === m.id)
-            return { ...m, width: before && before.width, height: before && before.height }
-          })
+          changes: free.map((m, i) => ({
+            id: m.id,
+            x: onX ? m.x + aligned.dx : grid[i].x,
+            y: onY ? m.y + aligned.dy : grid[i].y,
+            ...sizeOf(m.id)
+          }))
         })
+        this.draw()
         return
       }
 
@@ -244,6 +272,11 @@ Component({
       }
       this.drag = null
       this.resizing = null
+      // 辅助线是拖动时的提示，松手就清空
+      if (this.guides && this.guides.length) {
+        this.guides = []
+        this.draw()
+      }
     },
 
     /** 点缩略图跳过去：大图里这是唯一比反复拖画布快的导航方式 */
@@ -411,6 +444,28 @@ Component({
           ctx.strokeStyle = '#5e7ce0'
           ctx.lineWidth = 1 / this.view.scale
           ctx.strokeRect(rect.x, rect.y, rect.width, rect.height)
+          ctx.setLineDash([])
+        }
+
+        /*
+         * 对齐辅助线。虚线而不是实线：实线会和真正的连线混在一起，
+         * 读者要多看一眼才知道那不是图的一部分。
+         */
+        if (this.guides && this.guides.length) {
+          ctx.setLineDash([4 / this.view.scale, 3 / this.view.scale])
+          ctx.strokeStyle = '#5e7ce0'
+          ctx.lineWidth = 1 / this.view.scale
+          for (const guide of this.guides) {
+            ctx.beginPath()
+            if (guide.orientation === 'v') {
+              ctx.moveTo(guide.at, guide.from)
+              ctx.lineTo(guide.at, guide.to)
+            } else {
+              ctx.moveTo(guide.from, guide.at)
+              ctx.lineTo(guide.to, guide.at)
+            }
+            ctx.stroke()
+          }
           ctx.setLineDash([])
         }
       }

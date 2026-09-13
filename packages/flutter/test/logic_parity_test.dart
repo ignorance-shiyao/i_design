@@ -1351,6 +1351,42 @@ void main() {
     expect(shouldFlipUp(650, 32, 60, 720), true);
   });
 
+  test('对齐辅助线的吸附量与线位置与 Web 端一致', () {
+    // 第 1 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dx, -3);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dy, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides.length, 3);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[0].at, 100);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[1].at, 160);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 103, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[2].at, 220);
+    // 第 2 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 140, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dx, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 140, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dy, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 140, y: 200, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides.length, 0);
+    // 第 3 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 300, width: 60, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 70, y: 20, width: 120, height: 48)]).dx, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 300, width: 60, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 70, y: 20, width: 120, height: 48)]).dy, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 300, width: 60, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 70, y: 20, width: 120, height: 48)]).guides.length, 1);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 300, width: 60, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 70, y: 20, width: 120, height: 48)]).guides[0].at, 130);
+    // 第 4 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).dx, -2);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).dy, -3);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides.length, 6);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[0].at, 100);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[1].at, 160);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[2].at, 220);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[3].at, 200);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[4].at, 224);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 102, y: 203, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 200, width: 120, height: 48)]).guides[5].at, 248);
+    // 第 5 组
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dx, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).dy, 0);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides.length, 3);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[0].at, 100);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[1].at, 160);
+    expect(alignGuides(FlowNodeData(id: 'a', label: 'a', x: 100, y: 400, width: 120, height: 48), <FlowNodeData>[FlowNodeData(id: 'b', label: 'b', x: 100, y: 20, width: 120, height: 48)]).guides[2].at, 220);
+  });
+
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
     expect(shouldShowElapsed(0), false);
     expect(shouldShowElapsed(2999), false);

@@ -289,6 +289,119 @@ export function moveNodes(
     .map((node) => ({ id: node.id, x: node.x + dx, y: node.y + dy }))
 }
 
+/* ---------- 对齐辅助线 ---------- */
+
+/** 一条辅助线。`span` 是它要画多长——只盖住参与对齐的那几个节点 */
+export interface FlowGuide {
+  /** v 是竖线（左右对齐），h 是横线（上下对齐） */
+  orientation: 'v' | 'h'
+  /** 竖线的 x 或横线的 y */
+  at: number
+  /** 线的起止，沿另一根轴 */
+  from: number
+  to: number
+}
+
+/** 一个节点在某根轴上的三条对齐线：起边、中心、止边 */
+function linesOf(node: FlowNode, axis: 'x' | 'y') {
+  const start = axis === 'x' ? node.x : node.y
+  const size = (axis === 'x' ? node.width : node.height) ?? (axis === 'x' ? 120 : 48)
+  return [
+    { kind: 'start' as const, at: start },
+    { kind: 'center' as const, at: start + size / 2 },
+    { kind: 'end' as const, at: start + size }
+  ]
+}
+
+const spanOf = (node: FlowNode, axis: 'x' | 'y') => {
+  const start = axis === 'x' ? node.x : node.y
+  const size = (axis === 'x' ? node.width : node.height) ?? (axis === 'x' ? 120 : 48)
+  return [start, start + size] as const
+}
+
+/**
+ * 拖动时的对齐辅助线与吸附量。
+ *
+ * 手动把两个节点对齐是件很折磨人的事：差一两个像素看得出来，却怎么也拖不准。
+ * 辅助线把「已经对齐了」这件事说出来，吸附再把最后那一两像素替用户走完。
+ *
+ * 三条取舍：
+ *
+ * 1. **中心优先于边**。两个节点中心对齐时，即使宽度不同看起来也是齐的；
+ *    按边对齐则会在宽度不同时显得歪。所以同样距离内先吸中心。
+ * 2. **每根轴只吸一条**。同时吸左边和中心是自相矛盾的，取最近的那条。
+ * 3. **线只画到参与对齐的节点为止**，不贯穿整张画布。贯穿全画布的线在节点多的图上
+ *    会像一张网格，反而看不出是哪两个节点对齐了。
+ *
+ * 阈值用画布坐标，调用方按缩放比例换算——缩小到 50% 时，屏幕上的 6px 是画布上的 12px，
+ * 不换算的话图缩得越小越难吸上。
+ */
+export function alignGuides(
+  moving: FlowNode,
+  others: FlowNode[],
+  threshold = 6
+): { dx: number; dy: number; guides: FlowGuide[] } {
+  const guides: FlowGuide[] = []
+  let dx = 0
+  let dy = 0
+
+  for (const axis of ['x', 'y'] as const) {
+    const mine = linesOf(moving, axis)
+    let best: { delta: number; at: number; center: boolean; other: FlowNode } | null = null
+
+    for (const other of others) {
+      if (other.id === moving.id) continue
+      for (const line of linesOf(other, axis)) {
+        for (const own of mine) {
+          const delta = line.at - own.at
+          if (Math.abs(delta) > threshold) continue
+          const center = own.kind === 'center' && line.kind === 'center'
+          if (
+            !best ||
+            Math.abs(delta) < Math.abs(best.delta) ||
+            // 同样近时中心赢：宽度不同的两个节点，中心对齐才看着是齐的
+            (Math.abs(delta) === Math.abs(best.delta) && center && !best.center)
+          ) {
+            best = { delta, at: line.at, center, other }
+          }
+        }
+      }
+    }
+
+    if (!best) continue
+    if (axis === 'x') dx = best.delta
+    else dy = best.delta
+
+    /*
+     * 吸附量定下来之后，把这一位移下**所有**真正重合的线都画出来。
+     * 左边、中心、右边同时对齐时只画一条，读者会以为只有那一处齐了；
+     * 三条都画出来，「这两个节点完全对齐」才说得清楚。
+     */
+    const cross = axis === 'x' ? 'y' : 'x'
+    const [a1, a2] = spanOf(moving, cross)
+    const seen = new Set<number>()
+    for (const other of others) {
+      if (other.id === moving.id) continue
+      const [b1, b2] = spanOf(other, cross)
+      for (const line of linesOf(other, axis)) {
+        for (const own of linesOf(moving, axis)) {
+          if (line.at - own.at !== best.delta) continue
+          if (seen.has(line.at)) continue
+          seen.add(line.at)
+          guides.push({
+            orientation: axis === 'x' ? 'v' : 'h',
+            at: line.at,
+            from: Math.min(a1, b1),
+            to: Math.max(a2, b2)
+          })
+        }
+      }
+    }
+  }
+
+  return { dx, dy, guides }
+}
+
 /* ---------- 节点缩放 ---------- */
 
 /** 缩放手柄的位置。只放四个角：边中点手柄在小节点上会和角手柄挤在一起 */

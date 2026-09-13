@@ -344,3 +344,118 @@ Rect snapshotViewBox(List<FlowNodeData> nodes, {double padding = 24}) {
   final b = boundsOf(nodes, padding: padding);
   return Rect.fromLTWH(b.x, b.y, b.width, b.height);
 }
+
+/* ---------- 对齐辅助线（对应 logic/flow.ts 的 alignGuides） ---------- */
+
+enum IFlowGuideOrientation { vertical, horizontal }
+
+class IFlowGuide {
+  const IFlowGuide({
+    required this.orientation,
+    required this.at,
+    required this.from,
+    required this.to,
+  });
+
+  final IFlowGuideOrientation orientation;
+
+  /// 竖线的 x 或横线的 y
+  final double at;
+
+  /// 线的起止，沿另一根轴
+  final double from;
+  final double to;
+}
+
+class IFlowAlignment {
+  const IFlowAlignment({required this.dx, required this.dy, required this.guides});
+
+  final double dx;
+  final double dy;
+  final List<IFlowGuide> guides;
+}
+
+class _Line {
+  const _Line(this.kind, this.at);
+  final String kind;
+  final double at;
+}
+
+List<_Line> _linesOf(FlowNodeData node, bool horizontal) {
+  final start = horizontal ? node.x : node.y;
+  final size = horizontal ? node.width : node.height;
+  return [_Line('start', start), _Line('center', start + size / 2), _Line('end', start + size)];
+}
+
+List<double> _spanOf(FlowNodeData node, bool horizontal) {
+  final start = horizontal ? node.x : node.y;
+  final size = horizontal ? node.width : node.height;
+  return [start, start + size];
+}
+
+/// 拖动时的对齐辅助线与吸附量。
+///
+/// 手动把两个节点对齐是件很折磨人的事：差一两个像素看得出来，却怎么也拖不准。
+/// 三条取舍与 Web 端一致：中心优先于边、每根轴只吸一条、线只画到参与对齐的节点为止。
+IFlowAlignment alignGuides(
+  FlowNodeData moving,
+  List<FlowNodeData> others, {
+  double threshold = 6,
+}) {
+  final guides = <IFlowGuide>[];
+  var dx = 0.0;
+  var dy = 0.0;
+
+  for (final horizontal in [true, false]) {
+    double? bestDelta;
+    var bestCenter = false;
+
+    for (final other in others) {
+      if (other.id == moving.id) continue;
+      for (final line in _linesOf(other, horizontal)) {
+        for (final own in _linesOf(moving, horizontal)) {
+          final delta = line.at - own.at;
+          if (delta.abs() > threshold) continue;
+          final center = own.kind == 'center' && line.kind == 'center';
+          if (bestDelta == null ||
+              delta.abs() < bestDelta.abs() ||
+              // 同样近时中心赢：宽度不同的两个节点，中心对齐才看着是齐的
+              (delta.abs() == bestDelta.abs() && center && !bestCenter)) {
+            bestDelta = delta;
+            bestCenter = center;
+          }
+        }
+      }
+    }
+
+    if (bestDelta == null) continue;
+    if (horizontal) {
+      dx = bestDelta;
+    } else {
+      dy = bestDelta;
+    }
+
+    // 吸附量定下来之后，把这一位移下所有真正重合的线都画出来
+    final cross = _spanOf(moving, !horizontal);
+    final seen = <double>{};
+    for (final other in others) {
+      if (other.id == moving.id) continue;
+      final otherCross = _spanOf(other, !horizontal);
+      for (final line in _linesOf(other, horizontal)) {
+        for (final own in _linesOf(moving, horizontal)) {
+          if (line.at - own.at != bestDelta) continue;
+          if (!seen.add(line.at)) continue;
+          guides.add(IFlowGuide(
+            orientation:
+                horizontal ? IFlowGuideOrientation.vertical : IFlowGuideOrientation.horizontal,
+            at: line.at,
+            from: cross[0] < otherCross[0] ? cross[0] : otherCross[0],
+            to: cross[1] > otherCross[1] ? cross[1] : otherCross[1],
+          ));
+        }
+      }
+    }
+  }
+
+  return IFlowAlignment(dx: dx, dy: dy, guides: guides);
+}

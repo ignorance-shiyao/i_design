@@ -19,6 +19,7 @@ import { virtualWindow, scrollToRow, shouldVirtualize } from './virtual'
 import { isTextOverflowing, OVERFLOW_EPSILON } from './overflow'
 import { resolveLocale, zhCN, enUS } from './locale'
 import { shouldFlipUp } from './overlay'
+import { alignGuides } from './flow'
 import { contrastRatio, hexToRgb, readableOn, rgbToOklch } from './palette'
 import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
 import { qrMatrix, qrVersionFor } from './qrcode'
@@ -553,5 +554,62 @@ describe('贴着触发器的面板往哪边开', () => {
 
   it('正好卡在边上算放得下，不为了几个像素翻一次', () => {
     expect(shouldFlipUp(trigger, 280, 720)).toBe(false)
+  })
+})
+
+describe('拖动时的对齐辅助线', () => {
+  const node = (id: string, x: number, y: number, width = 120, height = 48) => ({
+    id,
+    x,
+    y,
+    width,
+    height,
+    label: id
+  })
+
+  it('差几像素就吸上去，并给出一条线', () => {
+    // 差一两个像素看得出来，却怎么也拖不准——最后那点距离该由吸附走完
+    const result = alignGuides(node('a', 103, 200), [node('b', 100, 20)])
+    expect(result.dx).toBe(-3)
+    expect(result.guides.some((g) => g.orientation === 'v' && g.at === 100)).toBe(true)
+  })
+
+  it('超出阈值就不吸，也不画线', () => {
+    expect(alignGuides(node('a', 140, 200), [node('b', 100, 20)])).toEqual({
+      dx: 0,
+      dy: 0,
+      guides: []
+    })
+  })
+
+  it('宽度不同的两个节点，中心对齐优先于按边对齐', () => {
+    // 按边对齐在宽度不同时看着是歪的
+    const result = alignGuides(node('a', 100, 300, 60), [node('b', 70, 20, 120)])
+    expect(result.dx).toBe(0)
+    expect(result.guides[0].at).toBe(130)
+  })
+
+  it('两根轴各吸一条，互不干扰', () => {
+    const result = alignGuides(node('a', 102, 203), [node('b', 100, 200)])
+    expect([result.dx, result.dy]).toEqual([-2, -3])
+    expect(new Set(result.guides.map((g) => g.orientation))).toEqual(new Set(['v', 'h']))
+  })
+
+  it('左中右同时对齐时三条线都画出来', () => {
+    // 只画一条的话，读者会以为只有那一处齐了
+    const result = alignGuides(node('a', 103, 200), [node('b', 100, 20)])
+    const vertical = result.guides.filter((g) => g.orientation === 'v').map((g) => g.at)
+    expect(vertical.sort((a, b) => a - b)).toEqual([100, 160, 220])
+  })
+
+  it('线只盖住参与对齐的那两个节点，不贯穿整张画布', () => {
+    // 贯穿全画布的线在节点多的图上像一张网格，反而看不出是哪两个对齐了
+    const [guide] = alignGuides(node('a', 100, 400), [node('b', 100, 20)]).guides
+    expect([guide.from, guide.to]).toEqual([20, 448])
+  })
+
+  it('不跟自己对齐', () => {
+    const self = node('a', 100, 100)
+    expect(alignGuides(self, [self]).guides).toEqual([])
   })
 })

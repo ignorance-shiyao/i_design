@@ -147,3 +147,17 @@
   stroke: var(--i-color-brand);
   stroke-width: 1.5;
 }
+
+/*
+ * 对齐辅助线。
+ *
+ * 用虚线而不是实线：实线会和真正的连线混在一起，读者要多看一眼才知道
+ * 那不是图的一部分。颜色用品牌色——画布上其余元素都是中性色，
+ * 只有它是「此刻正在发生的事」。
+ */
+.i-flow__guide {
+  stroke: var(--i-color-brand);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
