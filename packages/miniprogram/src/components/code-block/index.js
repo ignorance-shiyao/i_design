@@ -7,7 +7,7 @@
  * 这一端必须在 JS 里把行与 token 都算好交给模板：WXML 不能调用函数，
  * 也没有 v-html 这类东西——反过来说，注入那条路在这里根本不存在。
  */
-import { diffLines, diffStat, tokenizeLines } from '@i-design/common'
+import { dedentCode, diffLines, diffStat, tokenizeLines } from '@i-design/common'
 import { getLocale } from '../../config'
 
 Component({
@@ -39,7 +39,8 @@ Component({
     },
 
     trim(text) {
-      return String(text || '').replace(/^\n+|\s+$/g, '')
+      // 归一缩进走公共层：三端各写一套裁法，同一段代码会缩进不一样
+      return dedentCode(String(text || ''))
     },
 
     build() {

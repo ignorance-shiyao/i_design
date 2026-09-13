@@ -13,6 +13,8 @@
 import { computed, ref, watch } from 'vue'
 import { componentProps, type PropMeta } from '@/data/componentProps'
 import CodeBlock from './CodeBlock.vue'
+import { groupPlaygroundProps } from './playgroundGroups'
+import { formatSnippet } from './snippet'
 import ISegmented from '@/components/ISegmented.vue'
 import ISwitch from '@/components/ISwitch.vue'
 import IInput from '@/components/IInput.vue'
@@ -99,9 +101,15 @@ const code = computed(() => {
     else if (value === '') continue
     else attrs.push(`${meta.name}="${value}"`)
   }
-  const open = attrs.length ? `<${props.name}\n  ${attrs.join('\n  ')}\n>` : `<${props.name}>`
-  return props.slotText ? `${open}${props.slotText}</${props.name}>` : open.replace(/>$/, ' />')
+  // 放得下就一行，放不下才每个属性一行——读者要粘贴的往往就是一小段
+  return formatSnippet({ name: props.name, attrs, slot: props.slotText })
 })
+
+/*
+ * 分档显示：十几个属性摊在一格网格里，开关、分段器、输入框大小不一地混排，
+ * 读者得逐个看过去才知道哪个控件配哪个属性。
+ */
+const groups = computed(() => groupPlaygroundProps(metas.value))
 
 function reset() {
   const next: Record<string, unknown> = {}
@@ -117,13 +125,19 @@ function reset() {
     </div>
 
     <div class="pg__controls">
-      <div v-for="meta in metas" :key="meta.name" class="pg__row">
+      <section v-for="group in groups" :key="group.title" class="pg__group">
+        <h4 class="pg__group-title">
+          {{ group.title }}
+          <span class="pg__group-hint">{{ group.hint }}</span>
+        </h4>
+        <div class="pg__grid">
+      <div v-for="meta in group.metas" :key="meta.name" class="pg__row">
         <div class="pg__label">
           <code>{{ meta.name }}</code>
           <span v-if="meta.doc" class="pg__doc">{{ meta.doc }}</span>
         </div>
         <!--
-          每个控件都带上属性名作无障碍名：这一排控件左边虽然写着属性名，
+          每个控件都带上属性名作无障碍名：控件上面虽然写着属性名，
           但那是一个独立的 div，读屏不会把它和控件关联起来，
           听到的只是一串「开关，未选中」「编辑框，空」。
         -->
@@ -157,6 +171,8 @@ function reset() {
           />
         </div>
       </div>
+        </div>
+      </section>
       <button class="pg__reset" type="button" @click="reset">恢复默认值</button>
     </div>
 
@@ -185,40 +201,81 @@ function reset() {
 }
 .pg__controls {
   display: grid;
-  /* 一行放不下时自动折成一列，窄屏上控件不会被挤扁 */
-  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
-  gap: var(--i-spacing-4) var(--i-spacing-6);
+  gap: var(--i-spacing-5);
   padding: var(--i-spacing-5) var(--i-spacing-6);
   border-bottom: 1px solid var(--i-color-hairline);
 }
-.pg__row {
+.pg__group {
+  display: grid;
+  gap: var(--i-spacing-3);
+}
+.pg__group-title {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--i-spacing-4);
+  align-items: baseline;
+  gap: var(--i-spacing-2);
+  margin: 0;
+  font-size: var(--i-font-size-sm);
+  font-weight: 600;
+  color: var(--i-color-text);
+}
+.pg__group-hint {
+  font-size: var(--i-font-size-xs);
+  font-weight: 400;
+  color: var(--i-color-text-tertiary);
+}
+.pg__grid {
+  display: grid;
+  /* 一行放不下时自动折成一列，窄屏上控件不会被挤扁 */
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: var(--i-spacing-4) var(--i-spacing-6);
+}
+/*
+ * 属性名在上、控件在下，而不是左右分开。
+ *
+ * 左右分开时控件靠右对齐，而各个控件宽度差得很远（两个选项的分段器
+ * 与一个开关差着三倍），于是每一行的控件各自停在不同的位置上，
+ * 看起来像和左边的属性名没关系。名字压在控件正上方就不会有这个问题，
+ * 说明文字也终于有整行的宽度可用，不必截成「视觉层级：主按钮…」。
+ */
+.pg__row {
+  display: grid;
+  gap: var(--i-spacing-2);
+  align-content: start;
   min-width: 0;
 }
 .pg__label {
   display: flex;
   flex-direction: column;
+  /* 收到内容宽度：属性名带着底色，铺满整格会看起来像一个空输入框 */
+  align-items: flex-start;
   gap: 2px;
   min-width: 0;
 }
+/* 说明文字要整行，别跟着属性名一起收窄 */
+.pg__label .pg__doc { align-self: stretch; }
 .pg__label code {
   font-size: var(--i-font-size-sm);
   color: var(--i-color-text);
 }
 .pg__doc {
   font-size: var(--i-font-size-xs);
+  line-height: 1.5;
   color: var(--i-color-text-secondary);
-  /* 说明可能很长，占满一行会把控件挤走 */
+  /*
+   * 最多两行。属性名与控件改成上下排布之后，说明有整格的宽度可用，
+   * 原先那条「一行截断」会把「不传时用字典里的『请选择』，由 ConfigProvider …」
+   * 恰好截在最要紧的那半句上。留两行；再长的说明本来也该去看属性表。
+   */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .pg__control {
-  flex: none;
-  max-width: 60%;
+  min-width: 0;
+  /* 控件跟着格子走，不再限制在 60%：限制之后分段器会被压得选项挤在一起 */
+  max-width: 100%;
 }
 .pg__reset {
   grid-column: 1 / -1;

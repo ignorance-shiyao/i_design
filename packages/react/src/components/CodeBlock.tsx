@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  dedentCode,
   diffLines as buildDiff,
   diffStat,
   tokenizeLines,
@@ -57,9 +58,10 @@ export function CodeBlock({
   const [copied, setCopied] = useState(false)
 
   /* 首尾空行去掉：模板字符串写出来的代码几乎总是带着它们，留着白占两行 */
-  const source = code.replace(/^\n+|\s+$/g, '')
+  // 归一缩进：示例都写在模板内部，本身带着页面那几层缩进
+  const source = dedentCode(code)
   const isDiff = before !== ''
-  const diff = isDiff ? buildDiff(before.replace(/^\n+|\s+$/g, ''), source) : []
+  const diff = isDiff ? buildDiff(dedentCode(before), source) : []
   const stat = diffStat(diff)
   const lines = tokenizeLines(source, lang)
   const total = isDiff ? diff.length : lines.length

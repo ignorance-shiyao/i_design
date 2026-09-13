@@ -72,6 +72,7 @@ import {
   selectionExcerpt,
   selectionTooLong
 } from './selection'
+import { dedentCode } from './highlight'
 import { describeAccept } from './upload'
 import { contrastRatio, hexToRgb, readableOn, rgbToOklch, solidPair } from './palette'
 import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
@@ -1166,5 +1167,31 @@ describe('会话列表', () => {
     expect(moveActiveSession(groups, 'd', -1)).toBe('d')
     expect(moveActiveSession(groups, 'c', 1)).toBe('c')
     expect(moveActiveSession(groups, 'c', -1)).toBe('e')
+  })
+})
+
+describe('代码块的缩进归一', () => {
+  it('按最小缩进裁，保留代码本身的层级', () => {
+    // 逐行 trim 会把层级也抹平，<template> 里的两级缩进全贴到左边
+    const code = ['      <div>', '        <span />', '      </div>'].join('\n')
+    expect(dedentCode(code)).toBe('<div>\n  <span />\n</div>')
+  })
+
+  it('掐掉首尾空行：那是模板换行留下的，不是作者写的', () => {
+    expect(dedentCode('\n\n  <p />\n  \n')).toBe('<p />')
+  })
+
+  it('空行不参与最小缩进的计算', () => {
+    // 算进去的话最小值永远是 0，这个函数就什么也不做了
+    const code = ['    a', '', '    b'].join('\n')
+    expect(dedentCode(code)).toBe('a\n\nb')
+  })
+
+  it('本来就顶格的代码原样返回，只去掉行尾空白', () => {
+    expect(dedentCode('a  \nb')).toBe('a\nb')
+  })
+
+  it('全是空白时返回空串，而不是一串换行', () => {
+    expect(dedentCode('\n   \n  \n')).toBe('')
   })
 })

@@ -1513,6 +1513,15 @@ void main() {
     expect(moveActiveSession(groupSessions(sessions, now), 'c', -1), "e");
   });
 
+  test('代码块的缩进归一与 Web 端一致', () {
+    expect(dedentCode('      <div>\n        <span />\n      </div>'), '<div>\n  <span />\n</div>');
+    expect(dedentCode('\n\n  <p />\n  \n'), '<p />');
+    expect(dedentCode('    a\n\n    b'), 'a\n\nb');
+    expect(dedentCode('a  \nb'), 'a\nb');
+    expect(dedentCode('\n   \n  \n'), '');
+    expect(dedentCode('<IButton>提交</IButton>'), '<IButton>提交</IButton>');
+  });
+
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
     final steps = <IThinkingStep>[IThinkingStep(key: 'a', title: '拆解问题', kind: IThinkingStepKind.reason, status: IThinkingStepStatus.done), IThinkingStep(key: 'b', title: '检索文档', kind: IThinkingStepKind.search, status: IThinkingStepStatus.error), IThinkingStep(key: 'c', title: '写补丁', kind: IThinkingStepKind.code, status: IThinkingStepStatus.running), IThinkingStep(key: 'd', title: '复核', kind: IThinkingStepKind.tool, status: IThinkingStepStatus.done)];
     expect(defaultOpenSteps(steps), <String>['b', 'c']);

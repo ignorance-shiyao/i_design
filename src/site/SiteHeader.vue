@@ -146,7 +146,8 @@ const links = [
   display: flex;
   align-items: center;
   gap: var(--i-spacing-8);
-  height: 64px;
+  /* 与侧栏共用同一个数：侧栏贴着页头下沿粘住 */
+  height: var(--doc-header-h);
 }
 .header__brand {
   display: flex;

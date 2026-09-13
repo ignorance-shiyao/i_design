@@ -63,7 +63,13 @@ watch(() => route.path, () => {
 <template>
   <div class="i-container doc-layout">
     <aside ref="side" class="doc-layout__side">
-      <IInput v-model="search" placeholder="搜索文档" aria-label="搜索文档" />
+      <!--
+        搜索框单独包一层：它要粘在侧栏顶部，而分组标题粘在它下面，
+        两者得是两个独立的粘性元素，中间不能再隔一层普通容器。
+      -->
+      <div class="doc-layout__search">
+        <IInput v-model="search" placeholder="搜索文档" aria-label="搜索文档" />
+      </div>
       <p v-if="!filteredNav.length" class="doc-layout__empty">没有匹配的文档</p>
       <div
         v-for="group in filteredNav"
@@ -93,12 +99,26 @@ watch(() => route.path, () => {
   max-width: 1440px;
   grid-template-columns: 224px minmax(0, 1fr);
   gap: 48px;
-  padding-top: 32px;
+  /*
+   * 顶部留白给正文那一列，不给侧栏。
+   *
+   * 原先写在容器上，两列一起下移，于是侧栏顶上空出一条白带——它不承载任何东西，
+   * 看起来却像菜单没对齐。侧栏的第一行应当就是搜索框，紧贴页头。
+   */
   align-items: start;
 }
 .doc-layout__side {
   position: sticky;
-  top: 88px;
+  /*
+   * 紧贴页头下沿，不再空出一截。
+   *
+   * 原先是 88px：页头 64、再加 24 的空白。那段空白在侧栏顶上是白的，
+   * 看起来像菜单「没对齐」，而它并不承载任何东西——正文那一列的留白
+   * 由 .doc-layout 的 padding-top 给，侧栏不需要再来一份。
+   */
+  top: calc(var(--doc-header-h) + 1px);
+  /* 搜索框那一块的高度，分组标题要粘在它下面。与输入框用同一组令牌算出来 */
+  --doc-search-h: calc(var(--i-control-height-md) + var(--i-spacing-3) * 2);
   display: grid;
   gap: var(--i-spacing-4);
   align-content: start;
@@ -106,7 +126,8 @@ watch(() => route.path, () => {
    * 侧栏比视口高时，仅靠 sticky 会让下半截永远够不到——粘住顶部后它不随页面滚动，
    * 只有父容器快结束时才「解锁」，表现为菜单与内容错位。因此让它自己成为滚动容器。
    */
-  max-height: calc(100vh - 88px - var(--i-spacing-6));
+  max-height: calc(100vh - var(--doc-header-h) - var(--i-spacing-4));
+  /* 顶部那一档留白由搜索块自己的 padding 给，容器不再重复一份 */
   overflow-y: auto;
   overscroll-behavior: contain;
   /*
@@ -127,6 +148,22 @@ watch(() => route.path, () => {
   );
   padding-right: 20px;
   border-right: 1px solid var(--i-color-hairline);
+}
+
+/*
+ * 搜索框粘在侧栏最上面。
+ *
+ * 侧栏有三千多像素的内容，滚到中段想换个关键词就得先滚回顶部——
+ * 而「搜一下」恰恰是内容多了之后最常用的那个入口。
+ * 底色不能省：下面的链接要从它身后滚过去。
+ */
+.doc-layout__search {
+  position: sticky;
+  top: 0;
+  /* 比分组标题高一层：两者都粘住时，搜索框该压在上面 */
+  z-index: 2;
+  padding: var(--i-spacing-3) 0;
+  background: var(--i-color-bg);
 }
 /* 细滚动条，静止时隐藏，避免侧栏出现一条常驻竖线 */
 .doc-layout__side::-webkit-scrollbar {
@@ -154,7 +191,8 @@ watch(() => route.path, () => {
  */
 .doc-layout__group-title {
   position: sticky;
-  top: 0;
+  /* 粘在搜索框下沿，而不是侧栏顶——否则两者会叠在一起 */
+  top: var(--doc-search-h);
   z-index: 1;
   font-family: var(--i-font-family-mono);
   font-size: var(--i-font-size-xs);
@@ -197,6 +235,7 @@ watch(() => route.path, () => {
 .doc-layout__main {
   min-width: 0;
   max-width: 1000px;
+  padding-top: 32px;
   padding-bottom: var(--i-spacing-16);
 }
 
@@ -208,8 +247,8 @@ watch(() => route.path, () => {
   .doc-layout {
     grid-template-columns: 1fr;
     gap: 0;
-    padding-top: var(--i-spacing-6);
   }
+  .doc-layout__main { padding-top: var(--i-spacing-6); }
   .doc-layout__side {
     display: none;
   }
