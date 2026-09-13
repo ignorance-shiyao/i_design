@@ -121,6 +121,12 @@ const {
 const {
   cleanSelection, hasSelection, selectionAnchor, selectionCount, selectionExcerpt, selectionTooLong
 } = await bundle('packages/common/src/logic/selection.ts', 'selection')
+const {
+  changedKeys, clampFieldValue, fieldRatio, fineTuneSummary, formatFieldValue
+} = await bundle('packages/common/src/logic/finetune.ts', 'finetune')
+const {
+  canTakeOver, frameAge, frameStale, frameStaleText, screenAspect, screenStatusIcon, screenStatusText
+} = await bundle('packages/common/src/logic/screen.ts', 'screen')
 const { alignGuides, anchorOf, groupBounds, visibleEdges, visibleNodes } = await bundle(
   'packages/common/src/logic/flow.ts',
   'flowalign'
@@ -1867,6 +1873,98 @@ const selectionExpectations = [
 ]
 
 /*
+ * 属性检查器：夹范围、吸步长、改动判定与显示文字必须两端一致，
+ * 否则同一个属性在一端拖出 12、在另一端敲出 12.7，保存下来就不是同一份配置。
+ */
+const tuneFields = [
+  { key: 'size', label: '字号', kind: 'number', min: 12, max: 32, step: 2, unit: 'px' },
+  { key: 'opacity', label: '不透明度', kind: 'number', min: 0, max: 1, step: 0.1 },
+  { key: 'tone', label: '语气', kind: 'select', options: [{ value: 'calm', label: '克制' }] },
+  { key: 'bold', label: '加粗', kind: 'switch' }
+]
+/* switch 是 Dart 关键字，枚举项只能叫 switchKind */
+const dartTuneKind = { number: 'number', select: 'select', switch: 'switchKind', color: 'color', text: 'text' }
+const dartTuneField = (f) =>
+  `FineTuneFieldData(key: '${f.key}', label: '${f.label}', kind: FineTuneKind.${dartTuneKind[f.kind]}` +
+  (f.min !== undefined ? `, min: ${f.min}` : '') +
+  (f.max !== undefined ? `, max: ${f.max}` : '') +
+  (f.step !== undefined ? `, step: ${f.step}` : '') +
+  (f.unit ? `, unit: '${f.unit}'` : '') +
+  (f.options
+    ? `, options: <FineTuneOption>[${f.options
+        .map((o) => `FineTuneOption(value: '${o.value}', label: '${o.label}')`)
+        .join(', ')}]`
+    : '') +
+  ')'
+const dartTuneFields = `<FineTuneFieldData>[${tuneFields.map(dartTuneField).join(', ')}]`
+const dartTuneMap = (m) =>
+  `<String, Object?>{${Object.entries(m)
+    .map(([k, v]) => `'${k}': ${typeof v === 'string' ? `'${v}'` : v}`)
+    .join(', ')}}`
+const tuneOriginal = { size: 16, opacity: 0.5, tone: 'calm', bold: false }
+const tuneCurrent = { size: 24, opacity: 0.5, tone: 'calm', bold: true }
+const finetuneExpectations = [
+  ...[12.7, 13.2, 99, -5].map(
+    (v) =>
+      `    expect(clampFieldValue(${dartTuneField(tuneFields[0])}, ${v}), ${clampFieldValue(tuneFields[0], v)});`
+  ),
+  // 浮点步长不能留下 0.30000000000000004 那样的尾巴
+  ...[0.31, 0.44, 1.4].map(
+    (v) =>
+      `    expect(clampFieldValue(${dartTuneField(tuneFields[1])}, ${v}), ${clampFieldValue(tuneFields[1], v)});`
+  ),
+  `    expect(changedKeys(${dartTuneFields}, ${dartTuneMap(tuneOriginal)}, ${dartTuneMap(tuneCurrent)}), <String>[${changedKeys(tuneFields, tuneOriginal, tuneCurrent).map((k) => `'${k}'`).join(', ')}]);`,
+  `    expect(changedKeys(${dartTuneFields}, ${dartTuneMap(tuneOriginal)}, ${dartTuneMap(tuneOriginal)}), <String>[]);`,
+  ...[0, 1, 3].map((n) => `    expect(fineTuneSummary(${n}), ${JSON.stringify(fineTuneSummary(n))});`),
+  ...[
+    [0, 16],
+    [2, 'calm'],
+    [3, true],
+    [3, false],
+    [0, null]
+  ].map(([i, v]) => {
+    const field = tuneFields[i]
+    const dartValue = v === null ? 'null' : typeof v === 'string' ? `'${v}'` : v
+    return `    expect(formatFieldValue(${dartTuneField(field)}, ${dartValue}), ${JSON.stringify(formatFieldValue(field, v === null ? undefined : v))});`
+  }),
+  ...[22, 99, 12].map(
+    (v) =>
+      `    expect(fieldRatio(${dartTuneField(tuneFields[0])}, ${v}), ${fieldRatio(tuneFields[0], v)});`
+  ),
+  `    expect(fieldRatio(${dartTuneField(tuneFields[2])}, 'calm'), ${fieldRatio(tuneFields[2], 'calm')});`
+]
+
+/*
+ * 智能体屏幕：状态文字、能不能接管、画面几秒前、多久算卡住必须两端一致。
+ * 一端 15 秒提醒、另一端一分钟才提醒的话，同一次卡死在两端是两种体验。
+ */
+const screenStates = ['connecting', 'working', 'paused', 'done', 'error']
+const screenExpectations = [
+  ...screenStates.flatMap((st) => [
+    `    expect(screenStatusText(AgentScreenState.${st}), ${JSON.stringify(screenStatusText(st))});`,
+    `    expect(screenStatusText(AgentScreenState.${st}, '正在填写收货地址'), ${JSON.stringify(screenStatusText(st, '正在填写收货地址'))});`,
+    `    expect(screenStatusIcon(AgentScreenState.${st}), ${JSON.stringify(screenStatusIcon(st))});`,
+    `    expect(canTakeOver(AgentScreenState.${st}), ${canTakeOver(st)});`
+  ]),
+  // 两秒内返回空串：每帧都挂「刚刚更新」的话，真卡住时没人注意到它变了
+  ...[[10000, 9000], [10000, 7000], [200000, 20000], [8000000, 200000]].map(
+    ([now, at]) => `    expect(frameAge(${now}, ${at}), ${JSON.stringify(frameAge(now, at))});`
+  ),
+  ...[[30000, 10000, 'working'], [20000, 10000, 'working'], [30000, 10000, 'done'], [30000, 10000, 'error']].map(
+    ([now, at, st]) =>
+      `    expect(frameStale(${now}, ${at}, AgentScreenState.${st}), ${frameStale(now, at, st)});`
+  ),
+  // 「多久没动」与「什么时候的」是两句话，混用会写出「已经 44 秒前没动了」
+  ...[[54000, 10000], [200000, 20000], [8000000, 200000]].map(
+    ([now, at]) => `    expect(frameStaleText(${now}, ${at}), ${JSON.stringify(frameStaleText(now, at))});`
+  ),
+  // Dart 端的高宽比是宽÷高的数值，Web 端是 CSS 字符串；断言各自的形式，规则一致
+  `    expect(screenAspect(1280, 800), ${1280 / 800});`,
+  `    expect(screenAspect(), ${16 / 10});`,
+  `    expect(screenAspect(0, 800), ${16 / 10});`
+]
+
+/*
  * 推理轨迹：默认展开哪几步必须两端一致。
  * 一端展开出错那步、另一端全折叠的话，用户得学两遍。
  */
@@ -2579,6 +2677,14 @@ ${insightExpectations.join('\n')}
 
   test('选区的清理、字数上限、引文省略与动作条落点与 Web 端一致', () {
 ${selectionExpectations.join('\n')}
+  });
+
+  test('属性检查器的夹范围、改动判定与显示文字与 Web 端一致', () {
+${finetuneExpectations.join('\n')}
+  });
+
+  test('智能体屏幕的状态说法、接管条件与画面新鲜度与 Web 端一致', () {
+${screenExpectations.join('\n')}
   });
 
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {

@@ -1,0 +1,180 @@
+/* IFineTuneCard —— 由 Vue / React / 小程序各端共享 */
+.i-finetune {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-4);
+  /* 四边等宽的发丝线：改没改过由「退回」按钮与那行字说，不靠加粗某一边 */
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+}
+
+.i-finetune__head {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+}
+.i-finetune__title {
+  margin: 0;
+  font-size: var(--i-font-size-md);
+  font-weight: 600;
+  color: var(--i-color-text);
+}
+/* 改了几项写成字：一个小圆点说不清改了多少，也说不清改了哪几项 */
+.i-finetune__summary {
+  flex: 1;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+.i-finetune__reset-all,
+.i-finetune__revert {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  flex: none;
+  padding: 2px var(--i-spacing-2);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text-secondary);
+  font-family: inherit;
+  font-size: var(--i-font-size-xs);
+  cursor: pointer;
+}
+.i-finetune__reset-all:hover:not(:disabled),
+.i-finetune__revert:hover {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-brand-text);
+}
+.i-finetune__reset-all:focus-visible,
+.i-finetune__revert:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 1px;
+}
+/* 没什么可退回时变淡且不可点，不隐藏——按钮消失会让标题行左右跳 */
+.i-finetune__reset-all:disabled { opacity: 0.4; cursor: default; }
+/* 小程序没有 disabled 属性，同一副观感走类名 */
+.i-finetune__reset-all.is-disabled { opacity: 0.4; pointer-events: none; }
+
+.i-finetune__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/*
+ * 标签列给足宽度：那行小字说明（「影响措辞，不影响事实」）一旦折成三行，
+ * 这一行就比旁边高出一倍，整张表看着像排错了。
+ * 控件列不许无限长，否则下拉框会把同一行的其他控件挤扁。
+ */
+.i-finetune__row {
+  display: grid;
+  grid-template-columns: minmax(140px, auto) minmax(0, 1fr) minmax(56px, auto);
+  align-items: center;
+  gap: var(--i-spacing-2);
+  /* 每行留同样的高度：控件本身高矮不一，不兜底的话行距会一格宽一格窄 */
+  min-height: 36px;
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border-radius: var(--i-radius-sm);
+}
+/* 改过的行垫一块淡底：颜色是第三条线索，前两条是「退回」按钮与标题上那行字 */
+.i-finetune__row.is-changed {
+  background: color-mix(in srgb, var(--i-color-brand) 6%, transparent);
+}
+
+.i-finetune__label {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+}
+.i-finetune__hint {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  line-height: 1.5;
+}
+
+.i-finetune__control {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  min-width: 0;
+}
+/*
+ * 滑块与数字框都给：滑块看得见范围但敲不准，数字框敲得准但看不见范围。
+ * 两者同时在，粗调用拖、定稿用敲。
+ */
+.i-finetune__range {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  border-radius: var(--i-radius-full);
+  /*
+   * 轨道是两段纯色拼的，不是渐变：渐变在这里会让「已选中的一段」与
+   * 「未选中的一段」之间糊成一片，读不出当前值落在哪儿。
+   */
+  background: linear-gradient(
+    to right,
+    var(--i-color-brand) 0 var(--i-fill, 0%),
+    var(--i-color-bg-muted) var(--i-fill, 0%) 100%
+  );
+  appearance: none;
+  cursor: pointer;
+}
+.i-finetune__range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--i-color-bg-elevated);
+  border-radius: 50%;
+  background: var(--i-color-brand);
+  box-shadow: var(--i-shadow-sm);
+}
+.i-finetune__range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--i-color-bg-elevated);
+  border-radius: 50%;
+  background: var(--i-color-brand);
+}
+.i-finetune__range:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 4px;
+}
+
+.i-finetune__number,
+.i-finetune__text {
+  flex: none;
+  width: 72px;
+  padding: 2px var(--i-spacing-2);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg);
+  color: var(--i-color-text);
+  font-family: inherit;
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.i-finetune__text { flex: 1; width: auto; min-width: 0; }
+.i-finetune__number:focus-visible,
+.i-finetune__text:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 1px;
+}
+.i-finetune__color {
+  width: 32px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.i-finetune__value {
+  justify-self: end;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.i-finetune__revert { justify-self: end; }

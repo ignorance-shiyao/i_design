@@ -8,6 +8,7 @@
  * 本文件由 packages/vue/scripts/build-index.mjs 按目录生成。
  */
 export { default as IAffix } from './components/IAffix.vue'
+export { default as IAgentScreen } from './components/IAgentScreen.vue'
 export { default as IAgentTasks } from './components/IAgentTasks.vue'
 export { default as IAlert } from './components/IAlert.vue'
 export { default as IAnchor } from './components/IAnchor.vue'
@@ -64,6 +65,7 @@ export { default as IDivider } from './components/IDivider.vue'
 export { default as IDrawer } from './components/IDrawer.vue'
 export { default as IDropdown } from './components/IDropdown.vue'
 export { default as IEmpty } from './components/IEmpty.vue'
+export { default as IFineTuneCard } from './components/IFineTuneCard.vue'
 export { default as IFloatButton } from './components/IFloatButton.vue'
 export { default as IFlow } from './components/IFlow.vue'
 export { default as IForm } from './components/IForm.vue'

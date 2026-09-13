@@ -5,6 +5,8 @@ import IChatTyping from '@/components/IChatTyping.vue'
 import IChatThinking from '@/components/IChatThinking.vue'
 import IChatToolCall from '@/components/IChatToolCall.vue'
 import IToolChips from '@/components/IToolChips.vue'
+import IAgentScreen from '@/components/IAgentScreen.vue'
+import IFineTuneCard from '@/components/IFineTuneCard.vue'
 import IInsightCards from '@/components/IInsightCards.vue'
 import ISelectionActions from '@/components/ISelectionActions.vue'
 import IChatSources from '@/components/IChatSources.vue'
@@ -13,7 +15,15 @@ import IPromptInput from '@/components/IPromptInput.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
 import { snippets } from '@/data/snippets'
-import type { AgentTask, ApprovalQuestion, ContextChunk, DiffRow, InsightItem } from '@i-design/common'
+import type {
+  AgentTask,
+  ApprovalQuestion,
+  ContextChunk,
+  DiffRow,
+  FineTuneField,
+  FineTuneValues,
+  InsightItem
+} from '@i-design/common'
 import IApprovalCard from '@/components/IApprovalCard.vue'
 import IAgentTasks from '@/components/IAgentTasks.vue'
 import IRecommendCard from '@/components/IRecommendCard.vue'
@@ -260,6 +270,28 @@ const lastSelection = ref('')
 function onSelectionAction(payload: { action: { label: string }; text: string }) {
   lastSelection.value = `${payload.action.label}：${payload.text}`
 }
+
+/* 属性检查器：原始值是智能体给的那一份，当前值可以随便改，随时退得回去 */
+const tuneFields: FineTuneField[] = [
+  { key: 'size', label: '字号', kind: 'number', min: 12, max: 32, step: 2, unit: 'px' },
+  { key: 'tone', label: '语气', kind: 'select', hint: '影响措辞，不影响事实', options: [
+    { value: 'calm', label: '克制' },
+    { value: 'warm', label: '亲切' },
+    { value: 'brief', label: '精简' }
+  ] },
+  { key: 'cite', label: '标注来源', kind: 'switch' },
+  { key: 'accent', label: '强调色', kind: 'color' }
+]
+const tuneOriginal: FineTuneValues = { size: 16, tone: 'calm', cite: true, accent: '#5e7ce0' }
+const tuneValues = ref<FineTuneValues>({ ...tuneOriginal })
+
+/* 智能体屏幕：三种状态各摆一个，卡住的那个把时间戳往回拨，让提醒真的出现 */
+const screenStates = [
+  { key: 'working', state: 'working' as const, action: '正在填写收货地址', ago: 3000 },
+  { key: 'stale', state: 'working' as const, action: '正在等待页面加载', ago: 42_000 },
+  { key: 'paused', state: 'paused' as const, action: '等待短信验证码', ago: 8000 }
+]
+const screenNow = Date.now()
 </script>
 
 <template>
@@ -432,6 +464,55 @@ function onSelectionAction(payload: { action: { label: string }; text: string })
       </div>
     </DemoBlock>
 
+    <h2>属性检查器</h2>
+    <p>
+      与一张普通表单差在一件事上：随时看得出哪几项被自己改过，并且能单独退回去。没有这条，用户调了七八下之后就不敢再动了——他不知道自己已经偏离智能体给的原始结果多远，也不知道怎么退回某一项。所以改过的那一项旁边会多出一个写着原值的退回按钮，标题上写着改了几项；颜色只是第三条线索。
+    </p>
+    <p>
+      数值同时给滑块与数字框：滑块看得见范围但敲不准，数字框敲得准但看不见范围，粗调用拖、定稿用敲。夹范围与吸步长都在共享逻辑里做，不交给输入控件自己——滑块会吸附、数字框不会，同一个属性用拖的得到 12、用敲的得到 12.7，保存下来就不是同一份配置。
+    </p>
+    <DemoBlock
+      title="调一调再退回"
+      description="没改动时「全部退回」是灰的，改过的行才有退回按钮，按钮上写着要退回到什么。"
+      lang="vue"
+      code='<IFineTuneCard :fields="fields" :original="original" v-model:values="values" @reset="values = { ...original }" />'
+    >
+      <div class="tune-demo">
+        <IFineTuneCard
+          :fields="tuneFields"
+          :original="tuneOriginal"
+          v-model:values="tuneValues"
+          @reset="tuneValues = { ...tuneOriginal }"
+        />
+      </div>
+    </DemoBlock>
+
+    <h2>智能体屏幕</h2>
+    <p>
+      这件事有一个不明显的难点：一张静止的画面，看起来和一张卡住的画面一模一样。智能体在想事情、网络断了、进程挂了——三种情况下画面都不动，而用户只能干等。所以这个组件真正花力气的地方不是画面本身，是围着画面的那几行字：现在在做什么、画面是什么时候的、还能不能插手。
+    </p>
+    <p>
+      状态行写的是「在做什么」而不是「工作中」——后者没有信息量。画面超过十几秒没动就在画面上压一条提醒，而不是把它挤进头部那一行：用户此刻正看着画面。做完之后不再提醒，那张画面本来就不会再变。画面框的高宽比在第一帧之前就定下来，否则连上的那一刻整页会跳一下，而那一刻用户正盯着这里看。
+    </p>
+    <DemoBlock
+      title="三种状态"
+      description="中间那块的画面停了四十多秒，提醒压在画面上；暂停时把停在哪一步写出来，并且仍然可以接管——做完或出错之后接管等于重新开一局，那是另一个按钮的事。"
+      lang="vue"
+      code='<IAgentScreen :state="state" :action="action" :updated-at="updatedAt" @takeover="takeOver" />'
+    >
+      <div class="screen-demo">
+        <IAgentScreen
+          v-for="item in screenStates"
+          :key="item.key"
+          :state="item.state"
+          :action="item.action"
+          :updated-at="screenNow - item.ago"
+          :frame-width="1280"
+          :frame-height="800"
+        />
+      </div>
+    </DemoBlock>
+
     <h2>来源与追问</h2>
     <DemoBlock
       title="来源与建议"
@@ -600,6 +681,8 @@ function onSelectionAction(payload: { action: { label: string }; text: string })
         <tr><td>IToolChips</td><td>items、max、expanded</td><td>select、update:expanded</td></tr>
         <tr><td>IInsightCards</td><td>items、index</td><td>update:index</td></tr>
         <tr><td>ISelectionActions</td><td>actions、max</td><td>select</td></tr>
+        <tr><td>IFineTuneCard</td><td>fields、original、values、title</td><td>update:values、reset</td></tr>
+        <tr><td>IAgentScreen</td><td>state、action、frame、updated-at、frame-width、frame-height</td><td>takeover</td></tr>
         <tr><td>IChatSources</td><td>sources</td><td>—</td></tr>
         <tr><td>IChatSuggestions</td><td>items、title</td><td>select</td></tr>
         <tr><td>IPromptInput</td><td>modelValue、generating、maxLength、attachments、hint、submitOnEnter、mentions、commands</td><td>submit、stop、attach、removeAttachment、pick</td></tr>
@@ -624,6 +707,8 @@ function onSelectionAction(payload: { action: { label: string }; text: string })
 .insight-demo { max-width: 420px; }
 .selact-demo { display: flex; flex-direction: column; gap: var(--i-spacing-2); max-width: 560px; }
 .selact-demo__text { margin: 0; line-height: 1.8; }
+.tune-demo { max-width: 460px; }
+.screen-demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--i-spacing-3); width: 100%; }
 .chat {
   display: flex;
   flex-direction: column;

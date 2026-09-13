@@ -1408,6 +1408,67 @@ void main() {
     expect(selectionAnchor(IOverlayRect(0, 780, 40, 20), 200, 40, 1000, 800).placement, SelectionPlacement.top);
   });
 
+  test('属性检查器的夹范围、改动判定与显示文字与 Web 端一致', () {
+    expect(clampFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 12.7), 12);
+    expect(clampFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 13.2), 14);
+    expect(clampFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 99), 32);
+    expect(clampFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), -5), 12);
+    expect(clampFieldValue(FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), 0.31), 0.3);
+    expect(clampFieldValue(FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), 0.44), 0.4);
+    expect(clampFieldValue(FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), 1.4), 1);
+    expect(changedKeys(<FineTuneFieldData>[FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), FineTuneFieldData(key: 'tone', label: '语气', kind: FineTuneKind.select, options: <FineTuneOption>[FineTuneOption(value: 'calm', label: '克制')]), FineTuneFieldData(key: 'bold', label: '加粗', kind: FineTuneKind.switchKind)], <String, Object?>{'size': 16, 'opacity': 0.5, 'tone': 'calm', 'bold': false}, <String, Object?>{'size': 24, 'opacity': 0.5, 'tone': 'calm', 'bold': true}), <String>['size', 'bold']);
+    expect(changedKeys(<FineTuneFieldData>[FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), FineTuneFieldData(key: 'opacity', label: '不透明度', kind: FineTuneKind.number, min: 0, max: 1, step: 0.1), FineTuneFieldData(key: 'tone', label: '语气', kind: FineTuneKind.select, options: <FineTuneOption>[FineTuneOption(value: 'calm', label: '克制')]), FineTuneFieldData(key: 'bold', label: '加粗', kind: FineTuneKind.switchKind)], <String, Object?>{'size': 16, 'opacity': 0.5, 'tone': 'calm', 'bold': false}, <String, Object?>{'size': 16, 'opacity': 0.5, 'tone': 'calm', 'bold': false}), <String>[]);
+    expect(fineTuneSummary(0), "与原始结果一致");
+    expect(fineTuneSummary(1), "改了 1 项");
+    expect(fineTuneSummary(3), "改了 3 项");
+    expect(formatFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 16), "16px");
+    expect(formatFieldValue(FineTuneFieldData(key: 'tone', label: '语气', kind: FineTuneKind.select, options: <FineTuneOption>[FineTuneOption(value: 'calm', label: '克制')]), 'calm'), "克制");
+    expect(formatFieldValue(FineTuneFieldData(key: 'bold', label: '加粗', kind: FineTuneKind.switchKind), true), "开");
+    expect(formatFieldValue(FineTuneFieldData(key: 'bold', label: '加粗', kind: FineTuneKind.switchKind), false), "关");
+    expect(formatFieldValue(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), null), "—");
+    expect(fieldRatio(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 22), 0.5);
+    expect(fieldRatio(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 99), 1);
+    expect(fieldRatio(FineTuneFieldData(key: 'size', label: '字号', kind: FineTuneKind.number, min: 12, max: 32, step: 2, unit: 'px'), 12), 0);
+    expect(fieldRatio(FineTuneFieldData(key: 'tone', label: '语气', kind: FineTuneKind.select, options: <FineTuneOption>[FineTuneOption(value: 'calm', label: '克制')]), 'calm'), 0);
+  });
+
+  test('智能体屏幕的状态说法、接管条件与画面新鲜度与 Web 端一致', () {
+    expect(screenStatusText(AgentScreenState.connecting), "正在连接屏幕");
+    expect(screenStatusText(AgentScreenState.connecting, '正在填写收货地址'), "正在连接屏幕");
+    expect(screenStatusIcon(AgentScreenState.connecting), "refresh");
+    expect(canTakeOver(AgentScreenState.connecting), false);
+    expect(screenStatusText(AgentScreenState.working), "正在操作");
+    expect(screenStatusText(AgentScreenState.working, '正在填写收货地址'), "正在填写收货地址");
+    expect(screenStatusIcon(AgentScreenState.working), "sparkle");
+    expect(canTakeOver(AgentScreenState.working), true);
+    expect(screenStatusText(AgentScreenState.paused), "已暂停");
+    expect(screenStatusText(AgentScreenState.paused, '正在填写收货地址'), "已暂停：正在填写收货地址");
+    expect(screenStatusIcon(AgentScreenState.paused), "minus");
+    expect(canTakeOver(AgentScreenState.paused), true);
+    expect(screenStatusText(AgentScreenState.done), "已完成");
+    expect(screenStatusText(AgentScreenState.done, '正在填写收货地址'), "已完成");
+    expect(screenStatusIcon(AgentScreenState.done), "check-circle");
+    expect(canTakeOver(AgentScreenState.done), false);
+    expect(screenStatusText(AgentScreenState.error), "出错了");
+    expect(screenStatusText(AgentScreenState.error, '正在填写收货地址'), "正在填写收货地址");
+    expect(screenStatusIcon(AgentScreenState.error), "error-circle");
+    expect(canTakeOver(AgentScreenState.error), false);
+    expect(frameAge(10000, 9000), "");
+    expect(frameAge(10000, 7000), "画面 3 秒前");
+    expect(frameAge(200000, 20000), "画面 3 分钟前");
+    expect(frameAge(8000000, 200000), "画面 2 小时前");
+    expect(frameStale(30000, 10000, AgentScreenState.working), true);
+    expect(frameStale(20000, 10000, AgentScreenState.working), false);
+    expect(frameStale(30000, 10000, AgentScreenState.done), false);
+    expect(frameStale(30000, 10000, AgentScreenState.error), false);
+    expect(frameStaleText(54000, 10000), "画面已经 44 秒没动了，可能卡住了");
+    expect(frameStaleText(200000, 20000), "画面已经 3 分钟没动了，可能卡住了");
+    expect(frameStaleText(8000000, 200000), "画面已经 2 小时没动了，可能卡住了");
+    expect(screenAspect(1280, 800), 1.6);
+    expect(screenAspect(), 1.6);
+    expect(screenAspect(0, 800), 1.6);
+  });
+
   test('推理轨迹的默认展开、进度与图标与 Web 端一致', () {
     final steps = <IThinkingStep>[IThinkingStep(key: 'a', title: '拆解问题', kind: IThinkingStepKind.reason, status: IThinkingStepStatus.done), IThinkingStep(key: 'b', title: '检索文档', kind: IThinkingStepKind.search, status: IThinkingStepStatus.error), IThinkingStep(key: 'c', title: '写补丁', kind: IThinkingStepKind.code, status: IThinkingStepStatus.running), IThinkingStep(key: 'd', title: '复核', kind: IThinkingStepKind.tool, status: IThinkingStepStatus.done)];
     expect(defaultOpenSteps(steps), <String>['b', 'c']);

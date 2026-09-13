@@ -92,6 +92,8 @@ import IAffix from './IAffix.vue'
 import IBackTop from './IBackTop.vue'
 import ICodeBlock from './ICodeBlock.vue'
 import ICommandSearch from './ICommandSearch.vue'
+import IAgentScreen from './IAgentScreen.vue'
+import IFineTuneCard from './IFineTuneCard.vue'
 import IInsightCards from './IInsightCards.vue'
 import ISelectionActions from './ISelectionActions.vue'
 import IToolChips from './IToolChips.vue'
@@ -183,6 +185,8 @@ export {
   IBackTop,
   ICodeBlock,
   ICommandSearch,
+  IAgentScreen,
+  IFineTuneCard,
   IInsightCards,
   ISelectionActions,
   IToolChips,

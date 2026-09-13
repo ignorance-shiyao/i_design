@@ -38,6 +38,24 @@ import {
   type InsightItem
 } from './insight'
 import {
+  canTakeOver,
+  frameAge,
+  frameStale,
+  frameStaleText,
+  screenAspect,
+  screenStatusIcon,
+  screenStatusText
+} from './screen'
+import {
+  changedKeys,
+  clampFieldValue,
+  fieldRatio,
+  fineTuneSummary,
+  formatFieldValue,
+  resetField,
+  type FineTuneField
+} from './finetune'
+import {
   cleanSelection,
   hasSelection,
   selectionAnchor,
@@ -941,5 +959,119 @@ describe('选区操作', () => {
       { width: 1000, height: 800 }
     )
     expect(at.x).toBe(792)
+  })
+})
+
+describe('属性检查器', () => {
+  const fields: FineTuneField[] = [
+    { key: 'size', label: '字号', kind: 'number', min: 12, max: 32, step: 2, unit: 'px' },
+    { key: 'tone', label: '语气', kind: 'select', options: [{ value: 'calm', label: '克制' }] },
+    { key: 'bold', label: '加粗', kind: 'switch' }
+  ]
+  const original = { size: 16, tone: 'calm', bold: false }
+
+  it('夹范围与吸步长都在逻辑层做，拖的和敲的得到同一个值', () => {
+    // input[type=range] 自己会吸附，数字框不会，于是同一个属性两种输入法不一样
+    expect(clampFieldValue(fields[0], 12.7)).toBe(12)
+    expect(clampFieldValue(fields[0], 13.2)).toBe(14)
+    expect(clampFieldValue(fields[0], 99)).toBe(32)
+    expect(clampFieldValue(fields[0], -5)).toBe(12)
+  })
+
+  it('非数字输入退回下限，不让 NaN 流出去', () => {
+    expect(clampFieldValue(fields[0], '' as never)).toBe(12)
+  })
+
+  it('浮点步长不留 0.30000000000000004 那样的尾巴', () => {
+    const f: FineTuneField = { key: 'o', label: '不透明度', kind: 'number', min: 0, max: 1, step: 0.1 }
+    expect(clampFieldValue(f, 0.31)).toBe(0.3)
+  })
+
+  it('只报与原始值不同的项，且按面板顺序', () => {
+    expect(changedKeys(fields, original, { ...original, bold: true, size: 20 })).toEqual([
+      'size',
+      'bold'
+    ])
+    expect(changedKeys(fields, original, { ...original })).toEqual([])
+  })
+
+  it('数字按值比不按字面量：「12」与 12 是同一个设置', () => {
+    expect(changedKeys(fields, original, { ...original, size: '16' as never })).toEqual([])
+  })
+
+  it('单项退回只动那一项', () => {
+    const current = { size: 24, tone: 'calm', bold: true }
+    expect(resetField(original, current, 'size')).toEqual({ size: 16, tone: 'calm', bold: true })
+  })
+
+  it('零项时说「与原始结果一致」，不让读者把 0 翻译一遍', () => {
+    expect(fineTuneSummary(0)).toBe('与原始结果一致')
+    expect(fineTuneSummary(3)).toBe('改了 3 项')
+  })
+
+  it('显示文字带单位与选项标签，空值给破折号而不是空白', () => {
+    expect(formatFieldValue(fields[0], 16)).toBe('16px')
+    expect(formatFieldValue(fields[1], 'calm')).toBe('克制')
+    expect(formatFieldValue(fields[2], true)).toBe('开')
+    expect(formatFieldValue(fields[2], false)).toBe('关')
+    expect(formatFieldValue(fields[0], undefined)).toBe('—')
+  })
+
+  it('滑块比例夹在 0–1，范围缺省时给 0 而不是 NaN', () => {
+    expect(fieldRatio(fields[0], 22)).toBe(0.5)
+    expect(fieldRatio(fields[0], 99)).toBe(1)
+    expect(fieldRatio(fields[1], 'calm')).toBe(0)
+  })
+})
+
+describe('智能体屏幕', () => {
+  it('工作中显示「在做什么」，而不是笼统的「工作中」', () => {
+    expect(screenStatusText('working', '正在填写收货地址')).toBe('正在填写收货地址')
+    expect(screenStatusText('working')).toBe('正在操作')
+  })
+
+  it('暂停时把停在哪一步写出来', () => {
+    expect(screenStatusText('paused', '等待验证码')).toBe('已暂停：等待验证码')
+    expect(screenStatusText('paused')).toBe('已暂停')
+  })
+
+  it('只在做事或暂停时才能接管', () => {
+    // 没连上时没东西可管；做完或出错后接管等于重新开一局，那是另一个按钮
+    expect(canTakeOver('working')).toBe(true)
+    expect(canTakeOver('paused')).toBe(true)
+    expect(canTakeOver('connecting')).toBe(false)
+    expect(canTakeOver('done')).toBe(false)
+    expect(canTakeOver('error')).toBe(false)
+  })
+
+  it('两秒内不说话：每帧都挂「刚刚更新」的话，真卡住时没人注意到它变了', () => {
+    expect(frameAge(10_000, 9_000)).toBe('')
+    expect(frameAge(10_000, 7_000)).toBe('画面 3 秒前')
+    expect(frameAge(200_000, 20_000)).toBe('画面 3 分钟前')
+    expect(frameAge(8_000_000, 200_000)).toBe('画面 2 小时前')
+  })
+
+  it('「多久没动」与「什么时候的」是两句话', () => {
+    // 混用会写出「画面已经 44 秒前没动了」——「44 秒前」是一个时刻，不是一段时长
+    expect(frameAge(54_000, 10_000)).toBe('画面 44 秒前')
+    expect(frameStaleText(54_000, 10_000)).toBe('画面已经 44 秒没动了，可能卡住了')
+    expect(frameStaleText(200_000, 20_000)).toBe('画面已经 3 分钟没动了，可能卡住了')
+  })
+
+  it('画面停太久要提醒，但做完之后不提醒——那张画面本来就不会再变', () => {
+    expect(frameStale(30_000, 10_000, 'working')).toBe(true)
+    expect(frameStale(20_000, 10_000, 'working')).toBe(false)
+    expect(frameStale(30_000, 10_000, 'done')).toBe(false)
+  })
+
+  it('高宽比在第一帧之前就定下来，否则连上那一刻整页会跳', () => {
+    expect(screenAspect(1280, 800)).toBe('1280 / 800')
+    expect(screenAspect()).toBe('16 / 10')
+    expect(screenAspect(0, 800)).toBe('16 / 10')
+  })
+
+  it('每种状态都有图标，与文字成对', () => {
+    expect(screenStatusIcon('error')).toBe('error-circle')
+    expect(screenStatusIcon('done')).toBe('check-circle')
   })
 })

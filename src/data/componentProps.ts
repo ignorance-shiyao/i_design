@@ -24,6 +24,15 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"bottom","type":"number","doc":"距视口底部多少像素时吸住。与 top 二选一","defaultText":"undefined","control":{"kind":"number"}},
     {"name":"container","type":"string","doc":"容器选择器：容器滚出视口时元素跟着一起走","defaultText":"''","control":{"kind":"string"}},
   ],
+  IAgentScreen: [
+    {"name":"state","type":"AgentScreenState","doc":"","defaultText":"'connecting'","control":null},
+    {"name":"action","type":"string","doc":"当前在做什么。有它就显示它——「工作中」三个字没有信息量","defaultText":"''","control":{"kind":"string"}},
+    {"name":"frame","type":"string","doc":"当前画面的图片地址。没有时显示占位，框的大小不变","defaultText":"''","control":{"kind":"string"}},
+    {"name":"updatedAt","type":"number","doc":"画面的时间戳（毫秒）。用来算「画面几秒前」","defaultText":"0","control":{"kind":"number"}},
+    {"name":"frameWidth","type":"number","doc":"画面原始尺寸，用来定高宽比","defaultText":null,"control":{"kind":"number"}},
+    {"name":"frameHeight","type":"number","doc":"","defaultText":null,"control":{"kind":"number"}},
+    {"name":"title","type":"string","doc":"","defaultText":"'智能体屏幕'","control":{"kind":"string"}},
+  ],
   IAgentTasks: [
     {"name":"tasks","type":"AgentTask[]","doc":"","defaultText":null,"control":null},
     {"name":"variant","type":"'capsule' | 'list'","doc":"胶囊适合稀疏展示，列表适合密集场景","defaultText":"'capsule'","control":{"kind":"enum","options":["capsule","list"]}},
@@ -382,6 +391,12 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"title","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"description","type":"string","doc":"","defaultText":"''","control":{"kind":"string"}},
     {"name":"size","type":"'sm' | 'md'","doc":"","defaultText":"'md'","control":{"kind":"enum","options":["sm","md"]}},
+  ],
+  IFineTuneCard: [
+    {"name":"fields","type":"FineTuneField[]","doc":"","defaultText":null,"control":null},
+    {"name":"original","type":"FineTuneValues","doc":"智能体给出的原始值。退回时回到这里","defaultText":null,"control":null},
+    {"name":"values","type":"FineTuneValues","doc":"当前值（用 v-model:values 控制）","defaultText":null,"control":null},
+    {"name":"title","type":"string","doc":"","defaultText":"'微调'","control":{"kind":"string"}},
   ],
   IFloatButton: [
     {"name":"icon","type":"IconName","doc":"","defaultText":"'plus'","control":null},

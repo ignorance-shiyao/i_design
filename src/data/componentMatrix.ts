@@ -19,6 +19,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IAgentScreen",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IAgentTasks",
     "ends": {
       "vue-next": true,
@@ -565,6 +575,16 @@ export const componentMatrix: ComponentRow[] = [
       "vue": true,
       "react": true,
       "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IFineTuneCard",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": false,
       "flutter": true
     }
   },

@@ -9,6 +9,7 @@
  * 之前就漏掉了 17 个已实现但从未导出的组件。
  */
 export { Affix, type AffixProps } from './components/Affix'
+export { AgentScreen, type AgentScreenProps } from './components/AgentScreen'
 export { AgentTasks, type AgentTasksProps } from './components/AgentTasks'
 export { Alert, type AlertProps } from './components/Alert'
 export { Anchor, type AnchorItem, type AnchorProps } from './components/Anchor'
@@ -63,6 +64,7 @@ export { Divider, type DividerProps } from './components/Divider'
 export { Drawer, type DrawerProps } from './components/Drawer'
 export { Dropdown, type DropdownItem, type DropdownProps } from './components/Dropdown'
 export { Empty, type EmptyProps } from './components/Empty'
+export { FineTuneCard, type FineTuneCardProps } from './components/FineTuneCard'
 export { FloatButton, type FloatButtonProps } from './components/FloatButton'
 export { Flow, type FlowProps } from './components/Flow'
 export { Form, FormContext, useForm, type FormItemHandle, type FormContextValue, type FormProps } from './components/Form'

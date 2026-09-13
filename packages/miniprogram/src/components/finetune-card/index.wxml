@@ -1,0 +1,79 @@
+<view class="i-finetune">
+  <view class="i-finetune__head">
+    <text class="i-finetune__title">{{title}}</text>
+    <!-- 改了几项写成字：一个小圆点说不清改了多少，也说不清改了哪几项 -->
+    <text class="i-finetune__summary">{{summary}}</text>
+    <view
+      class="i-finetune__reset-all {{anyChanged ? '' : 'is-disabled'}}"
+      bindtap="resetAll"
+    >
+      <view class="i-icon i-icon--undo" style="width:13px;height:13px" />
+      <text>全部退回</text>
+    </view>
+  </view>
+
+  <view class="i-finetune__list">
+    <view
+      wx:for="{{rows}}"
+      wx:for-item="row"
+      wx:key="index"
+      class="i-finetune__row {{row.changed ? 'is-changed' : ''}}"
+    >
+      <view class="i-finetune__label">
+        <text>{{row.field.label}}</text>
+        <text wx:if="{{row.field.hint}}" class="i-finetune__hint">{{row.field.hint}}</text>
+      </view>
+
+      <view class="i-finetune__control">
+        <!-- 小程序的 slider 自带数值气泡，不再另给数字框：那一端敲字远比拖动费事 -->
+        <slider
+          wx:if="{{row.field.kind === 'number'}}"
+          class="i-finetune__range"
+          min="{{row.field.min}}"
+          max="{{row.field.max}}"
+          step="{{row.field.step}}"
+          value="{{row.value}}"
+          show-value="{{true}}"
+          disabled="{{row.field.disabled}}"
+          data-index="{{index}}"
+          bindchange="onNumber"
+        />
+        <i-switch
+          wx:elif="{{row.field.kind === 'switch'}}"
+          checked="{{row.value}}"
+          disabled="{{row.field.disabled}}"
+          data-index="{{index}}"
+          bindchange="onSwitch"
+        />
+        <i-select
+          wx:elif="{{row.field.kind === 'select'}}"
+          value="{{row.value}}"
+          options="{{row.field.options}}"
+          disabled="{{row.field.disabled}}"
+          data-index="{{index}}"
+          bindchange="onSelect"
+        />
+        <input
+          wx:else
+          class="i-finetune__text"
+          value="{{row.value}}"
+          disabled="{{row.field.disabled}}"
+          data-index="{{index}}"
+          bindblur="onText"
+        />
+      </view>
+
+      <!-- 改过的那一项才有退回按钮：没改的项上也摆一个灰按钮会让整列看起来全是可退回的 -->
+      <view
+        wx:if="{{row.changed}}"
+        class="i-finetune__revert"
+        data-index="{{index}}"
+        bindtap="revert"
+      >
+        <view class="i-icon i-icon--undo" style="width:12px;height:12px" />
+        <text>{{row.originalText}}</text>
+      </view>
+      <text wx:else class="i-finetune__value">{{row.valueText}}</text>
+    </view>
+  </view>
+</view>

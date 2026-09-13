@@ -157,6 +157,8 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'ContextCards', cn: '上下文卡', to: '/components/chat', desc: '检索到的片段与出处' },
       { name: 'InsightCards', cn: '洞察卡', to: '/components/chat', desc: '一句结论配一条可擦洗的趋势线' },
       { name: 'SelectionActions', cn: '选区操作', to: '/components/chat', desc: '选中一段文字就地交给智能体' },
+      { name: 'FineTuneCard', cn: '属性检查器', to: '/components/chat', desc: '生成之后逐项微调，改过的能退回' },
+      { name: 'AgentScreen', cn: '智能体屏幕', to: '/components/chat', desc: '看着它操作，画面几秒前一目了然' },
       { name: 'DiffTable', cn: '差异表', to: '/components/chat', desc: '成批改动逐行采纳' }
     ]
   },
