@@ -32,6 +32,7 @@
     "build:registry": "node scripts/build-capability-registry.mjs",
     "build:licenses": "node scripts/build-licenses.mjs",
     "check:licenses": "node --test scripts/check-licenses.test.mjs && node scripts/check-licenses.mjs",
+    "check:install": "npm run build:packages && node scripts/check-install.mjs",
     "check:registry": "node --test scripts/check-capability-registry.test.mjs && node scripts/check-capability-registry.mjs",
     "check:catalog": "node scripts/check-catalog.mjs && node --test scripts/check-catalog.test.mjs",
     "predev": "npm run build:catalog",
