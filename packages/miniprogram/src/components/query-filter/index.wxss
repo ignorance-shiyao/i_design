@@ -1,0 +1,2 @@
+@import '../../../dist/styles/query-filter.wxss';
+@import '../../../dist/styles/icons.wxss';

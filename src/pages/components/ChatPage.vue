@@ -7,6 +7,8 @@ import IChatToolCall from '@/components/IChatToolCall.vue'
 import IToolChips from '@/components/IToolChips.vue'
 import IAgentScreen from '@/components/IAgentScreen.vue'
 import IChatList from '@/components/IChatList.vue'
+import IMessageParts from '@/components/IMessageParts.vue'
+import type { MessagePart } from '@i-design/common'
 import IFineTuneCard from '@/components/IFineTuneCard.vue'
 import IInsightCards from '@/components/IInsightCards.vue'
 import ISelectionActions from '@/components/ISelectionActions.vue'
@@ -15,6 +17,13 @@ import IChatSuggestions from '@/components/IChatSuggestions.vue'
 import IPromptInput from '@/components/IPromptInput.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
+import {
+  removeSession as removeSession_,
+  sessionTitle,
+  setArchived,
+  undoRemove,
+  type RemovedSession
+} from '@i-design/common'
 import { snippets } from '@/data/snippets'
 import type {
   AgentTask,
@@ -32,6 +41,7 @@ import IRecommendCard from '@/components/IRecommendCard.vue'
 import IContextCards from '@/components/IContextCards.vue'
 import IDiffTable from '@/components/IDiffTable.vue'
 import ISegmented from '@/components/ISegmented.vue'
+import IButton from '@/components/IButton.vue'
 import ITag from '@/components/ITag.vue'
 
 /* 一段可以真的跑起来的模拟会话：逐字输出、可中断、可重发 */
@@ -303,12 +313,47 @@ const chatSessions = ref<ChatSession[]>([
   { id: 's3', title: '季度数据核对', updatedAt: screenNow - day },
   { id: 's4', title: '常用提示词', updatedAt: screenNow - 12 * day, pinned: true },
   { id: 's5', title: '上周那张图', updatedAt: screenNow - 4 * day },
-  { id: 's6', title: '去年的迁移方案', updatedAt: screenNow - 200 * day }
+  { id: 's6', title: '去年的迁移方案', updatedAt: screenNow - 200 * day },
+  // 打不开的两种：没权限与已失效。都笼统写成「打不开」会让人一直重试
+  { id: 's7', title: '别人分享的排班表', updatedAt: screenNow - 2 * day, access: 'forbidden' },
+  { id: 's8', title: '试用期的那个模型', updatedAt: screenNow - 40 * day, access: 'expired', accessReason: '模型已下线' },
+  { id: 's9', title: '归档：上半年复盘', updatedAt: screenNow - 90 * day, archived: true }
 ])
 const activeSession = ref('s3')
 
+/* 多段混排：正文、推理、代码、工具、产物、引用交替出现，收尾时间各不相同 */
+const messageParts = ref<MessagePart[]>([
+  { id: 'p1', kind: 'reasoning' as const, text: '先看交期，再比单价。两家的差价在 7%，而交期差 5 天。', complete: true },
+  { id: 'p2', kind: 'text' as const, text: '比对了 **12 家**供应商，结论如下：\n\n- 急单走明远\n- 常备库存走合力', complete: true },
+  { id: 'p3', kind: 'tool' as const, text: '', meta: { name: 'search_suppliers' }, complete: true },
+  { id: 'p4', kind: 'code' as const, text: "const plan = suppliers.filter((s) => s.leadTime <= 7)", meta: { lang: 'ts' }, complete: true },
+  { id: 'p5', kind: 'citation' as const, text: 'src-1', meta: { sourceId: 'src-1' }, complete: true },
+  { id: 'p6', kind: 'artifact' as const, text: '', meta: { title: '采购建议.md', version: '2' }, complete: true },
+  { id: 'p7', kind: 'text' as const, text: '正在整理明细…', complete: false }
+])
+const partSources = [
+  { id: 'src-1', title: '2026 Q1 供应商报价单' }
+]
+const citedSource = ref('')
+const sessionView = ref<'active' | 'archived'>('active')
+/** 撤销用：删掉的那条与它原来的位置 */
+const lastRemoved = ref<RemovedSession | null>(null)
+
 function removeSession(id: string) {
-  chatSessions.value = chatSessions.value.filter((s) => s.id !== id)
+  // 删除可撤销：撤销时放回原处，追加到末尾会让用户以为撤销没成功
+  const result = removeSession_(chatSessions.value, id)
+  chatSessions.value = result.sessions
+  lastRemoved.value = result.removed
+  // 撤销入口就放在列表旁边：message 是一闪而过的，撤销不该跟着一起消失
+  if (result.removed) message.info(`已删除「${sessionTitle(result.removed.session)}」`)
+}
+function undoRemoveSession() {
+  if (!lastRemoved.value) return
+  chatSessions.value = undoRemove(chatSessions.value, lastRemoved.value)
+  lastRemoved.value = null
+}
+function archiveSession(id: string, archived: boolean) {
+  chatSessions.value = setArchived(chatSessions.value, id, archived)
 }
 function pinSession(id: string) {
   chatSessions.value = chatSessions.value.map((s) =>
@@ -566,6 +611,52 @@ function createSession() {
       </div>
     </DemoBlock>
 
+    <DemoBlock
+      title="归档、删除撤销与打不开的会话"
+      description="归档不是删除，它只是从列表里挪开，所以有单独的视图可以切回去；归档也不改动活动时间——它不是一次「活动」，不该把会话顶到最前。删除可撤销，撤销时放回原来的位置，追加到末尾会让人以为撤销没成功。最后两条是打不开的会话：没权限与已失效分开说，都写成「打不开」的话，用户会一直重试一条永远打不开的会话。"
+      lang="vue"
+      code='<IChatList :sessions="sessions" :view="view" @archive="archive" @remove="remove" />'
+    >
+      <div class="chatlist-demo chatlist-demo--manage">
+        <ISegmented
+          v-model="sessionView"
+          :options="[
+            { label: '会话', value: 'active' },
+            { label: '已归档', value: 'archived' }
+          ]"
+          aria-label="会话视图"
+        />
+        <IChatList
+          :sessions="chatSessions"
+          :view="sessionView"
+          :search-after="4"
+          v-model:active="activeSession"
+          @create="createSession"
+          @remove="removeSession"
+          @pin="pinSession"
+          @archive="archiveSession"
+        />
+        <IButton v-if="lastRemoved" variant="secondary" size="sm" @click="undoRemoveSession">
+          撤销删除「{{ sessionTitle(lastRemoved.session) }}」
+        </IButton>
+      </div>
+    </DemoBlock>
+
+    <h2>多段混排</h2>
+    <DemoBlock
+      title="一条消息里的六种段"
+      description="模型的一次回答不是一块纯文本：正文、推理、代码、工具调用、产物、引用交替出现，而且每一段的收尾时间不同。拼成一个字符串再渲染，会丢掉「这一段还没收完」这个信息——最后那段正文就还在流。推理默认折叠，它是给愿意深究的人看的，不该挤掉结论；引用角标可点可聚焦，引用的价值在于能回到出处。"
+      lang="vue"
+      code='<IMessageParts :parts="parts" :sources="sources" @cite="locate" />'
+    >
+      <div class="md-parts">
+        <IMessageParts :parts="messageParts" :sources="partSources" @cite="(id) => (citedSource = id)" />
+        <p v-if="citedSource" class="md-parts__hit">
+          刚刚点了引用：{{ partSources.find((s) => s.id === citedSource)?.title }}
+        </p>
+      </div>
+    </DemoBlock>
+
     <h2>来源与追问</h2>
     <DemoBlock
       title="来源与建议"
@@ -762,6 +853,20 @@ function createSession() {
 .selact-demo { display: flex; flex-direction: column; gap: var(--i-spacing-2); max-width: 560px; }
 .selact-demo__text { margin: 0; line-height: 1.8; }
 .tune-demo { max-width: 460px; }
+.md-parts { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; min-width: 0; }
+.md-parts__hit { margin: 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+.chatlist-demo--manage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  /*
+   * 不用 align-items: flex-start——那会让列表按内容撑开，
+   * 窄屏下整页就能左右拖动了（390px 下实测溢出 34px）。
+   * 子项一律铺满容器，容器自己受 .chatlist-demo 的 min(300px, 100%) 约束。
+   */
+  align-items: stretch;
+}
+.chatlist-demo--manage > * { min-width: 0; }
 .chatlist-demo { width: min(300px, 100%); }
 .screen-demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: var(--i-spacing-3); width: 100%; }
 .chat {

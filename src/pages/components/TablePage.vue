@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import ITable, { type TableColumn, type TableRow } from '@/components/ITable.vue'
+import IQueryFilter from '@/components/IQueryFilter.vue'
 import ITag from '@/components/ITag.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import Playground from '@/site/Playground.vue'
 
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import {
+  fromSearch,
+  parseQuery,
+  serializeQuery,
+  toSearch,
+  type FilterField,
+  type QueryState,
+  type QuickFilter
+} from '@i-design/common'
 
 const picked = ref<(string | number)[]>([])
 const bigPicked = ref<(string | number)[]>([])
@@ -48,6 +58,50 @@ const actionColumns: TableColumn[] = [
   { key: 'action', title: '操作', width: '120px', align: 'right' }
 ]
 
+/* ---------- 查询筛选（B03）---------- */
+const queryFields: FilterField[] = [
+  { name: 'keyword', label: '关键词', kind: 'text', placeholder: '标题或编号', always: true },
+  {
+    name: 'status',
+    label: '状态',
+    kind: 'select',
+    options: [
+      { value: 'todo', label: '待开始' },
+      { value: 'doing', label: '进行中' },
+      { value: 'done', label: '已完成' }
+    ],
+    always: true
+  },
+  {
+    name: 'owner',
+    label: '负责人',
+    kind: 'multi-select',
+    options: owners.map((name) => ({ value: name, label: name }))
+  },
+  { name: 'points', label: '故事点', kind: 'number-range' },
+  { name: 'created', label: '创建时间', kind: 'date-range' },
+  { name: 'sprint', label: '迭代', kind: 'text' },
+  { name: 'label', label: '标签', kind: 'text' }
+]
+
+const quickFilters: QuickFilter[] = [
+  { key: 'doing', label: '进行中', values: { status: 'doing' } },
+  { key: 'mine', label: '我负责的', values: { owner: ['林岚'] } }
+]
+
+/* 演示里用一条假链接代替地址栏：文档站本身的路由不该被演示改掉 */
+const demoLink = ref('?owner=林岚&status=archived&page=0')
+const parsed = computed(() => parseQuery(fromSearch(demoLink.value), queryFields))
+const queryState = ref<QueryState>(parsed.value.state)
+const queryParams = ref<Record<string, string>>(serializeQuery(parsed.value.state, queryFields))
+
+function onQueryChange(payload: { state: QueryState; params: Record<string, string> }) {
+  queryState.value = payload.state
+  queryParams.value = payload.params
+}
+
+const queryLink = computed(() => toSearch(queryParams.value) || '（没有条件，链接不带参数）')
+
 /* playground 代码片段里固定属性的写法（模板里写会和属性引号打架） */
 const tablePgCode = [':columns="columns"', ':data="data"']
 </script>
@@ -58,6 +112,28 @@ const tablePgCode = [':columns="columns"', ':data="data"']
     <p class="i-lead">
       展示结构化的行列数据。列宽应按内容语义固定，避免用户在翻页时因列宽跳动而重新定位。
     </p>
+
+    <h2>查询筛选</h2>
+    <DemoBlock
+      title="条件、快捷筛选与链接往返"
+      description="条件一变就回第一页——不回的话，改完筛选看到的是空白的第 7 页，而结果其实只有两页，用户会以为「没有数据」。折叠不收走常用字段：标了 always 的留在原位，否则每次都要先展开再筛。组件不碰地址栏，只吐出参数记录，由页面决定写进 URL、小程序页面参数还是 Flutter 的路由对象——只有 Web 有地址栏，而这一层是全端的。下面这条演示链接里故意放了一个已下线的状态值和一个非法页码，看它们怎么被报出来。"
+      lang="vue"
+      code='<IQueryFilter v-model="state" :fields="fields" :quick-filters="quick" :invalid="invalid" @change="onChange" />'
+    >
+      <div class="query-demo">
+        <IQueryFilter
+          v-model="queryState"
+          :fields="queryFields"
+          :quick-filters="quickFilters"
+          :invalid="parsed.invalid"
+          @change="onQueryChange"
+        />
+        <p class="query-demo__link">
+          当前条件对应的链接：<code>{{ queryLink }}</code>
+        </p>
+        <p class="query-demo__link">第 {{ queryState.page }} 页，每页 {{ queryState.pageSize }} 条</p>
+      </div>
+    </DemoBlock>
 
     <h2>现场调参</h2>
     <p>下面的控件由源码里的属性类型生成，改动即时生效，代码区给出对应写法。</p>
@@ -195,6 +271,18 @@ const tablePgCode = [':columns="columns"', ':data="data"']
 </template>
 
 <style scoped>
+.query-demo {
+  display: grid;
+  gap: var(--i-spacing-3);
+}
+
+.query-demo__link {
+  margin: 0;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  overflow-wrap: anywhere;
+}
+
 .big-hint {
   margin-top: var(--i-spacing-3);
   font-size: var(--i-font-size-sm);

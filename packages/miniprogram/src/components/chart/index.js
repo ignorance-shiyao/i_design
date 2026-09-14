@@ -4,7 +4,19 @@
  * 小程序没有 SVG，只能画在 canvas 上；刻度、比例尺与格式化仍走公共层，
  * 因此同一份数据在小程序与 Web 上刻度完全一致，只是绘制手段不同。
  */
-import { domainOf, formatTick, niceTicks, scaleX, scaleY } from '@i-design/common'
+import {
+  barRect,
+  categoryBands,
+  dualAxis,
+  domainOf,
+  formatTick,
+  niceTicks,
+  percentStack,
+  rankOrder,
+  scaleX,
+  scaleY,
+  valueAxis
+} from '@i-design/common'
 
 // 分类色与 Web 端同一批取值、同一个顺序；顺序本身就是色觉安全机制
 const PALETTE = ['#5e7ce0', '#b7622a', '#0f8a68', '#7a4ee0', '#d64f8d', '#1f86b8', '#b08a1e', '#c2413d']
@@ -18,13 +30,32 @@ Component({
     labels: { type: Array, value: [] },
     type: { type: String, value: 'line' },
     stacked: { type: Boolean, value: false },
+    /** 百分比堆叠：整列为 0 或含负值的列不换算，并在提示里说明 */
+    percent: { type: Boolean, value: false },
+    /** 折线画法：step 适合两次采样之间保持不变的量 */
+    curve: { type: String, value: 'linear' },
+    /** 目标线：要达到的值。与阈值分开——目标不是故障 */
+    target: { type: Object, value: null },
+    /**
+     * 柱状图的方向。horizontal 把值轴放到水平方向、类目轴放到垂直方向：
+     * 类目名一长，纵向柱的标签只能隔一个显示，横条的标签正着写就读得下去。
+     */
+    orientation: { type: String, value: 'vertical' },
+    /** 横条按值排序。类目本身有顺序时排序反而破坏信息，所以不是默认 */
+    rank: { type: String, value: 'none' },
+    /**
+     * 第二值轴：把两种单位的量画在一张图里，只对折线生效。
+     * 两侧都必须写明单位；不该用双轴的情形（单位相同、有系列没归属、零位错位）
+     * 会写在图下，而不是让读者自己看出来。
+     */
+    axes: { type: Object, value: null },
     height: { type: Number, value: 220 },
     fromZero: { type: Boolean, value: true },
     title: { type: String, value: '' }
   },
-  data: { legend: [] },
+  data: { skippedColumns: 0, legend: [], axisIssues: [] },
   observers: {
-    'series, labels, type, stacked': function (series) {
+    'series, labels, type, stacked, orientation, rank, axes': function (series) {
       this.setData({
         legend: series.map((s, i) => ({ name: s.name, color: PALETTE[i % PALETTE.length] }))
       })
@@ -55,24 +86,121 @@ Component({
     },
 
     render(ctx, width, height) {
-      const { series, labels, type, stacked, fromZero } = this.data
+      const {
+        labels, type, stacked, fromZero, percent, curve, target, orientation, rank, axes
+      } = this.data
+      // 百分比换算在渲染前做，与 Web 端同一份实现；换算不了的列原样保留
+      const converted = percent ? percentStack(this.data.series) : { series: this.data.series, skipped: [] }
+      const series = converted.series
+      this.setData({ skippedColumns: converted.skipped.length })
       ctx.clearRect(0, 0, width, height)
       if (!series.length || !labels.length) return
 
       const isBar = type === 'bar'
+      const horizontal = isBar && orientation === 'horizontal'
       const stackedArea = type === 'area' && series.length > 1
-      const plotW = width - PAD.left - PAD.right
+      // 横条的类目名写在左边，44px 只够放数字刻度
+      const padLeft = horizontal ? 96 : PAD.left
+      const plotW = width - padLeft - PAD.right
       const plotH = height - PAD.top - PAD.bottom
 
       const domain = domainOf(series, {
         fromZero: isBar ? true : fromZero,
         stacked: (isBar && stacked) || stackedArea
       })
+      const below = (i, si) => series.slice(0, si).reduce((sum, s) => sum + (s.data[i] || 0), 0)
+
+      /*
+       * 横条：轴系走公共层的 axis，与 Web 端同一份实现——
+       * 横纵共用同一套刻度，同一份数据横过来刻度密度不会变。
+       */
+      if (horizontal) {
+        const axis = valueAxis(domain.min, domain.max, plotW, 'horizontal', { format: formatTick })
+        const bands = categoryBands(labels.length, plotH)
+        const order = rankOrder(
+          labels.map((_, i) => series.reduce((sum, s) => sum + (s.data[i] || 0), 0)),
+          rank
+        )
+        const hx = (value) =>
+          padLeft + ((value - axis.min) / (axis.max - axis.min || 1)) * plotW
+        const thickness = stacked
+          ? (bands[0] ? bands[0].size : 0) * 0.5
+          : ((bands[0] ? bands[0].size : 0) * 0.62) / series.length
+
+        ctx.strokeStyle = 'rgba(20,24,34,0.08)'
+        ctx.lineWidth = 1
+        ctx.font = '11px sans-serif'
+        ctx.fillStyle = '#8a8e99'
+        ctx.textAlign = 'center'
+        axis.ticks.forEach((tick) => {
+          ctx.beginPath()
+          ctx.moveTo(padLeft + tick.offset, PAD.top)
+          ctx.lineTo(padLeft + tick.offset, PAD.top + plotH)
+          ctx.stroke()
+          ctx.fillText(tick.label, padLeft + tick.offset, height - PAD.bottom + 14)
+        })
+        // 类目名正着写在左边，长名字也读得下去——这正是横条存在的理由
+        ctx.textAlign = 'right'
+        order.forEach((dataIndex, row) => {
+          ctx.fillText(labels[dataIndex], padLeft - 8, PAD.top + bands[row].center + 4)
+        })
+
+        series.forEach((s, si) => {
+          ctx.fillStyle = PALETTE[si % PALETTE.length]
+          order.forEach((dataIndex, row) => {
+            const band = bands[row]
+            const value = s.data[dataIndex] || 0
+            const base = stacked ? below(dataIndex, si) : 0
+            const offsetInBand = stacked
+              ? (band.size - thickness) / 2
+              : (band.size - thickness * series.length) / 2 + si * thickness
+            const rect = barRect(
+              { band: band, thickness: thickness, offsetInBand: offsetInBand },
+              { from: hx(base), to: hx(base + value) },
+              'horizontal'
+            )
+            ctx.fillRect(rect.x, rect.y + PAD.top, Math.max(1, rect.width), Math.max(1, rect.height))
+          })
+        })
+        return
+      }
+
       const ticks = niceTicks(domain.min, domain.max, 5)
       const lo = ticks[0]
       const hi = ticks[ticks.length - 1]
       const y = (v) => scaleY(v, lo, hi, plotH) + PAD.top
-      const x = (i) => scaleX(i, labels.length, plotW) + PAD.left
+
+      /*
+       * 双轴：判定与布局走公共层的 dualAxis，与 Web 端同一份。
+       * 两条线谁在上、在哪儿交叉全由两侧刻度决定，所以单位写在轴上，
+       * 不该用双轴的情形写在图下。
+       */
+      const indexOf = (names) =>
+        (names || []).map((n) => series.findIndex((s) => s.name === n)).filter((i) => i >= 0)
+      const dual = axes && type === 'line'
+        ? dualAxis(
+            series,
+            { series: indexOf(axes.left && axes.left.series), unit: (axes.left && axes.left.unit) || '' },
+            { series: indexOf(axes.right && axes.right.series), unit: (axes.right && axes.right.unit) || '' },
+            plotH,
+            { format: formatTick }
+          )
+        : null
+      this.setData({
+        axisIssues: dual
+          ? dual.issues
+          : axes && type !== 'line'
+            ? ['双轴只对折线生效：柱状与面积要一个系列一个图型，那是另一件事，这里没有假装支持。']
+            : []
+      })
+      const onRight = (name) =>
+        !!(axes && axes.right && (axes.right.series || []).indexOf(name) >= 0)
+      const yIn = (name, v) => {
+        if (!dual) return y(v)
+        const axis = onRight(name) ? dual.right : dual.left
+        return scaleY(v, axis.min, axis.max, plotH) + PAD.top
+      }
+      const x = (i) => scaleX(i, labels.length, plotW) + padLeft
 
       // 网格与刻度：背景信息，最淡的一档
       ctx.strokeStyle = 'rgba(20,24,34,0.08)'
@@ -82,20 +210,30 @@ Component({
       ctx.textAlign = 'right'
       ticks.forEach((tick) => {
         ctx.beginPath()
-        ctx.moveTo(PAD.left, y(tick))
+        ctx.moveTo(padLeft, y(tick))
         ctx.lineTo(width - PAD.right, y(tick))
         ctx.stroke()
-        ctx.fillText(formatTick(tick), PAD.left - 6, y(tick) + 4)
+        ctx.fillText(formatTick(tick), padLeft - 6, y(tick) + 4)
       })
+
+      if (dual) {
+        // 右轴刻度写在右边，单位跟着轴走——「这条线是什么量」只能靠它
+        ctx.textAlign = 'left'
+        dual.right.ticks.forEach((tick) => {
+          ctx.fillText(tick.label, width - PAD.right + 4, tick.offset + PAD.top + 4)
+        })
+        ctx.fillText((axes.right && axes.right.unit) || '', width - PAD.right + 4, PAD.top - 2)
+        ctx.textAlign = 'right'
+        ctx.fillText((axes.left && axes.left.unit) || '', padLeft - 6, PAD.top - 2)
+      }
 
       const band = plotW / Math.max(1, labels.length)
       ctx.textAlign = 'center'
       labels.forEach((label, i) => {
         if (labels.length > 8 && i % 2 === 1) return
-        ctx.fillText(label, isBar ? PAD.left + band * (i + 0.5) : x(i), height - PAD.bottom + 14)
+        ctx.fillText(label, isBar ? padLeft + band * (i + 0.5) : x(i), height - PAD.bottom + 14)
       })
 
-      const below = (i, si) => series.slice(0, si).reduce((sum, s) => sum + (s.data[i] || 0), 0)
 
       if (isBar) {
         const barW = stacked ? band * 0.5 : (band * 0.62) / series.length
@@ -139,13 +277,34 @@ Component({
         }
 
         ctx.beginPath()
-        upper.forEach((v, i) => (i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v))))
+        // 阶梯：值保持到下一个点再跳变，而不是斜着连过去
+        upper.forEach((v, i) => {
+          if (i === 0) { ctx.moveTo(x(i), yIn(s.name, v)); return }
+          if (curve === 'step') ctx.lineTo(x(i), yIn(s.name, upper[i - 1]))
+          ctx.lineTo(x(i), yIn(s.name, v))
+        })
         ctx.strokeStyle = color
         ctx.lineWidth = 2
         ctx.lineJoin = 'round'
         ctx.lineCap = 'round'
         ctx.stroke()
       })
+
+      /*
+       * 目标线：品牌色虚线，与阈值的状态色分开。
+       * 阈值说的是「越过就有问题」，目标说的是「要达到」——
+       * 用危险色画目标，会让一个还没达成的目标看起来像一次故障。
+       */
+      if (target && typeof target.value === 'number') {
+        ctx.beginPath()
+        ctx.setLineDash([6, 4])
+        ctx.strokeStyle = '#5e7ce0'
+        ctx.lineWidth = 1.5
+        ctx.moveTo(PAD.left, y(target.value))
+        ctx.lineTo(width - PAD.right, y(target.value))
+        ctx.stroke()
+        ctx.setLineDash([])
+      }
     }
   }
 })

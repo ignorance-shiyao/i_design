@@ -29,7 +29,12 @@ export const SCENARIOS = [
   { id: 'form', title: '一套表单（按钮 / 输入框 / 选择器 / 表单）', code: `export { IButton, IInput, ISelect, IForm, IFormItem } from ${JSON.stringify(distPath('vue-next'))}` },
   { id: 'all', title: '全量引入', code: `export * from ${JSON.stringify(distPath('vue-next'))}` },
   { id: 'common', title: '只引公共层（令牌与逻辑）', code: `export { icons, palette } from ${JSON.stringify(distPath('common'))}` },
-  { id: 'react-button', title: 'React：只引一个按钮', code: `export { Button } from ${JSON.stringify(distPath('react'))}` }
+  { id: 'react-button', title: 'React：只引一个按钮', code: `export { Button } from ${JSON.stringify(distPath('react'))}` },
+  {
+    id: 'one-icon',
+    title: '只引一个图标的 path 常量',
+    code: `export { iconTrash } from ${JSON.stringify(resolve(root, 'packages/common/dist/icons.mjs'))}`
+  }
 ]
 
 export async function measure(scenario) {

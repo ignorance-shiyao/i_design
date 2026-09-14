@@ -209,6 +209,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IChartFrame",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IChartFunnel",
     "ends": {
       "vue-next": true,
@@ -769,6 +779,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IMarkdown",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IMentions",
     "ends": {
       "vue-next": true,
@@ -780,6 +800,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IMenu",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IMessageParts",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -820,6 +850,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IPageHeader",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IPageState",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -880,6 +920,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IQrcode",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IQueryFilter",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -950,6 +1000,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IRow",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "ISchemaForm",
     "ends": {
       "vue-next": true,
       "vue": true,

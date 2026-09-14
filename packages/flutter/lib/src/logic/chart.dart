@@ -796,3 +796,73 @@ List<ITreemapTile> treemapLayout(List<ITreemapItem> items, double width, double 
 
   return tiles;
 }
+
+
+/// 百分比堆叠：把每一列换算成占比（对应 logic/chart.ts 的 percentStack）。
+///
+/// 只收原始数据列表而不是组件里的系列类型：逻辑层不该依赖组件层，
+/// 否则移植过来的这份实现会跟着组件的构造函数一起变。
+///
+/// 分母是唯一值得小心的东西：整列为 0 时没有分母，硬除会得到 NaN，
+/// 再被画成 0，一根空柱子看起来像「这一档占 0%」；列里有负数时，
+/// 「占总量的百分之多少」这句话本身不成立。两种都不换算，原样返回并记下来。
+class IPercentStackResult {
+  const IPercentStackResult(this.data, this.skipped);
+
+  /// 与入参同形状的数据
+  final List<List<double>> data;
+
+  /// 无法换算的列下标 → 原因（zero-total / has-negative）
+  final Map<int, String> skipped;
+}
+
+IPercentStackResult iPercentStack(List<List<double>> data) {
+  var length = 0;
+  for (final row in data) {
+    if (row.length > length) length = row.length;
+  }
+  final skipped = <int, String>{};
+  final totals = <double>[];
+
+  for (var i = 0; i < length; i += 1) {
+    final values = data.map((row) => i < row.length ? row[i] : 0.0).toList();
+    if (values.any((v) => v < 0)) {
+      skipped[i] = 'has-negative';
+      totals.add(double.nan);
+      continue;
+    }
+    final total = values.fold<double>(0, (a, b) => a + b);
+    if (total == 0) {
+      skipped[i] = 'zero-total';
+      totals.add(double.nan);
+      continue;
+    }
+    totals.add(total);
+  }
+
+  return IPercentStackResult(
+    data
+        .map((row) => [
+              for (var i = 0; i < row.length; i += 1)
+                totals.length > i && totals[i].isFinite ? row[i] / totals[i] * 100 : row[i]
+            ])
+        .toList(),
+    skipped,
+  );
+}
+
+/// 目标达成情况：说得出还差多少，而不只是达没达成
+class ITargetProgress {
+  const ITargetProgress({required this.reached, this.latest, this.gap});
+
+  final bool reached;
+  final double? latest;
+  final double? gap;
+}
+
+ITargetProgress iTargetProgress(List<double> data, double target) {
+  final finite = data.where((v) => v.isFinite).toList();
+  if (finite.isEmpty) return const ITargetProgress(reached: false);
+  final last = finite.last;
+  return ITargetProgress(reached: last >= target, latest: last, gap: target - last);
+}

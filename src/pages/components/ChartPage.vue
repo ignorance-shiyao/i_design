@@ -20,8 +20,58 @@ import IChartSankey from '@/components/IChartSankey.vue'
 import IChartTreemap from '@/components/IChartTreemap.vue'
 import IChartGantt from '@/components/IChartGantt.vue'
 import IChartWordCloud from '@/components/IChartWordCloud.vue'
+import IChartFrame from '@/components/IChartFrame.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
-import { sliceByWindow } from '@i-design/common'
+import IButton from '@/components/IButton.vue'
+import {
+  applySelection,
+  drillPath,
+  drillUp,
+  emptyLinkage,
+  sliceByWindow,
+  toLegacySeries,
+  type ChartDataset,
+  type ChartSpec
+} from '@i-design/common'
+
+/* 联动演示：点一次是筛选，再点一次是取消，双击才下钻——这里用按钮代替双击 */
+const linkage = ref(emptyLinkage('region'))
+const linkPath = computed(() => drillPath(linkage.value))
+function pick(region: string) {
+  linkage.value = applySelection(linkage.value, {
+    source: 'demo-bar',
+    kind: linkage.value.filters.some((f) => f.values?.includes(region)) ? 'drill' : 'filter',
+    field: linkage.value.dimension,
+    values: [region],
+    into: 'city'
+  })
+}
+function goUp() {
+  linkage.value = drillUp(linkage.value, 'region')
+}
+
+/*
+ * 带缺口与负值的一份数据：用它才说得清「缺失值不补零」——
+ * 17 日那天华东没上报，18 日是一笔退款。
+ */
+const frameDataset: ChartDataset = {
+  fields: [
+    { key: 'date', label: '日期', kind: 'time', tzOffsetMinutes: 480 },
+    { key: 'amount', label: '销售额', kind: 'measure', unit: '元' },
+    { key: 'region', label: '区域', kind: 'dimension' }
+  ],
+  rows: [
+    { date: Date.UTC(2026, 2, 16), amount: 1200, region: '华东' },
+    { date: Date.UTC(2026, 2, 16), amount: 860, region: '华南' },
+    { date: Date.UTC(2026, 2, 17), amount: null, region: '华东' },
+    { date: Date.UTC(2026, 2, 17), amount: 910, region: '华南' },
+    { date: Date.UTC(2026, 2, 18), amount: -240, region: '华东' },
+    { date: Date.UTC(2026, 2, 18), amount: 780, region: null }
+  ],
+  note: '含税，按下单日期统计'
+}
+const frameSpec: ChartSpec = { type: 'line', x: 'date', y: ['amount'], groupBy: 'region', bucket: 'day' }
+const frameLegacy = computed(() => toLegacySeries(frameDataset, frameSpec))
 
 const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月']
 
@@ -192,6 +242,29 @@ const waterfallItems = [
       仪表盘里的图表不是装饰，它替读者回答一个具体问题。这套图表把颜色、刻度与交互都固定下来：分类色按固定顺序分配、坐标轴刻度吸附到人能心算的数、每张图都带图例与数据表——于是「这条线是谁」永远不需要靠猜。
     </p>
 
+    <h2>图的外框与出口</h2>
+    <DemoBlock
+      title="标题、口径、数据表与下载"
+      description="每张图都要有一条不看图也能拿到数的路：读屏读不了 SVG，色觉障碍分不清相邻两个系列，而任何人想把数抄进邮件时都需要表格。表格与图同源——都从同一份数据集折出来，各算一遍的实现迟早会在某次改口径时只改一边。缺失值在表里显示「—」而不是 0；数据本身的问题（缺失、负值、缺维度）由图注说出来，不该由读者自己看出来。"
+      lang="vue"
+      code='<IChartFrame title="销售额" :dataset="dataset" :spec="spec" note="含税，按下单日期统计">
+  <IChart :labels="labels" :series="series" />
+</IChartFrame>'
+    >
+      <IChartFrame
+        class="frame-demo"
+        title="销售额"
+        subtitle="按区域拆分"
+        :dataset="frameDataset"
+        :spec="frameSpec"
+        :note="frameDataset.note"
+        file-name="sales"
+      >
+        <!-- 图自带的出口关掉：外框那一层的出口对所有图型都有，两个并排只会让人疑惑 -->
+        <IChart :labels="frameLegacy.labels" :series="frameLegacy.series" :height="200" :exits="false" />
+      </IChartFrame>
+    </DemoBlock>
+
     <h2>趋势</h2>
     <p>
       看变化用折线。悬停出现十字线与同一时刻的全部数值，比逐条对照图例快得多；末点直接标注系列名与数值，读者不必在图例和线之间来回找。
@@ -203,6 +276,127 @@ const waterfallItems = [
       <div class="chart-demo">
         <ISegmented v-model="view" :options="views" />
         <IChart :series="trend" :labels="months" :type="view" title="工作项趋势" unit=" 条" />
+      </div>
+    </DemoBlock>
+
+    <h2>百分比、阶梯与目标</h2>
+    <DemoBlock
+      title="百分比堆叠"
+      description="看的是构成比例而不是绝对量时用它。分母有两种情况不换算，并在图下说明：整列为 0 时没有分母（硬除会得到 NaN，再被渲染成 0，一根空柱子看起来像「这一档占 0%」）；列里有负数时，「占总量的百分之多少」这句话本身不成立。"
+      lang="vue"
+      code='<IChart type="bar" stacked percent :labels="labels" :series="series" />'
+    >
+      <IChart
+        type="bar"
+        stacked
+        percent
+        :labels="['一月', '二月', '三月', '四月']"
+        :series="[
+          { name: '直销', data: [30, 0, 50, 40] },
+          { name: '代理', data: [70, 0, 150, 60] }
+        ]"
+        :height="200"
+      />
+    </DemoBlock>
+
+    <DemoBlock
+      title="阶梯线与目标线"
+      description="阶梯适合「值在两次采样之间保持不变」的量——库存、在线人数、档位；用折线画会让读者以为中间在连续变化。目标线与阈值分开：阈值说的是「越过就有问题」，目标说的是「要达到」，把目标画成危险色会让一个还没达成的目标看起来像一次故障。"
+      lang="vue"
+      code='<IChart curve="step" :target="{ value: 120, label: &apos;季度目标&apos; }" :labels="labels" :series="series" />'
+    >
+      <IChart
+        curve="step"
+        :target="{ value: 120, label: '季度目标' }"
+        :labels="['第 1 周', '第 2 周', '第 3 周', '第 4 周', '第 5 周']"
+        :series="[{ name: '在库数量', data: [80, 80, 105, 105, 96] }]"
+        :height="200"
+      />
+    </DemoBlock>
+
+    <h2>轴系</h2>
+    <DemoBlock
+      title="横条：长类目名与排名"
+      description="类目名一长，纵向柱的标签只能斜排或者隔一个显示，两种都要读者费劲；横条的标签是一行行正着写的，长名字也读得下去。横条多数时候是在看排名，所以可以按值排序——但如果类目本身有顺序（星期、档位），排序反而破坏信息，因此不是默认。刻度与纵向同源：同一份数据横过来，刻度密度不会变。"
+      lang="vue"
+      code='<IChart type="bar" orientation="horizontal" rank="desc" :labels="labels" :series="series" />'
+    >
+      <IChart
+        type="bar"
+        orientation="horizontal"
+        rank="desc"
+        :labels="['华东大区直营门店', '华南大区加盟门店', '西南大区直营门店', '华北大区加盟门店']"
+        :series="[{ name: '季度营收', data: [420, 380, 260, 310] }]"
+        :height="220"
+        unit=" 万元"
+      />
+    </DemoBlock>
+
+    <DemoBlock
+      title="双轴：两种单位画在一张图里"
+      description="双轴是最容易骗人的图型——两条线谁在上、在哪儿交叉，全由两侧刻度的取值决定，换一组刻度就能把结论反过来。所以这里要求两侧都写明单位，并把「不该用双轴」的情形直接印在图下：两侧单位相同（那是一个轴的事，分成两个轴之后等高不再等值）、有系列没指定归属、两侧零位对不齐。双轴只对折线生效，柱状与面积要一个系列一个图型，那是另一件事。"
+      lang="vue"
+      code='<IChart :axes="{ left: { series: [&apos;销售额&apos;], unit: &apos;万元&apos; }, right: { series: [&apos;转化率&apos;], unit: &apos;%&apos; } }" :labels="labels" :series="series" />'
+    >
+      <IChart
+        :axes="{ left: { series: ['销售额'], unit: '万元' }, right: { series: ['转化率'], unit: '%' } }"
+        :labels="['一月', '二月', '三月', '四月', '五月']"
+        :series="[
+          { name: '销售额', data: [120, 168, 150, 210, 264] },
+          { name: '转化率', data: [3.2, 3.8, 3.5, 4.6, 5.1] }
+        ]"
+        :height="220"
+      />
+    </DemoBlock>
+
+    <DemoBlock
+      title="双轴不该这么用"
+      description="同一份数据，两侧单位都写成「万元」。图看起来没有任何异常——两条线照画，刻度照出——但等高已经不再等值，读者会按位置比大小。组件不拦着，因为确实有人需要临时这么看；但会把这句话印在图下，而不是让读者自己看出来。"
+      lang="vue"
+      code='<IChart :axes="{ left: { series: [&apos;直销&apos;], unit: &apos;万元&apos; }, right: { series: [&apos;代理&apos;], unit: &apos;万元&apos; } }" :labels="labels" :series="series" />'
+    >
+      <IChart
+        :axes="{ left: { series: ['直销'], unit: '万元' }, right: { series: ['代理'], unit: '万元' } }"
+        :labels="['一月', '二月', '三月', '四月', '五月']"
+        :series="[
+          { name: '直销', data: [120, 168, 150, 210, 264] },
+          { name: '代理', data: [12, 18, 15, 21, 26] }
+        ]"
+        :height="220"
+      />
+    </DemoBlock>
+
+    <h2>联动</h2>
+    <DemoBlock
+      title="过滤、下钻与返回"
+      description="一个看板上的图不是各自独立的：点饼图的一块要过滤旁边的表，双击一根柱要下钻到它的明细。这些交互统一表达成一种事件，下钻是压栈、返回是弹栈。两处容易出错的地方都在这里兜住：同一轮里一张图把自己的选择原样发回来会被忽略（否则两张图互相触发到栈溢出），返回恢复的是「进入这一级之前」的整套筛选，而不是逐条回滚。"
+      lang="vue"
+      code='const state = applySelection(current, { source: &apos;pie&apos;, kind: &apos;drill&apos;, field: &apos;region&apos;, values: [&apos;华东&apos;], into: &apos;city&apos; })'
+    >
+      <div class="link-demo">
+        <p class="link-demo__path">
+          <template v-for="(node, index) in linkPath" :key="index">
+            <span>{{ node }}</span>
+            <span v-if="index < linkPath.length - 1" aria-hidden="true"> / </span>
+          </template>
+        </p>
+        <div class="link-demo__row">
+          <IButton
+            v-for="region in ['华东', '华南', '华北']"
+            :key="region"
+            size="sm"
+            :variant="linkage.filters.some((f) => f.values?.includes(region)) ? 'primary' : 'secondary'"
+            @click="pick(region)"
+          >
+            {{ region }}
+          </IButton>
+          <IButton size="sm" variant="text" :disabled="!linkage.stack.length" @click="goUp">返回上一级</IButton>
+        </div>
+        <p class="link-demo__state">
+          当前维度：{{ linkage.dimension }}；筛选：{{
+            linkage.filters.length ? linkage.filters.map((f) => `${f.field}=${f.values?.join('、')}`).join('，') : '无'
+          }}
+        </p>
       </div>
     </DemoBlock>
 
@@ -441,6 +635,11 @@ const waterfallItems = [
 </template>
 
 <style scoped>
+.link-demo { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; }
+.link-demo__row { display: flex; flex-wrap: wrap; gap: var(--i-spacing-2); }
+.link-demo__path { margin: 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+.link-demo__state { margin: 0; color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); }
+.frame-demo { width: 100%; min-width: 0; }
 .chart-demo { display: flex; flex-direction: column; gap: var(--i-spacing-6); width: 100%; }
 .chart-demo--row { flex-direction: row; flex-wrap: wrap; gap: var(--i-spacing-8); }
 .spark { margin-top: var(--i-spacing-3); }

@@ -20,6 +20,9 @@ for (const file of readdirSync(DIR).filter((f) => f.endsWith('.vue')).sort()) {
     name: p.name,
     type: p.type,
     doc: p.doc,
+    // 必填与否是 Patterns Lab 能不能自动把组件渲染出来的前提：
+    // 缺一个必填属性，渲染出来的是个坏掉的组件，而那看起来和「没实现」一样
+    optional: p.optional,
     defaultText: p.defaultText,
     control: controlOf(p.type)
   }))
@@ -43,6 +46,8 @@ const lines = [
   '  /** 源码里属性上方的文档注释 */',
   '  doc: string',
   '  /** withDefaults 里的默认值文本；没有默认值时为 null */',
+  '  /** 是否可选；必填属性没给值时组件渲染不出正确形态 */',
+  '  optional: boolean',
   '  defaultText: string | null',
   '  control: PropControl | null',
   '}',

@@ -48,7 +48,12 @@ const require = createRequire(import.meta.url)
 
 const targets = [
   // 插画单独一个入口：它们体积大且没有组件依赖，不该压在主入口上
-  { dir: 'common', entry: { index: 'src/index.ts', illustrations: 'src/illustrations.ts' }, plugins: () => [] },
+  {
+    dir: 'common',
+    // icons 单独一个入口：按需引一个图标时，摇树只会带走那一条
+    entry: { index: 'src/index.ts', illustrations: 'src/illustrations.ts', icons: 'src/icons/paths.ts' },
+    plugins: () => []
+  },
   { dir: 'vue-next', entry: 'src/index.ts', plugins: () => [vue()] },
   { dir: 'vue', entry: 'src/index.ts', plugins: () => [vue2()] },
   { dir: 'mobile-vue', entry: 'src/index.ts', plugins: () => [vue()] },
@@ -68,6 +73,7 @@ async function buildOne(target) {
    */
   for (const name of ['index.mjs', 'index.cjs', 'index.mjs.map', 'index.cjs.map',
     'illustrations.mjs', 'illustrations.cjs', 'illustrations.mjs.map', 'illustrations.cjs.map',
+    'icons.mjs', 'icons.cjs', 'icons.mjs.map', 'icons.cjs.map',
     'style.css', 'types', 'styles']) {
     rmSync(join(dir, 'dist', name), { recursive: true, force: true })
   }

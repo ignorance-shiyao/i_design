@@ -31,10 +31,18 @@ npm run check:motion      # 系统的减少动效与面板开关都要真的把�
 npm run check:install     # 把包装进仓库外的干净项目里真跑一遍（慢，但只有它能证明别人装得上）
 npm run check:ssr         # 无 DOM 的 Node 里 import、Vue/React 服务端渲染、hydrate 与 CSP
 npm run check:bundle      # 按需引入的隔离与体积回归（要先 build:packages）
+npm run check:lab         # Patterns Lab 里每个组件都真的渲染出来（要先 build）
 ```
 
 **别用管道跑这些检查**：`npm run check:a11y | tail` 的退出码来自 `tail`，
 失败会被吞掉。这个仓库里有一条 nested-interactive 差点因此漏过去。
+
+## 图标
+
+图标本体在 `packages/common/src/icons/index.ts`，元数据（中文名、语义域、
+业务别名）在同目录的 `meta.ts`，单图标导出由脚本生成。新增一个图标要同时补
+元数据，否则它在检索里等于不存在——`npm run check:icons` 会报出来，
+形状与既有图标重复、别名被别的图标占用也会。
 
 ## 生成物
 
@@ -54,6 +62,8 @@ npm run check:bundle      # 按需引入的隔离与体积回归（要先 build:
 - 小程序目录名必须是组件名的 kebab 形式（`IFineTuneCard` → `fine-tune-card`），
   写成 `finetune-card` 会被覆盖矩阵判成这一端缺失，而且不报错；
 - 文档站里要有可运行的演示，`npm run check:registry` 会把只有源码没有演示的组件报出来；
+  组件会自动出现在 Patterns Lab（`/design/lab`）里，必填属性是数组或对象的，
+  要在 `src/data/labFixtures.ts` 补一份最小数据，否则 `check:lab` 会报「只有名字不算覆盖」；
 - 各端都要从包入口导出——有源码但没导出，覆盖矩阵照样是绿的，而使用方 import 不到。
 
 ## 新加检查

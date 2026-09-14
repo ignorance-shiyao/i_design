@@ -10,7 +10,9 @@ import IRadioGroup from '@/components/IRadioGroup.vue'
 import ICheckbox from '@/components/ICheckbox.vue'
 import ISwitch from '@/components/ISwitch.vue'
 import IButton from '@/components/IButton.vue'
+import ISchemaForm from '@/components/ISchemaForm.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
+import type { FormSchema } from '@i-design/common'
 import { message } from '@/components/message'
 import type { FormRule } from '@/components/validate'
 
@@ -90,6 +92,49 @@ function reset() {
   formRef.value?.clearValidate()
   submitted.value = ''
 }
+
+/* ---------- 按 schema 渲染（B08）---------- */
+const demoSchema: FormSchema = {
+  fields: [
+    {
+      name: 'type',
+      label: '客户类型',
+      kind: 'select',
+      rules: [{ kind: 'required', message: '请选择客户类型' }],
+      options: [
+        { value: 'person', label: '个人' },
+        { value: 'company', label: '企业' }
+      ]
+    },
+    {
+      name: 'taxNo',
+      label: '税号',
+      kind: 'text',
+      placeholder: '8 位以上大写字母或数字',
+      when: { field: 'type', op: 'eq', value: 'company' },
+      rules: [
+        { kind: 'required', message: '企业客户必须填税号' },
+        { kind: 'pattern', value: '^[A-Z0-9]{8,}$', message: '税号是 8 位以上的大写字母或数字' }
+      ]
+    },
+    {
+      name: 'lines',
+      label: '明细',
+      kind: 'array',
+      minItems: 1,
+      maxItems: 3,
+      item: [
+        { name: 'sku', label: '物料', kind: 'text', rules: [{ kind: 'required', message: '物料必填' }] },
+        { name: 'quantity', label: '数量', kind: 'number', rules: [{ kind: 'min', value: 1, message: '数量至少为 1' }] }
+      ]
+    }
+  ]
+}
+
+const schemaValues = ref<Record<string, unknown>>({ type: 'person', lines: [{ sku: 'SKU-1001', quantity: 2 }] })
+/* 对不上任何字段的服务端错误：演示它显示在表单级而不是被丢掉 */
+const demoServerErrors = [{ path: 'creditLimit', message: '超出授信额度，请联系财务' }]
+const schemaSubmitted = ref<Record<string, unknown> | null>(null)
 </script>
 
 <template>
@@ -191,6 +236,26 @@ const rules = {
       </div>
     </DemoBlock>
 
+    <h2>按 schema 渲染</h2>
+    <DemoBlock
+      title="显隐依赖、数组子表与服务端错误"
+      description="schema 里不出现任何可执行的东西：条件是数据结构，求值器只认识固定的算子表，异步规则也只给一个 handler 名字由宿主注册实现——schema 常常来自接口，能 eval 就等于把任意代码执行权交给了接口。把「客户类型」切到企业，税号才出现；切回个人时，已经填过的税号不会跟着提交上去（否则服务端会存下脏数据）。明细的错误落到具体那一格，而不是整张表报一句「有误」。下面还塞了一条服务端返回、但对不上任何字段的错误：它显示在表单级而不是被丢掉——丢掉等于「提交失败但没有原因」。"
+      lang="vue"
+      code='<ISchemaForm v-model="values" :schema="schema" :server-errors="serverErrors" @submit="onSubmit" />'
+    >
+      <div class="schema-demo">
+        <ISchemaForm
+          v-model="schemaValues"
+          :schema="demoSchema"
+          :server-errors="demoServerErrors"
+          @submit="(v: Record<string, unknown>) => (schemaSubmitted = v)"
+        />
+        <p v-if="schemaSubmitted" class="schema-demo__out">
+          提交上去的是：<code>{{ JSON.stringify(schemaSubmitted) }}</code>
+        </p>
+      </div>
+    </DemoBlock>
+
     <h2>校验时机</h2>
     <p>三条规则决定什么时候报错，目的都是不在用户还在输入时打断他：</p>
     <table class="i-table">
@@ -265,6 +330,19 @@ const rules = {
 </template>
 
 <style scoped>
+.schema-demo {
+  display: grid;
+  gap: var(--i-spacing-3);
+  max-width: 560px;
+}
+
+.schema-demo__out {
+  margin: 0;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+  overflow-wrap: anywhere;
+}
+
 .form-wrap { width: 100%; max-width: 560px; }
 .row { display: flex; gap: var(--i-spacing-2); }
 .result {

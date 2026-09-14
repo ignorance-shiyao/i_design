@@ -4,6 +4,10 @@
 /// 同一份会话在两端会分进不同的组、删一条之后跳到不同的位置。
 library;
 
+/// 一条会话现在还能不能打开。「没权限」与「已失效」必须分开说——
+/// 都笼统写成打不开的话，用户会一直重试一条永远打不开的会话。
+enum ChatAccess { ok, forbidden, expired }
+
 class ChatSessionData {
   const ChatSessionData({
     required this.id,
@@ -11,6 +15,9 @@ class ChatSessionData {
     this.title = '',
     this.preview = '',
     this.pinned = false,
+    this.archived = false,
+    this.access = ChatAccess.ok,
+    this.accessReason = '',
   });
 
   final String id;
@@ -20,6 +27,15 @@ class ChatSessionData {
 
   /// 会话标题。智能体还没起名时是空的
   final String title;
+
+  /// 已归档：默认不出现在列表里，但不是删除
+  final bool archived;
+
+  /// 能不能打开
+  final ChatAccess access;
+
+  /// 打不开的原因，直接显示给用户看
+  final String accessReason;
 
   /// 最后一条消息的摘要，标题为空时顶上
   final String preview;
@@ -149,3 +165,17 @@ String moveActiveSession(List<ChatGroupData> groups, String activeId, int step) 
   if (next > flat.length - 1) next = flat.length - 1;
   return flat[next].id;
 }
+
+
+/// 打不开时显示什么。原因由后端给，给不出时也要有一句能读的话
+String accessReasonOf(ChatSessionData session) {
+  if (session.access == ChatAccess.ok) return '';
+  if (session.accessReason.trim().isNotEmpty) return session.accessReason.trim();
+  return session.access == ChatAccess.forbidden ? '没有这条会话的权限' : '这条会话已失效';
+}
+
+bool canOpenSession(ChatSessionData session) => session.access == ChatAccess.ok;
+
+/// 列表视图：默认只看未归档的，归档视图只看归档的。两边都不含彼此
+List<ChatSessionData> visibleSessions(List<ChatSessionData> sessions, {bool archived = false}) =>
+    sessions.where((s) => s.archived == archived).toList();

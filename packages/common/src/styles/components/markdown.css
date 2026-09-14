@@ -1,0 +1,97 @@
+/* IMarkdown —— 由 Vue / React / mobile 各端共享 */
+/*
+ * min-width: 0 与 overflow-wrap 是一对：flex 子项默认按内容的最小宽度撑开，
+ * 而模型输出里常有超长的地址、路径、无空格的英文串——不管它们的话，
+ * 整页就能左右拖动（390px 下实测溢出 49px）。
+ */
+.i-md {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  min-width: 0;
+  color: var(--i-color-text);
+  overflow-wrap: anywhere;
+}
+.i-md > * { min-width: 0; max-width: 100%; }
+.i-md.is-compact { gap: var(--i-spacing-2); }
+.i-md__heading { margin: 0; font-weight: 600; line-height: 1.4; }
+.i-md__p { margin: 0; line-height: 1.7; }
+.i-md__code {
+  padding: 1px 4px;
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-muted);
+  font-family: var(--i-font-family-mono);
+  font-size: 0.92em;
+}
+.i-md__link { color: var(--i-color-brand-text); text-underline-offset: 2px; }
+.i-md__image { max-width: 100%; border-radius: var(--i-radius-sm); }
+
+/*
+ * 引用用左内边距加淡底色，不用一条加粗的左边线——
+ * 那正是禁令里点名的写法，而且在灰度下与普通边框没区别。
+ */
+.i-md__quote {
+  margin: 0;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+}
+.i-md__list { margin: 0; padding-left: var(--i-spacing-5); line-height: 1.7; }
+.i-md__list li + li { margin-top: var(--i-spacing-1); }
+.i-md__hr { width: 100%; height: 1px; margin: 0; border: 0; background: var(--i-color-hairline); }
+
+/* 表格自己横向滚动：让整页能左右拖比表格里滚更糟 */
+.i-md__table-wrap { overflow-x: auto; }
+.i-md__table { width: 100%; border-collapse: collapse; font-size: var(--i-font-size-sm); }
+.i-md__table th,
+.i-md__table td {
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  text-align: left;
+}
+.i-md__table th { background: var(--i-color-bg-subtle); font-weight: 500; }
+
+/* IMessageParts —— 多段混排 */
+.i-msg-parts { display: flex; flex-direction: column; gap: var(--i-spacing-3); min-width: 0; }
+.i-msg-parts.is-compact { gap: var(--i-spacing-2); }
+.i-msg-parts__reasoning {
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+}
+.i-msg-parts__reasoning summary {
+  display: flex;
+  gap: var(--i-spacing-2);
+  align-items: center;
+  cursor: pointer;
+}
+.i-msg-parts__chip {
+  display: inline-flex;
+  gap: var(--i-spacing-2);
+  align-items: center;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: var(--i-spacing-1) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
+  font-size: var(--i-font-size-sm);
+}
+.i-msg-parts__chip-icon { display: grid; place-items: center; color: var(--i-color-text-secondary); }
+.i-msg-parts__chip-state { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-xs); }
+/* 引用角标：可点、可聚焦，因为引用的价值在于能回到出处 */
+.i-msg-parts__cite {
+  align-self: flex-start;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--i-color-brand-text);
+  font-size: var(--i-font-size-xs);
+  cursor: pointer;
+}
+.i-msg-parts__cite:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }

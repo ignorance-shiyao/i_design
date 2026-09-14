@@ -27,6 +27,7 @@ class IChatList extends StatefulWidget {
     this.onCreate,
     this.onRemove,
     this.onPin,
+    this.onArchive,
   });
 
   final List<ChatSessionData> sessions;
@@ -38,6 +39,9 @@ class IChatList extends StatefulWidget {
   final VoidCallback? onCreate;
   final ValueChanged<String>? onRemove;
   final ValueChanged<String>? onPin;
+
+  /// 归档 / 取消归档；由调用方决定是真的归档还是只是标记
+  final void Function(String id, bool archived)? onArchive;
 
   @override
   State<IChatList> createState() => _IChatListState();
@@ -182,19 +186,43 @@ class _IChatListState extends State<IChatList> {
                 const SizedBox(width: IDesignTokensLight.spacing1),
               ],
               Expanded(
-                child: Text(
-                  title,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: isActive ? c.brand : c.text,
-                    fontSize: IDesignTokensLight.fontSizeSm,
-                    fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: isActive ? c.brand : c.text,
+                        fontSize: IDesignTokensLight.fontSizeSm,
+                        fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
+                      ),
+                    ),
+                    // 打不开的原因写出来，图标与文字一起给，不靠颜色单独表意
+                    if (accessReasonOf(session).isNotEmpty)
+                      Row(
+                        children: [
+                          IIcon(
+                            name: session.access == ChatAccess.forbidden ? 'lock' : 'history',
+                            size: 12,
+                            color: c.textTertiary,
+                          ),
+                          const SizedBox(width: IDesignTokensLight.spacing1),
+                          Text(
+                            accessReasonOf(session),
+                            style: TextStyle(color: c.textTertiary, fontSize: IDesignTokensLight.fontSizeXs),
+                          ),
+                        ],
+                      ),
+                  ],
                 ),
               ),
               // 触摸端没有悬停，操作按钮常驻：不常驻的话在手机上永远点不到
               _action(c, 'pin', session.pinned ? '取消置顶$title' : '置顶$title',
                   () => widget.onPin?.call(session.id)),
+              _action(c, session.archived ? 'undo' : 'box',
+                  session.archived ? '取消归档$title' : '归档$title',
+                  () => widget.onArchive?.call(session.id, !session.archived)),
               _action(c, 'trash', '删除 $title', () => _remove(session, groups)),
             ],
           ),

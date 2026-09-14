@@ -13,6 +13,7 @@ import IInputNumber from './IInputNumber.vue'
 import IInputOtp from './IInputOtp.vue'
 import ISlider from './ISlider.vue'
 import IQrcode from './IQrcode.vue'
+import IQueryFilter from './IQueryFilter.vue'
 import IRangeInput from './IRangeInput.vue'
 import IRate from './IRate.vue'
 import ILink from './ILink.vue'
@@ -22,6 +23,7 @@ import ISpace from './ISpace.vue'
 import ITypography from './ITypography.vue'
 import IRow from './IRow.vue'
 import ICol from './ICol.vue'
+import ISchemaForm from './ISchemaForm.vue'
 import ISegmented from './ISegmented.vue'
 import IProgress from './IProgress.vue'
 import IStatistic from './IStatistic.vue'
@@ -117,6 +119,10 @@ import IDivider from './IDivider.vue'
 import ITabs from './ITabs.vue'
 import IBreadcrumb from './IBreadcrumb.vue'
 import ISteps from './ISteps.vue'
+import IChartFrame from './IChartFrame.vue'
+import IMarkdown from './IMarkdown.vue'
+import IMessageParts from './IMessageParts.vue'
+import IPageState from './IPageState.vue'
 import IPagination from './IPagination.vue'
 import IPageHeader from './IPageHeader.vue'
 import ICard from './ICard.vue'
@@ -211,6 +217,10 @@ export {
   ITabs,
   IBreadcrumb,
   ISteps,
+  IChartFrame,
+  IMarkdown,
+  IMessageParts,
+  IPageState,
   IPagination,
   IPageHeader,
   ICard,
@@ -232,6 +242,7 @@ export {
   ITypography,
   IRow,
   ICol,
+  ISchemaForm,
   ISegmented,
   IProgress,
   IStatistic,
@@ -243,6 +254,7 @@ export {
   IInputOtp,
   ISlider,
   IQrcode,
+  IQueryFilter,
   IRangeInput,
   IRate,
   ILayout,
@@ -323,6 +335,10 @@ const components = {
   ITabs,
   IBreadcrumb,
   ISteps,
+  IChartFrame,
+  IMarkdown,
+  IMessageParts,
+  IPageState,
   IPagination,
   IPageHeader,
   ICard,
@@ -344,6 +360,7 @@ const components = {
   ITypography,
   IRow,
   ICol,
+  ISchemaForm,
   ISegmented,
   IProgress,
   IStatistic,
@@ -355,6 +372,7 @@ const components = {
   IInputOtp,
   ISlider,
   IQrcode,
+  IQueryFilter,
   IRangeInput,
   IRate,
   ILayout,

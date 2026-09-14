@@ -468,10 +468,13 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     },
     "demoRoutes": [
       "/components/button",
+      "/components/icon",
       "/components/form",
       "/components/badge",
       "/components/descriptions",
       "/components/skeleton",
+      "/components/page-state",
+      "/components/markdown",
       "/components/result",
       "/components/popconfirm",
       "/components/overlay",
@@ -490,8 +493,10 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/loading",
       "/components/drawer",
       "/components/message",
+      "/components/chat",
       "/components/layout",
       "/components/data-display",
+      "/components/chart",
       "/components/flow",
       "/components/mobile"
     ],
@@ -704,7 +709,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/chart",
       "page": "src/pages/components/ChartPage.vue",
-      "demos": 17
+      "demos": 24
     },
     "demoRoutes": [
       "/components/chart"
@@ -714,6 +719,19 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
         "line",
         "area",
         "bar"
+      ],
+      "curve": [
+        "linear",
+        "step"
+      ],
+      "orientation": [
+        "vertical",
+        "horizontal"
+      ],
+      "rank": [
+        "desc",
+        "asc",
+        "none"
       ]
     }
   },
@@ -725,6 +743,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "react": "packages/react/src/components/ChartBox.tsx",
       "miniprogram": "packages/miniprogram/src/components/chart-box",
       "flutter": "packages/flutter/lib/src/components/i_chart_stats.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/chart"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IChartFrame",
+    "sources": {
+      "vue-next": "src/components/IChartFrame.vue",
+      "vue": "packages/vue/src/components/IChartFrame.vue",
+      "react": "packages/react/src/components/ChartFrame.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-frame",
+      "flutter": "packages/flutter/lib/src/components/i_chart_frame.dart"
     },
     "ends": {
       "vue-next": true,
@@ -1142,7 +1190,12 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "demoRoutes": [
       "/components/chat"
     ],
-    "states": {}
+    "states": {
+      "view": [
+        "active",
+        "archived"
+      ]
+    }
   },
   {
     "name": "IChatMessage",
@@ -1971,6 +2024,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "maturity": "stable",
     "doc": null,
     "demoRoutes": [
+      "/components/icon",
       "/components/overlay"
     ],
     "states": {}
@@ -2151,7 +2205,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/form",
       "page": "src/pages/components/FormPage.vue",
-      "demos": 1
+      "demos": 2
     },
     "demoRoutes": [
       "/components/form"
@@ -2220,14 +2274,19 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/icon",
       "page": "src/pages/components/IconPage.vue",
-      "demos": 2
+      "demos": 3
     },
     "demoRoutes": [
       "/components/icon",
       "/components/badge",
       "/components/popconfirm"
     ],
-    "states": {}
+    "states": {
+      "variant": [
+        "stroke",
+        "fill"
+      ]
+    }
   },
   {
     "name": "IImage",
@@ -2679,6 +2738,40 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     }
   },
   {
+    "name": "IMarkdown",
+    "sources": {
+      "vue-next": "src/components/IMarkdown.vue",
+      "vue": "packages/vue/src/components/IMarkdown.vue",
+      "react": "packages/react/src/components/Markdown.tsx",
+      "miniprogram": "packages/miniprogram/src/components/markdown",
+      "flutter": "packages/flutter/lib/src/components/i_markdown.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": {
+      "route": "/components/markdown",
+      "page": "src/pages/components/MarkdownPage.vue",
+      "demos": 3
+    },
+    "demoRoutes": [
+      "/components/markdown"
+    ],
+    "states": {}
+  },
+  {
     "name": "IMentions",
     "sources": {
       "vue-next": "src/components/IMentions.vue",
@@ -2735,6 +2828,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": null,
     "demoRoutes": [
       "/components/navigation"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IMessageParts",
+    "sources": {
+      "vue-next": "src/components/IMessageParts.vue",
+      "vue": "packages/vue/src/components/IMessageParts.vue",
+      "react": "packages/react/src/components/MessageParts.tsx",
+      "miniprogram": "packages/miniprogram/src/components/message-parts",
+      "flutter": "packages/flutter/lib/src/components/i_message_parts.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/chat"
     ],
     "states": {}
   },
@@ -2859,6 +2982,47 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/layout"
     ],
     "states": {}
+  },
+  {
+    "name": "IPageState",
+    "sources": {
+      "vue-next": "src/components/IPageState.vue",
+      "vue": "packages/vue/src/components/IPageState.vue",
+      "react": "packages/react/src/components/PageState.tsx",
+      "miniprogram": "packages/miniprogram/src/components/page-state",
+      "flutter": "packages/flutter/lib/src/components/i_page_state.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": {
+      "route": "/components/page-state",
+      "page": "src/pages/components/PageStatePage.vue",
+      "demos": 2
+    },
+    "demoRoutes": [
+      "/components/page-state"
+    ],
+    "states": {
+      "emptyType": [
+        "empty",
+        "search",
+        "error",
+        "permission"
+      ]
+    }
   },
   {
     "name": "IPagination",
@@ -3086,6 +3250,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     },
     "demoRoutes": [
       "/components/qrcode"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IQueryFilter",
+    "sources": {
+      "vue-next": "src/components/IQueryFilter.vue",
+      "vue": "packages/vue/src/components/IQueryFilter.vue",
+      "react": "packages/react/src/components/QueryFilter.tsx",
+      "miniprogram": "packages/miniprogram/src/components/query-filter",
+      "flutter": "packages/flutter/lib/src/components/i_query_filter.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/table"
     ],
     "states": {}
   },
@@ -3362,6 +3556,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     }
   },
   {
+    "name": "ISchemaForm",
+    "sources": {
+      "vue-next": "src/components/ISchemaForm.vue",
+      "vue": "packages/vue/src/components/ISchemaForm.vue",
+      "react": "packages/react/src/components/SchemaForm.tsx",
+      "miniprogram": "packages/miniprogram/src/components/schema-form",
+      "flutter": "packages/flutter/lib/src/components/i_schema_form.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/form"
+    ],
+    "states": {}
+  },
+  {
     "name": "IScrollbar",
     "sources": {
       "vue-next": "src/components/IScrollbar.vue",
@@ -3421,6 +3645,9 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "maturity": "stable",
     "doc": null,
     "demoRoutes": [
+      "/components/icon",
+      "/components/page-state",
+      "/components/markdown",
       "/components/config-provider",
       "/components/qrcode",
       "/components/chat",
@@ -3956,10 +4183,11 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/table",
       "page": "src/pages/components/TablePage.vue",
-      "demos": 5
+      "demos": 6
     },
     "demoRoutes": [
       "/components/collapse",
+      "/components/page-state",
       "/components/table",
       "/components/pagination"
     ],
@@ -4123,6 +4351,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "demoRoutes": [
       "/components/form",
       "/components/textarea",
+      "/components/markdown",
       "/components/drawer"
     ],
     "states": {

@@ -597,3 +597,23 @@
   font-size: var(--i-font-size-xs);
   font-variant-numeric: tabular-nums;
 }
+
+/*
+ * 目标线：品牌色虚线，与阈值的状态色分开。
+ * 阈值说的是「越过就有问题」，目标说的是「要达到」——
+ * 把目标画成危险色，会让一个还没达成的目标看起来像一次故障。
+ */
+.i-chart__target-line {
+  stroke: var(--i-color-brand);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+.i-chart__target-label {
+  fill: var(--i-color-brand-text);
+  font-size: 11px;
+}
+.i-chart__hint {
+  margin: var(--i-spacing-1) 0 0;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}

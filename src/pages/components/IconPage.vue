@@ -2,22 +2,80 @@
 import { computed, ref } from 'vue'
 import IIcon from '@/components/IIcon.vue'
 import IInput from '@/components/IInput.vue'
-import { iconNames } from '@/components/icons'
+import ISegmented from '@/components/ISegmented.vue'
+import IDropdown from '@/components/IDropdown.vue'
+import IButton from '@/components/IButton.vue'
+import { iconNames, icons } from '@/components/icons'
 import { message } from '@/components/message'
 import DemoBlock from '@/site/DemoBlock.vue'
+import { CATEGORY_LABELS, iconMeta, iconsByCategory, searchIcons } from '@i-design/common'
 
 const keyword = ref('')
-const filtered = computed(() =>
-  iconNames.filter((name) => name.includes(keyword.value.trim().toLowerCase()))
+const size = ref(22)
+const stroke = ref(1.8)
+
+/*
+ * 检索走元数据而不是「名字里包不包含」：使用方脑子里是「删除」「回收站」，
+ * 而图标叫 trash。只按名字匹配的搜索框，等于要求他先知道答案。
+ */
+const hits = computed(() => (keyword.value.trim() ? new Set(searchIcons(keyword.value)) : null))
+
+const groups = computed(() =>
+  iconsByCategory()
+    .map((group) => ({ ...group, names: group.names.filter((name) => !hits.value || hits.value.has(name)) }))
+    .filter((group) => group.names.length > 0)
 )
 
-async function copyName(name: string) {
+const total = computed(() => groups.value.reduce((sum, group) => sum + group.names.length, 0))
+
+/** 与 IIcon 渲染出来的完全一致的独立 SVG，可直接存成文件 */
+function svgOf(name: string) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" ` +
+    `stroke="currentColor" stroke-width="${stroke.value}" stroke-linecap="round" stroke-linejoin="round">` +
+    `<path d="${icons[name as keyof typeof icons]}"/></svg>`
+}
+
+async function copy(text: string, hint: string) {
   try {
-    await navigator.clipboard.writeText(`<IIcon name="${name}" />`)
-    message.success(`已复制 ${name}`)
+    await navigator.clipboard.writeText(text)
+    message.success(hint)
   } catch {
     message.warning('当前环境不支持剪贴板，请手动复制')
   }
+}
+
+/** 下载单个 SVG。浏览器里没有别的办法把文本变成文件，只能造一个临时链接 */
+function download(name: string) {
+  const blob = new Blob([svgOf(name)], { type: 'image/svg+xml' })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = `${name}.svg`
+  anchor.click()
+  URL.revokeObjectURL(url)
+  message.success(`已下载 ${name}.svg`)
+}
+
+const actions = [
+  { key: 'vue', label: '复制 Vue 用法' },
+  { key: 'react', label: '复制 React 用法' },
+  { key: 'svg', label: '复制 SVG' },
+  { key: 'path', label: '复制按需引入' },
+  { key: 'download', label: '下载 .svg' }
+]
+
+function act(name: string, key: string) {
+  const bare = name.replace(/(^|-)([a-z0-9])/g, (_, __, ch) => ch.toUpperCase())
+  if (key === 'vue') return copy(`<IIcon name="${name}" />`, `已复制 ${name} 的 Vue 用法`)
+  if (key === 'react') return copy(`<Icon name="${name}" />`, `已复制 ${name} 的 React 用法`)
+  if (key === 'svg') return copy(svgOf(name), `已复制 ${name} 的 SVG`)
+  if (key === 'path') {
+    return copy(
+      `import { icon${bare} } from '@i-design/common/icons'\n<IIcon name="${name}" :path="icon${bare}" />`,
+      '已复制按需引入的写法'
+    )
+  }
+  return download(name)
 }
 </script>
 
@@ -53,6 +111,34 @@ async function copyName(name: string) {
     </DemoBlock>
 
     <DemoBlock
+      title="描边与填充"
+      description="描边在小尺寸、低对比的位置会「化掉」——徽标里的勾、16px 的状态点、移动端底栏的选中项。填充版把同一个形状做成实心，识别距离明显更远。不是每个图标都有填充版，没有的自动退回描边，任何时候都有东西可画。双色靠同一个 currentColor 的两档不透明度，不引第二种颜色：引入第二色就得为每个主题、每种底色重新验一遍对比度。"
+      lang="vue"
+      code='<IIcon name="check-circle" />
+<IIcon name="check-circle" variant="fill" />
+<IIcon name="user" variant="fill" />'
+    >
+      <span class="row">
+        <IIcon name="check-circle" :size="20" />
+        <IIcon name="info-circle" :size="20" />
+        <IIcon name="warning-triangle" :size="20" />
+        <IIcon name="error-circle" :size="20" />
+      </span>
+      <span class="row">
+        <IIcon name="check-circle" :size="20" variant="fill" />
+        <IIcon name="info-circle" :size="20" variant="fill" />
+        <IIcon name="warning-triangle" :size="20" variant="fill" />
+        <IIcon name="error-circle" :size="20" variant="fill" />
+        <IIcon name="user" :size="20" variant="fill" />
+      </span>
+      <span class="row">
+        <!-- 没有填充版的图标退回描边，而不是画一个空白 -->
+        <IIcon name="search" :size="20" variant="fill" />
+        <IIcon name="filter" :size="20" variant="fill" />
+      </span>
+    </DemoBlock>
+
+    <DemoBlock
       title="旋转与无障碍"
       description="spin 用于加载态；label 会输出 role=img + aria-label，不传则视为装饰性图标并对读屏隐藏。"
       lang="vue"
@@ -66,24 +152,52 @@ async function copyName(name: string) {
     </DemoBlock>
 
     <h2>全部图标</h2>
-    <p>共 {{ iconNames.length }} 个。点击任意图标复制其用法。</p>
-    <div class="search">
-      <IInput v-model="keyword" placeholder="搜索图标名，如 check、arrow" />
+    <p>
+      共 {{ iconNames.length }} 个，按语义域分组。搜索认业务词——搜「删除」「入库」「审计」都能找到对应的那个，不必先知道它叫什么。
+    </p>
+    <div class="browser">
+      <div class="search">
+        <IInput v-model="keyword" placeholder="搜索图标，如 删除、入库、cloud" clearable />
+      </div>
+      <ISegmented
+        v-model="size"
+        :options="[
+          { label: '16px', value: 16 },
+          { label: '22px', value: 22 },
+          { label: '32px', value: 32 }
+        ]"
+        aria-label="预览尺寸"
+      />
+      <ISegmented
+        v-model="stroke"
+        :options="[
+          { label: '细 1.5', value: 1.5 },
+          { label: '标准 1.8', value: 1.8 },
+          { label: '粗 2.2', value: 2.2 }
+        ]"
+        aria-label="预览线宽"
+      />
+      <p class="browser__count">{{ total }} / {{ iconNames.length }}</p>
     </div>
-    <div class="gallery">
-      <button
-        v-for="name in filtered"
-        :key="name"
-        class="cell"
-        type="button"
-        :title="name"
-        @click="copyName(name)"
-      >
-        <IIcon :name="name" :size="22" />
-        <span class="cell__name">{{ name }}</span>
-      </button>
-    </div>
-    <p v-if="!filtered.length" class="empty">没有匹配「{{ keyword }}」的图标。</p>
+
+    <section v-for="group in groups" :key="group.category" class="group">
+      <h3 class="group__title">{{ CATEGORY_LABELS[group.category] }}</h3>
+      <div class="gallery">
+        <div v-for="name in group.names" :key="name" class="cell">
+          <IIcon :name="name" :size="size" :stroke-width="stroke" />
+          <span class="cell__cn">{{ iconMeta[name].cn }}</span>
+          <code class="cell__name">{{ name }}</code>
+          <IDropdown :items="actions" @select="(key: string) => act(name, key)">
+            <IButton variant="text" size="sm" :aria-label="`${iconMeta[name].cn} 的复制与下载`">
+              复制 / 下载
+            </IButton>
+          </IDropdown>
+        </div>
+      </div>
+    </section>
+    <p v-if="!total" class="empty">
+      没有匹配「{{ keyword }}」的图标。可以试试业务词，比如「发货」「合同」「定位」。
+    </p>
 
     <h2>什么时候不该用它</h2>
     <ul>
@@ -113,16 +227,32 @@ async function copyName(name: string) {
 
 <style scoped>
 .row { display: inline-flex; align-items: center; gap: var(--i-spacing-4); }
-.search { max-width: 280px; margin-bottom: var(--i-spacing-5); }
+.browser {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-3);
+  align-items: center;
+  margin-bottom: var(--i-spacing-5);
+}
+.search { flex: 1 1 240px; max-width: 320px; }
+.browser__count { margin: 0; color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); }
+.group { margin-bottom: var(--i-spacing-6); }
+.group__title {
+  margin: 0 0 var(--i-spacing-3);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  font-weight: 500;
+}
+.cell__cn { color: var(--i-color-text); font-size: var(--i-font-size-sm); }
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(112px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr));
   gap: var(--i-spacing-2);
 }
 .cell {
   display: grid;
   justify-items: center;
-  gap: var(--i-spacing-2);
+  gap: var(--i-spacing-1);
   padding: var(--i-spacing-4) var(--i-spacing-2);
   border: 1px solid var(--i-color-hairline);
   border-radius: var(--i-radius-lg);

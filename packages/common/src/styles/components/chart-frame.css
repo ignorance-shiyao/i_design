@@ -1,0 +1,71 @@
+/* IChartFrame —— 由 Vue / React / mobile 各端共享 */
+.i-chart-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  margin: 0;
+  min-width: 0;
+}
+.i-chart-frame__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.i-chart-frame__titles { min-width: 0; }
+.i-chart-frame__title { margin: 0; font-size: var(--i-font-size-md); font-weight: 600; }
+.i-chart-frame__subtitle {
+  margin: 2px 0 0;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+}
+.i-chart-frame__actions { display: flex; gap: var(--i-spacing-1); align-items: center; }
+.i-chart-frame__canvas { min-width: 0; }
+/*
+ * 图表摘要：视觉上不占位，但读屏读得到。
+ * 不用 display: none 或 visibility: hidden——那两种读屏也读不到，
+ * 等于把摘要写给了空气。
+ */
+.i-chart-frame__summary {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 表格自己横向滚动：让整页能左右拖比表格里滚更糟 */
+.i-chart-frame__table-wrap { overflow-x: auto; }
+.i-chart-frame__table { width: 100%; border-collapse: collapse; font-size: var(--i-font-size-sm); }
+.i-chart-frame__caption {
+  padding-bottom: var(--i-spacing-2);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  text-align: left;
+}
+.i-chart-frame__table th,
+.i-chart-frame__table td {
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  text-align: left;
+}
+.i-chart-frame__table thead th { background: var(--i-color-bg-subtle); font-weight: 500; }
+/* 缺失值显示「—」并压低对比，但不是灰得读不出来——它也是数据的一部分 */
+.i-chart-frame__table td.is-missing { color: var(--i-color-text-tertiary); }
+.i-chart-frame__note { margin: 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+.i-chart-frame__issues {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+.i-chart-frame__issues li { display: flex; gap: var(--i-spacing-1); align-items: center; }

@@ -1,0 +1,37 @@
+/* IPageState —— 由 Vue / React / mobile 各端共享 */
+.i-page-state { display: flex; flex-direction: column; gap: var(--i-spacing-3); }
+
+/*
+ * 状态提示条：四边等宽的发丝线，不用加粗的左边线表达类型——
+ * 类型由图标与文字标签给出，颜色只是第三重线索。
+ */
+.i-page-state__note {
+  display: flex;
+  gap: var(--i-spacing-3);
+  align-items: center;
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+}
+.i-page-state__icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-secondary);
+  background: var(--i-color-bg-muted);
+}
+.i-page-state__note.is-danger .i-page-state__icon {
+  color: var(--i-color-danger-text);
+  background: color-mix(in srgb, var(--i-color-danger) 12%, transparent);
+}
+.i-page-state__note.is-warning .i-page-state__icon {
+  color: var(--i-color-warning-text);
+  background: color-mix(in srgb, var(--i-color-warning) 14%, transparent);
+}
+.i-page-state__body { flex: 1; min-width: 0; }
+.i-page-state__title { margin: 0; color: var(--i-color-text); font-size: var(--i-font-size-sm); font-weight: 500; }
+.i-page-state__reason { margin: 2px 0 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }

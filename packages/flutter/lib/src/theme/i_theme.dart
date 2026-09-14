@@ -11,6 +11,8 @@ class IColors {
     required this.brand,
     required this.brandHover,
     required this.brandSubtle,
+    required this.brandSolid,
+    required this.onBrand,
     required this.bg,
     required this.bgElevated,
     required this.bgSubtle,
@@ -42,6 +44,11 @@ class IColors {
   final Color brand;
   final Color brandHover;
   final Color brandSubtle;
+
+  /// 实心底与它成对的字色。底色压深一点点换来白字够用的对比度，
+  /// 两者必须一起取——写死白字在浅色主题上会印不上去（见 CLAUDE.md）
+  final Color brandSolid;
+  final Color onBrand;
   final Color bg;
   final Color bgElevated;
   final Color bgSubtle;
@@ -85,6 +92,8 @@ class IColors {
     brand: IDesignTokensLight.colorBrand,
     brandHover: IDesignTokensLight.colorBrandHover,
     brandSubtle: IDesignTokensLight.colorBrandSubtle,
+    brandSolid: IDesignTokensLight.colorBrandSolid,
+    onBrand: IDesignTokensLight.colorOnBrand,
     bg: IDesignTokensLight.colorBg,
     bgElevated: IDesignTokensLight.colorBgElevated,
     bgSubtle: IDesignTokensLight.colorBgSubtle,
@@ -117,6 +126,8 @@ class IColors {
     brand: IDesignTokensDark.colorBrand,
     brandHover: IDesignTokensDark.colorBrandHover,
     brandSubtle: IDesignTokensDark.colorBrandSubtle,
+    brandSolid: IDesignTokensDark.colorBrandSolid,
+    onBrand: IDesignTokensDark.colorOnBrand,
     bg: IDesignTokensDark.colorBg,
     bgElevated: IDesignTokensDark.colorBgElevated,
     bgSubtle: IDesignTokensDark.colorBgSubtle,

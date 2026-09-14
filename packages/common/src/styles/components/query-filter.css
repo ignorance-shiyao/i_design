@@ -1,0 +1,91 @@
+/* 查询筛选条（B03）。与各端共用同一份：pro 层全端，样式也只有一个来源 */
+.i-query {
+  display: grid;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-4);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+}
+
+.i-query__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+}
+
+.i-query__quick-item,
+.i-query__tag {
+  padding: 2px var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-full);
+  background: transparent;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
+}
+
+.i-query__quick-item.is-on,
+.i-query__tag.is-on {
+  border-color: transparent;
+  background: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
+}
+
+.i-query__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: var(--i-spacing-3);
+  align-items: end;
+}
+
+.i-query__field {
+  display: grid;
+  gap: var(--i-spacing-1);
+  min-width: 0;
+}
+
+.i-query__label {
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+}
+
+.i-query__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+}
+
+.i-query__range {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  min-width: 0;
+}
+
+.i-query__range-sep {
+  color: var(--i-color-text-tertiary);
+}
+
+.i-query__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+}
+
+.i-query__fold {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--i-color-brand-text);
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
+}
+
+.i-query__invalid {
+  margin: 0;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}

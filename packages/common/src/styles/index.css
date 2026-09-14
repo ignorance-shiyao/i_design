@@ -30,6 +30,7 @@
 @import './components/carousel.css';
 @import './components/cascader.css';
 @import './components/cell.css';
+@import './components/chart-frame.css';
 @import './components/chart.css';
 @import './components/chat-list.css';
 @import './components/chat-message.css';
@@ -77,6 +78,7 @@
 @import './components/link.css';
 @import './components/list.css';
 @import './components/loading.css';
+@import './components/markdown.css';
 @import './components/mentions.css';
 @import './components/menu.css';
 @import './components/message-list.css';
@@ -86,6 +88,7 @@
 @import './components/notification.css';
 @import './components/overlay.css';
 @import './components/page-header.css';
+@import './components/page-state.css';
 @import './components/pagination.css';
 @import './components/picker.css';
 @import './components/popconfirm.css';
@@ -94,11 +97,13 @@
 @import './components/prompt-input.css';
 @import './components/pull-refresh.css';
 @import './components/qrcode.css';
+@import './components/query-filter.css';
 @import './components/radio-group.css';
 @import './components/radio.css';
 @import './components/range-input.css';
 @import './components/rate.css';
 @import './components/result.css';
+@import './components/schema-form.css';
 @import './components/scrollbar.css';
 @import './components/search-bar.css';
 @import './components/segmented.css';

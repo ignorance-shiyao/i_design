@@ -39,6 +39,11 @@ const triggerEl = ref<HTMLElement>()
  * aria-haspopup / aria-expanded——那会被读成「按钮里套着一个按钮」，
  * 而属性挂在不可交互的 span 上本身也是无效的。
  * 只有在调用方塞进来的是纯文本时，这层才顶上去充当触发器的语义。
+ *
+ * 顶上去的时候要顶全套：role="button" 与 tabindex 也一起给。
+ * 只挂 aria-haspopup 的话，它挂在一个没有角色的 span 上，
+ * 既是无效 ARIA（axe 的 aria-allowed-attr），键盘也根本聚焦不到它——
+ * 也就是说纯文本触发器只有鼠标能用。
  */
 const triggerIsInteractive = ref(true)
 onMounted(() => {
@@ -141,6 +146,8 @@ const style = computed(() => ({ left: `${pos.value.x}px`, top: `${pos.value.y}px
   <span
     ref="triggerEl"
     class="i-overlay-trigger"
+    :role="triggerIsInteractive ? undefined : 'button'"
+    :tabindex="triggerIsInteractive ? undefined : 0"
     :aria-haspopup="triggerIsInteractive ? undefined : 'menu'"
     :aria-expanded="triggerIsInteractive ? undefined : visible"
     :aria-controls="visible ? id : undefined"

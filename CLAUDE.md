@@ -108,6 +108,11 @@ color: #fff;
 - **令牌、图标、纯逻辑只存在一份**，放在 `packages/common`；各端只写渲染适配。
 - 组件样式**只引用语义令牌**（`var(--i-color-*)` / `var(--i-radius-*)`），
   不写死色值与尺寸——否则主题配置面板一调就会露馅。
+- **pro 层（`packages/pro-*/`：ProTable / QueryFilter / SchemaForm 这类组合件）
+  与原子组件一样是全端的**，进覆盖矩阵。某个端确实做不到的，写进
+  `packages/common/src/contracts/capability.ts` 并指名替代路径——
+  「该端暂不支持」不算声明，`npm run check:capability` 会把这种空话判红；
+  声明写着不支持而实现还在，同样判红（过期的声明比没有声明更糟）。
 - 「清单类」文件一律按目录生成（导出清单、覆盖矩阵、小程序四件套），
   手写必然会漏，且漏掉不会让构建失败。哪些文件是生成的，看 `package.json`
   里 `build:*` 那几条脚本各自写到哪儿。

@@ -16,7 +16,8 @@ export const docNav: NavGroup[] = [
       { to: '/design/values', label: '设计价值观' },
       { to: '/design/tokens', label: '设计令牌' },
       { to: '/design/cross-platform', label: '跨端支持' },
-      { to: '/design/catalog', label: '组件全景' }
+      { to: '/design/catalog', label: '组件全景' },
+      { to: '/design/lab', label: 'Patterns Lab' }
     ]
   },
   {
@@ -82,6 +83,8 @@ export const docNav: NavGroup[] = [
       { to: '/components/image-viewer', label: 'ImageViewer 图片预览' },
       { to: '/components/qrcode', label: 'Qrcode 二维码' },
       { to: '/components/skeleton', label: 'Skeleton 骨架屏' },
+      { to: '/components/page-state', label: 'PageState 页面状态' },
+      { to: '/components/markdown', label: 'Markdown 渲染' },
       { to: '/components/data-display', label: '数据展示' },
       { to: '/components/chart', label: '图表' },
       { to: '/components/flow', label: '流程图' }
