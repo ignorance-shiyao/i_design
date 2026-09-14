@@ -1,0 +1,113 @@
+{
+  "$schema": "由 scripts/check-licenses.mjs 校验：每个二进制素材都必须在这里有一条，缺一条或多一条都失败",
+  "assets": {
+    "packages/common/src/assets/illustrations/empty/load-failed.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/empty/load-failed@2x.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/empty/no-data.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/empty/no-data@2x.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/empty/no-permission.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/empty/no-permission@2x.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/empty/search-empty.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/empty/search-empty@2x.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/error/404.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/error/404@2x.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/error/500.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/error/500@2x.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/hero/hero-dark.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/hero/hero-dark@2x.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/hero/hero-light.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/hero/hero-light@2x.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/mascot/mascot.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    },
+    "packages/common/src/assets/illustrations/mascot/mascot@2x.webp": {
+      "origin": "in-repo",
+      "author": "i-design contributors",
+      "license": "MIT",
+      "note": "随本仓库提交引入，没有记录外部来源；如果后来发现它取自第三方素材，必须在这里改成 third-party 并补上授权链接"
+    }
+  }
+}
