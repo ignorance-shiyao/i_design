@@ -18,11 +18,14 @@ import IIcon from './IIcon.vue'
 import IInput from './IInput.vue'
 import IEmpty from './IEmpty.vue'
 import {
+  accessReasonOf,
+  canOpenSession,
   filterSessions,
   groupSessions,
   moveActiveSession,
   nextAfterDelete,
   sessionTitle,
+  visibleSessions,
   type ChatSession
 } from '@i-design/common'
 
@@ -35,8 +38,10 @@ const props = withDefaults(
     searchable?: boolean
     /** 超过这个条数自动显示搜索框 */
     searchAfter?: number
+    /** 看未归档的还是已归档的。两个视图互不包含 */
+    view?: 'active' | 'archived'
   }>(),
-  { active: '', searchable: undefined, searchAfter: 8 }
+  { active: '', searchable: undefined, searchAfter: 8, view: 'active' }
 )
 
 const emit = defineEmits<{
@@ -44,6 +49,8 @@ const emit = defineEmits<{
   create: []
   remove: [id: string]
   pin: [id: string]
+  /** 归档 / 取消归档；由调用方决定是真的归档还是只是标记 */
+  archive: [id: string, archived: boolean]
 }>()
 
 const query = ref('')
@@ -52,7 +59,8 @@ const showSearch = computed(() =>
   props.searchable ?? props.sessions.length > props.searchAfter
 )
 
-const shown = computed(() => filterSessions(props.sessions, query.value))
+/* 先按视图分，再按关键词过滤：搜索不该把归档的会话搜出来混在里面 */
+const shown = computed(() => filterSessions(visibleSessions(props.sessions, props.view), query.value))
 /* 分组的「现在」每次求值都取一次：跨过零点之后「今天」得变成「昨天」 */
 const groups = computed(() => groupSessions(shown.value, Date.now()))
 
@@ -104,10 +112,19 @@ function remove(session: ChatSession) {
             class="i-chatlist__pick"
             type="button"
             :aria-current="session.id === active ? 'true' : undefined"
+            :disabled="!canOpenSession(session)"
             @click="emit('update:active', session.id)"
           >
             <IIcon v-if="session.pinned" class="i-chatlist__pin" name="pin" :size="12" />
             <span class="i-chatlist__title">{{ sessionTitle(session) }}</span>
+            <!--
+              打不开的原因要写出来，而且要分清「没权限」与「已失效」：
+              都笼统显示成打不开的话，用户会一直重试一条永远打不开的会话。
+            -->
+            <span v-if="accessReasonOf(session)" class="i-chatlist__reason">
+              <IIcon :name="session.access === 'forbidden' ? 'lock' : 'history'" :size="12" />
+              {{ accessReasonOf(session) }}
+            </span>
           </button>
           <span class="i-chatlist__actions">
             <button
@@ -117,6 +134,14 @@ function remove(session: ChatSession) {
               @click.stop="emit('pin', session.id)"
             >
               <IIcon name="pin" :size="12" />
+            </button>
+            <button
+              class="i-chatlist__action"
+              type="button"
+              :aria-label="`${session.archived ? '取消归档' : '归档'}${sessionTitle(session)}`"
+              @click.stop="emit('archive', session.id, !session.archived)"
+            >
+              <IIcon :name="session.archived ? 'undo' : 'box'" :size="12" />
             </button>
             <button
               class="i-chatlist__action"

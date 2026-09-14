@@ -154,3 +154,15 @@
   outline: 2px solid var(--i-color-brand);
   outline-offset: 1px;
 }
+
+/* 打不开的原因：图标 + 文字，颜色不是唯一线索 */
+.i-chatlist__reason {
+  display: flex;
+  gap: var(--i-spacing-1);
+  align-items: center;
+  margin-top: 2px;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+.i-chatlist__pick:disabled,
+.i-chatlist__pick.is-disabled { cursor: not-allowed; opacity: 0.72; }

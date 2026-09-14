@@ -238,6 +238,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"active","type":"string","doc":"当前选中的会话 id（用 v-model:active 控制）","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"searchable","type":"boolean","doc":"会话多了才需要搜索框；少几条时那个框只是占地方","optional":true,"defaultText":"undefined","control":{"kind":"boolean"}},
     {"name":"searchAfter","type":"number","doc":"超过这个条数自动显示搜索框","optional":true,"defaultText":"8","control":{"kind":"number"}},
+    {"name":"view","type":"'active' | 'archived'","doc":"看未归档的还是已归档的。两个视图互不包含","optional":true,"defaultText":"'active'","control":{"kind":"enum","options":["active","archived"]}},
   ],
   IChatMessage: [
     {"name":"role","type":"'user' | 'assistant'","doc":"","optional":true,"defaultText":"'assistant'","control":{"kind":"enum","options":["user","assistant"]}},

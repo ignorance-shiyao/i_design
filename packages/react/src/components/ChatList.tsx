@@ -7,11 +7,14 @@
  */
 import { useMemo, useState } from 'react'
 import {
+  accessReasonOf,
+  canOpenSession,
   filterSessions,
   groupSessions,
   moveActiveSession,
   nextAfterDelete,
   sessionTitle,
+  visibleSessions,
   type ChatSession
 } from '@i-design/common'
 import { Empty } from './Empty'
@@ -24,10 +27,14 @@ export interface ChatListProps {
   /** 会话多了才需要搜索框；少几条时那个框只是占地方 */
   searchable?: boolean
   searchAfter?: number
+  /** 看未归档的还是已归档的。两个视图互不包含 */
+  view?: 'active' | 'archived'
   onActiveChange?: (id: string) => void
   onCreate?: () => void
   onRemove?: (id: string) => void
   onPin?: (id: string) => void
+  /** 归档 / 取消归档；由调用方决定是真的归档还是只是标记 */
+  onArchive?: (id: string, archived: boolean) => void
 }
 
 export function ChatList({
@@ -35,15 +42,18 @@ export function ChatList({
   active = '',
   searchable,
   searchAfter = 8,
+  view = 'active',
   onActiveChange,
   onCreate,
   onRemove,
-  onPin
+  onPin,
+  onArchive
 }: ChatListProps) {
   const [query, setQuery] = useState('')
   const showSearch = searchable ?? sessions.length > searchAfter
 
-  const shown = filterSessions(sessions, query)
+  /* 先按视图分，再按关键词过滤：搜索不该把归档的会话搜出来混在里面 */
+  const shown = filterSessions(visibleSessions(sessions, view), query)
   /* 分组的「现在」每次求值都取一次：跨过零点之后「今天」得变成「昨天」 */
   const groups = useMemo(() => groupSessions(shown, Date.now()), [shown])
 
@@ -101,12 +111,23 @@ export function ChatList({
                   className="i-chatlist__pick"
                   type="button"
                   aria-current={session.id === active ? 'true' : undefined}
+                  disabled={!canOpenSession(session)}
                   onClick={() => onActiveChange?.(session.id)}
                 >
                   {session.pinned ? (
                     <Icon className="i-chatlist__pin" name="pin" size={12} />
                   ) : null}
                   <span className="i-chatlist__title">{sessionTitle(session)}</span>
+                  {/*
+                    打不开的原因要写出来，而且要分清「没权限」与「已失效」：
+                    都笼统显示成打不开的话，用户会一直重试一条永远打不开的会话。
+                  */}
+                  {accessReasonOf(session) ? (
+                    <span className="i-chatlist__reason">
+                      <Icon name={session.access === 'forbidden' ? 'lock' : 'history'} size={12} />
+                      {accessReasonOf(session)}
+                    </span>
+                  ) : null}
                 </button>
                 <span className="i-chatlist__actions">
                   <button
@@ -116,6 +137,14 @@ export function ChatList({
                     onClick={() => onPin?.(session.id)}
                   >
                     <Icon name="pin" size={12} />
+                  </button>
+                  <button
+                    className="i-chatlist__action"
+                    type="button"
+                    aria-label={`${session.archived ? '取消归档' : '归档'}${sessionTitle(session)}`}
+                    onClick={() => onArchive?.(session.id, !session.archived)}
+                  >
+                    <Icon name={session.archived ? 'undo' : 'box'} size={12} />
                   </button>
                   <button
                     className="i-chatlist__action"

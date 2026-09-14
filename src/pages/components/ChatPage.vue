@@ -15,6 +15,13 @@ import IChatSuggestions from '@/components/IChatSuggestions.vue'
 import IPromptInput from '@/components/IPromptInput.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
+import {
+  removeSession as removeSession_,
+  sessionTitle,
+  setArchived,
+  undoRemove,
+  type RemovedSession
+} from '@i-design/common'
 import { snippets } from '@/data/snippets'
 import type {
   AgentTask,
@@ -32,6 +39,7 @@ import IRecommendCard from '@/components/IRecommendCard.vue'
 import IContextCards from '@/components/IContextCards.vue'
 import IDiffTable from '@/components/IDiffTable.vue'
 import ISegmented from '@/components/ISegmented.vue'
+import IButton from '@/components/IButton.vue'
 import ITag from '@/components/ITag.vue'
 
 /* 一段可以真的跑起来的模拟会话：逐字输出、可中断、可重发 */
@@ -303,12 +311,32 @@ const chatSessions = ref<ChatSession[]>([
   { id: 's3', title: '季度数据核对', updatedAt: screenNow - day },
   { id: 's4', title: '常用提示词', updatedAt: screenNow - 12 * day, pinned: true },
   { id: 's5', title: '上周那张图', updatedAt: screenNow - 4 * day },
-  { id: 's6', title: '去年的迁移方案', updatedAt: screenNow - 200 * day }
+  { id: 's6', title: '去年的迁移方案', updatedAt: screenNow - 200 * day },
+  // 打不开的两种：没权限与已失效。都笼统写成「打不开」会让人一直重试
+  { id: 's7', title: '别人分享的排班表', updatedAt: screenNow - 2 * day, access: 'forbidden' },
+  { id: 's8', title: '试用期的那个模型', updatedAt: screenNow - 40 * day, access: 'expired', accessReason: '模型已下线' },
+  { id: 's9', title: '归档：上半年复盘', updatedAt: screenNow - 90 * day, archived: true }
 ])
 const activeSession = ref('s3')
+const sessionView = ref<'active' | 'archived'>('active')
+/** 撤销用：删掉的那条与它原来的位置 */
+const lastRemoved = ref<RemovedSession | null>(null)
 
 function removeSession(id: string) {
-  chatSessions.value = chatSessions.value.filter((s) => s.id !== id)
+  // 删除可撤销：撤销时放回原处，追加到末尾会让用户以为撤销没成功
+  const result = removeSession_(chatSessions.value, id)
+  chatSessions.value = result.sessions
+  lastRemoved.value = result.removed
+  // 撤销入口就放在列表旁边：message 是一闪而过的，撤销不该跟着一起消失
+  if (result.removed) message.info(`已删除「${sessionTitle(result.removed.session)}」`)
+}
+function undoRemoveSession() {
+  if (!lastRemoved.value) return
+  chatSessions.value = undoRemove(chatSessions.value, lastRemoved.value)
+  lastRemoved.value = null
+}
+function archiveSession(id: string, archived: boolean) {
+  chatSessions.value = setArchived(chatSessions.value, id, archived)
 }
 function pinSession(id: string) {
   chatSessions.value = chatSessions.value.map((s) =>
@@ -566,6 +594,37 @@ function createSession() {
       </div>
     </DemoBlock>
 
+    <DemoBlock
+      title="归档、删除撤销与打不开的会话"
+      description="归档不是删除，它只是从列表里挪开，所以有单独的视图可以切回去；归档也不改动活动时间——它不是一次「活动」，不该把会话顶到最前。删除可撤销，撤销时放回原来的位置，追加到末尾会让人以为撤销没成功。最后两条是打不开的会话：没权限与已失效分开说，都写成「打不开」的话，用户会一直重试一条永远打不开的会话。"
+      lang="vue"
+      code='<IChatList :sessions="sessions" :view="view" @archive="archive" @remove="remove" />'
+    >
+      <div class="chatlist-demo chatlist-demo--manage">
+        <ISegmented
+          v-model="sessionView"
+          :options="[
+            { label: '会话', value: 'active' },
+            { label: '已归档', value: 'archived' }
+          ]"
+          aria-label="会话视图"
+        />
+        <IChatList
+          :sessions="chatSessions"
+          :view="sessionView"
+          :search-after="4"
+          v-model:active="activeSession"
+          @create="createSession"
+          @remove="removeSession"
+          @pin="pinSession"
+          @archive="archiveSession"
+        />
+        <IButton v-if="lastRemoved" variant="secondary" size="sm" @click="undoRemoveSession">
+          撤销删除「{{ sessionTitle(lastRemoved.session) }}」
+        </IButton>
+      </div>
+    </DemoBlock>
+
     <h2>来源与追问</h2>
     <DemoBlock
       title="来源与建议"
@@ -762,6 +821,18 @@ function createSession() {
 .selact-demo { display: flex; flex-direction: column; gap: var(--i-spacing-2); max-width: 560px; }
 .selact-demo__text { margin: 0; line-height: 1.8; }
 .tune-demo { max-width: 460px; }
+.chatlist-demo--manage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  /*
+   * 不用 align-items: flex-start——那会让列表按内容撑开，
+   * 窄屏下整页就能左右拖动了（390px 下实测溢出 34px）。
+   * 子项一律铺满容器，容器自己受 .chatlist-demo 的 min(300px, 100%) 约束。
+   */
+  align-items: stretch;
+}
+.chatlist-demo--manage > * { min-width: 0; }
 .chatlist-demo { width: min(300px, 100%); }
 .screen-demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: var(--i-spacing-3); width: 100%; }
 .chat {

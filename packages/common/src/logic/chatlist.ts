@@ -13,6 +13,15 @@
  */
 import { isSameDay } from './date'
 
+/**
+ * 一条会话现在还能不能打开。
+ *
+ * 「打不开」有两种，必须分开说：没权限（别人分享给你但收回了）与已失效
+ * （后端清理了、模型下线了）。都笼统显示成「加载失败」的话，
+ * 用户会一直重试一条永远打不开的会话。
+ */
+export type ChatAccess = 'ok' | 'forbidden' | 'expired'
+
 export interface ChatSession {
   id: string
   /** 会话标题。智能体还没起名时是空的 */
@@ -23,6 +32,12 @@ export interface ChatSession {
   updatedAt: number
   /** 置顶的会话单独成组，排在时间分组之前 */
   pinned?: boolean
+  /** 已归档：默认不出现在列表里，但不是删除 */
+  archived?: boolean
+  /** 能不能打开；不传视为 ok */
+  access?: ChatAccess
+  /** 打不开的原因，直接显示给用户看 */
+  accessReason?: string
 }
 
 /**
@@ -152,4 +167,94 @@ export function moveActiveSession(groups: ChatGroup[], activeId: string, step: 1
   if (index < 0) return flat[0].id
   const next = Math.min(flat.length - 1, Math.max(0, index + step))
   return flat[next].id
+}
+
+
+/* ───────────────────────── 会话管理 ───────────────────────── */
+
+/** 打不开时显示什么。原因由后端给，给不出时也要有一句能读的话 */
+export function accessReasonOf(session: ChatSession): string {
+  if (!session.access || session.access === 'ok') return ''
+  if (session.accessReason?.trim()) return session.accessReason.trim()
+  return session.access === 'forbidden' ? '没有这条会话的权限' : '这条会话已失效'
+}
+
+export const canOpenSession = (session: ChatSession): boolean =>
+  !session.access || session.access === 'ok'
+
+/**
+ * 重命名。
+ *
+ * 空标题不是错误：它表示「交还给自动标题」，所以清空之后显示的是摘要或
+ * 「新会话」，而不是一条没有名字的空行。首尾空白一律去掉——
+ * 粘贴进来的标题常带着换行，留着会让列表行高忽高忽低。
+ */
+export function renameSession(sessions: ChatSession[], id: string, title: string): ChatSession[] {
+  const next = title.replace(/\s+/g, ' ').trim().slice(0, 60)
+  return sessions.map((s) => (s.id === id ? { ...s, title: next || undefined } : s))
+}
+
+/** 归档 / 取消归档。归档不改 updatedAt——它不是一次「活动」，不该把会话顶到最前 */
+export function setArchived(sessions: ChatSession[], id: string, archived: boolean): ChatSession[] {
+  return sessions.map((s) => (s.id === id ? { ...s, archived } : s))
+}
+
+/** 列表视图：默认只看未归档的，归档视图只看归档的。两边都不含彼此 */
+export function visibleSessions(sessions: ChatSession[], view: 'active' | 'archived' = 'active'): ChatSession[] {
+  return sessions.filter((s) => (view === 'archived' ? !!s.archived : !s.archived))
+}
+
+export interface RemovedSession {
+  session: ChatSession
+  /** 原来在数组里的位置。撤销时放回原处，而不是追加到末尾 */
+  index: number
+}
+
+/**
+ * 删除（可撤销）。
+ *
+ * 返回被删的那条与它的位置：撤销时放回原处。追加到末尾的话，
+ * 用户撤销之后会发现会话「跑到别的地方去了」，还以为撤销没成功。
+ */
+export function removeSession(sessions: ChatSession[], id: string): {
+  sessions: ChatSession[]
+  removed: RemovedSession | null
+} {
+  const index = sessions.findIndex((s) => s.id === id)
+  if (index < 0) return { sessions, removed: null }
+  const next = [...sessions]
+  const [session] = next.splice(index, 1)
+  return { sessions: next, removed: { session, index } }
+}
+
+export function undoRemove(sessions: ChatSession[], removed: RemovedSession): ChatSession[] {
+  const next = [...sessions]
+  next.splice(Math.min(removed.index, next.length), 0, removed.session)
+  return next
+}
+
+/**
+ * 分页。
+ *
+ * 长列表不跳动的关键不在分页本身，在**排序要稳定**：两条 updatedAt 相同的
+ * 会话，如果每次比较的结果不一样，翻页时它们会来回换位，看起来像列表在抖。
+ * 所以时间相同时按 id 兜底。
+ */
+export function pageSessions(
+  sessions: ChatSession[],
+  page: number,
+  pageSize: number
+): { items: ChatSession[]; page: number; pageCount: number; total: number } {
+  const sorted = [...sessions].sort(
+    (a, b) => b.updatedAt - a.updatedAt || a.id.localeCompare(b.id)
+  )
+  const size = Math.max(1, pageSize)
+  const pageCount = Math.max(1, Math.ceil(sorted.length / size))
+  const current = Math.min(Math.max(1, page), pageCount)
+  return {
+    items: sorted.slice((current - 1) * size, current * size),
+    page: current,
+    pageCount,
+    total: sorted.length
+  }
 }

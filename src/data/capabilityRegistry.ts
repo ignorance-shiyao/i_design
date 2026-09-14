@@ -492,6 +492,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/loading",
       "/components/drawer",
       "/components/message",
+      "/components/chat",
       "/components/layout",
       "/components/data-display",
       "/components/flow",
@@ -1144,7 +1145,12 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "demoRoutes": [
       "/components/chat"
     ],
-    "states": {}
+    "states": {
+      "view": [
+        "active",
+        "archived"
+      ]
+    }
   },
   {
     "name": "IChatMessage",
