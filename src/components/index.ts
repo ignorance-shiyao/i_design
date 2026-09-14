@@ -25,6 +25,7 @@ import IRow from './IRow.vue'
 import ICol from './ICol.vue'
 import ISchemaForm from './ISchemaForm.vue'
 import ISegmented from './ISegmented.vue'
+import IProTable from './IProTable.vue'
 import IProgress from './IProgress.vue'
 import IStatistic from './IStatistic.vue'
 import IConfigProvider from './IConfigProvider.vue'
@@ -244,6 +245,7 @@ export {
   ICol,
   ISchemaForm,
   ISegmented,
+  IProTable,
   IProgress,
   IStatistic,
   IConfigProvider,
@@ -362,6 +364,7 @@ const components = {
   ICol,
   ISchemaForm,
   ISegmented,
+  IProTable,
   IProgress,
   IStatistic,
   IConfigProvider,

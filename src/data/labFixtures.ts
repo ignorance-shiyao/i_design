@@ -229,6 +229,27 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
       { value: 'help', label: '帮助', icon: 'info-circle' }
     ]
   },
+  IProTable: {
+    columns: [
+      { key: 'id', title: '单号', width: '120px', locked: true },
+      { key: 'customer', title: '客户' },
+      { key: 'amount', title: '金额', width: '120px' },
+      { key: 'cost', title: '成本', width: '110px', restricted: true }
+    ],
+    state: {
+      query: { filters: {}, sort: { key: null, order: null }, page: 1, pageSize: 20 },
+      rows: [
+        { id: 'SO-2026-0007', customer: '明远制造', amount: '¥ 12,800', cost: '¥ 9,100' },
+        { id: 'SO-2026-0008', customer: '合力重工', amount: '¥ 26,400', cost: '¥ 18,300' }
+      ],
+      total: 2,
+      status: 'success',
+      seq: 1,
+      settledSeq: 1,
+      error: null,
+      discarded: []
+    }
+  },
   IQueryFilter: {
     fields: [
       { name: 'keyword', label: '关键词', kind: 'text', placeholder: '单号或客户', always: true },

@@ -110,6 +110,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IPagination.vue",
   "src/components/IPopconfirm.vue",
   "src/components/IPopover.vue",
+  "src/components/IProTable.vue",
   "src/components/IProgress.vue",
   "src/components/IPromptInput.vue",
   "src/components/IQrcode.vue",

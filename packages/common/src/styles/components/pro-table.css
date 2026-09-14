@@ -1,0 +1,138 @@
+/* ProTable（B04 + B05）。与各端共用同一份：pro 层全端，样式也只有一个来源 */
+.i-pro-table {
+  display: grid;
+  gap: var(--i-spacing-3);
+  min-width: 0;
+}
+
+.i-pro-table__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-3);
+}
+
+.i-pro-table__count {
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+}
+
+.i-pro-table__stale {
+  color: var(--i-color-text-tertiary);
+}
+
+.i-pro-table__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-2);
+}
+
+.i-pro-table__panel {
+  display: grid;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+}
+
+.i-pro-table__panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-3);
+}
+
+.i-pro-table__hint {
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+
+.i-pro-table__fix {
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  padding: 1px var(--i-spacing-2);
+  background: transparent;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+  cursor: pointer;
+}
+
+.i-pro-table__fix[aria-pressed='true'] {
+  background: var(--i-color-brand-solid);
+  color: var(--i-color-on-brand);
+  border-color: transparent;
+}
+
+.i-pro-table__rejected {
+  margin: 0;
+  color: var(--i-color-warning);
+  font-size: var(--i-font-size-xs);
+}
+
+/* 表格是唯一允许自己横向滚动的东西：列一多，压下来只会把每列压成一竖条字 */
+.i-pro-table__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+}
+
+.i-pro-table__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--i-font-size-sm);
+}
+
+.i-pro-table__table th,
+.i-pro-table__table td {
+  height: var(--i-pro-row-height, 40px);
+  padding: 0 var(--i-spacing-3);
+  border-bottom: 1px solid var(--i-color-hairline);
+  text-align: left;
+  white-space: nowrap;
+  background: var(--i-color-bg-elevated);
+}
+
+.i-pro-table__table th {
+  color: var(--i-color-text-secondary);
+  font-weight: 500;
+}
+
+/* 固定列：粘在左侧并盖住滚动过去的内容，所以要有自己的底色与一条分隔 */
+.i-pro-table__table .is-fixed {
+  position: sticky;
+  z-index: 1;
+  box-shadow: 1px 0 0 var(--i-color-hairline);
+}
+
+.i-pro-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.i-pro-table__empty {
+  color: var(--i-color-text-tertiary);
+  text-align: center;
+}
+
+.i-pro-table__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-3);
+}
+
+.i-pro-table__size {
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}

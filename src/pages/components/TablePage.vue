@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ITable, { type TableColumn, type TableRow } from '@/components/ITable.vue'
 import IQueryFilter from '@/components/IQueryFilter.vue'
+import IProTable from '@/components/IProTable.vue'
 import ITag from '@/components/ITag.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
@@ -8,6 +9,12 @@ import Playground from '@/site/Playground.vue'
 
 import { computed, ref } from 'vue'
 import {
+  initialTableState,
+  receive,
+  startRequest,
+  type ColumnSpec,
+  type TableQuery,
+  type TableState,
   fromSearch,
   parseQuery,
   serializeQuery,
@@ -102,6 +109,58 @@ function onQueryChange(payload: { state: QueryState; params: Record<string, stri
 
 const queryLink = computed(() => toSearch(queryParams.value) || '（没有条件，链接不带参数）')
 
+/* ---------- ProTable（B04 + B05）---------- */
+const proColumns: ColumnSpec[] = [
+  { key: 'id', title: '编号', width: '110px', locked: true },
+  { key: 'title', title: '标题', sortable: true },
+  { key: 'owner', title: '负责人', width: '110px' },
+  { key: 'points', title: '故事点', width: '100px', sortable: true },
+  { key: 'cost', title: '人力成本', width: '120px', restricted: true },
+  { key: 'status', title: '状态', width: '110px' }
+]
+
+const proRows: Record<string, unknown>[] = bigData.slice(0, 200).map((row) => ({
+  ...row,
+  cost: `¥ ${(Number(row.points) * 1200).toLocaleString('zh-CN')}`
+}))
+
+const proState = ref<TableState<Record<string, unknown>>>(initialTableState())
+
+/*
+ * 演示里的「取数」：越早发出的请求越慢，好让先发的那次后回来——
+ * 过期响应那条规则只有在这种时序下才看得见，而它在真实网络里天天发生。
+ */
+const log = ref<string[]>([])
+
+function fetchPage(query: TableQuery) {
+  const started = startRequest({ ...proState.value, query })
+  proState.value = started.state
+  const seq = started.request.seq
+  // 先发的更慢：第 n 次请求等 500 - 120n 毫秒，于是后点的先回来
+  const delay = Math.max(60, 500 - seq * 120)
+  setTimeout(() => {
+    const sorted = [...proRows].sort((a, b) => {
+      const key = query.sort.key
+      if (!key || !query.sort.order) return 0
+      const factor = query.sort.order === 'asc' ? 1 : -1
+      return String(a[key]).localeCompare(String(b[key]), 'zh-CN', { numeric: true }) * factor
+    })
+    const from = (query.page - 1) * query.pageSize
+    const before = proState.value.settledSeq
+    proState.value = receive(proState.value, {
+      seq,
+      rows: sorted.slice(from, from + query.pageSize),
+      total: sorted.length
+    })
+    log.value = [
+      `#${seq} 回来了${proState.value.settledSeq === before ? '：序号比屏幕上这份旧，已丢弃' : '：已落地'}`,
+      ...log.value
+    ].slice(0, 4)
+  }, delay)
+}
+
+fetchPage(proState.value.query)
+
 /* playground 代码片段里固定属性的写法（模板里写会和属性引号打架） */
 const tablePgCode = [':columns="columns"', ':data="data"']
 </script>
@@ -112,6 +171,32 @@ const tablePgCode = [':columns="columns"', ':data="data"']
     <p class="i-lead">
       展示结构化的行列数据。列宽应按内容语义固定，避免用户在翻页时因列宽跳动而重新定位。
     </p>
+
+    <h2>ProTable</h2>
+    <DemoBlock
+      title="查询层与列能力"
+      description="表格的难点不在渲染，在「我现在看到的这一屏是不是我最后一次请求的结果」。这个演示里第一次请求故意慢 600ms：连点两次排序，先发的那次后回来，它会被丢掉而不是覆盖掉新结果——右边的日志逐条写出来了。列设置里，编号是主键不可隐藏；人力成本标了受权限控制，把它藏起来只影响显示，导出与接口仍按 restricted 校验（真实事故是有人藏了成本列，于是导出时跳过了那一列的权限检查）。固定列总宽超过可视宽度一半时会被拒绝并说清原因：全固定等于没固定。"
+      lang="vue"
+      code='<IProTable :columns="columns" :state="state" @request="fetchPage" />'
+    >
+      <div class="pro-demo">
+        <!-- 可视宽度按演示区给：固定列的上限是「可视宽度的一半」，
+             给 960 的话这个演示里永远碰不到上限，那条规则就等于没演 -->
+        <IProTable
+          :columns="proColumns"
+          :state="proState"
+          :viewport-width="640"
+          @request="fetchPage"
+        >
+          <template #status="{ value }">
+            <ITag :type="statusMap[String(value)].type">{{ statusMap[String(value)].label }}</ITag>
+          </template>
+        </IProTable>
+        <ul class="pro-demo__log">
+          <li v-for="(line, i) in log" :key="i">{{ line }}</li>
+        </ul>
+      </div>
+    </DemoBlock>
 
     <h2>查询筛选</h2>
     <DemoBlock
@@ -271,6 +356,19 @@ const tablePgCode = [':columns="columns"', ':data="data"']
 </template>
 
 <style scoped>
+.pro-demo {
+  display: grid;
+  gap: var(--i-spacing-3);
+  min-width: 0;
+}
+
+.pro-demo__log {
+  margin: 0;
+  padding-left: var(--i-spacing-5);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+
 .query-demo {
   display: grid;
   gap: var(--i-spacing-3);

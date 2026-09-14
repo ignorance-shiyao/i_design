@@ -14,6 +14,7 @@ import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/axis.dart';
 import 'package:i_design/src/logic/query.dart';
 import 'package:i_design/src/logic/schemaform.dart';
+import 'package:i_design/src/logic/protable.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
@@ -662,6 +663,46 @@ void main() {
     expect(showLabelAt(8, 90, 8), true);
     expect(showLabelAt(88, 90, 8), false);
     expect(showLabelAt(89, 90, 8), true);
+  });
+
+  test('ProTable 的过期响应与分页规则与 Web 端一致', () {
+    var s = const ITableState<Map<String, Object?>>();
+    final a = startRequest(s);
+    final b = startRequest(a.state);
+    var after = receive(b.state, ITableResult<Map<String, Object?>>(seq: b.seq, rows: <Map<String, Object?>>[<String, Object?>{'id': 'new'}], total: 1));
+    expect(after.rows.first['id'], 'new');
+    expect(after.status.name, 'success');
+    after = receive(after, ITableResult<Map<String, Object?>>(seq: a.seq, rows: <Map<String, Object?>>[<String, Object?>{'id': 'old'}], total: 99));
+    expect(after.rows.first['id'], 'new');
+    expect(after.total, 1);
+    expect(after.discarded, <int>[1]);
+    after = fail(after, a.seq, '超时');
+    expect(after.status.name, 'success');
+    expect(after.error, null);
+    expect(toggleSort(const ISortState(), 'name').order, ISortOrder.asc);
+    expect(toggleSort(toggleSort(const ISortState(), 'name'), 'name').order, ISortOrder.desc);
+    expect(toggleSort(toggleSort(toggleSort(const ISortState(), 'name'), 'name'), 'name').order, null);
+    final paged = setPage(const ITableState<Map<String, Object?>>(), 0);
+    expect(paged.query.page, 1);
+    expect(setSort(const ITableState<Map<String, Object?>>(query: ITableQuery(page: 3)), 'name').query.page, 1);
+    expect(setPageSize(const ITableState<Map<String, Object?>>(query: ITableQuery(page: 3)), 100).query.page, 1);
+    expect(clampTablePage(const ITableState<Map<String, Object?>>(query: ITableQuery(page: 5), total: 21)).query.page, 2);
+  });
+
+  test('ProTable 的列能力与 Web 端一致', () {
+    final columns = <IColumnSpec>[IColumnSpec(key: 'id', title: '单号', width: 120, locked: true), IColumnSpec(key: 'customer', title: '客户'), IColumnSpec(key: 'cost', title: '成本价', width: 120, restricted: true), IColumnSpec(key: 'amount', title: '金额', width: 140)];
+    final base = defaultColumnState(columns);
+    expect(visibleTableColumns(columns, base).length, 4);
+    final hiddenCost = toggleColumn(base, 'cost', columns);
+    expect(visibleTableColumns(columns, hiddenCost).map((c) => c.key).toList(), <String>['id', 'customer', 'amount']);
+    expect(restrictedTableColumns(columns), <String>['cost']);
+    final lockedTry = toggleColumn(base, 'id', columns);
+    expect(visibleTableColumns(columns, lockedTry).map((c) => c.key).toList(), <String>['id', 'customer', 'cost', 'amount']);
+    final moved = moveColumn(base, 3, 0);
+    expect(resolveTableColumns(columns, moved).map((c) => c.key).toList(), <String>['amount', 'id', 'customer', 'cost']);
+    final withNew = <IColumnSpec>[IColumnSpec(key: 'id', title: '单号', width: 120, locked: true), IColumnSpec(key: 'customer', title: '客户'), IColumnSpec(key: 'cost', title: '成本价', width: 120, restricted: true), IColumnSpec(key: 'amount', title: '金额', width: 140), IColumnSpec(key: 'tax', title: '税额')];
+    expect(resolveTableColumns(withNew, base).map((c) => c.key).toList(), <String>['id', 'customer', 'cost', 'amount', 'tax']);
+    expect(resolveTableColumns(withNew, base).last.hidden, false);
   });
 
   test('表单 schema 的显隐、提交值与校验与 Web 端一致', () {

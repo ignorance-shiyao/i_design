@@ -639,6 +639,14 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"open","type":"boolean","doc":"受控开合。不传时组件自己管；传了则以外部为准—— Select、Cascader 这类「选完就该收起」的控件需要在选中时主动关闭。","optional":true,"defaultText":"undefined","control":{"kind":"boolean"}},
     {"name":"align","type":"'center' | 'start'","doc":"","optional":true,"defaultText":"'center'","control":{"kind":"enum","options":["center","start"]}},
   ],
+  IProTable: [
+    {"name":"columns","type":"ColumnSpec[]","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"state","type":"TableState<Row>","doc":"查询层状态。由页面持有，组件只读它并抛出「该请求什么」","optional":false,"defaultText":null,"control":null},
+    {"name":"columnState","type":"ColumnState | null","doc":"列设置。不传则组件自己维护一份内部状态","optional":true,"defaultText":"null","control":null},
+    {"name":"rowKey","type":"string","doc":"","optional":true,"defaultText":"'id'","control":{"kind":"string"}},
+    {"name":"viewportWidth","type":"number","doc":"可视宽度，用来判断固定列是否已经占满。窄屏上这个值要小","optional":true,"defaultText":"960","control":{"kind":"number"}},
+    {"name":"emptyText","type":"string","doc":"","optional":true,"defaultText":"'没有符合条件的数据'","control":{"kind":"string"}},
+  ],
   IProgress: [
     {"name":"percent","type":"number","doc":"0-100；indeterminate 时忽略","optional":true,"defaultText":"0","control":{"kind":"number"}},
     {"name":"type","type":"'line' | 'circle'","doc":"","optional":true,"defaultText":"'line'","control":{"kind":"enum","options":["line","circle"]}},

@@ -1,0 +1,60 @@
+<view class="i-pro-table">
+  <view class="i-pro-table__bar">
+    <text class="i-pro-table__count">
+      共 {{state.total}} 条<text wx:if="{{state.status === 'loading'}}" class="i-pro-table__stale">（正在更新…）</text>
+    </text>
+    <view class="i-pro-table__tools">
+      <view
+        wx:for="{{['compact', 'default', 'loose']}}"
+        wx:key="*this"
+        class="i-pro-table__fix {{density === item ? 'is-on' : ''}}"
+        data-value="{{item}}"
+        bindtap="onDensity"
+      >{{item === 'compact' ? '紧凑' : item === 'default' ? '默认' : '宽松'}}</view>
+      <view class="i-pro-table__fix" bindtap="onTogglePanel">列设置</view>
+    </view>
+  </view>
+
+  <!-- 列设置：显隐、优先显示、恢复默认。恢复默认这个出口必须一直在 -->
+  <view wx:if="{{panel}}" class="i-pro-table__panel">
+    <view wx:for="{{resolved}}" wx:key="key" class="i-pro-table__panel-row">
+      <view data-key="{{item.key}}" bindtap="onToggleColumn">
+        {{item.hidden ? '☐' : '☑'}} {{item.title}}
+        <text wx:if="{{item.locked}}" class="i-pro-table__hint">（主键不可隐藏）</text>
+        <text wx:elif="{{item.restricted}}" class="i-pro-table__hint">（受权限控制）</text>
+      </view>
+      <view class="i-pro-table__fix" data-key="{{item.key}}" bindtap="onPrioritize">优先显示</view>
+    </view>
+    <view class="i-pro-table__fix" bindtap="onReset">恢复默认</view>
+  </view>
+
+  <scroll-view class="i-pro-table__scroll" scroll-x>
+    <view class="i-pro-table__table">
+      <view class="i-pro-table__tr" style="height:{{rowHeight}}px">
+        <view
+          wx:for="{{shown}}"
+          wx:key="key"
+          class="i-pro-table__th"
+          data-key="{{item.key}}"
+          bindtap="onSort"
+        >{{item.title}}{{item.sortOrder === 'asc' ? ' ↑' : item.sortOrder === 'desc' ? ' ↓' : ''}}</view>
+      </view>
+      <view wx:for="{{cells}}" wx:key="key" class="i-pro-table__tr" style="height:{{rowHeight}}px">
+        <view wx:for="{{item.values}}" wx:for-item="cell" wx:key="key" class="i-pro-table__td">{{cell.text}}</view>
+      </view>
+      <view wx:if="{{!cells.length}}" class="i-pro-table__empty">
+        {{state.status === 'error' ? state.error : emptyText}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="i-pro-table__foot">
+    <view
+      wx:for="{{totalPages}}"
+      wx:key="*this"
+      class="i-pro-table__fix {{state.query.page === index + 1 ? 'is-on' : ''}}"
+      data-page="{{index + 1}}"
+      bindtap="onPage"
+    >{{index + 1}}</view>
+  </view>
+</view>

@@ -3144,6 +3144,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     }
   },
   {
+    "name": "IProTable",
+    "sources": {
+      "vue-next": "src/components/IProTable.vue",
+      "vue": "packages/vue/src/components/IProTable.vue",
+      "react": "packages/react/src/components/ProTable.tsx",
+      "miniprogram": "packages/miniprogram/src/components/pro-table",
+      "flutter": "packages/flutter/lib/src/components/i_pro_table.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/table"
+    ],
+    "states": {}
+  },
+  {
     "name": "IProgress",
     "sources": {
       "vue-next": "src/components/IProgress.vue",
@@ -4183,7 +4213,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/table",
       "page": "src/pages/components/TablePage.vue",
-      "demos": 6
+      "demos": 7
     },
     "demoRoutes": [
       "/components/collapse",

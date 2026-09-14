@@ -899,6 +899,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IProTable",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IProgress",
     "ends": {
       "vue-next": true,
