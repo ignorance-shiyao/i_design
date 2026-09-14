@@ -539,6 +539,136 @@ H06（发布渠道与回滚演练）依赖 A03 与 H02，放在这一批收口�
 完成后回填本任务 PR、验证证据和剩余边界，不勾选尚未实现部分。
 ```
 
+## 10. 进度核对（截至 2026-09-14）
+
+判定口径，三档，宁可判低不判高：
+
+- **✅ 完成**：有实现；若是库组件则五端齐备且都从入口导出；有自动检查或测试守着；
+  文档站有可运行演示。四条缺一条都不算完成。
+- **🟡 部分**：核心能力在，但验收条件里有明确的一条还没做到——括号里写清缺什么。
+- **⬜ 未开始**：没有对应实现。
+
+「有源码」不等于完成，「构建通过」也不等于完成——这张表按上面的口径填，
+不按工作量填。
+
+### A. 基础治理
+
+| ID | 状态 | 证据 |
+| --- | --- | --- |
+| A01 | ✅ | `scripts/build-capability-registry.mjs` + `check-capability-registry`，覆盖矩阵页 |
+| A02 | ✅ | `scripts/check-install.mjs`：打包 → 仓库外四个消费项目 → 断言渲染出的实际色值 |
+| A03 | ✅ | `VERSIONING.md`、`CHANGELOG.md`、`scripts/release.mjs`、`.github/workflows/release.yml` |
+| A04 | ✅ | `README.md`、`CONTRIBUTING.md`（含「已验证 / 未验证运行时 / 未发布」矩阵） |
+| A05 | ✅ | `scripts/check-style-rules.mjs`、`check-a11y`（零容忍）、`logic/palette.ts` 的 `solidPair` |
+| A06 | ✅ | `scripts/check-ssr.mjs`：无 DOM 导入、Vue/React SSR、两档 CSP 下的 hydration |
+| A07 | ✅ | `scripts/check-bundle.mjs`：按入口称重，单图标 gzip < 1 KB 是硬断言 |
+| A08 | ✅ | `scripts/check-licenses.mjs`、`THIRD-PARTY.md`、`assets/PROVENANCE.json` |
+
+### B. 原子组件补强与页面组合
+
+| ID | 状态 | 证据 / 缺口 |
+| --- | --- | --- |
+| B01 | 🟡 | 示例层有共用壳（`examples/shell/src/AppShell.vue`），**库组件 AppShell 未做**（五端、面包屑与用户菜单的组件化） |
+| B02 | ✅ | `IPageState` + `logic/pagestate.ts`，七种状态的优先级有测试 |
+| B03 | ✅ | `IQueryFilter` 五端 + `logic/query.ts` + 42 条 Dart 对齐断言 |
+| B04 | ⬜ | ProTable 查询层（分页/排序/请求取消/过期响应丢弃）未做 |
+| B05 | ⬜ | ProTable 列能力未做 |
+| B06 | ⬜ | 树表/多级表头/分组汇总未做（`ITable` 只有基础排序与虚拟滚动） |
+| B07 | ⬜ | 批量操作栏未做（`ITable` 有行选择，但没有「跨页/全部匹配」的作用域与部分失败定位） |
+| B08 | ⬜ | SchemaForm 未做（`IForm`/`IFormItem`/`logic/validate.ts` 是它的地基） |
+| B09 | ⬜ | FormPage/DrawerForm/ModalForm/StepForm 未做 |
+| B10 | 🟡 | `ITransfer`/`ITreeSelect`/`IMentions` 在，缺「远程检索 + 已选回显 + 禁用原因」的组合件 |
+| B11 | ⬜ | ImportWizard/ExportJob 未做（mock API 里已有 `importOrders` 的部分失败语义） |
+| B12 | ⬜ | DetailPage 组合件未做（ERP 示例里手写了一份详情页） |
+| B13 | ✅ | `IMarkdown` + `logic/markdown.ts`（令牌树、危险 URL 拒绝）、`ICodeBlock`、附件预览 |
+| B14 | 🟡 | `IComment` 在，缺未读定位与活动记录 |
+| B15 | 🟡 | `ICalendar`、`IChartGantt` 在，缺看板与人员泳道的拖动 |
+| B16 | ⬜ | 登录/设置/角色管理页面模式未做 |
+| B17 | ⬜ | 公共网页模式未做 |
+| B18 | 🟡 | `INotificationLayer`、`ICommandSearch` 在，缺异步任务中心与三者的整合 |
+
+### C. 图标与资源
+
+| ID | 状态 | 证据 |
+| --- | --- | --- |
+| C01 | ✅ | `icons/meta.ts` + `check-icons`（元数据、分类、别名唯一性） |
+| C02 | ✅ | 87 个图标，按语义域分类 |
+| C03 | ✅ | `icons/filled.ts` 的描边/填充协议，双色用同一色两档透明度 |
+| C04 | ✅ | 图标浏览器页（检索、尺寸/线宽预览、复制与下载） |
+| C05 | ✅ | `build-icon-paths.mjs` 的单图标导出 + `check-bundle` 的实测断言 |
+| C06 | ✅ | `illustrationMeta` + `check:illustrations`（@2x 尺寸、四角透明、替代文本） |
+
+### D. 图表与分析
+
+| ID | 状态 | 证据 / 缺口 |
+| --- | --- | --- |
+| D01 | ✅ | `contracts/chart.ts` + `logic/dataset.ts`（单位/时区/聚合/数据质量） |
+| D02 | ✅ | `IChartFrame`：口径、数据表、下载，缺失值不补零 |
+| D03 | ✅ | 百分比堆叠、阶梯线、目标线 |
+| D13 | ✅ | 横条与双轴（`logic/axis.ts` 五端共用，双轴把不该用的情形印在图下） |
+| D04 | 🟡 | 契约与逻辑在（`logic/stats.ts`：直方/KDE/误差棒/小提琴/散点矩阵），**渲染未做** |
+| D05 | ⬜ | 构成/归因（旭日、Icicle、帕累托、留存）未做 |
+| D06 | ✅ | `logic/linkage.ts`：统一 SelectionEvent、下钻压栈、循环终止 |
+| D07 | ⬜ | 实时滑窗/事件标记/断流状态未做 |
+| D08 | 🟡 | `IFlow` 与 `logic/graph.ts` 在，缺邻接矩阵与调用轨迹视图 |
+| D09～D12 | ⬜ | 地图、金融图、跨图协作等未做 |
+
+### E. 流程与可视化编辑
+
+| ID | 状态 | 证据 / 缺口 |
+| --- | --- | --- |
+| E01 | ✅ | `contracts/graph.ts` v2：往返无损、`extras` 保留、v1 迁移、拒绝过新版本 |
+| E02 | ⬜ | NodeRegistry / 节点工具箱 / 属性检查器未做（依赖 B08） |
+| E03 | ⬜ | 端口连线编辑与校验面板未做 |
+| E04 | 🟡 | `logic/flow.ts` 有框选、批量移动、缩放与缩略图，缺事务化的撤销/重做与剪贴板 |
+| E05～E08 | ⬜ | 布局导航、GraphStore、节点模板、运行态覆盖未做 |
+| E09 | ⬜ | 状态机/血缘模板与差异查看未做 |
+| E10 | 🟡 | 触摸与键盘在 `IFlow` 里，缺大图性能用例与导出验收 |
+
+### F. AI 对话与智能体
+
+| ID | 状态 | 证据 / 缺口 |
+| --- | --- | --- |
+| F01 | ✅ | `contracts/run.ts` + `logic/run.ts`：seq 排序、重复丢弃、终态、取消 |
+| F02 | ✅ | `logic/transport.ts`：mock 与流式、取消、重试、恢复游标 |
+| F03 | ✅ | `IChatList` + `logic/chatlist.ts`（搜索、重命名、归档、恢复） |
+| F04 | ✅ | `IMessageParts`、`IMarkdown`、`ICodeBlock`：多段混排与流式更新 |
+| F05 | 🟡 | `IPromptInput` + `logic/mention.ts` 在，缺附件校验与草稿恢复 |
+| F06 | 🟡 | 生命周期状态在 reducer 里，缺排队/连接两态的 UI 呈现 |
+| F07 | ✅ | `IChatToolCall` + `IToolChips`：输入输出、耗时、错误 |
+| F08 | 🟡 | `IApprovalCard` 在，缺过期与版本失效的决定路径 |
+| F09～F15 | ⬜ | 分支比较、产物工作区、上下文管理、Agent 配置、RunExplorer、评测、多模态未做 |
+
+### G. 示例应用
+
+| ID | 状态 | 证据 / 缺口 |
+| --- | --- | --- |
+| G01 | ✅ | `examples/shared`：固定种子、可控时钟、mock API、版本化存储、重放 |
+| G02 | ✅ | 门户 + 共用壳 + 应用登记表 + `check:examples`（双向链接、无死路） |
+| G03 | 🟡 | ERP 第一切片可跑（列表/新建/详情/状态流转，422/403/409/幂等），但它依赖的 B04/B07/B09/B12 还没组件化，页面是手写的 |
+| G04～G10 | ⬜ | OA、Analytics、Agent Studio、移动工作台未做（门户里如实标为「规划中」） |
+| G11 | ✅ | Patterns Lab 自动注册 + `check:lab`（每个组件必须真的渲染出来） |
+| G12 | ⬜ | 页面模板导出未做 |
+
+### H. 工程与质量
+
+| ID | 状态 | 证据 |
+| --- | --- | --- |
+| H01 | ✅ | parity / a11y / responsive / motion / lab / bundle / install / ssr / icons / routes / release / mp / flutter / illustrations / capability / examples，每条新检查都带故障注入 |
+| H05 | ✅ | 生成物漂移检查（CI 里 `git diff --exit-code`） |
+| H08 | ✅ | 确定性 mock：同一 seed 出同一批数据，截图与 E2E 不漂 |
+| H02～H04、H06、H07 | ⬜ | 端到端业务链回归、灰度与回滚演练、渠道发布演练未做（H06 没做完之前不宣称「可发布」） |
+
+### 下一步的顺序
+
+按依赖与阻塞面排，不按好做程度排：
+
+1. **B08 SchemaForm** —— 挡着 B09/B10/B11 与 E02，是 B 组里阻塞面最大的一个。
+2. **B04 + B05 ProTable** —— 挡着 B06/B07/B11 与 G03 的组件化。
+3. **B01 AppShell 库组件** —— 示例层已经验证过形态，抽成组件即可，挡着 B12/B16/B17。
+4. **D04 渲染** —— 逻辑已就绪，补四端绘制即可收口。
+5. **F06 / F08 的缺口** —— 两处都是「状态有了但没在界面上说出来」。
+
 ## 10. 参考与本次视觉取舍
 
 参考访问日期：2026-09-13。下列描述是对页面结构的观察与本项目取舍，不代表复用其代码或资产。
