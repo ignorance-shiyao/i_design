@@ -2205,7 +2205,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/form",
       "page": "src/pages/components/FormPage.vue",
-      "demos": 1
+      "demos": 2
     },
     "demoRoutes": [
       "/components/form"
@@ -3554,6 +3554,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
         "between"
       ]
     }
+  },
+  {
+    "name": "ISchemaForm",
+    "sources": {
+      "vue-next": "src/components/ISchemaForm.vue",
+      "vue": "packages/vue/src/components/ISchemaForm.vue",
+      "react": "packages/react/src/components/SchemaForm.tsx",
+      "miniprogram": "packages/miniprogram/src/components/schema-form",
+      "flutter": "packages/flutter/lib/src/components/i_schema_form.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/form"
+    ],
+    "states": {}
   },
   {
     "name": "IScrollbar",

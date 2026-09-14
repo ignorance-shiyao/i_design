@@ -727,6 +727,14 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"align","type":"'top' | 'middle' | 'bottom'","doc":"","optional":true,"defaultText":"'top'","control":{"kind":"enum","options":["top","middle","bottom"]}},
     {"name":"justify","type":"'start' | 'center' | 'end' | 'between'","doc":"","optional":true,"defaultText":"'start'","control":{"kind":"enum","options":["start","center","end","between"]}},
   ],
+  ISchemaForm: [
+    {"name":"schema","type":"FormSchema","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"modelValue","type":"Record<string, unknown>","doc":"表单值。受控：组件不自己存","optional":false,"defaultText":null,"control":null},
+    {"name":"serverErrors","type":"{ path: string; message: string }[]","doc":"服务端返回的错误，路径对不上字段的会显示在表单级","optional":true,"defaultText":"() => []","control":null},
+    {"name":"asyncValidator","type":"Record<string, (value: unknown) => Promise<boolean>>","doc":"异步规则的实现，键是 schema 里的 handler 名","optional":true,"defaultText":"() => ({})","control":null},
+    {"name":"submitText","type":"string","doc":"","optional":true,"defaultText":"'提交'","control":{"kind":"string"}},
+    {"name":"disabled","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+  ],
   IScrollbar: [
     {"name":"height","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"maxHeight","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},

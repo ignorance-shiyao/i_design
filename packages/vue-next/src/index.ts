@@ -23,6 +23,7 @@ import ISpace from './ISpace.vue'
 import ITypography from './ITypography.vue'
 import IRow from './IRow.vue'
 import ICol from './ICol.vue'
+import ISchemaForm from './ISchemaForm.vue'
 import ISegmented from './ISegmented.vue'
 import IProgress from './IProgress.vue'
 import IStatistic from './IStatistic.vue'
@@ -241,6 +242,7 @@ export {
   ITypography,
   IRow,
   ICol,
+  ISchemaForm,
   ISegmented,
   IProgress,
   IStatistic,
@@ -358,6 +360,7 @@ const components = {
   ITypography,
   IRow,
   ICol,
+  ISchemaForm,
   ISegmented,
   IProgress,
   IStatistic,

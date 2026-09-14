@@ -1,0 +1,90 @@
+<form class="i-schema-form" bindsubmit="onSubmit">
+  <view wx:for="{{fields}}" wx:key="name" class="i-schema-form__field">
+    <text class="i-schema-form__label">
+      {{item.label}}<text wx:if="{{item.required}}" class="i-schema-form__req">*</text>
+    </text>
+
+    <input
+      wx:if="{{item.isText}}"
+      class="i-input"
+      value="{{item.text}}"
+      placeholder="{{item.placeholder}}"
+      disabled="{{disabled}}"
+      data-name="{{item.name}}"
+      bindinput="onInput"
+    />
+
+    <textarea
+      wx:elif="{{item.isTextarea}}"
+      class="i-textarea"
+      value="{{item.text}}"
+      placeholder="{{item.placeholder}}"
+      disabled="{{disabled}}"
+      data-name="{{item.name}}"
+      bindinput="onInput"
+    />
+
+    <input
+      wx:elif="{{item.isNumber}}"
+      class="i-input"
+      type="digit"
+      value="{{item.text}}"
+      disabled="{{disabled}}"
+      data-name="{{item.name}}"
+      bindinput="onInput"
+    />
+
+    <switch
+      wx:elif="{{item.isSwitch}}"
+      checked="{{item.on}}"
+      disabled="{{disabled}}"
+      data-name="{{item.name}}"
+      bindchange="onSwitch"
+    />
+
+    <!-- 小程序没有等价的下拉，用 picker 承接；取值与 Web 端一致 -->
+    <picker
+      wx:elif="{{item.isSelect}}"
+      range="{{item.options}}"
+      range-key="label"
+      disabled="{{disabled}}"
+      data-name="{{item.name}}"
+      data-options="{{item.options}}"
+      bindchange="onSelect"
+    >
+      <view class="i-schema-form__picker">{{item.text || '请选择'}}</view>
+    </picker>
+
+    <!-- 数组子表：错误落到具体那一格，而不是整张表报一句「有误」 -->
+    <view wx:elif="{{item.isArray}}" class="i-schema-form__rows">
+      <view wx:for="{{item.rows}}" wx:for-item="row" wx:key="index" class="i-schema-form__row">
+        <view wx:for="{{row.cells}}" wx:for-item="cell" wx:key="name" class="i-schema-form__cell">
+          <text class="i-schema-form__label">{{cell.label}}</text>
+          <input
+            class="i-input"
+            value="{{cell.value}}"
+            disabled="{{disabled}}"
+            data-name="{{item.name}}"
+            data-index="{{row.index}}"
+            data-key="{{cell.name}}"
+            bindinput="onCell"
+          />
+          <text wx:if="{{cell.error}}" class="i-schema-form__error">{{cell.error}}</text>
+        </view>
+        <view class="i-schema-form__remove" data-name="{{item.name}}" data-index="{{row.index}}" bindtap="onRemoveRow">
+          删除这行
+        </view>
+      </view>
+      <view class="i-schema-form__add" data-name="{{item.name}}" bindtap="onAddRow">加一行</view>
+    </view>
+
+    <text wx:if="{{item.help}}" class="i-schema-form__help">{{item.help}}</text>
+    <text wx:if="{{item.error}}" class="i-schema-form__error">{{item.error}}</text>
+  </view>
+
+  <text wx:for="{{formErrors}}" wx:key="path" class="i-schema-form__error">{{item.path}}：{{item.message}}</text>
+
+  <view class="i-schema-form__actions">
+    <button class="i-button i-button--primary" form-type="submit" disabled="{{disabled}}">{{submitText}}</button>
+  </view>
+</form>

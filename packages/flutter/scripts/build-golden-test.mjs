@@ -525,6 +525,15 @@ const { valueAxis, categoryBands, barRect, rankOrder, dualAxis } =
 const { changeFilter, clearFilters, applyQuickFilter, matchQuickFilter, serializeQuery, parseQuery } =
   await bundle('packages/common/src/logic/query.ts', 'query')
 
+/* ---------- 表单 schema：显隐、环检测、校验、服务端错误落位 ----------
+ * 这四条抄错都不会报错：只会让同一份 schema 在某个端上多显示一个字段、
+ * 或者把一条服务端错误悄悄丢掉。
+ */
+const {
+  evaluate: evaluateCondition, dependencyOrder, visibleFields, submitValues,
+  validateSchema, applyServerErrors, firstErrorPath
+} = await bundle('packages/common/src/logic/schemaform.ts', 'schemaform')
+
 /* ---------- 流程图：框选、批量移动与节点缩放 ----------
  * 三条都是「抄错也不会报错」的规则：命中判定改成相交、位移逐个吸附、
  * 缩放时对角没固定住——每一条都只表现为手感不对，构建全绿。
@@ -836,6 +845,110 @@ const queryParseExpectations = queryParseCases.flatMap((params, i) => {
     `    expect(p${i}.state.values.length, ${Object.keys(r.state.values).length});`,
     `    expect(p${i}.invalid.length, ${r.invalid.length});`,
     ...r.invalid.map((inv, k) => `    expect(p${i}.invalid[${k}].reason, '${inv.reason}');`),
+  ]
+})
+
+const formSchema = {
+  fields: [
+    { name: 'type', label: '客户类型', kind: 'select', rules: [{ kind: 'required', message: '请选择客户类型' }] },
+    {
+      name: 'taxNo', label: '税号', kind: 'text',
+      when: { field: 'type', op: 'eq', value: 'company' },
+      rules: [
+        { kind: 'required', message: '企业客户必须填税号' },
+        { kind: 'pattern', value: '^[A-Z0-9]{8,}$', message: '税号是 8 位以上的大写字母或数字' },
+      ],
+    },
+    {
+      name: 'lines', label: '明细', kind: 'array', minItems: 1, maxItems: 3,
+      item: [
+        { name: 'sku', label: '物料', kind: 'text', rules: [{ kind: 'required', message: '物料必填' }] },
+        { name: 'quantity', label: '数量', kind: 'number', rules: [{ kind: 'min', value: 1, message: '数量至少为 1' }] },
+      ],
+    },
+  ],
+}
+const dartRule = (r) =>
+  `IFormFieldRule(kind: '${r.kind}', message: '${r.message}'${r.value === undefined ? '' : `, value: ${typeof r.value === 'number' ? r.value : `'${r.value}'`}`})`
+const dartCond = (c) =>
+  `ICondition(field: '${c.field}', op: IConditionOp.${c.op}, value: '${c.value}')`
+const dartFormKind = { text: 'text', select: 'select', number: 'number', array: 'array' }
+const dartSpec = (f) =>
+  `IFormFieldSpec(name: '${f.name}', label: '${f.label}', kind: IFormFieldKind.${dartFormKind[f.kind]}` +
+  `${f.when ? `, when: ${dartCond(f.when)}` : ''}` +
+  `${f.rules ? `, rules: <IFormFieldRule>[${f.rules.map(dartRule).join(', ')}]` : ''}` +
+  `${f.item ? `, item: <IFormFieldSpec>[${f.item.map(dartSpec).join(', ')}]` : ''}` +
+  `${f.minItems === undefined ? '' : `, minItems: ${f.minItems}`}` +
+  `${f.maxItems === undefined ? '' : `, maxItems: ${f.maxItems}`})`
+const dartFormSchema = `const IFormSchema(fields: <IFormFieldSpec>[${formSchema.fields.map(dartSpec).join(', ')}])`
+
+const dartValues = (v) => {
+  const cell = (x) => {
+    if (typeof x === 'string') return `'${x}'`
+    if (typeof x === 'number') return `${x}`
+    if (Array.isArray(x)) return `<Object?>[${x.map(cell).join(', ')}]`
+    if (x && typeof x === 'object') {
+      return `<String, Object?>{${Object.entries(x).map(([k, val]) => `'${k}': ${cell(val)}`).join(', ')}}`
+    }
+    return 'null'
+  }
+  return cell(v)
+}
+
+const formValueCases = [
+  { type: 'person', lines: [{ sku: 'A', quantity: 1 }] },
+  { type: 'company', lines: [{ sku: 'A', quantity: 1 }] },
+  { type: 'company', taxNo: 'abc', lines: [{ sku: 'A', quantity: 1 }] },
+  { type: 'person', taxNo: 'ABC12345', lines: [] },
+  { type: 'person', lines: [{ sku: 'A', quantity: 1 }, { sku: '', quantity: 0 }] },
+]
+const schemaFormExpectations = [
+  `    final schema = ${dartFormSchema};`,
+  ...formValueCases.flatMap((values, i) => {
+    const visible = visibleFields(formSchema, values).map((f) => f.name)
+    const errors = validateSchema(formSchema, values)
+    const submitted = Object.keys(submitValues(formSchema, values))
+    return [
+      `    final v${i} = ${dartValues(values)};`,
+      `    expect(visibleFields(schema, v${i}).map((f) => f.name).toList(), <String>[${visible.map((n) => `'${n}'`).join(', ')}]);`,
+      `    expect(submitValues(schema, v${i}).keys.toList(), <String>[${submitted.map((n) => `'${n}'`).join(', ')}]);`,
+      `    expect(validateSchema(schema, v${i}).length, ${errors.length});`,
+      ...errors.map((e, k) => [
+        `    expect(validateSchema(schema, v${i})[${k}].path, '${e.path}');`,
+        `    expect(validateSchema(schema, v${i})[${k}].message, '${e.message}');`,
+      ]).flat(),
+    ]
+  }),
+  // 条件算子逐个对齐
+  ...[
+    { op: 'eq', value: 'x', actual: 'x' },
+    { op: 'ne', value: 'x', actual: 'y' },
+    { op: 'truthy', actual: '' },
+    { op: 'falsy', actual: '' },
+    { op: 'gt', value: 5, actual: 9 },
+    { op: 'lt', value: 5, actual: 9 },
+  ].map((c, i) => {
+    const dartOp = { eq: 'eq', ne: 'ne', truthy: 'truthy', falsy: 'falsy', gt: 'gt', lt: 'lt' }[c.op]
+    const result = evaluateCondition({ field: 'a', op: c.op, value: c.value }, { a: c.actual })
+    const val = c.value === undefined ? '' : `, value: ${typeof c.value === 'number' ? c.value : `'${c.value}'`}`
+    const actual = typeof c.actual === 'number' ? c.actual : `'${c.actual}'`
+    return `    expect(evaluateCondition(const ICondition(field: 'a', op: IConditionOp.${dartOp}${val}), <String, Object?>{'a': ${actual}}), ${result});`
+  }),
+]
+
+const serverErrorCases = [
+  [{ path: 'taxNo', message: '税号在工商系统里查不到' }],
+  [{ path: 'lines[2].quantity', message: '库存不足' }],
+  [{ path: 'creditLimit', message: '超出授信额度' }],
+  [{ path: 'creditLimit', message: '超出授信额度' }, { path: 'taxNo', message: '税号无效' }],
+]
+const serverErrorExpectations = serverErrorCases.flatMap((list, i) => {
+  const mapped = applyServerErrors(formSchema, list)
+  const dartList = `<({String path, String message})>[${list.map((e) => `(path: '${e.path}', message: '${e.message}')`).join(', ')}]`
+  return [
+    `    final se${i} = applyServerErrors(schema, ${dartList});`,
+    ...mapped.map((e, k) => `    expect(se${i}[${k}].orphan, ${!!e.orphan});`),
+    `    expect(firstErrorPath(se${i}), ${firstErrorPath(mapped) === null ? 'null' : `'${firstErrorPath(mapped)}'`});`,
   ]
 })
 
@@ -2533,6 +2646,7 @@ import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/axis.dart';
 import 'package:i_design/src/logic/query.dart';
+import 'package:i_design/src/logic/schemaform.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
@@ -2798,6 +2912,15 @@ ${ratioExpectations.join('\n')}
   test('轴标签抽稀与 Web 端一致', () {
 ${ai_stepExpectations.join('\n')}
 ${showExpectations.join('\n')}
+  });
+
+  test('表单 schema 的显隐、提交值与校验与 Web 端一致', () {
+${schemaFormExpectations.join('\n')}
+  });
+
+  test('服务端错误落位与 Web 端一致', () {
+    final schema = ${dartFormSchema};
+${serverErrorExpectations.join('\n')}
   });
 
   test('查询条件的状态机与 Web 端一致', () {

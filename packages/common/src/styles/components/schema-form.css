@@ -1,0 +1,60 @@
+/* 按 schema 渲染的表单（B08）。与各端共用同一份：pro 层全端，样式也只有一个来源 */
+.i-schema-form {
+  display: grid;
+  gap: var(--i-spacing-4);
+}
+
+.i-schema-form__field {
+  display: grid;
+  gap: var(--i-spacing-1);
+  min-width: 0;
+}
+
+.i-schema-form__label {
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+}
+
+.i-schema-form__req {
+  color: var(--i-color-danger);
+}
+
+.i-schema-form__help {
+  margin: 0;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+
+.i-schema-form__error {
+  margin: 0;
+  color: var(--i-color-danger);
+  font-size: var(--i-font-size-xs);
+}
+
+.i-schema-form__rows {
+  display: grid;
+  gap: var(--i-spacing-3);
+}
+
+.i-schema-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+}
+
+.i-schema-form__cell {
+  display: grid;
+  gap: var(--i-spacing-1);
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.i-schema-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+}

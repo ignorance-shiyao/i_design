@@ -121,6 +121,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IRecommendCard.vue",
   "src/components/IResult.vue",
   "src/components/IRow.vue",
+  "src/components/ISchemaForm.vue",
   "src/components/IScrollbar.vue",
   "src/components/ISegmented.vue",
   "src/components/ISelect.vue",

@@ -257,6 +257,40 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
     modelValue: { values: { status: 'open' }, page: 1, pageSize: 20 },
     quickFilters: [{ key: 'open', label: '进行中', values: { status: 'open' } }]
   },
+  ISchemaForm: {
+    schema: {
+      fields: [
+        {
+          name: 'type',
+          label: '客户类型',
+          kind: 'select',
+          rules: [{ kind: 'required', message: '请选择客户类型' }],
+          options: [
+            { value: 'person', label: '个人' },
+            { value: 'company', label: '企业' }
+          ]
+        },
+        {
+          name: 'taxNo',
+          label: '税号',
+          kind: 'text',
+          when: { field: 'type', op: 'eq', value: 'company' },
+          rules: [{ kind: 'required', message: '企业客户必须填税号' }]
+        },
+        {
+          name: 'lines',
+          label: '明细',
+          kind: 'array',
+          minItems: 1,
+          item: [
+            { name: 'sku', label: '物料', kind: 'text' },
+            { name: 'quantity', label: '数量', kind: 'number' }
+          ]
+        }
+      ]
+    },
+    modelValue: { type: 'company', taxNo: 'ABC12345', lines: [{ sku: 'SKU-1001', quantity: 2 }] }
+  },
   ITable: {
     columns: [
       { key: 'id', title: '单号' },

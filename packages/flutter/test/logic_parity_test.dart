@@ -13,6 +13,7 @@ import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/axis.dart';
 import 'package:i_design/src/logic/query.dart';
+import 'package:i_design/src/logic/schemaform.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
@@ -661,6 +662,63 @@ void main() {
     expect(showLabelAt(8, 90, 8), true);
     expect(showLabelAt(88, 90, 8), false);
     expect(showLabelAt(89, 90, 8), true);
+  });
+
+  test('表单 schema 的显隐、提交值与校验与 Web 端一致', () {
+    final schema = const IFormSchema(fields: <IFormFieldSpec>[IFormFieldSpec(name: 'type', label: '客户类型', kind: IFormFieldKind.select, rules: <IFormFieldRule>[IFormFieldRule(kind: 'required', message: '请选择客户类型')]), IFormFieldSpec(name: 'taxNo', label: '税号', kind: IFormFieldKind.text, when: ICondition(field: 'type', op: IConditionOp.eq, value: 'company'), rules: <IFormFieldRule>[IFormFieldRule(kind: 'required', message: '企业客户必须填税号'), IFormFieldRule(kind: 'pattern', message: '税号是 8 位以上的大写字母或数字', value: '^[A-Z0-9]{8,}$')]), IFormFieldSpec(name: 'lines', label: '明细', kind: IFormFieldKind.array, item: <IFormFieldSpec>[IFormFieldSpec(name: 'sku', label: '物料', kind: IFormFieldKind.text, rules: <IFormFieldRule>[IFormFieldRule(kind: 'required', message: '物料必填')]), IFormFieldSpec(name: 'quantity', label: '数量', kind: IFormFieldKind.number, rules: <IFormFieldRule>[IFormFieldRule(kind: 'min', message: '数量至少为 1', value: 1)])], minItems: 1, maxItems: 3)]);
+    final v0 = <String, Object?>{'type': 'person', 'lines': <Object?>[<String, Object?>{'sku': 'A', 'quantity': 1}]};
+    expect(visibleFields(schema, v0).map((f) => f.name).toList(), <String>['type', 'lines']);
+    expect(submitValues(schema, v0).keys.toList(), <String>['type', 'lines']);
+    expect(validateSchema(schema, v0).length, 0);
+    final v1 = <String, Object?>{'type': 'company', 'lines': <Object?>[<String, Object?>{'sku': 'A', 'quantity': 1}]};
+    expect(visibleFields(schema, v1).map((f) => f.name).toList(), <String>['type', 'taxNo', 'lines']);
+    expect(submitValues(schema, v1).keys.toList(), <String>['type', 'lines']);
+    expect(validateSchema(schema, v1).length, 1);
+    expect(validateSchema(schema, v1)[0].path, 'taxNo');
+    expect(validateSchema(schema, v1)[0].message, '企业客户必须填税号');
+    final v2 = <String, Object?>{'type': 'company', 'taxNo': 'abc', 'lines': <Object?>[<String, Object?>{'sku': 'A', 'quantity': 1}]};
+    expect(visibleFields(schema, v2).map((f) => f.name).toList(), <String>['type', 'taxNo', 'lines']);
+    expect(submitValues(schema, v2).keys.toList(), <String>['type', 'taxNo', 'lines']);
+    expect(validateSchema(schema, v2).length, 1);
+    expect(validateSchema(schema, v2)[0].path, 'taxNo');
+    expect(validateSchema(schema, v2)[0].message, '税号是 8 位以上的大写字母或数字');
+    final v3 = <String, Object?>{'type': 'person', 'taxNo': 'ABC12345', 'lines': <Object?>[]};
+    expect(visibleFields(schema, v3).map((f) => f.name).toList(), <String>['type', 'lines']);
+    expect(submitValues(schema, v3).keys.toList(), <String>['type', 'lines']);
+    expect(validateSchema(schema, v3).length, 1);
+    expect(validateSchema(schema, v3)[0].path, 'lines');
+    expect(validateSchema(schema, v3)[0].message, '至少要有 1 行');
+    final v4 = <String, Object?>{'type': 'person', 'lines': <Object?>[<String, Object?>{'sku': 'A', 'quantity': 1}, <String, Object?>{'sku': '', 'quantity': 0}]};
+    expect(visibleFields(schema, v4).map((f) => f.name).toList(), <String>['type', 'lines']);
+    expect(submitValues(schema, v4).keys.toList(), <String>['type', 'lines']);
+    expect(validateSchema(schema, v4).length, 2);
+    expect(validateSchema(schema, v4)[0].path, 'lines[1].sku');
+    expect(validateSchema(schema, v4)[0].message, '物料必填');
+    expect(validateSchema(schema, v4)[1].path, 'lines[1].quantity');
+    expect(validateSchema(schema, v4)[1].message, '数量至少为 1');
+    expect(evaluateCondition(const ICondition(field: 'a', op: IConditionOp.eq, value: 'x'), <String, Object?>{'a': 'x'}), true);
+    expect(evaluateCondition(const ICondition(field: 'a', op: IConditionOp.ne, value: 'x'), <String, Object?>{'a': 'y'}), true);
+    expect(evaluateCondition(const ICondition(field: 'a', op: IConditionOp.truthy), <String, Object?>{'a': ''}), false);
+    expect(evaluateCondition(const ICondition(field: 'a', op: IConditionOp.falsy), <String, Object?>{'a': ''}), true);
+    expect(evaluateCondition(const ICondition(field: 'a', op: IConditionOp.gt, value: 5), <String, Object?>{'a': 9}), true);
+    expect(evaluateCondition(const ICondition(field: 'a', op: IConditionOp.lt, value: 5), <String, Object?>{'a': 9}), false);
+  });
+
+  test('服务端错误落位与 Web 端一致', () {
+    final schema = const IFormSchema(fields: <IFormFieldSpec>[IFormFieldSpec(name: 'type', label: '客户类型', kind: IFormFieldKind.select, rules: <IFormFieldRule>[IFormFieldRule(kind: 'required', message: '请选择客户类型')]), IFormFieldSpec(name: 'taxNo', label: '税号', kind: IFormFieldKind.text, when: ICondition(field: 'type', op: IConditionOp.eq, value: 'company'), rules: <IFormFieldRule>[IFormFieldRule(kind: 'required', message: '企业客户必须填税号'), IFormFieldRule(kind: 'pattern', message: '税号是 8 位以上的大写字母或数字', value: '^[A-Z0-9]{8,}$')]), IFormFieldSpec(name: 'lines', label: '明细', kind: IFormFieldKind.array, item: <IFormFieldSpec>[IFormFieldSpec(name: 'sku', label: '物料', kind: IFormFieldKind.text, rules: <IFormFieldRule>[IFormFieldRule(kind: 'required', message: '物料必填')]), IFormFieldSpec(name: 'quantity', label: '数量', kind: IFormFieldKind.number, rules: <IFormFieldRule>[IFormFieldRule(kind: 'min', message: '数量至少为 1', value: 1)])], minItems: 1, maxItems: 3)]);
+    final se0 = applyServerErrors(schema, <({String path, String message})>[(path: 'taxNo', message: '税号在工商系统里查不到')]);
+    expect(se0[0].orphan, false);
+    expect(firstErrorPath(se0), 'taxNo');
+    final se1 = applyServerErrors(schema, <({String path, String message})>[(path: 'lines[2].quantity', message: '库存不足')]);
+    expect(se1[0].orphan, false);
+    expect(firstErrorPath(se1), 'lines[2].quantity');
+    final se2 = applyServerErrors(schema, <({String path, String message})>[(path: 'creditLimit', message: '超出授信额度')]);
+    expect(se2[0].orphan, true);
+    expect(firstErrorPath(se2), null);
+    final se3 = applyServerErrors(schema, <({String path, String message})>[(path: 'creditLimit', message: '超出授信额度'), (path: 'taxNo', message: '税号无效')]);
+    expect(se3[0].orphan, true);
+    expect(se3[1].orphan, false);
+    expect(firstErrorPath(se3), 'taxNo');
   });
 
   test('查询条件的状态机与 Web 端一致', () {

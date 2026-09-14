@@ -1009,6 +1009,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ISchemaForm",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IScrollbar",
     "ends": {
       "vue-next": true,
