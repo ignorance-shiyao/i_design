@@ -3,8 +3,8 @@ import { computed } from 'vue'
 import { icons, type IconName } from '@i-design/common'
 
 const props = withDefaults(
-  defineProps<{ name: IconName; size?: number | string; strokeWidth?: number; spin?: boolean }>(),
-  { size: '1em', strokeWidth: 1.8, spin: false }
+  defineProps<{ name: IconName; size?: number | string; strokeWidth?: number; spin?: boolean; path?: string }>(),
+  { size: '1em', strokeWidth: 1.8, spin: false, path: undefined }
 )
 
 const dimension = computed(() => (typeof props.size === 'number' ? `${props.size}px` : props.size))
@@ -25,6 +25,6 @@ const sizing = computed(() => (dimension.value === '1em' ? undefined : { width: 
     stroke-linejoin="round"
     aria-hidden="true"
   >
-    <path :d="icons[name]" />
+    <path :d="path ?? icons[name]" />
   </svg>
 </template>

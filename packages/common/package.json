@@ -12,6 +12,11 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
+    "./icons": {
+      "types": "./dist/types/icons/paths.d.ts",
+      "import": "./dist/icons.mjs",
+      "require": "./dist/icons.cjs"
+    },
     "./illustrations": {
       "types": "./dist/types/illustrations.d.ts",
       "import": "./dist/illustrations.mjs",

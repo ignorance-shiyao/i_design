@@ -40,6 +40,18 @@ export async function checkBundle(root = process.cwd()) {
     )
   }
 
+  /*
+   * 按需引一个图标必须真的只带走那一条。这条是硬的、不跟着基线走：
+   * 图标表是个对象，摇树摇不掉，所以一旦有人把单图标导出改回从表里取，
+   * 这里会立刻从 0.1 kB 跳到整张表的大小。
+   */
+  const oneIcon = rows.find((r) => r.id === 'one-icon')
+  assert.ok(oneIcon, '体积报告里缺少「只引一个图标」这个场景')
+  assert.ok(
+    oneIcon.gzip < 1024,
+    `只引一个图标却带走了 ${(oneIcon.gzip / 1024).toFixed(1)} kB：按需导出没生效，整张图标表都进产物了`
+  )
+
   for (const row of rows) {
     const before = recorded.get(row.title)
     assert.ok(before, `BUNDLE.md 里没有「${row.title}」这一行：运行 npm run build:bundle 重新生成`)

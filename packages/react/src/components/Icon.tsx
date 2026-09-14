@@ -2,6 +2,13 @@ import { icons, type IconName } from '@i-design/common'
 
 export interface IconProps {
   name: IconName
+  /**
+   * 直接给 path 数据，跳过按名字查表。
+   *
+   * 只用少数几个图标、又在意体积时用它：`import { iconTrash }` 只会带走那一条，
+   * 而按名字查表是整张表一起进产物（表是一个对象，摇树摇不掉没用到的条目）。
+   */
+  path?: string
   /** 尺寸跟随字号更自然，传数字则按 px */
   size?: number | string
   strokeWidth?: number
@@ -13,6 +20,7 @@ export interface IconProps {
 
 export function Icon({
   name,
+  path,
   size = '1em',
   strokeWidth = 1.8,
   label,
@@ -39,7 +47,7 @@ export function Icon({
       aria-label={label || undefined}
       aria-hidden={label ? undefined : true}
     >
-      <path d={icons[name]} />
+      <path d={path ?? icons[name]} />
     </svg>
   )
 }

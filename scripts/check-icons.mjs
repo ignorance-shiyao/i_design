@@ -12,7 +12,9 @@
 import assert from 'node:assert/strict'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { readFileSync } from 'node:fs'
 import { build } from 'esbuild'
+import { pathsFile, pathsSource } from './build-icon-paths.mjs'
 
 async function load(root) {
   const bundled = await build({
@@ -54,13 +56,30 @@ export async function checkIcons(root = process.cwd()) {
     }
   }
 
+  /*
+   * 重复形状：两个图标画得一模一样，等于其中一个是误加的别名。
+   * 它不会有任何症状——两处都能渲染出东西，只是使用方在浏览器里挑了半天，
+   * 发现这两个格子长得一样，不知道该用哪个。
+   */
+  const byShape = new Map()
+  for (const [name, path] of Object.entries(icons)) {
+    const shape = path.replace(/\s+/g, ' ').trim()
+    const first = byShape.get(shape)
+    assert.ok(!first, `图标 ${first} 与 ${name} 的形状完全相同：其中一个多半是误加的`)
+    byShape.set(shape, name)
+  }
+
+  // 单图标导出必须与图标表同步，否则按需引入拿到的是上一版的形状
+  const paths = readFileSync(resolve(root, pathsFile), 'utf8')
+  assert.equal(paths, pathsSource(root), '单图标导出过期：运行 npm run build:icon-paths 并提交生成物')
+
   // 业务词能检索到图标——这条是整层元数据存在的理由，所以它自己也要被测
   for (const [word, expected] of [['删除', 'trash'], ['导出', 'download'], ['驳回', 'error-circle'], ['排期', 'calendar']]) {
     assert.equal(searchIcons(word)[0], expected, `搜「${word}」应当先给出 ${expected}`)
   }
 
   const missing = missingCategories()
-  return `图标检查通过：${Object.keys(icons).length} 个图标元数据齐全，` +
+  return `图标检查通过：${Object.keys(icons).length} 个图标元数据齐全、形状无重复，` +
     `${aliasOwner.size} 条别名无重复` +
     (missing.length ? `；还没有图标的语义域：${missing.join('、')}` : '')
 }

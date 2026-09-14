@@ -441,6 +441,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   ],
   IIcon: [
     {"name":"name","type":"IconName","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"path","type":"string","doc":"直接给 path 数据，跳过按名字查表。 只用少数几个图标、又在意体积时用它：`import { iconTrash }` 只会带走那一条， 而按名字查表是整张表一起进产物（表是一个对象，摇树摇不掉没用到的条目）。 小程序与 Flutter 没有 JS 摇树这回事，那两端不提供这个属性。","optional":true,"defaultText":"undefined","control":{"kind":"string"}},
     {"name":"size","type":"number | string","doc":"尺寸跟随字号更自然，传数字则按 px","optional":true,"defaultText":"'1em'","control":null},
     {"name":"strokeWidth","type":"number","doc":"线宽；小尺寸下适当加粗才不显虚","optional":true,"defaultText":"1.8","control":{"kind":"number"}},
     {"name":"label","type":"string","doc":"无障碍标签；不传时视为装饰性图标，对读屏隐藏","optional":true,"defaultText":"''","control":{"kind":"string"}},

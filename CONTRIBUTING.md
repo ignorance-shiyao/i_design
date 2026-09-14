@@ -37,6 +37,13 @@ npm run check:lab         # Patterns Lab 里每个组件都真的渲染出来（
 **别用管道跑这些检查**：`npm run check:a11y | tail` 的退出码来自 `tail`，
 失败会被吞掉。这个仓库里有一条 nested-interactive 差点因此漏过去。
 
+## 图标
+
+图标本体在 `packages/common/src/icons/index.ts`，元数据（中文名、语义域、
+业务别名）在同目录的 `meta.ts`，单图标导出由脚本生成。新增一个图标要同时补
+元数据，否则它在检索里等于不存在——`npm run check:icons` 会报出来，
+形状与既有图标重复、别名被别的图标占用也会。
+
 ## 生成物
 
 「清单类」文件一律按目录生成：导出清单、覆盖矩阵、能力注册表、属性表、

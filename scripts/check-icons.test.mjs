@@ -57,6 +57,19 @@ test('图标路径被清空时失败', async (t) => {
   await assert.rejects(checkIcons(root), /没有路径数据/)
 })
 
+test('两个图标画得一模一样时失败——其中一个多半是误加的', async (t) => {
+  const root = fixture(t)
+  patch(root, ICONS, "  menu: 'M4 7h16M4 12h16M4 17h16',", "  menu: 'M4 7h16M4 12h16M4 17h16',\n  'menu-copy': 'M4 7h16M4 12h16M4 17h16',")
+  patch(root, META, "  github: {", "  'menu-copy': { cn: '菜单副本', category: 'media' },\n  github: {")
+  await assert.rejects(checkIcons(root), /形状完全相同/)
+})
+
+test('单图标导出没跟着重新生成时失败', async (t) => {
+  const root = fixture(t)
+  patch(root, ICONS, "  menu: 'M4 7h16M4 12h16M4 17h16',", "  menu: 'M4 7h16M4 12h16M4 18h16',")
+  await assert.rejects(checkIcons(root), /单图标导出过期/)
+})
+
 test('业务词检索不到对应图标时失败——这是整层元数据存在的理由', async (t) => {
   const root = fixture(t)
   // 中文名本身就能命中，所以要把名字也一并改掉，才测得到「别名没覆盖业务词」这条路径
