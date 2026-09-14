@@ -253,6 +253,41 @@ const waterfallItems = [
       </div>
     </DemoBlock>
 
+    <h2>百分比、阶梯与目标</h2>
+    <DemoBlock
+      title="百分比堆叠"
+      description="看的是构成比例而不是绝对量时用它。分母有两种情况不换算，并在图下说明：整列为 0 时没有分母（硬除会得到 NaN，再被渲染成 0，一根空柱子看起来像「这一档占 0%」）；列里有负数时，「占总量的百分之多少」这句话本身不成立。"
+      lang="vue"
+      code='<IChart type="bar" stacked percent :labels="labels" :series="series" />'
+    >
+      <IChart
+        type="bar"
+        stacked
+        percent
+        :labels="['一月', '二月', '三月', '四月']"
+        :series="[
+          { name: '直销', data: [30, 0, 50, 40] },
+          { name: '代理', data: [70, 0, 150, 60] }
+        ]"
+        :height="200"
+      />
+    </DemoBlock>
+
+    <DemoBlock
+      title="阶梯线与目标线"
+      description="阶梯适合「值在两次采样之间保持不变」的量——库存、在线人数、档位；用折线画会让读者以为中间在连续变化。目标线与阈值分开：阈值说的是「越过就有问题」，目标说的是「要达到」，把目标画成危险色会让一个还没达成的目标看起来像一次故障。"
+      lang="vue"
+      code='<IChart curve="step" :target="{ value: 120, label: &apos;季度目标&apos; }" :labels="labels" :series="series" />'
+    >
+      <IChart
+        curve="step"
+        :target="{ value: 120, label: '季度目标' }"
+        :labels="['第 1 周', '第 2 周', '第 3 周', '第 4 周', '第 5 周']"
+        :series="[{ name: '在库数量', data: [80, 80, 105, 105, 96] }]"
+        :height="200"
+      />
+    </DemoBlock>
+
     <h2>阈值</h2>
     <p>
       只看趋势看不出「现在是不是超了」，而后者往往才是看这张图的原因。阈值线与阈值带把「多少算正常」画进图里：线用虚线、带用极低不透明度，并且用状态色而不是分类色——阈值不是又一组数据，借分类色会被当成第 N 个系列。落在值域之外的阈值会被丢弃，而不是压到边缘假装「刚好卡在临界」。

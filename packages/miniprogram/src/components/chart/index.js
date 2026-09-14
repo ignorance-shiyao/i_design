@@ -4,7 +4,7 @@
  * 小程序没有 SVG，只能画在 canvas 上；刻度、比例尺与格式化仍走公共层，
  * 因此同一份数据在小程序与 Web 上刻度完全一致，只是绘制手段不同。
  */
-import { domainOf, formatTick, niceTicks, scaleX, scaleY } from '@i-design/common'
+import { domainOf, formatTick, niceTicks, percentStack, scaleX, scaleY } from '@i-design/common'
 
 // 分类色与 Web 端同一批取值、同一个顺序；顺序本身就是色觉安全机制
 const PALETTE = ['#5e7ce0', '#b7622a', '#0f8a68', '#7a4ee0', '#d64f8d', '#1f86b8', '#b08a1e', '#c2413d']
@@ -18,11 +18,17 @@ Component({
     labels: { type: Array, value: [] },
     type: { type: String, value: 'line' },
     stacked: { type: Boolean, value: false },
+    /** 百分比堆叠：整列为 0 或含负值的列不换算，并在提示里说明 */
+    percent: { type: Boolean, value: false },
+    /** 折线画法：step 适合两次采样之间保持不变的量 */
+    curve: { type: String, value: 'linear' },
+    /** 目标线：要达到的值。与阈值分开——目标不是故障 */
+    target: { type: Object, value: null },
     height: { type: Number, value: 220 },
     fromZero: { type: Boolean, value: true },
     title: { type: String, value: '' }
   },
-  data: { legend: [] },
+  data: { skippedColumns: 0, legend: [] },
   observers: {
     'series, labels, type, stacked': function (series) {
       this.setData({
@@ -55,7 +61,11 @@ Component({
     },
 
     render(ctx, width, height) {
-      const { series, labels, type, stacked, fromZero } = this.data
+      const { labels, type, stacked, fromZero, percent, curve, target } = this.data
+      // 百分比换算在渲染前做，与 Web 端同一份实现；换算不了的列原样保留
+      const converted = percent ? percentStack(this.data.series) : { series: this.data.series, skipped: [] }
+      const series = converted.series
+      this.setData({ skippedColumns: converted.skipped.length })
       ctx.clearRect(0, 0, width, height)
       if (!series.length || !labels.length) return
 
@@ -139,13 +149,34 @@ Component({
         }
 
         ctx.beginPath()
-        upper.forEach((v, i) => (i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v))))
+        // 阶梯：值保持到下一个点再跳变，而不是斜着连过去
+        upper.forEach((v, i) => {
+          if (i === 0) { ctx.moveTo(x(i), y(v)); return }
+          if (curve === 'step') ctx.lineTo(x(i), y(upper[i - 1]))
+          ctx.lineTo(x(i), y(v))
+        })
         ctx.strokeStyle = color
         ctx.lineWidth = 2
         ctx.lineJoin = 'round'
         ctx.lineCap = 'round'
         ctx.stroke()
       })
+
+      /*
+       * 目标线：品牌色虚线，与阈值的状态色分开。
+       * 阈值说的是「越过就有问题」，目标说的是「要达到」——
+       * 用危险色画目标，会让一个还没达成的目标看起来像一次故障。
+       */
+      if (target && typeof target.value === 'number') {
+        ctx.beginPath()
+        ctx.setLineDash([6, 4])
+        ctx.strokeStyle = '#5e7ce0'
+        ctx.lineWidth = 1.5
+        ctx.moveTo(PAD.left, y(target.value))
+        ctx.lineTo(width - PAD.right, y(target.value))
+        ctx.stroke()
+        ctx.setLineDash([])
+      }
     }
   }
 })

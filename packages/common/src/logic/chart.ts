@@ -863,3 +863,112 @@ export function treemapLayout(
 
   return tiles
 }
+
+
+/* ───────────────────────── 百分比堆叠、阶梯与目标线 ───────────────────────── */
+
+/**
+ * 百分比堆叠：把每一列换算成占比。
+ *
+ * 分母是这里唯一值得小心的东西：
+ *   - 整列为 0 时没有分母，占比是「没有」而不是 0——硬除会得到 NaN，
+ *     再被渲染成 0，于是一根空柱子看起来像「这一档占 0%」；
+ *   - 列里有负数时，「占总量的百分之多少」这句话本身不成立
+ *     （正负相抵后总量可能比某一项还小，占比会超过 100% 甚至为负）。
+ * 两种情况都不换算，原样返回并报出来，由图注说明。
+ */
+export function percentStack(series: ChartSeries[]): {
+  series: ChartSeries[]
+  /** 无法换算的列下标与原因 */
+  skipped: { index: number; reason: 'zero-total' | 'has-negative' }[]
+} {
+  const length = Math.max(0, ...series.map((s) => s.data.length))
+  const skipped: { index: number; reason: 'zero-total' | 'has-negative' }[] = []
+  const columns: number[] = []
+
+  for (let i = 0; i < length; i += 1) {
+    const values = series.map((s) => s.data[i] ?? 0)
+    if (values.some((v) => v < 0)) {
+      skipped.push({ index: i, reason: 'has-negative' })
+      columns.push(Number.NaN)
+      continue
+    }
+    const total = values.reduce((a, b) => a + b, 0)
+    if (total === 0) {
+      skipped.push({ index: i, reason: 'zero-total' })
+      columns.push(Number.NaN)
+      continue
+    }
+    columns.push(total)
+  }
+
+  return {
+    series: series.map((s) => ({
+      name: s.name,
+      data: s.data.map((value, i) => {
+        const total = columns[i]
+        return Number.isFinite(total) ? (value / total) * 100 : value
+      })
+    })),
+    skipped
+  }
+}
+
+/**
+ * 阶梯线的点序列。
+ *
+ * 阶梯适合「值在两次采样之间保持不变」的量：库存、在线人数、档位。
+ * 用折线画这类量会让读者以为中间在连续变化，而实际上它是跳变的。
+ * after 表示先走后跳（值保持到下一个点），before 表示先跳后走。
+ */
+export function stepPath(
+  data: number[],
+  min: number,
+  max: number,
+  w: number,
+  h: number,
+  mode: 'after' | 'before' = 'after'
+): string {
+  if (!data.length) return ''
+  const px = (i: number) => scaleX(i, data.length, w)
+  const py = (v: number) => scaleY(v, min, max, h)
+  const parts = [`M${px(0).toFixed(2)} ${py(data[0]).toFixed(2)}`]
+  for (let i = 1; i < data.length; i += 1) {
+    if (mode === 'after') {
+      parts.push(`L${px(i).toFixed(2)} ${py(data[i - 1]).toFixed(2)}`)
+      parts.push(`L${px(i).toFixed(2)} ${py(data[i]).toFixed(2)}`)
+    } else {
+      parts.push(`L${px(i - 1).toFixed(2)} ${py(data[i]).toFixed(2)}`)
+      parts.push(`L${px(i).toFixed(2)} ${py(data[i]).toFixed(2)}`)
+    }
+  }
+  return parts.join('')
+}
+
+/**
+ * 目标线：与阈值同一套画法，但语义不同。
+ *
+ * 阈值说的是「越过这条线就有问题」，目标说的是「要达到这条线」。
+ * 两者的配色与标签写法都该不一样——把目标画成危险色，会让一个还没达成的
+ * 目标看起来像一次故障。
+ */
+export interface ChartTarget {
+  value: number
+  label?: string
+  /** 完成度文案由调用方给，组件只负责显示 */
+  hint?: string
+}
+
+/** 目标达成情况：给图注与读屏用 */
+export function targetProgress(series: ChartSeries[], target: number): {
+  reached: boolean
+  latest: number | null
+  gap: number | null
+} {
+  const values = series.flatMap((s) => s.data).filter((v) => Number.isFinite(v))
+  // 不用 Array.prototype.at：这个包的编译目标是 ES2020，小程序端的运行时更老
+  const finite = series[0]?.data.filter((v) => Number.isFinite(v)) ?? []
+  const last = finite.length ? finite[finite.length - 1] : null
+  if (!values.length || last === null) return { reached: false, latest: null, gap: null }
+  return { reached: last >= target, latest: last, gap: +(target - last).toFixed(4) }
+}

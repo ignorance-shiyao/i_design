@@ -6,6 +6,9 @@ import {
   domainOf,
   formatTick,
   linePath,
+  percentStack,
+  stepPath,
+  targetProgress,
   niceTicks,
   scaleX,
   scaleY,
@@ -23,6 +26,20 @@ export interface ChartProps {
    * 对所有图型都有；两个出口并排摆着，读者只会疑惑该点哪一个。
    */
   exits?: boolean
+  /**
+   * 百分比堆叠：每一列换算成占比。
+   *
+   * 分母有两种情况不换算并在图注里说明：整列为 0（没有分母）、
+   * 列里有负数（「占总量的百分之多少」这句话本身不成立）。
+   */
+  percent?: boolean
+  /**
+   * 折线的画法。step 适合「值在两次采样之间保持不变」的量——
+   * 库存、在线人数、档位。用折线画会让读者以为中间在连续变化。
+   */
+  curve?: 'linear' | 'step'
+  /** 目标线：要达到的值。与阈值分开——把目标画成危险色会让它看起来像故障 */
+  target?: { value: number; label?: string } | null
   /** 每个系列一条线／一组柱；系列顺序即取色顺序 */
   series: ChartSeries[]
   labels: string[]
@@ -50,6 +67,9 @@ export function Chart({
   labels,
   type = 'line',
   exits = true,
+  percent = false,
+  curve = 'linear',
+  target = null,
   stacked = false,
   height = 240,
   fromZero = true,
@@ -66,7 +86,13 @@ export function Chart({
   const [active, setActive] = useState<number | null>(null)
   const [showTable, setShowTable] = useState(false)
 
-  const visible = series.filter((s) => !hidden.has(s.name))
+  const rawVisible = series.filter((s) => !hidden.has(s.name))
+  /* 百分比堆叠在这里换算：换算不了的列原样保留，并由 percentSkipped 报出来 */
+  const percentResult = percent ? percentStack(rawVisible) : { series: rawVisible, skipped: [] }
+  const visible = percentResult.series
+  const percentSkipped = percentResult.skipped
+  /** 目标达成情况，供图注与读屏用 */
+  const goal = target ? targetProgress(visible, target.value) : null
   const isBar = type === 'bar'
   const isStackedBar = isBar && stacked
   const stackedArea = type === 'area' && visible.length > 1
@@ -281,7 +307,11 @@ export function Chart({
               <path
                 key={`line-${s.name}`}
                 className="i-chart__line"
-                d={linePath(s.data, scale.min, scale.max, plotW, plotH)}
+                d={
+                  curve === 'step'
+                    ? stepPath(s.data, scale.min, scale.max, plotW, plotH)
+                    : linePath(s.data, scale.min, scale.max, plotW, plotH)
+                }
                 stroke={colorOf(s.name)}
                 transform={`translate(${pad.left} ${pad.top})`}
               />
@@ -343,6 +373,25 @@ export function Chart({
             ))}
           </g>
         )}
+        {target ? (
+          <g>
+            <line
+              className="i-chart__target-line"
+              x1={pad.left}
+              x2={W - pad.right}
+              y1={y(target.value)}
+              y2={y(target.value)}
+            />
+            <text
+              className="i-chart__target-label"
+              x={W - pad.right}
+              y={y(target.value) - 4}
+              textAnchor="end"
+            >
+              {target.label || `目标 ${target.value}`}
+            </text>
+          </g>
+        ) : null}
       </svg>
 
       {active !== null && (
@@ -383,6 +432,24 @@ export function Chart({
           ))}
         </div>
       )}
+
+      {/*
+        目标线：与阈值分开画。阈值说的是「越过就有问题」，目标说的是「要达到」——
+        用危险色画目标，会让一个还没达成的目标看起来像一次故障。
+      */}
+      {/* 换算不了的列与目标达成情况都写出来，不让读者自己看出来 */}
+      {percentSkipped.length ? (
+        <p className="i-chart__hint">
+          {`有 ${percentSkipped.length} 列没有换算成百分比：`}
+          {percentSkipped.some((c) => c.reason === 'zero-total') ? '整列为 0 时没有分母；' : ''}
+          {percentSkipped.some((c) => c.reason === 'has-negative')
+            ? '含负值时「占总量的百分之多少」不成立。'
+            : ''}
+        </p>
+      ) : null}
+      {goal ? (
+        <p className="i-chart__hint">{goal.reached ? '已达成目标' : `距目标还差 ${goal.gap}`}</p>
+      ) : null}
 
       {exits ? (
       <div className="i-chart__actions">

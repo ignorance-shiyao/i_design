@@ -41,6 +41,9 @@ class IChart extends StatelessWidget {
     required this.labels,
     this.type = IChartType.line,
     this.stacked = false,
+    this.percent = false,
+    this.curve = 'linear',
+    this.target,
     this.height = 220,
     this.fromZero = true,
     this.title = '',
@@ -53,6 +56,17 @@ class IChart extends StatelessWidget {
 
   /// 柱状与面积：堆叠而不是并排／覆盖
   final bool stacked;
+  final String curve;
+  final double? target;
+
+  /// 百分比堆叠：整列为 0 或含负值的列不换算（见 logic/chart.dart 的 iPercentStack）
+  final bool percent;
+
+  /// 折线画法：step 适合「值在两次采样之间保持不变」的量
+  final String curve;
+
+  /// 目标线：要达到的值。与阈值分开——把目标画成危险色会让它看起来像故障
+  final double? target;
   final double height;
   final bool fromZero;
   final String title;
@@ -81,11 +95,22 @@ class IChart extends StatelessWidget {
           child: CustomPaint(
             size: Size.infinite,
             painter: _ChartPainter(
-              series: series,
+              // 百分比换算在这里做，与 Web 端同一份实现（iPercentStack）
+              series: percent
+                  ? () {
+                      final converted = iPercentStack([for (final s in series) s.data]);
+                      return [
+                        for (var i = 0; i < series.length; i += 1)
+                          IChartSeries(name: series[i].name, data: converted.data[i])
+                      ];
+                    }()
+                  : series,
               labels: labels,
               type: type,
               stacked: stacked,
               fromZero: fromZero,
+              curve: curve,
+              target: target,
               colors: c,
             ),
           ),
@@ -133,6 +158,8 @@ class _ChartPainter extends CustomPainter {
     required this.labels,
     required this.type,
     required this.stacked,
+    required this.curve,
+    required this.target,
     required this.fromZero,
     required this.colors,
   });
@@ -262,7 +289,13 @@ class _ChartPainter extends CustomPainter {
       final line = Path();
       for (var i = 0; i < upper.length; i++) {
         final p = Offset(x(i), y(upper[i]));
-        i == 0 ? line.moveTo(p.dx, p.dy) : line.lineTo(p.dx, p.dy);
+        if (i == 0) {
+          line.moveTo(p.dx, p.dy);
+        } else {
+          // 阶梯：值保持到下一个点再跳变，而不是斜着连过去
+          if (curve == 'step') line.lineTo(p.dx, y(upper[i - 1]));
+          line.lineTo(p.dx, p.dy);
+        }
       }
 
       if (type == IChartType.area) {
@@ -295,9 +328,36 @@ class _ChartPainter extends CustomPainter {
           ..strokeJoin = StrokeJoin.round,
       );
     }
+
+    /*
+     * 目标线：品牌色虚线，与阈值的状态色分开。
+     * 阈值说的是「越过就有问题」，目标说的是「要达到」——
+     * 用危险色画目标，会让一个还没达成的目标看起来像一次故障。
+     */
+    final goal = target;
+    if (goal != null) {
+      final paint = Paint()
+        ..color = colors.brand
+        ..strokeWidth = 1.5
+        ..style = PaintingStyle.stroke;
+      const dash = 6.0;
+      const gap = 4.0;
+      var cursor = padLeft;
+      final lineY = y(goal);
+      while (cursor < size.width - padRight) {
+        final end = math.min(cursor + dash, size.width - padRight);
+        canvas.drawLine(Offset(cursor, lineY), Offset(end, lineY), paint);
+        cursor = end + gap;
+      }
+    }
   }
 
   @override
   bool shouldRepaint(_ChartPainter old) =>
-      old.series != series || old.type != type || old.stacked != stacked || old.colors != colors;
+      old.series != series ||
+      old.type != type ||
+      old.stacked != stacked ||
+      old.curve != curve ||
+      old.target != target ||
+      old.colors != colors;
 }

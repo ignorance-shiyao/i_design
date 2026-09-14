@@ -11,6 +11,9 @@ import {
   domainOf,
   formatTick,
   linePath,
+  percentStack,
+  stepPath,
+  targetProgress,
   niceTicks,
   scaleX,
   scaleY,
@@ -37,6 +40,20 @@ const props = withDefaults(
      */
     exits?: boolean
     type?: 'line' | 'area' | 'bar'
+    /**
+     * 百分比堆叠：每一列换算成占比。
+     *
+     * 分母有两种情况不换算并在图注里说明：整列为 0（没有分母）、
+     * 列里有负数（「占总量的百分之多少」这句话本身不成立）。
+     */
+    percent?: boolean
+    /**
+     * 折线的画法。step 适合「值在两次采样之间保持不变」的量——
+     * 库存、在线人数、档位。用折线画会让读者以为中间在连续变化。
+     */
+    curve?: 'linear' | 'step'
+    /** 目标线：要达到的值。与阈值分开——把目标画成危险色会让它看起来像故障 */
+    target?: { value: number; label?: string } | null
     /** 柱状图专用：堆叠而不是并排 */
     stacked?: boolean
     height?: number
@@ -58,6 +75,9 @@ const props = withDefaults(
   {
     type: 'line',
     exits: true,
+    percent: false,
+    curve: 'linear',
+    target: null,
     stacked: false,
     height: 240,
     fromZero: true,
@@ -96,7 +116,19 @@ function toggle(name: string) {
   else if (props.series.length - next.size > 1) next.add(name)
   hidden.value = next
 }
-const visible = computed(() => props.series.filter((s) => !hidden.value.has(s.name)))
+const rawVisible = computed(() => props.series.filter((s) => !hidden.value.has(s.name)))
+
+/* 百分比堆叠在这里换算：换算不了的列原样保留，并由 percentSkipped 报出来 */
+const percentResult = computed(() =>
+  props.percent ? percentStack(rawVisible.value) : { series: rawVisible.value, skipped: [] }
+)
+const visible = computed(() => percentResult.value.series)
+const percentSkipped = computed(() => percentResult.value.skipped)
+
+/** 目标达成情况，供图注与读屏用 */
+const target = computed(() =>
+  props.target ? targetProgress(visible.value, props.target.value) : null
+)
 
 const isBar = computed(() => props.type === 'bar')
 const stacked = computed(() => isBar.value && props.stacked)
@@ -319,6 +351,23 @@ function exportCsv() {
         </text>
       </g>
 
+      <!--
+        目标线：与阈值分开画。阈值说的是「越过就有问题」，目标说的是「要达到」——
+        用危险色画目标，会让一个还没达成的目标看起来像一次故障。
+      -->
+      <g v-if="props.target">
+        <line
+          class="i-chart__target-line"
+          :x1="PAD.left"
+          :x2="W - PAD.right"
+          :y1="y(props.target.value)"
+          :y2="y(props.target.value)"
+        />
+        <text class="i-chart__target-label" :x="W - PAD.right" :y="y(props.target.value) - 4" text-anchor="end">
+          {{ props.target.label || `目标 ${props.target.value}` }}
+        </text>
+      </g>
+
       <!-- 柱 -->
       <g v-if="isBar">
         <template v-for="(s, si) in visible" :key="s.name">
@@ -354,7 +403,9 @@ function exportCsv() {
           v-for="s in (type === 'area' ? areaSeries : visible)"
           :key="`line-${s.name}`"
           class="i-chart__line"
-          :d="linePath(s.data, scale.min, scale.max, plotW, plotH)"
+          :d="curve === 'step'
+            ? stepPath(s.data, scale.min, scale.max, plotW, plotH)
+            : linePath(s.data, scale.min, scale.max, plotW, plotH)"
           :stroke="colorOf(s.name)"
           :transform="`translate(${PAD.left} ${PAD.top})`"
         />
@@ -438,6 +489,18 @@ function exportCsv() {
         {{ s.name }}
       </button>
     </div>
+
+    <!-- 换算不了的列与目标达成情况都写出来，不让读者自己看出来 -->
+    <p v-if="percentSkipped.length" class="i-chart__hint">
+      有 {{ percentSkipped.length }} 列没有换算成百分比：{{
+        percentSkipped.some((c) => c.reason === 'zero-total') ? '整列为 0 时没有分母；' : ''
+      }}{{
+        percentSkipped.some((c) => c.reason === 'has-negative') ? '含负值时「占总量的百分之多少」不成立。' : ''
+      }}
+    </p>
+    <p v-if="target" class="i-chart__hint">
+      {{ target.reached ? '已达成目标' : `距目标还差 ${target.gap}` }}
+    </p>
 
     <div v-if="exits" class="i-chart__actions">
       <button class="i-chart__table-toggle" @click="showTable = !showTable">
