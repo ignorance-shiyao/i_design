@@ -511,6 +511,13 @@ const {
   sankeyLayout, treemapLayout
 } = await bundle('packages/common/src/logic/chart.ts', 'chart')
 
+/* ---------- 轴系：横条与双轴 ----------
+ * 刻度、类目带、矩形与「不该用双轴」的判定全在这里对齐。
+ * 抄错不会报错：只会让同一份数据在两个端上刻度密度不一样，或者少报一条提示。
+ */
+const { valueAxis, categoryBands, barRect, rankOrder, dualAxis } =
+  await bundle('packages/common/src/logic/axis.ts', 'axis')
+
 /* ---------- 流程图：框选、批量移动与节点缩放 ----------
  * 三条都是「抄错也不会报错」的规则：命中判定改成相交、位移逐个吸附、
  * 缩放时对角没固定住——每一条都只表现为手感不对，构建全绿。
@@ -668,6 +675,85 @@ const showExpectations = [0, 1, step90, 88, 89].map((i) =>
  * 这三条里任何一条移植时走样，两端画出来的就是两张不同的图，
  * 而且都「看起来像桑基图」，肉眼对不出来。
  */
+const axisCases = [
+  { min: 0, max: 100, length: 200, orientation: 'vertical' },
+  { min: 0, max: 137, length: 200, orientation: 'horizontal' },
+  { min: -50, max: 50, length: 100, orientation: 'vertical' },
+  { min: 20, max: 80, length: 100, orientation: 'horizontal' },
+]
+const axisExpectations = axisCases.flatMap((c, ci) => {
+  const layout = valueAxis(c.min, c.max, c.length, c.orientation)
+  const dart = `valueAxis(${c.min.toFixed(1)}, ${c.max.toFixed(1)}, ${c.length.toFixed(1)}, orientation: IAxisOrientation.${c.orientation})`
+  return [
+    `    final axis${ci} = ${dart};`,
+    `    expect(axis${ci}.min, closeTo(${layout.min}, 1e-9));`,
+    `    expect(axis${ci}.max, closeTo(${layout.max}, 1e-9));`,
+    `    expect(axis${ci}.baseline, closeTo(${layout.baseline}, 1e-9));`,
+    `    expect(axis${ci}.ticks.length, ${layout.ticks.length});`,
+    ...layout.ticks.map((t, i) =>
+      `    expect(axis${ci}.ticks[${i}].offset, closeTo(${t.offset}, 1e-9));`),
+  ]
+})
+
+const axisBands = categoryBands(4, 200)
+const axisBandExpectations = [
+  `    final axisBands = categoryBands(4, 200.0);`,
+  `    expect(axisBands.length, ${axisBands.length});`,
+  ...axisBands.flatMap((b, i) => [
+    `    expect(axisBands[${i}].start, closeTo(${b.start}, 1e-9));`,
+    `    expect(axisBands[${i}].center, closeTo(${b.center}, 1e-9));`,
+  ]),
+  ...[
+    { from: 100, to: 40, orientation: 'vertical' },
+    { from: 0, to: 60, orientation: 'horizontal' },
+    { from: 50, to: 90, orientation: 'vertical' },
+    { from: 50, to: 10, orientation: 'horizontal' },
+  ].flatMap((c, i) => {
+    const r = barRect({ band: axisBands[1], thickness: 20, offsetInBand: 5 }, c, c.orientation)
+    return [
+      `    final rect${i} = barRect(band: axisBands[1], thickness: 20.0, offsetInBand: 5.0, from: ${c.from.toFixed(1)}, to: ${c.to.toFixed(1)}, orientation: IAxisOrientation.${c.orientation});`,
+      `    expect(rect${i}.x, closeTo(${r.x}, 1e-9));`,
+      `    expect(rect${i}.y, closeTo(${r.y}, 1e-9));`,
+      `    expect(rect${i}.width, closeTo(${r.width}, 1e-9));`,
+      `    expect(rect${i}.height, closeTo(${r.height}, 1e-9));`,
+      `    expect(rect${i}.negative, ${r.negative});`,
+    ]
+  }),
+  ...['desc', 'asc', 'none'].map((dir) =>
+    `    expect(rankOrder(<double>[3.0, 9.0, 1.0], '${dir}'), [${rankOrder([3, 9, 1], dir).join(', ')}]);`),
+]
+
+const dualSeries = [
+  { name: '销售额', data: [100, 120, 140] },
+  { name: '转化率', data: [3, 4, 5] },
+  { name: '净增', data: [-40, 20, 60] },
+]
+const dartDualSeries = `<IChartSeries>[${dualSeries
+  .map((s) => `IChartSeries(name: '${s.name}', data: <double>[${s.data.map((v) => v.toFixed(1)).join(', ')}])`)
+  .join(', ')}]`
+const dualCases = [
+  { left: { series: [0], unit: '元' }, right: { series: [1], unit: '%' } },
+  { left: { series: [0], unit: '元' }, right: { series: [1], unit: '元' } },
+  { left: { series: [0], unit: '元' }, right: { series: [1], unit: '  ' } },
+  { left: { series: [2], unit: '人' }, right: { series: [1], unit: '%' } },
+]
+const dualExpectations = [
+  `    final series = ${dartDualSeries};`,
+  ...dualCases.flatMap((c, i) => {
+    // 第三个系列在多数用例里没有归属，提示里会点它的名——那正是要对齐的一条
+    const r = dualAxis(dualSeries, c.left, c.right, 200)
+    const side = (s) => `IDualAxisSide(series: <int>[${s.series.join(', ')}], unit: '${s.unit}')`
+    return [
+      `    final dual${i} = dualAxis(series, ${side(c.left)}, ${side(c.right)}, 200.0);`,
+      `    expect(dual${i}.issues.length, ${r.issues.length});`,
+      ...r.issues.map((issue, k) => `    expect(dual${i}.issues[${k}], '${issue.replace(/'/g, "\\'")}');`),
+      `    expect(dual${i}.zeroAligned, ${r.zeroAligned});`,
+      `    expect(dual${i}.left.baseline, closeTo(${r.left.baseline}, 1e-9));`,
+      `    expect(dual${i}.right.baseline, closeTo(${r.right.baseline}, 1e-9));`,
+    ]
+  }),
+]
+
 const sankeyCases = [
   { from: 'visit', to: 'leave', value: 600 },
   { from: 'visit', to: 'signup', value: 400 },
@@ -2360,6 +2446,7 @@ import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
+import 'package:i_design/src/logic/axis.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
@@ -2625,6 +2712,18 @@ ${ratioExpectations.join('\n')}
   test('轴标签抽稀与 Web 端一致', () {
 ${ai_stepExpectations.join('\n')}
 ${showExpectations.join('\n')}
+  });
+
+  test('值轴刻度与像素位置横纵一致，与 Web 端一致', () {
+${axisExpectations.join('\n')}
+  });
+
+  test('类目带、条形矩形与排名顺序与 Web 端一致', () {
+${axisBandExpectations.join('\n')}
+  });
+
+  test('双轴的提示与零位判定与 Web 端一致', () {
+${dualExpectations.join('\n')}
   });
 
   test('桑基图分层、节点高度与缎带几何与 Web 端一致', () {

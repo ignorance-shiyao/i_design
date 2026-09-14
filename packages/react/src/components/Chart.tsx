@@ -15,7 +15,11 @@ import {
   type ChartSeries,
   type ChartThreshold,
   labelStep,
-  showLabelAt
+  showLabelAt,
+  barRect,
+  categoryBands,
+  rankOrder,
+  valueAxis
 } from '@i-design/common'
 
 export interface ChartProps {
@@ -46,6 +50,18 @@ export interface ChartProps {
   type?: 'line' | 'area' | 'bar'
   /** 柱状图专用：堆叠而不是并排 */
   stacked?: boolean
+  /**
+   * 柱状图的方向。horizontal 把值轴放到水平方向、类目轴放到垂直方向。
+   *
+   * 类目名一长，纵向柱的标签只能斜排或者隔一个显示；横条的标签正着写，
+   * 长名字也读得下去。其它图型忽略它——折线横过来读者会把「时间」读成「量」。
+   */
+  orientation?: 'vertical' | 'horizontal'
+  /**
+   * 横条按值排序。横条多数时候是排名；但类目本身有顺序（星期、档位）时
+   * 排序反而破坏信息，所以不是默认。
+   */
+  rank?: 'desc' | 'asc' | 'none'
   height?: number
   /** 折线是否从零起。柱状图恒从零起——不从零会放大差异 */
   fromZero?: boolean
@@ -71,6 +87,8 @@ export function Chart({
   curve = 'linear',
   target = null,
   stacked = false,
+  orientation = 'vertical',
+  rank = 'none',
   height = 240,
   fromZero = true,
   labelLast = true,
@@ -97,11 +115,13 @@ export function Chart({
   const isStackedBar = isBar && stacked
   const stackedArea = type === 'area' && visible.length > 1
 
+  const horizontal = isBar && orientation === 'horizontal'
   const pad = {
     top: 16,
     right: labelLast && !isBar ? 96 : 16,
     bottom: 28,
-    left: 48
+    // 横条的类目名写在左边，48px 只够放数字刻度
+    left: horizontal ? 110 : 48
   }
   const plotW = W - pad.left - pad.right
   /*
@@ -159,8 +179,55 @@ export function Chart({
     setHidden(next)
   }
 
+  /* ---------- 横条 ----------
+   * 轴系走 @i-design/common 的 axis，与 Vue 端同一份：
+   * 横纵共用同一套刻度，同一份数据横过来刻度密度不会变。
+   */
+  const hAxis = valueAxis(domain.min, domain.max, plotW, 'horizontal', { format: formatTick })
+  const hBands = categoryBands(labels.length, plotH)
+  const hOrder = rankOrder(
+    labels.map((_, i) => visible.reduce((sum, s) => sum + (s.data[i] ?? 0), 0)),
+    rank
+  )
+  const hThickness = isStackedBar
+    ? (hBands[0]?.size ?? 0) * 0.5
+    : ((hBands[0]?.size ?? 0) * 0.62) / Math.max(1, visible.length)
+  const hx = (value: number) =>
+    pad.left + ((value - hAxis.min) / (hAxis.max - hAxis.min || 1)) * plotW
+  const hBars = visible.flatMap((s, si) =>
+    hOrder.map((dataIndex, row) => {
+      const band = hBands[row]
+      const value = s.data[dataIndex] ?? 0
+      const base = isStackedBar ? below(dataIndex, si) : 0
+      const offsetInBand = isStackedBar
+        ? (band.size - hThickness) / 2
+        : (band.size - hThickness * visible.length) / 2 + si * hThickness
+      const rect = barRect(
+        { band, thickness: hThickness, offsetInBand },
+        { from: hx(base), to: hx(base + value) },
+        'horizontal'
+      )
+      return {
+        key: `${s.name}-${dataIndex}`,
+        name: s.name,
+        dataIndex,
+        x: rect.x,
+        y: rect.y + pad.top,
+        width: Math.max(1, rect.width),
+        height: Math.max(1, rect.height),
+        // 堆叠时只有最外面一段收圆角：中间段也圆会看起来像一颗颗独立的胶囊
+        rounded: !isStackedBar || si === visible.length - 1
+      }
+    })
+  )
+  /*
+   * 阈值目前只画在纵向上：横条的阈值是一条竖线，会被读成分隔栏。
+   * 没实现就明说，不静默丢掉。
+   */
+  const thresholdsDropped = horizontal && thresholds.length > 0
+
   /* 超出值域的阈值静默丢弃：压到边缘会让读者误以为「刚好卡在临界」 */
-  const marks = thresholds
+  const marks = (horizontal ? [] : thresholds)
     .filter((t) => t.value === undefined || (t.value >= scale.min && t.value <= scale.max))
     .map((t) => {
       const status = t.status ?? 'warning'
@@ -191,6 +258,15 @@ export function Chart({
   function onMove(event: MouseEvent<SVGSVGElement>) {
     const rect = root.current?.getBoundingClientRect()
     if (!rect || !labels.length) return
+    if (horizontal) {
+      // 横条的命中走垂直方向；落在第几条带上要按排序后的顺序反查回数据下标
+      const row = Math.floor(
+        (((event.clientY - rect.top) / rect.height) * height - pad.top) /
+          Math.max(1, hBands[0]?.size ?? 1)
+      )
+      setActive(hOrder[Math.min(labels.length - 1, Math.max(0, row))] ?? null)
+      return
+    }
     const px = ((event.clientX - rect.left) / rect.width) * W
     const step = isBar ? bandWidth : plotW / Math.max(1, labels.length - 1)
     const index = Math.round((px - pad.left - (isBar ? bandWidth / 2 : 0)) / step)
@@ -210,21 +286,67 @@ export function Chart({
         onMouseMove={onMove}
         onMouseLeave={() => setActive(null)}
       >
-        {ticks.map((tick) => (
-          <g key={tick}>
-            <line className="i-chart__grid" x1={pad.left} x2={W - pad.right} y1={y(tick)} y2={y(tick)} />
-            <text className="i-chart__tick" x={pad.left - 8} y={y(tick) + 4} textAnchor="end">
-              {formatTick(tick)}
-            </text>
-          </g>
-        ))}
-        <line
-          className="i-chart__axis"
-          x1={pad.left}
-          x2={W - pad.right}
-          y1={y(Math.max(scale.min, 0))}
-          y2={y(Math.max(scale.min, 0))}
-        />
+        {!horizontal &&
+          ticks.map((tick) => (
+            <g key={tick}>
+              <line className="i-chart__grid" x1={pad.left} x2={W - pad.right} y1={y(tick)} y2={y(tick)} />
+              <text className="i-chart__tick" x={pad.left - 8} y={y(tick) + 4} textAnchor="end">
+                {formatTick(tick)}
+              </text>
+            </g>
+          ))}
+        {!horizontal && (
+          <line
+            className="i-chart__axis"
+            x1={pad.left}
+            x2={W - pad.right}
+            y1={y(Math.max(scale.min, 0))}
+            y2={y(Math.max(scale.min, 0))}
+          />
+        )}
+
+        {/* 横条：网格竖着画、刻度写在下沿、类目名正着写在左边 */}
+        {horizontal && (
+          <>
+            {hAxis.ticks.map((tick) => (
+              <g key={`h-${tick.value}`}>
+                <line
+                  className="i-chart__grid"
+                  x1={pad.left + tick.offset}
+                  x2={pad.left + tick.offset}
+                  y1={pad.top}
+                  y2={pad.top + plotH}
+                />
+                <text
+                  className="i-chart__tick"
+                  x={pad.left + tick.offset}
+                  y={height - 8}
+                  textAnchor="middle"
+                >
+                  {tick.label}
+                </text>
+              </g>
+            ))}
+            <line
+              className="i-chart__axis"
+              x1={pad.left + hAxis.baseline}
+              x2={pad.left + hAxis.baseline}
+              y1={pad.top}
+              y2={pad.top + plotH}
+            />
+            {hOrder.map((row, i) => (
+              <text
+                key={`h-label-${row}`}
+                className="i-chart__tick"
+                x={pad.left - 10}
+                y={pad.top + hBands[i].center + 4}
+                textAnchor="end"
+              >
+                {labels[row]}
+              </text>
+            ))}
+          </>
+        )}
 
         {/*
           阈值画在网格之上、数据之下：它是参考背景，不该盖住数据本身。
@@ -252,7 +374,7 @@ export function Chart({
           </g>
         ))}
 
-        {labels.map((label, i) => (
+        {!horizontal && labels.map((label, i) => (
           <text
             key={`${label}-${i}`}
             className="i-chart__tick"
@@ -269,7 +391,23 @@ export function Chart({
           </text>
         ))}
 
-        {isBar
+        {horizontal
+          ? hBars.map((bar) => (
+              <rect
+                key={bar.key}
+                className="i-chart__bar"
+                x={bar.x}
+                y={bar.y}
+                width={bar.width}
+                height={bar.height}
+                fill={colorOf(bar.name)}
+                rx={bar.rounded ? 3 : 0}
+                opacity={active === null || active === bar.dataIndex ? 1 : 0.55}
+              />
+            ))
+          : null}
+
+        {isBar && !horizontal
           ? visible.map((s, si) =>
               s.data.map((value, i) => (
                 <rect
@@ -373,7 +511,26 @@ export function Chart({
             ))}
           </g>
         )}
-        {target ? (
+        {target && horizontal ? (
+          <g>
+            <line
+              className="i-chart__target-line"
+              x1={hx(target.value)}
+              x2={hx(target.value)}
+              y1={pad.top}
+              y2={pad.top + plotH}
+            />
+            <text
+              className="i-chart__target-label"
+              x={hx(target.value)}
+              y={pad.top - 4}
+              textAnchor="middle"
+            >
+              {target.label || `目标 ${target.value}`}
+            </text>
+          </g>
+        ) : null}
+        {target && !horizontal ? (
           <g>
             <line
               className="i-chart__target-line"
@@ -398,8 +555,12 @@ export function Chart({
         <div
           className="i-chart__tooltip"
           style={{
-            left: `${(((isBar ? pad.left + bandWidth * (active + 0.5) : x(active)) / W) * 100).toFixed(2)}%`,
-            top: `${((y(scale.max) / height) * 100).toFixed(2)}%`
+            left: horizontal
+              ? `${(((pad.left + plotW / 2) / W) * 100).toFixed(2)}%`
+              : `${(((isBar ? pad.left + bandWidth * (active + 0.5) : x(active)) / W) * 100).toFixed(2)}%`,
+            top: horizontal
+              ? `${(((pad.top + (hBands[hOrder.indexOf(active)]?.center ?? 0) - 8) / height) * 100).toFixed(2)}%`
+              : `${((y(scale.max) / height) * 100).toFixed(2)}%`
           }}
         >
           <div className="i-chart__tooltip-title">{labels[active]}</div>
@@ -438,6 +599,11 @@ export function Chart({
         用危险色画目标，会让一个还没达成的目标看起来像一次故障。
       */}
       {/* 换算不了的列与目标达成情况都写出来，不让读者自己看出来 */}
+      {thresholdsDropped ? (
+        <p className="i-chart__hint">
+          横条暂不画阈值线：竖着的阈值线会被读成分隔栏。需要阈值请用纵向柱状图。
+        </p>
+      ) : null}
       {percentSkipped.length ? (
         <p className="i-chart__hint">
           {`有 ${percentSkipped.length} 列没有换算成百分比：`}

@@ -137,6 +137,8 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"curve","type":"'linear' | 'step'","doc":"折线的画法。step 适合「值在两次采样之间保持不变」的量—— 库存、在线人数、档位。用折线画会让读者以为中间在连续变化。","optional":true,"defaultText":"'linear'","control":{"kind":"enum","options":["linear","step"]}},
     {"name":"target","type":"{ value: number; label?: string } | null","doc":"目标线：要达到的值。与阈值分开——把目标画成危险色会让它看起来像故障","optional":true,"defaultText":"null","control":null},
     {"name":"stacked","type":"boolean","doc":"柱状图专用：堆叠而不是并排","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"orientation","type":"'vertical' | 'horizontal'","doc":"柱状图的方向。horizontal 把值轴放到水平方向、类目轴放到垂直方向。 类目名一长，纵向柱的标签只能斜排或者隔一个显示，两种都要读者费劲； 横条的标签是一行行正着写的，长名字也读得下去。其它图型忽略这个属性—— 折线横过来读者会把「时间」读成「量」。","optional":true,"defaultText":"'vertical'","control":{"kind":"enum","options":["vertical","horizontal"]}},
+    {"name":"rank","type":"'desc' | 'asc' | 'none'","doc":"横条按值排序。横条多数时候是排名，乱序的话读者会自己去找最长的那根； 但如果类目本身有顺序（星期、档位），排序反而破坏信息，所以不是默认。","optional":true,"defaultText":"'none'","control":{"kind":"enum","options":["desc","asc","none"]}},
     {"name":"height","type":"number","doc":"","optional":true,"defaultText":"240","control":{"kind":"number"}},
     {"name":"fromZero","type":"boolean","doc":"折线是否从零起。柱状图恒从零起——不从零会放大差异，是最常见的误导","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
     {"name":"labelLast","type":"boolean","doc":"末点直接标注数值，省掉「看图例再找线」这一步","optional":true,"defaultText":"true","control":{"kind":"boolean"}},

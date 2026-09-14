@@ -4,7 +4,18 @@
  * 小程序没有 SVG，只能画在 canvas 上；刻度、比例尺与格式化仍走公共层，
  * 因此同一份数据在小程序与 Web 上刻度完全一致，只是绘制手段不同。
  */
-import { domainOf, formatTick, niceTicks, percentStack, scaleX, scaleY } from '@i-design/common'
+import {
+  barRect,
+  categoryBands,
+  domainOf,
+  formatTick,
+  niceTicks,
+  percentStack,
+  rankOrder,
+  scaleX,
+  scaleY,
+  valueAxis
+} from '@i-design/common'
 
 // 分类色与 Web 端同一批取值、同一个顺序；顺序本身就是色觉安全机制
 const PALETTE = ['#5e7ce0', '#b7622a', '#0f8a68', '#7a4ee0', '#d64f8d', '#1f86b8', '#b08a1e', '#c2413d']
@@ -24,13 +35,20 @@ Component({
     curve: { type: String, value: 'linear' },
     /** 目标线：要达到的值。与阈值分开——目标不是故障 */
     target: { type: Object, value: null },
+    /**
+     * 柱状图的方向。horizontal 把值轴放到水平方向、类目轴放到垂直方向：
+     * 类目名一长，纵向柱的标签只能隔一个显示，横条的标签正着写就读得下去。
+     */
+    orientation: { type: String, value: 'vertical' },
+    /** 横条按值排序。类目本身有顺序时排序反而破坏信息，所以不是默认 */
+    rank: { type: String, value: 'none' },
     height: { type: Number, value: 220 },
     fromZero: { type: Boolean, value: true },
     title: { type: String, value: '' }
   },
   data: { skippedColumns: 0, legend: [] },
   observers: {
-    'series, labels, type, stacked': function (series) {
+    'series, labels, type, stacked, orientation, rank': function (series) {
       this.setData({
         legend: series.map((s, i) => ({ name: s.name, color: PALETTE[i % PALETTE.length] }))
       })
@@ -61,7 +79,7 @@ Component({
     },
 
     render(ctx, width, height) {
-      const { labels, type, stacked, fromZero, percent, curve, target } = this.data
+      const { labels, type, stacked, fromZero, percent, curve, target, orientation, rank } = this.data
       // 百分比换算在渲染前做，与 Web 端同一份实现；换算不了的列原样保留
       const converted = percent ? percentStack(this.data.series) : { series: this.data.series, skipped: [] }
       const series = converted.series
@@ -70,19 +88,79 @@ Component({
       if (!series.length || !labels.length) return
 
       const isBar = type === 'bar'
+      const horizontal = isBar && orientation === 'horizontal'
       const stackedArea = type === 'area' && series.length > 1
-      const plotW = width - PAD.left - PAD.right
+      // 横条的类目名写在左边，44px 只够放数字刻度
+      const padLeft = horizontal ? 96 : PAD.left
+      const plotW = width - padLeft - PAD.right
       const plotH = height - PAD.top - PAD.bottom
 
       const domain = domainOf(series, {
         fromZero: isBar ? true : fromZero,
         stacked: (isBar && stacked) || stackedArea
       })
+      const below = (i, si) => series.slice(0, si).reduce((sum, s) => sum + (s.data[i] || 0), 0)
+
+      /*
+       * 横条：轴系走公共层的 axis，与 Web 端同一份实现——
+       * 横纵共用同一套刻度，同一份数据横过来刻度密度不会变。
+       */
+      if (horizontal) {
+        const axis = valueAxis(domain.min, domain.max, plotW, 'horizontal', { format: formatTick })
+        const bands = categoryBands(labels.length, plotH)
+        const order = rankOrder(
+          labels.map((_, i) => series.reduce((sum, s) => sum + (s.data[i] || 0), 0)),
+          rank
+        )
+        const hx = (value) =>
+          padLeft + ((value - axis.min) / (axis.max - axis.min || 1)) * plotW
+        const thickness = stacked
+          ? (bands[0] ? bands[0].size : 0) * 0.5
+          : ((bands[0] ? bands[0].size : 0) * 0.62) / series.length
+
+        ctx.strokeStyle = 'rgba(20,24,34,0.08)'
+        ctx.lineWidth = 1
+        ctx.font = '11px sans-serif'
+        ctx.fillStyle = '#8a8e99'
+        ctx.textAlign = 'center'
+        axis.ticks.forEach((tick) => {
+          ctx.beginPath()
+          ctx.moveTo(padLeft + tick.offset, PAD.top)
+          ctx.lineTo(padLeft + tick.offset, PAD.top + plotH)
+          ctx.stroke()
+          ctx.fillText(tick.label, padLeft + tick.offset, height - PAD.bottom + 14)
+        })
+        // 类目名正着写在左边，长名字也读得下去——这正是横条存在的理由
+        ctx.textAlign = 'right'
+        order.forEach((dataIndex, row) => {
+          ctx.fillText(labels[dataIndex], padLeft - 8, PAD.top + bands[row].center + 4)
+        })
+
+        series.forEach((s, si) => {
+          ctx.fillStyle = PALETTE[si % PALETTE.length]
+          order.forEach((dataIndex, row) => {
+            const band = bands[row]
+            const value = s.data[dataIndex] || 0
+            const base = stacked ? below(dataIndex, si) : 0
+            const offsetInBand = stacked
+              ? (band.size - thickness) / 2
+              : (band.size - thickness * series.length) / 2 + si * thickness
+            const rect = barRect(
+              { band: band, thickness: thickness, offsetInBand: offsetInBand },
+              { from: hx(base), to: hx(base + value) },
+              'horizontal'
+            )
+            ctx.fillRect(rect.x, rect.y + PAD.top, Math.max(1, rect.width), Math.max(1, rect.height))
+          })
+        })
+        return
+      }
+
       const ticks = niceTicks(domain.min, domain.max, 5)
       const lo = ticks[0]
       const hi = ticks[ticks.length - 1]
       const y = (v) => scaleY(v, lo, hi, plotH) + PAD.top
-      const x = (i) => scaleX(i, labels.length, plotW) + PAD.left
+      const x = (i) => scaleX(i, labels.length, plotW) + padLeft
 
       // 网格与刻度：背景信息，最淡的一档
       ctx.strokeStyle = 'rgba(20,24,34,0.08)'
@@ -92,20 +170,19 @@ Component({
       ctx.textAlign = 'right'
       ticks.forEach((tick) => {
         ctx.beginPath()
-        ctx.moveTo(PAD.left, y(tick))
+        ctx.moveTo(padLeft, y(tick))
         ctx.lineTo(width - PAD.right, y(tick))
         ctx.stroke()
-        ctx.fillText(formatTick(tick), PAD.left - 6, y(tick) + 4)
+        ctx.fillText(formatTick(tick), padLeft - 6, y(tick) + 4)
       })
 
       const band = plotW / Math.max(1, labels.length)
       ctx.textAlign = 'center'
       labels.forEach((label, i) => {
         if (labels.length > 8 && i % 2 === 1) return
-        ctx.fillText(label, isBar ? PAD.left + band * (i + 0.5) : x(i), height - PAD.bottom + 14)
+        ctx.fillText(label, isBar ? padLeft + band * (i + 0.5) : x(i), height - PAD.bottom + 14)
       })
 
-      const below = (i, si) => series.slice(0, si).reduce((sum, s) => sum + (s.data[i] || 0), 0)
 
       if (isBar) {
         const barW = stacked ? band * 0.5 : (band * 0.62) / series.length

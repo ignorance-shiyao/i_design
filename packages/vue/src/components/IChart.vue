@@ -20,7 +20,11 @@ import {
   type ChartSeries,
   type ChartThreshold,
   labelStep,
-  showLabelAt
+  showLabelAt,
+  barRect,
+  categoryBands,
+  rankOrder,
+  valueAxis
 } from '@i-design/common'
 
 /* 文案走字典：图表的数据表是它的无障碍出口，按钮与表头也得跟着换语言 */
@@ -56,6 +60,19 @@ const props = withDefaults(
     target?: { value: number; label?: string } | null
     /** 柱状图专用：堆叠而不是并排 */
     stacked?: boolean
+    /**
+     * 柱状图的方向。horizontal 把值轴放到水平方向、类目轴放到垂直方向。
+     *
+     * 类目名一长，纵向柱的标签只能斜排或者隔一个显示，两种都要读者费劲；
+     * 横条的标签是一行行正着写的，长名字也读得下去。其它图型忽略这个属性——
+     * 折线横过来读者会把「时间」读成「量」。
+     */
+    orientation?: 'vertical' | 'horizontal'
+    /**
+     * 横条按值排序。横条多数时候是排名，乱序的话读者会自己去找最长的那根；
+     * 但如果类目本身有顺序（星期、档位），排序反而破坏信息，所以不是默认。
+     */
+    rank?: 'desc' | 'asc' | 'none'
     height?: number
     /** 折线是否从零起。柱状图恒从零起——不从零会放大差异，是最常见的误导 */
     fromZero?: boolean
@@ -79,6 +96,8 @@ const props = withDefaults(
     curve: 'linear',
     target: null,
     stacked: false,
+    orientation: 'vertical',
+    rank: 'none',
     height: 240,
     fromZero: true,
     labelLast: true,
@@ -95,7 +114,8 @@ const PAD = computed(() => ({
   top: 16,
   right: props.labelLast && props.type !== 'bar' ? 96 : 16,
   bottom: 28,
-  left: 48
+  // 横条的类目名写在左边，48px 只够放数字刻度
+  left: props.type === 'bar' && props.orientation === 'horizontal' ? 110 : 48
 }))
 const plotW = computed(() => W - PAD.value.left - PAD.value.right)
 const plotH = computed(() => props.height - PAD.value.top - PAD.value.bottom)
@@ -210,6 +230,68 @@ function stackBase(i: number, seriesIndex: number) {
   return visible.value.slice(0, seriesIndex).reduce((sum, s) => sum + (s.data[i] ?? 0), 0)
 }
 
+/* ---------- 横条 ----------
+ * 轴系走 @i-design/common 的 axis：横纵两个方向共用同一套刻度与类目带，
+ * 两端各写一套的话，刻度密度一定会一个疏一个密。
+ */
+const horizontal = computed(() => isBar.value && props.orientation === 'horizontal')
+
+/** 横条的值轴：值向右增长，与像素同向 */
+const hAxis = computed(() =>
+  valueAxis(domain.value.min, domain.value.max, plotW.value, 'horizontal', { format: formatTick })
+)
+
+/** 类目带铺在垂直方向 */
+const hBands = computed(() => categoryBands(props.labels.length, plotH.value))
+
+/** 排名顺序：只改画的顺序与标签顺序，不动传入的数据 */
+const hOrder = computed(() => {
+  const totals = props.labels.map((_, i) =>
+    visible.value.reduce((sum, s) => sum + (s.data[i] ?? 0), 0)
+  )
+  return rankOrder(totals, props.rank)
+})
+
+const hThickness = computed(() => {
+  const size = hBands.value[0]?.size ?? 0
+  return stacked.value ? size * 0.5 : (size * 0.62) / Math.max(1, visible.value.length)
+})
+
+const hx = (value: number) => {
+  const { min, max } = hAxis.value
+  return PAD.value.left + ((value - min) / (max - min || 1)) * plotW.value
+}
+
+/** 每根横条的矩形：负值从基线往左长，圆角换到左端 */
+const hBars = computed(() =>
+  visible.value.flatMap((s, si) =>
+    hOrder.value.map((dataIndex, row) => {
+      const band = hBands.value[row]
+      const value = s.data[dataIndex] ?? 0
+      const base = stacked.value ? stackBase(dataIndex, si) : 0
+      const offsetInBand = stacked.value
+        ? (band.size - hThickness.value) / 2
+        : (band.size - hThickness.value * visible.value.length) / 2 + si * hThickness.value
+      const rect = barRect(
+        { band, thickness: hThickness.value, offsetInBand },
+        { from: hx(base), to: hx(base + value) },
+        'horizontal'
+      )
+      return {
+        key: `${s.name}-${dataIndex}`,
+        name: s.name,
+        dataIndex,
+        x: rect.x,
+        y: rect.y + PAD.value.top,
+        width: Math.max(1, rect.width),
+        height: Math.max(1, rect.height),
+        // 堆叠时只有最外面一段收圆角：中间段也圆会看起来像一颗颗独立的胶囊
+        rounded: !stacked.value || si === visible.value.length - 1
+      }
+    })
+  )
+)
+
 /* ---------- 悬停 ---------- */
 const active = ref<number | null>(null)
 const root = ref<HTMLElement | null>(null)
@@ -217,6 +299,16 @@ const root = ref<HTMLElement | null>(null)
 function onMove(event: MouseEvent) {
   const rect = root.value?.getBoundingClientRect()
   if (!rect || !props.labels.length) return
+  if (horizontal.value) {
+    // 横条的命中走垂直方向；而且落在第几条带上要按排序后的顺序反查回数据下标
+    const row = Math.floor(
+      (((event.clientY - rect.top) / rect.height) * props.height - PAD.value.top) /
+        Math.max(1, hBands.value[0]?.size ?? 1)
+    )
+    const clamped = Math.min(props.labels.length - 1, Math.max(0, row))
+    active.value = hOrder.value[clamped] ?? null
+    return
+  }
   const ratio = (event.clientX - rect.left) / rect.width
   const px = ratio * W
   // 取最近的数据点，而不是要求指针精确落在点上——命中区域要比标记大
@@ -227,6 +319,14 @@ function onMove(event: MouseEvent) {
 
 const tooltipStyle = computed(() => {
   if (active.value === null) return {}
+  if (horizontal.value) {
+    const row = hOrder.value.indexOf(active.value)
+    const band = hBands.value[row]
+    return {
+      left: `${((PAD.value.left + plotW.value / 2) / W) * 100}%`,
+      top: `${(((band ? PAD.value.top + band.center : PAD.value.top) - 8) / props.height) * 100}%`
+    }
+  }
   const px = isBar.value ? PAD.value.left + bandWidth.value * (active.value + 0.5) : x(active.value)
   return { left: `${(px / W) * 100}%`, top: `${(y(scale.value.max) / props.height) * 100}%` }
 })
@@ -235,8 +335,14 @@ const tooltipStyle = computed(() => {
  * 阈值只有落在当前值域里才画得出来。
  * 超出值域的阈值静默丢弃——把它硬压到边缘会让读者误以为「刚好卡在临界」。
  */
+/*
+ * 阈值目前只画在纵向上：横条的阈值是一条竖线，与「排名」这个读法冲突
+ * （读者会把竖线当成分隔栏）。没实现就明说，不静默丢掉。
+ */
+const thresholdsDropped = computed(() => horizontal.value && props.thresholds.length > 0)
+
 const marks = computed(() =>
-  props.thresholds
+  horizontal.value ? [] : props.thresholds
     .filter((t) => t.value === undefined || (t.value >= scale.value.min && t.value <= scale.value.max))
     .map((t) => {
       const status = t.status ?? 'warning'
@@ -292,7 +398,7 @@ function exportCsv() {
       @mouseleave="active = null"
     >
       <!-- 网格与刻度：背景信息，最淡的一档 -->
-      <g>
+      <g v-if="!horizontal">
         <template v-for="tick in ticks" :key="tick">
           <line class="i-chart__grid" :x1="PAD.left" :x2="W - PAD.right" :y1="y(tick)" :y2="y(tick)" />
           <text class="i-chart__tick" :x="PAD.left - 8" :y="y(tick) + 4" text-anchor="end">
@@ -306,6 +412,44 @@ function exportCsv() {
           :y1="y(Math.max(scale.min, 0))"
           :y2="y(Math.max(scale.min, 0))"
         />
+      </g>
+
+      <!--
+        横条的网格与刻度：网格竖着画、刻度写在下沿。
+        密度与纵向同源（valueAxis 用的是同一套 niceTicks），
+        不然同一份数据横过来读者会觉得「怎么刻度变了」。
+      -->
+      <g v-else>
+        <template v-for="tick in hAxis.ticks" :key="`h-${tick.value}`">
+          <line
+            class="i-chart__grid"
+            :x1="PAD.left + tick.offset"
+            :x2="PAD.left + tick.offset"
+            :y1="PAD.top"
+            :y2="PAD.top + plotH"
+          />
+          <text class="i-chart__tick" :x="PAD.left + tick.offset" :y="height - 8" text-anchor="middle">
+            {{ tick.label }}
+          </text>
+        </template>
+        <line
+          class="i-chart__axis"
+          :x1="PAD.left + hAxis.baseline"
+          :x2="PAD.left + hAxis.baseline"
+          :y1="PAD.top"
+          :y2="PAD.top + plotH"
+        />
+        <!-- 类目名正着写在左边，长名字也读得下去——这正是横条存在的理由 -->
+        <text
+          v-for="(row, i) in hOrder"
+          :key="`h-label-${row}`"
+          class="i-chart__tick"
+          :x="PAD.left - 10"
+          :y="PAD.top + hBands[i].center + 4"
+          text-anchor="end"
+        >
+          {{ labels[row] }}
+        </text>
       </g>
 
       <!--
@@ -336,7 +480,7 @@ function exportCsv() {
       </g>
 
       <!-- x 轴标签：标签多时隔一个显示，避免叠字 -->
-      <g>
+      <g v-if="!horizontal">
         <text
           v-for="(label, i) in labels"
           v-show="showLabelAt(i, labels.length, tickStep)"
@@ -355,7 +499,19 @@ function exportCsv() {
         目标线：与阈值分开画。阈值说的是「越过就有问题」，目标说的是「要达到」——
         用危险色画目标，会让一个还没达成的目标看起来像一次故障。
       -->
-      <g v-if="props.target">
+      <g v-if="props.target && horizontal">
+        <line
+          class="i-chart__target-line"
+          :x1="hx(props.target.value)"
+          :x2="hx(props.target.value)"
+          :y1="PAD.top"
+          :y2="PAD.top + plotH"
+        />
+        <text class="i-chart__target-label" :x="hx(props.target.value)" :y="PAD.top - 4" text-anchor="middle">
+          {{ props.target.label || `目标 ${props.target.value}` }}
+        </text>
+      </g>
+      <g v-else-if="props.target">
         <line
           class="i-chart__target-line"
           :x1="PAD.left"
@@ -369,7 +525,7 @@ function exportCsv() {
       </g>
 
       <!-- 柱 -->
-      <g v-if="isBar">
+      <g v-if="isBar && !horizontal">
         <template v-for="(s, si) in visible" :key="s.name">
           <rect
             v-for="(value, i) in s.data"
@@ -384,6 +540,22 @@ function exportCsv() {
             :opacity="active === null || active === i ? 1 : 0.55"
           />
         </template>
+      </g>
+
+      <!-- 横条 -->
+      <g v-else-if="horizontal">
+        <rect
+          v-for="bar in hBars"
+          :key="bar.key"
+          class="i-chart__bar"
+          :x="bar.x"
+          :y="bar.y"
+          :width="bar.width"
+          :height="bar.height"
+          :fill="colorOf(bar.name)"
+          :rx="bar.rounded ? 3 : 0"
+          :opacity="active === null || active === bar.dataIndex ? 1 : 0.55"
+        />
       </g>
 
       <!-- 线与面积 -->
@@ -497,6 +669,9 @@ function exportCsv() {
       }}{{
         percentSkipped.some((c) => c.reason === 'has-negative') ? '含负值时「占总量的百分之多少」不成立。' : ''
       }}
+    </p>
+    <p v-if="thresholdsDropped" class="i-chart__hint">
+      横条暂不画阈值线：竖着的阈值线会被读成分隔栏。需要阈值请用纵向柱状图。
     </p>
     <p v-if="target" class="i-chart__hint">
       {{ target.reached ? '已达成目标' : `距目标还差 ${target.gap}` }}

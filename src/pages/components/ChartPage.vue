@@ -314,6 +314,24 @@ const waterfallItems = [
       />
     </DemoBlock>
 
+    <h2>轴系</h2>
+    <DemoBlock
+      title="横条：长类目名与排名"
+      description="类目名一长，纵向柱的标签只能斜排或者隔一个显示，两种都要读者费劲；横条的标签是一行行正着写的，长名字也读得下去。横条多数时候是在看排名，所以可以按值排序——但如果类目本身有顺序（星期、档位），排序反而破坏信息，因此不是默认。刻度与纵向同源：同一份数据横过来，刻度密度不会变。"
+      lang="vue"
+      code='<IChart type="bar" orientation="horizontal" rank="desc" :labels="labels" :series="series" />'
+    >
+      <IChart
+        type="bar"
+        orientation="horizontal"
+        rank="desc"
+        :labels="['华东大区直营门店', '华南大区加盟门店', '西南大区直营门店', '华北大区加盟门店']"
+        :series="[{ name: '季度营收', data: [420, 380, 260, 310] }]"
+        :height="220"
+        unit=" 万元"
+      />
+    </DemoBlock>
+
     <h2>联动</h2>
     <DemoBlock
       title="过滤、下钻与返回"

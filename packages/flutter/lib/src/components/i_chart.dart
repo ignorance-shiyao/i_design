@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../logic/axis.dart';
 import '../logic/chart.dart';
 import '../theme/i_theme.dart';
 import '../tokens/tokens.dart';
@@ -44,6 +45,8 @@ class IChart extends StatelessWidget {
     this.percent = false,
     this.curve = 'linear',
     this.target,
+    this.orientation = IAxisOrientation.vertical,
+    this.rank = 'none',
     this.height = 220,
     this.fromZero = true,
     this.title = '',
@@ -65,6 +68,14 @@ class IChart extends StatelessWidget {
 
   /// 目标线：要达到的值。与阈值分开——把目标画成危险色会让它看起来像故障
   final double? target;
+
+  /// 柱状图的方向。horizontal 把值轴放到水平方向、类目轴放到垂直方向：
+  /// 类目名一长，纵向柱的标签只能隔一个显示，横条的标签正着写就读得下去。
+  /// 其它图型忽略它——折线横过来读者会把「时间」读成「量」。
+  final IAxisOrientation orientation;
+
+  /// 横条按值排序。类目本身有顺序（星期、档位）时排序反而破坏信息，所以不是默认。
+  final String rank;
   final double height;
   final bool fromZero;
   final String title;
@@ -109,6 +120,8 @@ class IChart extends StatelessWidget {
               fromZero: fromZero,
               curve: curve,
               target: target,
+              orientation: orientation,
+              rank: rank,
               colors: c,
             ),
           ),
@@ -158,6 +171,8 @@ class _ChartPainter extends CustomPainter {
     required this.stacked,
     required this.curve,
     required this.target,
+    required this.orientation,
+    required this.rank,
     required this.fromZero,
     required this.colors,
   });
@@ -168,6 +183,8 @@ class _ChartPainter extends CustomPainter {
   final bool stacked;
   final String curve;
   final double? target;
+  final IAxisOrientation orientation;
+  final String rank;
   final bool fromZero;
   final IColors colors;
 
@@ -194,8 +211,17 @@ class _ChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (series.isEmpty || labels.isEmpty) return;
 
-    final plotW = size.width - padLeft - padRight;
+    final horizontal = type == IChartType.bar && orientation == IAxisOrientation.horizontal;
+    // 横条的类目名写在左边，44px 只够放数字刻度
+    final left = horizontal ? 96.0 : padLeft;
+    final plotW = size.width - left - padRight;
     final plotH = size.height - padTop - padBottom;
+
+    if (horizontal) {
+      _paintHorizontal(canvas, size, left, plotW, plotH);
+      return;
+    }
+
     final isBar = type == IChartType.bar;
     final stackedArea = type == IChartType.area && series.length > 1;
 
@@ -352,6 +378,94 @@ class _ChartPainter extends CustomPainter {
     }
   }
 
+  /*
+   * 横条：轴系走 logic/axis.dart，与 Web 端同一份实现——
+   * 横纵共用同一套刻度，同一份数据横过来刻度密度不会变。
+   */
+  void _paintHorizontal(Canvas canvas, Size size, double left, double plotW, double plotH) {
+    final domain = domainOf(
+      series.map((s) => s.data).toList(),
+      fromZero: true,
+      stacked: stacked,
+    );
+    final axis = valueAxis(domain.min, domain.max, plotW,
+        orientation: IAxisOrientation.horizontal, format: formatTick);
+    final bands = categoryBands(labels.length, plotH);
+    final totals = [
+      for (var i = 0; i < labels.length; i += 1)
+        series.fold<double>(0, (sum, s) => sum + (i < s.data.length ? s.data[i] : 0))
+    ];
+    final order = rankOrder(totals, rank);
+    final thickness = stacked
+        ? (bands.isEmpty ? 0.0 : bands.first.size) * 0.5
+        : ((bands.isEmpty ? 0.0 : bands.first.size) * 0.62) / series.length;
+
+    double hx(double value) =>
+        left + ((value - axis.min) / ((axis.max - axis.min) == 0 ? 1 : axis.max - axis.min)) * plotW;
+
+    final grid = Paint()
+      ..color = colors.hairline
+      ..strokeWidth = 1;
+    for (final tick in axis.ticks) {
+      canvas.drawLine(
+        Offset(left + tick.offset, padTop),
+        Offset(left + tick.offset, padTop + plotH),
+        grid,
+      );
+      _text(canvas, tick.label, Offset(left + tick.offset, size.height - padBottom + 6),
+          colors.textTertiary, align: TextAlign.center);
+    }
+    canvas.drawLine(
+      Offset(left + axis.baseline, padTop),
+      Offset(left + axis.baseline, padTop + plotH),
+      Paint()
+        ..color = colors.border
+        ..strokeWidth = 1,
+    );
+
+    // 类目名正着写在左边，长名字也读得下去——这正是横条存在的理由
+    for (var row = 0; row < order.length; row += 1) {
+      _text(canvas, labels[order[row]], Offset(left - 8, padTop + bands[row].center - 7),
+          colors.textTertiary, align: TextAlign.right);
+    }
+
+    double below(int i, int si) => series
+        .take(si)
+        .fold<double>(0, (sum, s) => sum + (i < s.data.length ? s.data[i] : 0));
+
+    for (var si = 0; si < series.length; si += 1) {
+      final paint = Paint()..color = iChartPalette[si % iChartPalette.length];
+      for (var row = 0; row < order.length; row += 1) {
+        final dataIndex = order[row];
+        final band = bands[row];
+        final value = dataIndex < series[si].data.length ? series[si].data[dataIndex] : 0.0;
+        final base = stacked ? below(dataIndex, si) : 0.0;
+        final offsetInBand = stacked
+            ? (band.size - thickness) / 2
+            : (band.size - thickness * series.length) / 2 + si * thickness;
+        final rect = barRect(
+          band: band,
+          thickness: thickness,
+          offsetInBand: offsetInBand,
+          from: hx(base),
+          to: hx(base + value),
+          orientation: IAxisOrientation.horizontal,
+        );
+        // 只有最外面一段收圆角：中间段也圆会看起来像一颗颗独立的胶囊
+        final isOuter = !stacked || si == series.length - 1;
+        canvas.drawRRect(
+          RRect.fromRectAndCorners(
+            Rect.fromLTWH(rect.x, rect.y + padTop, rect.width < 1 ? 1 : rect.width,
+                rect.height < 1 ? 1 : rect.height),
+            topRight: Radius.circular(isOuter ? 3 : 0),
+            bottomRight: Radius.circular(isOuter ? 3 : 0),
+          ),
+          paint,
+        );
+      }
+    }
+  }
+
   @override
   bool shouldRepaint(_ChartPainter old) =>
       old.series != series ||
@@ -359,5 +473,7 @@ class _ChartPainter extends CustomPainter {
       old.stacked != stacked ||
       old.curve != curve ||
       old.target != target ||
+      old.orientation != orientation ||
+      old.rank != rank ||
       old.colors != colors;
 }

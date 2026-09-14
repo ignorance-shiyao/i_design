@@ -13,6 +13,7 @@ export 'src/icons/icons.dart';
 export 'src/logic/affix.dart';
 export 'src/logic/agent.dart';
 export 'src/logic/anchor.dart';
+export 'src/logic/axis.dart';
 export 'src/logic/calendar.dart';
 export 'src/logic/carousel.dart';
 export 'src/logic/chart.dart';

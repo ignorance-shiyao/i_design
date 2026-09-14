@@ -709,7 +709,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/chart",
       "page": "src/pages/components/ChartPage.vue",
-      "demos": 21
+      "demos": 22
     },
     "demoRoutes": [
       "/components/chart"
@@ -723,6 +723,15 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "curve": [
         "linear",
         "step"
+      ],
+      "orientation": [
+        "vertical",
+        "horizontal"
+      ],
+      "rank": [
+        "desc",
+        "asc",
+        "none"
       ]
     }
   },
