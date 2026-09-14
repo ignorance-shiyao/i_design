@@ -1,0 +1,10 @@
+{
+  "component": true,
+  "styleIsolation": "apply-shared",
+  "usingComponents": {
+    "i-button": "../button/index",
+    "i-empty": "../empty/index",
+    "i-icon": "../icon/index",
+    "i-skeleton": "../skeleton/index"
+  }
+}

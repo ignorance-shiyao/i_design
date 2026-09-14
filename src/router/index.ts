@@ -38,6 +38,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'collapse', component: () => import('@/pages/components/CollapsePage.vue') },
       { path: 'descriptions', component: () => import('@/pages/components/DescriptionsPage.vue') },
       { path: 'skeleton', component: () => import('@/pages/components/SkeletonPage.vue') },
+      { path: 'page-state', component: () => import('@/pages/components/PageStatePage.vue') },
       { path: 'result', component: () => import('@/pages/components/ResultPage.vue') },
       { path: 'popconfirm', component: () => import('@/pages/components/PopconfirmPage.vue') },
       { path: 'overlay', component: () => import('@/pages/components/OverlayPage.vue') },

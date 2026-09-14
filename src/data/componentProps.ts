@@ -571,6 +571,17 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"backText","type":"string","doc":"返回键文案；传空字符串则只显示箭头","optional":true,"defaultText":"'返回'","control":{"kind":"string"}},
     {"name":"back","type":"boolean","doc":"不需要返回时整块去掉，而不是留一个点不动的箭头","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
   ],
+  IPageState: [
+    {"name":"loading","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"online","type":"boolean","doc":"","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
+    {"name":"error","type":"{ code?: number | string; message?: string } | null","doc":"请求错误；403 会被识别成「无权限」而不是普通失败","optional":true,"defaultText":"null","control":null},
+    {"name":"loaded","type":"number","doc":"已经拿到的数据条数。部分成功要靠它与 failed 一起判定","optional":true,"defaultText":"0","control":{"kind":"number"}},
+    {"name":"failed","type":"number","doc":"","optional":true,"defaultText":"0","control":{"kind":"number"}},
+    {"name":"fetchedAt","type":"number","doc":"","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"staleAfter","type":"number","doc":"","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"emptyType","type":"'empty' | 'search' | 'error' | 'permission'","doc":"空态的成因，决定用哪张插画与默认文案","optional":true,"defaultText":"'empty'","control":{"kind":"enum","options":["empty","search","error","permission"]}},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+  ],
   IPagination: [
     {"name":"modelValue","type":"number","doc":"当前页码，从 1 开始","optional":true,"defaultText":"1","control":{"kind":"number"}},
     {"name":"total","type":"number","doc":"","optional":false,"defaultText":null,"control":{"kind":"number"}},

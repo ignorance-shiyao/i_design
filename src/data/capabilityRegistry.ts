@@ -473,6 +473,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/badge",
       "/components/descriptions",
       "/components/skeleton",
+      "/components/page-state",
       "/components/result",
       "/components/popconfirm",
       "/components/overlay",
@@ -2863,6 +2864,47 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IPageState",
+    "sources": {
+      "vue-next": "src/components/IPageState.vue",
+      "vue": "packages/vue/src/components/IPageState.vue",
+      "react": "packages/react/src/components/PageState.tsx",
+      "miniprogram": "packages/miniprogram/src/components/page-state",
+      "flutter": "packages/flutter/lib/src/components/i_page_state.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": {
+      "route": "/components/page-state",
+      "page": "src/pages/components/PageStatePage.vue",
+      "demos": 2
+    },
+    "demoRoutes": [
+      "/components/page-state"
+    ],
+    "states": {
+      "emptyType": [
+        "empty",
+        "search",
+        "error",
+        "permission"
+      ]
+    }
+  },
+  {
     "name": "IPagination",
     "sources": {
       "vue-next": "src/components/IPagination.vue",
@@ -3424,6 +3466,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": null,
     "demoRoutes": [
       "/components/icon",
+      "/components/page-state",
       "/components/config-provider",
       "/components/qrcode",
       "/components/chat",
@@ -3963,6 +4006,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     },
     "demoRoutes": [
       "/components/collapse",
+      "/components/page-state",
       "/components/table",
       "/components/pagination"
     ],

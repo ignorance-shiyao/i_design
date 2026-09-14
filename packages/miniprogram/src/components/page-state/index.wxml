@@ -1,0 +1,17 @@
+<view class="i-page-state">
+  <!-- 骨架屏只在一条数据都没有时占位；已有数据时刷新不该先变成一片白 -->
+  <i-skeleton wx:if="{{kind === 'loading' && !keepsContent}}" rows="{{4}}" />
+
+  <i-empty wx:elif="{{kind === 'empty'}}" type="{{emptyType}}" title="{{title}}" />
+
+  <view wx:elif="{{kind !== 'ready'}}" class="i-page-state__note is-{{tone}}">
+    <view class="i-page-state__icon"><i-icon name="{{icon}}" size="{{18}}" /></view>
+    <view class="i-page-state__body">
+      <view class="i-page-state__title">{{title || label}}</view>
+      <view class="i-page-state__reason">{{reason}}</view>
+    </view>
+    <i-button wx:if="{{action}}" variant="secondary" size="sm" bindtap="onAction">{{actionLabel}}</i-button>
+  </view>
+
+  <view wx:if="{{keepsContent}}" class="i-page-state__content"><slot></slot></view>
+</view>

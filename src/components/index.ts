@@ -117,6 +117,7 @@ import IDivider from './IDivider.vue'
 import ITabs from './ITabs.vue'
 import IBreadcrumb from './IBreadcrumb.vue'
 import ISteps from './ISteps.vue'
+import IPageState from './IPageState.vue'
 import IPagination from './IPagination.vue'
 import IPageHeader from './IPageHeader.vue'
 import ICard from './ICard.vue'
@@ -211,6 +212,7 @@ export {
   ITabs,
   IBreadcrumb,
   ISteps,
+  IPageState,
   IPagination,
   IPageHeader,
   ICard,
@@ -323,6 +325,7 @@ const components = {
   ITabs,
   IBreadcrumb,
   ISteps,
+  IPageState,
   IPagination,
   IPageHeader,
   ICard,

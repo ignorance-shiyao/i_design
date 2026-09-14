@@ -103,6 +103,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/INotificationLayer.vue",
   "src/components/INumberKeypad.vue",
   "src/components/IPageHeader.vue",
+  "src/components/IPageState.vue",
   "src/components/IPagination.vue",
   "src/components/IPopconfirm.vue",
   "src/components/IPopover.vue",

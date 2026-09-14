@@ -86,6 +86,7 @@
 @import './components/notification.css';
 @import './components/overlay.css';
 @import './components/page-header.css';
+@import './components/page-state.css';
 @import './components/pagination.css';
 @import './components/picker.css';
 @import './components/popconfirm.css';

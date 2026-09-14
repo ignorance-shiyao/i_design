@@ -17,6 +17,8 @@
  *               反过来不要求 React 必须有同名属性
  *   大小写      `readonly` / `readOnly`、`maxlength` / `maxLength`——
  *               各自跟随本端的命名惯例，比对时一律转小写
+ *   短横        Vue 插槽 `empty-action` 对 React 属性 `emptyAction`，
+ *               比对时去掉短横
  *   DOM 透传    React 组件 `extends InputHTMLAttributes` 时，
  *               `placeholder` / `disabled` / `type` 这些是继承来的，不必重复声明
  *   事件        React 的 `onXxx` 对应 Vue 的 emits，由 emits 单独比
@@ -71,7 +73,11 @@ function readReact(file, name) {
   return { props, inheritsDom: /HTMLAttributes/.test(m[1]) }
 }
 
-const lower = (s) => s.toLowerCase()
+/*
+ * 比对前统一成小写并去掉短横：Vue 的插槽名按惯例是 kebab（empty-action），
+ * React 的属性按惯例是 camel（emptyAction），这是语言差异不是能力差异。
+ */
+const lower = (s) => s.toLowerCase().replace(/-/g, '')
 // `renderFooter` 与 `footer` 指的是同一件事，比对前去掉前缀。
 // 不加大小写限定：调用方可能已经把名字转成小写了
 const unrender = (s) => (/^render./.test(s) ? s.slice(6) : s)
