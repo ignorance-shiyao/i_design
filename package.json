@@ -32,6 +32,7 @@
     "build:registry": "node scripts/build-capability-registry.mjs",
     "build:licenses": "node scripts/build-licenses.mjs",
     "check:licenses": "node --test scripts/check-licenses.test.mjs && node scripts/check-licenses.mjs",
+    "check:ssr": "npm run build:packages && node scripts/check-ssr.mjs",
     "check:install": "npm run build:packages && node scripts/check-install.mjs",
     "check:contracts": "node --test scripts/check-contracts.test.mjs && node scripts/check-contracts.mjs",
     "check:style-rules": "node --test scripts/check-style-rules.test.mjs && node scripts/check-style-rules.mjs",

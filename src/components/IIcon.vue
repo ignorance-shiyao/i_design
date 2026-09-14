@@ -18,13 +18,18 @@ const props = withDefaults(
 
 const path = computed(() => icons[props.name])
 const dimension = computed(() => (typeof props.size === 'number' ? `${props.size}px` : props.size))
+/*
+ * 默认尺寸由 .i-icon 的类给出，这里就不写内联样式了——
+ * 不带 unsafe-inline 的 CSP 会拒绝整个 style 属性，那样图标会全部塌成 0。
+ */
+const sizing = computed(() => (dimension.value === '1em' ? undefined : { width: dimension.value, height: dimension.value }))
 </script>
 
 <template>
   <svg
     class="i-icon"
     :class="{ 'is-spin': spin }"
-    :style="{ width: dimension, height: dimension }"
+    :style="sizing"
     viewBox="0 0 24 24"
     fill="none"
     :stroke-width="strokeWidth"

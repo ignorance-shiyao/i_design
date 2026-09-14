@@ -8,13 +8,15 @@ const props = withDefaults(
 )
 
 const dimension = computed(() => (typeof props.size === 'number' ? `${props.size}px` : props.size))
+/* 默认尺寸由 .i-icon 的类给出；内联 style 在严格 CSP 下会被整条拒绝 */
+const sizing = computed(() => (dimension.value === '1em' ? undefined : { width: dimension.value, height: dimension.value }))
 </script>
 
 <template>
   <svg
     class="i-icon"
     :class="{ 'is-spin': spin }"
-    :style="{ width: dimension, height: dimension }"
+    :style="sizing"
     viewBox="0 0 24 24"
     fill="none"
     :stroke-width="strokeWidth"
