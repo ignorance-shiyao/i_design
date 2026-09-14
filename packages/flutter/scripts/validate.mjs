@@ -59,7 +59,53 @@ for (const file of dartFiles) {
     if (diff !== 0) problems.push(`${rel}: ${label}不配对（差 ${diff}）`)
   }
 
-  /* ---------- 4. library 指令必须在 import 之前 ---------- */
+  /* ---------- 4. 字段与构造参数必须一一对应 ----------
+   * dart analyze 不在这条流水线上，字段写重了或者构造里 this.x 没有对应字段，
+   * 都要等到真机编译才报错——而这个仓库的 Flutter 端从来不在 CI 里编译。
+   * 这两种错都只看单个类的文本就能判定，所以在这里判。 */
+  // 类体按花括号配平切出来：顺着文件切到末尾的话，类后面顶层函数里的
+  // 局部变量会被当成字段。
+  const classes = []
+  for (const m of code.matchAll(/\bclass\s+(\w+)/g)) {
+    const open = code.indexOf('{', m.index)
+    if (open < 0) continue
+    let depth = 0
+    let i = open
+    for (; i < code.length; i += 1) {
+      if (code[i] === '{') depth += 1
+      else if (code[i] === '}') {
+        depth -= 1
+        if (depth === 0) break
+      }
+    }
+    classes.push([m[1], code.slice(open, i)])
+  }
+  for (const [className, segment] of classes) {
+    // 只认缩进两格的类成员：再深的 final 是方法体里的局部变量。
+    // 声明里可能带函数类型（void Function(String)? onTap），所以按「分号前最后一个
+    // 标识符」取名，不去解析类型。
+    const fields = []
+    for (const [, decl] of segment.matchAll(/^ {2}(?:static )?(?:final|late final|const|var)\b([^;]*);/gm)) {
+      // const 构造函数（const IPageItem.gap(this.gap) : page = null;）也以 const 开头，
+      // 初始化列表里的 page = null 会被误当成字段名，先排掉。
+      if (/^\s*_?[A-Z]\w*(?:\.\w+)?\s*\(/.test(decl)) continue
+      const name = (decl.split('=')[0].match(/(\w+)\s*$/) || [])[1]
+      if (name) fields.push(name)
+    }
+    const seen = new Set()
+    for (const name of fields) {
+      if (seen.has(name)) problems.push(`${rel}: ${className} 重复声明字段 ${name}`)
+      seen.add(name)
+    }
+    const ctor = segment.match(/(?:const\s+)?_?\w+\(\{[\s\S]*?\}\)\s*(?::[\s\S]*?)?;/)
+    if (ctor) {
+      for (const [, name] of ctor[0].matchAll(/\bthis\.(\w+)\b/g)) {
+        if (!seen.has(name)) problems.push(`${rel}: ${className} 构造参数 this.${name} 没有对应字段`)
+      }
+    }
+  }
+
+  /* ---------- 5. library 指令必须在 import 之前 ---------- */
   const firstImport = code.indexOf('import ')
   const libraryAt = code.indexOf('library')
   if (libraryAt > -1 && firstImport > -1 && libraryAt > firstImport) {
@@ -67,7 +113,7 @@ for (const file of dartFiles) {
   }
 }
 
-/* ---------- 5. 导出清单不能漏 ---------- */
+/* ---------- 6. 导出清单不能漏 ---------- */
 const barrel = readFileSync(join(lib, 'i_design.dart'), 'utf8')
 for (const file of dartFiles) {
   const rel = relative(lib, file).split('\\').join('/')

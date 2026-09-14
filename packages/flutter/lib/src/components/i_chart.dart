@@ -56,8 +56,6 @@ class IChart extends StatelessWidget {
 
   /// 柱状与面积：堆叠而不是并排／覆盖
   final bool stacked;
-  final String curve;
-  final double? target;
 
   /// 百分比堆叠：整列为 0 或含负值的列不换算（见 logic/chart.dart 的 iPercentStack）
   final bool percent;
@@ -168,6 +166,8 @@ class _ChartPainter extends CustomPainter {
   final List<String> labels;
   final IChartType type;
   final bool stacked;
+  final String curve;
+  final double? target;
   final bool fromZero;
   final IColors colors;
 
