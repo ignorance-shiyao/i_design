@@ -16,6 +16,13 @@ import {
 } from '@i-design/common'
 
 export interface ChartProps {
+  /**
+   * 是否自带「数据表 / 导出」出口。
+   *
+   * 外面套了 ChartFrame 时要关掉：那一层的出口是按数据集出的，
+   * 对所有图型都有；两个出口并排摆着，读者只会疑惑该点哪一个。
+   */
+  exits?: boolean
   /** 每个系列一条线／一组柱；系列顺序即取色顺序 */
   series: ChartSeries[]
   labels: string[]
@@ -42,6 +49,7 @@ export function Chart({
   series,
   labels,
   type = 'line',
+  exits = true,
   stacked = false,
   height = 240,
   fromZero = true,
@@ -376,6 +384,7 @@ export function Chart({
         </div>
       )}
 
+      {exits ? (
       <div className="i-chart__actions">
         <button className="i-chart__table-toggle" onClick={() => setShowTable(!showTable)}>
           {showTable ? locale.chartTableHide : locale.chartTableShow}
@@ -384,7 +393,8 @@ export function Chart({
           导出 CSV
         </button>
       </div>
-      {showTable && (
+      ) : null}
+      {exits && showTable && (
         <table className="i-chart__table">
           <thead>
             <tr>

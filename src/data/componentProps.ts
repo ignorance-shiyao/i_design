@@ -131,6 +131,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   IChart: [
     {"name":"series","type":"ChartSeries[]","doc":"每个系列一条线／一组柱；系列顺序即取色顺序","optional":false,"defaultText":null,"control":null},
     {"name":"labels","type":"string[]","doc":"x 轴标签，与 data 一一对应","optional":false,"defaultText":null,"control":null},
+    {"name":"exits","type":"boolean","doc":"是否自带「数据表 / 导出」出口。 外面套了 IChartFrame 时要关掉：那一层的出口是按数据集出的， 对所有图型都有；两个出口并排摆着，读者只会疑惑该点哪一个。","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
     {"name":"type","type":"'line' | 'area' | 'bar'","doc":"","optional":true,"defaultText":"'line'","control":{"kind":"enum","options":["line","area","bar"]}},
     {"name":"stacked","type":"boolean","doc":"柱状图专用：堆叠而不是并排","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
     {"name":"height","type":"number","doc":"","optional":true,"defaultText":"240","control":{"kind":"number"}},
@@ -145,6 +146,16 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"height","type":"number","doc":"","optional":true,"defaultText":"260","control":{"kind":"number"}},
     {"name":"unit","type":"string","doc":"纵轴单位，跟在刻度后面","optional":true,"defaultText":"''","control":{"kind":"string"}},
+  ],
+  IChartFrame: [
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"subtitle","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"note","type":"string","doc":"统计口径。同一张图换个口径就是另一回事，而读者无从分辨，除非写出来","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"dataset","type":"ChartDataset | null","doc":"","optional":true,"defaultText":"null","control":null},
+    {"name":"spec","type":"ChartSpec | null","doc":"","optional":true,"defaultText":"null","control":null},
+    {"name":"loading","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"error","type":"{ code?: number | string; message?: string } | null","doc":"","optional":true,"defaultText":"null","control":null},
+    {"name":"fileName","type":"string","doc":"下载的文件名，不含扩展名","optional":true,"defaultText":"'chart'","control":{"kind":"string"}},
   ],
   IChartFunnel: [
     {"name":"stages","type":"FunnelStage[]","doc":"","optional":false,"defaultText":null,"control":null},

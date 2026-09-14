@@ -708,7 +708,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/chart",
       "page": "src/pages/components/ChartPage.vue",
-      "demos": 17
+      "demos": 18
     },
     "demoRoutes": [
       "/components/chart"
@@ -729,6 +729,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "react": "packages/react/src/components/ChartBox.tsx",
       "miniprogram": "packages/miniprogram/src/components/chart-box",
       "flutter": "packages/flutter/lib/src/components/i_chart_stats.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/chart"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IChartFrame",
+    "sources": {
+      "vue-next": "src/components/IChartFrame.vue",
+      "vue": "packages/vue/src/components/IChartFrame.vue",
+      "react": "packages/react/src/components/ChartFrame.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-frame",
+      "flutter": "packages/flutter/lib/src/components/i_chart_frame.dart"
     },
     "ends": {
       "vue-next": true,

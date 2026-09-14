@@ -25,6 +25,13 @@ const props = withDefaults(
     series: ChartSeries[]
     /** x 轴标签，与 data 一一对应 */
     labels: string[]
+    /**
+     * 是否自带「数据表 / 导出」出口。
+     *
+     * 外面套了 IChartFrame 时要关掉：那一层的出口是按数据集出的，
+     * 对所有图型都有；两个出口并排摆着，读者只会疑惑该点哪一个。
+     */
+    exits?: boolean
     type?: 'line' | 'area' | 'bar'
     /** 柱状图专用：堆叠而不是并排 */
     stacked?: boolean
@@ -46,6 +53,7 @@ const props = withDefaults(
   }>(),
   {
     type: 'line',
+    exits: true,
     stacked: false,
     height: 240,
     fromZero: true,
@@ -427,13 +435,13 @@ function exportCsv() {
       </button>
     </div>
 
-    <div class="i-chart__actions">
+    <div v-if="exits" class="i-chart__actions">
       <button class="i-chart__table-toggle" @click="showTable = !showTable">
         {{ showTable ? locale.chartTableHide : locale.chartTableShow }}
       </button>
       <button class="i-chart__table-toggle" @click="exportCsv">导出 CSV</button>
     </div>
-    <table v-if="showTable" class="i-chart__table">
+    <table v-if="exits && showTable" class="i-chart__table">
       <thead>
         <tr>
           <th>{{ title || locale.chartCategory }}</th>

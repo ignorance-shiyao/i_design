@@ -1,0 +1,32 @@
+<view class="i-chart-frame">
+  <view class="i-chart-frame__head">
+    <view class="i-chart-frame__titles">
+      <view wx:if="{{title}}" class="i-chart-frame__title">{{title}}</view>
+      <view wx:if="{{subtitle}}" class="i-chart-frame__subtitle">{{subtitle}}</view>
+    </view>
+    <view class="i-chart-frame__actions">
+      <i-button variant="text" size="sm" bindtap="toggle">{{showTable ? '看图' : '看数据'}}</i-button>
+      <i-button variant="text" size="sm" bindtap="copyCsv">复制 CSV</i-button>
+    </view>
+  </view>
+
+  <!-- 图由调用方给：这个组件不认识任何一种图 -->
+  <view wx:if="{{!showTable}}" class="i-chart-frame__canvas" aria-label="{{summary}}"><slot></slot></view>
+
+  <!-- 表格出口：与图同源，缺失值显示「—」而不是 0 -->
+  <scroll-view wx:else class="i-chart-frame__table-wrap" scroll-x>
+    <view class="i-chart-frame__table">
+      <view class="i-chart-frame__tr">
+        <view wx:for="{{header}}" wx:for-item="head" wx:key="index" class="i-chart-frame__th">{{head}}</view>
+      </view>
+      <view wx:for="{{rows}}" wx:for-item="row" wx:key="index" class="i-chart-frame__tr">
+        <view wx:for="{{row}}" wx:for-item="cell" wx:key="index" class="i-chart-frame__td">{{cell}}</view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{note}}" class="i-chart-frame__note">口径：{{note}}</view>
+  <view wx:if="{{issues.length}}" class="i-chart-frame__issues">
+    <view wx:for="{{issues}}" wx:for-item="issue" wx:key="index">{{issue}}</view>
+  </view>
+</view>

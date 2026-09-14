@@ -20,8 +20,32 @@ import IChartSankey from '@/components/IChartSankey.vue'
 import IChartTreemap from '@/components/IChartTreemap.vue'
 import IChartGantt from '@/components/IChartGantt.vue'
 import IChartWordCloud from '@/components/IChartWordCloud.vue'
+import IChartFrame from '@/components/IChartFrame.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
-import { sliceByWindow } from '@i-design/common'
+import { sliceByWindow, toLegacySeries, type ChartDataset, type ChartSpec } from '@i-design/common'
+
+/*
+ * 带缺口与负值的一份数据：用它才说得清「缺失值不补零」——
+ * 17 日那天华东没上报，18 日是一笔退款。
+ */
+const frameDataset: ChartDataset = {
+  fields: [
+    { key: 'date', label: '日期', kind: 'time', tzOffsetMinutes: 480 },
+    { key: 'amount', label: '销售额', kind: 'measure', unit: '元' },
+    { key: 'region', label: '区域', kind: 'dimension' }
+  ],
+  rows: [
+    { date: Date.UTC(2026, 2, 16), amount: 1200, region: '华东' },
+    { date: Date.UTC(2026, 2, 16), amount: 860, region: '华南' },
+    { date: Date.UTC(2026, 2, 17), amount: null, region: '华东' },
+    { date: Date.UTC(2026, 2, 17), amount: 910, region: '华南' },
+    { date: Date.UTC(2026, 2, 18), amount: -240, region: '华东' },
+    { date: Date.UTC(2026, 2, 18), amount: 780, region: null }
+  ],
+  note: '含税，按下单日期统计'
+}
+const frameSpec: ChartSpec = { type: 'line', x: 'date', y: ['amount'], groupBy: 'region', bucket: 'day' }
+const frameLegacy = computed(() => toLegacySeries(frameDataset, frameSpec))
 
 const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月']
 
@@ -191,6 +215,29 @@ const waterfallItems = [
     <p class="i-lead">
       仪表盘里的图表不是装饰，它替读者回答一个具体问题。这套图表把颜色、刻度与交互都固定下来：分类色按固定顺序分配、坐标轴刻度吸附到人能心算的数、每张图都带图例与数据表——于是「这条线是谁」永远不需要靠猜。
     </p>
+
+    <h2>图的外框与出口</h2>
+    <DemoBlock
+      title="标题、口径、数据表与下载"
+      description="每张图都要有一条不看图也能拿到数的路：读屏读不了 SVG，色觉障碍分不清相邻两个系列，而任何人想把数抄进邮件时都需要表格。表格与图同源——都从同一份数据集折出来，各算一遍的实现迟早会在某次改口径时只改一边。缺失值在表里显示「—」而不是 0；数据本身的问题（缺失、负值、缺维度）由图注说出来，不该由读者自己看出来。"
+      lang="vue"
+      code='<IChartFrame title="销售额" :dataset="dataset" :spec="spec" note="含税，按下单日期统计">
+  <IChart :labels="labels" :series="series" />
+</IChartFrame>'
+    >
+      <IChartFrame
+        class="frame-demo"
+        title="销售额"
+        subtitle="按区域拆分"
+        :dataset="frameDataset"
+        :spec="frameSpec"
+        :note="frameDataset.note"
+        file-name="sales"
+      >
+        <!-- 图自带的出口关掉：外框那一层的出口对所有图型都有，两个并排只会让人疑惑 -->
+        <IChart :labels="frameLegacy.labels" :series="frameLegacy.series" :height="200" :exits="false" />
+      </IChartFrame>
+    </DemoBlock>
 
     <h2>趋势</h2>
     <p>
@@ -441,6 +488,7 @@ const waterfallItems = [
 </template>
 
 <style scoped>
+.frame-demo { width: 100%; min-width: 0; }
 .chart-demo { display: flex; flex-direction: column; gap: var(--i-spacing-6); width: 100%; }
 .chart-demo--row { flex-direction: row; flex-wrap: wrap; gap: var(--i-spacing-8); }
 .spark { margin-top: var(--i-spacing-3); }

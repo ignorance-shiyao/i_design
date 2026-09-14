@@ -28,6 +28,7 @@ export { Carousel, type CarouselItem, type CarouselProps } from './components/Ca
 export { Cascader, type CascaderProps } from './components/Cascader'
 export { Chart, type ChartProps } from './components/Chart'
 export { ChartBox, type BoxGroup, type ChartBoxProps } from './components/ChartBox'
+export { ChartFrame, type ChartFrameProps } from './components/ChartFrame'
 export { ChartFunnel, type FunnelStage, type ChartFunnelProps } from './components/ChartFunnel'
 export { ChartGantt, type ChartGanttProps } from './components/ChartGantt'
 export { ChartGauge, type ChartGaugeProps } from './components/ChartGauge'

@@ -256,3 +256,68 @@ export function toLegacySeries(dataset: ChartDataset, spec: ChartSpec): {
     gaps: series.map((s) => s.points.map((p, i) => (p.y === null ? i : -1)).filter((i) => i >= 0))
   }
 }
+
+
+/* ───────────────────────── 文本与表格出口 ───────────────────────── */
+
+/**
+ * 图的表格出口。
+ *
+ * 每张图都要有一条不看图也能拿到数的路：读屏用户读不了 SVG，
+ * 色觉障碍用户分不清相邻两个系列，而任何人想把数抄进邮件时都需要它。
+ *
+ * 表格与图必须同源——都从 toSeries 出来。各算一遍的那种实现，
+ * 迟早会在某次改聚合口径时只改一边，而对不上的两个数字比没有表格更糟。
+ */
+export function toTable(dataset: ChartDataset, spec: ChartSpec): {
+  header: string[]
+  rows: (string | number | null)[][]
+} {
+  const series = toSeries(dataset, spec)
+  const xField = fieldOf(dataset, spec.x)
+  const tzOffset = xField?.tzOffsetMinutes ?? 0
+  const axis = (series[0]?.points ?? []).map((p) =>
+    xField?.kind === 'time'
+      ? new Date(Number(p.x) + tzOffset * 60_000).toISOString().slice(0, 10)
+      : String(p.x)
+  )
+  return {
+    header: [xField?.label ?? spec.x, ...series.map((s) => s.name)],
+    // null 留在这里，由渲染层显示成「—」：写成 0 就等于在表格里也撒谎
+    rows: axis.map((label, index) => [label, ...series.map((s) => s.points[index]?.y ?? null)])
+  }
+}
+
+/** 转成 CSV。缺失值留空单元格，不是 0 */
+export function toCsv(table: { header: string[]; rows: (string | number | null)[][] }): string {
+  const cell = (value: string | number | null) => {
+    if (value === null) return ''
+    const text = String(value)
+    return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
+  }
+  return [table.header, ...table.rows].map((row) => row.map(cell).join(',')).join('\n')
+}
+
+/**
+ * 一句话说清这张图在说什么，给读屏与摘要用。
+ *
+ * 「一张折线图」对读屏用户毫无信息量。至少要有：几个系列、覆盖哪段、
+ * 最高最低在哪儿。这段文字也是 alt 文本的来源。
+ */
+export function chartSummary(dataset: ChartDataset, spec: ChartSpec): string {
+  const series = toSeries(dataset, spec)
+  if (!series.length) return '没有数据'
+  const table = toTable(dataset, spec)
+  const first = table.rows[0]?.[0]
+  const last = table.rows[table.rows.length - 1]?.[0]
+  const parts = series.map((s) => {
+    const numbers = s.points.filter((p) => p.y !== null) as { x: string | number; y: number }[]
+    if (!numbers.length) return `${s.name}：没有数据`
+    const top = numbers.reduce((a, b) => (b.y > a.y ? b : a))
+    const low = numbers.reduce((a, b) => (b.y < a.y ? b : a))
+    const unit = s.unit ?? ''
+    return `${s.name}：最高 ${top.y}${unit}，最低 ${low.y}${unit}`
+  })
+  const range = first && last && first !== last ? `${first} 到 ${last}` : String(first ?? '')
+  return `${range}，共 ${series.length} 个系列。${parts.join('；')}。`
+}
