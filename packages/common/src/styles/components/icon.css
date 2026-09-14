@@ -3,6 +3,13 @@
   flex: none;
   display: inline-block;
   vertical-align: -0.125em;
+  /*
+   * 默认尺寸放在类里而不是内联样式上：图标是全库出现次数最多的元素，
+   * 而内联 style 属性在不带 unsafe-inline 的 CSP 下会被整条拒绝。
+   * 只有传了具体尺寸时才回落到内联样式。
+   */
+  width: 1em;
+  height: 1em;
 }
 .i-icon.is-spin { animation: i-icon-spin 900ms linear infinite; }
 @keyframes i-icon-spin { to { transform: rotate(360deg); } }

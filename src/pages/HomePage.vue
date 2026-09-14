@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import IIcon from "@/components/IIcon.vue";
-import { heroIllustrations } from "@i-design/common";
+import { heroIllustrations } from "@i-design/common/illustrations";
 import { useTheme } from "@/composables/useTheme";
 import ShowcaseDesk from "@/site/ShowcaseDesk.vue";
 const { theme } = useTheme();

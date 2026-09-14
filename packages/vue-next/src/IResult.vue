@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import IIcon from './IIcon.vue'
 import type { IconName } from './icons'
-import { errorIllustrations } from '@i-design/common'
+import { errorIllustrations } from '@i-design/common/illustrations'
 
 const props = withDefaults(
   defineProps<{

@@ -20,10 +20,15 @@ export function Icon({
   className = ''
 }: IconProps) {
   const dimension = typeof size === 'number' ? `${size}px` : size
+  /*
+   * 默认尺寸由 .i-icon 的类给出，这里就不写内联样式了——
+   * 不带 unsafe-inline 的 CSP 会拒绝整个 style 属性，那样图标会全部塌成 0。
+   */
+  const sizing = dimension === '1em' ? undefined : { width: dimension, height: dimension }
   return (
     <svg
       className={['i-icon', spin ? 'is-spin' : '', className].filter(Boolean).join(' ')}
-      style={{ width: dimension, height: dimension }}
+      style={sizing}
       viewBox="0 0 24 24"
       fill="none"
       strokeWidth={strokeWidth}

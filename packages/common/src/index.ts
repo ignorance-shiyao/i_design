@@ -60,4 +60,11 @@ export * from './logic/theme'
 export * from './logic/anchor'
 export * from './logic/menu'
 export * from './logic/agent'
-export * from './illustrations'
+export * from './contracts/run'
+export * from './logic/run'
+/*
+ * 插画不走主入口，用的人从 @i-design/common/illustrations 引。
+ *
+ * 它们是绘画稿，十八张加起来一兆多，而 Vite 的 library 模式会把资源内联进 JS，
+ * 内联之后摇树也摇不掉——放在主入口里，只引一个按钮的使用方也要把整套图背走。
+ */

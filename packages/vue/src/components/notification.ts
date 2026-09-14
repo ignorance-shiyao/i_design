@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { ref } from 'vue'
 
 /**
  * 通知的命令式 API：notification.success('标题', '说明')。
@@ -23,12 +23,17 @@ export interface NotificationItem {
   actions?: NotificationAction[]
 }
 
-export const notifications = reactive<NotificationItem[]>([])
+/*
+ * 用 ref 而不是 reactive：Vue 2.7 不能把数组本身作为 reactive 的根，
+ * 那样它在 watch / watchEffect 里跟踪不到——同一份代码在 Vue 3 端正常、
+ * 在 Vue 2 端通知列表不刷新，而且只会刷一条控制台告警，构建照样绿。
+ */
+export const notifications = ref<NotificationItem[]>([])
 let seed = 0
 
 export function closeNotification(id: number) {
-  const index = notifications.findIndex((n) => n.id === id)
-  if (index !== -1) notifications.splice(index, 1)
+  const index = notifications.value.findIndex((n) => n.id === id)
+  if (index !== -1) notifications.value.splice(index, 1)
 }
 
 export interface NotifyOptions {
@@ -41,7 +46,7 @@ function push(type: NotificationType, title: string, options: NotifyOptions = {}
   const id = ++seed
   // 带操作的通知默认不自动关闭：正要去点，它消失了
   const duration = options.duration ?? (options.actions?.length ? 0 : 4500)
-  notifications.push({ id, type, title, description: options.description, duration, actions: options.actions })
+  notifications.value.push({ id, type, title, description: options.description, duration, actions: options.actions })
   if (duration > 0) setTimeout(() => closeNotification(id), duration)
   return id
 }

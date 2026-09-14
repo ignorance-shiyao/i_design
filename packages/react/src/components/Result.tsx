@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { errorIllustrations, type IconName } from '@i-design/common'
+import { type IconName } from '@i-design/common'
+import { errorIllustrations } from '@i-design/common/illustrations'
 import { Icon } from './Icon'
 
 export interface ResultProps {

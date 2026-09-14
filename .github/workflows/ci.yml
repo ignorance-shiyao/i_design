@@ -61,6 +61,15 @@ jobs:
       - name: 发布产物构建与入口核对
         run: npm run build:packages
 
+      # 摇树失效不会让任何构建变红，只能打一遍再称重
+      - name: 按需引入的体积
+        run: node scripts/check-bundle.mjs
+
+      # 顶层碰一下 document，使用方的 SSR 就会崩在 import 那一行，
+      # 而本仓库是纯客户端的，怎么跑都看不出来
+      - name: SSR 与 CSP 兼容性
+        run: node scripts/check-ssr.mjs
+
       # 仓库内的 alias 与 tsconfig paths 让一切看起来正常，装到别人项目里才暴露。
       # 这一步把包 pack 出来，装进仓库外的干净项目，真的打包并在浏览器里渲染一次。
       - name: 外部安装烟测
