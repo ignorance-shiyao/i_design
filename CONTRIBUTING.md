@@ -69,6 +69,18 @@ npm run check:ssr         # 无 DOM 的 Node 里 import、Vue/React 服务端渲
 用 Playwright 真跑一遍并**量**出来：改尺寸就量高度，改动效就量过渡中的位置，
 不是只截图。已经有过多次「代码看着对、量一下差 4px」。
 
+## 发布
+
+版本、弃用与兼容策略见 [VERSIONING.md](VERSIONING.md)：各端的包同版本号一起发，
+包与包之间写死版本而不是范围，弃用必须写明在哪个版本移除。
+
+```bash
+npm run release            # dry-run：看会发出去哪些文件
+```
+
+真发只从 CI 的 Release 流程手动触发，`NPM_TOKEN` 只在那里。
+本地跑 `release.mjs --yes` 在没有 NPM_TOKEN 时会直接拒绝。
+
 ## 提交与 PR
 
 - 一个 PR 只解决一件事。几项混在一起时，一项不合格整个 PR 都得退回。
@@ -88,7 +100,7 @@ npm run check:ssr         # 无 DOM 的 Node 里 import、Vue/React 服务端渲
 | 严格 CSP（`style-src 'self'`，不带 unsafe-inline） | `check:ssr` 分两档测 | **只有不依赖动态几何的组件可用**，见下 |
 | 小程序 | 四件套齐全性与目录校验，**没有在真机或开发者工具里跑过** | 未验证运行时 |
 | Flutter | barrel、golden 测试脚本齐全性，**没有在模拟器或真机上跑过** | 未验证运行时 |
-| npm registry 发布 | 尚未发布；现阶段只能按本地 tarball 消费 | 未发布 |
+| npm registry 发布 | 流程与 dry-run 已就绪（`npm run release`），**尚未真正发布过任何版本** | 未发布 |
 
 关于 CSP：图表按数据定形状、图标按 px 定尺寸，这些只能写成内联 style 属性，
 而不带 `unsafe-inline` 的 `style-src` 会把整个 style 属性拒掉——症状是图形塌成 0，

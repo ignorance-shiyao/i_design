@@ -1,0 +1,57 @@
+name: Release
+
+# 只手动触发。发布不跟着 push 走：任何一次合并都不该顺手把包推上 npm。
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 发布通道（next 为预发布，latest 为正式）
+        type: choice
+        options: [next, latest]
+        default: next
+      confirm:
+        description: 输入 publish 确认真发；留空只做 dry-run
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # 这个 environment 上配了必需的人工审批：凭证在它下面，审批没过就拿不到
+    environment: npm-publish
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+
+      # 发布前把门槛完整跑一遍。发出去的版本撤不回来，这里省下的几分钟
+      # 会变成使用方那边的一次 npm install 失败
+      - run: npm run check:parity
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: 准备浏览器
+        run: npx playwright install --with-deps chromium
+      - run: npm run check:a11y
+      - run: npm run check:responsive
+      - run: npm run check:motion
+      - run: npm run build:packages
+      - run: node scripts/check-ssr.mjs
+      - run: node scripts/check-install.mjs
+
+      - name: dry-run
+        run: node scripts/release.mjs --tag=${{ inputs.tag }}
+
+      - name: 发布
+        if: inputs.confirm == 'publish'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: node scripts/release.mjs --tag=${{ inputs.tag }} --yes
