@@ -118,6 +118,46 @@ export const iconMeta: Record<IconName, IconMeta> = {
   sun: { cn: '亮色主题', category: 'media', aliases: ['白天', '浅色', 'light'] },
   moon: { cn: '暗色主题', category: 'media', aliases: ['夜间', '深色', 'dark'] },
 
+  server: { cn: '服务器', category: 'device', aliases: ['主机', '机房', '数据源', 'host'] },
+  cloud: { cn: '云', category: 'device', aliases: ['云端', '云服务', 'cloud storage'] },
+  network: { cn: '网络', category: 'device', aliases: ['联网', '在线', '全球', 'online', 'globe'] },
+  offline: { cn: '断网', category: 'device', aliases: ['离线', '连接断开', 'disconnected'] },
+  device: { cn: '设备', category: 'device', aliases: ['手机', '终端', '移动端', 'mobile', 'phone'] },
+  printer: { cn: '打印', category: 'device', aliases: ['打印机', '出单', 'print'] },
+
+  box: { cn: '货品', category: 'commerce', aliases: ['商品', '物料', 'SKU', '纸箱', 'product'] },
+  warehouse: { cn: '仓库', category: 'commerce', aliases: ['库房', '库存地点', 'storage'] },
+  truck: { cn: '发货', category: 'commerce', aliases: ['物流', '配送', '运输', 'shipping', 'logistics'] },
+  cart: { cn: '采购', category: 'commerce', aliases: ['购物车', '下单', 'purchase'] },
+  'stock-in': { cn: '入库', category: 'commerce', aliases: ['收货', '进货', 'inbound'] },
+  'stock-out': { cn: '出库', category: 'commerce', aliases: ['发料', '领用', 'outbound'] },
+  tag: { cn: '标签', category: 'commerce', aliases: ['价签', '分类标记', 'label'] },
+
+  coin: { cn: '金额', category: 'finance', aliases: ['费用', '金钱', '价格', 'money', 'amount'] },
+  invoice: { cn: '单据', category: 'finance', aliases: ['发票', '账单', 'bill', 'receipt'] },
+  contract: { cn: '合同', category: 'finance', aliases: ['协议', '条款', 'agreement'] },
+  wallet: { cn: '钱包', category: 'finance', aliases: ['账户', '余额', 'balance'] },
+  'invoice-check': { cn: '单据已审', category: 'finance', aliases: ['报销通过', '已核销', 'approved bill'] },
+
+  'map-pin': { cn: '位置', category: 'map', aliases: ['地点', '坐标', '定位', 'location', 'place'] },
+  map: { cn: '地图', category: 'map', aliases: ['区域', '分布', 'region'] },
+  route: { cn: '路线', category: 'map', aliases: ['路径', '走向', '流转', 'path'] },
+  navigation: { cn: '导航', category: 'map', aliases: ['指向', '出发', 'navigate'] },
+
+  shield: { cn: '安全', category: 'security', aliases: ['防护', '保护', 'protection'] },
+  'shield-check': { cn: '已通过校验', category: 'security', aliases: ['安全检查', '合规', 'verified'] },
+  lock: { cn: '锁定', category: 'security', aliases: ['加密', '受限', '私密', 'locked', 'private'] },
+  unlock: { cn: '解锁', category: 'security', aliases: ['开放', '已授权', 'unlocked'] },
+  key: { cn: '密钥', category: 'security', aliases: ['凭证', '权限', 'token', 'credential'] },
+  eye: { cn: '查看', category: 'security', aliases: ['可见', '预览', '明文', 'visible', 'preview'] },
+  'eye-off': { cn: '隐藏', category: 'security', aliases: ['不可见', '遮蔽', '脱敏', 'hidden', 'masked'] },
+  history: { cn: '操作记录', category: 'security', aliases: ['审计', '历史', '版本记录', 'audit', 'log'] },
+
+  tap: { cn: '点按', category: 'gesture', aliases: ['单击', '触摸', 'touch'] },
+  swipe: { cn: '滑动', category: 'gesture', aliases: ['左右滑', '横滑', 'slide'] },
+  'pinch-zoom': { cn: '双指缩放', category: 'gesture', aliases: ['捏合', '放大缩小', 'zoom'] },
+  'long-press': { cn: '长按', category: 'gesture', aliases: ['按住', 'hold'] },
+
   github: { cn: 'GitHub', category: 'brand', aliases: ['仓库', 'repo'] }
 }
 
