@@ -1,0 +1,2 @@
+@import '../../../dist/styles/chart-distribution.wxss';
+@import '../../../dist/styles/icons.wxss';

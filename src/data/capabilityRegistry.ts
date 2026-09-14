@@ -739,7 +739,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/chart",
       "page": "src/pages/components/ChartPage.vue",
-      "demos": 24
+      "demos": 26
     },
     "demoRoutes": [
       "/components/chart"
@@ -794,6 +794,48 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/chart"
     ],
     "states": {}
+  },
+  {
+    "name": "IChartDistribution",
+    "sources": {
+      "vue-next": "src/components/IChartDistribution.vue",
+      "vue": "packages/vue/src/components/IChartDistribution.vue",
+      "react": "packages/react/src/components/ChartDistribution.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-distribution",
+      "flutter": "packages/flutter/lib/src/components/i_chart_distribution.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/chart"
+    ],
+    "states": {
+      "type": [
+        "histogram",
+        "density",
+        "violin",
+        "error"
+      ],
+      "rule": [
+        "freedman-diaconis",
+        "sturges",
+        "fixed"
+      ]
+    }
   },
   {
     "name": "IChartFrame",

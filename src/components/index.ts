@@ -2,6 +2,7 @@ import type { App } from 'vue'
 import IIcon from './IIcon.vue'
 import IFlow from './IFlow.vue'
 import IChart from './IChart.vue'
+import IChartDistribution from './IChartDistribution.vue'
 import IChartFunnel from './IChartFunnel.vue'
 import IChartGauge from './IChartGauge.vue'
 import IChartRadar from './IChartRadar.vue'
@@ -268,6 +269,7 @@ export {
   IChartPie,
   ISparkline,
   IFlow,
+  IChartDistribution,
   IChartFunnel,
   IChartGauge,
   IChartRadar,
@@ -388,6 +390,7 @@ const components = {
   IChartPie,
   ISparkline,
   IFlow,
+  IChartDistribution,
   IChartFunnel,
   IChartGauge,
   IChartRadar,

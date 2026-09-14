@@ -1,0 +1,68 @@
+/* 分布图（D04）。与各端共用同一份 */
+.i-chart-dist {
+  display: grid;
+  gap: var(--i-spacing-2);
+  margin: 0;
+  min-width: 0;
+}
+
+.i-chart-dist__title {
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-md);
+  font-weight: 500;
+}
+
+.i-chart-dist__svg {
+  width: 100%;
+}
+
+.i-chart-dist__grid {
+  stroke: var(--i-color-hairline);
+  stroke-width: 1;
+}
+
+.i-chart-dist__tick {
+  fill: var(--i-color-text-tertiary);
+  font-size: 11px;
+}
+
+.i-chart-dist__bar {
+  fill: var(--i-chart-1);
+}
+
+.i-chart-dist__line {
+  fill: none;
+  stroke: var(--i-chart-1);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+/* 小提琴用半透明填充加一条实线边：纯填充在两把琴重叠时分不出边界 */
+.i-chart-dist__violin {
+  fill: var(--i-chart-1);
+  fill-opacity: 0.28;
+  stroke: var(--i-chart-1);
+  stroke-width: 1.5;
+}
+
+.i-chart-dist__whisker,
+.i-chart-dist__cap {
+  stroke: var(--i-chart-1);
+  stroke-width: 2;
+}
+
+.i-chart-dist__mean {
+  fill: var(--i-chart-1);
+}
+
+.i-chart-dist__caption {
+  margin: 0;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-xs);
+}
+
+.i-chart-dist__issue {
+  margin: 0;
+  color: var(--i-color-warning);
+  font-size: var(--i-font-size-xs);
+}

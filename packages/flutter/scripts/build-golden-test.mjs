@@ -548,6 +548,13 @@ const {
   toggleColumn, moveColumn
 } = await bundle('packages/common/src/logic/columns.ts', 'columns')
 
+/* ---------- 分布统计：分箱、带宽、误差棒 ----------
+ * 分布图的形状就是它的全部内容：分箱宽度或带宽差一点，两端画出来就是两张图，
+ * 而两张都「看起来像那么回事」。
+ */
+const { histogram, kde, errorBar, violinShape, pearson } =
+  await bundle('packages/common/src/logic/stats.ts', 'stats')
+
 /* ---------- 流程图：框选、批量移动与节点缩放 ----------
  * 三条都是「抄错也不会报错」的规则：命中判定改成相交、位移逐个吸附、
  * 缩放时对角没固定住——每一条都只表现为手感不对，构建全绿。
@@ -1040,6 +1047,60 @@ const proColumnExpectations = (() => {
     `    expect(resolveTableColumns(withNew, base).last.hidden, ${resolveTableColumns(withNew, base).at(-1).hidden});`,
   ]
 })()
+
+const uniformSample = Array.from({ length: 100 }, (_, i) => i)
+const skewedSample = [...Array(60).fill(5), 1, 2, 3, 40, 80]
+const smallSample = [2, 4, 4, 4, 5, 5, 7, 9]
+const dartDoubles = (xs) => `<double>[${xs.map((v) => v.toFixed(1)).join(', ')}]`
+
+const statsExpectations = [
+  `    final uniform = ${dartDoubles(uniformSample)};`,
+  `    final skewed = ${dartDoubles(skewedSample)};`,
+  `    final small = ${dartDoubles(smallSample)};`,
+  // 分箱：规则、箱数、箱宽与「每个样本都落进某个箱」
+  ...[['uniform', uniformSample], ['skewed', skewedSample], ['small', smallSample]].flatMap(([name, sample]) => {
+    const h = histogram(sample)
+    return [
+      `    final h_${name} = histogram(${name});`,
+      `    expect(h_${name}.rule, '${h.rule}');`,
+      `    expect(h_${name}.bins.length, ${h.bins.length});`,
+      `    expect(h_${name}.width, closeTo(${h.width}, 1e-9));`,
+      `    expect(h_${name}.bins.fold<int>(0, (s, b) => s + b.count), ${h.bins.reduce((s, b) => s + b.count, 0)});`,
+      `    expect(h_${name}.issues.length, ${h.issues.length});`,
+      ...h.issues.map((issue, i) => `    expect(h_${name}.issues[${i}].kind, '${issue.kind}');`),
+    ]
+  }),
+  // 固定宽度
+  (() => {
+    const h = histogram(uniformSample, { rule: 'fixed', width: 25 })
+    return `    expect(histogram(uniform, rule: 'fixed', width: 25.0).bins.length, ${h.bins.length});`
+  })(),
+  // 带宽：Silverman 的结果必须一模一样，否则两端的曲线胖瘦不同
+  ...[['uniform', uniformSample], ['small', smallSample]].map(([name, sample]) =>
+    `    expect(kde(${name}).bandwidth, closeTo(${kde(sample).bandwidth}, 1e-9));`),
+  `    expect(kde(uniform).points.length, ${kde(uniformSample).points.length});`,
+  `    expect(kde(uniform).points.first.y, closeTo(${kde(uniformSample).points[0].y}, 1e-12));`,
+  `    expect(kde(uniform).points[32].y, closeTo(${kde(uniformSample).points[32].y}, 1e-12));`,
+  // 取值全同：不画假曲线
+  `    expect(kde(<double>[4.0, 4.0, 4.0, 4.0]).points.length, ${kde([4, 4, 4, 4]).points.length});`,
+  `    expect(kde(<double>[4.0, 4.0, 4.0, 4.0]).issues.last.kind, '${kde([4, 4, 4, 4]).issues.at(-1).kind}');`,
+  // 误差棒：三种长度与三句图注
+  ...['sd', 'sem', 'ci95'].flatMap((kind) => {
+    const b = errorBar(smallSample, kind)
+    return [
+      `    expect(errorBar(small, '${kind}').delta, closeTo(${b.delta}, 1e-9));`,
+      `    expect(errorBar(small, '${kind}').low, closeTo(${b.low}, 1e-9));`,
+      `    expect(errorBar(small, '${kind}').caption, '${b.caption}');`,
+    ]
+  }),
+  `    expect(errorBar(<double>[5.0], 'sd').delta, ${errorBar([5], 'sd').delta});`,
+  // 小提琴的峰值：宽度按它归一化，差一点两把琴的胖瘦就不可比
+  `    expect(violinShape(uniform).peak, closeTo(${violinShape(uniformSample).peak}, 1e-12));`,
+  // 相关系数：常量列返回 null 而不是 0
+  `    expect(pearson(<double>[1.0, 2.0, 3.0, 4.0], <double>[2.0, 4.0, 6.0, 8.0]), closeTo(${pearson([1, 2, 3, 4], [2, 4, 6, 8])}, 1e-12));`,
+  `    expect(pearson(<double>[1.0, 1.0, 1.0, 1.0], <double>[1.0, 2.0, 3.0, 4.0]), ${pearson([1, 1, 1, 1], [1, 2, 3, 4])});`,
+  `    expect(pearson(<double>[1.0, 2.0], <double>[2.0, 4.0]), ${pearson([1, 2], [2, 4])});`,
+]
 
 const sankeyCases = [
   { from: 'visit', to: 'leave', value: 600 },
@@ -2737,6 +2798,7 @@ import 'package:i_design/src/logic/axis.dart';
 import 'package:i_design/src/logic/query.dart';
 import 'package:i_design/src/logic/schemaform.dart';
 import 'package:i_design/src/logic/protable.dart';
+import 'package:i_design/src/logic/stats.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
@@ -3002,6 +3064,10 @@ ${ratioExpectations.join('\n')}
   test('轴标签抽稀与 Web 端一致', () {
 ${ai_stepExpectations.join('\n')}
 ${showExpectations.join('\n')}
+  });
+
+  test('分布统计的分箱、带宽与误差棒与 Web 端一致', () {
+${statsExpectations.join('\n')}
   });
 
   test('ProTable 的过期响应与分页规则与 Web 端一致', () {

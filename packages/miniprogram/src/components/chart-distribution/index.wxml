@@ -1,0 +1,6 @@
+<view class="i-chart-dist">
+  <text wx:if="{{title}}" class="i-chart-dist__title">{{title}}</text>
+  <canvas class="i-chart-dist__canvas" type="2d" style="width:100%;height:{{height}}px" />
+  <text class="i-chart-dist__caption">{{caption}}</text>
+  <text wx:for="{{issues}}" wx:key="kind" class="i-chart-dist__issue">{{item.message}}</text>
+</view>

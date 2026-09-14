@@ -229,6 +229,15 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
       { value: 'help', label: '帮助', icon: 'info-circle' }
     ]
   },
+  IChartDistribution: {
+    values: [
+      12, 15, 15, 16, 18, 18, 19, 20, 21, 22, 22, 23, 24, 25, 26, 28, 29, 31, 33, 35,
+      36, 38, 41, 44, 48, 52, 57, 63, 70, 88
+    ],
+    type: 'histogram',
+    title: '订单金额分布',
+    unit: ' 万元'
+  },
   IAppShell: {
     title: '青禾 ERP',
     user: '林岚（销售经理）',

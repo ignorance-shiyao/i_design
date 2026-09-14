@@ -161,6 +161,17 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"height","type":"number","doc":"","optional":true,"defaultText":"260","control":{"kind":"number"}},
     {"name":"unit","type":"string","doc":"纵轴单位，跟在刻度后面","optional":true,"defaultText":"''","control":{"kind":"string"}},
   ],
+  IChartDistribution: [
+    {"name":"values","type":"number[]","doc":"原始样本。分布图吃的是样本本身，不是聚合过的值","optional":false,"defaultText":null,"control":null},
+    {"name":"type","type":"'histogram' | 'density' | 'violin' | 'error'","doc":"","optional":true,"defaultText":"'histogram'","control":{"kind":"enum","options":["histogram","density","violin","error"]}},
+    {"name":"rule","type":"'freedman-diaconis' | 'sturges' | 'fixed'","doc":"分箱规则。fixed 时必须给 binWidth","optional":true,"defaultText":"'freedman-diaconis'","control":{"kind":"enum","options":["freedman-diaconis","sturges","fixed"]}},
+    {"name":"binWidth","type":"number","doc":"","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"bandwidth","type":"number","doc":"核密度带宽。不给则按 Silverman 经验法则算","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"errorKind","type":"ErrorKind","doc":"误差棒的含义，必填意义上的选项：三者说的不是一回事","optional":true,"defaultText":"'sd'","control":null},
+    {"name":"height","type":"number","doc":"","optional":true,"defaultText":"260","control":{"kind":"number"}},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"unit","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+  ],
   IChartFrame: [
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"subtitle","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
