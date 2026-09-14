@@ -61,6 +61,10 @@ jobs:
       - name: 发布产物构建与入口核对
         run: npm run build:packages
 
+      # 覆盖率最容易骗自己：页面上名字都在，其中几个组件早就渲染不出来了
+      - name: Patterns Lab 覆盖
+        run: npm run check:lab
+
       # 摇树失效不会让任何构建变红，只能打一遍再称重
       - name: 按需引入的体积
         run: node scripts/check-bundle.mjs

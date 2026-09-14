@@ -16,7 +16,7 @@ class IDesignTokensLight {
   static const colorBgInverse = Color(0xFF141822);
   static const colorText = Color(0xFF252B3A);
   static const colorTextSecondary = Color(0xFF575D6C);
-  static const colorTextTertiary = Color(0xFF6B7080);
+  static const colorTextTertiary = Color(0xFF686D7D);
   static const colorTextInverse = Color(0xFFFFFFFF);
   static const colorOnMedia = Color(0xFFFFFFFF);
   static const colorTextLink = Color(0xFF4A63C4);

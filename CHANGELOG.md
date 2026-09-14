@@ -18,6 +18,8 @@
   （`npm run check:style-rules`）。
 - 许可证随包分发，素材来源逐个登记（`LICENSE`、`THIRD-PARTY.md`）。
 - 运行事件契约与 reducer：乱序、重发、迟到、取消后续写都有明确处理。
+- Patterns Lab（`/design/lab`）：每个组件按注册表自动出现并真的渲染一次，
+  `npm run check:lab` 盯着「只剩一个名字」的情况。
 
 ### 修复
 
@@ -30,6 +32,11 @@
 
 - `notification` 的列表从模块顶层的 `reactive([])` 改为 `ref`：
   Vue 2.7 不接受数组作为 reactive 的根，导致 watch / watchEffect 跟踪不到。
+- `IDropdown` 的纯文本触发器补上 `role="button"` 与 `tabindex`：
+  此前只挂了 `aria-haspopup`，它挂在一个没有角色的 span 上既是无效 ARIA，
+  键盘也聚焦不到——纯文本触发器只有鼠标能用。Vue 与 React 两端都改了。
+- 第三级文字色由 `#6b7080` 压到 `#686d7d`：在第三档底色 `#eef0f5`
+  （填充面板、演示区）上原先只有 4.33:1，而第三级文字最常出现的就是这种面板。
 - 图标的默认尺寸从内联 style 属性挪进 `.i-icon` 类：
   不带 `unsafe-inline` 的 CSP 会拒掉整个 style 属性，图标会塌成 0。
 

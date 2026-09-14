@@ -42,6 +42,13 @@ export function Dropdown({
   const triggerRef = useRef<HTMLSpanElement | null>(null)
   const popupRef = useRef<HTMLDivElement | null>(null)
   const [visible, setVisible] = useState(false)
+  /* 传进来的是不是一个本来就可交互的元素；是的话这层包装不抢语义 */
+  const [triggerIsInteractive, setTriggerIsInteractive] = useState(true)
+  useEffect(() => {
+    setTriggerIsInteractive(
+      !!triggerRef.current?.querySelector('button, a[href], [role="button"], input, select, textarea')
+    )
+  }, [children])
   const [active, setActive] = useState(-1)
   const [pos, setPos] = useState({ x: 0, y: 0, placement, arrow: 0 })
 
@@ -161,15 +168,22 @@ export function Dropdown({
   return (
     <>
       {/*
-        触发器只做包裹，不自称 button：插槽里传入的通常已经是一个真正的按钮，
+        触发器只做包裹，不自称 button：传进来的通常已经是一个真正的按钮，
         外层再声明 role/tabIndex 会形成嵌套按钮语义（读屏念两遍），并多出一个焦点点。
         键盘事件由内部控件冒泡上来，这里照样收得到。
+
+        只有传进来是纯文本时这层才顶上去充当触发器，而且要顶全套：
+        role、tabIndex 与 aria 一起给。只挂 aria-haspopup 的话，它挂在一个
+        没有角色的 span 上，既是无效 ARIA，键盘也根本聚焦不到——
+        纯文本触发器就成了只有鼠标能用。
       */}
       <span
         ref={triggerRef}
         className="i-overlay-trigger"
-        aria-haspopup="menu"
-        aria-expanded={visible}
+        role={triggerIsInteractive ? undefined : 'button'}
+        tabIndex={triggerIsInteractive ? undefined : 0}
+        aria-haspopup={triggerIsInteractive ? undefined : 'menu'}
+        aria-expanded={triggerIsInteractive ? undefined : visible}
         onClick={() => (visible ? close() : open())}
         onKeyDown={onKeyDown}
       >

@@ -11,6 +11,7 @@ const meta = (name: string, kind: PropMeta['control'] extends infer _ ? string :
   name,
   type: 'string',
   doc: '',
+  optional: true,
   defaultText: null,
   control:
     kind === 'enum'
