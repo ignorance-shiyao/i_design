@@ -15,3 +15,4 @@ packages/vue/node_modules
 *.tmp.svg
 tmp-*.mjs
 tmp-*.png
+dist-examples

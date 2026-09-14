@@ -12,7 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build:tokens": "node packages/common/scripts/build-tokens.mjs",
-    "check:parity": "npm run check:catalog && npm run check:registry && npm run check:routes && npm run check:icons && npm run check:capability && npm run check:licenses && npm run check:style-rules && npm run check:readability && npm run check:contracts && npm run check:release && npm run build:tokens && npm run build:styles && npm run build:vue-next && npm run build:vue2 && npm run build:react-index && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:mobile-index && npm run build:stats && npm run build:matrix && npm run build:props && npm run check:snippets && npm run check:scoped-css && npm run check:props && npm run check:cjk && npm run check:whennot && npm run build:registry && npm run build:licenses && npm run build:icon-paths",
+    "check:parity": "npm run check:catalog && npm run check:registry && npm run check:routes && npm run check:icons && npm run check:capability && npm run check:examples && npm run check:licenses && npm run check:style-rules && npm run check:readability && npm run check:contracts && npm run check:release && npm run build:tokens && npm run build:styles && npm run build:vue-next && npm run build:vue2 && npm run build:react-index && node scripts/check-parity.mjs && npm run check:mp && npm run check:flutter && npm run build:mobile-index && npm run build:stats && npm run build:matrix && npm run build:props && npm run check:snippets && npm run check:scoped-css && npm run check:props && npm run check:cjk && npm run check:whennot && npm run build:registry && npm run build:licenses && npm run build:icon-paths",
     "build:styles:mp": "node packages/miniprogram/scripts/build-styles.mjs",
     "build:react-demo": "vite build --config packages/react/vite.config.ts",
     "build:styles": "node scripts/build-styles-index.mjs",
@@ -57,7 +57,10 @@
     "check:motion": "node scripts/check-motion.mjs",
     "build:props": "node scripts/build-component-props.mjs",
     "check:cjk": "node --test scripts/check-cjk-wrap.test.mjs && node scripts/check-cjk-wrap.mjs",
-    "check:whennot": "node --test scripts/check-when-not.test.mjs && node scripts/check-when-not.mjs"
+    "check:whennot": "node --test scripts/check-when-not.test.mjs && node scripts/check-when-not.mjs",
+    "dev:examples": "vite --config examples/portal/vite.config.ts examples/portal",
+    "build:examples": "node scripts/build-examples.mjs",
+    "check:examples": "node --test scripts/check-examples.test.mjs && node scripts/check-examples.mjs"
   },
   "dependencies": {
     "three": "^0.186.0",

@@ -48,6 +48,12 @@ const illustrations = illustrationMeta.map((meta) => ({
 }))
 
 const resources = [
+  {
+    title: '示例应用',
+    desc: '完整的业务闭环：订单从新建到状态流转，含没权限、版本冲突、重复提交这些真实分支。',
+    to: '',
+    href: 'examples/portal/index.html'
+  },
   { title: '设计令牌表', desc: '完整的色彩、字号、间距、圆角、阴影与动效令牌，含语义层映射。', to: '/design/tokens' },
   { title: '设计价值观', desc: '沉浸、灵活、至简三条原则，以及它们如何影响具体的组件默认值。', to: '/design/values' },
   { title: '组件文档', desc: '每个组件的用法、可配置项与交互示例，示例可直接复制到业务中。', to: '/components' }
@@ -68,9 +74,15 @@ const contributing = [
     <p class="i-lead">从这里进入体系的各个部分，或按下列约定参与共建。</p>
 
     <div class="resources">
-      <RouterLink v-for="item in resources" :key="item.to" :to="item.to" class="resources__link">
-        <ICard :title="item.title" hoverable>{{ item.desc }}</ICard>
-      </RouterLink>
+      <template v-for="item in resources" :key="item.to || item.href">
+        <!-- 示例是另一套独立构建的站点，走普通链接；组件文档在本站内，走路由 -->
+        <a v-if="item.href" :href="item.href" class="resources__link">
+          <ICard :title="item.title" hoverable>{{ item.desc }}</ICard>
+        </a>
+        <RouterLink v-else :to="item.to" class="resources__link">
+          <ICard :title="item.title" hoverable>{{ item.desc }}</ICard>
+        </RouterLink>
+      </template>
     </div>
 
     <h2>插画</h2>

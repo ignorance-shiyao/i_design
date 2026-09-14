@@ -21,6 +21,12 @@
       "@/*": [
         "src/*"
       ],
+      "@i-design/examples-shared": [
+        "examples/shared/src/index.ts"
+      ],
+      "@i-design/examples-shell/*": [
+        "examples/shell/src/*"
+      ],
       "@i-design/common": [
         "packages/common/src/index.ts"
       ],
@@ -48,6 +54,7 @@
     "packages/*/src/**/*.ts",
     "packages/*/src/**/*.tsx",
     "examples/*/src/**/*.ts",
+    "examples/*/src/**/*.vue",
     "vite.config.ts"
   ],
   "//paths": "各包的 package.json 指向的是构建产物（dist），仓库自身开发时要走源码——否则改了组件得先构建才看得见，且类型会停在上一次构建的样子",
