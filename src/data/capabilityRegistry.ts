@@ -468,6 +468,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     },
     "demoRoutes": [
       "/components/button",
+      "/components/icon",
       "/components/form",
       "/components/badge",
       "/components/descriptions",
@@ -1971,6 +1972,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "maturity": "stable",
     "doc": null,
     "demoRoutes": [
+      "/components/icon",
       "/components/overlay"
     ],
     "states": {}
@@ -3421,6 +3423,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "maturity": "stable",
     "doc": null,
     "demoRoutes": [
+      "/components/icon",
       "/components/config-provider",
       "/components/qrcode",
       "/components/chat",
