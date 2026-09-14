@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import IButton from '@/components/IButton.vue'
 import IIcon from '@/components/IIcon.vue'
-import { errorIllustrations } from '@i-design/common'
+import { errorIllustrations } from '@i-design/common/illustrations'
 
 const art = errorIllustrations['404']
 </script>

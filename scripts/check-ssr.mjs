@@ -103,7 +103,11 @@ async function hydrateVue(browser, ssrHtml, work, scene, styleInline) {
     nodePaths: [resolve(root, 'node_modules')],
     // 明确指到 dist：workspace 的软链会把 @i-design/common 解析回源码，
     // 那样测的就不是使用方拿到的产物了
-    alias: { '@i-design/common': distPath('common') },
+    alias: {
+      // 子路径排在前面：否则会被拼成 index.mjs/illustrations
+      '@i-design/common/illustrations': resolve(root, 'packages/common/dist/illustrations.mjs'),
+      '@i-design/common': distPath('common')
+    },
     define: {
       'process.env.NODE_ENV': '"development"',
       // esm-bundler 版的 vue 要求打包器注入这几个开关，不注入会刷一条告警，

@@ -29,7 +29,7 @@ const bigList = Array.from({ length: 20000 }, (_, i) => ({
   name: `工单 ${String(i + 1).padStart(5, '0')}`,
   owner: ['林岚', '陈序', '苏禾', '周迟'][i % 4]
 }))
-import { heroIllustrations } from '@i-design/common'
+import { heroIllustrations } from '@i-design/common/illustrations'
 
 /* 预览用的图组：故意混一个坏地址进去，好让「加载失败」这一态在文档里看得见 */
 const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]

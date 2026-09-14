@@ -21,6 +21,13 @@
 
 ### 修复
 
+- 插画不再随主入口分发：移到 `@i-design/common/illustrations` 子路径，
+  并在各端构建里外置。此前 Vite 的 library 模式把十八张绘画稿内联成 data URI，
+  内联之后摇树也摇不掉——只引一个按钮的使用方要背走整套图。
+  实测：只引一个按钮从 815 kB gzip 降到 9.0 kB。
+  **如果你在用 `emptyIllustrations` / `errorIllustrations` / `heroIllustrations` /
+  `mascotIllustration`，把 import 改成 `@i-design/common/illustrations`。**
+
 - `notification` 的列表从模块顶层的 `reactive([])` 改为 `ref`：
   Vue 2.7 不接受数组作为 reactive 的根，导致 watch / watchEffect 跟踪不到。
 - 图标的默认尺寸从内联 style 属性挪进 `.i-icon` 类：

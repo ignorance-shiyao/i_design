@@ -4,7 +4,7 @@
 -->
 <script setup lang="ts">
 import { computed } from 'vue'
-import { emptyIllustrations } from '@i-design/common'
+import { emptyIllustrations } from '@i-design/common/illustrations'
 import { useConfig } from './useConfig'
 
 const props = withDefaults(

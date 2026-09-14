@@ -34,13 +34,21 @@ import react from '@vitejs/plugin-react'
  */
 const EXTERNAL = [
   'vue', 'react', 'react-dom', 'react/jsx-runtime', 'react-dom/client',
-  '@i-design/common', '@i-design/vue-next', '@i-design/react'
+  '@i-design/common', '@i-design/vue-next', '@i-design/react',
+  /*
+   * 插画子路径也要外置。不外置的话，它会被内联进每个端的产物——
+   * Vite 的 library 模式一定会把图片变成 data URI，而 data URI 一旦进了
+   * 组件文件，只用按钮的使用方也要把整套绘画稿背走。实测：外置之前
+   * 只引一个按钮是 360 kB gzip，其中绝大部分与按钮毫无关系。
+   */
+  '@i-design/common/illustrations'
 ]
 
 const require = createRequire(import.meta.url)
 
 const targets = [
-  { dir: 'common', entry: 'src/index.ts', plugins: () => [] },
+  // 插画单独一个入口：它们体积大且没有组件依赖，不该压在主入口上
+  { dir: 'common', entry: { index: 'src/index.ts', illustrations: 'src/illustrations.ts' }, plugins: () => [] },
   { dir: 'vue-next', entry: 'src/index.ts', plugins: () => [vue()] },
   { dir: 'vue', entry: 'src/index.ts', plugins: () => [vue2()] },
   { dir: 'mobile-vue', entry: 'src/index.ts', plugins: () => [vue()] },
@@ -58,7 +66,9 @@ async function buildOne(target) {
    * 公共包的 dist 里还有 build-tokens.mjs 编出来的 tokens/——那是跨端校验读的东西，
    * 一起删掉的话，下一次 check:parity 才会报错，而错因看上去与本脚本毫无关系。
    */
-  for (const name of ['index.mjs', 'index.cjs', 'index.mjs.map', 'index.cjs.map', 'style.css', 'types', 'styles']) {
+  for (const name of ['index.mjs', 'index.cjs', 'index.mjs.map', 'index.cjs.map',
+    'illustrations.mjs', 'illustrations.cjs', 'illustrations.mjs.map', 'illustrations.cjs.map',
+    'style.css', 'types', 'styles']) {
     rmSync(join(dir, 'dist', name), { recursive: true, force: true })
   }
 
@@ -69,15 +79,33 @@ async function buildOne(target) {
     plugins: target.plugins(),
     resolve: {
       alias: {
+        // 子路径要排在前面：Vite 的 alias 按顺序匹配，先命中主入口的话
+        // '@i-design/common/illustrations' 会被拼成 index.ts/illustrations
+        '@i-design/common/illustrations': join(root, 'packages/common/src/illustrations.ts'),
         '@i-design/common': join(root, 'packages/common/src/index.ts'),
         // Vue 2 包必须解析到 2.7：根 node_modules 的 vue 是 3.x
         ...(target.dir === 'vue' ? { vue: dirname(require.resolve('vue/package.json', { paths: [dir] })) } : {})
       }
     },
     build: {
-      lib: { entry: join(dir, target.entry), formats: ['es', 'cjs'], fileName: (f) => `index.${f === 'es' ? 'mjs' : 'cjs'}` },
+      lib: {
+        entry: typeof target.entry === 'string'
+          ? join(dir, target.entry)
+          : Object.fromEntries(Object.entries(target.entry).map(([name, file]) => [name, join(dir, file)])),
+        formats: ['es', 'cjs'],
+        fileName: (format, name) => `${name}.${format === 'es' ? 'mjs' : 'cjs'}`
+      },
       outDir: join(dir, 'dist'),
       emptyOutDir: false,
+      /*
+       * 图片一律作为独立文件发出去，不内联成 data URI。
+       *
+       * Vite 的 library 模式默认把资源内联进 JS——插画是绘画稿，
+       * 十八张内联进去就是一兆多，而且**摇树摇不掉**：
+       * 只引一个按钮的使用方也会拿到全部插画。实测过，那时 button 入口
+       * gzip 815 kB，其中绝大部分是与按钮毫无关系的图。
+       */
+      assetsInlineLimit: 0,
       // 样式单独出口，不由 JS 自动注入：使用方可能要在自己的层叠顺序里决定何时引入
       cssCodeSplit: false,
       sourcemap: true,
@@ -85,7 +113,14 @@ async function buildOne(target) {
         external: EXTERNAL,
         // 有 default 导出的包（整包注册的 install）不加这行会被 rollup 归成 auto，
         // CJS 使用方 require 回来的就成了「默认导出挂在 .default 上」的形状
-        output: { exports: 'named', assetFileNames: 'style.css' }
+        /*
+         * 样式固定叫 style.css（使用方按这个名字引），图片进 assets/ 保留哈希：
+         * 全都塞给 assetFileNames 一个固定名字的话，十八张图会互相覆盖成一张。
+         */
+        output: {
+          exports: 'named',
+          assetFileNames: (info) => (info.name?.endsWith('.css') ? 'style.css' : 'assets/[name]-[hash][extname]')
+        }
       }
     }
   })

@@ -32,6 +32,8 @@
     "build:registry": "node scripts/build-capability-registry.mjs",
     "build:licenses": "node scripts/build-licenses.mjs",
     "check:licenses": "node --test scripts/check-licenses.test.mjs && node scripts/check-licenses.mjs",
+    "build:bundle": "npm run build:packages && node scripts/build-bundle-report.mjs",
+    "check:bundle": "node --test scripts/check-bundle.test.mjs && node scripts/check-bundle.mjs",
     "check:release": "node --test scripts/check-release.test.mjs && node scripts/check-release.mjs",
     "release": "node scripts/release.mjs",
     "check:ssr": "npm run build:packages && node scripts/check-ssr.mjs",

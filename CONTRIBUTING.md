@@ -30,6 +30,7 @@ npm run check:responsive  # 390 / 320 两个宽度，整页能左右拖就失败
 npm run check:motion      # 系统的减少动效与面板开关都要真的把动效关掉
 npm run check:install     # 把包装进仓库外的干净项目里真跑一遍（慢，但只有它能证明别人装得上）
 npm run check:ssr         # 无 DOM 的 Node 里 import、Vue/React 服务端渲染、hydrate 与 CSP
+npm run check:bundle      # 按需引入的隔离与体积回归（要先 build:packages）
 ```
 
 **别用管道跑这些检查**：`npm run check:a11y | tail` 的退出码来自 `tail`，
@@ -100,6 +101,7 @@ npm run release            # dry-run：看会发出去哪些文件
 | 严格 CSP（`style-src 'self'`，不带 unsafe-inline） | `check:ssr` 分两档测 | **只有不依赖动态几何的组件可用**，见下 |
 | 小程序 | 四件套齐全性与目录校验，**没有在真机或开发者工具里跑过** | 未验证运行时 |
 | Flutter | barrel、golden 测试脚本齐全性，**没有在模拟器或真机上跑过** | 未验证运行时 |
+| 按需引入 | `check:bundle`：打包实测，只引一个按钮的产物不含流程画布/图表/三维，且体积不超预算 | 已验证 |
 | npm registry 发布 | 流程与 dry-run 已就绪（`npm run release`），**尚未真正发布过任何版本** | 未发布 |
 
 关于 CSP：图表按数据定形状、图标按 px 定尺寸，这些只能写成内联 style 属性，

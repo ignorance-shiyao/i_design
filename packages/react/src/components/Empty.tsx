@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { emptyIllustrations } from '@i-design/common'
+import { emptyIllustrations } from '@i-design/common/illustrations'
 import { useConfig } from './ConfigProvider'
 
 export interface EmptyProps {

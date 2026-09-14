@@ -5,7 +5,7 @@ import {
   errorIllustrations,
   heroIllustrations,
   mascotIllustration
-} from '@i-design/common'
+} from '@i-design/common/illustrations'
 
 const mascot = mascotIllustration.src
 const mascot2x = mascotIllustration.srcset
