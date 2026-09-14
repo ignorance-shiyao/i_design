@@ -504,3 +504,121 @@ D09/D11、F09/F11 ～ F15、G12、H04/H07。以实际应用需求决定地图、
 - [i-design 当前站](https://ignorance-shiyao.github.io/i_design/)与[源码仓库](https://github.com/ignorance-shiyao/i_design)：保留品牌、语义令牌、导航与多端设计原则。
 
 不将参考站的整页文案、商标、收费模板或插画带入本仓库。首页所有图形由现有组件、CSS 形态和已有小白/十五素材组成；业务预览按真实可操作范围表述。详细技术来源在对应章节紧邻说明，避免将建议写成未经核验的现状事实。
+
+## 11. Shadcn UI Kit 对照补充：缺失组件与变体待实现
+
+核对日期：2026-09-14；来源：[Shadcn UI Kit 组件目录](https://shadcnuikit.com/components)及下表各分类的公开预览。基线是本分支基于 `main@62ed38e` 的源码，主要核对 `src/components/`、组件示例页和公共逻辑。本节是待办补充，不表示这些组件已经实现。
+
+### 11.1 对照规则
+
+按目录的 48 个分类逐行登记，不把不同命名当作缺失：Accordion 对应 ICollapse，Sheet 对应 IDrawer，Scroll Area 对应 IScrollbar，Sonner Toast 对应现有消息/通知体系。已有基础能力但没有可复用高级能力、成套组合示例或状态契约的，仍列入增强待办。下表“增强/组合”只针对所列缺口，不否认现有组件。
+
+参考站部分页面缓存版本不同，预览也有折叠、付费代码和不可见状态；不以其宣传的变体数量作为验收分母，不声称已审计付费实现。视觉近似不能证明 API 相同。每项实施前需要复核最新源码；能用插槽与现有能力组合的，交付到 Patterns Lab，不强行新增公共组件。参考站的渐变分隔线等不符合本库纯色规则的样式，采用纯色替代并登记差异，不直接照搬。
+
+### 11.2 全分类映射与待实现入口
+
+“基础已有”不等于本行所有变体完成；所有带任务编号的补充能力均为待实现。J 系列在 11.3 拆分；B/F/G/H 系列沿用前文任务。
+
+| 参考分类（原页）                                                      | 当前对应                                                   | 待实现缺口 / 处理方式                                                                         | 任务            |
+| --------------------------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------- |
+| [Accordion](https://shadcnuikit.com/components/accordion)             | ICollapse，已有单开/多开                                   | 标题图标、副标题、自定义展开图标与位置、完整标题插槽；堆叠/边框组合示例                       | J10             |
+| [Alert](https://shadcnuikit.com/components/alert)                     | IAlert                                                     | 多条校验原因、撤销/操作按钮、紧凑通知组合；复用已有状态色与关闭能力                           | J19             |
+| [Alert Dialog](https://shadcnuikit.com/components/alert-dialog)       | IModal、IConfirmLayer                                      | 长内容与固定操作区、条款确认、反馈、OTP、登录、结算、订阅变更、资料编辑、引导弹窗组合         | J20、B09、B16   |
+| [Attachment](https://shadcnuikit.com/components/attachment)           | IUpload、IImage，上传基础已有                              | 独立于上传入口的附件展示组件：媒体缩略图、文件元信息、紧凑尺寸、处理/失败/重试状态与操作      | J01、F05        |
+| [Autocomplete](https://shadcnuikit.com/components/autocomplete)       | IAutoComplete                                              | 清空、分组标题、异步加载、首项自动高亮的可配置策略                                            | J08             |
+| [Avatar](https://shadcnuikit.com/components/avatar)                   | IAvatar、IAvatarGroup、IBadge                              | 在线/认证/加载状态组合、头像溢出菜单、用户资料/协作者邀请组合                                 | J17             |
+| [Badge](https://shadcnuikit.com/components/badge)                     | IBadge、ITag、ICheckTag                                    | 链接徽标、头像标签、趋势与公告条组合；关闭标签复用 ITag                                       | J17             |
+| [Breadcrumb](https://shadcnuikit.com/components/breadcrumb)           | IBreadcrumb                                                | 中间路径折叠菜单、图标节点与长路径响应式策略                                                  | J12             |
+| [Button](https://shadcnuikit.com/components/button)                   | IButton                                                    | 分裂按钮、快捷键/计数/头像组合、关注与增减交互示例                                            | J11             |
+| [Button Group](https://shadcnuikit.com/components/button-group)       | IButtonGroup、IInputAdornment                              | 按钮+输入+选择器混合成组、分裂操作、统一接缝/焦点/禁用组合                                    | J11             |
+| [Bubble](https://shadcnuikit.com/components/bubble)                   | IChatMessage 等聊天组件                                    | 附件/媒体消息与发送状态的完整组合覆盖；共用消息契约                                           | J22、F04、F06   |
+| [Calendar](https://shadcnuikit.com/components/calendar)               | ICalendar、IDatePicker                                     | 多月面板、月份/年份快速选择、自定义日单元价格等内容、多日期选择；范围选择已有                 | J15             |
+| [Card](https://shadcnuikit.com/components/card)                       | ICard                                                      | 图片、表单、标签页、会议协作者、隐私同意、社交资料等可复用卡片配方                            | J18             |
+| [Carousel](https://shadcnuikit.com/components/carousel)               | ICarousel，已有手势/循环/自动播放                          | 多列、纵向、缩略图联动、自定义箭头/指示点、计数和进度；卡片/评价/图文示例                     | J16             |
+| [Checkbox](https://shadcnuikit.com/components/checkbox)               | ICheckbox、ICheckboxGroup、ITree                           | 卡片/图标/头像选项、待办/权限组合、选中后展开补充字段；树选择复用现有逻辑                     | J14             |
+| [Collapsible](https://shadcnuikit.com/components/collapsible)         | ICollapse、ITree、IComment 部分覆盖                        | 任意触发器与内容的受控展开原语；文件、代码、回复、表单等局部折叠                              | J10             |
+| [Combobox](https://shadcnuikit.com/components/combobox)               | ISelectInput 外壳、ISelect、IAutoComplete                  | 可搜索选择完整组件：多选、分组、图标/描述、异步加载、最近选项、清空、长列表；外壳不算完整实现 | J07             |
+| [Command](https://shadcnuikit.com/components/command)                 | ICommandSearch                                             | 内嵌模式、分类标签、富结果、最近搜索、详情预览面板、底部快捷键说明                            | J09             |
+| [Context Menu](https://shadcnuikit.com/components/context-menu)       | IDropdown 可复用菜单逻辑                                   | 缺少上下文菜单：指针坐标定位、右键与键盘唤起、焦点返回                                        | J02             |
+| [Data Table](https://shadcnuikit.com/components/data-table)           | ITable，排序/选择/滚动已有                                 | 查询工具栏、列设置、展开行、行拖拽、列拖拽、批量/行操作的成套数据表                           | J23、B04 ～ B07 |
+| [Drawer](https://shadcnuikit.com/components/drawer)                   | IDrawer                                                    | 可滚动内容、信息、隐私设置、登录、新建任务等业务组合；不另建同义组件                          | J20             |
+| [Dropdown Menu](https://shadcnuikit.com/components/dropdown-menu)     | IDropdown，图标/分组已有                                   | 复选/单选菜单项、子菜单、富用户菜单与复杂动作插槽                                             | J03             |
+| [Empty State](https://shadcnuikit.com/components/empty)               | IEmpty、IResult                                            | 首次使用、无搜索结果、离线、维护、404 搜索、上传入口等完整恢复操作配方                        | J19、B02        |
+| [Field](https://shadcnuikit.com/components/field)                     | IForm、IFormItem                                           | Fieldset/Legend/FieldGroup 语义组合、复合控件标签与描述关联、多控件共享错误                   | J13、B08        |
+| [Hover Card](https://shadcnuikit.com/components/hover-card)           | IPopover hover 可复用                                      | 缺少标准化资料预览封装：延迟策略、跨触发区保持、头像/统计/动作配方与触屏降级                  | J04             |
+| [Spinner](https://shadcnuikit.com/components/spinner)                 | ILoading、按钮加载态                                       | 内联验证、可取消长任务、文件转换/下载、金额处理等状态组合；不重复建立 Spinner                 | J19             |
+| [Input](https://shadcnuikit.com/components/input)                     | IInput、IInputAdornment、IInputOtp、IRangeInput、ITagInput | 密码显隐/强度、电话国家码、掩码、支付字段、清空/复制/计数/浮动标签配方                        | J13、J21        |
+| [Item](https://shadcnuikit.com/components/item)                       | IList，媒体/附加内容插槽已有                               | 独立可组合 Item：标题/描述/媒体/动作/头尾区域；链接与选择语义、模型/用户/媒体条目             | J06             |
+| [Menubar](https://shadcnuikit.com/components/menubar)                 | IMenu horizontal 仅导航基础                                | 缺少桌面应用菜单栏：跨菜单键盘导航、子菜单、快捷键展示                                        | J05             |
+| [Native Select](https://shadcnuikit.com/components/native-select)     | ISelect 为自绘列表                                         | 缺少原生 select 封装：option/optgroup、name/required、原生表单提交与系统选择器                | J07N            |
+| [Navigation Menu](https://shadcnuikit.com/components/navigation-menu) | IMenu、SiteHeader                                          | 缺少通用网站导航面板：多列链接/富内容、焦点和移动端折叠；具体视觉变体实施时复核               | J05N            |
+| [Pagination](https://shadcnuikit.com/components/pagination)           | IPagination                                                | 紧凑、首末页、结果区间、每页数量/跳页与表格联动的完整示例核对与补齐                           | J12、B04        |
+| [Popover](https://shadcnuikit.com/components/popover)                 | IPopover、ITour                                            | 分享、反馈、资料、多步提示的交互配方；焦点策略随内容角色定义                                  | J20             |
+| [Progress](https://shadcnuikit.com/components/progress)               | IProgress、ISteps                                          | 多资源、分阶段、容量阈值、上传启停/恢复组合；具体计算逻辑从示例提取                           | J19             |
+| [Radio Group](https://shadcnuikit.com/components/radio-group)         | IRadio、IRadioGroup                                        | 套餐/支付/配送/评分/色板/资源规格选择卡，带描述与条件表单                                     | J14             |
+| [Scroll Area](https://shadcnuikit.com/components/scroll-area)         | IScrollbar、IVirtualList、ISticky                          | 水平人员列表、分组吸顶动态、抽屉内滚动、聊天跟随新消息示例                                    | J22             |
+| [Select](https://shadcnuikit.com/components/select)                   | ISelect、ISelectInput                                      | 选项分组、头像/图标/描述/状态、自适应宽度、自定义选中展示、搜索+操作入口                      | J07             |
+| [Separator](https://shadcnuikit.com/components/separator)             | IDivider                                                   | 图标/文字/更多操作的横纵分隔配方；渐变示例登记为纯色替代                                      | J18             |
+| [Sheet](https://shadcnuikit.com/components/sheet)                     | IDrawer                                                    | 四方向、长滚动、表单编辑、个人资料面板组合；与 Drawer 共用任务                                | J20             |
+| [Sonner Toast](https://shadcnuikit.com/components/sonner-toast)       | 消息/通知体系                                              | Promise 生命周期、撤销动作、自定义通知体、位置切换的配方和能力核对；不引入同名库作为平行体系  | J19             |
+| [Skeleton](https://shadcnuikit.com/components/skeleton)               | ISkeleton                                                  | 用户/文章/卡片/列表/表格等与真实内容尺寸匹配的骨架配方与切换验证                              | J18             |
+| [Slider](https://shadcnuikit.com/components/slider)                   | ISlider、IRangeInput                                       | 刻度/端点、数值输入联动、价格范围、评价与多频段均衡器配方；不重复范围基础                     | J14             |
+| [Switch](https://shadcnuikit.com/components/switch)                   | ISwitch                                                    | 双侧标签、图标、说明型设置行、方形外观等变体核对补齐；均需文本状态                            | J14             |
+| [Table](https://shadcnuikit.com/components/table)                     | ITable                                                     | 固定列、样式密度与卡片表格、复杂单元格/操作列组合；与 Data Table 共用能力                     | J23、B05、B06   |
+| [Tabs](https://shadcnuikit.com/components/tabs)                       | ITabs、ISegmented                                          | 图标/徽标/计数、自定义标题、横向溢出及竖向等变体核对补齐                                      | J12             |
+| [Textarea](https://shadcnuikit.com/components/textarea)               | ITextarea，已有计数/上限/resize                            | 自动增高、浮动标签、带头像/工具栏/提示的输入组合                                              | J13             |
+| [Toggle](https://shadcnuikit.com/components/toggle)                   | ICheckTag 已有 aria-pressed，ISegmented 部分覆盖           | 通用图标 Toggle 外观与单选/多选 ToggleGroup；复用按压语义，补齐组键盘行为                     | J14T            |
+| [Tooltip](https://shadcnuikit.com/components/tooltip)                 | ITooltip、IPopover                                         | 标题/统计/产品预览、无箭头等配方核对；含交互动作时归 Popover/Hover Card                       | J04、J20        |
+
+### 11.3 可直接领取的待办拆分
+
+以下全部未完成。规模沿用 S/M/L；每行作为独立工作包，L 按“契约 → 各端实现 → 示例/验收”再拆 PR。名称是建议名，须经过 A01 的 API/命名审核。公共组件遵守既有多端一致性门槛；业务配方无需伪造多端能力。
+
+| 状态 / ID                      | 优先级 / 规模 | 交付与明确验收                                                                                                                                                     | 依赖 / 首个应用                      |
+| ------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| [ ] J01 附件展示               | P0 / M        | Attachment 契约含元信息/缩略图/尺寸/ready/uploading/processing/success/error；预览、下载、移除、重试事件分开；无上传入口也能展示；长文件名、失败缩略图不溢出       | F01、上传公共类型；ERP 单据、AI 对话 |
+| [ ] J02 上下文菜单             | P1 / M        | ContextMenu 支持鼠标坐标锚点、Shift+F10/Menu 键、边界翻转、关闭焦点返回；触屏有可见更多操作入口                                                                    | J03 菜单逻辑；OA 文件、Agent 画布    |
+| [ ] J03 菜单能力               | P0 / L        | 共用菜单项模型支持 action/checkbox/radio/submenu；禁用、勾选、快捷键、分组；验证方向键/退出/子菜单返回，不让选择状态与动作混淆                                     | A01；ERP 行操作、设置                |
+| [ ] J04 悬停资料卡             | P1 / M        | 复用 IPopover，补可配置开关延迟、指针经过间隙保持、焦点与触屏访问；提供用户/组织/资源资料配方；Tooltip 不承载可点击控件                                            | J06；OA 通讯录、ERP 客户             |
+| [ ] J05 应用菜单栏             | P1 / L        | Menubar 共用 J03 菜单模型；左右切换顶级菜单、上下进入菜单、Esc 分级退出、焦点唯一、快捷键展示                                                                      | J03；Agent Studio 编辑器             |
+| [ ] J05N 网站导航菜单          | P1 / M        | NavigationMenu 支持链接/富面板、多列、自适应布局、键盘进入离开、移动折叠和当前路由；不混用应用 menubar 角色                                                        | B01；门户、Patterns Lab              |
+| [ ] J06 可组合条目             | P0 / M        | Item/ItemGroup 的媒体、标题、描述、动作、头尾插槽；静态/链接/选择模式语义明确；整行点击不嵌套按钮；提供人员/模型/文件配方                                          | A01；OA 通讯录、AI 模型选择          |
+| [ ] J07 搜索与富选项选择       | P0 / L        | 在 ISelectInput 上统一 Combobox/Select 契约，复用 ISelect 单多选；分组、富选项、自适应面板、加载/空/失败、最近记录、清除；输入与选中值分离；异步旧响应不覆盖新查询 | A01、B10；ERP 商品/客户、AI 模型     |
+| [ ] J07N 原生选择器            | P1 / M        | NativeSelect 透传 name/form/required/disabled、option/optgroup；原生提交/重置一致；label 与错误关联；验证手机系统选择器                                            | J13；Mobile、设置                    |
+| [ ] J08 自动补全增强           | P1 / M        | IAutoComplete 分组/清空/异步状态/自动高亮选项；输入法期间不误选，旧结果取消或忽略；可自由输入与严格选择有明确区别                                                  | J07 共用查询状态；ERP 搜索           |
+| [ ] J09 命令中心增强           | P1 / L        | ICommandSearch 内嵌/弹层共用查询层；分类过滤、最近记录、富结果插槽、预览区、键盘帮助；切换分类不遗留无效高亮                                                       | J06；全部应用全局搜索                |
+| [ ] J10 展开原语与标题扩展     | P1 / M        | Collapsible 任意触发器/受控开合/内容卸载策略；ICollapse 补标题插槽和图标位置；aria-expanded/controls 完整，隐藏内容不可聚焦；提供文件/代码/回复配方                | A01；OA 评论、Agent 代码             |
+| [ ] J11 复合操作组             | P1 / M        | SplitButton 主动作与菜单动作明确；Input/Button/Select 混合组在不同尺寸/方向保持接缝、焦点可见；加载与禁用不重复提交                                                | J03、J07；ERP 批处理                 |
+| [ ] J12 导航变体               | P1 / M        | 分 3 个 PR：面包屑折叠；Tabs 富标题/溢出/方向；Pagination 配方与查询联动。逐项核对已有 API，仅补缺口；320px 长文案验证                                             | B01、B04；ERP/OA                     |
+| [ ] J13 字段体系与输入布局     | P0 / L        | Fieldset/Legend/FieldGroup/描述/错误语义；复合控件与动态字段；Textarea 自动增高；浮动/内嵌标签、帮助/成功/错误/计数/清空/复制配方；持久可访问名称                  | B08；ERP 表单、OA 审批               |
+| [ ] J14 选择与滑块配方         | P1 / L        | 分复选卡、单选卡、设置开关、滑块联动 4 个 PR；覆盖图标/头像/描述/套餐/支付/色板/条件字段/价格范围/均衡器；条件字段显隐有验证与焦点策略                             | J13；设置、ERP、Patterns Lab         |
+| [ ] J14T Toggle 与 ToggleGroup | P1 / M        | 复用 ICheckTag 按压行为，补图标/文字外观；组支持单选/多选、允许取消、方向/禁用/受控状态；键盘移动和 aria-pressed 正确                                              | A01；编辑器工具栏                    |
+| [ ] J15 日历面板增强           | P1 / L        | 分多月/快速年月导航、多选日期、自定义单元格 3 个 PR；保持现有单选/范围 API；禁用日期、跨年、区域周起始、价格文案无障碍验证                                         | B15；OA 日程、ERP 交期               |
+| [ ] J16 轮播增强               | P2 / L        | 多列/纵向、主图缩略图同步、自定义导航、计数/进度；保留手势/自动播放；禁用动效及键盘焦点进入暂停继续可用                                                            | H03；门户、商品资料                  |
+| [ ] J17 身份与徽标配方         | P1 / M        | 在线/认证/加载头像、群组溢出菜单、邀请空位、资料入口；链接/趋势/公告徽标配方；同时提供图标或文字状态                                                               | J03、J04；OA/ERP                     |
+| [ ] J18 内容与加载配方         | P1 / M        | Card 业务配方、横纵 Divider 内容插槽/纯色替代、Skeleton 场景配方；图片失败和加载到内容切换保持布局；不把每个卡片样式另发组件                                       | B17、H03；门户、Patterns Lab         |
+| [ ] J19 反馈与任务状态         | P0 / L        | 分 Alert/Empty、Spinner/Progress、Toast 3 个 PR；覆盖恢复动作、多原因、取消、阶段/容量、Promise 成功失败与撤销；消息 key 更新、重复点击、卸载后回调验证            | B02、B18；ERP 导入、OA 通知          |
+| [ ] J20 弹层业务配方           | P1 / L        | Modal/Confirm/Drawer/Popover 配方库；逐项覆盖 11.2 业务内容；验证长内容滚动、固定操作区、异步提交失败、关闭后焦点与表单数据策略                                    | J13、B09；ERP 新建、OA 审批          |
+| [ ] J21 专用输入               | P1 / L        | 分密码显隐/强度、电话国家码、掩码/支付字段 3 个 PR；显示值/提交值分离、粘贴/删除/输入法/自动填充正确；密码强度为前端提示，支付例不采集真实卡数据                   | J13；认证、ERP 联系人、Lab           |
+| [ ] J22 消息与滚动配方         | P1 / M        | 聊天气泡/附件/发送状态共用 F 系列；滚动区用户列表/吸顶分组/抽屉嵌套；用户上翻时不强制滚底，有新消息提示                                                            | J01、F04、F06；OA 消息、AI Chat      |
+| [ ] J23 数据表补充             | P0 / L        | 在 B04 ～ B07 增加明确子任务：展开行、行排序拖拽、列排序拖拽、固定列；提供键盘移动替代；排序/筛选后按稳定 ID 保持选择和展开，保存失败回滚                          | B04 ～ B07；ERP 订单                 |
+| [ ] J24 对照注册表与示例覆盖   | P0 / M        | 将本节分类/能力/任务/本地组件/示例路由/差异原因写入机器可读 registry；新增能力逐条状态记录；站内可按来源、组件、场景筛选，不用静态数量充当覆盖率                   | A01、G11、H01；Patterns Lab          |
+
+### 11.4 批次与应用验收路线
+
+1. **先建立核对基线**：J24 的 registry 骨架与 J07/J13/J03 的契约评审。保留现有组件 API，制定扩展与迁移策略。把每项标为 `missing-component`、`missing-capability`、`missing-recipe` 或 `intentional-difference`；发现已实现则附源码和示例证据，不直接删除记录。
+2. **ERP 首批**：J01、J06、J07、J13、J19、J23。用“搜索商品 → 新建采购单 → 添加附件 → 查询列表 → 展开/调整列 → 导入失败重试”串起表单、附件、数据表和反馈。
+3. **OA 与全局导航**：J02 ～ J05N、J08 ～ J12、J15、J17、J20、J22。用“搜索人员 → 悬停资料 → 发起审批 → 附件预览 → 评论回复 → 通知跳转”串起资料、菜单、消息和弹层。
+4. **Agent Studio / Patterns Lab**：J14、J14T、J18、J21；J16 放在门户与商品媒体需要时实施。补齐工具栏、模型选择、专用输入、卡片等配方。任何未被 ERP/OA 使用的变体必须在 Lab 有独立可访问示例，不能因缺少业务入口遗漏。
+
+上述路线是依赖排序，不是额外创建一套与第 9 节冲突的排期。J23 合并进 B04 ～ B07 的同一交付；J22 与 F04/F06 共用消息状态；J01 与 F05 共用附件数据。任务关联多个页面时只实现一次，消费端共享。
+
+### 11.5 每项关闭条件与来源边界
+
+- [ ] 在 registry 留存参考分类 URL、核对日期、本地组件/API、能力列表、示例路由、关联 PR、尚未覆盖状态与差异原因。把参考站仅有静态预览的能力标记清楚，不能宣称其服务端行为。
+- [ ] 每个缺失能力分别验收，不能因为新增了一个同名组件就把整分类勾完；对付费/隐藏变体只依据公开可观察内容规划，不复制其源码或受限资产。
+- [ ] 公共组件交付共享逻辑及必要端适配、消费端入口、文档与生成物；配方交付可复制组合和真实事件处理。复核浅/深主题、不同密度、320/390px、键盘、无障碍、动效关闭。
+- [ ] 业务页面覆盖正常/空/加载/失败/禁用/超长内容；异步类覆盖取消、乱序、重试，涉及选择的组件覆盖受控更新与表单重置。
+- [ ] 参考站不提供本任务要求的完整图标、图表、流程编辑器及智能体运行体系的穷尽目录；继续实施 C/D/E/F 系列，不能用本节替代这些既定任务。
+
+本次补充覆盖上述组件目录分类与公开可识别能力，不将站点其他导航下的付费 Blocks、整套商业模板或未来新增分类暗中计为已对照范围。后续定期重核 registry，新增分类以增量待办形式进入本节。
