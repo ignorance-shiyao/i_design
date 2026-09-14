@@ -575,7 +575,7 @@ H06（发布渠道与回滚演练）依赖 A03 与 H02，放在这一批收口�
 | B05 | ⬜ | ProTable 列能力未做 |
 | B06 | ⬜ | 树表/多级表头/分组汇总未做（`ITable` 只有基础排序与虚拟滚动） |
 | B07 | ⬜ | 批量操作栏未做（`ITable` 有行选择，但没有「跨页/全部匹配」的作用域与部分失败定位） |
-| B08 | ⬜ | SchemaForm 未做（`IForm`/`IFormItem`/`logic/validate.ts` 是它的地基） |
+| B08 | ✅ | `ISchemaForm` 五端 + `logic/schemaform.ts`（条件是数据、环检测、数组子表、服务端错误落位），40 条 Dart 对齐断言 |
 | B09 | ⬜ | FormPage/DrawerForm/ModalForm/StepForm 未做 |
 | B10 | 🟡 | `ITransfer`/`ITreeSelect`/`IMentions` 在，缺「远程检索 + 已选回显 + 禁用原因」的组合件 |
 | B11 | ⬜ | ImportWizard/ExportJob 未做（mock API 里已有 `importOrders` 的部分失败语义） |
@@ -663,7 +663,7 @@ H06（发布渠道与回滚演练）依赖 A03 与 H02，放在这一批收口�
 
 按依赖与阻塞面排，不按好做程度排：
 
-1. **B08 SchemaForm** —— 挡着 B09/B10/B11 与 E02，是 B 组里阻塞面最大的一个。
+1. ~~B08 SchemaForm~~ —— 已完成，B09/B10/B11 与 E02 的前置已解除。
 2. **B04 + B05 ProTable** —— 挡着 B06/B07/B11 与 G03 的组件化。
 3. **B01 AppShell 库组件** —— 示例层已经验证过形态，抽成组件即可，挡着 B12/B16/B17。
 4. **D04 渲染** —— 逻辑已就绪，补四端绘制即可收口。
