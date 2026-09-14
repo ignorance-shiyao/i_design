@@ -111,6 +111,34 @@ function act(name: string, key: string) {
     </DemoBlock>
 
     <DemoBlock
+      title="描边与填充"
+      description="描边在小尺寸、低对比的位置会「化掉」——徽标里的勾、16px 的状态点、移动端底栏的选中项。填充版把同一个形状做成实心，识别距离明显更远。不是每个图标都有填充版，没有的自动退回描边，任何时候都有东西可画。双色靠同一个 currentColor 的两档不透明度，不引第二种颜色：引入第二色就得为每个主题、每种底色重新验一遍对比度。"
+      lang="vue"
+      code='<IIcon name="check-circle" />
+<IIcon name="check-circle" variant="fill" />
+<IIcon name="user" variant="fill" />'
+    >
+      <span class="row">
+        <IIcon name="check-circle" :size="20" />
+        <IIcon name="info-circle" :size="20" />
+        <IIcon name="warning-triangle" :size="20" />
+        <IIcon name="error-circle" :size="20" />
+      </span>
+      <span class="row">
+        <IIcon name="check-circle" :size="20" variant="fill" />
+        <IIcon name="info-circle" :size="20" variant="fill" />
+        <IIcon name="warning-triangle" :size="20" variant="fill" />
+        <IIcon name="error-circle" :size="20" variant="fill" />
+        <IIcon name="user" :size="20" variant="fill" />
+      </span>
+      <span class="row">
+        <!-- 没有填充版的图标退回描边，而不是画一个空白 -->
+        <IIcon name="search" :size="20" variant="fill" />
+        <IIcon name="filter" :size="20" variant="fill" />
+      </span>
+    </DemoBlock>
+
+    <DemoBlock
       title="旋转与无障碍"
       description="spin 用于加载态；label 会输出 role=img + aria-label，不传则视为装饰性图标并对读屏隐藏。"
       lang="vue"

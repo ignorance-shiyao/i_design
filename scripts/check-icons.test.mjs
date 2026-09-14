@@ -70,6 +70,18 @@ test('单图标导出没跟着重新生成时失败', async (t) => {
   await assert.rejects(checkIcons(root), /单图标导出过期/)
 })
 
+test('填充版没有对应的描边版时失败——「退回描边」这条降级就落空了', async (t) => {
+  const root = fixture(t)
+  patch(root, 'packages/common/src/icons/filled.ts', "  pin: {", "  'only-filled': { path: 'M0 0h24v24H0z' },\n  pin: {")
+  await assert.rejects(checkIcons(root), /没有对应的描边版/)
+})
+
+test('填充路径里混进非路径数据时失败', async (t) => {
+  const root = fixture(t)
+  patch(root, 'packages/common/src/icons/filled.ts', "  pin: {\n    path: '", "  pin: {\n    path: '<script>")
+  await assert.rejects(checkIcons(root), /不是纯路径数据/)
+})
+
 test('业务词检索不到对应图标时失败——这是整层元数据存在的理由', async (t) => {
   const root = fixture(t)
   // 中文名本身就能命中，所以要把名字也一并改掉，才测得到「别名没覆盖业务词」这条路径

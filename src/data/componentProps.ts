@@ -458,6 +458,7 @@ export const componentProps: Record<string, PropMeta[]> = {
   IIcon: [
     {"name":"name","type":"IconName","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"path","type":"string","doc":"直接给 path 数据，跳过按名字查表。 只用少数几个图标、又在意体积时用它：`import { iconTrash }` 只会带走那一条， 而按名字查表是整张表一起进产物（表是一个对象，摇树摇不掉没用到的条目）。 小程序与 Flutter 没有 JS 摇树这回事，那两端不提供这个属性。","optional":true,"defaultText":"undefined","control":{"kind":"string"}},
+    {"name":"variant","type":"'stroke' | 'fill'","doc":"描边还是填充。 填充用在小尺寸、低对比的位置：徽标里的勾、16px 的状态点、 移动端底栏的选中项——描边在那些地方会「化掉」。 没有填充版的图标自动退回描边，任何时候都有东西可画。","optional":true,"defaultText":"'stroke'","control":{"kind":"enum","options":["stroke","fill"]}},
     {"name":"size","type":"number | string","doc":"尺寸跟随字号更自然，传数字则按 px","optional":true,"defaultText":"'1em'","control":null},
     {"name":"strokeWidth","type":"number","doc":"线宽；小尺寸下适当加粗才不显虚","optional":true,"defaultText":"1.8","control":{"kind":"number"}},
     {"name":"label","type":"string","doc":"无障碍标签；不传时视为装饰性图标，对读屏隐藏","optional":true,"defaultText":"''","control":{"kind":"string"}},

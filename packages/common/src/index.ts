@@ -72,6 +72,7 @@ export * from './logic/linkage'
 export * from './contracts/graph'
 export * from './logic/graph'
 export * from './icons/meta'
+export * from './icons/filled'
 /*
  * 插画不走主入口，用的人从 @i-design/common/illustrations 引。
  *

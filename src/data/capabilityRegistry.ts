@@ -2265,14 +2265,19 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/icon",
       "page": "src/pages/components/IconPage.vue",
-      "demos": 2
+      "demos": 3
     },
     "demoRoutes": [
       "/components/icon",
       "/components/badge",
       "/components/popconfirm"
     ],
-    "states": {}
+    "states": {
+      "variant": [
+        "stroke",
+        "fill"
+      ]
+    }
   },
   {
     "name": "IImage",
