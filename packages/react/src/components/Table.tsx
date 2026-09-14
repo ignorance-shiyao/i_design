@@ -86,13 +86,28 @@ export function Table<T extends Record<string, any>>({
     return out
   }, [virtual, rows, win.start, win.end])
 
+  /*
+   * 能不能横向滚、有没有滚到头：右边缘的淡出靠它。手机上量到的问题是最后一列
+   * 被切成「¥ 49,」，读者会以为表坏了，而不是还能往右拖。
+   */
+  const [scrollX, setScrollX] = useState(false)
+  const [scrollEnd, setScrollEnd] = useState(false)
+  const measureScrollX = useCallback(() => {
+    const el = wrap.current
+    if (!el) return
+    setScrollX(el.scrollWidth - el.clientWidth > 1)
+    setScrollEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1)
+  }, [])
+
   /* 滚动事件远多于帧，而每次都要读一次布局 */
   const onScroll = useMemo(
     () =>
       rafThrottle(() => {
-        if (wrap.current) setScrollTop(wrap.current.scrollTop)
+        if (!wrap.current) return
+        setScrollTop(wrap.current.scrollTop)
+        measureScrollX()
       }),
-    []
+    [measureScrollX]
   )
   useEffect(() => () => onScroll.cancel(), [onScroll])
 
@@ -100,9 +115,10 @@ export function Table<T extends Record<string, any>>({
     const el = wrap.current
     if (!el) return
     setViewportHeight(el.clientHeight)
+    measureScrollX()
     const first = el.querySelector<HTMLElement>('tbody tr:not(.i-table-c__spacer)')
     if (first && first.offsetHeight > 0) setRowHeight(first.offsetHeight)
-  }, [])
+  }, [measureScrollX])
 
   useLayoutEffect(measure, [measure, height, rows.length])
 
@@ -156,7 +172,14 @@ export function Table<T extends Record<string, any>>({
   return (
     <div
       ref={wrap}
-      className={['i-table-wrap', height ? 'is-scrollable' : ''].filter(Boolean).join(' ')}
+      className={[
+        'i-table-wrap',
+        height ? 'is-scrollable' : '',
+        scrollX ? 'is-scroll-x' : '',
+        scrollEnd ? 'is-scroll-end' : ''
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{ height: height || undefined }}
       onScroll={onScroll}
     >

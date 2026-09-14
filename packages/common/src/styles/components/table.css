@@ -89,3 +89,24 @@
   padding: 0;
   pointer-events: none;
 }
+
+/*
+ * 右边被截断的那一列要看得出「还能往右拖」。
+ *
+ * 手机上量到的：最后一列的金额被切成「¥ 49,」——读者第一反应是「这表坏了」，
+ * 而不是「它还能横向滚」。用一层渐变遮罩在右边缘做出淡出，
+ * 淡出的意思是「后面还有」，比一条硬边界诚实。
+ *
+ * 这是 CLAUDE.md 允许的那类渐变：它描述的是容器边缘的质感，不是某个控件的颜色。
+ * 只在真的能滚时才加（is-scroll-x 由 IE… 由组件在测出 scrollWidth > clientWidth 时挂上）。
+ */
+.i-table-wrap.is-scroll-x {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+}
+
+/* 滚到头之后不该再淡出：那会让人以为后面永远还有内容 */
+.i-table-wrap.is-scroll-x.is-scroll-end {
+  -webkit-mask-image: none;
+  mask-image: none;
+}

@@ -158,4 +158,21 @@
   .i-app-shell__user {
     display: none;
   }
+
+  /*
+   * 顶栏中段（应用切换、搜索这类）在窄屏上单独占一行，而不是和标题挤在一起：
+   * 挤在一起时标题被推到左边一小块，中段被裁掉一半——两样都读不成。
+   * 也不能直接藏掉：有的应用只把入口放在这里，藏了等于入口消失。
+   */
+  .i-app-shell__bar {
+    flex-wrap: wrap;
+    height: auto;
+    padding-block: var(--i-spacing-2);
+    row-gap: var(--i-spacing-2);
+  }
+
+  .i-app-shell__slot {
+    flex-basis: 100%;
+    order: 1;
+  }
 }
