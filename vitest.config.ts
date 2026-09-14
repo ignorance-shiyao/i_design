@@ -9,6 +9,6 @@ export default defineConfig({
      * 让 vitest 也去收那个文件的话，它会因为断言库不同而直接失败——
      * 不是那份测试有问题，是两套跑法撞在了一起。
      */
-    include: ['packages/*/src/**/*.test.ts', 'src/**/*.test.ts']
+    include: ['packages/*/src/**/*.test.ts', 'src/**/*.test.ts', 'examples/*/src/**/*.test.ts']
   }
 })

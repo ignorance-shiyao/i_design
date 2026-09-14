@@ -121,8 +121,8 @@ function checkIcons(root, problems) {
 
 export function checkStyleRules(root = process.cwd()) {
   const problems = []
-  const files = ['src', 'packages']
-    .flatMap((dir) => walk(resolve(root, dir)))
+  const files = ['src', 'packages', 'examples']
+    .flatMap((dir) => { try { return walk(resolve(root, dir)) } catch { return [] } })
     .map((f) => relative(root, f))
     .filter((f) => !TOKEN_FILES.test(f))
     .sort()

@@ -18,7 +18,8 @@ const SKIP = /(^|\/)(node_modules|dist|\.git)$/
 const RENDER_DIRS = [
   'src/components', 'src/pages',
   'packages/vue-next/src', 'packages/vue/src/components',
-  'packages/react/src/components', 'packages/mobile-vue/src', 'packages/mobile-react/src'
+  'packages/react/src/components', 'packages/mobile-vue/src', 'packages/mobile-react/src',
+  'examples'
 ]
 const VENDOR_FIELDS = /\.(choices|candidates|completion_tokens|prompt_tokens)\b/
 
