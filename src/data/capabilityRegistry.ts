@@ -3254,6 +3254,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IQueryFilter",
+    "sources": {
+      "vue-next": "src/components/IQueryFilter.vue",
+      "vue": "packages/vue/src/components/IQueryFilter.vue",
+      "react": "packages/react/src/components/QueryFilter.tsx",
+      "miniprogram": "packages/miniprogram/src/components/query-filter",
+      "flutter": "packages/flutter/lib/src/components/i_query_filter.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/table"
+    ],
+    "states": {}
+  },
+  {
     "name": "IRadio",
     "sources": {
       "vue-next": "src/components/IRadio.vue",
@@ -4123,7 +4153,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/table",
       "page": "src/pages/components/TablePage.vue",
-      "demos": 5
+      "demos": 6
     },
     "demoRoutes": [
       "/components/collapse",

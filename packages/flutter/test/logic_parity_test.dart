@@ -12,6 +12,7 @@ import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/axis.dart';
+import 'package:i_design/src/logic/query.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
@@ -660,6 +661,71 @@ void main() {
     expect(showLabelAt(8, 90, 8), true);
     expect(showLabelAt(88, 90, 8), false);
     expect(showLabelAt(89, 90, 8), true);
+  });
+
+  test('查询条件的状态机与 Web 端一致', () {
+    final fields = <IFilterField>[IFilterField(name: 'keyword', label: '关键词', kind: IFilterKind.text), IFilterField(name: 'status', label: '状态', kind: IFilterKind.select, options: <IFilterOption>[IFilterOption(value: 'open', label: '进行中'), IFilterOption(value: 'done', label: '已完成')]), IFilterField(name: 'tags', label: '标签', kind: IFilterKind.multiSelect, options: <IFilterOption>[IFilterOption(value: 'vip', label: 'VIP'), IFilterOption(value: 'new', label: '新客')]), IFilterField(name: 'created', label: '创建时间', kind: IFilterKind.dateRange)];
+    final start = const IQueryState(values: <String, Object>{'status': 'open'}, page: 3, pageSize: 20);
+    expect(changeFilter(start, 'keyword', '订单').page, 1);
+    expect(changeFilter(start, 'status', 'open').page, 3);
+    expect(clearFilters(const IQueryState(values: <String, Object>{'keyword': 'x'}, page: 5, pageSize: 50)).pageSize, 50);
+    expect(clearFilters(const IQueryState(values: <String, Object>{'keyword': 'x'}, page: 5, pageSize: 50)).values.length, 0);
+    expect(applyQuickFilter(start, const IQuickFilter(key: 'mine', label: '我的进行中', values: <String, Object>{'status': 'open'})).page, 1);
+    expect(matchQuickFilter(const <String, Object>{'status': 'open'}, const IQuickFilter(key: 'mine', label: '我的进行中', values: <String, Object>{'status': 'open'})), true);
+    expect(matchQuickFilter(const <String, Object>{'status': 'open', 'keyword': 'x'}, const IQuickFilter(key: 'mine', label: '我的进行中', values: <String, Object>{'status': 'open'})), false);
+  });
+
+  test('查询参数序列化与 Web 端一致（键顺序也要一样）', () {
+    final fields = <IFilterField>[IFilterField(name: 'keyword', label: '关键词', kind: IFilterKind.text), IFilterField(name: 'status', label: '状态', kind: IFilterKind.select, options: <IFilterOption>[IFilterOption(value: 'open', label: '进行中'), IFilterOption(value: 'done', label: '已完成')]), IFilterField(name: 'tags', label: '标签', kind: IFilterKind.multiSelect, options: <IFilterOption>[IFilterOption(value: 'vip', label: 'VIP'), IFilterOption(value: 'new', label: '新客')]), IFilterField(name: 'created', label: '创建时间', kind: IFilterKind.dateRange)];
+    final s0 = serializeQuery(IQueryState(values: <String, Object>{'status': 'open', 'keyword': 'x'}, page: 1, pageSize: 20), fields);
+    expect(s0.keys.toList(), <String>['keyword', 'status']);
+    expect(s0['keyword'], 'x');
+    expect(s0['status'], 'open');
+    final s1 = serializeQuery(IQueryState(values: <String, Object>{'tags': <String>['vip', 'new'], 'created': IFilterRange(from: '2024-01-01', to: '2024-03-31')}, page: 4, pageSize: 50), fields);
+    expect(s1.keys.toList(), <String>['created', 'tags', 'page', 'pageSize']);
+    expect(s1['created'], '2024-01-01~2024-03-31');
+    expect(s1['tags'], 'vip,new');
+    expect(s1['page'], '4');
+    expect(s1['pageSize'], '50');
+    final s2 = serializeQuery(IQueryState(values: <String, Object>{}, page: 1, pageSize: 20), fields);
+    expect(s2.keys.toList(), <String>[]);
+  });
+
+  test('无效查询参数的判定与文案与 Web 端一致', () {
+    final fields = <IFilterField>[IFilterField(name: 'keyword', label: '关键词', kind: IFilterKind.text), IFilterField(name: 'status', label: '状态', kind: IFilterKind.select, options: <IFilterOption>[IFilterOption(value: 'open', label: '进行中'), IFilterOption(value: 'done', label: '已完成')]), IFilterField(name: 'tags', label: '标签', kind: IFilterKind.multiSelect, options: <IFilterOption>[IFilterOption(value: 'vip', label: 'VIP'), IFilterOption(value: 'new', label: '新客')]), IFilterField(name: 'created', label: '创建时间', kind: IFilterKind.dateRange)];
+    final p0 = parseQuery(const <String, String>{'status': 'archived'}, fields);
+    expect(p0.state.page, 1);
+    expect(p0.state.values.length, 0);
+    expect(p0.invalid.length, 1);
+    expect(p0.invalid[0].reason, '状态 里没有这个取值');
+    final p1 = parseQuery(const <String, String>{'tags': 'vip,ghost'}, fields);
+    expect(p1.state.page, 1);
+    expect(p1.state.values.length, 1);
+    expect(p1.invalid.length, 1);
+    expect(p1.invalid[0].reason, '标签 里没有这个取值');
+    final p2 = parseQuery(const <String, String>{'removedField': 'x'}, fields);
+    expect(p2.state.page, 1);
+    expect(p2.state.values.length, 0);
+    expect(p2.invalid.length, 1);
+    expect(p2.invalid[0].reason, '这个筛选项已经不存在了');
+    final p3 = parseQuery(const <String, String>{'created': '2024-05-01~2024-01-01'}, fields);
+    expect(p3.state.page, 1);
+    expect(p3.state.values.length, 0);
+    expect(p3.invalid.length, 1);
+    expect(p3.invalid[0].reason, '创建时间 的开始晚于结束');
+    final p4 = parseQuery(const <String, String>{'created': '2024-01-01~'}, fields);
+    expect(p4.state.page, 1);
+    expect(p4.state.values.length, 1);
+    expect(p4.invalid.length, 0);
+    final p5 = parseQuery(const <String, String>{'page': '0'}, fields);
+    expect(p5.state.page, 1);
+    expect(p5.state.values.length, 0);
+    expect(p5.invalid.length, 1);
+    expect(p5.invalid[0].reason, '页码不是正整数');
+    final p6 = parseQuery(const <String, String>{'status': 'open', 'page': '2'}, fields);
+    expect(p6.state.page, 2);
+    expect(p6.state.values.length, 1);
+    expect(p6.invalid.length, 0);
   });
 
   test('值轴刻度与像素位置横纵一致，与 Web 端一致', () {

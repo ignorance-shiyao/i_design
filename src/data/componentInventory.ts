@@ -113,6 +113,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IProgress.vue",
   "src/components/IPromptInput.vue",
   "src/components/IQrcode.vue",
+  "src/components/IQueryFilter.vue",
   "src/components/IRadio.vue",
   "src/components/IRadioGroup.vue",
   "src/components/IRangeInput.vue",

@@ -1,0 +1,84 @@
+<view class="i-query">
+  <!-- 快捷筛选在最前：它替代的是「手工把三个条件依次选一遍」 -->
+  <view wx:if="{{quickState.length}}" class="i-query__quick">
+    <view
+      wx:for="{{quickState}}"
+      wx:key="key"
+      class="i-query__quick-item {{item.on ? 'is-on' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="onQuick"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="i-query__grid">
+    <view wx:for="{{shownFields}}" wx:key="name" class="i-query__field">
+      <text class="i-query__label">{{item.label}}</text>
+
+      <input
+        wx:if="{{item.isText}}"
+        class="i-input"
+        value="{{item.text}}"
+        placeholder="{{item.placeholder}}"
+        data-name="{{item.name}}"
+        bindinput="onText"
+      />
+
+      <!-- 小程序没有等价的下拉：用 picker 承接，取值与 Web 端完全一致 -->
+      <picker
+        wx:elif="{{item.isSelect}}"
+        range="{{item.options}}"
+        range-key="label"
+        data-name="{{item.name}}"
+        bindchange="onSelect"
+      >
+        <view class="i-query__picker">{{item.text || '全部'}}</view>
+      </picker>
+
+      <!-- 多选用一排可切换的标签：下拉里的多选要点开才看得见已选了什么 -->
+      <view wx:elif="{{item.isMulti}}" class="i-query__tags">
+        <view
+          wx:for="{{item.tagOptions}}"
+          wx:for-item="option"
+          wx:key="value"
+          class="i-query__tag {{option.on ? 'is-on' : ''}}"
+          data-name="{{item.name}}"
+          data-value="{{option.value}}"
+          bindtap="onToggleTag"
+        >{{option.label}}</view>
+      </view>
+
+      <view wx:else class="i-query__range">
+        <input
+          class="i-input"
+          type="{{item.inputType}}"
+          value="{{item.from}}"
+          data-name="{{item.name}}"
+          data-part="from"
+          bindinput="onRange"
+        />
+        <text class="i-query__range-sep">–</text>
+        <input
+          class="i-input"
+          type="{{item.inputType}}"
+          value="{{item.to}}"
+          data-name="{{item.name}}"
+          data-part="to"
+          bindinput="onRange"
+        />
+      </view>
+    </view>
+  </view>
+
+  <view class="i-query__actions">
+    <view wx:if="{{active > 0}}" class="i-query__clear" bindtap="onClear">清空条件（{{active}}）</view>
+    <view wx:if="{{hiddenCount > 0 || !folded}}" class="i-query__fold" bindtap="onFold">
+      {{folded ? '展开其余 ' + hiddenCount + ' 项' : '收起'}}
+    </view>
+  </view>
+
+  <!-- 无效参数逐条说：链接是别人发给你的，你有权知道哪一条没生效 -->
+  <view wx:if="{{invalid.length}}" class="i-query__invalid">
+    链接里有 {{invalid.length}} 个条件没生效：
+    <text wx:for="{{invalid}}" wx:key="name">{{item.name}}=「{{item.raw}}」{{item.reason}} </text>
+  </view>
+</view>

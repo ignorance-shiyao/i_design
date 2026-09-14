@@ -13,6 +13,7 @@ import IInputNumber from './IInputNumber.vue'
 import IInputOtp from './IInputOtp.vue'
 import ISlider from './ISlider.vue'
 import IQrcode from './IQrcode.vue'
+import IQueryFilter from './IQueryFilter.vue'
 import IRangeInput from './IRangeInput.vue'
 import IRate from './IRate.vue'
 import ILink from './ILink.vue'
@@ -251,6 +252,7 @@ export {
   IInputOtp,
   ISlider,
   IQrcode,
+  IQueryFilter,
   IRangeInput,
   IRate,
   ILayout,
@@ -367,6 +369,7 @@ const components = {
   IInputOtp,
   ISlider,
   IQrcode,
+  IQueryFilter,
   IRangeInput,
   IRate,
   ILayout,

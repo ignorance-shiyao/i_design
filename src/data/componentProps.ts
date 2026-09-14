@@ -670,6 +670,14 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"background","type":"string","doc":"","optional":true,"defaultText":"'#ffffff'","control":{"kind":"string"}},
     {"name":"label","type":"string","doc":"码下方的说明文字","optional":true,"defaultText":"''","control":{"kind":"string"}},
   ],
+  IQueryFilter: [
+    {"name":"fields","type":"FilterField[]","doc":"字段定义；顺序即显示顺序","optional":false,"defaultText":null,"control":null},
+    {"name":"modelValue","type":"QueryState","doc":"当前条件与分页。受控：组件不自己存状态","optional":false,"defaultText":null,"control":null},
+    {"name":"quickFilters","type":"QuickFilter[]","doc":"快捷筛选：点一下整套替换当前条件","optional":true,"defaultText":"() => []","control":null},
+    {"name":"invalid","type":"InvalidParam[]","doc":"解析链接时认不出来的参数，逐条显示","optional":true,"defaultText":"() => []","control":null},
+    {"name":"collapsedCount","type":"number","doc":"折叠时最多显示几个字段；标了 always 的不计入","optional":true,"defaultText":"3","control":{"kind":"number"}},
+    {"name":"collapsed","type":"boolean","doc":"默认是否折叠","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
+  ],
   IRadio: [
     {"name":"modelValue","type":"string | number | boolean","doc":"","optional":true,"defaultText":"undefined","control":null},
     {"name":"value","type":"string | number | boolean","doc":"","optional":false,"defaultText":null,"control":null},

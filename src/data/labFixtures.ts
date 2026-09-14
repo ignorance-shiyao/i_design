@@ -229,6 +229,34 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
       { value: 'help', label: '帮助', icon: 'info-circle' }
     ]
   },
+  IQueryFilter: {
+    fields: [
+      { name: 'keyword', label: '关键词', kind: 'text', placeholder: '单号或客户', always: true },
+      {
+        name: 'status',
+        label: '状态',
+        kind: 'select',
+        options: [
+          { value: 'open', label: '进行中' },
+          { value: 'done', label: '已完成' }
+        ],
+        always: true
+      },
+      {
+        name: 'owner',
+        label: '负责人',
+        kind: 'multi-select',
+        options: [
+          { value: 'lin', label: '林岚' },
+          { value: 'shen', label: '沈黎' }
+        ]
+      },
+      { name: 'created', label: '创建时间', kind: 'date-range' },
+      { name: 'amount', label: '金额', kind: 'number-range' }
+    ],
+    modelValue: { values: { status: 'open' }, page: 1, pageSize: 20 },
+    quickFilters: [{ key: 'open', label: '进行中', values: { status: 'open' } }]
+  },
   ITable: {
     columns: [
       { key: 'id', title: '单号' },

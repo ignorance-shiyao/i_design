@@ -97,6 +97,7 @@
 @import './components/prompt-input.css';
 @import './components/pull-refresh.css';
 @import './components/qrcode.css';
+@import './components/query-filter.css';
 @import './components/radio-group.css';
 @import './components/radio.css';
 @import './components/range-input.css';

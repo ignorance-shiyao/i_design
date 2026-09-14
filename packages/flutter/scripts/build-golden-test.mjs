@@ -518,6 +518,13 @@ const {
 const { valueAxis, categoryBands, barRect, rankOrder, dualAxis } =
   await bundle('packages/common/src/logic/axis.ts', 'axis')
 
+/* ---------- 查询条件：状态机与参数往返 ----------
+ * pro 层第一个五端切片。条件一变回第一页、参数往返无损、无效参数逐条报出来——
+ * 三条抄错都不会报错，只会让某个端悄悄地表现得不一样。
+ */
+const { changeFilter, clearFilters, applyQuickFilter, matchQuickFilter, serializeQuery, parseQuery } =
+  await bundle('packages/common/src/logic/query.ts', 'query')
+
 /* ---------- 流程图：框选、批量移动与节点缩放 ----------
  * 三条都是「抄错也不会报错」的规则：命中判定改成相交、位移逐个吸附、
  * 缩放时对角没固定住——每一条都只表现为手感不对，构建全绿。
@@ -753,6 +760,84 @@ const dualExpectations = [
     ]
   }),
 ]
+
+const queryFields = [
+  { name: 'keyword', label: '关键词', kind: 'text' },
+  { name: 'status', label: '状态', kind: 'select', options: [{ value: 'open', label: '进行中' }, { value: 'done', label: '已完成' }] },
+  { name: 'tags', label: '标签', kind: 'multi-select', options: [{ value: 'vip', label: 'VIP' }, { value: 'new', label: '新客' }] },
+  { name: 'created', label: '创建时间', kind: 'date-range' },
+]
+const filterKind = { text: 'text', select: 'select', 'multi-select': 'multiSelect', 'date-range': 'dateRange', 'number-range': 'numberRange' }
+const dartFields = `<IFilterField>[${queryFields
+  .map((f) => {
+    const options = (f.options ?? [])
+      .map((o) => `IFilterOption(value: '${o.value}', label: '${o.label}')`)
+      .join(', ')
+    return `IFilterField(name: '${f.name}', label: '${f.label}', kind: IFilterKind.${filterKind[f.kind]}${options ? `, options: <IFilterOption>[${options}]` : ''})`
+  })
+  .join(', ')}]`
+
+const startState = { values: { status: 'open' }, page: 3, pageSize: 20 }
+const dartStart = `const IQueryState(values: <String, Object>{'status': 'open'}, page: 3, pageSize: 20)`
+const changed = changeFilter(startState, 'keyword', '订单')
+const unchanged = changeFilter(startState, 'status', 'open')
+const cleared = clearFilters({ values: { keyword: 'x' }, page: 5, pageSize: 50 })
+const quick = { key: 'mine', label: '我的进行中', values: { status: 'open' } }
+const dartQuick = `const IQuickFilter(key: 'mine', label: '我的进行中', values: <String, Object>{'status': 'open'})`
+
+const queryExpectations = [
+  `    final fields = ${dartFields};`,
+  `    final start = ${dartStart};`,
+  // 条件一变就回第一页；同一个值再选一遍不打断翻页
+  `    expect(changeFilter(start, 'keyword', '订单').page, ${changed.page});`,
+  `    expect(changeFilter(start, 'status', 'open').page, ${unchanged.page});`,
+  `    expect(clearFilters(const IQueryState(values: <String, Object>{'keyword': 'x'}, page: 5, pageSize: 50)).pageSize, ${cleared.pageSize});`,
+  `    expect(clearFilters(const IQueryState(values: <String, Object>{'keyword': 'x'}, page: 5, pageSize: 50)).values.length, ${Object.keys(cleared.values).length});`,
+  `    expect(applyQuickFilter(start, ${dartQuick}).page, ${applyQuickFilter(startState, quick).page});`,
+  `    expect(matchQuickFilter(const <String, Object>{'status': 'open'}, ${dartQuick}), ${matchQuickFilter({ status: 'open' }, quick)});`,
+  `    expect(matchQuickFilter(const <String, Object>{'status': 'open', 'keyword': 'x'}, ${dartQuick}), ${matchQuickFilter({ status: 'open', keyword: 'x' }, quick)});`,
+]
+
+const serializeCases = [
+  { values: { status: 'open', keyword: 'x' }, page: 1, pageSize: 20 },
+  { values: { tags: ['vip', 'new'], created: { from: '2024-01-01', to: '2024-03-31' } }, page: 4, pageSize: 50 },
+  { values: {}, page: 1, pageSize: 20 },
+]
+const dartValue = (v) => {
+  if (typeof v === 'string') return `'${v}'`
+  if (Array.isArray(v)) return `<String>[${v.map((x) => `'${x}'`).join(', ')}]`
+  return `IFilterRange(from: ${v.from ? `'${v.from}'` : 'null'}, to: ${v.to ? `'${v.to}'` : 'null'})`
+}
+const serializeExpectations = serializeCases.flatMap((state, i) => {
+  const params = serializeQuery(state, queryFields)
+  const values = Object.entries(state.values).map(([k, v]) => `'${k}': ${dartValue(v)}`).join(', ')
+  return [
+    `    final s${i} = serializeQuery(IQueryState(values: <String, Object>{${values}}, page: ${state.page}, pageSize: ${state.pageSize}), fields);`,
+    `    expect(s${i}.keys.toList(), <String>[${Object.keys(params).map((k) => `'${k}'`).join(', ')}]);`,
+    ...Object.entries(params).map(([k, v]) => `    expect(s${i}['${k}'], '${v}');`),
+  ]
+})
+
+const queryParseCases = [
+  { status: 'archived' },
+  { tags: 'vip,ghost' },
+  { removedField: 'x' },
+  { created: '2024-05-01~2024-01-01' },
+  { created: '2024-01-01~' },
+  { page: '0' },
+  { status: 'open', page: '2' },
+]
+const queryParseExpectations = queryParseCases.flatMap((params, i) => {
+  const r = parseQuery(params, queryFields)
+  const entries = Object.entries(params).map(([k, v]) => `'${k}': '${v}'`).join(', ')
+  return [
+    `    final p${i} = parseQuery(const <String, String>{${entries}}, fields);`,
+    `    expect(p${i}.state.page, ${r.state.page});`,
+    `    expect(p${i}.state.values.length, ${Object.keys(r.state.values).length});`,
+    `    expect(p${i}.invalid.length, ${r.invalid.length});`,
+    ...r.invalid.map((inv, k) => `    expect(p${i}.invalid[${k}].reason, '${inv.reason}');`),
+  ]
+})
 
 const sankeyCases = [
   { from: 'visit', to: 'leave', value: 600 },
@@ -2447,6 +2532,7 @@ import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/axis.dart';
+import 'package:i_design/src/logic/query.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
@@ -2712,6 +2798,20 @@ ${ratioExpectations.join('\n')}
   test('轴标签抽稀与 Web 端一致', () {
 ${ai_stepExpectations.join('\n')}
 ${showExpectations.join('\n')}
+  });
+
+  test('查询条件的状态机与 Web 端一致', () {
+${queryExpectations.join('\n')}
+  });
+
+  test('查询参数序列化与 Web 端一致（键顺序也要一样）', () {
+    final fields = ${dartFields};
+${serializeExpectations.join('\n')}
+  });
+
+  test('无效查询参数的判定与文案与 Web 端一致', () {
+    final fields = ${dartFields};
+${queryParseExpectations.join('\n')}
   });
 
   test('值轴刻度与像素位置横纵一致，与 Web 端一致', () {
