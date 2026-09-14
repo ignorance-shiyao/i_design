@@ -2783,6 +2783,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IMessageParts",
+    "sources": {
+      "vue-next": "src/components/IMessageParts.vue",
+      "vue": "packages/vue/src/components/IMessageParts.vue",
+      "react": "packages/react/src/components/MessageParts.tsx",
+      "miniprogram": "packages/miniprogram/src/components/message-parts",
+      "flutter": "packages/flutter/lib/src/components/i_message_parts.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/chat"
+    ],
+    "states": {}
+  },
+  {
     "name": "IModal",
     "sources": {
       "vue-next": "src/components/IModal.vue",

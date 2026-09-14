@@ -32,6 +32,7 @@ defineProps<{ blocks: MdBlock[] }>()
       :code="block.text"
       :lang="block.lang || undefined"
       :copyable="!block.open"
+      :streaming="block.open"
     />
 
     <blockquote v-else-if="block.type === 'quote'" class="i-md__quote">

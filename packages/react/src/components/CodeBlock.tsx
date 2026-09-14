@@ -3,7 +3,7 @@ import {
   dedentCode,
   diffLines as buildDiff,
   diffStat,
-  tokenizeLines,
+  tokenizeLines, shouldHighlight, plainLines,
   type CodeToken
 } from '@i-design/common'
 import { useConfig } from './ConfigProvider'
@@ -28,6 +28,8 @@ export interface CodeBlockProps {
   lineNumbers?: boolean
   /** 显示复制按钮 */
   copyable?: boolean
+  /** 还在流式输出中：染色阈值收紧，因为每来一片都要重算一次 */
+  streaming?: boolean
   /** 改动前的内容。给了就切成统一 diff 视图 */
   before?: string
   /** 超过多少行折叠起来；0 表示不折叠 */
@@ -49,6 +51,7 @@ export function CodeBlock({
   filename = '',
   lineNumbers = true,
   copyable = true,
+  streaming = false,
   before = '',
   maxLines = 0,
   onCopy,
@@ -63,7 +66,12 @@ export function CodeBlock({
   const isDiff = before !== ''
   const diff = isDiff ? buildDiff(dedentCode(before), source) : []
   const stat = diffStat(diff)
-  const lines = tokenizeLines(source, lang)
+  /*
+   * 超过阈值就不染色：染色是同步的，五千行 TS 实测 177ms，
+   * 而流式输出时每来一片都会把整块重染一遍，用户会发现输入框卡住了。
+   * 没有颜色的代码仍然能读，卡住的输入框没法用。
+   */
+  const lines = shouldHighlight(source, streaming) ? tokenizeLines(source, lang) : plainLines(source)
   const total = isDiff ? diff.length : lines.length
   const clipped = maxLines > 0 && total > maxLines
 

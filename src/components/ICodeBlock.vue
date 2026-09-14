@@ -15,7 +15,7 @@ import {
   dedentCode,
   diffLines as buildDiff,
   diffStat,
-  tokenizeLines,
+  tokenizeLines, shouldHighlight, plainLines,
   type CodeToken,
   type DiffLine
 } from '@i-design/common'
@@ -31,6 +31,8 @@ const props = withDefaults(
     lineNumbers?: boolean
     /** 显示复制按钮 */
     copyable?: boolean
+    /** 还在流式输出中：染色阈值收紧，因为每来一片都要重算一次 */
+    streaming?: boolean
     /**
      * 改动前的内容。给了就切成统一 diff 视图：
      * `code` 是改动后的样子，这里是改动前的。
@@ -44,6 +46,7 @@ const props = withDefaults(
     filename: '',
     lineNumbers: true,
     copyable: true,
+    streaming: false,
     before: '',
     maxLines: 0
   }
@@ -66,8 +69,17 @@ const diff = computed<DiffLine[]>(() =>
 )
 const stat = computed(() => diffStat(diff.value))
 
-/** 普通视图：每行一串 token */
-const lines = computed<CodeToken[][]>(() => tokenizeLines(source.value, props.lang))
+/*
+ * 普通视图：每行一串 token。
+ *
+ * 超过阈值就不染色了——染色是同步的，五千行 TS 实测 177ms，
+ * 而流式输出时每来一片都会把整块重染一遍，用户会发现自己的输入框卡住了。
+ * 没有颜色的代码仍然能读，卡住的输入框没法用。
+ */
+const highlighted = computed(() => shouldHighlight(source.value, props.streaming))
+const lines = computed<CodeToken[][]>(() =>
+  highlighted.value ? tokenizeLines(source.value, props.lang) : plainLines(source.value)
+)
 
 /** diff 视图：每行的 token 单独切，否则跨行的字符串会把后面几行一起染色 */
 const diffTokens = computed(() => diff.value.map((line) => tokenizeLines(line.text, props.lang)[0] ?? []))

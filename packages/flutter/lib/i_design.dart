@@ -138,6 +138,7 @@ export 'src/components/i_loading.dart';
 export 'src/components/i_markdown.dart';
 export 'src/components/i_mentions.dart';
 export 'src/components/i_menu.dart';
+export 'src/components/i_message_parts.dart';
 export 'src/components/i_modal.dart';
 export 'src/components/i_notification.dart';
 export 'src/components/i_number_keypad.dart';

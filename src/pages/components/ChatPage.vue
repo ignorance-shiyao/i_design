@@ -7,6 +7,8 @@ import IChatToolCall from '@/components/IChatToolCall.vue'
 import IToolChips from '@/components/IToolChips.vue'
 import IAgentScreen from '@/components/IAgentScreen.vue'
 import IChatList from '@/components/IChatList.vue'
+import IMessageParts from '@/components/IMessageParts.vue'
+import type { MessagePart } from '@i-design/common'
 import IFineTuneCard from '@/components/IFineTuneCard.vue'
 import IInsightCards from '@/components/IInsightCards.vue'
 import ISelectionActions from '@/components/ISelectionActions.vue'
@@ -318,6 +320,21 @@ const chatSessions = ref<ChatSession[]>([
   { id: 's9', title: '归档：上半年复盘', updatedAt: screenNow - 90 * day, archived: true }
 ])
 const activeSession = ref('s3')
+
+/* 多段混排：正文、推理、代码、工具、产物、引用交替出现，收尾时间各不相同 */
+const messageParts = ref<MessagePart[]>([
+  { id: 'p1', kind: 'reasoning' as const, text: '先看交期，再比单价。两家的差价在 7%，而交期差 5 天。', complete: true },
+  { id: 'p2', kind: 'text' as const, text: '比对了 **12 家**供应商，结论如下：\n\n- 急单走明远\n- 常备库存走合力', complete: true },
+  { id: 'p3', kind: 'tool' as const, text: '', meta: { name: 'search_suppliers' }, complete: true },
+  { id: 'p4', kind: 'code' as const, text: "const plan = suppliers.filter((s) => s.leadTime <= 7)", meta: { lang: 'ts' }, complete: true },
+  { id: 'p5', kind: 'citation' as const, text: 'src-1', meta: { sourceId: 'src-1' }, complete: true },
+  { id: 'p6', kind: 'artifact' as const, text: '', meta: { title: '采购建议.md', version: '2' }, complete: true },
+  { id: 'p7', kind: 'text' as const, text: '正在整理明细…', complete: false }
+])
+const partSources = [
+  { id: 'src-1', title: '2026 Q1 供应商报价单' }
+]
+const citedSource = ref('')
 const sessionView = ref<'active' | 'archived'>('active')
 /** 撤销用：删掉的那条与它原来的位置 */
 const lastRemoved = ref<RemovedSession | null>(null)
@@ -625,6 +642,21 @@ function createSession() {
       </div>
     </DemoBlock>
 
+    <h2>多段混排</h2>
+    <DemoBlock
+      title="一条消息里的六种段"
+      description="模型的一次回答不是一块纯文本：正文、推理、代码、工具调用、产物、引用交替出现，而且每一段的收尾时间不同。拼成一个字符串再渲染，会丢掉「这一段还没收完」这个信息——最后那段正文就还在流。推理默认折叠，它是给愿意深究的人看的，不该挤掉结论；引用角标可点可聚焦，引用的价值在于能回到出处。"
+      lang="vue"
+      code='<IMessageParts :parts="parts" :sources="sources" @cite="locate" />'
+    >
+      <div class="md-parts">
+        <IMessageParts :parts="messageParts" :sources="partSources" @cite="(id) => (citedSource = id)" />
+        <p v-if="citedSource" class="md-parts__hit">
+          刚刚点了引用：{{ partSources.find((s) => s.id === citedSource)?.title }}
+        </p>
+      </div>
+    </DemoBlock>
+
     <h2>来源与追问</h2>
     <DemoBlock
       title="来源与建议"
@@ -821,6 +853,8 @@ function createSession() {
 .selact-demo { display: flex; flex-direction: column; gap: var(--i-spacing-2); max-width: 560px; }
 .selact-demo__text { margin: 0; line-height: 1.8; }
 .tune-demo { max-width: 460px; }
+.md-parts { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; min-width: 0; }
+.md-parts__hit { margin: 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
 .chatlist-demo--manage {
   display: flex;
   flex-direction: column;

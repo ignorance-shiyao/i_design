@@ -201,3 +201,31 @@ export function tokenizeLines(code: string, lang?: Lang | string): CodeToken[][]
   }
   return lines
 }
+
+
+/*
+ * 什么时候干脆别染色。
+ *
+ * 染色是同步的，跑在主线程上：五千行 TS 实测 177ms，而流式输出时每来一片
+ * 都会把整块重染一遍——用户一边看模型写代码，一边发现自己的输入框卡住了。
+ *
+ * 两档阈值：已经收完的块放宽一些（读者在读，偶尔一次 100ms 可以接受），
+ * 还在流的块收紧（每片都要重算，这里的代价要乘以片数）。
+ * 超过阈值就渲染成纯文本——没有颜色的代码仍然能读，卡住的输入框没法用。
+ */
+export const HIGHLIGHT_MAX_LINES = 600
+export const HIGHLIGHT_STREAMING_MAX_LINES = 200
+
+export function shouldHighlight(code: string, streaming = false): boolean {
+  const limit = streaming ? HIGHLIGHT_STREAMING_MAX_LINES : HIGHLIGHT_MAX_LINES
+  let lines = 1
+  for (let i = 0; i < code.length; i += 1) {
+    if (code.charCodeAt(i) === 10 && ++lines > limit) return false
+  }
+  return true
+}
+
+/** 不染色时的退化形态：每行一个整体 token，渲染路径与染色时完全一致 */
+export function plainLines(code: string): CodeToken[][] {
+  return code.split('\n').map((line) => (line ? [{ type: 'plain', text: line }] : []))
+}

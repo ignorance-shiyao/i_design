@@ -57,7 +57,15 @@ function Blocks({ blocks }: { blocks: MdBlock[] }): ReactNode {
         return <p key={index} className="i-md__p"><Inline nodes={block.children} /></p>
       case 'code':
         // 还没收完的代码块不给复制按钮：复制到一半的代码比不给复制更坑
-        return <CodeBlock key={index} code={block.text} lang={block.lang || undefined} copyable={!block.open} />
+        return (
+          <CodeBlock
+            key={index}
+            code={block.text}
+            lang={block.lang || undefined}
+            copyable={!block.open}
+            streaming={block.open}
+          />
+        )
       case 'quote':
         return <blockquote key={index} className="i-md__quote"><Blocks blocks={block.children} /></blockquote>
       case 'list':

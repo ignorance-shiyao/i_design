@@ -1,0 +1,36 @@
+<view class="i-msg-parts {{compact ? 'is-compact' : ''}}">
+  <block wx:for="{{items}}" wx:for-item="item" wx:key="id">
+    <i-markdown wx:if="{{item.kind === 'text'}}" source="{{item.text}}" compact="{{compact}}" />
+
+    <!-- 推理过程默认折叠：它是给愿意深究的人看的，不该挤掉结论 -->
+    <view wx:elif="{{item.kind === 'reasoning'}}" class="i-msg-parts__reasoning">
+      <view class="i-msg-parts__reasoning-head">推理过程{{item.complete ? '' : '（进行中）'}}</view>
+      <i-markdown source="{{item.text}}" compact="{{true}}" />
+    </view>
+
+    <i-code-block
+      wx:elif="{{item.kind === 'code'}}"
+      code="{{item.text}}"
+      lang="{{item.lang}}"
+      copyable="{{item.complete}}"
+    />
+
+    <view wx:elif="{{item.kind === 'tool'}}" class="i-msg-parts__chip">
+      <text>{{item.name}}</text>
+      <text class="i-msg-parts__chip-state">{{item.complete ? '已完成' : '执行中'}}</text>
+    </view>
+
+    <view wx:elif="{{item.kind === 'artifact'}}" class="i-msg-parts__chip">
+      <text>{{item.title}}</text>
+      <text wx:if="{{item.version}}" class="i-msg-parts__chip-state">v{{item.version}}</text>
+    </view>
+
+    <!-- 引用角标可点：引用的价值在于能回到出处 -->
+    <view
+      wx:elif="{{item.kind === 'citation'}}"
+      class="i-msg-parts__cite"
+      data-id="{{item.sourceId}}"
+      bindtap="cite"
+    >[{{item.citeIndex}}]</view>
+  </block>
+</view>

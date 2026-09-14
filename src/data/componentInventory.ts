@@ -100,6 +100,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IMentions.vue",
   "src/components/IMenu.vue",
   "src/components/IMessageList.vue",
+  "src/components/IMessageParts.vue",
   "src/components/IModal.vue",
   "src/components/INotificationLayer.vue",
   "src/components/INumberKeypad.vue",

@@ -52,3 +52,46 @@
   text-align: left;
 }
 .i-md__table th { background: var(--i-color-bg-subtle); font-weight: 500; }
+
+/* IMessageParts —— 多段混排 */
+.i-msg-parts { display: flex; flex-direction: column; gap: var(--i-spacing-3); min-width: 0; }
+.i-msg-parts.is-compact { gap: var(--i-spacing-2); }
+.i-msg-parts__reasoning {
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+}
+.i-msg-parts__reasoning summary {
+  display: flex;
+  gap: var(--i-spacing-2);
+  align-items: center;
+  cursor: pointer;
+}
+.i-msg-parts__chip {
+  display: inline-flex;
+  gap: var(--i-spacing-2);
+  align-items: center;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: var(--i-spacing-1) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-elevated);
+  font-size: var(--i-font-size-sm);
+}
+.i-msg-parts__chip-icon { display: grid; place-items: center; color: var(--i-color-text-secondary); }
+.i-msg-parts__chip-state { color: var(--i-color-text-tertiary); font-size: var(--i-font-size-xs); }
+/* 引用角标：可点、可聚焦，因为引用的价值在于能回到出处 */
+.i-msg-parts__cite {
+  align-self: flex-start;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--i-color-brand-text);
+  font-size: var(--i-font-size-xs);
+  cursor: pointer;
+}
+.i-msg-parts__cite:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }

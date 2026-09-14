@@ -295,6 +295,7 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"filename","type":"string","doc":"标题栏左侧的文件名；不传则显示语言名","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"lineNumbers","type":"boolean","doc":"显示行号","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
     {"name":"copyable","type":"boolean","doc":"显示复制按钮","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
+    {"name":"streaming","type":"boolean","doc":"还在流式输出中：染色阈值收紧，因为每来一片都要重算一次","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
     {"name":"before","type":"string","doc":"改动前的内容。给了就切成统一 diff 视图： `code` 是改动后的样子，这里是改动前的。","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"maxLines","type":"number","doc":"超过多少行折叠起来；0 表示不折叠","optional":true,"defaultText":"0","control":{"kind":"number"}},
   ],
@@ -555,6 +556,11 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"openKeys","type":"string[]","doc":"展开的分组；不传时组件自己管","optional":true,"defaultText":"undefined","control":null},
     {"name":"accordion","type":"boolean","doc":"手风琴：同层只展开一个","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
     {"name":"collapsed","type":"boolean","doc":"收起为图标栏","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+  ],
+  IMessageParts: [
+    {"name":"parts","type":"MessagePart[]","doc":"","optional":true,"defaultText":"() => []","control":null},
+    {"name":"sources","type":"{ id: string; title: string }[]","doc":"引用编号对应的来源标题，用于把角标写成人能读的东西","optional":true,"defaultText":"() => []","control":null},
+    {"name":"compact","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
   ],
   IModal: [
     {"name":"modelValue","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},

@@ -118,6 +118,7 @@ import ITabs from './ITabs.vue'
 import IBreadcrumb from './IBreadcrumb.vue'
 import ISteps from './ISteps.vue'
 import IMarkdown from './IMarkdown.vue'
+import IMessageParts from './IMessageParts.vue'
 import IPageState from './IPageState.vue'
 import IPagination from './IPagination.vue'
 import IPageHeader from './IPageHeader.vue'
@@ -214,6 +215,7 @@ export {
   IBreadcrumb,
   ISteps,
   IMarkdown,
+  IMessageParts,
   IPageState,
   IPagination,
   IPageHeader,
@@ -328,6 +330,7 @@ const components = {
   IBreadcrumb,
   ISteps,
   IMarkdown,
+  IMessageParts,
   IPageState,
   IPagination,
   IPageHeader,

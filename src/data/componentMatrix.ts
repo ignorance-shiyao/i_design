@@ -799,6 +799,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IMessageParts",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IModal",
     "ends": {
       "vue-next": true,
