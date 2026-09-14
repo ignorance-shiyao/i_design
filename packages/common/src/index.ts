@@ -62,6 +62,7 @@ export * from './logic/menu'
 export * from './logic/agent'
 export * from './contracts/run'
 export * from './logic/run'
+export * from './logic/transport'
 /*
  * 插画不走主入口，用的人从 @i-design/common/illustrations 引。
  *

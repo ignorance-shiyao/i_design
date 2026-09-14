@@ -18,6 +18,7 @@
   （`npm run check:style-rules`）。
 - 许可证随包分发，素材来源逐个登记（`LICENSE`、`THIRD-PARTY.md`）。
 - 运行事件契约与 reducer：乱序、重发、迟到、取消后续写都有明确处理。
+- 传输适配层：SSE 解码、断线重连带恢复游标、取消、幂等键。
 - Patterns Lab（`/design/lab`）：每个组件按注册表自动出现并真的渲染一次，
   `npm run check:lab` 盯着「只剩一个名字」的情况。
 
