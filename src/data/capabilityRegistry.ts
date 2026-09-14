@@ -474,6 +474,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/descriptions",
       "/components/skeleton",
       "/components/page-state",
+      "/components/markdown",
       "/components/result",
       "/components/popconfirm",
       "/components/overlay",
@@ -2688,6 +2689,40 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     }
   },
   {
+    "name": "IMarkdown",
+    "sources": {
+      "vue-next": "src/components/IMarkdown.vue",
+      "vue": "packages/vue/src/components/IMarkdown.vue",
+      "react": "packages/react/src/components/Markdown.tsx",
+      "miniprogram": "packages/miniprogram/src/components/markdown",
+      "flutter": "packages/flutter/lib/src/components/i_markdown.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": {
+      "route": "/components/markdown",
+      "page": "src/pages/components/MarkdownPage.vue",
+      "demos": 3
+    },
+    "demoRoutes": [
+      "/components/markdown"
+    ],
+    "states": {}
+  },
+  {
     "name": "IMentions",
     "sources": {
       "vue-next": "src/components/IMentions.vue",
@@ -3473,6 +3508,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "demoRoutes": [
       "/components/icon",
       "/components/page-state",
+      "/components/markdown",
       "/components/config-provider",
       "/components/qrcode",
       "/components/chat",
@@ -4176,6 +4212,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "demoRoutes": [
       "/components/form",
       "/components/textarea",
+      "/components/markdown",
       "/components/drawer"
     ],
     "states": {

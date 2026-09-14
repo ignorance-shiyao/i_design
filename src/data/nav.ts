@@ -84,6 +84,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/qrcode', label: 'Qrcode 二维码' },
       { to: '/components/skeleton', label: 'Skeleton 骨架屏' },
       { to: '/components/page-state', label: 'PageState 页面状态' },
+      { to: '/components/markdown', label: 'Markdown 渲染' },
       { to: '/components/data-display', label: '数据展示' },
       { to: '/components/chart', label: '图表' },
       { to: '/components/flow', label: '流程图' }

@@ -96,6 +96,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ILink.vue",
   "src/components/IList.vue",
   "src/components/ILoading.vue",
+  "src/components/IMarkdown.vue",
   "src/components/IMentions.vue",
   "src/components/IMenu.vue",
   "src/components/IMessageList.vue",

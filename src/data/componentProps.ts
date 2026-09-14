@@ -537,6 +537,10 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"fullscreen","type":"boolean","doc":"遮罩是否覆盖整个父容器（父容器需为定位上下文）","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
     {"name":"elapsed","type":"boolean","doc":"显示已等待时长。 智能体的一次调用动辄十几秒，只转圈不给数字的话，三秒和三十秒看起来一样， 于是有人反复点，或者以为卡死了刷新页面——前一次的结果就此丢掉。","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
   ],
+  IMarkdown: [
+    {"name":"source","type":"string","doc":"Markdown 原文","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"compact","type":"boolean","doc":"紧凑排版：用在气泡、卡片这类空间紧张的地方","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+  ],
   IMentions: [
     {"name":"modelValue","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"options","type":"MentionOption[]","doc":"","optional":false,"defaultText":null,"control":null},
@@ -958,5 +962,11 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"opacity","type":"number","doc":"","optional":true,"defaultText":"0.12","control":{"kind":"number"}},
     {"name":"color","type":"string","doc":"不传时跟随文字色，深浅主题都能看见","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"guard","type":"boolean","doc":"水印层被删除或被改样式时自动重建","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
+  ],
+  _MdBlocks: [
+    {"name":"blocks","type":"MdBlock[]","doc":"","optional":false,"defaultText":null,"control":null},
+  ],
+  _MdInline: [
+    {"name":"nodes","type":"MdInline[]","doc":"","optional":false,"defaultText":null,"control":null},
   ],
 }

@@ -1,0 +1,48 @@
+<view class="i-md {{compact ? 'is-compact' : ''}}">
+  <block wx:for="{{nodes}}" wx:for-item="node" wx:key="index">
+    <!-- 标题层级用类名表达：WXML 里没有动态标签名这回事 -->
+    <view wx:if="{{node.kind === 'heading'}}" class="i-md__heading i-md__heading--{{node.level}}">
+      <block wx:for="{{node.inline}}" wx:for-item="piece" wx:key="index">
+        <text
+          class="{{piece.kind === 'code' ? 'i-md__code' : ''}} {{piece.strong ? 'is-strong' : ''}} {{piece.em ? 'is-em' : ''}} {{piece.del ? 'is-del' : ''}} {{piece.link ? 'i-md__link' : ''}}"
+        >{{piece.text}}</text>
+      </block>
+    </view>
+
+    <view wx:elif="{{node.kind === 'paragraph'}}" class="i-md__p">
+      <block wx:for="{{node.inline}}" wx:for-item="piece" wx:key="index">
+        <image wx:if="{{piece.kind === 'image'}}" class="i-md__image" src="{{piece.src}}" mode="widthFix" />
+        <text
+          wx:else
+          class="{{piece.kind === 'code' ? 'i-md__code' : ''}} {{piece.strong ? 'is-strong' : ''}} {{piece.em ? 'is-em' : ''}} {{piece.del ? 'is-del' : ''}} {{piece.link ? 'i-md__link' : ''}}"
+        >{{piece.text}}</text>
+      </block>
+    </view>
+
+    <view wx:elif="{{node.kind === 'code'}}" class="i-md__pre"><text>{{node.text}}</text></view>
+
+    <view wx:elif="{{node.kind === 'list-item'}}" class="i-md__li"><text>{{node.marker}}</text></view>
+
+    <view wx:elif="{{node.kind === 'quote-open'}}" class="i-md__quote-open" />
+    <view wx:elif="{{node.kind === 'quote-close'}}" class="i-md__quote-close" />
+
+    <view wx:elif="{{node.kind === 'table'}}" class="i-md__table-wrap">
+      <scroll-view scroll-x>
+        <view class="i-md__table">
+          <view class="i-md__tr">
+            <view wx:for="{{node.head}}" wx:for-item="cell" wx:key="index" class="i-md__th">
+              <text wx:for="{{cell}}" wx:for-item="piece" wx:key="index">{{piece.text}}</text>
+            </view>
+          </view>
+          <view wx:for="{{node.rows}}" wx:for-item="row" wx:key="index" class="i-md__tr">
+            <view wx:for="{{row}}" wx:for-item="cell" wx:key="index" class="i-md__td">
+              <text wx:for="{{cell}}" wx:for-item="piece" wx:key="index">{{piece.text}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view wx:elif="{{node.kind === 'hr'}}" class="i-md__hr" />
+  </block>
+</view>
