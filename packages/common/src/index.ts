@@ -69,6 +69,8 @@ export * from './logic/markdown'
 export * from './contracts/chart'
 export * from './logic/dataset'
 export * from './logic/linkage'
+export * from './contracts/graph'
+export * from './logic/graph'
 export * from './icons/meta'
 /*
  * 插画不走主入口，用的人从 @i-design/common/illustrations 引。
