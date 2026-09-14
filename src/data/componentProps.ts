@@ -49,6 +49,14 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"items","type":"AnchorItem[]","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"offset","type":"number","doc":"判定线相对视口顶端的偏移，通常等于吸顶导航高度","optional":true,"defaultText":"80","control":{"kind":"number"}},
   ],
+  IAppShell: [
+    {"name":"nav","type":"AppNavItem[]","doc":"侧栏导航","optional":false,"defaultText":null,"control":null},
+    {"name":"current","type":"string","doc":"当前选中的导航项 key。深链刷新后由页面从地址里解析出来传进来","optional":false,"defaultText":null,"control":{"kind":"string"}},
+    {"name":"crumbs","type":"{ label: string }[]","doc":"面包屑，从应用名之后开始写","optional":true,"defaultText":"() => []","control":null},
+    {"name":"title","type":"string","doc":"应用名，显示在顶栏左侧","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"user","type":"string","doc":"当前用户，显示在顶栏右侧","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"breakpoint","type":"number","doc":"窄屏断点（px）。小于它时侧栏收进抽屉","optional":true,"defaultText":"720","control":{"kind":"number"}},
+  ],
   IApprovalCard: [
     {"name":"questions","type":"ApprovalQuestion[]","doc":"一组问题，逐题回答；只有一题时不显示分页","optional":false,"defaultText":null,"control":null},
     {"name":"confirmText","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},

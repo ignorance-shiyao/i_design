@@ -59,6 +59,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IAppShell",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IApprovalCard",
     "ends": {
       "vue-next": true,

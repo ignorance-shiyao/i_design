@@ -24,6 +24,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IAgentTasks.vue",
   "src/components/IAlert.vue",
   "src/components/IAnchor.vue",
+  "src/components/IAppShell.vue",
   "src/components/IApprovalCard.vue",
   "src/components/IAutoComplete.vue",
   "src/components/IAvatar.vue",

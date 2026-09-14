@@ -76,6 +76,7 @@ export 'src/components/i_agent_context.dart';
 export 'src/components/i_agent_screen.dart';
 export 'src/components/i_alert.dart';
 export 'src/components/i_anchor.dart';
+export 'src/components/i_app_shell.dart';
 export 'src/components/i_auto_complete.dart';
 export 'src/components/i_avatar.dart';
 export 'src/components/i_avatar_group.dart';

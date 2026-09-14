@@ -229,6 +229,16 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
       { value: 'help', label: '帮助', icon: 'info-circle' }
     ]
   },
+  IAppShell: {
+    title: '青禾 ERP',
+    user: '林岚（销售经理）',
+    nav: [
+      { key: 'orders', label: '销售订单', icon: 'file-text', children: [{ key: 'orders/draft', label: '草稿箱' }] },
+      { key: 'stock', label: '库存', icon: 'warehouse' }
+    ],
+    current: 'orders',
+    crumbs: [{ label: '销售订单' }]
+  },
   IProTable: {
     columns: [
       { key: 'id', title: '单号', width: '120px', locked: true },

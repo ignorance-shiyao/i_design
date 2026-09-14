@@ -92,6 +92,7 @@ import ITimePicker from './ITimePicker.vue'
 import ITimeSelect from './ITimeSelect.vue'
 import ITransfer from './ITransfer.vue'
 import IAffix from './IAffix.vue'
+import IAppShell from './IAppShell.vue'
 import IBackTop from './IBackTop.vue'
 import ICodeBlock from './ICodeBlock.vue'
 import ICommandSearch from './ICommandSearch.vue'
@@ -190,6 +191,7 @@ export {
   ITimeSelect,
   ITransfer,
   IAffix,
+  IAppShell,
   IBackTop,
   ICodeBlock,
   ICommandSearch,
@@ -378,6 +380,7 @@ const components = {
   IQueryFilter,
   IRangeInput,
   IRate,
+  IAppShell,
   ILayout,
   ILink,
   IList,

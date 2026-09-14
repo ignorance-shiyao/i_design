@@ -188,6 +188,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IAppShell",
+    "sources": {
+      "vue-next": "src/components/IAppShell.vue",
+      "vue": "packages/vue/src/components/IAppShell.vue",
+      "react": "packages/react/src/components/AppShell.tsx",
+      "miniprogram": "packages/miniprogram/src/components/app-shell",
+      "flutter": "packages/flutter/lib/src/components/i_app_shell.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/layout"
+    ],
+    "states": {}
+  },
+  {
     "name": "IApprovalCard",
     "sources": {
       "vue-next": "src/components/IApprovalCard.vue",
@@ -2598,7 +2628,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/layout",
       "page": "src/pages/components/LayoutPage.vue",
-      "demos": 13
+      "demos": 14
     },
     "demoRoutes": [
       "/components/layout"
