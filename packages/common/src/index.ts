@@ -64,6 +64,7 @@ export * from './contracts/run'
 export * from './logic/run'
 export * from './logic/transport'
 export * from './logic/observability'
+export * from './icons/meta'
 /*
  * 插画不走主入口，用的人从 @i-design/common/illustrations 引。
  *
