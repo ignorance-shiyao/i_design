@@ -37,7 +37,7 @@ export function ChartTreemap({ items, title = '', height = 300, unit = '' }: Cha
   const hit = tiles.find((t) => t.label === active)
 
   return (
-    <figure className="i-chart">
+    <figure className="i-chart i-chart--wide">
       {title && <figcaption className="i-chart__title">{title}</figcaption>}
 
       <svg

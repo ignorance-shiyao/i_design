@@ -172,6 +172,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/notification.ts",
   "src/components/overlayPosition.ts",
   "src/components/upload.ts",
+  "src/components/useChartWidth.ts",
   "src/components/useConfig.ts",
   "src/components/validate.ts"
 ]

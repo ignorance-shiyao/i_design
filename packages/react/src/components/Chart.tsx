@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, type MouseEvent } from 'react'
+import { useMemo, useState, type MouseEvent } from 'react'
+import { useChartWidth } from './useChartWidth'
 import { useConfig } from './ConfigProvider'
 import {
   areaPath,
@@ -88,7 +89,7 @@ export interface ChartProps {
   className?: string
 }
 
-const W = 640
+
 
 export function Chart({
   series,
@@ -112,7 +113,11 @@ export function Chart({
 }: ChartProps) {
   /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
   const { locale } = useConfig()
-  const root = useRef<HTMLElement>(null)
+  /*
+   * 视图宽度跟着容器走（见 useChartWidth）：固定 640 时这张图在手机上被整体缩到
+   * 0.48，11px 的刻度字实际只剩 6px——量出来的。对齐容器宽度后缩放比回到 1。
+   */
+  const { ref: root, width: W } = useChartWidth<HTMLElement>()
   const [hidden, setHidden] = useState<Set<string>>(new Set())
   const [active, setActive] = useState<number | null>(null)
   const [showTable, setShowTable] = useState(false)

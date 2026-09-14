@@ -77,7 +77,7 @@ const dropped = computed(() => wordOverflow(props.words, placed.value))
 </script>
 
 <template>
-  <figure class="i-chart i-wordcloud">
+  <figure class="i-chart i-chart--wide i-wordcloud">
     <figcaption v-if="title" class="i-chart__title">{{ title }}</figcaption>
 
     <svg

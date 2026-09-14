@@ -381,6 +381,11 @@ const shellCurrent = ref('orders/draft')
     </DemoBlock>
 
     <IBackTop />
+    <h2>Layout 还是 AppShell</h2>
+    <p>
+      <code>ILayout</code> 只摆四块位置（顶栏、侧栏、正文、底栏），不认识导航，也不管窄屏；需要自己拼一套壳时用它。<code>IAppShell</code> 是拼好的那一套：导航项、面包屑、页面操作槽、窄屏抽屉与焦点归位都在里面，代价是它对结构有主张。一个业务系统通常只需要 AppShell；而登录页、大屏、嵌进别人页面的局部视图，用 Layout 更合适。
+    </p>
+
     <h2>什么时候不该用它</h2>
     <ul>
       <li>页面只有一栏内容时——直接写，套一层栅格只会多出一层嵌套。</li>

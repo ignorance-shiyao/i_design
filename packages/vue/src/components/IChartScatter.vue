@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
+import { useChartWidth } from './useChartWidth'
 import {
   SCATTER_MAX_SERIES,
   bubbleRadius,
@@ -35,9 +36,14 @@ const props = withDefaults(
   { xLabel: '', yLabel: '', height: 280, title: '', xUnit: '', yUnit: '', trend: false }
 )
 
-const W = 640
+/*
+ * 视图宽度跟着容器走（见 useChartWidth）：固定 640 时这张图在手机上被整体缩到
+ * 0.48，11px 的刻度字实际只剩 6px——量出来的。对齐容器宽度后缩放比回到 1。
+ */
+const host = ref<HTMLElement | null>(null)
+const W = useChartWidth(host)
 const PAD = { top: 16, right: 24, bottom: 40, left: 56 }
-const plotW = W - PAD.left - PAD.right
+const plotW = computed(() => W.value - PAD.left - PAD.right)
 const plotH = computed(() => props.height - PAD.top - PAD.bottom)
 
 /*
@@ -69,7 +75,7 @@ const yTicks = computed(() => niceTicks(yExtent.value.min, yExtent.value.max, 5)
 const xScale = computed(() => ({ min: xTicks.value[0], max: xTicks.value[xTicks.value.length - 1] }))
 const yScale = computed(() => ({ min: yTicks.value[0], max: yTicks.value[yTicks.value.length - 1] }))
 
-const px = (v: number) => PAD.left + ((v - xScale.value.min) / (xScale.value.max - xScale.value.min)) * plotW
+const px = (v: number) => PAD.left + ((v - xScale.value.min) / (xScale.value.max - xScale.value.min)) * plotW.value
 const py = (v: number) =>
   PAD.top + plotH.value - ((v - yScale.value.min) / (yScale.value.max - yScale.value.min)) * plotH.value
 
@@ -97,7 +103,7 @@ const clipId = `i-scatter-clip-${Math.random().toString(36).slice(2, 9)}`
 </script>
 
 <template>
-  <figure class="i-chart i-chart--scatter">
+  <figure ref="host" class="i-chart i-chart--scatter">
     <figcaption v-if="title" class="i-chart__title">{{ title }}</figcaption>
 
     <svg

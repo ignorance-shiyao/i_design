@@ -39,7 +39,7 @@ export function ChartSankey({
   }
 
   return (
-    <figure className="i-chart">
+    <figure className="i-chart i-chart--wide">
       {title && <figcaption className="i-chart__title">{title}</figcaption>}
 
       <svg

@@ -65,7 +65,7 @@ export function ChartGantt({
   const percent = (v?: number) => `${Math.round((v ?? 0) * 100)}%`
 
   return (
-    <figure className={`i-chart i-gantt ${className}`.trim()}>
+    <figure className={`i-chart i-chart--wide i-gantt ${className}`.trim()}>
       {title && <figcaption className="i-chart__title">{title}</figcaption>}
 
       {cycle.length > 0 && (

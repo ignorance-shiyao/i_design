@@ -47,9 +47,13 @@
   stroke-width: 1.5;
 }
 .i-flow__edge.is-active { stroke: var(--i-color-brand); stroke-width: 2; }
+/*
+ * 边标签 12px 而不是 11px：画布缩到 0.75（窄屏自动适应的下限）时，
+ * 11px 渲染出来是 8.3px，低于「还认得出是什么字」的 9px 下限。
+ */
 .i-flow__edge-label {
   fill: var(--i-color-text-tertiary);
-  font-size: 11px;
+  font-size: 12px;
   pointer-events: none;
 }
 .i-flow__edge-label-bg { fill: var(--i-color-bg); }

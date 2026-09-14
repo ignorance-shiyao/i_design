@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useChartWidth } from './useChartWidth'
 import { useConfig } from './ConfigProvider'
 import { boxStats, formatTick, niceTicks, scaleY } from '@i-design/common'
 
@@ -15,10 +16,11 @@ export interface ChartBoxProps {
   unit?: string
 }
 
-const W = 640
+
 const PAD = { top: 16, right: 16, bottom: 28, left: 48 }
 
 export function ChartBox({ groups, title = '', height = 260, unit = '' }: ChartBoxProps) {
+  const { ref: host, width: W } = useChartWidth<HTMLElement>()
   /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
   const { locale } = useConfig()
   const [active, setActive] = useState(-1)
@@ -49,7 +51,7 @@ export function ChartBox({ groups, title = '', height = 260, unit = '' }: ChartB
   const center = (i: number) => PAD.left + band * (i + 0.5)
 
   return (
-    <figure className="i-chart">
+    <figure ref={host} className="i-chart">
       {title && <figcaption className="i-chart__title">{title}</figcaption>}
 
       <svg

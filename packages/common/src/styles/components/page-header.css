@@ -62,3 +62,40 @@
   flex-basis: 100%;
   margin-top: var(--i-spacing-3);
 }
+
+/*
+ * 窄屏：返回、标题、副标题、操作各占一行，而不是挤在一行里靠换行自己找位置。
+ *
+ * 量出来的问题：390px 上「返回 | 单号 · 区域」会折成两行，标题被夹在中间，
+ * 右侧两个按钮再挤到第三行——读者第一眼看到的不是标题，而是一团折行。
+ * 标题是这一页最重要的那行字，所以它单独成行，按钮整排放在下面。
+ */
+@media (max-width: 560px) {
+  .i-page-header {
+    align-items: flex-start;
+    gap: var(--i-spacing-2);
+  }
+
+  .i-page-header__back {
+    order: -1;
+    min-height: auto;
+  }
+
+  /* 竖线是给「同一行的两段文字」用的；各自成行之后它只是一个多余的点 */
+  .i-page-header__divider {
+    display: none;
+  }
+
+  .i-page-header__main {
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .i-page-header__extra {
+    flex-basis: 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+}

@@ -1,3 +1,4 @@
+import { useChartWidth } from './useChartWidth'
 /**
  * 分布图：直方、密度、小提琴、误差棒（astra.md 的 D04）。
  *
@@ -31,7 +32,7 @@ export interface ChartDistributionProps {
   className?: string
 }
 
-const W = 640
+
 const PAD = { top: 16, right: 16, bottom: 36, left: 52 }
 
 export function ChartDistribution({
@@ -46,6 +47,7 @@ export function ChartDistribution({
   unit = '',
   className = ''
 }: ChartDistributionProps) {
+  const { ref: host, width: W } = useChartWidth<HTMLElement>()
   const plotW = W - PAD.left - PAD.right
   const plotH = height - PAD.top - PAD.bottom
 
@@ -106,7 +108,7 @@ export function ChartDistribution({
   const issues = [...(hist?.issues ?? []), ...(density?.issues ?? []), ...(violin?.issues ?? [])]
 
   return (
-    <figure className={['i-chart-dist', className].filter(Boolean).join(' ')}>
+    <figure ref={host} className={['i-chart-dist', className].filter(Boolean).join(' ')}>
       {title && <figcaption className="i-chart-dist__title">{title}</figcaption>}
 
       <svg

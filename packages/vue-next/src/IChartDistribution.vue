@@ -15,7 +15,8 @@
  * 样本量不足、取值全同这类「这张图现在不该被当真」的情况一并写出来——
  * 计算全在 logic/stats.ts 里，五端共用。
  */
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useChartWidth } from './useChartWidth'
 import {
   errorBar,
   formatTick,
@@ -54,9 +55,14 @@ const props = withDefaults(
   }
 )
 
-const W = 640
+/*
+ * 视图宽度跟着容器走（见 useChartWidth）：固定 640 时这张图在手机上被整体缩到
+ * 0.48，11px 的刻度字实际只剩 6px——量出来的。对齐容器宽度后缩放比回到 1。
+ */
+const host = ref<HTMLElement | null>(null)
+const W = useChartWidth(host)
 const PAD = { top: 16, right: 16, bottom: 36, left: 52 }
-const plotW = W - PAD.left - PAD.right
+const plotW = computed(() => W.value - PAD.left - PAD.right)
 const plotH = computed(() => props.height - PAD.top - PAD.bottom)
 
 const hist = computed(() =>
@@ -88,7 +94,7 @@ const domain = computed(() => {
 const ticks = computed(() => niceTicks(domain.value.min, domain.value.max, 5))
 const lo = computed(() => ticks.value[0])
 const hi = computed(() => ticks.value[ticks.value.length - 1])
-const x = (v: number) => PAD.left + ((v - lo.value) / (hi.value - lo.value || 1)) * plotW
+const x = (v: number) => PAD.left + ((v - lo.value) / (hi.value - lo.value || 1)) * plotW.value
 
 /** 直方图的高度按最大频数归一化：纵轴是频数，不是密度 */
 const maxCount = computed(() => Math.max(1, ...(hist.value?.bins ?? []).map((b) => b.count)))
@@ -146,7 +152,7 @@ const mid = computed(() => PAD.top + plotH.value / 2)
 </script>
 
 <template>
-  <figure class="i-chart-dist">
+  <figure ref="host" class="i-chart-dist">
     <figcaption v-if="title" class="i-chart-dist__title">{{ title }}</figcaption>
 
     <svg class="i-chart-dist__svg" :viewBox="`0 0 ${W} ${height}`" :style="{ height: `${height}px` }" role="img" :aria-label="`${title || '分布图'}：${caption}`">

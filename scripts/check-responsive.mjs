@@ -15,6 +15,11 @@
  * 那是有意为之，不该算问题。所以只有溢出到视口之外、且祖先里没有横向滚动容器的
  * 元素才会被点名。
  *
+ * 除了溢出，这里还量**字在屏幕上真正有多大**。SVG 里的文字会跟着 viewBox
+ * 一起缩：图表的 viewBox 曾经恒为 640，在 358px 宽的手机上整体缩到 0.48，
+ * 于是 11px 的刻度字实际只有 6px——没有任何检查会红，页面也不溢出，
+ * 只是没人读得出刻度。所以把「渲染后不足 9px 的文字」也算失败。
+ *
  * 用法：
  *   node scripts/check-responsive.mjs
  *   node scripts/check-responsive.mjs --base=http://localhost:5173
@@ -59,6 +64,12 @@ if (!baseArg) {
   }
 }
 const base = baseArg ? baseArg.slice('--base='.length) : `http://localhost:${port}`
+
+/*
+ * 渲染后字号的下限。9px 不是好看的下限，是「还认得出是什么字」的下限——
+ * 低于它的刻度与标签，读者只能看出那儿有东西。
+ */
+const MIN_TEXT_PX = 9
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined })
 const problems = []
@@ -106,6 +117,29 @@ try {
         return { over, culprits: [...new Set(culprits)].slice(0, 3) }
       }, TOLERANCE)
 
+      // 量渲染后的实际字号：SVG 文字跟着 viewBox 缩，声明 11px 不代表屏幕上是 11px
+      const tiny = await page.evaluate((min) => {
+        const out = []
+        for (const el of document.querySelectorAll('svg text')) {
+          const text = (el.textContent ?? '').trim()
+          if (!text) continue
+          const box = el.getBoundingClientRect()
+          if (box.height === 0) continue
+          // 用包围盒高度近似字号：它已经包含了 viewBox 的缩放
+          if (box.height < min) {
+            const cls = [...el.classList].join('.')
+            out.push(`${cls || el.tagName}「${text.slice(0, 8)}」${box.height.toFixed(1)}px`)
+          }
+        }
+        return [...new Set(out)].slice(0, 3)
+      }, MIN_TEXT_PX)
+
+      if (tiny.length) {
+        problems.push(
+          `${width}px ${path} — SVG 文字缩得读不了（不足 ${MIN_TEXT_PX}px）：${tiny.join('、')}`
+        )
+      }
+
       if (found) {
         problems.push(
           `${width}px ${path} — 横向溢出 ${found.over}px：${found.culprits.join('、') || '(未定位到具体元素)'}`
@@ -120,7 +154,7 @@ try {
 }
 
 if (problems.length) {
-  console.error('窄屏自适应检查未通过——这些页面在手机宽度下会左右拖动：')
+  console.error('窄屏自适应检查未通过——这些页面在手机宽度下会左右拖动，或者字小到读不出来：')
   for (const line of problems) console.error(`  - ${line}`)
   console.error(
     '\n修掉它们。常见成因：固定 `width: NNNpx`（改成 `width: min(NNNpx, 100%)`）、' +
@@ -130,4 +164,7 @@ if (problems.length) {
   )
   process.exit(1)
 }
-console.log(`窄屏自适应检查通过：${scanned} 个页面（${WIDTHS.join(' / ')}px），无横向溢出`)
+console.log(
+  `窄屏自适应检查通过：${scanned} 个页面（${WIDTHS.join(' / ')}px），` +
+    `无横向溢出，SVG 文字渲染后都不小于 ${MIN_TEXT_PX}px`
+)

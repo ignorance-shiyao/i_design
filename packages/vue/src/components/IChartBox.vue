@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
+import { useChartWidth } from './useChartWidth'
 import { boxStats, formatTick, niceTicks, scaleY } from '@i-design/common'
 
 /* 文案走字典：图表的数据表是它的无障碍出口，按钮与表头也得跟着换语言 */
@@ -26,9 +27,14 @@ const props = withDefaults(
   { title: '', height: 260, unit: '' }
 )
 
-const W = 640
+/*
+ * 视图宽度跟着容器走（见 useChartWidth）：固定 640 时这张图在手机上被整体缩到
+ * 0.48，11px 的刻度字实际只剩 6px——量出来的。对齐容器宽度后缩放比回到 1。
+ */
+const host = ref<HTMLElement | null>(null)
+const W = useChartWidth(host)
 const PAD = { top: 16, right: 16, bottom: 28, left: 48 }
-const plotW = W - PAD.left - PAD.right
+const plotW = computed(() => W.value - PAD.left - PAD.right)
 const plotH = computed(() => props.height - PAD.top - PAD.bottom)
 
 const stats = computed(() => props.groups.map((g) => ({ label: g.label, ...boxStats(g.values) })))
@@ -46,7 +52,7 @@ const scale = computed(() => {
 })
 
 const y = (v: number) => scaleY(v, scale.value.min, scale.value.max, plotH.value) + PAD.top
-const band = computed(() => plotW / Math.max(1, props.groups.length))
+const band = computed(() => plotW.value / Math.max(1, props.groups.length))
 /* 箱体占带宽的一半：留出的空白让相邻箱子不会看起来像连成一片 */
 const boxW = computed(() => Math.min(56, band.value * 0.5))
 const center = (i: number) => PAD.left + band.value * (i + 0.5)
@@ -56,7 +62,7 @@ const showTable = ref(false)
 </script>
 
 <template>
-  <figure class="i-chart">
+  <figure ref="host" class="i-chart">
     <figcaption v-if="title" class="i-chart__title">{{ title }}</figcaption>
 
     <svg

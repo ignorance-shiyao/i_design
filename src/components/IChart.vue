@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useConfig } from './useConfig'
+import { useChartWidth } from './useChartWidth'
 import { computed, ref } from 'vue'
 import {
   areaPath,
@@ -120,8 +121,13 @@ const props = withDefaults(
   }
 )
 
-// 画布尺寸用视图坐标固定，外层再按容器宽度缩放；这样刻度密度不随容器抖动
-const W = 640
+/*
+ * 视图宽度跟着容器走（见 useChartWidth）：固定 640 时，这张图在手机上会被整体
+ * 缩到 0.48，11px 的刻度字实际只剩 6px，而标签抽稀还按 640 的密度排——缩完糊成
+ * 一条黑边。对齐容器宽度之后，缩放比回到 1，字是几号就是几号。
+ */
+const root = ref<HTMLElement | null>(null)
+const W = useChartWidth(root)
 // 右侧留白按是否直接标注决定：标注是文字，挤在边缘会被裁掉
 const PAD = computed(() => ({
   top: 16,
@@ -131,7 +137,7 @@ const PAD = computed(() => ({
   // 横条的类目名写在左边，48px 只够放数字刻度
   left: props.type === 'bar' && props.orientation === 'horizontal' ? 110 : 48
 }))
-const plotW = computed(() => W - PAD.value.left - PAD.value.right)
+const plotW = computed(() => W.value - PAD.value.left - PAD.value.right)
 const plotH = computed(() => props.height - PAD.value.top - PAD.value.bottom)
 
 /** 被图例关掉的系列：只影响显示，不改传入的数据 */
@@ -340,7 +346,6 @@ const hBars = computed(() =>
 
 /* ---------- 悬停 ---------- */
 const active = ref<number | null>(null)
-const root = ref<HTMLElement | null>(null)
 
 function onMove(event: MouseEvent) {
   const rect = root.value?.getBoundingClientRect()
@@ -356,7 +361,7 @@ function onMove(event: MouseEvent) {
     return
   }
   const ratio = (event.clientX - rect.left) / rect.width
-  const px = ratio * W
+  const px = ratio * W.value
   // 取最近的数据点，而不是要求指针精确落在点上——命中区域要比标记大
   const step = isBar.value ? bandWidth.value : plotW.value / Math.max(1, props.labels.length - 1)
   const index = Math.round((px - PAD.value.left - (isBar.value ? bandWidth.value / 2 : 0)) / step)
@@ -369,12 +374,12 @@ const tooltipStyle = computed(() => {
     const row = hOrder.value.indexOf(active.value)
     const band = hBands.value[row]
     return {
-      left: `${((PAD.value.left + plotW.value / 2) / W) * 100}%`,
+      left: `${((PAD.value.left + plotW.value / 2) / W.value) * 100}%`,
       top: `${(((band ? PAD.value.top + band.center : PAD.value.top) - 8) / props.height) * 100}%`
     }
   }
   const px = isBar.value ? PAD.value.left + bandWidth.value * (active.value + 0.5) : x(active.value)
-  return { left: `${(px / W) * 100}%`, top: `${(y(scale.value.max) / props.height) * 100}%` }
+  return { left: `${(px / W.value) * 100}%`, top: `${(y(scale.value.max) / props.height) * 100}%` }
 })
 
 /*
