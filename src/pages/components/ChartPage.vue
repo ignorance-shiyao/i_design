@@ -22,7 +22,33 @@ import IChartGantt from '@/components/IChartGantt.vue'
 import IChartWordCloud from '@/components/IChartWordCloud.vue'
 import IChartFrame from '@/components/IChartFrame.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
-import { sliceByWindow, toLegacySeries, type ChartDataset, type ChartSpec } from '@i-design/common'
+import IButton from '@/components/IButton.vue'
+import {
+  applySelection,
+  drillPath,
+  drillUp,
+  emptyLinkage,
+  sliceByWindow,
+  toLegacySeries,
+  type ChartDataset,
+  type ChartSpec
+} from '@i-design/common'
+
+/* 联动演示：点一次是筛选，再点一次是取消，双击才下钻——这里用按钮代替双击 */
+const linkage = ref(emptyLinkage('region'))
+const linkPath = computed(() => drillPath(linkage.value))
+function pick(region: string) {
+  linkage.value = applySelection(linkage.value, {
+    source: 'demo-bar',
+    kind: linkage.value.filters.some((f) => f.values?.includes(region)) ? 'drill' : 'filter',
+    field: linkage.value.dimension,
+    values: [region],
+    into: 'city'
+  })
+}
+function goUp() {
+  linkage.value = drillUp(linkage.value, 'region')
+}
 
 /*
  * 带缺口与负值的一份数据：用它才说得清「缺失值不补零」——
@@ -288,6 +314,40 @@ const waterfallItems = [
       />
     </DemoBlock>
 
+    <h2>联动</h2>
+    <DemoBlock
+      title="过滤、下钻与返回"
+      description="一个看板上的图不是各自独立的：点饼图的一块要过滤旁边的表，双击一根柱要下钻到它的明细。这些交互统一表达成一种事件，下钻是压栈、返回是弹栈。两处容易出错的地方都在这里兜住：同一轮里一张图把自己的选择原样发回来会被忽略（否则两张图互相触发到栈溢出），返回恢复的是「进入这一级之前」的整套筛选，而不是逐条回滚。"
+      lang="vue"
+      code='const state = applySelection(current, { source: &apos;pie&apos;, kind: &apos;drill&apos;, field: &apos;region&apos;, values: [&apos;华东&apos;], into: &apos;city&apos; })'
+    >
+      <div class="link-demo">
+        <p class="link-demo__path">
+          <template v-for="(node, index) in linkPath" :key="index">
+            <span>{{ node }}</span>
+            <span v-if="index < linkPath.length - 1" aria-hidden="true"> / </span>
+          </template>
+        </p>
+        <div class="link-demo__row">
+          <IButton
+            v-for="region in ['华东', '华南', '华北']"
+            :key="region"
+            size="sm"
+            :variant="linkage.filters.some((f) => f.values?.includes(region)) ? 'primary' : 'secondary'"
+            @click="pick(region)"
+          >
+            {{ region }}
+          </IButton>
+          <IButton size="sm" variant="text" :disabled="!linkage.stack.length" @click="goUp">返回上一级</IButton>
+        </div>
+        <p class="link-demo__state">
+          当前维度：{{ linkage.dimension }}；筛选：{{
+            linkage.filters.length ? linkage.filters.map((f) => `${f.field}=${f.values?.join('、')}`).join('，') : '无'
+          }}
+        </p>
+      </div>
+    </DemoBlock>
+
     <h2>阈值</h2>
     <p>
       只看趋势看不出「现在是不是超了」，而后者往往才是看这张图的原因。阈值线与阈值带把「多少算正常」画进图里：线用虚线、带用极低不透明度，并且用状态色而不是分类色——阈值不是又一组数据，借分类色会被当成第 N 个系列。落在值域之外的阈值会被丢弃，而不是压到边缘假装「刚好卡在临界」。
@@ -523,6 +583,10 @@ const waterfallItems = [
 </template>
 
 <style scoped>
+.link-demo { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; }
+.link-demo__row { display: flex; flex-wrap: wrap; gap: var(--i-spacing-2); }
+.link-demo__path { margin: 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+.link-demo__state { margin: 0; color: var(--i-color-text-tertiary); font-size: var(--i-font-size-sm); }
 .frame-demo { width: 100%; min-width: 0; }
 .chart-demo { display: flex; flex-direction: column; gap: var(--i-spacing-6); width: 100%; }
 .chart-demo--row { flex-direction: row; flex-wrap: wrap; gap: var(--i-spacing-8); }

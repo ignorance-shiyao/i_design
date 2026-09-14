@@ -496,6 +496,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/chat",
       "/components/layout",
       "/components/data-display",
+      "/components/chart",
       "/components/flow",
       "/components/mobile"
     ],
@@ -708,7 +709,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/chart",
       "page": "src/pages/components/ChartPage.vue",
-      "demos": 20
+      "demos": 21
     },
     "demoRoutes": [
       "/components/chart"
