@@ -9,8 +9,9 @@
 推送到 `main` 或开发分支后，GitHub Actions 会自动构建并部署到 GitHub Pages：
 `https://ignorance-shiyao.github.io/i_design/`
 
-首次使用需在仓库 **Settings → Pages → Source** 选择 **GitHub Actions**（一次性设置）。
-工作流见 `.github/workflows/deploy.yml`；站点使用 hash 路由，部署在子路径下也无需服务端改写。
+首次使用需在仓库 **Settings → Pages → Source** 选择 **Deploy from a branch → `gh-pages` / `(root)`**（一次性设置）。
+工作流把产物推到 `gh-pages` 分支：`main` 发到站点根目录，其余分支发到 `preview/<分支名>/`，分支删除后自动清理。
+工作流见 `.github/workflows/deploy.yml` 与 `.github/workflows/preview.yml`；站点使用 hash 路由，部署在子路径下也无需服务端改写。
 
 ## 快速开始
 
@@ -33,8 +34,8 @@ npm run preview   # 本地预览构建产物
 
 ## 令牌分层
 
-1. **基础层** `src/tokens/index.ts` — 调色板与原子刻度，只描述值。
-2. **语义层** `src/styles/tokens.css` — 把基础层映射到用途（`--i-color-brand`、`--i-color-text-secondary` …），亮/暗两套主题在此覆盖。
+1. **基础层** `packages/common/src/tokens/index.ts` — 调色板与原子刻度，只描述值。
+2. **语义层** `packages/common/src/styles/tokens.css` — 把基础层映射到用途（`--i-color-brand`、`--i-color-text-secondary` …），亮/暗两套主题在此覆盖。
 3. **组件层** — 组件样式只引用语义层变量，因此主题切换无需改动任何组件代码。
 
 ## 组件
