@@ -19,7 +19,8 @@
     "./tokens/*": "./dist/tokens/*"
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "sideEffects": [
     "**/*.css"

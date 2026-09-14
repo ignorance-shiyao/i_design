@@ -61,6 +61,11 @@ jobs:
       - name: 发布产物构建与入口核对
         run: npm run build:packages
 
+      # 仓库内的 alias 与 tsconfig paths 让一切看起来正常，装到别人项目里才暴露。
+      # 这一步把包 pack 出来，装进仓库外的干净项目，真的打包并在浏览器里渲染一次。
+      - name: 外部安装烟测
+        run: node scripts/check-install.mjs
+
       # 生成物是提交进仓库的。上面几步会重新生成它们，若与提交的内容不一致，
       # 说明改了源码却没跑生成脚本——这种漏掉不会让任何一步失败，只能这样兜住。
       - name: 生成物是否已提交
