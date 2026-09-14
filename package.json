@@ -34,6 +34,7 @@
     "build:icon-paths": "node scripts/build-icon-paths.mjs",
     "check:icons": "node --test scripts/check-icons.test.mjs && node scripts/check-icons.mjs",
     "check:routes": "node --test scripts/check-routes.test.mjs && node scripts/check-routes.mjs",
+    "check:illustrations": "node --test scripts/check-illustrations.test.mjs && node scripts/check-illustrations.mjs",
     "check:licenses": "node --test scripts/check-licenses.test.mjs && node scripts/check-licenses.mjs",
     "build:bundle": "npm run build:packages && node scripts/build-bundle-report.mjs",
     "check:bundle": "node --test scripts/check-bundle.test.mjs && node scripts/check-bundle.mjs",

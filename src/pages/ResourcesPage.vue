@@ -4,22 +4,48 @@ import {
   emptyIllustrations,
   errorIllustrations,
   heroIllustrations,
+  illustrationMeta,
   mascotIllustration
 } from '@i-design/common/illustrations'
 
 const mascot = mascotIllustration.src
 const mascot2x = mascotIllustration.srcset
 
-const illustrations = [
-  { src: emptyIllustrations.empty.src, name: 'no-data', usage: '空状态 · 从未创建' },
-  { src: emptyIllustrations.search.src, name: 'search-empty', usage: '空状态 · 筛选无果' },
-  { src: emptyIllustrations.error.src, name: 'load-failed', usage: '空状态 · 加载失败' },
-  { src: emptyIllustrations.permission.src, name: 'no-permission', usage: '空状态 · 无权限' },
-  { src: errorIllustrations['404'].src, name: '404', usage: '错误页 · 地址不存在' },
-  { src: errorIllustrations['500'].src, name: '500', usage: '错误页 · 服务异常' },
-  { src: heroIllustrations.light.src, name: 'hero-light', usage: '首页 Hero · 浅色' },
-  { src: heroIllustrations.dark.src, name: 'hero-dark', usage: '首页 Hero · 深色' }
-]
+// 画廊与矩阵都从注册表来：用途、替代文本、宽度只写在 illustrationMeta 一处，
+// 手抄一遍必然会和素材对不上
+const byKey: Record<string, { src: string; srcset: string }> = {
+  'empty.empty': emptyIllustrations.empty,
+  'empty.search': emptyIllustrations.search,
+  'empty.error': emptyIllustrations.error,
+  'empty.permission': emptyIllustrations.permission,
+  'error.404': errorIllustrations['404'],
+  'error.500': errorIllustrations['500'],
+  'hero.light': heroIllustrations.light,
+  'hero.dark': heroIllustrations.dark,
+  'mascot.mascot': mascotIllustration
+}
+
+const categoryNames: Record<string, string> = {
+  empty: '空状态',
+  error: '错误页',
+  hero: '首页 Hero',
+  mascot: '品牌形象'
+}
+
+const themeNames: Record<string, string> = {
+  any: '两个主题通用',
+  light: '仅浅色',
+  dark: '仅深色'
+}
+
+const illustrations = illustrationMeta.map((meta) => ({
+  ...meta,
+  name: meta.file.split('/').pop()!.replace('.webp', ''),
+  src: byKey[meta.key].src,
+  srcset: byKey[meta.key].srcset,
+  categoryName: categoryNames[meta.category],
+  themeName: themeNames[meta.theme]
+}))
 
 const resources = [
   { title: '设计令牌表', desc: '完整的色彩、字号、间距、圆角、阴影与动效令牌，含语义层映射。', to: '/design/tokens' },
@@ -63,13 +89,48 @@ const contributing = [
 
     <div class="gallery">
       <figure v-for="item in illustrations" :key="item.name">
-        <img :src="item.src" :alt="item.usage" loading="lazy" />
+        <img :src="item.src" :srcset="item.srcset" :alt="item.alt" loading="lazy" />
         <figcaption>
           <code>{{ item.name }}</code>
           <span>{{ item.usage }}</span>
         </figcaption>
       </figure>
     </div>
+
+    <h3>插画矩阵</h3>
+    <p>
+      这张表是插画的唯一登记处：用途、显示宽度、主题适用与替代文本都只写在这里一份，组件与文档都从它取值。<code>npm run check:illustrations</code> 会拿它和磁盘上的素材对一遍——多一条、少一张 <code>@2x</code>、尺寸对不上、素材里烤了底，都会让检查变红。
+    </p>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>类别</th>
+            <th>键</th>
+            <th>用途</th>
+            <th>显示宽度</th>
+            <th>主题</th>
+            <th>替代文本</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in illustrations" :key="item.key">
+            <td>{{ item.categoryName }}</td>
+            <td><code>{{ item.key }}</code></td>
+            <td>{{ item.usage }}</td>
+            <td>{{ item.width }}px</td>
+            <td>{{ item.themeName }}</td>
+            <td>{{ item.alt }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      替代文本写的是「图里画了什么」，念不念由使用处决定：空状态与错误页的标题已经把话说全了，那里渲染成 <code>alt=&quot;&quot;</code>；这一页把插画当内容展示，才把它念出来。同一句话念两遍，读屏器用户听到的是重复。
+    </p>
+    <p>
+      除 Hero 外的插画四角全透明、没有烤进去的底，因此浅色与深色主题下直接通用；Hero 画了背景氛围，所以成对提供浅色与深色两版，缺一版检查就会变红。
+    </p>
 
     <h3>为什么是 WebP 位图而不是 SVG</h3>
     <p>
@@ -160,5 +221,29 @@ ol { color: var(--i-color-text-secondary); padding-left: var(--i-spacing-5); }
   color: var(--i-color-text-tertiary);
 }
 .gallery code { font-size: var(--i-font-size-xs); }
+/* 表格是唯一允许自己横向滚动的东西：六列在 320px 上压不下来，
+   压下来也会把替代文本折成一列单字 */
+.matrix-wrap {
+  margin-top: var(--i-spacing-4);
+  overflow-x: auto;
+}
+.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--i-font-size-sm);
+}
+.matrix th,
+.matrix td {
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-bottom: 1px solid var(--i-color-hairline);
+  text-align: left;
+  white-space: nowrap;
+}
+.matrix th {
+  color: var(--i-color-text-secondary);
+  font-weight: 500;
+}
+.matrix code { font-size: var(--i-font-size-xs); }
+
 ol li { margin-bottom: var(--i-spacing-2); }
 </style>
