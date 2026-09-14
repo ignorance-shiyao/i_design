@@ -332,6 +332,40 @@ const waterfallItems = [
       />
     </DemoBlock>
 
+    <DemoBlock
+      title="双轴：两种单位画在一张图里"
+      description="双轴是最容易骗人的图型——两条线谁在上、在哪儿交叉，全由两侧刻度的取值决定，换一组刻度就能把结论反过来。所以这里要求两侧都写明单位，并把「不该用双轴」的情形直接印在图下：两侧单位相同（那是一个轴的事，分成两个轴之后等高不再等值）、有系列没指定归属、两侧零位对不齐。双轴只对折线生效，柱状与面积要一个系列一个图型，那是另一件事。"
+      lang="vue"
+      code='<IChart :axes="{ left: { series: [&apos;销售额&apos;], unit: &apos;万元&apos; }, right: { series: [&apos;转化率&apos;], unit: &apos;%&apos; } }" :labels="labels" :series="series" />'
+    >
+      <IChart
+        :axes="{ left: { series: ['销售额'], unit: '万元' }, right: { series: ['转化率'], unit: '%' } }"
+        :labels="['一月', '二月', '三月', '四月', '五月']"
+        :series="[
+          { name: '销售额', data: [120, 168, 150, 210, 264] },
+          { name: '转化率', data: [3.2, 3.8, 3.5, 4.6, 5.1] }
+        ]"
+        :height="220"
+      />
+    </DemoBlock>
+
+    <DemoBlock
+      title="双轴不该这么用"
+      description="同一份数据，两侧单位都写成「万元」。图看起来没有任何异常——两条线照画，刻度照出——但等高已经不再等值，读者会按位置比大小。组件不拦着，因为确实有人需要临时这么看；但会把这句话印在图下，而不是让读者自己看出来。"
+      lang="vue"
+      code='<IChart :axes="{ left: { series: [&apos;直销&apos;], unit: &apos;万元&apos; }, right: { series: [&apos;代理&apos;], unit: &apos;万元&apos; } }" :labels="labels" :series="series" />'
+    >
+      <IChart
+        :axes="{ left: { series: ['直销'], unit: '万元' }, right: { series: ['代理'], unit: '万元' } }"
+        :labels="['一月', '二月', '三月', '四月', '五月']"
+        :series="[
+          { name: '直销', data: [120, 168, 150, 210, 264] },
+          { name: '代理', data: [12, 18, 15, 21, 26] }
+        ]"
+        :height="220"
+      />
+    </DemoBlock>
+
     <h2>联动</h2>
     <DemoBlock
       title="过滤、下钻与返回"

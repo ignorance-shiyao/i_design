@@ -18,6 +18,7 @@ import {
   showLabelAt,
   barRect,
   categoryBands,
+  dualAxis,
   rankOrder,
   valueAxis
 } from '@i-design/common'
@@ -69,6 +70,17 @@ export interface ChartProps {
   title?: string
   unit?: string
   /**
+   * 第二值轴：把两种单位的量画在一张图里，只对折线生效。
+   *
+   * 双轴是最容易骗人的图型——两条线谁在上、在哪儿交叉全由两侧刻度决定。
+   * 所以两侧都必须写明单位，并把「不该用双轴」的情形印在图下。
+   * 柱状与面积不支持：那需要每个系列各自的图型，是另一件事。
+   */
+  axes?: {
+    left: { series: string[]; unit: string; label?: string }
+    right: { series: string[]; unit: string; label?: string }
+  } | null
+  /**
    * 阈值线与阈值带：把「多少算正常」画进图里。
    * 只看趋势看不出「现在是不是超了」，而后者往往才是看这张图的原因。
    */
@@ -95,6 +107,7 @@ export function Chart({
   title = '',
   unit = '',
   thresholds = [],
+  axes = null,
   className = ''
 }: ChartProps) {
   /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
@@ -116,9 +129,11 @@ export function Chart({
   const stackedArea = type === 'area' && visible.length > 1
 
   const horizontal = isBar && orientation === 'horizontal'
+  const hasDual = !!axes && type === 'line'
   const pad = {
     top: 16,
-    right: labelLast && !isBar ? 96 : 16,
+    // 双轴要在右边写刻度与单位，末点标注就让位——两样都塞进去会互相压住
+    right: hasDual ? 56 : labelLast && !isBar ? 96 : 16,
     bottom: 28,
     // 横条的类目名写在左边，48px 只够放数字刻度
     left: horizontal ? 110 : 48
@@ -177,6 +192,31 @@ export function Chart({
     if (next.has(name)) next.delete(name)
     else if (series.length - next.size > 1) next.add(name)
     setHidden(next)
+  }
+
+  /* ---------- 双轴 ----------
+   * 判定与布局都在公共层的 dualAxis 里，与 Vue 端同一份：
+   * 哪些情形不该用双轴，不该由各端各写一遍。
+   */
+  const indexOf = (names: string[]) =>
+    names.map((n) => visible.findIndex((s) => s.name === n)).filter((i) => i >= 0)
+  const dual = hasDual && axes
+    ? dualAxis(
+        visible,
+        { series: indexOf(axes.left.series), unit: axes.left.unit, label: axes.left.label },
+        { series: indexOf(axes.right.series), unit: axes.right.unit, label: axes.right.label },
+        plotH,
+        { format: formatTick }
+      )
+    : null
+  /** 双轴被忽略时要明说：折线以外的图型不支持 */
+  const dualIgnored = !!axes && type !== 'line'
+  const axisFor = (name: string) =>
+    dual ? (axes!.right.series.includes(name) ? dual.right : dual.left) : null
+  /** 双轴下每个系列用自己那一侧的刻度，所以单位必须写在轴上 */
+  const yIn = (name: string, value: number) => {
+    const axis = axisFor(name)
+    return axis ? scaleY(value, axis.min, axis.max, plotH) + pad.top : y(value)
   }
 
   /* ---------- 横条 ----------
@@ -348,6 +388,29 @@ export function Chart({
           </>
         )}
 
+        {/* 右轴：刻度写在右边，单位跟着轴走——双轴图里「这条线是什么量」只能靠它 */}
+        {dual && (
+          <>
+            {dual.right.ticks.map((tick) => (
+              <text
+                key={`right-${tick.value}`}
+                className="i-chart__tick"
+                x={W - pad.right + 8}
+                y={tick.offset + pad.top + 4}
+                textAnchor="start"
+              >
+                {tick.label}
+              </text>
+            ))}
+            <text className="i-chart__tick" x={W - pad.right + 8} y={pad.top - 4} textAnchor="start">
+              {axes!.right.label || axes!.right.unit}
+            </text>
+            <text className="i-chart__tick" x={pad.left - 8} y={pad.top - 4} textAnchor="end">
+              {axes!.left.label || axes!.left.unit}
+            </text>
+          </>
+        )}
+
         {/*
           阈值画在网格之上、数据之下：它是参考背景，不该盖住数据本身。
           带用低不透明度填充，线用虚线——实线会被误读成又一个数据系列。
@@ -447,14 +510,15 @@ export function Chart({
                 className="i-chart__line"
                 d={
                   curve === 'step'
-                    ? stepPath(s.data, scale.min, scale.max, plotW, plotH)
-                    : linePath(s.data, scale.min, scale.max, plotW, plotH)
+                    ? stepPath(s.data, axisFor(s.name)?.min ?? scale.min, axisFor(s.name)?.max ?? scale.max, plotW, plotH)
+                    : linePath(s.data, axisFor(s.name)?.min ?? scale.min, axisFor(s.name)?.max ?? scale.max, plotW, plotH)
                 }
                 stroke={colorOf(s.name)}
                 transform={`translate(${pad.left} ${pad.top})`}
               />
             ))}
-            {labelLast &&
+            {/* 双轴时右边让给刻度与单位：末点标注再挤进去，两样都读不清 */}
+            {labelLast && !dual &&
               endLabels.map((row) => (
                 <g key={`label-${row.name}`}>
                   <circle
@@ -504,7 +568,7 @@ export function Chart({
                 key={`hit-${s.name}`}
                 className="i-chart__dot"
                 cx={x(active)}
-                cy={y(s.data[active] ?? 0)}
+                cy={yIn(s.name, s.data[active] ?? 0)}
                 r={4.5}
                 fill={colorOf(s.name)}
               />
@@ -599,6 +663,14 @@ export function Chart({
         用危险色画目标，会让一个还没达成的目标看起来像一次故障。
       */}
       {/* 换算不了的列与目标达成情况都写出来，不让读者自己看出来 */}
+      {(dual?.issues ?? []).map((issue) => (
+        <p className="i-chart__hint" key={issue}>{issue}</p>
+      ))}
+      {dualIgnored ? (
+        <p className="i-chart__hint">
+          双轴只对折线生效：柱状与面积要一个系列一个图型，那是另一件事，这里没有假装支持。
+        </p>
+      ) : null}
       {thresholdsDropped ? (
         <p className="i-chart__hint">
           横条暂不画阈值线：竖着的阈值线会被读成分隔栏。需要阈值请用纵向柱状图。

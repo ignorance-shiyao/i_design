@@ -47,6 +47,7 @@ class IChart extends StatelessWidget {
     this.target,
     this.orientation = IAxisOrientation.vertical,
     this.rank = 'none',
+    this.axes,
     this.height = 220,
     this.fromZero = true,
     this.title = '',
@@ -76,6 +77,13 @@ class IChart extends StatelessWidget {
 
   /// 横条按值排序。类目本身有顺序（星期、档位）时排序反而破坏信息，所以不是默认。
   final String rank;
+
+  /// 第二值轴：把两种单位的量画在一张图里，只对折线生效。
+  ///
+  /// 两条线谁在上、在哪儿交叉全由两侧刻度决定，所以两侧都必须写明单位；
+  /// 不该用双轴的情形（单位相同、有系列没归属、零位错位）写在图下，
+  /// 而不是让读者自己看出来。柱状与面积不支持：那需要每个系列各自的图型。
+  final ({IDualAxisSide left, IDualAxisSide right})? axes;
   final double height;
   final bool fromZero;
   final String title;
@@ -84,6 +92,21 @@ class IChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = iColorsOf(context);
+    final dualResult = axes != null && type == IChartType.line
+        // 用与画布一致的绘图高度：零位是否对齐是按像素判定的，
+        // 随便传个长度会让「零位错位」这条提示时有时无
+        ? dualAxis(
+            series,
+            axes!.left,
+            axes!.right,
+            height - _ChartPainter.padTop - _ChartPainter.padBottom,
+            format: formatTick,
+          )
+        : null;
+    final axisIssues = dualResult?.issues ??
+        (axes != null
+            ? const ['双轴只对折线生效：柱状与面积要一个系列一个图型，那是另一件事，这里没有假装支持。']
+            : const <String>[]);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,10 +145,23 @@ class IChart extends StatelessWidget {
               target: target,
               orientation: orientation,
               rank: rank,
+              axes: axes,
               colors: c,
             ),
           ),
         ),
+        // 不该用双轴的情形写在图下：图本身看不出异常，只有这句话看得出
+        if (axisIssues.isNotEmpty) ...[
+          const SizedBox(height: IDesignTokensLight.spacing2),
+          for (final issue in axisIssues)
+            Text(
+              issue,
+              style: TextStyle(
+                color: c.textTertiary,
+                fontSize: IDesignTokensLight.fontSizeXs,
+              ),
+            ),
+        ],
         // 两个以上系列必有图例：颜色不能是识别身份的唯一通道
         if (series.length > 1) ...[
           const SizedBox(height: IDesignTokensLight.spacing3),
@@ -173,6 +209,7 @@ class _ChartPainter extends CustomPainter {
     required this.target,
     required this.orientation,
     required this.rank,
+    required this.axes,
     required this.fromZero,
     required this.colors,
   });
@@ -185,6 +222,7 @@ class _ChartPainter extends CustomPainter {
   final double? target;
   final IAxisOrientation orientation;
   final String rank;
+  final ({IDualAxisSide left, IDualAxisSide right})? axes;
   final bool fromZero;
   final IColors colors;
 
@@ -305,6 +343,34 @@ class _ChartPainter extends CustomPainter {
       return;
     }
 
+    /*
+     * 双轴：每条线在自己那一侧的刻度上，这正是双轴能骗人的地方，
+     * 所以单位画在轴头上。判定与布局走 logic/axis.dart，与 Web 端同一份。
+     */
+    final dual = axes != null && type == IChartType.line
+        ? dualAxis(series, axes!.left, axes!.right, plotH, format: formatTick)
+        : null;
+    double yIn(String name, double v) {
+      if (dual == null) return y(v);
+      final side = axes!.right.series.contains(
+        series.indexWhere((s) => s.name == name),
+      )
+          ? dual.right
+          : dual.left;
+      return scaleY(v, side.min, side.max, plotH) + padTop;
+    }
+
+    if (dual != null) {
+      for (final tick in dual.right.ticks) {
+        _text(canvas, tick.label, Offset(size.width - padRight + 4, tick.offset + padTop - 7),
+            colors.textTertiary);
+      }
+      _text(canvas, axes!.right.unit, Offset(size.width - padRight + 4, padTop - 14),
+          colors.textTertiary);
+      _text(canvas, axes!.left.unit, Offset(padLeft - 6, padTop - 14), colors.textTertiary,
+          align: TextAlign.right);
+    }
+
     for (var si = 0; si < series.length; si++) {
       final color = iChartPalette[si % iChartPalette.length];
       final raw = series[si].data;
@@ -312,14 +378,15 @@ class _ChartPainter extends CustomPainter {
           ? [for (var i = 0; i < raw.length; i++) raw[i] + below(i, si)]
           : raw;
 
+      final name = series[si].name;
       final line = Path();
       for (var i = 0; i < upper.length; i++) {
-        final p = Offset(x(i), y(upper[i]));
+        final p = Offset(x(i), yIn(name, upper[i]));
         if (i == 0) {
           line.moveTo(p.dx, p.dy);
         } else {
           // 阶梯：值保持到下一个点再跳变，而不是斜着连过去
-          if (curve == 'step') line.lineTo(p.dx, y(upper[i - 1]));
+          if (curve == 'step') line.lineTo(p.dx, yIn(name, upper[i - 1]));
           line.lineTo(p.dx, p.dy);
         }
       }
@@ -475,5 +542,6 @@ class _ChartPainter extends CustomPainter {
       old.target != target ||
       old.orientation != orientation ||
       old.rank != rank ||
+      old.axes != axes ||
       old.colors != colors;
 }

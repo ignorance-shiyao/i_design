@@ -7,6 +7,7 @@
 import {
   barRect,
   categoryBands,
+  dualAxis,
   domainOf,
   formatTick,
   niceTicks,
@@ -42,13 +43,19 @@ Component({
     orientation: { type: String, value: 'vertical' },
     /** 横条按值排序。类目本身有顺序时排序反而破坏信息，所以不是默认 */
     rank: { type: String, value: 'none' },
+    /**
+     * 第二值轴：把两种单位的量画在一张图里，只对折线生效。
+     * 两侧都必须写明单位；不该用双轴的情形（单位相同、有系列没归属、零位错位）
+     * 会写在图下，而不是让读者自己看出来。
+     */
+    axes: { type: Object, value: null },
     height: { type: Number, value: 220 },
     fromZero: { type: Boolean, value: true },
     title: { type: String, value: '' }
   },
-  data: { skippedColumns: 0, legend: [] },
+  data: { skippedColumns: 0, legend: [], axisIssues: [] },
   observers: {
-    'series, labels, type, stacked, orientation, rank': function (series) {
+    'series, labels, type, stacked, orientation, rank, axes': function (series) {
       this.setData({
         legend: series.map((s, i) => ({ name: s.name, color: PALETTE[i % PALETTE.length] }))
       })
@@ -79,7 +86,9 @@ Component({
     },
 
     render(ctx, width, height) {
-      const { labels, type, stacked, fromZero, percent, curve, target, orientation, rank } = this.data
+      const {
+        labels, type, stacked, fromZero, percent, curve, target, orientation, rank, axes
+      } = this.data
       // 百分比换算在渲染前做，与 Web 端同一份实现；换算不了的列原样保留
       const converted = percent ? percentStack(this.data.series) : { series: this.data.series, skipped: [] }
       const series = converted.series
@@ -160,6 +169,37 @@ Component({
       const lo = ticks[0]
       const hi = ticks[ticks.length - 1]
       const y = (v) => scaleY(v, lo, hi, plotH) + PAD.top
+
+      /*
+       * 双轴：判定与布局走公共层的 dualAxis，与 Web 端同一份。
+       * 两条线谁在上、在哪儿交叉全由两侧刻度决定，所以单位写在轴上，
+       * 不该用双轴的情形写在图下。
+       */
+      const indexOf = (names) =>
+        (names || []).map((n) => series.findIndex((s) => s.name === n)).filter((i) => i >= 0)
+      const dual = axes && type === 'line'
+        ? dualAxis(
+            series,
+            { series: indexOf(axes.left && axes.left.series), unit: (axes.left && axes.left.unit) || '' },
+            { series: indexOf(axes.right && axes.right.series), unit: (axes.right && axes.right.unit) || '' },
+            plotH,
+            { format: formatTick }
+          )
+        : null
+      this.setData({
+        axisIssues: dual
+          ? dual.issues
+          : axes && type !== 'line'
+            ? ['双轴只对折线生效：柱状与面积要一个系列一个图型，那是另一件事，这里没有假装支持。']
+            : []
+      })
+      const onRight = (name) =>
+        !!(axes && axes.right && (axes.right.series || []).indexOf(name) >= 0)
+      const yIn = (name, v) => {
+        if (!dual) return y(v)
+        const axis = onRight(name) ? dual.right : dual.left
+        return scaleY(v, axis.min, axis.max, plotH) + PAD.top
+      }
       const x = (i) => scaleX(i, labels.length, plotW) + padLeft
 
       // 网格与刻度：背景信息，最淡的一档
@@ -175,6 +215,17 @@ Component({
         ctx.stroke()
         ctx.fillText(formatTick(tick), padLeft - 6, y(tick) + 4)
       })
+
+      if (dual) {
+        // 右轴刻度写在右边，单位跟着轴走——「这条线是什么量」只能靠它
+        ctx.textAlign = 'left'
+        dual.right.ticks.forEach((tick) => {
+          ctx.fillText(tick.label, width - PAD.right + 4, tick.offset + PAD.top + 4)
+        })
+        ctx.fillText((axes.right && axes.right.unit) || '', width - PAD.right + 4, PAD.top - 2)
+        ctx.textAlign = 'right'
+        ctx.fillText((axes.left && axes.left.unit) || '', padLeft - 6, PAD.top - 2)
+      }
 
       const band = plotW / Math.max(1, labels.length)
       ctx.textAlign = 'center'
@@ -228,9 +279,9 @@ Component({
         ctx.beginPath()
         // 阶梯：值保持到下一个点再跳变，而不是斜着连过去
         upper.forEach((v, i) => {
-          if (i === 0) { ctx.moveTo(x(i), y(v)); return }
-          if (curve === 'step') ctx.lineTo(x(i), y(upper[i - 1]))
-          ctx.lineTo(x(i), y(v))
+          if (i === 0) { ctx.moveTo(x(i), yIn(s.name, v)); return }
+          if (curve === 'step') ctx.lineTo(x(i), yIn(s.name, upper[i - 1]))
+          ctx.lineTo(x(i), yIn(s.name, v))
         })
         ctx.strokeStyle = color
         ctx.lineWidth = 2

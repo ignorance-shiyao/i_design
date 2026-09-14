@@ -5,6 +5,7 @@
     type="2d"
     style="width:100%;height:{{height}}px"
   />
+  <view wx:for="{{axisIssues}}" wx:key="*this" class="i-chart__hint">{{item}}</view>
   <view wx:if="{{legend.length > 1}}" class="i-chart__legend">
     <view wx:for="{{legend}}" wx:key="name" class="i-chart__legend-item">
       <view class="i-chart__swatch" style="background:{{item.color}}" />

@@ -709,7 +709,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/chart",
       "page": "src/pages/components/ChartPage.vue",
-      "demos": 22
+      "demos": 24
     },
     "demoRoutes": [
       "/components/chart"
