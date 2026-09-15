@@ -1,0 +1,49 @@
+<view wx:if="{{visible}}" class="i-bulk-bar {{scope === 'matched' ? 'i-bulk-bar--matched' : ''}}">
+  <view wx:if="{{scope === 'matched'}}" class="i-bulk-bar__badge">
+    <i-icon name="warning-triangle" size="14" />
+  </view>
+
+  <!-- 摘要在最左边，在按钮之前：范围写在按钮右边等于让人先点后读 -->
+  <view class="i-bulk-bar__summary"><text class="i-bulk-bar__count">{{summary}}</text></view>
+
+  <view class="i-bulk-bar__scope">
+    <!-- 只在「当前页已全勾上、匹配总数更多」时给这个入口 -->
+    <i-button wx:if="{{escalatable}}" size="sm" variant="text" bind:tap="onEscalate">{{escalateText}}</i-button>
+    <i-button wx:if="{{scope === 'matched'}}" size="sm" variant="text" bind:tap="onShrink">仅保留已勾选的 {{selectedCount}} 项</i-button>
+    <i-button wx:if="{{count > 0}}" size="sm" variant="text" bind:tap="onClear">取消选择</i-button>
+  </view>
+
+  <view class="i-bulk-bar__actions">
+    <slot name="actions" />
+    <i-button size="sm" variant="primary" loading="{{busy}}" disabled="{{busy || count === 0}}" bind:tap="onRun">执行</i-button>
+  </view>
+
+  <!-- 确认就地展开在条下面：用户点的是这条上的按钮，答案就该出现在这条上 -->
+  <view wx:if="{{asking}}" class="i-bulk-bar__panel i-bulk-bar__panel--danger">
+    <view class="i-bulk-bar__panel-icon"><i-icon name="warning-triangle" size="14" /></view>
+    <view class="i-bulk-bar__panel-text">{{confirmMessage}}</view>
+    <i-button size="sm" bind:tap="onKeepLooking">再看看</i-button>
+    <i-button size="sm" variant="danger" bind:tap="onRun">确认执行</i-button>
+  </view>
+
+  <block wx:if="{{outcome}}">
+    <view class="i-bulk-bar__panel {{outcomeOk ? 'i-bulk-bar__panel--success' : 'i-bulk-bar__panel--danger'}}">
+      <view class="i-bulk-bar__panel-icon">
+        <i-icon name="{{outcomeOk ? 'check-circle' : 'error-circle'}}" size="14" />
+      </view>
+      <view class="i-bulk-bar__panel-text">{{outcome.summary}}</view>
+      <!-- 重试只发失败项：成功项再执行一次，扣款与发货这类动作就是事故 -->
+      <i-button wx:if="{{outcome.retryIds.length}}" size="sm" loading="{{busy}}" bind:tap="onRetry">
+        只重试失败的 {{outcome.retryIds.length}} 项
+      </i-button>
+    </view>
+
+    <view wx:if="{{failures.length}}" class="i-bulk-bar__failures">
+      <view wx:for="{{failures}}" wx:key="id">
+        <text class="i-bulk-bar__failure-id">{{item.id}}</text>
+        <text> —— {{item.reason}}</text>
+      </view>
+      <view wx:if="{{hiddenFailures}}">还有 {{hiddenFailures}} 项失败，展开列表查看</view>
+    </view>
+  </block>
+</view>

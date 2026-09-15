@@ -2,6 +2,7 @@
 import ITable, { type TableColumn, type TableRow } from '@/components/ITable.vue'
 import IQueryFilter from '@/components/IQueryFilter.vue'
 import IProTable from '@/components/IProTable.vue'
+import IBulkBar from '@/components/IBulkBar.vue'
 import ITag from '@/components/ITag.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
@@ -21,7 +22,12 @@ import {
   toSearch,
   type FilterField,
   type QueryState,
-  type QuickFilter
+  type QuickFilter,
+  bulkOutcome,
+  mergeOutcome,
+  type BulkId,
+  type BulkOutcome,
+  type BulkScope
 } from '@i-design/common'
 
 const picked = ref<(string | number)[]>([])
@@ -97,6 +103,49 @@ const quickFilters: QuickFilter[] = [
 ]
 
 /* 演示里用一条假链接代替地址栏：文档站本身的路由不该被演示改掉 */
+/*
+ * 批量操作条的演示状态。
+ *
+ * 「符合筛选的全部」故意给一个远大于当前页的数（8000）：这条组件存在的全部
+ * 理由就是这个数与当前页的 3 之间的差——用户以为勾的是眼前这几行。
+ *
+ * 执行故意做成部分失败，因为批量操作十有八九就是部分成功：要看的正是
+ * 「只重试失败的那几项」，以及重试之后成功数是累加而不是被覆盖。
+ */
+const bulkPageIds = ['SO-2026-0007', 'SO-2026-0008', 'SO-2026-0009']
+const bulkScope = ref<BulkScope>('selected')
+const bulkSelected = ref<BulkId[]>([...bulkPageIds])
+const bulkOutcomeState = ref<BulkOutcome | undefined>(undefined)
+const bulkBusy = ref(false)
+
+/*
+ * 这一行第一次会失败、重试就成功——像库存锁竞争那样的一次性失败。
+ *
+ * 做成「永远失败」的话，重试之后摘要还是「2 项成功，1 项失败」，
+ * 看不出成功集到底是累加的还是被这一轮覆盖了——而那正是这段要演的东西：
+ * 第二轮只发了 1 项，若用它的结果直接覆盖，摘要会变成「1 项全部成功」。
+ */
+const FLAKY = 'SO-2026-0008'
+const bulkTried = new Set<string>()
+
+function runBulk(ids: BulkId[]) {
+  bulkBusy.value = true
+  setTimeout(() => {
+    const round = bulkOutcome(
+      ids.map((id) => {
+        const key = String(id)
+        const willFail = key === FLAKY && !bulkTried.has(key)
+        bulkTried.add(key)
+        return { id, ok: !willFail, reason: willFail ? '库存被占用，请稍后重试' : undefined }
+      })
+    )
+    bulkOutcomeState.value = bulkOutcomeState.value
+      ? mergeOutcome(bulkOutcomeState.value, round)
+      : round
+    bulkBusy.value = false
+  }, 700)
+}
+
 const demoLink = ref('?owner=林岚&status=archived&page=0')
 const parsed = computed(() => parseQuery(fromSearch(demoLink.value), queryFields))
 const queryState = ref<QueryState>(parsed.value.state)
@@ -195,6 +244,46 @@ const tablePgCode = [':columns="columns"', ':data="data"']
         <ul class="pro-demo__log">
           <li v-for="(line, i) in log" :key="i">{{ line }}</li>
         </ul>
+      </div>
+    </DemoBlock>
+
+    <h2>批量操作</h2>
+    <p>
+      列表页上「全选」这个词有三种完全不同的含义：勾中的这几行、当前这一页、符合当前筛选的全部。三者在屏幕上差别极小——一个复选框、一行小字——而后果差着数量级：用户以为勾的是当前页的 20 行，实际发出去的是 8000 行，那是一次谁也收不回的操作。
+    </p>
+    <p>
+      所以作用域在这里是一个显式的值，不是「勾了几个」推出来的；摘要永远写在按钮左边，读者的视线从左往右，把范围写在按钮右边等于让他先点后读；「全部匹配」这一档必须再确认一次，确认语里复述条数与范围，不说「确定吗」。这一档的 <code>ids</code> 还是 <code>null</code> 而不是一份名单：前端手里根本没有这份名单，硬凑只会凑出「当前页的那些」——那正是这层要防的误解。
+    </p>
+    <DemoBlock
+      title="三种作用域，以及部分失败之后只重试失败项"
+      description="当前页三行已全部勾上，于是出现「选择全表的全部 8000 项」这个入口——只在这种时候给，别的时候摆出来只会让人在没想清楚范围时点到它。切过去之后底色转警告、点「执行」会先要一次确认，确认语里复述的是 8000 与「包含当前页看不到的数据」。退回「已勾选的 3 项」再执行：有一行会失败（库存被占用这类一次性失败），结果条摊开成 2 成功 1 失败，并且只给「只重试失败的 1 项」。点它——第二轮只发出去 1 项，而摘要变成「3 项全部成功」而不是「1 项全部成功」：成功集是累加的，先前成功的两项没有被这一轮的结果覆盖，也没有被重新执行一遍。"
+      lang="vue"
+      code='<IBulkBar
+  v-model:scope="scope"
+  :page-ids="pageIds"
+  :selected-ids="selected"
+  :matched-total="8000"
+  :outcome="outcome"
+  @execute="(s) => run(s.ids ?? undefined)"
+  @retry="run"
+/>'
+    >
+      <div class="bulk-demo">
+        <IBulkBar
+          :scope="bulkScope"
+          :page-ids="bulkPageIds"
+          :selected-ids="bulkSelected"
+          :matched-total="8000"
+          :outcome="bulkOutcomeState"
+          :busy="bulkBusy"
+          @update:scope="(v: BulkScope) => (bulkScope = v)"
+          @execute="(sel) => runBulk(sel.ids ?? bulkPageIds)"
+          @retry="runBulk"
+          @clear="() => { bulkSelected = []; bulkScope = 'selected'; bulkOutcomeState = undefined }"
+        />
+        <p class="bulk-demo__hint">
+          当前页三行：{{ bulkPageIds.join('、') }}；其中<code>SO-2026-0008</code> 第一次会失败，重试就成功。
+        </p>
       </div>
     </DemoBlock>
 
@@ -362,6 +451,9 @@ const tablePgCode = [':columns="columns"', ':data="data"']
 </template>
 
 <style scoped>
+.bulk-demo { display: grid; gap: var(--i-spacing-3); }
+.bulk-demo__hint { margin: 0; font-size: var(--i-font-size-sm); color: var(--i-color-text-secondary); }
+
 .pro-demo {
   display: grid;
   gap: var(--i-spacing-3);

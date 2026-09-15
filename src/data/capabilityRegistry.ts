@@ -468,6 +468,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IBulkBar",
+    "sources": {
+      "vue-next": "src/components/IBulkBar.vue",
+      "vue": "packages/vue/src/components/IBulkBar.vue",
+      "react": "packages/react/src/components/BulkBar.tsx",
+      "miniprogram": "packages/miniprogram/src/components/bulk-bar",
+      "flutter": "packages/flutter/lib/src/components/i_bulk_bar.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/table"
+    ],
+    "states": {}
+  },
+  {
     "name": "IButton",
     "sources": {
       "vue-next": "src/components/IButton.vue",
@@ -4440,7 +4470,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/table",
       "page": "src/pages/components/TablePage.vue",
-      "demos": 7
+      "demos": 8
     },
     "demoRoutes": [
       "/components/collapse",

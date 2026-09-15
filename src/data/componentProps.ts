@@ -104,6 +104,16 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"separator","type":"string","doc":"传入字符串则用文字分隔；默认使用图标，视觉上比斜杠更轻","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"separatorIcon","type":"IconName","doc":"","optional":true,"defaultText":"'chevron-right'","control":null},
   ],
+  IBulkBar: [
+    {"name":"scope","type":"BulkScope","doc":"当前作用域。受控：这是整条的核心状态，不能由组件自己猜","optional":true,"defaultText":"'selected'","control":null},
+    {"name":"pageIds","type":"BulkId[]","doc":"当前页的行 id","optional":true,"defaultText":"() => []","control":null},
+    {"name":"selectedIds","type":"BulkId[]","doc":"用户勾中的行 id","optional":true,"defaultText":"() => []","control":null},
+    {"name":"matchedTotal","type":"number","doc":"符合当前筛选的总条数，由服务端给","optional":true,"defaultText":"0","control":{"kind":"number"}},
+    {"name":"filtered","type":"boolean","doc":"当前有没有筛选条件。没有筛选时「全部匹配」就是「全表」","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"outcome","type":"BulkOutcome","doc":"上一轮的执行结果。给了就把成功与失败摊在条下面","optional":true,"defaultText":"undefined","control":null},
+    {"name":"busy","type":"boolean","doc":"正在执行","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"maxFailures","type":"number","doc":"失败清单最多列几条，再多就折成一句","optional":true,"defaultText":"5","control":{"kind":"number"}},
+  ],
   IButton: [
     {"name":"variant","type":"'primary' | 'secondary' | 'text' | 'danger'","doc":"视觉层级：主按钮 / 次按钮 / 文字按钮 / 危险操作","optional":true,"defaultText":"'secondary'","control":{"kind":"enum","options":["primary","secondary","text","danger"]}},
     {"name":"size","type":"'sm' | 'md' | 'lg'","doc":"","optional":true,"defaultText":null,"control":{"kind":"enum","options":["sm","md","lg"]}},

@@ -87,6 +87,7 @@ export 'src/components/i_avatar_group.dart';
 export 'src/components/i_back_top.dart';
 export 'src/components/i_badge.dart';
 export 'src/components/i_breadcrumb.dart';
+export 'src/components/i_bulk_bar.dart';
 export 'src/components/i_button.dart';
 export 'src/components/i_button_group.dart';
 export 'src/components/i_calendar.dart';

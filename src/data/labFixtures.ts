@@ -128,6 +128,7 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
   /* 浮层类组件在 Lab 里默认不展开（见 LabPage 的 INTERACTIVE），必填属性仍要齐 */
   IDrawerForm: { values: {}, initial: {} },
   IModalForm: { values: {}, initial: {} },
+  IBulkBar: { scope: 'page', pageIds: ['SO-1', 'SO-2', 'SO-3'], selectedIds: ['SO-1'], matchedTotal: 8000 },
   IStepForm: {
     modelValue: {},
     steps: [
