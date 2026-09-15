@@ -578,7 +578,7 @@ H06（发布渠道与回滚演练）依赖 A03 与 H02，放在这一批收口�
 | B07 | ✅ | `IBulkBar` 五端 + `logic/bulk.ts`（三种作用域各有摘要、「全部匹配」要再确认且不给 id 名单、部分失败只重试失败项、多轮重试成功集累加），81 条 Dart 对齐断言 |
 | B08 | ✅ | `ISchemaForm` 五端 + `logic/schemaform.ts`（条件是数据、环检测、数组子表、服务端错误落位），40 条 Dart 对齐断言 |
 | B09 | ✅ | `IFormPage` / `IDrawerForm` / `IModalForm` / `IStepForm` 五端 + `logic/formhost.ts`（重复提交、失败保留输入、离开保护、重置范围、分步不丢数据），97 条 Dart 对齐断言 |
-| B10 | 🟡 | `ITransfer`/`ITreeSelect`/`IMentions` 在，缺「远程检索 + 已选回显 + 禁用原因」的组合件 |
+| B10 | ✅ | `IEntityPicker` 五端 + `logic/entitypicker.ts`（已选存完整对象所以翻页不丢名字、不可选的留在列表里说原因、停用的不能新选但已选照常显示与移除），44 条 Dart 对齐断言 |
 | B11 | ⬜ | ImportWizard/ExportJob 未做（mock API 里已有 `importOrders` 的部分失败语义） |
 | B12 | ✅ | `IDetailPage` 五端 + `logic/detail.ts`（状态不允许的动作不出现、没权限的出现但停用并说明、失效时写动作停而只读动作照常、返回票据与上一条/下一条），93 条 Dart 对齐断言 |
 | B13 | ✅ | `IMarkdown` + `logic/markdown.ts`（令牌树、危险 URL 拒绝）、`ICodeBlock`、附件预览 |
@@ -673,13 +673,15 @@ H06（发布渠道与回滚演练）依赖 A03 与 H02，放在这一批收口�
 7. ~~B07 批量操作栏~~ —— 已完成。
 8. ~~B12 DetailPage~~ —— 已完成。
 9. ~~G03 换成组件~~ —— 已完成，G03 转正。
-10. **B10 人员 / 组织 / 资源选择** —— 远程检索 + 已选回显 + 禁用原因。
-    难点是「翻页之后已选的还在不在」与「不可选的那些要说清为什么」——
-    停用实体仍要能读历史记录，直接过滤掉会让旧单据上的负责人变成一个空格。
-11. **B06 树表与分组汇总** —— `ITable` 只有基础排序与虚拟滚动；
+10. ~~B10 人员 / 组织 / 资源选择~~ —— 已完成。
+11. **B11 ImportWizard / ExportJob** —— mock API 里已经有 `importOrders`
+    的部分失败语义，B07 的 `bulkOutcome` / `mergeOutcome` 可以直接接上，
+    B09 的 StepForm 也正好是导入向导的骨架。难点是「预校验不写业务数据」
+    与「列映射可回退」——预校验一旦落库，用户取消之后数据已经脏了。
+12. **B06 树表与分组汇总** —— `ITable` 只有基础排序与虚拟滚动；
     这条的关键是「排序与展开不能丢选择」。
-12. **B11 ImportWizard / ExportJob** —— mock API 里已经有 `importOrders`
-    的部分失败语义，B07 的结果模型可以直接接上。
+13. **B14 / B15 / B18 的补完** —— 评论的未读定位、看板与人员泳道的拖动、
+    异步任务中心；三条都是 🟡，各缺一块明确的东西。
 
 ## 10. 参考与本次视觉取舍
 
