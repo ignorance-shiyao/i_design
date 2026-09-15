@@ -42,6 +42,7 @@ import IStepForm from './IStepForm.vue'
 import IBulkBar from './IBulkBar.vue'
 import IDetailPage from './IDetailPage.vue'
 import IEntityPicker from './IEntityPicker.vue'
+import IImportWizard from './IImportWizard.vue'
 import IChatThinking from './IChatThinking.vue'
 import IChatToolCall from './IChatToolCall.vue'
 import IChatSources from './IChatSources.vue'
@@ -253,6 +254,7 @@ export {
   IBulkBar,
   IDetailPage,
   IEntityPicker,
+  IImportWizard,
   IChatThinking,
   IChatToolCall,
   IChatSources,
@@ -381,6 +383,7 @@ const components = {
   IBulkBar,
   IDetailPage,
   IEntityPicker,
+  IImportWizard,
   IChatThinking,
   IChatToolCall,
   IChatSources,

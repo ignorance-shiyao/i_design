@@ -1,9 +1,62 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import IUpload from '@/components/IUpload.vue'
+import IImportWizard from '@/components/IImportWizard.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
 import type { UploadFile } from '@/components/upload'
+import {
+  dryRun,
+  guessMapping,
+  importKey,
+  type ColumnMapping,
+  type DryRunReport
+} from '@i-design/common'
+
+/*
+ * 导入向导的演示数据：一张三行的「表格」，其中两行有问题。
+ *
+ * 表头故意起成「联系人」而不是「负责人」——别名匹配得管用，
+ * 否则每个客户的表都要手工映一遍；而「金额」那一列故意不存在，
+ * 好让「必填字段还没映上」这条 error 一开始就摆在那儿。
+ */
+const importSources = [
+  { key: '客户', sample: '明远制造' },
+  { key: '联系人', sample: '林岚' },
+  { key: '备注', sample: '急单' }
+]
+const importFields = [
+  { key: 'customer', label: '客户', required: true },
+  { key: 'owner', label: '负责人', required: true, aliases: ['联系人'] },
+  { key: 'note', label: '备注' },
+  { key: 'amount', label: '金额', required: true }
+]
+const importRows = [
+  { 客户: '明远制造', 联系人: '林岚', 备注: '急单' },
+  { 客户: '', 联系人: '沈黎', 备注: '' },
+  { 客户: '合力重工', 联系人: '', 备注: '含逗号,的备注' }
+]
+const importMapping = ref<ColumnMapping>(guessMapping(importSources, importFields))
+const importReport = ref<DryRunReport | undefined>(undefined)
+const importBusy = ref(false)
+
+function runDryRun() {
+  importBusy.value = true
+  // 预检只跑纯校验器：它拿不到任何写入口，所以不可能落库
+  setTimeout(() => {
+    importReport.value = dryRun(importRows, (row) => {
+      const problems: { column?: string; message: string }[] = []
+      for (const field of importFields) {
+        if (!field.required) continue
+        const source = importMapping.value[field.key]
+        const value = source ? (row as Record<string, string>)[source] : ''
+        if (!value) problems.push({ column: field.label, message: `${field.label}为空` })
+      }
+      return problems
+    })
+    importBusy.value = false
+  }, 500)
+}
 
 const basic = ref<UploadFile[]>([])
 const auto = ref<UploadFile[]>([])
@@ -94,6 +147,41 @@ function onReject(file: File, reason: string) {
       </div>
     </DemoBlock>
 
+    <h2>导入向导：列映射与预检</h2>
+    <p>
+      导入向导通常是「上传 → 列映射 → 预校验 → 真正导入」。四步里有三处一做错就会让用户付出真实代价：<strong>预校验不能写业务数据</strong>——预检一旦落库，用户看完报告点了取消，数据已经脏了，而他以为自己什么也没做；<strong>列映射要能回退</strong>——映射是数据，不是一次性的向导步骤；<strong>重发不能导两份</strong>——同一份文件加同一套映射要算出同一个幂等键。
+    </p>
+    <p>
+      映射表按「一行一个目标字段」排，不按来源列排：用户心里的问题是「我这张表里哪一列是客户」，从目标字段出发才答得上；反过来排，必填字段漏没漏映还得自己在脑子里对一遍。自动猜的那一版只按名字与别名<strong>精确</strong>匹配，不做模糊匹配——猜错的成本比没猜到高得多：没猜到用户会去选，猜错了他多半直接点下一步。
+    </p>
+    <DemoBlock
+      title="映射、预检与错误清单"
+      description="表头里叫「联系人」，字段叫「负责人」，靠别名自动映上了；而「金额」这一列文件里根本没有，于是「必填字段还没映上」拦住了预检。把「金额」指到「备注」就能往下走——再把「备注」指回去看看：一个来源列被指给别人时会从原处自动摘掉，不会悄悄变成「一列映给两个字段」。预检跑完给出逐行问题，行号是文件里的原始行号，下载下来的 CSV 第一列就是它。"
+      lang="vue"
+      code='<IImportWizard
+  v-model="mapping"
+  :sources="headerFromFile"
+  :fields="targetFields"
+  :report="report"
+  @dry-run="runDryRun"
+  @submit="startImport"
+  @download="(csv) => saveAs(csv)"
+/>'
+    >
+      <div class="import-demo">
+        <IImportWizard
+          v-model="importMapping"
+          :sources="importSources"
+          :fields="importFields"
+          :report="importReport"
+          :busy="importBusy"
+          @dry-run="runDryRun"
+          @submit="() => message.success(`开始导入，幂等键 ${importKey('demo-file', importMapping)}`)"
+          @download="(csv: string) => message.info(`错误清单已交给调用方：${csv.split('\n').length - 1} 行`)"
+        />
+      </div>
+    </DemoBlock>
+
     <h2>校验</h2>
     <p>
       浏览器原生的 <code>accept</code> 只过滤文件选择框，<strong>拖拽进来的文件不受它约束</strong>，因此组件对类型、体积、数量做了二次校验。被拒的文件通过 <code>reject</code>事件抛出而非静默丢弃——用户需要知道为什么少了一个文件。
@@ -148,5 +236,7 @@ function onReject(file: File, reason: string) {
 </template>
 
 <style scoped>
+.import-demo { width: min(640px, 100%); }
+
 .w { width: 100%; max-width: 480px; }
 </style>

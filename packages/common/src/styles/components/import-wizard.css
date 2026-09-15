@@ -1,0 +1,141 @@
+/*
+ * IImportWizard —— 列映射与预检报告。
+ *
+ * 映射表用「一行一个目标字段」而不是「一行一个来源列」：用户心里的问题是
+ * 「我这张表里哪一列是客户」，从目标字段出发才答得上；反过来排，
+ * 必填字段漏没漏映就得自己在脑子里对一遍。
+ *
+ * 问题清单的等级用图标 + 淡底色块 + 文字三重表达：一排红点与黄点里
+ * 哪个拦得住导入、哪个只是提醒，灰度打印下分不出来。
+ */
+.i-import-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-4);
+}
+
+.i-import-wizard__map {
+  display: grid;
+  gap: var(--i-spacing-2);
+  margin: 0;
+}
+.i-import-wizard__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+}
+.i-import-wizard__field {
+  flex: none;
+  min-width: 7em;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+}
+/* 必填标记不只靠那个星号：后面跟着「必填」两个字 */
+.i-import-wizard__required {
+  margin-left: var(--i-spacing-1);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-danger-text);
+}
+.i-import-wizard__pick { flex: 1; min-width: 12em; }
+/* 样例值：帮人确认这一列是不是他以为的那一列 */
+.i-import-wizard__sample {
+  flex: none;
+  max-width: 14em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+
+.i-import-wizard__issues {
+  display: grid;
+  gap: var(--i-spacing-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.i-import-wizard__issue {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border-radius: var(--i-radius-sm);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-import-wizard__issue-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--i-radius-full);
+}
+.i-import-wizard__issue--error .i-import-wizard__issue-icon {
+  color: var(--i-color-danger-text);
+  background: var(--i-color-danger-subtle);
+}
+.i-import-wizard__issue--warning .i-import-wizard__issue-icon {
+  color: var(--i-color-warning-text);
+  background: var(--i-color-warning-subtle);
+}
+
+/*
+ * 报告条用网格而不是 flex-wrap。
+ *
+ * 第一版是 flex + `flex-basis: 100%` 让安全提示换到第二行，跑起来才发现它没换：
+ * 外层样式表给 `p` 加了一条 `max-width`（文档站的正文行长上限就是这么一条），
+ * 而 max-width 会把 flex 的基准尺寸夹小——夹小之后它「装得下」，于是留在了第一行，
+ * 把摘要挤成了每行三个字的竖条。
+ *
+ * 网格的行列位置不受 max-width 影响，所以这种由外部样式引起的重排根本不会发生。
+ * 一个组件的换行，不该由「祖先有没有给 p 设过 max-width」来决定。
+ */
+.i-import-wizard__report {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--i-spacing-1) var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+}
+.i-import-wizard__report-text { min-width: 0; }
+/* 「预检没有写入任何数据」——这句话要一直在，它是用户敢点预检的理由 */
+.i-import-wizard__safe {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+
+.i-import-wizard__problems {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  max-height: 200px;
+  overflow: auto;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-import-wizard__row-no {
+  font-family: var(--i-font-family-mono);
+  color: var(--i-color-text);
+}
+
+.i-import-wizard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+}

@@ -1,0 +1,60 @@
+<view class="i-import-wizard">
+  <!-- 一行一个目标字段：用户心里的问题是「我这张表里哪一列是客户」 -->
+  <view class="i-import-wizard__map">
+    <view wx:for="{{rows}}" wx:key="key" class="i-import-wizard__row">
+      <view class="i-import-wizard__field">
+        <text>{{item.label}}</text>
+        <!-- 必填不只靠星号：后面跟着「必填」两个字 -->
+        <text wx:if="{{item.required}}" class="i-import-wizard__required">必填</text>
+      </view>
+      <picker
+        class="i-import-wizard__pick"
+        range="{{pickerRange}}"
+        value="{{item.index}}"
+        data-field="{{item.key}}"
+        bindchange="onPick"
+      >
+        <view class="i-input">{{item.source || '（不映射）'}}</view>
+      </picker>
+      <text wx:if="{{item.sample}}" class="i-import-wizard__sample">样例：{{item.sample}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{issues.length}}" class="i-import-wizard__issues">
+    <view
+      wx:for="{{issues}}"
+      wx:key="message"
+      class="i-import-wizard__issue i-import-wizard__issue--{{item.level}}"
+    >
+      <view class="i-import-wizard__issue-icon">
+        <i-icon name="{{item.level === 'error' ? 'error-circle' : 'warning-triangle'}}" size="12" />
+      </view>
+      <text>{{item.message}}</text>
+    </view>
+  </view>
+
+  <view class="i-import-wizard__actions">
+    <i-button size="sm" loading="{{busy}}" disabled="{{busy || !ready}}" bind:tap="onDryRun">预检</i-button>
+    <i-button size="sm" variant="primary" loading="{{busy}}" disabled="{{busy || !ready || !report}}" bind:tap="onSubmit">开始导入</i-button>
+    <i-button wx:if="{{report && report.problems.length}}" size="sm" bind:tap="onDownload">下载错误清单</i-button>
+  </view>
+
+  <block wx:if="{{report}}">
+    <view class="i-import-wizard__report">
+      <view class="i-import-wizard__issue-icon"><i-icon name="{{reportIcon}}" size="12" /></view>
+      <text class="i-import-wizard__report-text">{{report.summary}}</text>
+      <!-- 这句话要一直在：它是用户敢点预检的理由 -->
+      <view class="i-import-wizard__safe">预检没有写入任何数据，现在取消不会留下半份记录。</view>
+    </view>
+
+    <view wx:if="{{problems.length}}" class="i-import-wizard__problems">
+      <view wx:for="{{problems}}" wx:key="index">
+        <!-- 行号在最前面：用户手里那份是几千行的表格 -->
+        <text class="i-import-wizard__row-no">第 {{item.row}} 行</text>
+        <text wx:if="{{item.column}}"> · {{item.column}}</text>
+        <text> —— {{item.message}}</text>
+      </view>
+      <view wx:if="{{hiddenProblems}}">还有 {{hiddenProblems}} 条，下载错误清单看完整的</view>
+    </view>
+  </block>
+</view>

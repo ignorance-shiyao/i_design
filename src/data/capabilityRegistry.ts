@@ -2596,6 +2596,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IImportWizard",
+    "sources": {
+      "vue-next": "src/components/IImportWizard.vue",
+      "vue": "packages/vue/src/components/IImportWizard.vue",
+      "react": "packages/react/src/components/ImportWizard.tsx",
+      "miniprogram": "packages/miniprogram/src/components/import-wizard",
+      "flutter": "packages/flutter/lib/src/components/i_import_wizard.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/upload"
+    ],
+    "states": {}
+  },
+  {
     "name": "IInfiniteScroll",
     "sources": {
       "vue-next": "src/components/IInfiniteScroll.vue",
@@ -5077,7 +5107,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/upload",
       "page": "src/pages/components/UploadPage.vue",
-      "demos": 3
+      "demos": 4
     },
     "demoRoutes": [
       "/components/upload"

@@ -1,0 +1,2 @@
+@import '../../../dist/styles/import-wizard.wxss';
+@import '../../../dist/styles/icons.wxss';

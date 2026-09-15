@@ -573,6 +573,14 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"alt","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"modelValue","type":"unknown","doc":"","optional":true,"defaultText":null,"control":null},
   ],
+  IImportWizard: [
+    {"name":"sources","type":"SourceColumn[]","doc":"文件表头。由调用方解析出来","optional":true,"defaultText":"() => []","control":null},
+    {"name":"fields","type":"TargetField[]","doc":"要导入到哪些字段","optional":true,"defaultText":"() => []","control":null},
+    {"name":"modelValue","type":"ColumnMapping","doc":"目标字段 → 来源列。受控：映射是数据，不是向导的内部状态","optional":true,"defaultText":"() => ({})","control":null},
+    {"name":"report","type":"DryRunReport","doc":"预检报告。跑过才有","optional":true,"defaultText":"undefined","control":null},
+    {"name":"busy","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"maxProblems","type":"number","doc":"问题清单最多列几条，再多折成一句","optional":true,"defaultText":"8","control":{"kind":"number"}},
+  ],
   IInfiniteScroll: [
     {"name":"status","type":"LoadStatus","doc":"","optional":true,"defaultText":"'idle'","control":null},
     {"name":"threshold","type":"number","doc":"距底多少像素开始加载","optional":true,"defaultText":"120","control":{"kind":"number"}},

@@ -128,6 +128,17 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
   /* 浮层类组件在 Lab 里默认不展开（见 LabPage 的 INTERACTIVE），必填属性仍要齐 */
   IDrawerForm: { values: {}, initial: {} },
   IModalForm: { values: {}, initial: {} },
+  IImportWizard: {
+    sources: [
+      { key: '客户', sample: '明远制造' },
+      { key: '联系人', sample: '林岚' }
+    ],
+    fields: [
+      { key: 'customer', label: '客户', required: true },
+      { key: 'owner', label: '负责人', required: true, aliases: ['联系人'] }
+    ],
+    modelValue: { customer: '客户', owner: '联系人' }
+  },
   IEntityPicker: {
     page: [
       { id: 'p1', label: '张三', hint: '销售一部' },

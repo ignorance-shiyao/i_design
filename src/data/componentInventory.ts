@@ -94,6 +94,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IIcon.vue",
   "src/components/IImage.vue",
   "src/components/IImageViewer.vue",
+  "src/components/IImportWizard.vue",
   "src/components/IInfiniteScroll.vue",
   "src/components/IInput.vue",
   "src/components/IInputAdornment.vue",

@@ -47,6 +47,7 @@ const KNOWN = {
   ProTable: { react: ['cell'], why: 'Vue 端每列一个具名插槽渲染单元格，React 没有插槽，只能用一张 key → 渲染函数的表' },
   FormPage: { model: 'values', why: 'React 端把表单值做成受控属性 values，对应 Vue 的 v-model；叫 value 会和单个输入框的值混淆——这里装的是一整张表' },
   BulkBar: { react: ['renderActions'], why: 'Vue 端这一条上的操作按钮是具名插槽 actions，React 没有插槽，只能用 renderActions 回调——它还要拿到当前的 selection 与 run' },
+  ImportWizard: { model: 'mapping', why: 'React 端把列映射做成受控属性 mapping，对应 Vue 的 v-model；叫 value 会和一个表单控件的值混淆——这里装的是一整张映射表' },
   StepForm: { model: 'values', react: ['renderStep'], why: 'React 端把表单值做成受控属性 values（对应 Vue 的 v-model）；每一步的内容 Vue 用具名插槽（插槽名就是这一步的 key），React 没有插槽，只能用 renderStep 回调' },
   SelectInput: { react: ['keyword', 'open'], why: 'React 无 v-model，受控的输入词与展开态只能各开一个属性；Vue 端由 v-model 与内部状态承担' }
 }
