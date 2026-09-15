@@ -461,6 +461,7 @@ npm test
 npm run build
 npm run check:a11y
 npm run check:responsive
+npm run check:layout
 npm run check:motion
 npm run build:packages
 ```

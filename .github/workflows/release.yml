@@ -41,6 +41,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - run: npm run check:a11y
       - run: npm run check:responsive
+      - run: npm run check:layout
       - run: npm run check:motion
       - run: npm run build:packages
       - run: node scripts/check-ssr.mjs

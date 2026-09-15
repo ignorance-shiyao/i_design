@@ -59,6 +59,7 @@ npm run build
 export CHROMIUM_PATH=/opt/pw-browsers/chromium
 npm run check:a11y         # 零容忍：任何 serious / critical 都算失败
 npm run check:responsive   # 390 / 320 两个宽度；现在还量渲染后的字号（< 9px 判红）
+npm run check:layout       # 1440 宽度：一行不超过 52 个汉字；卡片网格不许撑出成片空白
 npm run check:motion
 ```
 

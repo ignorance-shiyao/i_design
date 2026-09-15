@@ -27,6 +27,7 @@ npm run build
 npm run build:packages    # 顺带核对各包的 main / module / types / exports
 npm run check:a11y        # 零容忍：任何 serious / critical 都失败
 npm run check:responsive  # 390 / 320 两个宽度，整页能左右拖就失败
+npm run check:layout      # 1440 宽度：正文行长与卡片网格撑出来的空白
 npm run check:motion      # 系统的减少动效与面板开关都要真的把动效关掉
 npm run check:install     # 把包装进仓库外的干净项目里真跑一遍（慢，但只有它能证明别人装得上）
 npm run check:ssr         # 无 DOM 的 Node 里 import、Vue/React 服务端渲染、hydrate 与 CSP

@@ -52,6 +52,10 @@ jobs:
       - name: 窄屏自适应检查
         run: npm run check:responsive
 
+      # 行长与撑高的空白只在宽屏上出现，上面那条窄屏检查永远查不到
+      - name: 桌面版面检查
+        run: npm run check:layout
+
       # 开发机上没人会去打开系统的「减少动效」，漏掉那一半完全看不出来
       - name: 动效开关检查
         run: npm run check:motion

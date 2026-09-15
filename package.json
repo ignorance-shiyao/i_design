@@ -54,6 +54,7 @@
     "check:props": "node --test scripts/lib/parse-props.test.mjs && node scripts/check-props.mjs",
     "check:a11y": "node scripts/check-a11y.mjs",
     "check:responsive": "node scripts/check-responsive.mjs",
+    "check:layout": "node --test scripts/check-layout.test.mjs && node scripts/check-layout.mjs",
     "check:motion": "node scripts/check-motion.mjs",
     "build:props": "node scripts/build-component-props.mjs",
     "check:cjk": "node --test scripts/check-cjk-wrap.test.mjs && node scripts/check-cjk-wrap.mjs",
