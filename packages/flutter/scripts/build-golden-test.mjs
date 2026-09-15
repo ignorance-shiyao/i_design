@@ -110,6 +110,9 @@ const {
   submitGate, changedFields, isDirty, leaveGuard, resetValues, resetLabel,
   stepState, stepOfError
 } = await bundle('packages/common/src/logic/formhost.ts', 'formhost')
+const {
+  bulkSelection, canEscalate, escalateLabel, bulkOutcome, mergeOutcome, failureIndex
+} = await bundle('packages/common/src/logic/bulk.ts', 'bulk')
 const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
 const { searchCommands, moveCommandIndex } = await bundle(
   'packages/common/src/logic/command.ts',
@@ -2161,6 +2164,131 @@ const elapsedExpectations = [
 ]
 
 /*
+ * 批量操作：三种作用域各自的条数、摘要与是否要再确认，以及部分失败之后
+ * 重试发什么、多轮重试怎么并。两端判得不一样的后果是实打实的：
+ * 一次范围搞错的批量操作收不回来，一次全量重发会让已经成功的再执行一遍。
+ */
+const BULK_SCOPE_DART = {
+  selected: 'IBulkScope.selected',
+  page: 'IBulkScope.page',
+  matched: 'IBulkScope.matched'
+}
+const bulkDartList = (xs) =>
+  `[${xs.map((x) => (typeof x === 'number' ? x : JSON.stringify(x))).join(', ')}]`
+const BULK_PAGE_IDS = [1, 2, 3]
+const bulkSelectionCases = [
+  { scope: 'selected', selectedIds: [1], matchedTotal: 8000 },
+  { scope: 'selected', selectedIds: [], matchedTotal: 8000 },
+  { scope: 'page', selectedIds: [1], matchedTotal: 8000 },
+  { scope: 'page', selectedIds: [], matchedTotal: 0, pageIds: [] },
+  { scope: 'matched', selectedIds: [], matchedTotal: 8000 },
+  { scope: 'matched', selectedIds: [], matchedTotal: 20, filtered: true },
+  { scope: 'matched', selectedIds: [], matchedTotal: 0 }
+]
+const bulkEscalateCases = [
+  { selectedIds: [1, 2, 3], matchedTotal: 8000 },
+  { selectedIds: [1, 2], matchedTotal: 8000 },
+  { selectedIds: [1, 2, 3], matchedTotal: 3 },
+  { selectedIds: [], matchedTotal: 8000, pageIds: [] }
+]
+const bulkOutcomeCases = [
+  [{ id: 1, ok: true }, { id: 2, ok: false, reason: '已出库，不能撤销' }, { id: 3, ok: false }],
+  [{ id: 1, ok: true }],
+  [{ id: 1, ok: false, reason: '库存不足' }],
+  []
+]
+const bulkDartItems = (items) =>
+  `[${items
+    .map(
+      (i) =>
+        `IBulkResultItem(id: ${i.id}, ok: ${i.ok}` +
+        `${i.reason === undefined ? '' : `, reason: ${JSON.stringify(i.reason)}`})`
+    )
+    .join(', ')}]`
+const bulkExpectations = [
+  ...bulkSelectionCases.flatMap((input, i) => {
+    const pageIds = input.pageIds ?? BULK_PAGE_IDS
+    const sel = bulkSelection({ ...input, pageIds })
+    const v = `bs${i}`
+    return [
+      `    final ${v} = bulkSelection(scope: ${BULK_SCOPE_DART[input.scope]}, ` +
+        `pageIds: ${bulkDartList(pageIds)}, selectedIds: ${bulkDartList(input.selectedIds)}, ` +
+        `matchedTotal: ${input.matchedTotal}` +
+        `${input.filtered === undefined ? '' : `, filtered: ${input.filtered}`});`,
+      `    expect(${v}.count, ${sel.count});`,
+      `    expect(${v}.summary, ${JSON.stringify(sel.summary)});`,
+      `    expect(${v}.needsConfirm, ${sel.needsConfirm});`,
+      `    expect(${v}.confirmMessage, ${JSON.stringify(sel.confirmMessage)});`,
+      `    expect(${v}.ids, ${sel.ids === null ? 'null' : bulkDartList(sel.ids)});`
+    ]
+  }),
+  ...bulkEscalateCases.map((input) => {
+    const pageIds = input.pageIds ?? BULK_PAGE_IDS
+    return (
+      `    expect(canEscalate(pageIds: ${bulkDartList(pageIds)}, ` +
+      `selectedIds: ${bulkDartList(input.selectedIds)}, matchedTotal: ${input.matchedTotal}), ` +
+      `${canEscalate({ ...input, pageIds })});`
+    )
+  }),
+  ...[[8000, true], [8000, false], [3, true]].map(
+    ([n, f]) =>
+      `    expect(escalateLabel(${n}, filtered: ${f}), ${JSON.stringify(escalateLabel(n, f))});`
+  ),
+  ...bulkOutcomeCases.flatMap((items, i) => {
+    const outcome = bulkOutcome(items)
+    const v = `bo${i}`
+    return [
+      `    final ${v} = bulkOutcome(${bulkDartItems(items)});`,
+      `    expect(${v}.kind, IBulkOutcomeKind.${
+        outcome.kind === 'all-ok' ? 'allOk' : outcome.kind === 'all-failed' ? 'allFailed' : 'partial'
+      });`,
+      `    expect(${v}.total, ${outcome.total});`,
+      `    expect(${v}.succeeded, ${bulkDartList(outcome.succeeded)});`,
+      `    expect(${v}.retryIds, ${bulkDartList(outcome.retryIds)});`,
+      `    expect(${v}.summary, ${JSON.stringify(outcome.summary)});`,
+      `    expect(failureIndex(${v}), ${
+        Object.keys(failureIndex(outcome)).length === 0
+          ? '<String, String>{}'
+          : `{${Object.entries(failureIndex(outcome))
+              .map(([k, val]) => `${JSON.stringify(k)}: ${JSON.stringify(val)}`)
+              .join(', ')}}`
+      });`
+    ]
+  }),
+  ...(() => {
+    const first = bulkOutcome([
+      { id: 1, ok: true },
+      { id: 2, ok: false, reason: '库存不足' },
+      { id: 3, ok: false, reason: '库存不足' }
+    ])
+    const retries = [
+      [{ id: 2, ok: true }, { id: 3, ok: false, reason: '库存不足' }],
+      [{ id: 2, ok: true }, { id: 3, ok: true }],
+      [{ id: 2, ok: false, reason: '已被他人锁定' }, { id: 3, ok: true }]
+    ]
+    const firstLiteral = `bulkOutcome(${bulkDartItems([
+      { id: 1, ok: true },
+      { id: 2, ok: false, reason: '库存不足' },
+      { id: 3, ok: false, reason: '库存不足' }
+    ])})`
+    return retries.flatMap((items, i) => {
+      const merged = mergeOutcome(first, bulkOutcome(items))
+      const v = `bm${i}`
+      return [
+        `    final ${v} = mergeOutcome(${firstLiteral}, bulkOutcome(${bulkDartItems(items)}));`,
+        `    expect(${v}.succeeded, ${bulkDartList(merged.succeeded)});`,
+        `    expect(${v}.retryIds, ${bulkDartList(merged.retryIds)});`,
+        `    expect(${v}.total, ${merged.total});`,
+        `    expect(${v}.summary, ${JSON.stringify(merged.summary)});`,
+        `    expect(${v}.failed, [${merged.failed
+          .map((f) => `IBulkFailure(id: ${f.id}, reason: ${JSON.stringify(f.reason)})`)
+          .join(', ')}]);`
+      ]
+    })
+  })()
+]
+
+/*
  * 表单壳：什么时候拦住提交、什么时候拦住离开、「重置」重置到哪儿、
  * 分步走到哪一步能不能往下。全是「该不该拦住用户」的决定，
  * 两端判得不一样就会出现同一张表在一端拦住了、在另一端直接放走。
@@ -3084,6 +3212,7 @@ import 'package:i_design/src/logic/diff.dart';
 import 'package:i_design/src/logic/elapsed.dart';
 import 'package:i_design/src/logic/lifecycle.dart';
 import 'package:i_design/src/logic/formhost.dart';
+import 'package:i_design/src/logic/bulk.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -3560,6 +3689,10 @@ ${lifecycleExpectations.join('\n')}
 
   test('表单壳的提交闸、离开保护、重置范围与分步状态与 Web 端一致', () {
 ${formHostExpectations.join('\n')}
+  });
+
+  test('批量操作的作用域、升级入口与部分失败重试与 Web 端一致', () {
+${bulkExpectations.join('\n')}
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {
