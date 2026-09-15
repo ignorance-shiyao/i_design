@@ -125,6 +125,9 @@ const {
   guessMapping, mappingIssues, canProceed, clearMapping, assignMapping,
   problemsCsv, importKey
 } = await bundle('packages/common/src/logic/importjob.ts', 'importjob')
+const {
+  describeExport, remainingLife, humanDuration, formatStamp
+} = await bundle('packages/common/src/logic/exportjob.ts', 'exportjob')
 const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
 const { searchCommands, moveCommandIndex } = await bundle(
   'packages/common/src/logic/command.ts',
@@ -2176,6 +2179,85 @@ const elapsedExpectations = [
 ]
 
 /*
+ * 导出任务：哪一态给什么出口、总数未知时给不给百分比、过期的 ready 算不算
+ * ready、剩余时间怎么说成人话、时间戳怎么排版。
+ *
+ * 出处（exportProvenance / exportFileName）里带着本地时区转换，
+ * 两端跑在不同时区的机器上会算出不同的字符串——那红跟规则本身无关。
+ * 所以这里只对齐**排版规则** formatStamp（它只收拆好的数字，不碰时区），
+ * 时区转换留给各端自己的 Date / DateTime。
+ */
+const EXPORT_NOW = 1700000000000
+const EXPORT_STATUS_DART = {
+  queued: 'IExportStatus.queued',
+  running: 'IExportStatus.running',
+  ready: 'IExportStatus.ready',
+  expired: 'IExportStatus.expired',
+  failed: 'IExportStatus.failed',
+  cancelled: 'IExportStatus.cancelled'
+}
+const exportCases = [
+  { status: 'queued', queuePosition: 3 },
+  { status: 'queued', queuePosition: 0 },
+  { status: 'queued' },
+  { status: 'running', processed: 12000 },
+  { status: 'running', processed: 3000, total: 12000 },
+  { status: 'running', processed: 0, total: 0 },
+  { status: 'running' },
+  { status: 'ready', expiresAt: EXPORT_NOW + 720000 },
+  { status: 'ready', expiresAt: EXPORT_NOW - 1 },
+  { status: 'ready' },
+  { status: 'expired' },
+  { status: 'failed', error: '超时' },
+  { status: 'failed' },
+  { status: 'cancelled' }
+]
+const exportExpectations = [
+  ...exportCases.flatMap((input, i) => {
+    const view = describeExport({ ...input, now: EXPORT_NOW })
+    const args = [
+      `status: ${EXPORT_STATUS_DART[input.status]}`,
+      `now: ${EXPORT_NOW}`,
+      ...(input.queuePosition === undefined ? [] : [`queuePosition: ${input.queuePosition}`]),
+      ...(input.processed === undefined ? [] : [`processed: ${input.processed}`]),
+      ...(input.total === undefined ? [] : [`total: ${input.total}`]),
+      ...(input.expiresAt === undefined ? [] : [`expiresAt: ${input.expiresAt}`]),
+      ...(input.error === undefined ? [] : [`error: ${JSON.stringify(input.error)}`])
+    ]
+    const v = `ex${i}`
+    return [
+      `    final ${v} = describeExport(${args.join(', ')});`,
+      `    expect(${v}.status, ${EXPORT_STATUS_DART[view.status]});`,
+      `    expect(${v}.tone, IExportTone.${view.tone});`,
+      `    expect(${v}.label, ${JSON.stringify(view.label)});`,
+      `    expect(${v}.detail, ${JSON.stringify(view.detail)});`,
+      `    expect(${v}.percent, ${view.percent === null ? 'null' : view.percent});`,
+      `    expect(${v}.busy, ${view.busy});`,
+      `    expect(${v}.action, IExportAction.${view.action});`
+    ]
+  }),
+  ...[1500, -9000, 0, 720000].map(
+    (delta) =>
+      `    expect(remainingLife(${EXPORT_NOW + delta}, ${EXPORT_NOW}), ` +
+      `${remainingLife(EXPORT_NOW + delta, EXPORT_NOW)});`
+  ),
+  ...[0, 45, 60, 600, 3600, 3660, 7325, -5].map(
+    (n) => `    expect(humanDuration(${n}), ${JSON.stringify(humanDuration(n))});`
+  ),
+  ...[
+    [{ year: 2026, month: 9, day: 5, hour: 4, minute: 7 }, ' '],
+    [{ year: 2026, month: 9, day: 5, hour: 4, minute: 7 }, '-'],
+    [{ year: 2026, month: 12, day: 31, hour: 23, minute: 59 }, ' ']
+  ].map(([parts, sep]) => {
+    const dart =
+      `IStampParts(year: ${parts.year}, month: ${parts.month}, day: ${parts.day}, ` +
+      `hour: ${parts.hour}, minute: ${parts.minute})`
+    return `    expect(formatStamp(${dart}, ${JSON.stringify(sep)}), ` +
+      `${JSON.stringify(formatStamp(parts, sep))});`
+  })
+]
+
+/*
  * 批量导入：列映射猜得对不对、映射有什么问题、改一列会不会悄悄变成
  * 「一列映给两个字段」、错误清单怎么转义、幂等键在键序不同时还一不一样。
  * 两端算出不同的幂等键，等于同一批货导进去两遍。
@@ -3607,6 +3689,7 @@ import 'package:i_design/src/logic/bulk.dart';
 import 'package:i_design/src/logic/detail.dart';
 import 'package:i_design/src/logic/entitypicker.dart';
 import 'package:i_design/src/logic/importjob.dart';
+import 'package:i_design/src/logic/exportjob.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -4099,6 +4182,10 @@ ${pickerExpectations.join('\n')}
 
   test('导入的列映射、错误清单转义与幂等键与 Web 端一致', () {
 ${importExpectations.join('\n')}
+  });
+
+  test('导出任务的状态、进度与时间排版与 Web 端一致', () {
+${exportExpectations.join('\n')}
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {
