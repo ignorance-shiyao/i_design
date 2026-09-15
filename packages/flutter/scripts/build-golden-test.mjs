@@ -113,6 +113,10 @@ const {
 const {
   bulkSelection, canEscalate, escalateLabel, bulkOutcome, mergeOutcome, failureIndex
 } = await bundle('packages/common/src/logic/bulk.ts', 'bulk')
+const {
+  detailActions, noActionHint, recordFreshness, detailNeighbours,
+  packReturn, unpackReturn, returnLabel
+} = await bundle('packages/common/src/logic/detail.ts', 'detail')
 const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
 const { searchCommands, moveCommandIndex } = await bundle(
   'packages/common/src/logic/command.ts',
@@ -2164,6 +2168,175 @@ const elapsedExpectations = [
 ]
 
 /*
+ * 详情页：哪些动作出现、哪些是灰的、为什么灰（三条停用理由的优先级），
+ * 记录失效怎么说，上一条 / 下一条的位置文案与边界提示，以及「从哪儿来」
+ * 那张票据的往返。两端判得不一样的后果是同一条记录在一端能操作、在另一端不能。
+ */
+const DETAIL_KIND_DART = {
+  primary: 'IDetailActionKind.primary',
+  default: 'IDetailActionKind.standard',
+  danger: 'IDetailActionKind.danger'
+}
+const detailSpecs = [
+  { key: 'edit', label: '编辑', states: ['draft'] },
+  { key: 'submit', label: '提交', kind: 'primary', states: ['draft'] },
+  { key: 'approve', label: '通过', states: ['submitted'], permission: '审批' },
+  { key: 'print', label: '打印', readonly: true },
+  { key: 'void', label: '作废', kind: 'danger', states: ['submitted'], permission: '作废' }
+]
+const detailSpecsDart = `[${detailSpecs
+  .map((spec) => {
+    const args = [
+      `key: ${JSON.stringify(spec.key)}`,
+      `label: ${JSON.stringify(spec.label)}`,
+      ...(spec.kind ? [`kind: ${DETAIL_KIND_DART[spec.kind]}`] : []),
+      ...(spec.states ? [`states: [${spec.states.map((x) => JSON.stringify(x)).join(', ')}]`] : []),
+      ...(spec.permission ? [`permission: ${JSON.stringify(spec.permission)}`] : []),
+      ...(spec.readonly ? ['readOnly: true'] : [])
+    ]
+    return `IDetailActionSpec(${args.join(', ')})`
+  })
+  .join(', ')}]`
+const DETAIL_FRESHNESS_DART = {
+  fresh: 'IRecordFreshness.fresh',
+  stale: 'IRecordFreshness.stale',
+  deleted: 'IRecordFreshness.deleted'
+}
+const detailActionCases = [
+  { status: 'draft', permissions: ['审批'] },
+  { status: 'submitted', permissions: [] },
+  { status: 'submitted', permissions: ['审批', '作废'] },
+  { status: 'draft', permissions: [], freshness: 'stale' },
+  { status: 'draft', permissions: [], freshness: 'deleted' },
+  { status: 'submitted', permissions: ['审批'], denied: { approve: '不能审批自己提交的单据' } },
+  {
+    status: 'submitted',
+    permissions: [],
+    freshness: 'stale',
+    denied: { approve: '不能审批自己提交的单据' }
+  },
+  { status: 'shipped', permissions: [] }
+]
+const detailFreshnessCases = [
+  { seenRevision: 3, currentRevision: 3 },
+  { seenRevision: 3, currentRevision: 5 },
+  { seenRevision: 3, currentRevision: 3, exists: false },
+  { seenRevision: 1, currentRevision: 9, exists: false }
+]
+const DETAIL_IDS = ['a', 'b', 'c']
+const detailReturnCases = [
+  { search: '?owner=林岚&status=archived&page=6', scrollY: 1280, focusId: 'SO-7' },
+  { search: '', scrollY: 12.6 },
+  { search: '', scrollY: -40 },
+  { search: '?q=' + encodeURIComponent('A&B') + '&tag=x', scrollY: 0 }
+]
+const detailExpectations = [
+  ...detailActionCases.flatMap((input, i) => {
+    const actions = detailActions(detailSpecs, input)
+    const args = [
+      `status: ${JSON.stringify(input.status)}`,
+      `permissions: [${(input.permissions ?? []).map((x) => JSON.stringify(x)).join(', ')}]`,
+      ...(input.freshness ? [`freshness: ${DETAIL_FRESHNESS_DART[input.freshness]}`] : []),
+      ...(input.denied
+        ? [
+            `denied: {${Object.entries(input.denied)
+              .map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`)
+              .join(', ')}}`
+          ]
+        : [])
+    ]
+    const v = `da${i}`
+    return [
+      `    final ${v} = detailActions(${detailSpecsDart}, ${args.join(', ')});`,
+      `    expect(${v}.map((a) => a.key).toList(), ` +
+        `[${actions.map((a) => JSON.stringify(a.key)).join(', ')}]);`,
+      `    expect(${v}.map((a) => a.disabled).toList(), ` +
+        `[${actions.map((a) => a.disabled).join(', ')}]);`,
+      `    expect(${v}.map((a) => a.reason).toList(), ` +
+        `[${actions.map((a) => JSON.stringify(a.reason)).join(', ')}]);`,
+      `    expect(${v}.map((a) => a.kind).toList(), ` +
+        `[${actions.map((a) => DETAIL_KIND_DART[a.kind]).join(', ')}]);`
+    ]
+  }),
+  ...['已发货', 'draft'].map(
+    (status) =>
+      `    expect(noActionHint(${JSON.stringify(status)}), ${JSON.stringify(noActionHint(status))});`
+  ),
+  ...detailFreshnessCases.flatMap((input, i) => {
+    const state = recordFreshness(input)
+    const v = `df${i}`
+    const args = [
+      `seenRevision: ${input.seenRevision}`,
+      `currentRevision: ${input.currentRevision}`,
+      ...(input.exists === undefined ? [] : [`exists: ${input.exists}`])
+    ]
+    return [
+      `    final ${v} = recordFreshness(${args.join(', ')});`,
+      `    expect(${v}.kind, ${DETAIL_FRESHNESS_DART[state.kind]});`,
+      `    expect(${v}.label, ${JSON.stringify(state.label)});`,
+      `    expect(${v}.detail, ${JSON.stringify(state.detail)});`,
+      `    expect(${v}.action, IFreshnessAction.${state.action});`
+    ]
+  }),
+  ...['a', 'b', 'c', 'zz'].flatMap((id, i) => {
+    const n = detailNeighbours(DETAIL_IDS, id)
+    const v = `dn${i}`
+    return [
+      `    final ${v} = detailNeighbours(` +
+        `[${DETAIL_IDS.map((x) => JSON.stringify(x)).join(', ')}], ${JSON.stringify(id)});`,
+      `    expect(${v}.index, ${n.index});`,
+      `    expect(${v}.prevId, ${n.prevId === null ? 'null' : JSON.stringify(n.prevId)});`,
+      `    expect(${v}.nextId, ${n.nextId === null ? 'null' : JSON.stringify(n.nextId)});`,
+      `    expect(${v}.position, ${JSON.stringify(n.position)});`,
+      `    expect(${v}.edgeHint, ${JSON.stringify(n.edgeHint)});`
+    ]
+  }),
+  (() => {
+    const one = detailNeighbours(['a'], 'a')
+    return `    expect(detailNeighbours(["a"], "a").edgeHint, ${JSON.stringify(one.edgeHint)});`
+  })(),
+  ...detailReturnCases.flatMap((ticket, i) => {
+    const round = unpackReturn(packReturn(ticket))
+    const v = `dr${i}`
+    const args = [
+      `search: ${JSON.stringify(ticket.search)}`,
+      `scrollY: ${Math.max(0, Math.round(ticket.scrollY))}`,
+      ...(ticket.focusId ? [`focusId: ${JSON.stringify(ticket.focusId)}`] : [])
+    ]
+    return [
+      `    final ${v} = unpackReturn(packReturn(IReturnTicket(${args.join(', ')})));`,
+      `    expect(${v}!.search, ${JSON.stringify(round.search)});`,
+      `    expect(${v}.scrollY, ${round.scrollY});`,
+      `    expect(${v}.focusId, ${round.focusId === undefined ? 'null' : JSON.stringify(round.focusId)});`
+    ]
+  }),
+  ...['{不是 JSON', '', '123'].map(
+    (raw) =>
+      `    expect(unpackReturn(${JSON.stringify(raw)}), ` +
+      `${unpackReturn(raw) === null ? 'null' : 'isNotNull'});`
+  ),
+  '    expect(unpackReturn(null), null);',
+  ...(() => {
+    const partial = unpackReturn('{"s":"?a=1"}')
+    return [
+      `    final drp = unpackReturn('{"s":"?a=1"}');`,
+      `    expect(drp!.search, ${JSON.stringify(partial.search)});`,
+      `    expect(drp.scrollY, ${partial.scrollY});`,
+      `    expect(drp.focusId, null);`
+    ]
+  })(),
+  ...[
+    { search: '?page=6', scrollY: 0 },
+    { search: '?owner=x', scrollY: 0 }
+  ].map(
+    (ticket) =>
+      `    expect(returnLabel(IReturnTicket(search: ${JSON.stringify(ticket.search)}, scrollY: 0)), ` +
+      `${JSON.stringify(returnLabel(ticket))});`
+  ),
+  `    expect(returnLabel(null), ${JSON.stringify(returnLabel(null))});`
+]
+
+/*
  * 批量操作：三种作用域各自的条数、摘要与是否要再确认，以及部分失败之后
  * 重试发什么、多轮重试怎么并。两端判得不一样的后果是实打实的：
  * 一次范围搞错的批量操作收不回来，一次全量重发会让已经成功的再执行一遍。
@@ -3213,6 +3386,7 @@ import 'package:i_design/src/logic/elapsed.dart';
 import 'package:i_design/src/logic/lifecycle.dart';
 import 'package:i_design/src/logic/formhost.dart';
 import 'package:i_design/src/logic/bulk.dart';
+import 'package:i_design/src/logic/detail.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -3693,6 +3867,10 @@ ${formHostExpectations.join('\n')}
 
   test('批量操作的作用域、升级入口与部分失败重试与 Web 端一致', () {
 ${bulkExpectations.join('\n')}
+  });
+
+  test('详情页的动作可用性、记录失效、相邻条目与返回票据与 Web 端一致', () {
+${detailExpectations.join('\n')}
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {

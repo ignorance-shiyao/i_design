@@ -24,6 +24,7 @@ export 'src/logic/command.dart';
 export 'src/logic/confirm.dart';
 export 'src/logic/countdown.dart';
 export 'src/logic/dataset.dart';
+export 'src/logic/detail.dart';
 export 'src/logic/diff.dart';
 export 'src/logic/elapsed.dart';
 export 'src/logic/file.dart';
