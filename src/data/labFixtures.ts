@@ -128,6 +128,13 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
   /* 浮层类组件在 Lab 里默认不展开（见 LabPage 的 INTERACTIVE），必填属性仍要齐 */
   IDrawerForm: { values: {}, initial: {} },
   IModalForm: { values: {}, initial: {} },
+  IStepForm: {
+    modelValue: {},
+    steps: [
+      { key: 'base', title: '基本信息', fields: ['title'] },
+      { key: 'more', title: '补充说明', fields: ['note'] }
+    ]
+  },
   IFormPage: {
     title: '编辑采购单',
     modelValue: { title: '春季补货' },

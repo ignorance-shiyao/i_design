@@ -182,6 +182,7 @@ export 'src/components/i_space.dart';
 export 'src/components/i_sparkline.dart';
 export 'src/components/i_splitter.dart';
 export 'src/components/i_statistic.dart';
+export 'src/components/i_step_form.dart';
 export 'src/components/i_steps.dart';
 export 'src/components/i_sticky.dart';
 export 'src/components/i_sticky_tool.dart';

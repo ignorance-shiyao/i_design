@@ -1199,6 +1199,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IStepForm",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ISteps",
     "ends": {
       "vue-next": true,

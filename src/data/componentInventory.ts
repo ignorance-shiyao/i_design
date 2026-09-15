@@ -140,6 +140,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ISparkline.vue",
   "src/components/ISplitter.vue",
   "src/components/IStatistic.vue",
+  "src/components/IStepForm.vue",
   "src/components/ISteps.vue",
   "src/components/ISticky.vue",
   "src/components/IStickyTool.vue",

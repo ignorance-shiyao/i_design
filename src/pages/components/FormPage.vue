@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import IForm from '@/components/IForm.vue'
 import IFormItem from '@/components/IFormItem.vue'
 import IInput from '@/components/IInput.vue'
@@ -14,6 +14,7 @@ import ISchemaForm from '@/components/ISchemaForm.vue'
 import IFormPage from '@/components/IFormPage.vue'
 import IDrawerForm from '@/components/IDrawerForm.vue'
 import IModalForm from '@/components/IModalForm.vue'
+import IStepForm from '@/components/IStepForm.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import type { FormSchema, SubmitPhase } from '@i-design/common'
 import { message } from '@/components/message'
@@ -54,6 +55,45 @@ const overlayValues = ref<Record<string, unknown>>({ title: '春季补货' })
 const overlayInitial = { title: '春季补货' }
 const drawerOpen = ref(false)
 const modalOpen = ref(false)
+
+/*
+ * 分步表单的演示状态。
+ *
+ * 错误故意来自「服务端」而不是即时校验，因为跳回那条路只在这种情况下才发生：
+ * 第一步当场就能查出来的错，根本走不出第一步——是提交时服务端说「第 1 步那个
+ * 编号不对」，而用户正站在第三步，这才需要把他带回去。
+ *
+ * 判定是「编号不以 PO- 开头」。改动编号时把服务端错误清掉，否则用户改对了
+ * 按钮还是灰的。
+ */
+const stepSpecs = [
+  { key: 'base', title: '基本信息', fields: ['code', 'title'] },
+  { key: 'addr', title: '收货地址', fields: ['addr'] },
+  { key: 'note', title: '备注', fields: ['note'], optional: true }
+]
+const stepValues = ref<Record<string, unknown>>({ code: 'X-1', title: '', addr: '', note: '' })
+const stepPhase = ref<SubmitPhase>('idle')
+const stepErrors = ref<string[]>([])
+
+function setStepValue(key: string, value: string) {
+  stepValues.value = { ...stepValues.value, [key]: value }
+  // 改到哪个字段就把它身上的服务端错误清掉：改对了按钮还是灰的最让人火大
+  if (stepErrors.value.includes(key)) {
+    stepErrors.value = stepErrors.value.filter((p) => p !== key)
+    stepPhase.value = 'idle'
+  }
+}
+
+function stepSubmit() {
+  stepPhase.value = 'submitting'
+  setTimeout(() => {
+    const ok = String(stepValues.value.code ?? '').startsWith('PO-')
+    stepErrors.value = ok ? [] : ['code']
+    stepPhase.value = ok ? 'succeeded' : 'failed'
+    if (ok) message.success('提交成功')
+    else message.error('提交失败：编号要以 PO- 开头（这条错在第 1 步）')
+  }, 900)
+}
 
 const model = reactive({
   title: '',
@@ -405,6 +445,72 @@ const rules = {
           </template>
         </IFormItem>
       </IModalForm>
+    </DemoBlock>
+
+    <h2>切成几步</h2>
+    <p>
+      分步真正难的不是把字段切成几屏，是这三件事：返回上一步不能丢数据；只用这一步自己的字段判断能不能往下走——拿整张表的错误去拦，会出现第一步填得好好的却点不动下一步，而错在他还没看到的第三步；提交失败要跳回出错的那一步——光在当前步说一句「提交失败」没有用，错的字段可能在第一步，而用户正站在最后一步，他只会反复点提交。
+    </p>
+    <p>
+      值由调用方持有、逐步累积，这个壳一个字都不存，所以往回翻天然是安全的。步骤条上每一步的状态用图标形状、淡底色块与文字三重表达：一排小圆点里哪个是红的、哪个是灰的，灰度打印与色觉障碍下分不出来，而「第几步填错了」正是最需要读出来的那条。
+    </p>
+    <DemoBlock
+      title="返回上一步不丢数据；提交失败跳回出错的那一步"
+      description="直接走到第三步点「提交」：服务端会说编号不对，于是被跳回第一步，底下那行字说清是「这一步还有字段没填对」——站在哪一步，那一步的标记就是「当前」，出错的提示由状态栏和字段本身给；被标成「有错」的是那些走过、但此刻不在上面的步骤，而且红圈旁边一定有「有错」两个字。没走到过的步骤不标红：一进来满屏红叉说的是「你还没填」，不是「你填错了」。错误当场就能查出来的话根本走不出第一步，所以跳回这条路只在服务端退回时才发生。"
+      lang="vue"
+      code='<IStepForm v-model="values" :steps="steps" :error-paths="errors" :phase="phase" @submit="submit">
+  <template #base>…第一步的字段…</template>
+  <template #addr>…第二步的字段…</template>
+</IStepForm>'
+    >
+      <IStepForm
+        v-model="stepValues"
+        :steps="stepSpecs"
+        :error-paths="stepErrors"
+        :phase="stepPhase"
+        :resettable="false"
+        @submit="stepSubmit"
+      >
+        <template #base>
+          <div class="host-fields">
+            <IFormItem label="单据编号" help="不以 PO- 开头时，服务端会在提交那一刻退回来">
+              <template #default="{ id }">
+                <IInput
+                  :id="id"
+                  :model-value="String(stepValues.code ?? '')"
+                  @update:model-value="(v: string) => setStepValue('code', v)"
+                />
+              </template>
+            </IFormItem>
+          </div>
+        </template>
+        <template #addr>
+          <div class="host-fields">
+            <IFormItem label="收货地址">
+              <template #default="{ id }">
+                <IInput
+                  :id="id"
+                  :model-value="String(stepValues.addr ?? '')"
+                  @update:model-value="(v: string) => setStepValue('addr', v)"
+                />
+              </template>
+            </IFormItem>
+          </div>
+        </template>
+        <template #note>
+          <div class="host-fields">
+            <IFormItem label="备注">
+              <template #default="{ id }">
+                <IInput
+                  :id="id"
+                  :model-value="String(stepValues.note ?? '')"
+                  @update:model-value="(v: string) => setStepValue('note', v)"
+                />
+              </template>
+            </IFormItem>
+          </div>
+        </template>
+      </IStepForm>
     </DemoBlock>
 
     <h2>校验时机</h2>

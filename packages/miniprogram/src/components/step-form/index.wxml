@@ -1,0 +1,31 @@
+<view class="i-step-form">
+  <!-- 步骤条：形状 + 淡底色块 + 文字三重表达，颜色不单独承担「哪一步错了」 -->
+  <view class="i-step-form__marks">
+    <view
+      wx:for="{{marks}}"
+      wx:key="key"
+      class="i-step-form__mark is-{{item.state}}"
+    >
+      <view class="i-step-form__mark-icon">
+        <i-icon wx:if="{{item.state === 'done'}}" name="check" size="12" />
+        <i-icon wx:elif="{{item.state === 'error'}}" name="warning-triangle" size="12" />
+        <text wx:else>{{item.no}}</text>
+      </view>
+      <text>{{item.title}}</text>
+      <text wx:if="{{item.state === 'error'}}" class="i-step-form__mark-note">有错</text>
+    </view>
+  </view>
+
+  <view class="i-step-form__body"><slot /></view>
+
+  <view class="i-form-bar">
+    <!-- 只把按钮置灰而不说原因，用户只会反复点它 -->
+    <view class="i-form-bar__status {{status ? 'is-blocked' : ''}}">{{status}}</view>
+    <view class="i-form-bar__actions">
+      <i-button size="sm" disabled="{{!canPrev}}" bind:tap="onPrev">上一步</i-button>
+      <i-button wx:if="{{resettable}}" size="sm" disabled="{{busy}}" bind:tap="onReset">{{resetText}}</i-button>
+      <i-button wx:if="{{!isLast}}" size="sm" variant="primary" disabled="{{!canNext}}" bind:tap="onNext">下一步</i-button>
+      <i-button wx:else size="sm" variant="primary" loading="{{busy}}" disabled="{{!allowed}}" bind:tap="onSubmit">{{submitText}}</i-button>
+    </view>
+  </view>
+</view>

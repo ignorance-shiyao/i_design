@@ -142,7 +142,8 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'SchemaForm', cn: 'Schema 表单', to: '/components/form', desc: '按数据结构渲染表单；schema 里不执行任何字符串' },
       { name: 'FormPage', cn: '表单页', to: '/components/form', desc: '围着表单的那几件事：重复提交、离开保护与重置范围' },
       { name: 'DrawerForm', cn: '抽屉表单', to: '/components/form', desc: '抽屉里的表单壳；关闭动作也要过离开保护' },
-      { name: 'ModalForm', cn: '弹窗表单', to: '/components/form', desc: '弹窗里的表单壳；关闭动作也要过离开保护' }
+      { name: 'ModalForm', cn: '弹窗表单', to: '/components/form', desc: '弹窗里的表单壳；关闭动作也要过离开保护' },
+      { name: 'StepForm', cn: '分步表单', to: '/components/form', desc: '返回上一步不丢数据；提交失败跳回出错的那一步' }
     ]
   },
   {

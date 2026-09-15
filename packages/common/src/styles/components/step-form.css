@@ -1,0 +1,76 @@
+/*
+ * IStepForm —— 分步表单的壳。
+ *
+ * 步骤条上每一步的状态用「图标形状 + 淡底色块 + 文字」三重表达，
+ * 不靠颜色单独承担：一排小圆点里哪个是红的、哪个是灰的，
+ * 灰度打印与色觉障碍下分不出来，而「第几步填错了」正是这条最需要读出来的信息。
+ *
+ * 操作条与离开确认在 form-shell.css，三种表单壳共用一份。
+ */
+.i-step-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-4);
+}
+
+.i-step-form__marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.i-step-form__mark {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+/* 当前这一步用底色区分，而不是把它的边框加粗——加粗的边线不表达状态 */
+.i-step-form__mark.is-current {
+  background: var(--i-color-brand-subtle);
+  color: var(--i-color-brand-text);
+}
+.i-step-form__mark-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-tertiary);
+  background: var(--i-color-bg-subtle);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.i-step-form__mark.is-current .i-step-form__mark-icon {
+  color: var(--i-color-brand-text);
+  background: var(--i-color-bg-elevated);
+}
+.i-step-form__mark.is-done .i-step-form__mark-icon {
+  color: var(--i-color-success-text);
+  background: var(--i-color-success-subtle);
+}
+.i-step-form__mark.is-error .i-step-form__mark-icon {
+  color: var(--i-color-danger-text);
+  background: var(--i-color-danger-subtle);
+}
+/* 「这一步有错」也要有字，不能只有一个红圈 */
+.i-step-form__mark-note {
+  color: var(--i-color-danger-text);
+  font-size: var(--i-font-size-xs);
+}
+
+.i-step-form__body { min-width: 0; }
+
+/* 窄屏上一排步骤会把标题压成竖排单字，改成一列 */
+@media (max-width: 560px) {
+  .i-step-form__marks { flex-direction: column; }
+  .i-step-form__mark { width: 100%; box-sizing: border-box; }
+}

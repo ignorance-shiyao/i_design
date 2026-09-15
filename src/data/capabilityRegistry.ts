@@ -2312,7 +2312,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/form",
       "page": "src/pages/components/FormPage.vue",
-      "demos": 4
+      "demos": 5
     },
     "demoRoutes": [
       "/components/form"
@@ -4234,6 +4234,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
         "sm"
       ]
     }
+  },
+  {
+    "name": "IStepForm",
+    "sources": {
+      "vue-next": "src/components/IStepForm.vue",
+      "vue": "packages/vue/src/components/IStepForm.vue",
+      "react": "packages/react/src/components/StepForm.tsx",
+      "miniprogram": "packages/miniprogram/src/components/step-form",
+      "flutter": "packages/flutter/lib/src/components/i_step_form.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/form"
+    ],
+    "states": {}
   },
   {
     "name": "ISteps",

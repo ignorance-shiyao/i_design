@@ -1,0 +1,2 @@
+@import '../../../dist/styles/step-form.wxss';
+@import '../../../dist/styles/icons.wxss';
