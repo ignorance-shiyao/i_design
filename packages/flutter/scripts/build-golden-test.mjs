@@ -117,6 +117,10 @@ const {
   detailActions, noActionHint, recordFreshness, detailNeighbours,
   packReturn, unpackReturn, returnLabel
 } = await bundle('packages/common/src/logic/detail.ts', 'detail')
+const {
+  pickerRows, togglePick, removePick, offPageChosen, inactiveChosen,
+  pickerSummary, pickerHint
+} = await bundle('packages/common/src/logic/entitypicker.ts', 'entitypicker')
 const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
 const { searchCommands, moveCommandIndex } = await bundle(
   'packages/common/src/logic/command.ts',
@@ -2168,6 +2172,115 @@ const elapsedExpectations = [
 ]
 
 /*
+ * 人员 / 组织 / 资源选择：每一行能不能点与为什么不能、点一下之后已选变成什么、
+ * 翻页之后哪些已选不在当前页、摘要与检索提示。两端判得不一样的后果是
+ * 同一批人在一端选得上、在另一端选不上，或者停用的人在一端直接消失。
+ */
+const pickerPage = [
+  { id: 'p1', label: '张三', hint: '销售一部' },
+  { id: 'p2', label: '李四', hint: '销售二部', blockedReason: '没有该部门的查看权限' },
+  { id: 'p3', label: '王五', hint: '已离职', inactive: true }
+]
+const pickerDartOption = (o) => {
+  const args = [
+    `id: ${JSON.stringify(o.id)}`,
+    `label: ${JSON.stringify(o.label)}`,
+    ...(o.hint === undefined ? [] : [`hint: ${JSON.stringify(o.hint)}`]),
+    ...(o.blockedReason === undefined ? [] : [`blockedReason: ${JSON.stringify(o.blockedReason)}`]),
+    ...(o.inactive === undefined ? [] : [`inactive: ${o.inactive}`])
+  ]
+  return `IEntityOption(${args.join(', ')})`
+}
+const pickerDartList = (xs) => `[${xs.map(pickerDartOption).join(', ')}]`
+const pickerPageDart = pickerDartList(pickerPage)
+const pickerRowCases = [
+  { chosen: [] },
+  { chosen: [{ id: 'p3', label: '王五', inactive: true }], multiple: true, max: 1 },
+  { chosen: [{ id: 'p9', label: '赵六' }], multiple: true, max: 1 },
+  { chosen: [{ id: 'p1', label: '张三', hint: '销售一部' }], multiple: true }
+]
+const pickerToggleCases = [
+  { chosen: [], multiple: true, id: 'p1' },
+  { chosen: [], multiple: true, id: 'p2' },
+  { chosen: [], multiple: true, id: 'p3' },
+  { chosen: [{ id: 'p9', label: '赵六' }], id: 'p1' },
+  { chosen: [{ id: 'p1', label: '张三', hint: '销售一部' }], multiple: true, id: 'p1' },
+  { chosen: [], multiple: true, id: 'zz' }
+]
+const pickerExpectations = [
+  ...pickerRowCases.flatMap((input, i) => {
+    const rows = pickerRows({ page: pickerPage, ...input })
+    const v = `pr${i}`
+    const args = [
+      `page: ${pickerPageDart}`,
+      `chosen: ${pickerDartList(input.chosen)}`,
+      ...(input.multiple === undefined ? [] : [`multiple: ${input.multiple}`]),
+      ...(input.max === undefined ? [] : [`max: ${input.max}`])
+    ]
+    return [
+      `    final ${v} = pickerRows(${args.join(', ')});`,
+      `    expect(${v}.map((r) => r.selected).toList(), [${rows.map((r) => r.selected).join(', ')}]);`,
+      `    expect(${v}.map((r) => r.disabled).toList(), [${rows.map((r) => r.disabled).join(', ')}]);`,
+      `    expect(${v}.map((r) => r.reason).toList(), ` +
+        `[${rows.map((r) => JSON.stringify(r.reason)).join(', ')}]);`
+    ]
+  }),
+  ...pickerToggleCases.map((input) => {
+    const next = togglePick({ page: pickerPage, ...input }, input.id)
+    const args = [
+      `page: ${pickerPageDart}`,
+      `chosen: ${pickerDartList(input.chosen)}`,
+      ...(input.multiple === undefined ? [] : [`multiple: ${input.multiple}`]),
+      `id: ${JSON.stringify(input.id)}`
+    ]
+    return `    expect(togglePick(${args.join(', ')}), ${pickerDartList(next)});`
+  }),
+  `    expect(removePick([IEntityOption(id: "zz", label: "不在本页的人")], "zz"), <IEntityOption>[]);`,
+  ...[
+    [{ id: 'p1', label: '张三' }, { id: 'zz', label: '远处的人' }],
+    [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+    []
+  ].map(
+    (chosen) =>
+      `    expect(offPageChosen(${pickerDartList(chosen)}, ${pickerPageDart}), ` +
+      `${pickerDartList(offPageChosen(chosen, pickerPage))});`
+  ),
+  ...[
+    { chosen: [{ id: 'a', label: 'A' }], max: 3, unit: '人' },
+    { chosen: [{ id: 'a', label: 'A' }] },
+    { chosen: [{ id: 'p3', label: '王五', inactive: true }], unit: '人' },
+    { chosen: [], max: 0 }
+  ].flatMap((input, i) => {
+    const summary = pickerSummary(input.chosen, input.max, input.unit)
+    const v = `ps${i}`
+    const args = [
+      pickerDartList(input.chosen),
+      ...(input.max === undefined ? [] : [`max: ${input.max}`]),
+      ...(input.unit === undefined ? [] : [`unit: ${JSON.stringify(input.unit)}`])
+    ]
+    return [
+      `    final ${v} = pickerSummary(${args.join(', ')});`,
+      `    expect(${v}.count, ${summary.count});`,
+      `    expect(${v}.text, ${JSON.stringify(summary.text)});`,
+      `    expect(${v}.full, ${summary.full});`,
+      `    expect(${v}.notice, ${JSON.stringify(summary.notice)});`
+    ]
+  }),
+  `    expect(inactiveChosen(${pickerDartList([{ id: 'p3', label: '王五', inactive: true }])}).length, 1);`,
+  ...[
+    ['', false, 0],
+    ['张', false, 0],
+    ['张', true, 0],
+    ['张', false, 3],
+    ['  ', false, 0]
+  ].map(
+    ([kw, loading, n]) =>
+      `    expect(pickerHint(${JSON.stringify(kw)}, ${loading}, ${n}), ` +
+      `${JSON.stringify(pickerHint(kw, loading, n))});`
+  )
+]
+
+/*
  * 详情页：哪些动作出现、哪些是灰的、为什么灰（三条停用理由的优先级），
  * 记录失效怎么说，上一条 / 下一条的位置文案与边界提示，以及「从哪儿来」
  * 那张票据的往返。两端判得不一样的后果是同一条记录在一端能操作、在另一端不能。
@@ -3387,6 +3500,7 @@ import 'package:i_design/src/logic/lifecycle.dart';
 import 'package:i_design/src/logic/formhost.dart';
 import 'package:i_design/src/logic/bulk.dart';
 import 'package:i_design/src/logic/detail.dart';
+import 'package:i_design/src/logic/entitypicker.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -3871,6 +3985,10 @@ ${bulkExpectations.join('\n')}
 
   test('详情页的动作可用性、记录失效、相邻条目与返回票据与 Web 端一致', () {
 ${detailExpectations.join('\n')}
+  });
+
+  test('人员选择的可选性、已选顺序、翻页回显与提示与 Web 端一致', () {
+${pickerExpectations.join('\n')}
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {

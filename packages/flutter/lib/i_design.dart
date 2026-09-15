@@ -27,6 +27,7 @@ export 'src/logic/dataset.dart';
 export 'src/logic/detail.dart';
 export 'src/logic/diff.dart';
 export 'src/logic/elapsed.dart';
+export 'src/logic/entitypicker.dart';
 export 'src/logic/file.dart';
 export 'src/logic/finetune.dart';
 export 'src/logic/float.dart';
