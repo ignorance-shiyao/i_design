@@ -12,9 +12,18 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import type { IconName } from '@i-design/common'
 import AppShell from '@i-design/examples-shell/AppShell.vue'
+import { personName, session } from './data'
 import OrderList from './pages/OrderList.vue'
 import OrderCreate from './pages/OrderCreate.vue'
 import OrderDetail from './pages/OrderDetail.vue'
+
+/*
+ * 从列表点进详情时带过来的两样东西：返回票据（筛选、页码、滚动位置）与
+ * 这一页的 id 列表（详情页的上一条 / 下一条要用）。
+ * 直接从地址里读的话，返回时只能落回第一页顶部——等于把用户翻的七页作废。
+ */
+const returnTicket = ref('')
+const siblingIds = ref<string[]>([])
 
 const route = ref(location.hash.replace(/^#/, '') || '/orders')
 const onHash = () => (route.value = location.hash.replace(/^#/, '') || '/orders')
@@ -41,18 +50,41 @@ const nav: { key: string; label: string; icon: IconName }[] = [
 const go = (key: string) => {
   location.hash = key
 }
+
+/** 列表交出来的三样：去哪一张单、怎么回来、这一页还有哪些单 */
+function openOrder(payload: { id: string; ticket: string; ids: string[] }) {
+  returnTicket.value = payload.ticket
+  siblingIds.value = payload.ids
+  go(`/orders/${payload.id}`)
+}
 </script>
 
 <template>
-  <AppShell app-id="erp" :nav="nav" :current="view.name === 'list' ? '/orders' : '/orders/new'" :crumbs="crumbs" @navigate="go">
+  <!--
+    顶栏里的名字必须是 data.ts 里那个 session 的人：壳自己有个默认名字，
+    用默认的话，界面上写着「林岚」而实际以「沈野」的身份在操作——
+    「不能审批自己提交的单据」这条规则一出现，就没人说得清到底是谁的单。
+  -->
+  <AppShell app-id="erp" :user="`${personName(session.personId)}（销售经理）`" :nav="nav" :current="view.name === 'list' ? '/orders' : '/orders/new'" :crumbs="crumbs" @navigate="go">
     <template #actions>
       <a v-if="view.name !== 'new'" class="erp__action" href="#/orders/new">新建订单</a>
       <a v-if="view.name !== 'list'" class="erp__action" href="#/orders">返回列表</a>
     </template>
 
-    <OrderList v-if="view.name === 'list'" @open="(id: string) => go(`/orders/${id}`)" />
-    <OrderCreate v-else-if="view.name === 'new'" @created="(id: string) => go(`/orders/${id}`)" />
-    <OrderDetail v-else :id="view.id" @back="() => go('/orders')" />
+    <OrderList v-if="view.name === 'list'" @open="openOrder" />
+    <OrderCreate
+      v-else-if="view.name === 'new'"
+      @created="(id: string) => go(`/orders/${id}`)"
+      @cancelled="() => go('/orders')"
+    />
+    <OrderDetail
+      v-else
+      :id="view.id"
+      :sibling-ids="siblingIds"
+      :return-ticket="returnTicket"
+      @back="() => go('/orders')"
+      @open="(id: string) => go(`/orders/${id}`)"
+    />
   </AppShell>
 </template>
 

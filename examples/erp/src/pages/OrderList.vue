@@ -7,19 +7,31 @@
  * 这正是 B03 那份契约要证明的事。
  */
 import { computed, ref, watch } from 'vue'
-import { IPagination, IQueryFilter, ITable, ITag } from '@i-design/vue-next'
+import { IBulkBar, IButton, IPagination, IQueryFilter, ITable, ITag } from '@i-design/vue-next'
 import {
+  bulkOutcome,
   fromSearch,
+  mergeOutcome,
+  packReturn,
   parseQuery,
   serializeQuery,
   toSearch,
+  type BulkId,
+  type BulkOutcome,
+  type BulkScope,
   type FilterField,
   type QueryState,
   type QuickFilter
 } from '@i-design/common'
-import { STATUS_LABEL, STATUS_TONE, api, money, personName, staff } from '../data'
+import { ApiError } from '@i-design/examples-shared'
+import { STATUS_LABEL, STATUS_TONE, api, money, personName, session, staff } from '../data'
 
-const emit = defineEmits<{ open: [id: string] }>()
+/*
+ * 打开详情时把「从哪儿来」一并交出去：查询串、滚动位置、点的是哪一行，
+ * 外加这一页的 id 列表（详情页的上一条 / 下一条要用）。
+ * 不交的话，详情页返回时只能落回第一页顶部——等于把用户翻的七页作废。
+ */
+const emit = defineEmits<{ open: [payload: { id: string; ticket: string; ids: string[] }] }>()
 
 const fields: FilterField[] = [
   { name: 'keyword', label: '关键词', kind: 'text', placeholder: '单号或客户', always: true },
@@ -92,6 +104,59 @@ function onQuery(payload: { state: QueryState }) {
   state.value = payload.state
   // 条件变了，上一条链接里的无效参数提示就过期了，留着会让人以为还在报错
   invalid.value = []
+  // 条件一变，之前勾的那些行多半已经不在结果里了，留着会让人对着一批看不见的行执行操作
+  picked.value = []
+  scope.value = 'selected'
+  outcome.value = undefined
+}
+
+function open(id: string) {
+  emit('open', {
+    id,
+    ticket: packReturn({
+      search: toSearch(serializeQuery(state.value, fields)),
+      scrollY: window.scrollY,
+      focusId: id
+    }),
+    ids: rows.value.map((r) => String(r.id))
+  })
+}
+
+/* ---------- 批量操作（B07） ---------- */
+
+const picked = ref<BulkId[]>([])
+const scope = ref<BulkScope>('selected')
+const outcome = ref<BulkOutcome | undefined>(undefined)
+const busy = ref(false)
+
+/**
+ * 批量取消。
+ *
+ * 只有草稿与已通过的单能取消，别的会被服务端退回来——于是这一批注定是
+ * 部分成功，而那恰恰是批量操作的常态：结果条会摊开成功与失败，
+ * 重试只发失败的那几张，已经取消掉的不会被再执行一次。
+ */
+function runBulk(ids: BulkId[]) {
+  busy.value = true
+  setTimeout(() => {
+    const round = bulkOutcome(
+      ids.map((id) => {
+        try {
+          const current = api.getOrder(String(id)).order
+          api.updateStatus(String(id), 'cancelled', current.revision, {
+            personId: session.personId,
+            roles: ['admin']
+          })
+          return { id, ok: true }
+        } catch (e) {
+          return { id, ok: false, reason: e instanceof ApiError ? e.message : String(e) }
+        }
+      })
+    )
+    outcome.value = outcome.value ? mergeOutcome(outcome.value, round) : round
+    picked.value = picked.value.filter((id) => !outcome.value!.succeeded.includes(id))
+    busy.value = false
+  }, 400)
 }
 </script>
 
@@ -105,9 +170,33 @@ function onQuery(payload: { state: QueryState }) {
       @change="onQuery"
     />
 
-    <ITable :columns="columns" :data="rows" row-key="id">
+    <!--
+      批量操作条只在有选择或有上一轮结果时出现。它要说清的是「对谁做」：
+      勾了三行还是当前页全部，还是符合筛选的全部——后者会碰到用户没看见过的行。
+    -->
+    <IBulkBar
+      :scope="scope"
+      :page-ids="rows.map((r) => String(r.id))"
+      :selected-ids="picked"
+      :matched-total="result.total"
+      :filtered="Object.keys(state.values).length > 0"
+      :outcome="outcome"
+      :busy="busy"
+      @update:scope="(v: BulkScope) => (scope = v)"
+      @execute="(sel) => runBulk(sel.ids ?? rows.map((r) => String(r.id)))"
+      @retry="runBulk"
+      @clear="() => { picked = []; scope = 'selected'; outcome = undefined }"
+    >
+      <template #actions="{ selection, run }">
+        <IButton size="sm" variant="danger" :disabled="busy || selection.count === 0" @click="run">
+          批量取消
+        </IButton>
+      </template>
+    </IBulkBar>
+
+    <ITable :columns="columns" :data="rows" row-key="id" selectable v-model:selected="picked">
       <template #id="{ row }">
-        <a class="list__link" :href="`#/orders/${row.id}`" @click.prevent="emit('open', String(row.id))">
+        <a class="list__link" :href="`#/orders/${row.id}`" @click.prevent="open(String(row.id))">
           {{ row.id }}
         </a>
       </template>

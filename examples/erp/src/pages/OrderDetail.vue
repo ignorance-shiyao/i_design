@@ -2,22 +2,30 @@
 /**
  * 订单详情与状态流转。
  *
- * 这一页要演的是三条真实分支，而不是「详情页长什么样」：
+ * 这一页现在是 IDetailPage（B12）的宿主，只负责把业务规则翻译成它认识的三样
+ * 东西：**状态**（决定哪些动作根本不出现）、**权限**（决定哪些出现但是灰的）、
+ * **版本**（决定这一份还作不作数）。动作该不该出现、灰按钮写什么话、
+ * 失效提示排在哪儿，全在 logic/detail.ts 里判，示例不再自己写一遍。
  *
- * - **403：不能审批自己提交的单据。** 前端也挡一次，是为了不让按钮点下去才发现；
- *   后端那份才是真的挡住。示例里两份都在。
- * - **409：详情页停留期间别人改过。** 带着进页面时拿到的 revision 提交，
- *   版本对不上就报出来，而不是「谁后提交谁说了算」。页面上给了一个
- *   「模拟他人修改」的按钮，好让这条看得见。
- * - **状态机拒绝**：草稿不能直接变成已发货，按钮只出现在允许的目标上。
+ * 三条真实分支仍然是这一页要演的东西：
+ *
+ * - **403：不能审批自己提交的单据。** 它既不是状态问题也不是权限问题——
+ *   这个人确实有审批角色，只是不能审自己的。这类规则写不进状态机也写不进
+ *   权限表，所以走 denied：按钮出现、是灰的、旁边写着为什么。
+ *   后端那份规则会在任何情况下挡住，前端这道只是不让人点下去才发现。
+ * - **409：详情页停留期间别人改过。** 带着进页面时拿到的 revision 提交；
+ *   而在提交之前，版本对不上就已经由 IDetailPage 说出来了（「你看到的是 v3，
+ *   现在已经是 v5」），写动作全部停用——不必等服务端退一个 409 回来。
+ * - **状态机拒绝**：草稿不能直接变成已发货，所以那个动作在草稿态下不出现。
  */
 import { computed, ref } from 'vue'
-import { IButton, ITag } from '@i-design/vue-next'
+import { IDetailPage } from '@i-design/vue-next'
 import { ApiError, ORDER_TRANSITIONS, type OrderStatus } from '@i-design/examples-shared'
+import type { DetailActionSpec } from '@i-design/common'
 import { STATUS_LABEL, STATUS_TONE, api, money, personName, session } from '../data'
 
-const props = defineProps<{ id: string }>()
-defineEmits<{ back: [] }>()
+const props = defineProps<{ id: string; siblingIds?: string[]; returnTicket?: string }>()
+const emit = defineEmits<{ back: []; open: [id: string] }>()
 
 const error = ref('')
 const notice = ref('')
@@ -35,24 +43,48 @@ const order = computed(() => {
 /** 进页面时拿到的版本号：提交时带着它，才谈得上乐观锁 */
 const seenRevision = ref(order.value?.revision ?? 0)
 
-const targets = computed<OrderStatus[]>(() =>
-  order.value ? [...ORDER_TRANSITIONS[order.value.status]] : []
-)
+/*
+ * 把状态机翻译成动作清单。
+ *
+ * 每个目标状态一个动作，`states` 写的是「从哪些状态过得去」——于是
+ * IDetailPage 自己就知道该摆出哪几个，而不需要这一页先筛一遍。
+ */
+const actionSpecs = computed<DetailActionSpec[]>(() => {
+  const all = new Set<OrderStatus>()
+  for (const targets of Object.values(ORDER_TRANSITIONS)) for (const t of targets) all.add(t)
+  return [...all].map((to) => ({
+    key: to,
+    label: STATUS_LABEL[to],
+    kind: to === 'approved' ? ('primary' as const) : to === 'cancelled' ? ('danger' as const) : undefined,
+    states: Object.entries(ORDER_TRANSITIONS)
+      .filter(([, targets]) => (targets as readonly string[]).includes(to))
+      .map(([from]) => STATUS_LABEL[from]),
+    // 审批类动作要审批权限；其余动作谁都能做
+    permission: to === 'approved' || to === 'rejected' ? '审批' : undefined
+  }))
+})
 
-/** 自己的单据自己审批：前端先挡一次，省得点下去才知道 */
-const selfApproval = (to: OrderStatus) =>
-  (to === 'approved' || to === 'rejected') &&
-  order.value?.ownerId === session.personId &&
-  !session.roles.includes('admin')
+const permissions = computed(() => (session.roles.includes('approver') ? ['审批'] : []))
 
-function move(to: OrderStatus) {
+/** 自己的单据自己审批：这类规则写不进状态机也写不进权限表 */
+const denied = computed<Record<string, string>>(() => {
+  const out: Record<string, string> = {}
+  if (!order.value) return out
+  const own = order.value.ownerId === session.personId && !session.roles.includes('admin')
+  if (!own) return out
+  out.approved = '不能审批自己提交的单据'
+  out.rejected = out.approved
+  return out
+})
+
+function run(key: string) {
   error.value = ''
   notice.value = ''
   try {
-    const r = api.updateStatus(props.id, to, seenRevision.value, session)
+    const r = api.updateStatus(props.id, key as OrderStatus, seenRevision.value, session)
     seenRevision.value = r.order.revision
     version.value += 1
-    notice.value = `已变为「${STATUS_LABEL[to]}」，版本 v${r.order.revision}`
+    notice.value = `已变为「${STATUS_LABEL[key]}」，版本 v${r.order.revision}`
   } catch (e) {
     error.value = e instanceof ApiError ? `${e.code} ${e.message}（trace ${e.traceId}）` : String(e)
     version.value += 1
@@ -69,107 +101,69 @@ function simulateConcurrentEdit() {
   }
   api.updateStatus(props.id, next, current.revision, { personId: 'p-other', roles: ['admin'] })
   version.value += 1
-  notice.value = `别人已经把它改成了「${STATUS_LABEL[next]}」，你手上的还是 v${seenRevision.value}——现在点任何状态按钮都会得到 409`
+  notice.value = `别人已经把它改成了「${STATUS_LABEL[next]}」，你手上的还是 v${seenRevision.value}`
+}
+
+function refresh() {
+  seenRevision.value = api.getOrder(props.id).order.revision
+  version.value += 1
+  notice.value = `已取到最新版本 v${seenRevision.value}`
 }
 </script>
 
 <template>
-  <section v-if="order" class="detail">
-    <header class="detail__head">
-      <h2>{{ order.id }}</h2>
-      <ITag :type="STATUS_TONE[order.status]">{{ STATUS_LABEL[order.status] }}</ITag>
-      <span class="detail__rev">你看到的是 v{{ seenRevision }}</span>
-    </header>
-
-    <dl class="detail__fields">
-      <div><dt>客户</dt><dd>{{ order.customer }}</dd></div>
-      <div><dt>负责人</dt><dd>{{ personName(order.ownerId) }}</dd></div>
-      <div><dt>金额</dt><dd>{{ money(order.amount) }}</dd></div>
-      <div><dt>明细</dt><dd>{{ order.lines.length }} 行</dd></div>
-    </dl>
-
-    <div class="detail__actions">
-      <IButton
-        v-for="to in targets"
-        :key="to"
-        size="sm"
-        :variant="to === 'approved' ? 'primary' : 'secondary'"
-        :disabled="selfApproval(to)"
-        :title="selfApproval(to) ? '不能审批自己提交的单据' : undefined"
-        @click="move(to)"
-      >
-        {{ STATUS_LABEL[to] }}
-      </IButton>
-      <span v-if="!targets.length" class="detail__rev">终态，没有下一步</span>
+  <IDetailPage
+    v-if="order"
+    :title="order.id"
+    :status="STATUS_LABEL[order.status]"
+    :status-tone="STATUS_TONE[order.status]"
+    :summary="`客户：${order.customer} · 负责人：${personName(order.ownerId)} · ${money(order.amount)} · 明细 ${order.lines.length} 行`"
+    :actions="actionSpecs"
+    :permissions="permissions"
+    :seen-revision="seenRevision"
+    :current-revision="order.revision"
+    :denied="denied"
+    :sibling-ids="siblingIds ?? []"
+    :current-id="order.id"
+    :return-ticket="returnTicket ?? ''"
+    @action="run"
+    @refresh="refresh"
+    @back="emit('back')"
+    @navigate="(id: string) => emit('open', id)"
+  >
+    <div class="detail__extras">
+      <button class="detail__sim" type="button" @click="simulateConcurrentEdit">
+        模拟他人修改（演示 409）
+      </button>
+      <p v-if="error" class="detail__error" role="alert">{{ error }}</p>
+      <p v-if="notice" class="detail__notice" role="status">{{ notice }}</p>
     </div>
-
-    <p v-if="targets.some(selfApproval)" class="detail__rev">
-      「通过 / 退回」是灰的：这张单是你自己提交的，不能自己审批。换个身份才点得动，
-      而后端那份规则会在任何情况下挡住。
-    </p>
-
-    <div class="detail__row">
-      <IButton size="sm" @click="simulateConcurrentEdit">模拟他人修改（演示 409）</IButton>
-    </div>
-
-    <p v-if="error" class="detail__error" role="alert">{{ error }}</p>
-    <p v-if="notice" class="detail__notice" role="status">{{ notice }}</p>
-  </section>
+  </IDetailPage>
 
   <p v-else class="detail__error">找不到这张单：{{ id }}</p>
 </template>
 
 <style scoped>
-.detail {
+.detail__extras {
   display: grid;
-  gap: var(--i-spacing-4);
-}
-
-.detail__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--i-spacing-3);
-}
-
-.detail__head h2 {
-  margin: 0;
-  font-size: var(--i-font-size-lg);
-}
-
-.detail__rev {
-  color: var(--i-color-text-tertiary);
-  font-size: var(--i-font-size-xs);
-}
-
-.detail__fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
-  gap: var(--i-spacing-3);
-  margin: 0;
-}
-
-.detail__fields dt {
-  color: var(--i-color-text-tertiary);
-  font-size: var(--i-font-size-xs);
-}
-
-.detail__fields dd {
-  margin: 2px 0 0;
-  color: var(--i-color-text);
-}
-
-.detail__actions,
-.detail__row {
-  display: flex;
-  flex-wrap: wrap;
   gap: var(--i-spacing-2);
-  align-items: center;
+  justify-items: start;
+}
+
+.detail__sim {
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  color: var(--i-color-text-secondary);
+  font: inherit;
+  font-size: var(--i-font-size-sm);
+  cursor: pointer;
 }
 
 .detail__error {
   margin: 0;
-  color: var(--i-color-danger);
+  color: var(--i-color-danger-text);
   font-size: var(--i-font-size-sm);
 }
 
