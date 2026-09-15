@@ -88,7 +88,7 @@ export function ChartWordCloud({
   const dropped = wordOverflow(words, placed)
 
   return (
-    <figure className={`i-chart i-wordcloud ${className}`.trim()}>
+    <figure className={`i-chart i-chart--wide i-wordcloud ${className}`.trim()}>
       {title && <figcaption className="i-chart__title">{title}</figcaption>}
 
       <svg

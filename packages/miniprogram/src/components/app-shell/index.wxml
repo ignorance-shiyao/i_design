@@ -1,0 +1,32 @@
+<view class="i-app-shell">
+  <view class="i-app-shell__bar">
+    <view class="i-app-shell__toggle" bindtap="onOpen">☰</view>
+    <text wx:if="{{title}}" class="i-app-shell__title">{{title}}</text>
+    <view class="i-app-shell__slot"><slot name="topbar" /></view>
+    <text wx:if="{{user}}" class="i-app-shell__user">{{user}}</text>
+  </view>
+
+  <view class="i-app-shell__main">
+    <view class="i-app-shell__head">
+      <view class="i-breadcrumb">
+        <text wx:for="{{crumbs}}" wx:key="label" class="i-breadcrumb__item">{{item.label}}</text>
+      </view>
+      <view class="i-app-shell__actions"><slot name="actions" /></view>
+    </view>
+    <slot />
+  </view>
+
+  <!-- 抽屉：小程序页面本来就窄，侧栏常驻会把正文压成一条 -->
+  <view wx:if="{{drawer}}" class="i-app-shell__scrim" bindtap="onClose">
+    <view class="i-app-shell__drawer" catchtap="noop">
+      <view class="i-app-shell__close" bindtap="onClose">关闭</view>
+      <view
+        wx:for="{{flatNav}}"
+        wx:key="key"
+        class="i-app-shell__nav {{item.child ? 'is-child' : ''}} {{item.on ? 'is-on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onNavigate"
+      >{{item.label}}</view>
+    </view>
+  </view>
+</view>

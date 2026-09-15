@@ -125,6 +125,20 @@ const catalogDefinitions: (Omit<CatalogGroup, 'items'> & { items: CatalogDefinit
     ]
   },
   {
+    /*
+     * 业务组合与原子组件是两层东西：原子组件解决「这个控件长什么样」，
+     * 业务组合解决「这套状态机由谁来维护」。分在同一档里选型时会反复纠结。
+     */
+    title: '业务组合',
+    intent: '一整套业务状态机连同界面一起给出来：查询、列设置、schema 渲染、应用骨架。',
+    items: [
+      { label: '应用骨架', api: 'IAppShell', note: '顶栏、侧栏、面包屑与窄屏抽屉；不认识路由，点导航只抛事件' },
+      { label: '查询筛选', api: 'IQueryFilter', note: '列表页上方那排条件；条件一变回第一页，无效参数逐条报出来' },
+      { label: '查询表格', api: 'IProTable', note: '在 Table 之上补查询层与列能力；乱序返回的过期响应会被丢掉' },
+      { label: 'Schema 表单', api: 'ISchemaForm', note: '按数据结构渲染；条件是数据，schema 里不执行任何字符串' }
+    ]
+  },
+  {
     title: '数据可视化',
     intent: '让数字自己说话：趋势、构成、占比与流程走向。',
     items: [

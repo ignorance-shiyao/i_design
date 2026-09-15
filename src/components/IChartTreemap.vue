@@ -39,7 +39,7 @@ const showTable = ref(false)
 </script>
 
 <template>
-  <figure class="i-chart">
+  <figure class="i-chart i-chart--wide">
     <figcaption v-if="title" class="i-chart__title">{{ title }}</figcaption>
 
     <svg

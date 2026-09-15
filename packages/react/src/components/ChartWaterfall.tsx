@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useChartWidth } from './useChartWidth'
 import { useConfig } from './ConfigProvider'
 import {
   formatTick,
@@ -16,7 +17,7 @@ export interface ChartWaterfallProps {
   unit?: string
 }
 
-const W = 640
+
 const PAD = { top: 24, right: 16, bottom: 44, left: 56 }
 const sign = (v: number) => (v > 0 ? `+${formatTick(v)}` : formatTick(v))
 
@@ -26,6 +27,7 @@ export function ChartWaterfall({
   height = 280,
   unit = ''
 }: ChartWaterfallProps) {
+  const { ref: host, width: W } = useChartWidth<HTMLElement>()
   /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
   const { locale } = useConfig()
   const [active, setActive] = useState(-1)
@@ -47,7 +49,7 @@ export function ChartWaterfall({
   const left = (i: number) => PAD.left + band * i + (band - barW) / 2
 
   return (
-    <figure className="i-chart">
+    <figure ref={host} className="i-chart">
       {title && <figcaption className="i-chart__title">{title}</figcaption>}
 
       <svg

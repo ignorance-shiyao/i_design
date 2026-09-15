@@ -49,6 +49,14 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"items","type":"AnchorItem[]","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"offset","type":"number","doc":"判定线相对视口顶端的偏移，通常等于吸顶导航高度","optional":true,"defaultText":"80","control":{"kind":"number"}},
   ],
+  IAppShell: [
+    {"name":"nav","type":"AppNavItem[]","doc":"侧栏导航","optional":false,"defaultText":null,"control":null},
+    {"name":"current","type":"string","doc":"当前选中的导航项 key。深链刷新后由页面从地址里解析出来传进来","optional":false,"defaultText":null,"control":{"kind":"string"}},
+    {"name":"crumbs","type":"{ label: string }[]","doc":"面包屑，从应用名之后开始写","optional":true,"defaultText":"() => []","control":null},
+    {"name":"title","type":"string","doc":"应用名，显示在顶栏左侧","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"user","type":"string","doc":"当前用户，显示在顶栏右侧","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"breakpoint","type":"number","doc":"窄屏断点（px）。小于它时侧栏收进抽屉","optional":true,"defaultText":"720","control":{"kind":"number"}},
+  ],
   IApprovalCard: [
     {"name":"questions","type":"ApprovalQuestion[]","doc":"一组问题，逐题回答；只有一题时不显示分页","optional":false,"defaultText":null,"control":null},
     {"name":"confirmText","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
@@ -152,6 +160,17 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"height","type":"number","doc":"","optional":true,"defaultText":"260","control":{"kind":"number"}},
     {"name":"unit","type":"string","doc":"纵轴单位，跟在刻度后面","optional":true,"defaultText":"''","control":{"kind":"string"}},
+  ],
+  IChartDistribution: [
+    {"name":"values","type":"number[]","doc":"原始样本。分布图吃的是样本本身，不是聚合过的值","optional":false,"defaultText":null,"control":null},
+    {"name":"type","type":"'histogram' | 'density' | 'violin' | 'error'","doc":"","optional":true,"defaultText":"'histogram'","control":{"kind":"enum","options":["histogram","density","violin","error"]}},
+    {"name":"rule","type":"'freedman-diaconis' | 'sturges' | 'fixed'","doc":"分箱规则。fixed 时必须给 binWidth","optional":true,"defaultText":"'freedman-diaconis'","control":{"kind":"enum","options":["freedman-diaconis","sturges","fixed"]}},
+    {"name":"binWidth","type":"number","doc":"","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"bandwidth","type":"number","doc":"核密度带宽。不给则按 Silverman 经验法则算","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"errorKind","type":"ErrorKind","doc":"误差棒的含义，必填意义上的选项：三者说的不是一回事","optional":true,"defaultText":"'sd'","control":null},
+    {"name":"height","type":"number","doc":"","optional":true,"defaultText":"260","control":{"kind":"number"}},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"unit","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
   ],
   IChartFrame: [
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
@@ -638,6 +657,14 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"disabled","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
     {"name":"open","type":"boolean","doc":"受控开合。不传时组件自己管；传了则以外部为准—— Select、Cascader 这类「选完就该收起」的控件需要在选中时主动关闭。","optional":true,"defaultText":"undefined","control":{"kind":"boolean"}},
     {"name":"align","type":"'center' | 'start'","doc":"","optional":true,"defaultText":"'center'","control":{"kind":"enum","options":["center","start"]}},
+  ],
+  IProTable: [
+    {"name":"columns","type":"ColumnSpec[]","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"state","type":"TableState<Row>","doc":"查询层状态。由页面持有，组件只读它并抛出「该请求什么」","optional":false,"defaultText":null,"control":null},
+    {"name":"columnState","type":"ColumnState | null","doc":"列设置。不传则组件自己维护一份内部状态","optional":true,"defaultText":"null","control":null},
+    {"name":"rowKey","type":"string","doc":"","optional":true,"defaultText":"'id'","control":{"kind":"string"}},
+    {"name":"viewportWidth","type":"number","doc":"可视宽度，用来判断固定列是否已经占满。窄屏上这个值要小","optional":true,"defaultText":"960","control":{"kind":"number"}},
+    {"name":"emptyText","type":"string","doc":"","optional":true,"defaultText":"'没有符合条件的数据'","control":{"kind":"string"}},
   ],
   IProgress: [
     {"name":"percent","type":"number","doc":"0-100；indeterminate 时忽略","optional":true,"defaultText":"0","control":{"kind":"number"}},

@@ -16,6 +16,7 @@
 @import './components/agent.css';
 @import './components/alert.css';
 @import './components/anchor.css';
+@import './components/app-shell.css';
 @import './components/autocomplete.css';
 @import './components/avatar-group.css';
 @import './components/avatar.css';
@@ -30,6 +31,7 @@
 @import './components/carousel.css';
 @import './components/cascader.css';
 @import './components/cell.css';
+@import './components/chart-distribution.css';
 @import './components/chart-frame.css';
 @import './components/chart.css';
 @import './components/chat-list.css';
@@ -93,6 +95,7 @@
 @import './components/picker.css';
 @import './components/popconfirm.css';
 @import './components/popup.css';
+@import './components/pro-table.css';
 @import './components/progress.css';
 @import './components/prompt-input.css';
 @import './components/pull-refresh.css';

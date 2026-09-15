@@ -389,11 +389,23 @@ function zoom(delta: number) {
   view.value = { ...view.value, scale: Math.min(2, Math.max(0.4, view.value.scale + delta)) }
 }
 
+/*
+ * 自动适应视图的缩放下限是 0.75，不是 0.4。
+ *
+ * 量出来的：320px 宽的手机上按整图缩放会缩到 0.5 上下，节点标题实际只剩 6–7px，
+ * 边上的「通过 / 驳回」更小——读者只能看出那儿有字。缩到看不清的「全貌」
+ * 不是全貌，还不如让他横着拖一下：画布本来就可拖可缩。
+ */
+const MIN_FIT_SCALE = 0.75
+
 function fit() {
   const rect = root.value?.getBoundingClientRect()
   const bounds = boundsOf(props.nodes)
   if (!rect || !bounds.width) return
-  const scale = Math.min(2, Math.max(0.4, Math.min(rect.width / bounds.width, props.height / bounds.height)))
+  const scale = Math.min(
+    2,
+    Math.max(MIN_FIT_SCALE, Math.min(rect.width / bounds.width, props.height / bounds.height))
+  )
   view.value = {
     scale,
     x: rect.width / 2 - (bounds.x + bounds.width / 2) * scale,

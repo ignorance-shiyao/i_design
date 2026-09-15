@@ -229,6 +229,46 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
       { value: 'help', label: '帮助', icon: 'info-circle' }
     ]
   },
+  IChartDistribution: {
+    values: [
+      12, 15, 15, 16, 18, 18, 19, 20, 21, 22, 22, 23, 24, 25, 26, 28, 29, 31, 33, 35,
+      36, 38, 41, 44, 48, 52, 57, 63, 70, 88
+    ],
+    type: 'histogram',
+    title: '订单金额分布',
+    unit: ' 万元'
+  },
+  IAppShell: {
+    title: '青禾 ERP',
+    user: '林岚（销售经理）',
+    nav: [
+      { key: 'orders', label: '销售订单', icon: 'file-text', children: [{ key: 'orders/draft', label: '草稿箱' }] },
+      { key: 'stock', label: '库存', icon: 'warehouse' }
+    ],
+    current: 'orders',
+    crumbs: [{ label: '销售订单' }]
+  },
+  IProTable: {
+    columns: [
+      { key: 'id', title: '单号', width: '120px', locked: true },
+      { key: 'customer', title: '客户' },
+      { key: 'amount', title: '金额', width: '120px' },
+      { key: 'cost', title: '成本', width: '110px', restricted: true }
+    ],
+    state: {
+      query: { filters: {}, sort: { key: null, order: null }, page: 1, pageSize: 20 },
+      rows: [
+        { id: 'SO-2026-0007', customer: '明远制造', amount: '¥ 12,800', cost: '¥ 9,100' },
+        { id: 'SO-2026-0008', customer: '合力重工', amount: '¥ 26,400', cost: '¥ 18,300' }
+      ],
+      total: 2,
+      status: 'success',
+      seq: 1,
+      settledSeq: 1,
+      error: null,
+      discarded: []
+    }
+  },
   IQueryFilter: {
     fields: [
       { name: 'keyword', label: '关键词', kind: 'text', placeholder: '单号或客户', always: true },

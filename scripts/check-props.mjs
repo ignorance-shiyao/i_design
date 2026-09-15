@@ -43,6 +43,8 @@ const KNOWN = {
   VirtualList: { react: ['handle'], why: 'React 端没有模板 ref，滚动到指定项的命令式入口只能作为属性传出去' },
   ChartZoom: { model: 'window', why: 'React 端把缩放区间做成受控属性 window，对应 Vue 的 v-model' },
   Carousel: { react: ['renderItem'], why: 'Vue 端用具名动态插槽逐张渲染，React 端只能用 renderItem 回调' },
+  AppShell: { react: ['topbar', 'actions', 'drawerExtra'], why: 'Vue 端这三处是具名插槽（topbar / actions / drawer），React 没有插槽，只能各开一个 ReactNode 属性' },
+  ProTable: { react: ['cell'], why: 'Vue 端每列一个具名插槽渲染单元格，React 没有插槽，只能用一张 key → 渲染函数的表' },
   SelectInput: { react: ['keyword', 'open'], why: 'React 无 v-model，受控的输入词与展开态只能各开一个属性；Vue 端由 v-model 与内部状态承担' }
 }
 

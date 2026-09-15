@@ -286,6 +286,27 @@ function reset() {
   font-size: var(--i-font-size-sm);
   color: var(--i-color-text-secondary);
 }
+
+/*
+ * 窄屏上把卡片压紧：一屏只装得下两三张卡时，卡片之间那几十像素的呼吸感
+ * 换来的是要滑十几屏才翻得完一个分类——量出来整页 22000px 高。
+ * 压紧之后信息一条不少，只是行距回到正文的密度。
+ */
+@media (max-width: 560px) {
+  .tile {
+    padding: var(--i-spacing-3) var(--i-spacing-4);
+  }
+
+  .tile__name {
+    display: inline;
+    margin-top: 0;
+    margin-left: var(--i-spacing-2);
+  }
+
+  .tile__desc {
+    margin-top: var(--i-spacing-1);
+  }
+}
 .library-empty {
   padding: var(--i-spacing-16) var(--i-spacing-4);
   text-align: center;

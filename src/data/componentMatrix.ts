@@ -59,6 +59,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IAppShell",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IApprovalCard",
     "ends": {
       "vue-next": true,
@@ -200,6 +210,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IChartBox",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IChartDistribution",
     "ends": {
       "vue-next": true,
       "vue": true,
@@ -890,6 +910,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IPopover",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IProTable",
     "ends": {
       "vue-next": true,
       "vue": true,

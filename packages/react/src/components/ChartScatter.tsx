@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useChartWidth } from './useChartWidth'
 import { useConfig } from './ConfigProvider'
 import {
   SCATTER_MAX_SERIES,
@@ -25,7 +26,7 @@ export interface ChartScatterProps {
   className?: string
 }
 
-const W = 640
+
 const PAD = { top: 16, right: 24, bottom: 40, left: 56 }
 
 export function ChartScatter({
@@ -39,6 +40,7 @@ export function ChartScatter({
   trend = false,
   className = ''
 }: ChartScatterProps) {
+  const { ref: host, width: W } = useChartWidth<HTMLElement>()
   /* 文案走字典：数据表是图表的无障碍出口，按钮与表头也得跟着换语言 */
   const { locale } = useConfig()
   const [hidden, setHidden] = useState<Set<string>>(new Set())
@@ -96,7 +98,7 @@ export function ChartScatter({
   }
 
   return (
-    <figure className={['i-chart', 'i-chart--scatter', className].filter(Boolean).join(' ')}>
+    <figure ref={host} className={['i-chart', 'i-chart--scatter', className].filter(Boolean).join(' ')}>
       {title && <figcaption className="i-chart__title">{title}</figcaption>}
 
       <svg

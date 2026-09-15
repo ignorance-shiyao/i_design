@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { useConfig } from './useConfig'
 import { computed, ref } from 'vue'
+import { useChartWidth } from './useChartWidth'
 import {
   formatTick,
   niceTicks,
@@ -27,9 +28,14 @@ const props = withDefaults(
   { title: '', height: 280, unit: '' }
 )
 
-const W = 640
+/*
+ * 视图宽度跟着容器走（见 useChartWidth）：固定 640 时这张图在手机上被整体缩到
+ * 0.48，11px 的刻度字实际只剩 6px——量出来的。对齐容器宽度后缩放比回到 1。
+ */
+const host = ref<HTMLElement | null>(null)
+const W = useChartWidth(host)
 const PAD = { top: 24, right: 16, bottom: 44, left: 56 }
-const plotW = W - PAD.left - PAD.right
+const plotW = computed(() => W.value - PAD.left - PAD.right)
 const plotH = computed(() => props.height - PAD.top - PAD.bottom)
 
 const bars = computed(() => waterfallBars(props.items))
@@ -41,7 +47,7 @@ const scale = computed(() => {
 })
 
 const y = (v: number) => scaleY(v, scale.value.min, scale.value.max, plotH.value) + PAD.top
-const band = computed(() => plotW / Math.max(1, bars.value.length))
+const band = computed(() => plotW.value / Math.max(1, bars.value.length))
 const barW = computed(() => Math.min(48, band.value * 0.62))
 const left = (i: number) => PAD.left + band.value * i + (band.value - barW.value) / 2
 
@@ -65,7 +71,7 @@ const sign = (v: number) => (v > 0 ? `+${formatTick(v)}` : formatTick(v))
 </script>
 
 <template>
-  <figure class="i-chart">
+  <figure ref="host" class="i-chart">
     <figcaption v-if="title" class="i-chart__title">{{ title }}</figcaption>
 
     <svg

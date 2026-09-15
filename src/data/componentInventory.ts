@@ -24,6 +24,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IAgentTasks.vue",
   "src/components/IAlert.vue",
   "src/components/IAnchor.vue",
+  "src/components/IAppShell.vue",
   "src/components/IApprovalCard.vue",
   "src/components/IAutoComplete.vue",
   "src/components/IAvatar.vue",
@@ -39,6 +40,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ICascader.vue",
   "src/components/IChart.vue",
   "src/components/IChartBox.vue",
+  "src/components/IChartDistribution.vue",
   "src/components/IChartFrame.vue",
   "src/components/IChartFunnel.vue",
   "src/components/IChartGantt.vue",
@@ -110,6 +112,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IPagination.vue",
   "src/components/IPopconfirm.vue",
   "src/components/IPopover.vue",
+  "src/components/IProTable.vue",
   "src/components/IProgress.vue",
   "src/components/IPromptInput.vue",
   "src/components/IQrcode.vue",
@@ -169,6 +172,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/notification.ts",
   "src/components/overlayPosition.ts",
   "src/components/upload.ts",
+  "src/components/useChartWidth.ts",
   "src/components/useConfig.ts",
   "src/components/validate.ts"
 ]

@@ -188,6 +188,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IAppShell",
+    "sources": {
+      "vue-next": "src/components/IAppShell.vue",
+      "vue": "packages/vue/src/components/IAppShell.vue",
+      "react": "packages/react/src/components/AppShell.tsx",
+      "miniprogram": "packages/miniprogram/src/components/app-shell",
+      "flutter": "packages/flutter/lib/src/components/i_app_shell.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/layout"
+    ],
+    "states": {}
+  },
+  {
     "name": "IApprovalCard",
     "sources": {
       "vue-next": "src/components/IApprovalCard.vue",
@@ -709,7 +739,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/chart",
       "page": "src/pages/components/ChartPage.vue",
-      "demos": 24
+      "demos": 26
     },
     "demoRoutes": [
       "/components/chart"
@@ -764,6 +794,48 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/chart"
     ],
     "states": {}
+  },
+  {
+    "name": "IChartDistribution",
+    "sources": {
+      "vue-next": "src/components/IChartDistribution.vue",
+      "vue": "packages/vue/src/components/IChartDistribution.vue",
+      "react": "packages/react/src/components/ChartDistribution.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-distribution",
+      "flutter": "packages/flutter/lib/src/components/i_chart_distribution.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/chart"
+    ],
+    "states": {
+      "type": [
+        "histogram",
+        "density",
+        "violin",
+        "error"
+      ],
+      "rule": [
+        "freedman-diaconis",
+        "sturges",
+        "fixed"
+      ]
+    }
   },
   {
     "name": "IChartFrame",
@@ -2598,7 +2670,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/layout",
       "page": "src/pages/components/LayoutPage.vue",
-      "demos": 13
+      "demos": 14
     },
     "demoRoutes": [
       "/components/layout"
@@ -3142,6 +3214,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
         "start"
       ]
     }
+  },
+  {
+    "name": "IProTable",
+    "sources": {
+      "vue-next": "src/components/IProTable.vue",
+      "vue": "packages/vue/src/components/IProTable.vue",
+      "react": "packages/react/src/components/ProTable.tsx",
+      "miniprogram": "packages/miniprogram/src/components/pro-table",
+      "flutter": "packages/flutter/lib/src/components/i_pro_table.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/table"
+    ],
+    "states": {}
   },
   {
     "name": "IProgress",
@@ -4183,7 +4285,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/table",
       "page": "src/pages/components/TablePage.vue",
-      "demos": 6
+      "demos": 7
     },
     "demoRoutes": [
       "/components/collapse",

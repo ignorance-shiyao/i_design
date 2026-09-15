@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import IChart from '@/components/IChart.vue'
+import IChartDistribution from '@/components/IChartDistribution.vue'
 import IChartPie from '@/components/IChartPie.vue'
 import ISparkline from '@/components/ISparkline.vue'
 import ICard from '@/components/ICard.vue'
@@ -233,6 +234,19 @@ const waterfallItems = [
   { label: '退货入库', value: 140 },
   { label: '期末库存', value: 0, total: true }
 ]
+
+/* ---------- 分布（D04）：一批有偏的样本，两种分箱规则画出不同的故事 ---------- */
+const distSample = [
+  ...Array.from({ length: 40 }, (_, i) => 20 + (i % 7) * 2),
+  ...Array.from({ length: 30 }, (_, i) => 48 + (i % 5) * 3),
+  92, 96, 104, 118
+]
+const distRule = ref<'freedman-diaconis' | 'sturges' | 'fixed'>('freedman-diaconis')
+const distRules = [
+  { label: 'Freedman–Diaconis', value: 'freedman-diaconis' },
+  { label: 'Sturges', value: 'sturges' },
+  { label: '固定 5', value: 'fixed' }
+]
 </script>
 
 <template>
@@ -312,6 +326,38 @@ const waterfallItems = [
         :series="[{ name: '在库数量', data: [80, 80, 105, 105, 96] }]"
         :height="200"
       />
+    </DemoBlock>
+
+    <h2>分布</h2>
+    <DemoBlock
+      title="直方图：分箱规则决定你看到几个峰"
+      description="分布图最容易在「看起来很专业」的外表下说错话。切换下面三种规则：这批样本上 Freedman–Diaconis 给出箱宽 13.3、Sturges 给出 12.3（都是 8 个箱），固定 8 则变成 13 个箱——箱数一变，尾部那几个大额订单是「一个孤立的小峰」还是「并进前一箱」就跟着变。所以组件把规则与箱宽印在图下，而不是留给读者猜。默认用 Freedman–Diaconis（对长尾与离群点比 Sturges 稳）；IQR 为 0 时自动退回 Sturges，因为此时 FD 会给出零宽度、算出无穷多个箱。样本量少于 20 时照画，但会写明「这里的形状主要是噪声」。"
+      lang="vue"
+      code='<IChartDistribution type="histogram" rule="freedman-diaconis" :values="values" />'
+    >
+      <div class="dist-demo">
+        <ISegmented v-model="distRule" :options="distRules" />
+        <IChartDistribution
+          type="histogram"
+          :rule="distRule"
+          :bin-width="8"
+          :values="distSample"
+          unit=" 分"
+        />
+      </div>
+    </DemoBlock>
+
+    <DemoBlock
+      title="密度、小提琴与误差棒"
+      description="密度曲线唯一重要的旋钮是带宽：调小了噪声会变成「第三个峰」，调大了两个峰会并成一个，所以算出来的带宽写在图下。小提琴的宽度按峰值归一化，否则两把琴的「胖」不可比——那正是小提琴图最常被误读的地方。误差棒必须说清它是什么：同一批数据，标准差、标准误、95% 置信区间画出来差好几倍，而三者说的是完全不同的事（数据有多散 / 均值估得多准 / 均值落在哪）。"
+      lang="vue"
+      code='<IChartDistribution type="error" error-kind="ci95" :values="values" />'
+    >
+      <div class="dist-demo">
+        <IChartDistribution type="density" :values="distSample" title="密度" unit=" 分" :height="200" />
+        <IChartDistribution type="violin" :values="distSample" title="小提琴" unit=" 分" :height="200" />
+        <IChartDistribution type="error" error-kind="ci95" :values="distSample" title="误差棒" unit=" 分" :height="120" />
+      </div>
     </DemoBlock>
 
     <h2>轴系</h2>
@@ -635,6 +681,12 @@ const waterfallItems = [
 </template>
 
 <style scoped>
+.dist-demo {
+  display: grid;
+  gap: var(--i-spacing-4);
+  min-width: 0;
+}
+
 .link-demo { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; }
 .link-demo__row { display: flex; flex-wrap: wrap; gap: var(--i-spacing-2); }
 .link-demo__path { margin: 0; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }

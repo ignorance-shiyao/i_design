@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import CodeBlock from "./CodeBlock.vue";
 import FrameworkTabs from "./FrameworkTabs.vue";
 import IIcon from "@/components/IIcon.vue";
 import type { SnippetSet } from "@/data/snippets";
 
-defineProps<{
+const props = defineProps<{
   title?: string;
   description?: string;
   code?: string;
@@ -14,13 +14,35 @@ defineProps<{
   snippets?: SnippetSet;
 }>();
 const showCode = ref(false);
+
+/*
+ * 长说明在窄屏上会占掉整整一屏，读者要滑过一大段字才看得到演示本身——
+ * 而他点进来是为了看那个东西怎么动。所以超过这个长度的说明默认折到三行，
+ * 由读者决定要不要展开；不是删掉它，理由仍然在原地。
+ *
+ * 阈值按「三行大概装得下多少字」取：390px 宽、14px 字，一行约 22 个汉字。
+ */
+const LONG_DESC = 70;
+const longDesc = computed(() => (props.description?.length ?? 0) > LONG_DESC);
+const descOpen = ref(false);
 </script>
 
 <template>
   <section class="demo">
     <header v-if="title" class="demo__head">
       <h3 class="demo__title">{{ title }}</h3>
-      <p v-if="description" class="demo__desc">{{ description }}</p>
+      <p
+        v-if="description"
+        class="demo__desc"
+        :class="{ 'is-clamped': longDesc && !descOpen }"
+      >{{ description }}</p>
+      <button
+        v-if="longDesc"
+        type="button"
+        class="demo__desc-toggle"
+        :aria-expanded="descOpen"
+        @click="descOpen = !descOpen"
+      >{{ descOpen ? '收起说明' : '展开说明' }}</button>
     </header>
     <div class="demo__stage"><slot /></div>
     <footer v-if="code || snippets" class="demo__foot">
@@ -54,6 +76,34 @@ const showCode = ref(false);
 .demo:hover {
   border-color: var(--i-color-border-strong);
 }
+.demo__desc-toggle {
+  display: none;
+  margin-top: var(--i-spacing-1);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--i-color-brand-text);
+  font-size: var(--i-font-size-xs);
+  cursor: pointer;
+}
+
+/*
+ * 只在窄屏折叠：桌面上这段字占不到一屏，折起来反而多一次点击。
+ * 用 -webkit-line-clamp 而不是定高：定高会把最后一行切成半个字。
+ */
+@media (max-width: 560px) {
+  .demo__desc.is-clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .demo__desc-toggle {
+    display: inline-block;
+  }
+}
+
 .demo__head {
   padding: var(--i-spacing-5) var(--i-spacing-6) 0;
   border-radius: var(--i-radius-xl) var(--i-radius-xl) 0 0;

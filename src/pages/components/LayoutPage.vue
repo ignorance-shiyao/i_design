@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import IAppShell, { type AppNavItem } from '@/components/IAppShell.vue'
 import ILayout from '@/components/ILayout.vue'
 import IPageHeader from '@/components/IPageHeader.vue'
 import { message } from '@/components/message'
@@ -33,6 +34,14 @@ import { heroIllustrations } from '@i-design/common/illustrations'
 
 /* 预览用的图组：故意混一个坏地址进去，好让「加载失败」这一态在文档里看得见 */
 const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
+
+/* ---------- AppShell（B01）---------- */
+const shellNav: AppNavItem[] = [
+  { key: 'orders', label: '销售订单', icon: 'file-text', children: [{ key: 'orders/draft', label: '草稿箱' }] },
+  { key: 'stock', label: '库存', icon: 'warehouse' },
+  { key: 'report', label: '经营分析', icon: 'grid' }
+]
+const shellCurrent = ref('orders/draft')
 </script>
 
 <template>
@@ -98,6 +107,30 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
           <p>正文区域：页面的主要内容放在这里。</p>
           <template #footer>© Ignorance Design</template>
         </ILayout>
+      </div>
+    </DemoBlock>
+
+    <h2>AppShell 应用骨架</h2>
+    <DemoBlock
+      title="导航、面包屑、页面操作与窄屏抽屉"
+      description="顶栏、侧栏、面包屑与页面操作槽是每个业务页面都要重搭一遍的东西，所以它们该是一个组件而不是一份模板。窄屏下侧栏收进抽屉而不是被挤窄——挤窄之后每一项只剩两三个字，认不出来还占着地方。抽屉用 Esc 能关，关掉时焦点回到打开它的那个按钮：不还的话，键盘与读屏用户会被丢回页面顶部，得从头 Tab 一遍。组件不认识路由，点导航只抛事件，由页面决定怎么跳——内置路由的话，换一个路由库就得改组件。二级项选中时父项也会显示出来，否则用户不知道自己在哪一块里。"
+      lang="vue"
+      code='<IAppShell :nav="nav" :current="current" :crumbs="[{ label: &apos;草稿箱&apos; }]" @navigate="go" />'
+    >
+      <div class="shell-demo">
+        <IAppShell
+          title="青禾 ERP"
+          user="林岚（销售经理）"
+          :nav="shellNav"
+          :current="shellCurrent"
+          :crumbs="[{ label: shellNav.flatMap((n) => [n, ...(n.children ?? [])]).find((n) => n.key === shellCurrent)?.label ?? '' }]"
+          @navigate="(key: string) => (shellCurrent = key)"
+        >
+          <template #actions>
+            <IButton size="sm" variant="primary">新建订单</IButton>
+          </template>
+          <p>正文区。当前导航：<code>{{ shellCurrent }}</code></p>
+        </IAppShell>
       </div>
     </DemoBlock>
 
@@ -348,6 +381,11 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
     </DemoBlock>
 
     <IBackTop />
+    <h2>Layout 还是 AppShell</h2>
+    <p>
+      <code>ILayout</code> 只摆四块位置（顶栏、侧栏、正文、底栏），不认识导航，也不管窄屏；需要自己拼一套壳时用它。<code>IAppShell</code> 是拼好的那一套：导航项、面包屑、页面操作槽、窄屏抽屉与焦点归位都在里面，代价是它对结构有主张。一个业务系统通常只需要 AppShell；而登录页、大屏、嵌进别人页面的局部视图，用 Layout 更合适。
+    </p>
+
     <h2>什么时候不该用它</h2>
     <ul>
       <li>页面只有一栏内容时——直接写，套一层栅格只会多出一层嵌套。</li>
@@ -358,6 +396,14 @@ const shots = [heroIllustrations.light.src, heroIllustrations.dark.src]
 </template>
 
 <style scoped>
+/* 演示里给骨架一个固定高度：它本来是占满整屏的，塞在文档流里要有个边界 */
+.shell-demo {
+  height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+}
+
 .wm-demo {
   padding: var(--i-spacing-6);
   border: 1px solid var(--i-color-hairline);

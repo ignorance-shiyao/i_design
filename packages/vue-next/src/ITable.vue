@@ -156,9 +156,25 @@ const visibleRowsData = computed(() => {
   return out
 })
 
+/*
+ * 能不能横向滚、有没有滚到头：右边缘的淡出要靠它。
+ * 手机上量到的问题是最后一列被切成「¥ 49,」，读者会以为表坏了而不是还能拖。
+ */
+const scrollX = ref(false)
+const scrollEnd = ref(false)
+
+function measureScrollX() {
+  const el = wrap.value
+  if (!el) return
+  scrollX.value = el.scrollWidth - el.clientWidth > 1
+  scrollEnd.value = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1
+}
+
 /* 滚动事件远多于帧，而每次都要读一次布局 */
 const onScroll = rafThrottle(() => {
-  if (wrap.value) scrollTop.value = wrap.value.scrollTop
+  if (!wrap.value) return
+  scrollTop.value = wrap.value.scrollTop
+  measureScrollX()
 })
 onBeforeUnmount(() => onScroll.cancel())
 
@@ -166,6 +182,7 @@ function measure() {
   const el = wrap.value
   if (!el) return
   viewportHeight.value = el.clientHeight
+  measureScrollX()
   const first = el.querySelector<HTMLElement>('tbody tr:not(.i-table-c__spacer)')
   if (first && first.offsetHeight > 0) rowHeight.value = first.offsetHeight
 }
@@ -181,7 +198,7 @@ watch(
   <div
     ref="wrap"
     class="i-table-wrap"
-    :class="{ 'is-scrollable': !!height }"
+    :class="{ 'is-scrollable': !!height, 'is-scroll-x': scrollX, 'is-scroll-end': scrollEnd }"
     :style="{ height: height || undefined }"
     @scroll.passive="onScroll"
   >

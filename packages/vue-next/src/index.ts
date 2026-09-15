@@ -2,6 +2,7 @@ import type { App } from 'vue'
 import IIcon from './IIcon.vue'
 import IFlow from './IFlow.vue'
 import IChart from './IChart.vue'
+import IChartDistribution from './IChartDistribution.vue'
 import IChartFunnel from './IChartFunnel.vue'
 import IChartGauge from './IChartGauge.vue'
 import IChartRadar from './IChartRadar.vue'
@@ -25,6 +26,7 @@ import IRow from './IRow.vue'
 import ICol from './ICol.vue'
 import ISchemaForm from './ISchemaForm.vue'
 import ISegmented from './ISegmented.vue'
+import IProTable from './IProTable.vue'
 import IProgress from './IProgress.vue'
 import IStatistic from './IStatistic.vue'
 import IConfigProvider from './IConfigProvider.vue'
@@ -91,6 +93,7 @@ import ITimePicker from './ITimePicker.vue'
 import ITimeSelect from './ITimeSelect.vue'
 import ITransfer from './ITransfer.vue'
 import IAffix from './IAffix.vue'
+import IAppShell from './IAppShell.vue'
 import IBackTop from './IBackTop.vue'
 import ICodeBlock from './ICodeBlock.vue'
 import ICommandSearch from './ICommandSearch.vue'
@@ -189,6 +192,7 @@ export {
   ITimeSelect,
   ITransfer,
   IAffix,
+  IAppShell,
   IBackTop,
   ICodeBlock,
   ICommandSearch,
@@ -244,6 +248,7 @@ export {
   ICol,
   ISchemaForm,
   ISegmented,
+  IProTable,
   IProgress,
   IStatistic,
   IConfigProvider,
@@ -264,6 +269,7 @@ export {
   IChartPie,
   ISparkline,
   IFlow,
+  IChartDistribution,
   IChartFunnel,
   IChartGauge,
   IChartRadar,
@@ -362,6 +368,7 @@ const components = {
   ICol,
   ISchemaForm,
   ISegmented,
+  IProTable,
   IProgress,
   IStatistic,
   IConfigProvider,
@@ -375,6 +382,7 @@ const components = {
   IQueryFilter,
   IRangeInput,
   IRate,
+  IAppShell,
   ILayout,
   ILink,
   IList,
@@ -382,6 +390,7 @@ const components = {
   IChartPie,
   ISparkline,
   IFlow,
+  IChartDistribution,
   IChartFunnel,
   IChartGauge,
   IChartRadar,

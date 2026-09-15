@@ -21,6 +21,12 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
     title: '基础',
     desc: '构成界面的最小交互单元。',
     items: [
+      { name: 'Typography', cn: '文字排版', to: '/components/config-provider', desc: '标题、正文与辅助文字的层级' },
+      { name: 'Space', cn: '间距', to: '/components/layout', desc: '一组元素之间的标准间距' },
+      { name: 'CheckTag', cn: '可选标签', to: '/components/tag', desc: '点一下就切换的标签，用作轻量筛选' },
+      { name: 'Progress', cn: '进度条', to: '/components/data-display', desc: '一件事进行到哪一步' },
+      { name: 'Statistic', cn: '统计数值', to: '/components/chart', desc: '把一个关键数字放大说清楚' },
+      { name: 'Watermark', cn: '水印', to: '/components/layout', desc: '铺一层可追溯的标识' },
       { name: 'Button', cn: '按钮', to: '/components/button', desc: '触发一个即时操作' },
       { name: 'Icon', cn: '图标', to: '/components/icon', desc: '跟随文字色的内联 SVG 图标' },
       { name: 'Tag', cn: '标签', to: '/components/tag', desc: '标记分类或状态' },
@@ -35,9 +41,24 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
     ]
   },
   {
+    title: '布局',
+    desc: '把东西摆正：结构、间距与滚动行为，它们本身没有视觉主张。',
+    items: [
+      { name: 'Layout', cn: '页面骨架', to: '/components/layout', desc: '顶栏、侧栏、正文、底栏，只摆位置' },
+      { name: 'PageHeader', cn: '页头', to: '/components/layout', desc: '返回、标题、副标题与右侧操作' },
+      { name: 'Splitter', cn: '分栏', to: '/components/layout', desc: '可拖动的左右/上下分栏' },
+      { name: 'Affix', cn: '固钉', to: '/components/layout', desc: '滚过某个位置后钉住' },
+      { name: 'Sticky', cn: '吸顶容器', to: '/components/data-display', desc: '滚动时把一段内容吸在边缘' },
+      { name: 'BackTop', cn: '回到顶部', to: '/components/layout', desc: '长页面的返回入口' },
+      { name: 'VirtualList', cn: '虚拟列表', to: '/components/layout', desc: '上万行只渲染看得见的那几行' },]
+  },
+  {
     title: '导航',
     desc: '在信息层级之间移动。',
     items: [
+      { name: 'Menu', cn: '菜单', to: '/components/navigation', desc: '多级导航的主入口' },
+      { name: 'Anchor', cn: '锚点', to: '/components/navigation', desc: '长文里的章节定位' },
+      { name: 'Dropdown', cn: '下拉菜单', to: '/components/overlay', desc: '一个入口收起多个次要操作' },
       { name: 'Tabs', cn: '标签页', to: '/components/tabs', desc: '切换并列的内容视图' },
       { name: 'Pagination', cn: '分页', to: '/components/pagination', desc: '把长列表切成可控片段' },
       { name: 'Breadcrumb', cn: '面包屑', to: '/components/breadcrumb', desc: '展示当前所处层级' },
@@ -48,6 +69,10 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
     title: '数据录入',
     desc: '采集用户输入，是中后台产品的主战场。',
     items: [
+      { name: 'ColorPicker', cn: '颜色选择', to: '/components/layout', desc: '取一个颜色值' },
+      { name: 'Mentions', cn: '提及输入', to: '/components/data-display', desc: '输入 @ 拉起人员或条目' },
+      { name: 'Segmented', cn: '分段控制器', to: '/components/chart', desc: '在少数几个视图之间切换' },
+      { name: 'Calendar', cn: '日历', to: '/components/data-display', desc: '按月查看与选择日期' },
       { name: 'Input', cn: '输入框', to: '/components/input', desc: '单行文本输入' },
       { name: 'InputAdornment', cn: '输入前后缀', to: '/components/input-adornment', desc: '把固定的前后缀移出输入框' },
       { name: 'RangeInput', cn: '区间输入', to: '/components/range-input', desc: '一次填一个区间的两端' },
@@ -78,6 +103,11 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
     title: '数据展示',
     desc: '把结构化数据呈现给用户。',
     items: [
+      { name: 'List', cn: '列表', to: '/components/data-entry', desc: '一列条目，可带操作与状态' },
+      { name: 'Timeline', cn: '时间线', to: '/components/data-display', desc: '按时间排列的事件' },
+      { name: 'Image', cn: '图片', to: '/components/image-viewer', desc: '带加载与失败态的图片' },
+      { name: 'Markdown', cn: 'Markdown', to: '/components/markdown', desc: '渲染 Markdown，不走 HTML 字符串' },
+      { name: 'PageState', cn: '页面状态', to: '/components/page-state', desc: '加载、空、无权限、失败、离线' },
       { name: 'Table', cn: '表格', to: '/components/table', desc: '行列数据与排序' },
       { name: 'Card', cn: '卡片', to: '/components/card', desc: '承载一组相关信息' },
       { name: 'Tooltip', cn: '文字提示', to: '/components/tooltip', desc: '悬浮时补充说明' },
@@ -97,9 +127,26 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
     ]
   },
   {
+    /*
+     * 业务组合与上面的原子组件是两层东西，所以单独一档：它们各自替代的是
+     * 「把三四个原子组件拼起来再补一套状态机」这件事。选型时按「我要不要那套
+     * 状态机」判断——只要展示一张静态表就用 Table，需要分页/排序/过期响应
+     * 丢弃才用 ProTable。
+     */
+    title: '业务组合',
+    desc: '把一整套业务状态机连同界面一起给出来，而不是让每个项目再拼一遍。',
+    items: [
+      { name: 'AppShell', cn: '应用骨架', to: '/components/layout', desc: '顶栏、侧栏、面包屑与窄屏抽屉；只摆结构不认识路由' },
+      { name: 'QueryFilter', cn: '查询筛选', to: '/components/table', desc: '列表页上方那排条件；条件变了回第一页，参数可往返' },
+      { name: 'ProTable', cn: '查询表格', to: '/components/table', desc: 'Table 加查询层与列能力；过期响应会被丢掉' },
+      { name: 'SchemaForm', cn: 'Schema 表单', to: '/components/form', desc: '按数据结构渲染表单；schema 里不执行任何字符串' }
+    ]
+  },
+  {
     title: '消息反馈',
     desc: '把系统状态告诉用户，按打断成本从低到高选择。',
     items: [
+      { name: 'Popover', cn: '气泡卡片', to: '/components/overlay', desc: '悬浮里放一小块可交互内容' },
       { name: 'Alert', cn: '警告提示', to: '/components/alert', desc: '页面内的持续提示' },
       { name: 'Message', cn: '全局提示', to: '/components/message', desc: '操作结果的轻量反馈' },
       { name: 'Notification', cn: '通知', to: '/components/navigation', desc: '角落通知，可常驻并带操作' },
@@ -115,6 +162,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
     title: '图表',
     desc: '让数据自己说话。颜色按「它在表达什么」分工，而不是按好看程度挑。',
     items: [
+      { name: 'ChartFrame', cn: '图表外框', to: '/components/chart', desc: '标题、口径、数据表与下载' },
       { name: 'Chart', cn: '折线 / 柱状 / 面积', to: '/components/chart', desc: '趋势与对比' },
       { name: 'ChartPie', cn: '饼图 / 环图', to: '/components/chart', desc: '构成占比' },
       { name: 'ChartScatter', cn: '散点 / 气泡', to: '/components/chart', desc: '相关性与离群点' },
@@ -122,7 +170,8 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'ChartRadar', cn: '雷达图', to: '/components/chart', desc: '多维度对比' },
       { name: 'ChartFunnel', cn: '漏斗图', to: '/components/chart', desc: '转化流失' },
       { name: 'ChartGauge', cn: '仪表盘', to: '/components/chart', desc: '单值与阈值' },
-      { name: 'ChartBox', cn: '箱线图', to: '/components/chart', desc: '分布与离群点' },
+      { name: 'ChartBox', cn: '箱线图', to: '/components/chart', desc: '多组之间比分布：五数概括加离群点' },
+      { name: 'ChartDistribution', cn: '分布图', to: '/components/chart', desc: '单组看形状：直方、密度、小提琴、误差棒' },
       { name: 'ChartWaterfall', cn: '瀑布图', to: '/components/chart', desc: '增减归因' },
       { name: 'ChartSankey', cn: '桑基图', to: '/components/chart', desc: '流向与分流' },
       { name: 'ChartTreemap', cn: '矩形树图', to: '/components/chart', desc: '层级占比' },
@@ -146,6 +195,10 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
     title: 'AI 会话',
     desc: '智能体替你做事时，人在哪一步介入、看到什么、能否反悔。',
     items: [
+      { name: 'MessageParts', cn: '消息分段', to: '/components/chat', desc: '一条回答里的多段混排' },
+      { name: 'ChatSources', cn: '引用来源', to: '/components/chat', desc: '回答依据的出处' },
+      { name: 'ChatSuggestions', cn: '追问建议', to: '/components/chat', desc: '接着问什么' },
+      { name: 'ChatTyping', cn: '生成中', to: '/components/chat', desc: '正在生成的节奏提示' },
       { name: 'ChatMessage', cn: '消息气泡', to: '/components/chat', desc: '流式输出与来源标注' },
       { name: 'PromptInput', cn: '输入台', to: '/components/chat', desc: '多行输入、附件与发送' },
       { name: 'ChatThinking', cn: '思考过程', to: '/components/chat', desc: '可展开的推理步骤' },
@@ -177,8 +230,6 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'Picker', cn: '选择器', to: '/components/mobile', desc: '滚轮式多列选择' },
       { name: 'NoticeBar', cn: '通告栏', to: '/components/mobile', desc: '与操作无关的广播' },
       { name: 'CountDown', cn: '倒计时', to: '/components/mobile', desc: '秒杀与验证码计时' },
-      { name: 'NumberKeypad', cn: '数字键盘', to: '/components/mobile', desc: '金额与验证码输入' },
-      { name: 'InfiniteScroll', cn: '无限滚动', to: '/components/mobile', desc: '翻到底自动续下一页' },
       { name: 'Tour', cn: '新手引导', to: '/components/overlay', desc: '分步指向界面上的关键位置' }
     ]
   }

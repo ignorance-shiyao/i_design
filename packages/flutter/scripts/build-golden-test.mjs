@@ -534,6 +534,27 @@ const {
   validateSchema, applyServerErrors, firstErrorPath
 } = await bundle('packages/common/src/logic/schemaform.ts', 'schemaform')
 
+/* ---------- ProTable：过期响应与列能力 ----------
+ * 这两条抄错都不会报错：乱序返回时旧结果覆盖新结果，界面上看不出异常；
+ * 隐藏列与权限合并之后，藏一列就等于跳过了那一列的权限检查。
+ */
+const {
+  initialTableState, startRequest, receive: receiveTable, fail: failTable,
+  setSort: setTableSort, setPage: setTablePage, setPageSize: setTablePageSize,
+  setFilters: setTableFilters, clampTablePage, toggleSort: toggleTableSort
+} = await bundle('packages/common/src/logic/protable.ts', 'protable')
+const {
+  defaultColumnState, resolveTableColumns, visibleTableColumns, restrictedTableColumns,
+  toggleColumn, moveColumn
+} = await bundle('packages/common/src/logic/columns.ts', 'columns')
+
+/* ---------- 分布统计：分箱、带宽、误差棒 ----------
+ * 分布图的形状就是它的全部内容：分箱宽度或带宽差一点，两端画出来就是两张图，
+ * 而两张都「看起来像那么回事」。
+ */
+const { histogram, kde, errorBar, violinShape, pearson } =
+  await bundle('packages/common/src/logic/stats.ts', 'stats')
+
 /* ---------- 流程图：框选、批量移动与节点缩放 ----------
  * 三条都是「抄错也不会报错」的规则：命中判定改成相交、位移逐个吸附、
  * 缩放时对角没固定住——每一条都只表现为手感不对，构建全绿。
@@ -951,6 +972,135 @@ const serverErrorExpectations = serverErrorCases.flatMap((list, i) => {
     `    expect(firstErrorPath(se${i}), ${firstErrorPath(mapped) === null ? 'null' : `'${firstErrorPath(mapped)}'`});`,
   ]
 })
+
+/* 过期响应：两个请求乱序回来，旧的那个必须被丢掉 */
+const seqScript = (() => {
+  let state = initialTableState()
+  const a = startRequest(state)
+  const b = startRequest(a.state)
+  const afterNew = receiveTable(b.state, { seq: b.request.seq, rows: [{ id: 'new' }], total: 1 })
+  const afterOld = receiveTable(afterNew, { seq: a.request.seq, rows: [{ id: 'old' }], total: 99 })
+  const afterFail = failTable(afterOld, a.request.seq, '超时')
+  return { afterNew, afterOld, afterFail }
+})()
+
+const proTableExpectations = [
+  `    var s = const ITableState<Map<String, Object?>>();`,
+  `    final a = startRequest(s);`,
+  `    final b = startRequest(a.state);`,
+  `    var after = receive(b.state, ITableResult<Map<String, Object?>>(seq: b.seq, rows: <Map<String, Object?>>[<String, Object?>{'id': 'new'}], total: 1));`,
+  `    expect(after.rows.first['id'], '${seqScript.afterNew.rows[0].id}');`,
+  `    expect(after.status.name, '${seqScript.afterNew.status}');`,
+  `    after = receive(after, ITableResult<Map<String, Object?>>(seq: a.seq, rows: <Map<String, Object?>>[<String, Object?>{'id': 'old'}], total: 99));`,
+  // 旧响应被丢掉：行与总数都不变，且记进 discarded
+  `    expect(after.rows.first['id'], '${seqScript.afterOld.rows[0].id}');`,
+  `    expect(after.total, ${seqScript.afterOld.total});`,
+  `    expect(after.discarded, <int>[${seqScript.afterOld.discarded.join(', ')}]);`,
+  `    after = fail(after, a.seq, '超时');`,
+  `    expect(after.status.name, '${seqScript.afterFail.status}');`,
+  `    expect(after.error, ${seqScript.afterFail.error === null ? 'null' : `'${seqScript.afterFail.error}'`});`,
+  // 排序三态与页码规则
+  ...['asc', 'desc', 'none'].map((_, i) => {
+    let sort = { key: null, order: null }
+    for (let k = 0; k <= i; k += 1) sort = toggleTableSort(sort, 'name')
+    const dartOrder = sort.order === null ? 'null' : `ISortOrder.${sort.order}`
+    return `    expect(${'toggleSort('.repeat(i + 1)}const ISortState()${", 'name')".repeat(i + 1)}.order, ${dartOrder});`
+  }),
+  `    final paged = setPage(const ITableState<Map<String, Object?>>(), ${0});`,
+  `    expect(paged.query.page, ${setTablePage(initialTableState(), 0).query.page});`,
+  `    expect(setSort(const ITableState<Map<String, Object?>>(query: ITableQuery(page: 3)), 'name').query.page, ${setTableSort({ ...initialTableState(), query: { ...initialTableState().query, page: 3 } }, 'name').query.page});`,
+  `    expect(setPageSize(const ITableState<Map<String, Object?>>(query: ITableQuery(page: 3)), 100).query.page, ${setTablePageSize({ ...initialTableState(), query: { ...initialTableState().query, page: 3 } }, 100).query.page});`,
+  `    expect(clampTablePage(const ITableState<Map<String, Object?>>(query: ITableQuery(page: 5), total: 21)).query.page, ${clampTablePage({ ...initialTableState(), total: 21, query: { ...initialTableState().query, page: 5 } }).query.page});`,
+]
+
+const columnSpecs = [
+  { key: 'id', title: '单号', width: '120px', locked: true },
+  { key: 'customer', title: '客户' },
+  { key: 'cost', title: '成本价', width: '120px', restricted: true },
+  { key: 'amount', title: '金额', width: '140px' },
+]
+const dartColumns = `<IColumnSpec>[${columnSpecs
+  .map((c) => `IColumnSpec(key: '${c.key}', title: '${c.title}'${c.width ? `, width: ${Number.parseFloat(c.width)}` : ''}${c.locked ? ', locked: true' : ''}${c.restricted ? ', restricted: true' : ''})`)
+  .join(', ')}]`
+
+const proColumnExpectations = (() => {
+  const base = defaultColumnState(columnSpecs)
+  const hiddenCost = toggleColumn(base, 'cost', columnSpecs)
+  const lockedTry = toggleColumn(base, 'id', columnSpecs)
+  const moved = moveColumn(base, 3, 0)
+  const withNew = [...columnSpecs, { key: 'tax', title: '税额' }]
+  return [
+    `    final columns = ${dartColumns};`,
+    `    final base = defaultColumnState(columns);`,
+    `    expect(visibleTableColumns(columns, base).length, ${visibleTableColumns(columnSpecs, base).length});`,
+    `    final hiddenCost = toggleColumn(base, 'cost', columns);`,
+    `    expect(visibleTableColumns(columns, hiddenCost).map((c) => c.key).toList(), <String>[${visibleTableColumns(columnSpecs, hiddenCost).map((c) => `'${c.key}'`).join(', ')}]);`,
+    // 藏掉成本列不影响它仍然受权限控制
+    `    expect(restrictedTableColumns(columns), <String>[${restrictedTableColumns(columnSpecs).map((k) => `'${k}'`).join(', ')}]);`,
+    `    final lockedTry = toggleColumn(base, 'id', columns);`,
+    `    expect(visibleTableColumns(columns, lockedTry).map((c) => c.key).toList(), <String>[${visibleTableColumns(columnSpecs, lockedTry).map((c) => `'${c.key}'`).join(', ')}]);`,
+    `    final moved = moveColumn(base, 3, 0);`,
+    `    expect(resolveTableColumns(columns, moved).map((c) => c.key).toList(), <String>[${resolveTableColumns(columnSpecs, moved).map((c) => `'${c.key}'`).join(', ')}]);`,
+    // 保存过设置之后新增的列仍然出现并默认显示
+    `    final withNew = ${`<IColumnSpec>[${[...columnSpecs, { key: 'tax', title: '税额' }].map((c) => `IColumnSpec(key: '${c.key}', title: '${c.title}'${c.width ? `, width: ${Number.parseFloat(c.width)}` : ''}${c.locked ? ', locked: true' : ''}${c.restricted ? ', restricted: true' : ''})`).join(', ')}]`};`,
+    `    expect(resolveTableColumns(withNew, base).map((c) => c.key).toList(), <String>[${resolveTableColumns(withNew, base).map((c) => `'${c.key}'`).join(', ')}]);`,
+    `    expect(resolveTableColumns(withNew, base).last.hidden, ${resolveTableColumns(withNew, base).at(-1).hidden});`,
+  ]
+})()
+
+const uniformSample = Array.from({ length: 100 }, (_, i) => i)
+const skewedSample = [...Array(60).fill(5), 1, 2, 3, 40, 80]
+const smallSample = [2, 4, 4, 4, 5, 5, 7, 9]
+const dartDoubles = (xs) => `<double>[${xs.map((v) => v.toFixed(1)).join(', ')}]`
+
+const statsExpectations = [
+  `    final uniform = ${dartDoubles(uniformSample)};`,
+  `    final skewed = ${dartDoubles(skewedSample)};`,
+  `    final small = ${dartDoubles(smallSample)};`,
+  // 分箱：规则、箱数、箱宽与「每个样本都落进某个箱」
+  ...[['uniform', uniformSample], ['skewed', skewedSample], ['small', smallSample]].flatMap(([name, sample]) => {
+    const h = histogram(sample)
+    return [
+      `    final h_${name} = histogram(${name});`,
+      `    expect(h_${name}.rule, '${h.rule}');`,
+      `    expect(h_${name}.bins.length, ${h.bins.length});`,
+      `    expect(h_${name}.width, closeTo(${h.width}, 1e-9));`,
+      `    expect(h_${name}.bins.fold<int>(0, (s, b) => s + b.count), ${h.bins.reduce((s, b) => s + b.count, 0)});`,
+      `    expect(h_${name}.issues.length, ${h.issues.length});`,
+      ...h.issues.map((issue, i) => `    expect(h_${name}.issues[${i}].kind, '${issue.kind}');`),
+    ]
+  }),
+  // 固定宽度
+  (() => {
+    const h = histogram(uniformSample, { rule: 'fixed', width: 25 })
+    return `    expect(histogram(uniform, rule: 'fixed', width: 25.0).bins.length, ${h.bins.length});`
+  })(),
+  // 带宽：Silverman 的结果必须一模一样，否则两端的曲线胖瘦不同
+  ...[['uniform', uniformSample], ['small', smallSample]].map(([name, sample]) =>
+    `    expect(kde(${name}).bandwidth, closeTo(${kde(sample).bandwidth}, 1e-9));`),
+  `    expect(kde(uniform).points.length, ${kde(uniformSample).points.length});`,
+  `    expect(kde(uniform).points.first.y, closeTo(${kde(uniformSample).points[0].y}, 1e-12));`,
+  `    expect(kde(uniform).points[32].y, closeTo(${kde(uniformSample).points[32].y}, 1e-12));`,
+  // 取值全同：不画假曲线
+  `    expect(kde(<double>[4.0, 4.0, 4.0, 4.0]).points.length, ${kde([4, 4, 4, 4]).points.length});`,
+  `    expect(kde(<double>[4.0, 4.0, 4.0, 4.0]).issues.last.kind, '${kde([4, 4, 4, 4]).issues.at(-1).kind}');`,
+  // 误差棒：三种长度与三句图注
+  ...['sd', 'sem', 'ci95'].flatMap((kind) => {
+    const b = errorBar(smallSample, kind)
+    return [
+      `    expect(errorBar(small, '${kind}').delta, closeTo(${b.delta}, 1e-9));`,
+      `    expect(errorBar(small, '${kind}').low, closeTo(${b.low}, 1e-9));`,
+      `    expect(errorBar(small, '${kind}').caption, '${b.caption}');`,
+    ]
+  }),
+  `    expect(errorBar(<double>[5.0], 'sd').delta, ${errorBar([5], 'sd').delta});`,
+  // 小提琴的峰值：宽度按它归一化，差一点两把琴的胖瘦就不可比
+  `    expect(violinShape(uniform).peak, closeTo(${violinShape(uniformSample).peak}, 1e-12));`,
+  // 相关系数：常量列返回 null 而不是 0
+  `    expect(pearson(<double>[1.0, 2.0, 3.0, 4.0], <double>[2.0, 4.0, 6.0, 8.0]), closeTo(${pearson([1, 2, 3, 4], [2, 4, 6, 8])}, 1e-12));`,
+  `    expect(pearson(<double>[1.0, 1.0, 1.0, 1.0], <double>[1.0, 2.0, 3.0, 4.0]), ${pearson([1, 1, 1, 1], [1, 2, 3, 4])});`,
+  `    expect(pearson(<double>[1.0, 2.0], <double>[2.0, 4.0]), ${pearson([1, 2], [2, 4])});`,
+]
 
 const sankeyCases = [
   { from: 'visit', to: 'leave', value: 600 },
@@ -2647,6 +2797,8 @@ import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/axis.dart';
 import 'package:i_design/src/logic/query.dart';
 import 'package:i_design/src/logic/schemaform.dart';
+import 'package:i_design/src/logic/protable.dart';
+import 'package:i_design/src/logic/stats.dart';
 import 'package:i_design/src/logic/flow.dart';
 import 'package:i_design/src/logic/carousel.dart';
 import 'package:i_design/src/logic/scroll.dart';
@@ -2912,6 +3064,18 @@ ${ratioExpectations.join('\n')}
   test('轴标签抽稀与 Web 端一致', () {
 ${ai_stepExpectations.join('\n')}
 ${showExpectations.join('\n')}
+  });
+
+  test('分布统计的分箱、带宽与误差棒与 Web 端一致', () {
+${statsExpectations.join('\n')}
+  });
+
+  test('ProTable 的过期响应与分页规则与 Web 端一致', () {
+${proTableExpectations.join('\n')}
+  });
+
+  test('ProTable 的列能力与 Web 端一致', () {
+${proColumnExpectations.join('\n')}
   });
 
   test('表单 schema 的显隐、提交值与校验与 Web 端一致', () {

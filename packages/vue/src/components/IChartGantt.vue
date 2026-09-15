@@ -68,7 +68,7 @@ const percent = (v?: number) => `${Math.round((v ?? 0) * 100)}%`
 </script>
 
 <template>
-  <figure class="i-chart i-gantt">
+  <figure class="i-chart i-chart--wide i-gantt">
     <figcaption v-if="title" class="i-chart__title">{{ title }}</figcaption>
 
     <p v-if="cycle.length" class="i-gantt__warn" role="status">

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ITable, { type TableColumn, type TableRow } from '@/components/ITable.vue'
 import IQueryFilter from '@/components/IQueryFilter.vue'
+import IProTable from '@/components/IProTable.vue'
 import ITag from '@/components/ITag.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
@@ -8,6 +9,12 @@ import Playground from '@/site/Playground.vue'
 
 import { computed, ref } from 'vue'
 import {
+  initialTableState,
+  receive,
+  startRequest,
+  type ColumnSpec,
+  type TableQuery,
+  type TableState,
   fromSearch,
   parseQuery,
   serializeQuery,
@@ -102,6 +109,58 @@ function onQueryChange(payload: { state: QueryState; params: Record<string, stri
 
 const queryLink = computed(() => toSearch(queryParams.value) || '（没有条件，链接不带参数）')
 
+/* ---------- ProTable（B04 + B05）---------- */
+const proColumns: ColumnSpec[] = [
+  { key: 'id', title: '编号', width: '110px', locked: true },
+  { key: 'title', title: '标题', sortable: true },
+  { key: 'owner', title: '负责人', width: '110px' },
+  { key: 'points', title: '故事点', width: '100px', sortable: true },
+  { key: 'cost', title: '人力成本', width: '120px', restricted: true },
+  { key: 'status', title: '状态', width: '110px' }
+]
+
+const proRows: Record<string, unknown>[] = bigData.slice(0, 200).map((row) => ({
+  ...row,
+  cost: `¥ ${(Number(row.points) * 1200).toLocaleString('zh-CN')}`
+}))
+
+const proState = ref<TableState<Record<string, unknown>>>(initialTableState())
+
+/*
+ * 演示里的「取数」：越早发出的请求越慢，好让先发的那次后回来——
+ * 过期响应那条规则只有在这种时序下才看得见，而它在真实网络里天天发生。
+ */
+const log = ref<string[]>([])
+
+function fetchPage(query: TableQuery) {
+  const started = startRequest({ ...proState.value, query })
+  proState.value = started.state
+  const seq = started.request.seq
+  // 先发的更慢：第 n 次请求等 500 - 120n 毫秒，于是后点的先回来
+  const delay = Math.max(60, 500 - seq * 120)
+  setTimeout(() => {
+    const sorted = [...proRows].sort((a, b) => {
+      const key = query.sort.key
+      if (!key || !query.sort.order) return 0
+      const factor = query.sort.order === 'asc' ? 1 : -1
+      return String(a[key]).localeCompare(String(b[key]), 'zh-CN', { numeric: true }) * factor
+    })
+    const from = (query.page - 1) * query.pageSize
+    const before = proState.value.settledSeq
+    proState.value = receive(proState.value, {
+      seq,
+      rows: sorted.slice(from, from + query.pageSize),
+      total: sorted.length
+    })
+    log.value = [
+      `#${seq} 回来了${proState.value.settledSeq === before ? '：序号比屏幕上这份旧，已丢弃' : '：已落地'}`,
+      ...log.value
+    ].slice(0, 4)
+  }, delay)
+}
+
+fetchPage(proState.value.query)
+
 /* playground 代码片段里固定属性的写法（模板里写会和属性引号打架） */
 const tablePgCode = [':columns="columns"', ':data="data"']
 </script>
@@ -112,6 +171,32 @@ const tablePgCode = [':columns="columns"', ':data="data"']
     <p class="i-lead">
       展示结构化的行列数据。列宽应按内容语义固定，避免用户在翻页时因列宽跳动而重新定位。
     </p>
+
+    <h2>ProTable</h2>
+    <DemoBlock
+      title="查询层与列能力"
+      description="表格的难点不在渲染，在「我现在看到的这一屏是不是我最后一次请求的结果」。这个演示里第一次请求故意慢 600ms：连点两次排序，先发的那次后回来，它会被丢掉而不是覆盖掉新结果——右边的日志逐条写出来了。列设置里，编号是主键不可隐藏；人力成本标了受权限控制，把它藏起来只影响显示，导出与接口仍按 restricted 校验（真实事故是有人藏了成本列，于是导出时跳过了那一列的权限检查）。固定列总宽超过可视宽度一半时会被拒绝并说清原因：全固定等于没固定。"
+      lang="vue"
+      code='<IProTable :columns="columns" :state="state" @request="fetchPage" />'
+    >
+      <div class="pro-demo">
+        <!-- 可视宽度按演示区给：固定列的上限是「可视宽度的一半」，
+             给 960 的话这个演示里永远碰不到上限，那条规则就等于没演 -->
+        <IProTable
+          :columns="proColumns"
+          :state="proState"
+          :viewport-width="640"
+          @request="fetchPage"
+        >
+          <template #status="{ value }">
+            <ITag :type="statusMap[String(value)].type">{{ statusMap[String(value)].label }}</ITag>
+          </template>
+        </IProTable>
+        <ul class="pro-demo__log">
+          <li v-for="(line, i) in log" :key="i">{{ line }}</li>
+        </ul>
+      </div>
+    </DemoBlock>
 
     <h2>查询筛选</h2>
     <DemoBlock
@@ -229,9 +314,15 @@ const tablePgCode = [':columns="columns"', ':data="data"']
       Web 与小程序端自己算窗口，只渲染看得见的那几行；Flutter 端交给能按需建子项的列表。三端共同的一条：列宽必须算死了同时喂给表头与每一行——让每一行各自去量内容宽度的话，滚起来列会左右跳，表头也对不上。所以 Web 端的滚动容器是表格外层而不是<code>tbody</code>：给 <code>tbody</code> 加 <code>overflow</code> 会让它脱离表格布局，列宽随即变成各行各算各的。
     </p>
 
+    <h2>Table 还是 ProTable</h2>
+    <p>
+      这一页有两个表格，选型只看一件事：<strong>你要不要那套查询状态机</strong>。只展示一批已经在手上的行（详情页里的明细、配置页里的几十条记录），用<code>ITable</code>——它不发请求、不管分页，把数据给它就画出来。需要分页/排序/筛选往返服务端，并且会出现「用户连点两次、响应乱序回来」的场景，才用 <code>IProTable</code>：它多出来的不是样式，是请求序号、过期响应丢弃、列显隐与视图持久化这一整套状态机。两者的单元格插槽与列定义是同一套写法，从前者换到后者不需要重写模板。
+    </p>
+
     <h2>什么时候不该用它</h2>
     <ul>
       <li>每行的字段少、以浏览为主时——用列表或卡片，表格的横向对齐在窄屏上会全军覆没。</li>
+      <li>已经在手上的一批数据不需要服务端查询时——用 <code>ITable</code> 就够，ProTable 的查询层会变成一层空转。</li>
       <li>数据只有几条且无需对比时——直接写成描述列表。</li>
       <li>用户真正要做的是分析时——表格给的是明细，趋势与占比该交给图表。</li>
     </ul>
@@ -271,6 +362,19 @@ const tablePgCode = [':columns="columns"', ':data="data"']
 </template>
 
 <style scoped>
+.pro-demo {
+  display: grid;
+  gap: var(--i-spacing-3);
+  min-width: 0;
+}
+
+.pro-demo__log {
+  margin: 0;
+  padding-left: var(--i-spacing-5);
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+
 .query-demo {
   display: grid;
   gap: var(--i-spacing-3);

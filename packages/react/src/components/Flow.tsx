@@ -121,7 +121,11 @@ export function Flow({
     const rect = root.current?.getBoundingClientRect()
     const bounds = boundsOf(nodes)
     if (!rect || !bounds.width) return
-    const scale = Math.min(2, Math.max(0.4, Math.min(rect.width / bounds.width, height / bounds.height)))
+    /*
+     * 自动适应的缩放下限 0.75（与 Vue 端同一条）：320px 上按整图缩放会缩到 0.5，
+     * 节点标题实际只剩 6–7px。缩到看不清的「全貌」不是全貌，让他拖一下更好。
+     */
+    const scale = Math.min(2, Math.max(0.75, Math.min(rect.width / bounds.width, height / bounds.height)))
     setView({
       scale,
       x: rect.width / 2 - (bounds.x + bounds.width / 2) * scale,
