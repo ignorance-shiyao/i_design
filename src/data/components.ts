@@ -139,6 +139,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'AppShell', cn: '应用骨架', to: '/components/layout', desc: '顶栏、侧栏、面包屑与窄屏抽屉；只摆结构不认识路由' },
       { name: 'QueryFilter', cn: '查询筛选', to: '/components/table', desc: '列表页上方那排条件；条件变了回第一页，参数可往返' },
       { name: 'ProTable', cn: '查询表格', to: '/components/table', desc: 'Table 加查询层与列能力；过期响应会被丢掉' },
+      { name: 'TreeTable', cn: '树表', to: '/components/table', desc: '层级、分组小计；排序与折叠都不丢选择' },
       { name: 'BulkBar', cn: '批量操作条', to: '/components/table', desc: '把「对谁做」说死；部分失败只重试失败项' },
       { name: 'SchemaForm', cn: 'Schema 表单', to: '/components/form', desc: '按数据结构渲染表单；schema 里不执行任何字符串' },
       { name: 'ImportWizard', cn: '导入向导', to: '/components/upload', desc: '列映射、预检不落库、错误清单带原始行号' },

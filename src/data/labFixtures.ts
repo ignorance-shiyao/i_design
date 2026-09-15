@@ -153,6 +153,30 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
       rows: 48_000
     }
   },
+  /* 树表在 Lab 里要有层级、有小计、有一条不可选的行，否则看不出它与 Table 的差别 */
+  ITreeTable: {
+    columns: [
+      { key: 'name', title: '客户 / 大区', sortable: true },
+      { key: 'amount', title: '金额', numeric: true, sortable: true }
+    ],
+    data: [
+      {
+        key: 'east',
+        name: '华东大区',
+        amount: 3000,
+        children: [
+          { key: 'east-1', name: '明远制造', amount: 1200 },
+          { key: 'east-2', name: '合力重工', amount: 2600 },
+          { key: 'east-3', name: '安泰化工', selectableReason: '没有查看权限' }
+        ]
+      }
+    ],
+    expanded: ['east'],
+    selected: ['east-1'],
+    aggregates: [{ field: 'amount', kind: 'sum' }],
+    selectable: true,
+    showTotal: true
+  },
   IEntityPicker: {
     page: [
       { id: 'p1', label: '张三', hint: '销售一部' },

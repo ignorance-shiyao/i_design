@@ -164,6 +164,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ITransfer.vue",
   "src/components/ITree.vue",
   "src/components/ITreeSelect.vue",
+  "src/components/ITreeTable.vue",
   "src/components/ITypography.vue",
   "src/components/IUpload.vue",
   "src/components/IVirtualList.vue",

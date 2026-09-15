@@ -124,6 +124,60 @@ List<IFlatRow> flattenRows(List<ITreeRow> rows, Set<String> expandedKeys) {
   return out;
 }
 
+/// 渲染序列里的一项：一行数据，或者一个分组的小计
+class IRenderRow {
+  const IRenderRow.row(this.row)
+      : kind = IRenderKind.row,
+        group = null,
+        level = 0;
+  const IRenderRow.summary(ITreeRow this.group, this.level)
+      : kind = IRenderKind.summary,
+        row = null;
+
+  final IRenderKind kind;
+  final IFlatRow? row;
+  final ITreeRow? group;
+  final int level;
+
+  String get groupKey => group?.key ?? '';
+}
+
+enum IRenderKind { row, summary }
+
+/// 连小计一起排好的渲染序列。
+///
+/// 小计跟在**这个分组最后一条子行之后**，不是紧跟在标题下面——
+/// 摆在标题下面的话它读起来像这一行自己的数字，而它是底下那几行的和。
+/// 收起的分组不出小计：那一行自己就代表它。
+List<IRenderRow> renderRows(
+  List<ITreeRow> rows,
+  Set<String> expandedKeys, {
+  bool withSummary = true,
+}) {
+  final out = <IRenderRow>[];
+  void walk(List<ITreeRow> list, int level, String? parentKey) {
+    for (final row in list) {
+      final hasChildren = row.children.isNotEmpty;
+      final isExpanded = expandedKeys.contains(row.key);
+      out.add(IRenderRow.row(IFlatRow(
+        key: row.key,
+        row: row,
+        level: level,
+        parentKey: parentKey,
+        hasChildren: hasChildren,
+        expanded: isExpanded,
+      )));
+      if (hasChildren && isExpanded) {
+        walk(row.children, level + 1, row.key);
+        if (withSummary) out.add(IRenderRow.summary(row, level));
+      }
+    }
+  }
+
+  walk(rows, 0, null);
+  return out;
+}
+
 /// 整棵树上的全部行，不管展开与否
 List<ITreeRow> allRows(List<ITreeRow> rows) {
   final out = <ITreeRow>[];

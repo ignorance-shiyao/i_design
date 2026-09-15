@@ -213,6 +213,7 @@ export 'src/components/i_tour.dart';
 export 'src/components/i_transfer.dart';
 export 'src/components/i_tree.dart';
 export 'src/components/i_tree_select.dart';
+export 'src/components/i_tree_table.dart';
 export 'src/components/i_typography.dart';
 export 'src/components/i_upload.dart';
 export 'src/components/i_virtual_list.dart';

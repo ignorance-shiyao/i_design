@@ -79,6 +79,46 @@ export function flattenRows(rows: readonly TreeRow[], expandedKeys: Iterable<str
   return out
 }
 
+export type RenderRow =
+  | { kind: 'row'; row: FlatRow }
+  /** 一个分组的小计，摆在它最后一条子行之后 */
+  | { kind: 'summary'; groupKey: string; group: TreeRow; level: number }
+
+/**
+ * 连小计一起排好的渲染序列。
+ *
+ * 小计跟在**这个分组最后一条子行之后**，不是紧跟在分组标题下面——
+ * 摆在标题下面的话，它读起来像这一行自己的数字，而它是底下那几行的和；
+ * 嵌套分组里更糟：两层小计会连着出现在两行标题之间，谁也分不清哪个是哪个的。
+ *
+ * 收起的分组不出小计：那一行自己就代表它，再挂一行「小计」是同一个数说两遍。
+ */
+export function renderRows(
+  rows: readonly TreeRow[],
+  expandedKeys: Iterable<string>,
+  /** 不给汇总规格时只是 flattenRows 的等价物 */
+  withSummary = true
+): RenderRow[] {
+  const expanded = new Set(expandedKeys)
+  const out: RenderRow[] = []
+  const walk = (list: readonly TreeRow[], level: number, parentKey?: string) => {
+    for (const row of list) {
+      const hasChildren = !!row.children?.length
+      const isExpanded = expanded.has(row.key)
+      out.push({
+        kind: 'row',
+        row: { key: row.key, row, level, parentKey, hasChildren, expanded: isExpanded }
+      })
+      if (hasChildren && isExpanded) {
+        walk(row.children!, level + 1, row.key)
+        if (withSummary) out.push({ kind: 'summary', groupKey: row.key, group: row, level })
+      }
+    }
+  }
+  walk(rows, 0)
+  return out
+}
+
 /** 整棵树上的全部行，不管展开与否。汇总、全选与「藏起来几项」都靠它 */
 export function allRows(rows: readonly TreeRow[]): TreeRow[] {
   const out: TreeRow[] = []

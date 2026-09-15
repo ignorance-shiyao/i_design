@@ -2613,6 +2613,12 @@ void main() {
     expect(flat2.map((r) => r.key).toList(), ["g1","a","b","g2","c","d"]);
     expect(flat2.map((r) => r.level).toList(), [0,1,1,0,1,1]);
     expect(flat2.map((r) => r.hasChildren).toList(), [true,false,false,true,false,false]);
+    final seq0 = renderRows(rows, {"g1", "g2"}).map((e) => e.kind == IRenderKind.row ? e.row!.key : '小计:${e.groupKey}').toList();
+    expect(seq0, ["g1","a","b","小计:g1","g2","c","d","小计:g2"]);
+    final seq1 = renderRows(rows, {"g1"}).map((e) => e.kind == IRenderKind.row ? e.row!.key : '小计:${e.groupKey}').toList();
+    expect(seq1, ["g1","a","b","小计:g1","g2"]);
+    final seq2 = renderRows(rows, <String>{}).map((e) => e.kind == IRenderKind.row ? e.row!.key : '小计:${e.groupKey}').toList();
+    expect(seq2, ["g1","g2"]);
     expect(allRows(rows).length, 6);
     expect(leafRows(rows).map((r) => r.key).toList(), ["a","b","c","d"]);
     expect(expandAll(rows), {"g1", "g2"});

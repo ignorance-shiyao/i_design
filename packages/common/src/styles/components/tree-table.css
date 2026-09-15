@@ -1,0 +1,81 @@
+/*
+ * ITreeTable —— 带层级与分组汇总的表格。
+ *
+ * 层级只用**缩进 + 一个展开箭头**表示，不用加粗的边线、不用整行换底色去标
+ * 「这是父行」：那既是 CLAUDE.md 禁的边线状态，也让真正需要着色的选中行没了对比。
+ *
+ * 选择摘要那一行永远在表头下面。「其中 N 项在收起的分组里」不是补充说明，
+ * 是用户敢按下删除的前提。
+ */
+.i-tree-table { width: 100%; }
+
+.i-tree-table__summary-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  margin-bottom: var(--i-spacing-2);
+  background: var(--i-color-bg-subtle);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+/* 有行藏在收起的分组里时，用图标 + 淡底色块点出来，不靠颜色单独表意 */
+.i-tree-table__hidden {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  padding: 0 var(--i-spacing-2);
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-warning-text);
+  background: var(--i-color-warning-subtle);
+}
+
+/* 展开箭头。按钮本身要够大，手指点得到 */
+.i-tree-table__toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  color: var(--i-color-text-tertiary);
+  cursor: pointer;
+  transition: transform var(--i-motion-fast) var(--i-motion-easing);
+}
+.i-tree-table__toggle:hover { background: var(--i-color-bg-subtle); color: var(--i-color-text); }
+.i-tree-table__toggle.is-open { transform: rotate(90deg); }
+/* 没有子行的那一格留出同样的宽度，否则叶子行的文字比父行左移一截 */
+.i-tree-table__toggle-placeholder { display: inline-block; width: 24px; }
+
+.i-tree-table__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+}
+
+/* 汇总行：整行淡底 + 一个「小计」标签，不靠加粗边线 */
+.i-tree-table__row--summary > td {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text);
+}
+.i-tree-table__row--total > td {
+  background: var(--i-color-bg-muted);
+  color: var(--i-color-text);
+  font-weight: 600;
+}
+/* 数字列用等宽数字：一列数字不对齐，扫一眼看不出哪个更大 */
+.i-tree-table__num { font-variant-numeric: tabular-nums; }
+
+/* 不可选的行：复选框禁用，理由写在旁边——只禁用不说理由，用户只会反复点 */
+.i-tree-table__blocked {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .i-tree-table__toggle { transition: none; }
+}

@@ -8,6 +8,7 @@ import {
   groupSummary,
   leafRows,
   pruneSelection,
+  renderRows,
   rowSelectable,
   selectAllState,
   selectionSummary,
@@ -173,5 +174,27 @@ describe('汇总', () => {
   it('汇总行明写算了几条明细', () => {
     expect(summaryLabel(groupSummary(rows[0], []))).toBe('小计（2 条明细）')
     expect(summaryLabel(grandTotal(rows, []), '合计')).toBe('合计（4 条明细）')
+  })
+})
+
+describe('小计摆在哪儿', () => {
+  it('跟在这个分组最后一条子行之后，不是紧跟在标题下面', () => {
+    const seq = renderRows(rows, ['g1', 'g2']).map((entry) =>
+      entry.kind === 'row' ? entry.row.key : `小计:${entry.groupKey}`
+    )
+    expect(seq).toEqual(['g1', 'a', 'b', '小计:g1', 'g2', 'c', 'd', '小计:g2'])
+  })
+
+  it('收起的分组不出小计：那一行自己就代表它', () => {
+    const seq = renderRows(rows, ['g1']).map((entry) =>
+      entry.kind === 'row' ? entry.row.key : `小计:${entry.groupKey}`
+    )
+    expect(seq).toEqual(['g1', 'a', 'b', '小计:g1', 'g2'])
+  })
+
+  it('不要小计时与 flattenRows 等价', () => {
+    expect(renderRows(rows, ['g1'], false).map((e) => (e.kind === 'row' ? e.row.key : ''))).toEqual(
+      flattenRows(rows, ['g1']).map((r) => r.key)
+    )
   })
 })

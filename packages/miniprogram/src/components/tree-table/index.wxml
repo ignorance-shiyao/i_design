@@ -1,0 +1,66 @@
+<view class="i-tree-table">
+  <!-- 「其中 N 项在收起的分组里」是用户敢按下一步的前提，跟着选择一起出现 -->
+  <view wx:if="{{selectable}}" class="i-tree-table__summary-bar">
+    <text>{{summaryText}}</text>
+    <view wx:if="{{hiddenCount > 0}}" class="i-tree-table__hidden">
+      <i-icon name="eye-off" size="12" />
+      <text>{{hiddenCount}} 项已折叠</text>
+    </view>
+  </view>
+
+  <view class="i-table-c i-table-c--sm">
+    <view class="i-table-c__head">
+      <view wx:if="{{selectable}}" class="i-table-c__check-cell">
+        <checkbox class="i-table-c__check" checked="{{allChecked}}" bindtap="onToggleAll" />
+      </view>
+      <view wx:for="{{columns}}" wx:key="key" class="i-table-c__cell i-table-c__th">{{item.title}}</view>
+    </view>
+
+    <view
+      wx:for="{{rows}}"
+      wx:key="key"
+      class="i-table-c__row {{item.summary ? 'i-tree-table__row--summary' : ''}} {{item.checked ? 'is-selected' : ''}}"
+    >
+      <view wx:if="{{selectable}}" class="i-table-c__check-cell">
+        <checkbox
+          wx:if="{{!item.summary}}"
+          class="i-table-c__check"
+          checked="{{item.checked}}"
+          disabled="{{!item.selectable}}"
+          data-key="{{item.key}}"
+          bindtap="onToggleRow"
+        />
+      </view>
+
+      <view wx:for="{{item.cells}}" wx:for-item="cell" wx:key="key"
+            class="i-table-c__cell {{cell.numeric ? 'i-tree-table__num' : ''}}">
+        <!-- 第一列带缩进与箭头：层级只靠这两样表示 -->
+        <view wx:if="{{index === 0}}" class="i-tree-table__label" style="padding-left:{{item.indent}}rpx">
+          <view
+            wx:if="{{item.hasChildren}}"
+            class="i-tree-table__toggle {{item.expanded ? 'is-open' : ''}}"
+            data-key="{{item.key}}"
+            bindtap="onToggleExpand"
+          >
+            <i-icon name="chevron-right" size="14" />
+          </view>
+          <view wx:elif="{{!item.summary}}" class="i-tree-table__toggle-placeholder" />
+          <text>{{item.summary ? item.label : cell.text}}</text>
+          <!-- 不可选的行把理由写在旁边：只禁用不说理由，用户只会反复点 -->
+          <text wx:if="{{item.blockedReason}}" class="i-tree-table__blocked">{{item.blockedReason}}</text>
+        </view>
+        <text wx:else>{{cell.text}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{total}}" class="i-table-c__row i-tree-table__row--total">
+      <view wx:if="{{selectable}}" class="i-table-c__check-cell" />
+      <view wx:for="{{total.cells}}" wx:for-item="cell" wx:key="key"
+            class="i-table-c__cell {{cell.numeric ? 'i-tree-table__num' : ''}}">
+        <text>{{index === 0 ? total.label : cell.text}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{!rows.length}}" class="i-table-c__state">没有数据</view>
+  </view>
+</view>

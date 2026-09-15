@@ -3,6 +3,7 @@ import ITable, { type TableColumn, type TableRow } from '@/components/ITable.vue
 import IQueryFilter from '@/components/IQueryFilter.vue'
 import IProTable from '@/components/IProTable.vue'
 import IBulkBar from '@/components/IBulkBar.vue'
+import ITreeTable, { type TreeTableColumn } from '@/components/ITreeTable.vue'
 import ITag from '@/components/ITag.vue'
 import IButton from '@/components/IButton.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
@@ -27,8 +28,58 @@ import {
   mergeOutcome,
   type BulkId,
   type BulkOutcome,
-  type BulkScope
+  type BulkScope,
+  type AggregateSpec,
+  type SortOrder,
+  type TreeRow
 } from '@i-design/common'
+
+/*
+ * 树表的演示数据：两个大区、各带几家客户。
+ *
+ * 金额故意让「子行比父行大」（华北的远大科技 5200 比华北那行的 3000 大），
+ * 好让「排序只在兄弟之间排」这件事看得出来——真打平了排，远大科技会跑到
+ * 华东下面去。再放一条没有查看权限的客户：它进不了全选，也勾不动。
+ */
+const treeData: TreeRow[] = [
+  {
+    key: 'east',
+    name: '华东大区',
+    owner: '林岚',
+    amount: 3000,
+    children: [
+      { key: 'east-1', name: '明远制造', owner: '林岚', amount: 1200 },
+      { key: 'east-2', name: '合力重工', owner: '沈黎', amount: 2600 },
+      { key: 'east-3', name: '中辰物流', owner: '周其', amount: 800 }
+    ]
+  },
+  {
+    key: 'north',
+    name: '华北大区',
+    owner: '安阳',
+    amount: 4000,
+    children: [
+      { key: 'north-1', name: '远大科技', owner: '安阳', amount: 5200 },
+      { key: 'north-2', name: '瑞鑫能源', owner: '陆停云', amount: 1400 },
+      {
+        key: 'north-3',
+        name: '安泰化工',
+        owner: '—',
+        selectableReason: '没有该客户的查看权限'
+      }
+    ]
+  }
+]
+const treeColumns: TreeTableColumn[] = [
+  { key: 'name', title: '客户 / 大区', width: '40%', sortable: true },
+  { key: 'owner', title: '负责人' },
+  { key: 'amount', title: '本季金额（万元）', numeric: true, sortable: true }
+]
+const treeAggregates: AggregateSpec[] = [{ field: 'amount', kind: 'sum' }]
+const treeExpanded = ref<string[]>(['east', 'north'])
+const treeSelected = ref<string[]>([])
+const treeSortKey = ref<string | null>(null)
+const treeSortOrder = ref<SortOrder>(null)
 
 const picked = ref<(string | number)[]>([])
 const bigPicked = ref<(string | number)[]>([])
@@ -245,6 +296,46 @@ const tablePgCode = [':columns="columns"', ':data="data"']
           <li v-for="(line, i) in log" :key="i">{{ line }}</li>
         </ul>
       </div>
+    </DemoBlock>
+
+    <h2>树表与分组汇总</h2>
+    <p>
+      表格一旦有了层级，三件事最容易做错，而且都不会报错，只会让用户在某个时刻发现「数字不对」或者「我刚才勾的那些没了」。
+    </p>
+    <p>
+      <strong>排序只在兄弟之间排。</strong>拿拍平后的行去排，子行会跑到别人家下面去——层级是数据的一部分，排序改变的是同一个父节点下的先后，不是归属。<strong>折叠不丢选择，但要把「有几项在收起的分组里」数出来。</strong>收起分组后悄悄清掉选择，是「我明明勾了」的来源；留着却不说，用户按下删除时会删掉他看不见的那几行。<strong>汇总按全部叶子行算。</strong>一个合计数字在折叠之后变小，用户会当成数据错了——他不会想到那是「只算了看得见的行」。
+    </p>
+    <p>
+      还有一条：树表不是树形选择器。这里的父行是一条真实记录（一张主订单、一个大区），勾它不等于勾它下面每一条；父子联动搬过来，用户勾一个大区就会连带提交它下面所有客户。
+    </p>
+    <DemoBlock
+      title="排序、折叠与小计"
+      description="按金额倒序排一下：华北排到前面，但远大科技的 5200 还在华北下面，没有跑到华东去。勾上几行再收起那个分组——选择还在，摘要那行会写出「其中 N 项在收起的分组里」，表头的复选框也不会因为折叠就从「全选」退回「半选」。小计与合计按全部叶子行算，收起再展开都是同一个数。「安泰化工」没有查看权限：它勾不动，理由写在名字旁边。"
+      lang="vue"
+      code='<ITreeTable
+  v-model:expanded="expanded"
+  v-model:selected="selected"
+  v-model:sort-key="sortKey"
+  v-model:sort-order="sortOrder"
+  :columns="columns"
+  :data="data"
+  :aggregates="aggregates"
+  selectable
+  show-total
+/>'
+    >
+      <ITreeTable
+        v-model:expanded="treeExpanded"
+        v-model:selected="treeSelected"
+        v-model:sort-key="treeSortKey"
+        v-model:sort-order="treeSortOrder"
+        :columns="treeColumns"
+        :data="treeData"
+        :aggregates="treeAggregates"
+        selectable
+        show-total
+        size="sm"
+      />
     </DemoBlock>
 
     <h2>批量操作</h2>

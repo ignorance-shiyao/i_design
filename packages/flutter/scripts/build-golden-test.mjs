@@ -25,7 +25,7 @@ const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
 const {
   sortTree, flattenRows, allRows, leafRows, toggleExpanded, expandAll,
-  selectionSummary, selectAllState, toggleSelectAll, toggleRow, pruneSelection,
+  selectionSummary, selectAllState, toggleSelectAll, toggleRow, pruneSelection, renderRows,
   rowSelectable, aggregateField, groupSummary, grandTotal, summaryLabel
 } = await bundle('packages/common/src/logic/treetable.ts', 'treetable')
 const { buildCalendar, weekdayLabels, toISO: dateToISO } = await bundle(
@@ -2261,6 +2261,18 @@ const treeExpectations = [
       `    expect(${v}.map((r) => r.level).toList(), ${JSON.stringify(flat.map((r) => r.level))});`,
       `    expect(${v}.map((r) => r.hasChildren).toList(), ` +
         `${JSON.stringify(flat.map((r) => r.hasChildren))});`
+    ]
+  }),
+  // 小计跟在分组最后一条子行之后，收起的分组不出小计
+  ...[['g1', 'g2'], ['g1'], []].flatMap((expanded, i) => {
+    const seq = renderRows(TREE_ROWS, expanded).map((entry) =>
+      entry.kind === 'row' ? entry.row.key : `小计:${entry.groupKey}`
+    )
+    const v = `seq${i}`
+    return [
+      `    final ${v} = renderRows(rows, ${treeSet(expanded)}).map(` +
+        `(e) => e.kind == IRenderKind.row ? e.row!.key : '小计:\${e.groupKey}').toList();`,
+      `    expect(${v}, ${JSON.stringify(seq)});`
     ]
   }),
   `    expect(allRows(rows).length, ${allRows(TREE_ROWS).length});`,

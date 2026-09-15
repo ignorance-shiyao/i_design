@@ -4599,7 +4599,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/table",
       "page": "src/pages/components/TablePage.vue",
-      "demos": 8
+      "demos": 9
     },
     "demoRoutes": [
       "/components/collapse",
@@ -5059,6 +5059,41 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/tree"
     ],
     "states": {}
+  },
+  {
+    "name": "ITreeTable",
+    "sources": {
+      "vue-next": "src/components/ITreeTable.vue",
+      "vue": "packages/vue/src/components/ITreeTable.vue",
+      "react": "packages/react/src/components/TreeTable.tsx",
+      "miniprogram": "packages/miniprogram/src/components/tree-table",
+      "flutter": "packages/flutter/lib/src/components/i_tree_table.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/table"
+    ],
+    "states": {
+      "size": [
+        "sm",
+        "md"
+      ]
+    }
   },
   {
     "name": "ITypography",
