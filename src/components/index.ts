@@ -36,6 +36,8 @@ import IChatMessage from './IChatMessage.vue'
 import IChatTyping from './IChatTyping.vue'
 import IRunStatus from './IRunStatus.vue'
 import IFormPage from './IFormPage.vue'
+import IDrawerForm from './IDrawerForm.vue'
+import IModalForm from './IModalForm.vue'
 import IChatThinking from './IChatThinking.vue'
 import IChatToolCall from './IChatToolCall.vue'
 import IChatSources from './IChatSources.vue'
@@ -241,6 +243,8 @@ export {
   IChatTyping,
   IRunStatus,
   IFormPage,
+  IDrawerForm,
+  IModalForm,
   IChatThinking,
   IChatToolCall,
   IChatSources,
@@ -363,6 +367,8 @@ const components = {
   IChatTyping,
   IRunStatus,
   IFormPage,
+  IDrawerForm,
+  IModalForm,
   IChatThinking,
   IChatToolCall,
   IChatSources,

@@ -10,17 +10,17 @@
   <view class="i-form-page__body"><slot /></view>
 
   <!-- 离开确认就地展开：用户点的是底部的「取消」，答案就该出现在他手指所在的地方 -->
-  <view wx:if="{{asking}}" class="i-form-page__confirm">
-    <view class="i-form-page__confirm-icon"><i-icon name="warning-triangle" size="14" /></view>
-    <view class="i-form-page__confirm-text">{{guardMessage}}</view>
+  <view wx:if="{{asking && guardBlocked}}" class="i-form-confirm">
+    <view class="i-form-confirm__icon"><i-icon name="warning-triangle" size="14" /></view>
+    <view class="i-form-confirm__text">{{guardMessage}}</view>
     <i-button size="sm" bind:tap="onKeepEditing">继续编辑</i-button>
     <i-button size="sm" variant="danger" bind:tap="onLeave">放弃修改并离开</i-button>
   </view>
 
-  <view class="i-form-page__foot">
+  <view class="i-form-page__foot i-form-bar">
     <!-- 只把按钮置灰而不说原因，用户只会反复点它 -->
-    <view class="i-form-page__status {{blocked ? 'is-blocked' : ''}}">{{status}}</view>
-    <view class="i-form-page__actions">
+    <view class="i-form-bar__status {{blocked ? 'is-blocked' : ''}}">{{status}}</view>
+    <view class="i-form-bar__actions">
       <i-button size="sm" bind:tap="onCancel">{{cancelText}}</i-button>
       <i-button wx:if="{{resettable}}" size="sm" disabled="{{busy}}" bind:tap="onReset">{{resetText}}</i-button>
       <i-button size="sm" variant="primary" loading="{{busy}}" disabled="{{!allowed}}" bind:tap="onSubmit">{{submitText}}</i-button>

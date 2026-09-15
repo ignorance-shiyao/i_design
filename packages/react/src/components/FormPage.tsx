@@ -110,11 +110,11 @@ export function FormPage({
         离开确认就地展开：用户点的是底部的「取消」，答案就该出现在他手指所在的地方。
       */}
       {confirming && (
-        <div className="i-form-page__confirm" role="alertdialog" aria-label={guard.message}>
-          <span className="i-form-page__confirm-icon">
+        <div className="i-form-confirm" role="alertdialog" aria-label={guard.message}>
+          <span className="i-form-confirm__icon">
             <Icon name="warning-triangle" size={14} />
           </span>
-          <span className="i-form-page__confirm-text">{guard.message}</span>
+          <span className="i-form-confirm__text">{guard.message}</span>
           <Button size="sm" onClick={() => setAsking(false)}>
             继续编辑
           </Button>
@@ -124,10 +124,10 @@ export function FormPage({
         </div>
       )}
 
-      <footer className="i-form-page__foot">
+      <footer className="i-form-page__foot i-form-bar">
         {/* 只把按钮置灰而不说原因，用户只会反复点它 */}
-        <p className={`i-form-page__status${gate.reason ? ' is-blocked' : ''}`}>{status}</p>
-        <div className="i-form-page__actions">
+        <p className={`i-form-bar__status${gate.reason ? ' is-blocked' : ''}`}>{status}</p>
+        <div className="i-form-bar__actions">
           <Button size="sm" onClick={() => (guard.blocked ? setAsking(true) : onCancel?.())}>
             {cancelText}
           </Button>

@@ -125,6 +125,9 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
   IChatToolCall: { name: 'search_suppliers' },
   /* status 的类型是从 contracts 引来的别名，属性解析器看不到它的字面量，得在这儿给 */
   IRunStatus: { status: 'queued', queuePosition: 3 },
+  /* 浮层类组件在 Lab 里默认不展开（见 LabPage 的 INTERACTIVE），必填属性仍要齐 */
+  IDrawerForm: { values: {}, initial: {} },
+  IModalForm: { values: {}, initial: {} },
   IFormPage: {
     title: '编辑采购单',
     modelValue: { title: '春季补货' },

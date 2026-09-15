@@ -12,6 +12,8 @@ import ISwitch from '@/components/ISwitch.vue'
 import IButton from '@/components/IButton.vue'
 import ISchemaForm from '@/components/ISchemaForm.vue'
 import IFormPage from '@/components/IFormPage.vue'
+import IDrawerForm from '@/components/IDrawerForm.vue'
+import IModalForm from '@/components/IModalForm.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import type { FormSchema, SubmitPhase } from '@i-design/common'
 import { message } from '@/components/message'
@@ -43,6 +45,15 @@ function hostSubmit() {
     )
   }, 1200)
 }
+
+/*
+ * 浮层表单壳的演示状态。两个壳共用同一份判断，所以这里也共用同一组字段——
+ * 要看的是「关闭这个动作本身会不会被拦住」，抽屉与弹窗在这件事上没有区别。
+ */
+const overlayValues = ref<Record<string, unknown>>({ title: '春季补货' })
+const overlayInitial = { title: '春季补货' }
+const drawerOpen = ref(false)
+const modalOpen = ref(false)
 
 const model = reactive({
   title: '',
@@ -334,6 +345,66 @@ const rules = {
           </IFormItem>
         </div>
       </IFormPage>
+    </DemoBlock>
+
+    <h2>放进抽屉与弹窗</h2>
+    <p>
+      同一套判断换个容器。浮层多出来的那件事是：<strong>关闭这个动作本身也要过离开保护</strong>。点遮罩、按 Esc、点右上角的叉，在改了一半的表单上都等于「放弃刚才填的东西」，而这三条路默认是直接把浮层关掉的——用户按 Esc 只是想收起键盘，二十个字段就没了。所以这两个壳不把容器的关闭直接放过去：先问一句，问完才关。
+    </p>
+    <p>
+      确认就地展开在「取消」上方，而不是再叠一层对话框：两层浮层谁先关、焦点回到哪儿，这些问题没人答得上来。抽屉与弹窗的分工是内容量——字段多、需要一边看列表一边填的用抽屉；三五个字段、填完就走的用弹窗。
+    </p>
+    <DemoBlock
+      title="关闭动作也要过离开保护"
+      description="先改一个字段，再去点遮罩、按 Esc 或点右上角的叉——都不会直接关掉，而是就地问一句。没改过则三条路都直接关，不拦。"
+      lang="vue"
+      code='<IDrawerForm v-model="open" :values="values" :initial="initial" title="编辑采购单" @submit="submit" />
+<IModalForm v-model="open" :values="values" :initial="initial" title="编辑采购单" @submit="submit" />'
+    >
+      <div class="row">
+        <IButton @click="drawerOpen = true">在抽屉里打开</IButton>
+        <IButton @click="modalOpen = true">在弹窗里打开</IButton>
+      </div>
+
+      <IDrawerForm
+        v-model="drawerOpen"
+        :values="overlayValues"
+        :initial="overlayInitial"
+        title="编辑采购单"
+        @update:values="(v: Record<string, unknown>) => (overlayValues = v)"
+        @submit="() => { drawerOpen = false; message.success('已提交') }"
+        @cancel="() => message.info('已离开，修改未保存')"
+      >
+        <IFormItem label="单据标题">
+          <template #default="{ id }">
+            <IInput
+              :id="id"
+              :model-value="String(overlayValues.title ?? '')"
+              @update:model-value="(v: string) => (overlayValues = { ...overlayValues, title: v })"
+            />
+          </template>
+        </IFormItem>
+      </IDrawerForm>
+
+      <IModalForm
+        v-model="modalOpen"
+        :values="overlayValues"
+        :initial="overlayInitial"
+        title="编辑采购单"
+        @update:values="(v: Record<string, unknown>) => (overlayValues = v)"
+        @submit="() => { modalOpen = false; message.success('已提交') }"
+        @cancel="() => message.info('已离开，修改未保存')"
+      >
+        <IFormItem label="单据标题">
+          <template #default="{ id }">
+            <IInput
+              :id="id"
+              :model-value="String(overlayValues.title ?? '')"
+              @update:model-value="(v: string) => (overlayValues = { ...overlayValues, title: v })"
+            />
+          </template>
+        </IFormItem>
+      </IModalForm>
     </DemoBlock>
 
     <h2>校验时机</h2>

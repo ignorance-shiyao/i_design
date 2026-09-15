@@ -599,6 +599,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IDrawerForm",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IDropdown",
     "ends": {
       "vue-next": true,
@@ -850,6 +860,16 @@ export const componentMatrix: ComponentRow[] = [
   },
   {
     "name": "IModal",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
+    "name": "IModalForm",
     "ends": {
       "vue-next": true,
       "vue": true,

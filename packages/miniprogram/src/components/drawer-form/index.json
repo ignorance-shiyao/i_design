@@ -1,0 +1,9 @@
+{
+  "component": true,
+  "styleIsolation": "apply-shared",
+  "usingComponents": {
+    "i-button": "../button/index",
+    "i-drawer": "../drawer/index",
+    "i-icon": "../icon/index"
+  }
+}

@@ -1,0 +1,23 @@
+<i-drawer visible="{{visible}}" title="{{title}}" placement="{{placement}}" size="{{size}}" hasFooter="{{true}}" bind:close="onRequestClose">
+  <view class="i-form-overlay__body"><slot /></view>
+
+  <view slot="footer" class="i-form-overlay__foot">
+    <!-- 确认就地展开在按钮上方，而不是再叠一层浮层 -->
+    <view wx:if="{{asking && guardBlocked}}" class="i-form-confirm">
+      <view class="i-form-confirm__icon"><i-icon name="warning-triangle" size="14" /></view>
+      <view class="i-form-confirm__text">{{guardMessage}}</view>
+      <i-button size="sm" bind:tap="onKeepEditing">继续编辑</i-button>
+      <i-button size="sm" variant="danger" bind:tap="onLeave">放弃修改并离开</i-button>
+    </view>
+
+    <view class="i-form-bar">
+      <!-- 只把按钮置灰而不说原因，用户只会反复点它 -->
+      <view class="i-form-bar__status {{blocked ? 'is-blocked' : ''}}">{{status}}</view>
+      <view class="i-form-bar__actions">
+        <i-button size="sm" bind:tap="onRequestClose">{{cancelText}}</i-button>
+        <i-button wx:if="{{resettable}}" size="sm" disabled="{{busy}}" bind:tap="onReset">{{resetText}}</i-button>
+        <i-button size="sm" variant="primary" loading="{{busy}}" disabled="{{!allowed}}" bind:tap="onSubmit">{{submitText}}</i-button>
+      </view>
+    </view>
+  </view>
+</i-drawer>

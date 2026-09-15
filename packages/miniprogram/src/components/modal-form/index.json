@@ -1,0 +1,9 @@
+{
+  "component": true,
+  "styleIsolation": "apply-shared",
+  "usingComponents": {
+    "i-button": "../button/index",
+    "i-icon": "../icon/index",
+    "i-modal": "../modal/index"
+  }
+}

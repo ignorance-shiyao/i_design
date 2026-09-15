@@ -2071,6 +2071,41 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     }
   },
   {
+    "name": "IDrawerForm",
+    "sources": {
+      "vue-next": "src/components/IDrawerForm.vue",
+      "vue": "packages/vue/src/components/IDrawerForm.vue",
+      "react": "packages/react/src/components/DrawerForm.tsx",
+      "miniprogram": "packages/miniprogram/src/components/drawer-form",
+      "flutter": "packages/flutter/lib/src/components/i_form_overlay.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/form"
+    ],
+    "states": {
+      "placement": [
+        "right",
+        "left"
+      ]
+    }
+  },
+  {
     "name": "IDropdown",
     "sources": {
       "vue-next": "src/components/IDropdown.vue",
@@ -2277,7 +2312,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/form",
       "page": "src/pages/components/FormPage.vue",
-      "demos": 3
+      "demos": 4
     },
     "demoRoutes": [
       "/components/form"
@@ -2994,6 +3029,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     },
     "demoRoutes": [
       "/components/modal"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IModalForm",
+    "sources": {
+      "vue-next": "src/components/IModalForm.vue",
+      "vue": "packages/vue/src/components/IModalForm.vue",
+      "react": "packages/react/src/components/ModalForm.tsx",
+      "miniprogram": "packages/miniprogram/src/components/modal-form",
+      "flutter": "packages/flutter/lib/src/components/i_form_overlay.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/form"
     ],
     "states": {}
   },

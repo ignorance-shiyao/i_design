@@ -35,6 +35,8 @@ const HOSTS = ['IMessageList', 'IConfirmLayer', 'INotificationLayer']
  */
 const INTERACTIVE: Record<string, string> = {
   IModal: '要点开才出现，且会接管整页',
+  IModalForm: '要点开才出现，且会接管整页',
+  IDrawerForm: '要点开才出现，且会接管整页',
   IDrawer: '要点开才出现，且会接管整页',
   IImageViewer: '要点开才出现，且会接管整页',
   ITour: '要开始引导才出现，会高亮整页元素',

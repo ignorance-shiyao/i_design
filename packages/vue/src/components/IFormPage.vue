@@ -137,19 +137,19 @@ function reset() {
       离开确认就地展开：用户点的是底部的「取消」，答案就该出现在他手指所在的地方。
       role="alertdialog" 让读屏知道这里在等一个答复，而不是一条读完就过的提示。
     -->
-    <div v-if="confirming" class="i-form-page__confirm" role="alertdialog" :aria-label="guard.message">
-      <span class="i-form-page__confirm-icon">
+    <div v-if="confirming" class="i-form-confirm" role="alertdialog" :aria-label="guard.message">
+      <span class="i-form-confirm__icon">
         <IIcon name="warning-triangle" :size="14" />
       </span>
-      <span class="i-form-page__confirm-text">{{ guard.message }}</span>
+      <span class="i-form-confirm__text">{{ guard.message }}</span>
       <IButton size="sm" @click="asking = false">继续编辑</IButton>
       <IButton size="sm" variant="danger" @click="emit('cancel')">放弃修改并离开</IButton>
     </div>
 
-    <footer class="i-form-page__foot">
+    <footer class="i-form-page__foot i-form-bar">
       <!-- 只把按钮置灰而不说原因，用户只会反复点它 -->
-      <p class="i-form-page__status" :class="{ 'is-blocked': !!gate.reason }">{{ status }}</p>
-      <div class="i-form-page__actions">
+      <p class="i-form-bar__status" :class="{ 'is-blocked': !!gate.reason }">{{ status }}</p>
+      <div class="i-form-bar__actions">
         <IButton size="sm" @click="requestCancel">{{ cancelText }}</IButton>
         <IButton v-if="resettable" size="sm" :disabled="gate.busy" @click="reset">
           {{ resetText }}

@@ -132,6 +132,7 @@ export 'src/components/i_fine_tune_card.dart';
 export 'src/components/i_float_button.dart';
 export 'src/components/i_flow.dart';
 export 'src/components/i_form.dart';
+export 'src/components/i_form_overlay.dart';
 export 'src/components/i_form_page.dart';
 export 'src/components/i_grid.dart';
 export 'src/components/i_icon.dart';
