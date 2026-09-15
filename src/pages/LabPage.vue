@@ -222,16 +222,35 @@ watchEffect(() => {
   color: var(--i-color-text-secondary);
   font-size: var(--i-font-size-sm);
 }
+/*
+ * 一百多个格子高矮差得很远：IAffix 只有一行字，IAgentTasks 有三行任务列表。
+ * 用网格排，同一行里所有格子都会被最高的那个拉齐——量出来整片网格 18% 的高度
+ * 是这么撑出来的空白，最惨的一格被拉高 224px，滚过去看到的大半是灰底不是组件。
+ * 改成 `align-items: start` 只是把空白从格子里挪到格子之间，页面一样长。
+ *
+ * 所以这里用多列（masonry 那种排法）：每一格按自己的内容定高，
+ * 下一格紧接着往上补，列与列之间不互相牵制。
+ * `break-inside: avoid` 保证一个格子不会被从中间劈到下一列去。
+ *
+ * 代价是阅读顺序变成「先下后右」。这一页的清单本来就是按组件名排的，
+ * 顺着一列往下读和横着读一样自然；而 DOM 顺序没变，键盘 Tab 与读屏
+ * 走的仍是同一条路，视觉顺序和焦点顺序对得上。
+ */
 .lab__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-  gap: var(--i-spacing-4);
+  column-width: 320px;
+  column-gap: var(--i-spacing-4);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.lab__grid.is-compact { gap: var(--i-spacing-2); }
+.lab__grid.is-compact {
+  column-gap: var(--i-spacing-2);
+}
+.lab__grid.is-compact .lab__cell { margin-bottom: var(--i-spacing-2); }
 .lab__cell {
+  /* 多列里一个格子被从中间劈到下一列的话，读起来就成了两个半截组件 */
+  break-inside: avoid;
+  margin-bottom: var(--i-spacing-4);
   display: flex;
   flex-direction: column;
   gap: var(--i-spacing-2);
