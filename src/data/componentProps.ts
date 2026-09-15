@@ -59,8 +59,13 @@ export const componentProps: Record<string, PropMeta[]> = {
   ],
   IApprovalCard: [
     {"name":"questions","type":"ApprovalQuestion[]","doc":"一组问题，逐题回答；只有一题时不显示分页","optional":false,"defaultText":null,"control":null},
+    {"name":"expiresAt","type":"number","doc":"过期时刻（毫秒时间戳）。不给表示这条确认不过期。 这张卡片会在屏幕上待很久——人去开了个会、切走看别的。回来时那个动作 可能已经不该再执行了，而卡片长得和刚发出来时一模一样：按钮还亮着， 点下去要么服务端报一个看不懂的错，要么更糟——真的执行了一次。","optional":true,"defaultText":null,"control":{"kind":"number"}},
+    {"name":"version","type":"number","doc":"这条确认是针对哪个版本发出的","optional":true,"defaultText":null,"control":{"kind":"number"}},
+    {"name":"currentVersion","type":"number","doc":"被确认的东西现在是第几版。与 version 不同就说明前提变了","optional":true,"defaultText":null,"control":{"kind":"number"}},
     {"name":"confirmText","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"skipText","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"renewText","type":"string","doc":"","optional":true,"defaultText":"'重新发起'","control":{"kind":"string"}},
+    {"name":"reviewText","type":"string","doc":"","optional":true,"defaultText":"'查看新版本'","control":{"kind":"string"}},
     {"name":"closable","type":"boolean","doc":"","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
   ],
   IAutoComplete: [

@@ -136,6 +136,31 @@ onMounted(() => {
 })
 onBeforeUnmount(() => clearInterval(retryTimer))
 
+/*
+ * 确认卡三种失效的示例时刻。
+ *
+ * 「快过期」那张同样要一轮轮往前推：写死一个时刻的话，倒计时走到 0 之后
+ * 这张示例就变成了第二张，读者再也看不到「还剩几秒但仍可拍板」这一态。
+ */
+const gateQuestion = {
+  id: 'gate',
+  title: '这批采购走哪条审批线？',
+  options: [
+    { value: 'normal', label: '常规线' },
+    { value: 'fast', label: '快速线', hint: '（金额 5 万以下）' }
+  ]
+}
+const EXPIRING_CYCLE = 20_000
+const expiringAt = ref(Date.now() + EXPIRING_CYCLE)
+const expiredAt = Date.now() - 60_000
+let expiringTimer: ReturnType<typeof setInterval> | undefined
+onMounted(() => {
+  expiringTimer = setInterval(() => {
+    expiringAt.value = Date.now() + EXPIRING_CYCLE
+  }, EXPIRING_CYCLE)
+})
+onBeforeUnmount(() => clearInterval(expiringTimer))
+
 const sources = [
   { title: 'packages/common/src/logic/pagination.ts', url: undefined },
   { title: 'Pagination 分页 · 组件文档', url: '#/components/pagination' }
@@ -795,6 +820,42 @@ function createSession() {
       />
     </DemoBlock>
 
+    <p>
+      这张卡片会在屏幕上待很久——人去开了个会、切走看别的、合上笔记本。回来时那个动作可能已经不该再执行了，而卡片长得和刚发出来时一模一样：按钮还亮着，点下去要么服务端报一个看不懂的错，要么更糟——真的执行了一次基于旧前提的操作。
+    </p>
+    <p>
+      所以两种「不该再执行」要分开说，因为出口不同：<strong>过期</strong>只是等太久了，前提没变，出口是重新发起同一次确认；<strong>版本失效</strong>是被确认的东西在这期间改了，出口不是重发而是先看新版本——对着第 2 版点的「同意」不该落到第 3 版上。两者同时成立时以版本失效为准：给一条针对旧版本的确认续期，等于把「内容变了」悄悄抹掉。
+    </p>
+    <DemoBlock
+      title="快过期 / 已过期 / 版本失效"
+      description="快到期时报出剩余秒数但仍允许拍板，剩下的两种一律停用选项与按钮，并各给各的出口。停用之后不再有悬停反馈也不再是手型——按钮还亮着却点不动，比直接看出它不能点更让人恼火。"
+      lang="vue"
+      code='<IApprovalCard :questions="questions" :expires-at="expiresAt" @renew="restart" />
+<IApprovalCard :questions="questions" :version="2" :current-version="3" @review="openLatest" />'
+    >
+      <div class="approval-gates">
+        <IApprovalCard
+          :questions="[gateQuestion]"
+          :expires-at="expiringAt"
+          :closable="false"
+          @complete="() => message.success('已确认')"
+        />
+        <IApprovalCard
+          :questions="[gateQuestion]"
+          :expires-at="expiredAt"
+          :closable="false"
+          @renew="() => message.info('重新发起同一次确认')"
+        />
+        <IApprovalCard
+          :questions="[gateQuestion]"
+          :version="2"
+          :current-version="3"
+          :closable="false"
+          @review="() => message.info('打开第 3 版再看一遍')"
+        />
+      </div>
+    </DemoBlock>
+
     <h2>任务行</h2>
     <p>
       智能体做事的过程是可见的。状态同时用形状与颜色表达——只靠颜色的话，灰绿两色在灰度打印与色觉障碍下分不出来。
@@ -897,7 +958,7 @@ function createSession() {
         <tr><td>IChatSources</td><td>sources</td><td>—</td></tr>
         <tr><td>IChatSuggestions</td><td>items、title</td><td>select</td></tr>
         <tr><td>IPromptInput</td><td>modelValue、generating、maxLength、attachments、hint、submitOnEnter、mentions、commands</td><td>submit、stop、attach、removeAttachment、pick</td></tr>
-        <tr><td>IApprovalCard</td><td>questions、confirmText、skipText、closable</td><td>complete、close</td></tr>
+        <tr><td>IApprovalCard</td><td>questions、expiresAt、version、currentVersion、confirmText、skipText、renewText、reviewText、closable</td><td>complete、renew、review、close</td></tr>
         <tr><td>IAgentTasks</td><td>tasks、variant、showSummary</td><td>select</td></tr>
         <tr><td>IRecommendCard</td><td>title、confidence、acceptText、alternativeText、showAlternative</td><td>accept、alternative</td></tr>
         <tr><td>IContextCards</td><td>chunks、title、previewLimit</td><td>—</td></tr>
@@ -914,6 +975,16 @@ function createSession() {
 </template>
 
 <style scoped>
+/* 三张卡并排对比措辞；窄屏自动落成一列 */
+.approval-gates {
+  /* 演示区是纵向 flex，不给宽度的话网格会缩到内容宽，三列变一列 */
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: var(--i-spacing-4);
+  align-items: start;
+}
+
 /* 四条状态条竖着排，逐条对比措辞——横着摆会把补充说明压成竖排单字 */
 .run-states {
   display: grid;

@@ -174,7 +174,7 @@ const {
   cascaderColumns, cascaderActivate, nodePath
 } = await bundle('packages/common/src/logic/tree.ts', 'tree')
 const {
-  summarizeTasks, confidenceOf, approvalProgress,
+  summarizeTasks, confidenceOf, approvalProgress, approvalGate, approvalRemaining,
   chunkLength, chunkPreview, summarizeDiff, defaultDiffSelection,
   toggleDiffRow, diffActionLabel
 } = await bundle('packages/common/src/logic/agent.ts', 'agent')
@@ -388,6 +388,52 @@ const confidenceExpectations = confidenceCases.map((v) => {
 const progressExpectations = [[0, 3], [1, 3], [2, 3], [9, 3], [0, 1]].map(
   ([i, t]) => `    expect(approvalProgress(${i}, ${t}), '${approvalProgress(i, t)}');`
 )
+
+/*
+ * 确认还作不作数：过期与版本失效各自的出口、两者同时成立时的优先级，
+ * 以及「这一刻按钮该不该停用」。判错的代价是真的执行了一次基于旧前提的操作，
+ * 所以两端必须给同一个答案。
+ */
+const APPROVAL_NOW = 1000000
+const approvalGateCases = [
+  {},
+  { expiresAt: APPROVAL_NOW + 300000 },
+  { expiresAt: APPROVAL_NOW + 12000 },
+  { expiresAt: APPROVAL_NOW + 30000 },
+  { expiresAt: APPROVAL_NOW - 1 },
+  { version: 2, currentVersion: 3 },
+  { version: 2, currentVersion: 2 },
+  { version: 2 },
+  { expiresAt: APPROVAL_NOW - 1, version: 1, currentVersion: 4 },
+  { expiresAt: APPROVAL_NOW + 12000, warnBefore: 5000 }
+]
+const approvalGateExpectations = [
+  ...approvalGateCases.flatMap((input, i) => {
+    const gate = approvalGate({ ...input, now: APPROVAL_NOW })
+    const args = [
+      `now: ${APPROVAL_NOW}`,
+      ...(input.expiresAt === undefined ? [] : [`expiresAt: ${input.expiresAt}`]),
+      ...(input.version === undefined ? [] : [`version: ${input.version}`]),
+      ...(input.currentVersion === undefined ? [] : [`currentVersion: ${input.currentVersion}`]),
+      ...(input.warnBefore === undefined ? [] : [`warnBefore: ${input.warnBefore}`])
+    ]
+    const v = `g${i}`
+    return [
+      `    final ${v} = approvalGate(${args.join(', ')});`,
+      `    expect(${v}.state, IApprovalGateState.${gate.state});`,
+      `    expect(${v}.decidable, ${gate.decidable});`,
+      `    expect(${v}.label, ${JSON.stringify(gate.label)});`,
+      `    expect(${v}.detail, ${JSON.stringify(gate.detail)});`,
+      `    expect(${v}.action, IApprovalGateAction.${gate.action});`,
+      `    expect(${v}.remaining, ${gate.remaining === undefined ? 'null' : gate.remaining});`
+    ]
+  }),
+  ...[9001, 10000, 1, 0, -8000].map(
+    (delta) =>
+      `    expect(approvalRemaining(${APPROVAL_NOW + delta}, ${APPROVAL_NOW}), ` +
+      `${approvalRemaining(APPROVAL_NOW + delta, APPROVAL_NOW)});`
+  )
+]
 
 /* ---------- 上下文片段与差异表 ----------
  * chunkLength 按码点计数：Dart 的 String.length 是 UTF-16 单元数，
@@ -3106,6 +3152,10 @@ ${taskExpectations.join('\n')}
   test('置信度分档与进度文本与 Web 端一致', () {
 ${confidenceExpectations.join('\n')}
 ${progressExpectations.join('\n')}
+  });
+
+  test('确认的过期与版本失效判定与 Web 端一致', () {
+${approvalGateExpectations.join('\n')}
   });
 
   test('片段字符数与截断按码点计算，与 Web 端一致', () {

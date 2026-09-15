@@ -63,6 +63,109 @@ export function toggleApprovalValue(
   return [...next]
 }
 
+/* ---------- 确认还作不作数 ---------- */
+
+/**
+ * 一条待确认在这一刻还能不能拍板。
+ *
+ * 征求确认的卡片会在屏幕上待很久——人去开了个会、切走看别的、合上笔记本。
+ * 回来时那个动作可能已经不该再执行了，而卡片长得和刚发出来时一模一样：
+ * 按钮还亮着，点下去要么服务端报一个看不懂的错，要么更糟——真的执行了一次
+ * 基于旧前提的操作。
+ *
+ * 两种「不该再执行」要分开说，因为出口不同：
+ *
+ *   过期      只是等太久了，前提没变。出口是重新发起同一次确认。
+ *   版本失效  被确认的东西在这期间改了。出口不是重发，是先看新版本——
+ *             对着 v2 点的「同意」不该落到 v3 上。
+ *
+ * 两者同时成立时以版本失效为准：给一条针对旧版本的确认续期，
+ * 等于把「内容变了」这件事悄悄抹掉。
+ */
+export type ApprovalGateState = 'open' | 'expiring' | 'expired' | 'stale'
+
+export interface ApprovalGateInput {
+  /** 过期时刻（毫秒时间戳）。不给表示这条确认不过期 */
+  expiresAt?: number
+  now: number
+  /** 这条确认是针对哪个版本发出的 */
+  version?: number
+  /** 被确认的东西现在是第几版 */
+  currentVersion?: number
+  /** 快到期的提前量（毫秒）。默认 30 秒 */
+  warnBefore?: number
+}
+
+export interface ApprovalGate {
+  state: ApprovalGateState
+  /** 这一刻还能不能做决定。false 时选项与确认按钮都要停用 */
+  decidable: boolean
+  /** 距离过期还有几秒。没有期限或已过期时是 undefined */
+  remaining?: number
+  /** 状态本身。颜色不是唯一线索，这句话必须出现 */
+  label: string
+  detail: string
+  /** 这一刻该给的出口 */
+  action: 'none' | 'renew' | 'review'
+}
+
+/** 默认提前 30 秒开始报剩余时间：再早会变成一直在催，再晚来不及反应 */
+export const APPROVAL_WARN_BEFORE = 30_000
+
+/**
+ * 剩余秒数。
+ *
+ * 向上取整，和重试倒计时同一个理由：显示「10 秒」时真实剩余不超过 10 秒。
+ * 向下取整会先显示「0 秒」再等一下才真的过期。
+ */
+export function approvalRemaining(expiresAt: number, now: number): number {
+  return Math.max(0, Math.ceil((expiresAt - now) / 1000))
+}
+
+export function approvalGate(input: ApprovalGateInput): ApprovalGate {
+  const { expiresAt, now, version, currentVersion } = input
+  const warnBefore = input.warnBefore ?? APPROVAL_WARN_BEFORE
+
+  // 版本失效压过过期：给一条针对旧版本的确认续期，等于把「内容变了」悄悄抹掉
+  if (version !== undefined && currentVersion !== undefined && currentVersion !== version) {
+    return {
+      state: 'stale',
+      decidable: false,
+      label: '内容已更新',
+      detail: `这条确认是针对第 ${version} 版发出的，现在是第 ${currentVersion} 版`,
+      action: 'review'
+    }
+  }
+
+  if (expiresAt === undefined) {
+    return { state: 'open', decidable: true, label: '待确认', detail: '', action: 'none' }
+  }
+
+  const remaining = approvalRemaining(expiresAt, now)
+  if (remaining <= 0) {
+    return {
+      state: 'expired',
+      decidable: false,
+      label: '已过期',
+      detail: '这条确认等待太久已失效，需要重新发起',
+      action: 'renew'
+    }
+  }
+
+  if (expiresAt - now <= warnBefore) {
+    return {
+      state: 'expiring',
+      decidable: true,
+      remaining,
+      label: '即将过期',
+      detail: `还有 ${remaining} 秒`,
+      action: 'none'
+    }
+  }
+
+  return { state: 'open', decidable: true, remaining, label: '待确认', detail: '', action: 'none' }
+}
+
 /* ---------- 任务行 ---------- */
 
 export type AgentTaskStatus = 'pending' | 'running' | 'completed' | 'failed'

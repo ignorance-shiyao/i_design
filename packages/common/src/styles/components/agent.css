@@ -24,7 +24,71 @@
   font-size: var(--i-font-size-md);
   font-weight: 500;
 }
+/*
+ * 「这条确认还作不作数」。
+ *
+ * 状态落在图标那一格：图标形状 + 淡底色块，卡片自己的边框保持四边等宽的发丝线。
+ * 文字标签永远在（「已过期」「内容已更新」），颜色只是第三条线索——
+ * 灰度打印与色觉障碍都只能靠那几个字。
+ *
+ * 两种失效用不同的图标而不是只换颜色：等太久了是时钟，内容变了是版本记录。
+ */
+.i-approval__gate {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  margin-bottom: var(--i-spacing-3);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-approval__gate-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-secondary);
+  background: var(--i-color-bg-elevated);
+}
+.i-approval__gate--expiring .i-approval__gate-icon {
+  color: var(--i-color-warning-text);
+  background: var(--i-color-warning-subtle);
+}
+.i-approval__gate--expired .i-approval__gate-icon,
+.i-approval__gate--stale .i-approval__gate-icon {
+  color: var(--i-color-danger-text);
+  background: var(--i-color-danger-subtle);
+}
+.i-approval__gate-text { flex: 1; min-width: 0; }
+/* 小程序端没有 <strong>，用一个类名走同一条规则 */
+.i-approval__gate-text strong,
+.i-approval__gate-label {
+  margin-right: var(--i-spacing-2);
+  color: var(--i-color-text);
+  font-weight: 500;
+}
+.i-approval__gate-action { flex: none; }
+
 .i-approval__options { display: grid; gap: 2px; }
+/*
+ * 停用之后不再有悬停反馈、不再是手型：按钮还亮着却点不动，
+ * 比直接看出它不能点更让人恼火。
+ */
+/* 小程序端的 <view> 没有 disabled，用 is-disabled 走同一条规则 */
+.i-approval__option:disabled,
+.i-approval__option.is-disabled,
+.i-approval__custom:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.i-approval__option:disabled:hover,
+.i-approval__option.is-disabled:hover { background: none; }
+.i-approval__option.is-selected:disabled:hover,
+.i-approval__option.is-selected.is-disabled:hover { background: var(--i-color-brand-subtle); }
 .i-approval__option {
   display: flex;
   align-items: center;

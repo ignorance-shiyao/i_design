@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../theme/i_theme.dart';
 import '../tokens/tokens.dart';
 import '../logic/agent.dart';
+import '../logic/elapsed.dart';
 import 'i_icon.dart';
 import 'i_button.dart';
 
@@ -34,18 +37,45 @@ class IApprovalCard extends StatefulWidget {
   const IApprovalCard({
     super.key,
     required this.questions,
+    this.expiresAt,
+    this.version,
+    this.currentVersion,
     this.confirmText = '继续',
     this.skipText = '跳过',
+    this.renewText = '重新发起',
+    this.reviewText = '查看新版本',
     this.onComplete,
+    this.onRenew,
+    this.onReview,
     this.onClose,
   });
 
   final List<IApprovalQuestion> questions;
+
+  /// 过期时刻（毫秒时间戳）。不给表示这条确认不过期。
+  ///
+  /// 这张卡片会在屏幕上待很久——人切到别的应用、锁了屏。回来时那个动作
+  /// 可能已经不该再执行了，而卡片长得和刚发出来时一模一样：按钮还亮着。
+  final int? expiresAt;
+
+  /// 这条确认是针对哪个版本发出的
+  final int? version;
+
+  /// 被确认的东西现在是第几版。与 version 不同就说明前提变了
+  final int? currentVersion;
   final String confirmText;
   final String skipText;
+  final String renewText;
+  final String reviewText;
 
   /// 全部答完后一次性给出，键为问题 id
   final void Function(Map<String, List<String>>)? onComplete;
+
+  /// 过期了：请调用方重新发起同一次确认
+  final VoidCallback? onRenew;
+
+  /// 版本变了：请调用方把新版本摊开给人看，而不是续期旧的
+  final VoidCallback? onReview;
   final VoidCallback? onClose;
 
   @override
@@ -58,10 +88,27 @@ class _IApprovalCardState extends State<IApprovalCard> {
   final TextEditingController _custom = TextEditingController();
   final Map<String, List<String>> _answers = {};
 
+  /*
+   * 自己走的时钟，只为倒计时。交给使用方传「还剩几秒」等于要求每个页面
+   * 自己开一个定时器，而且各家的进位还会不一样。
+   */
+  Timer? _timer;
+  int _now = DateTime.now().millisecondsSinceEpoch;
+
   @override
   void dispose() {
+    _timer?.cancel();
     _custom.dispose();
     super.dispose();
+  }
+
+  /// 只在还剩时间时走表：过期或版本失效之后再跳，除了耗电什么也不做
+  void _schedule() {
+    _timer?.cancel();
+    _timer = Timer(Duration(milliseconds: elapsedInterval(_now)), () {
+      if (!mounted) return;
+      setState(() => _now = DateTime.now().millisecondsSinceEpoch);
+    });
   }
 
   void _commit(List<String> values) {
@@ -83,7 +130,19 @@ class _IApprovalCardState extends State<IApprovalCard> {
     final c = iColorsOf(context);
     if (widget.questions.isEmpty) return const SizedBox.shrink();
     final current = widget.questions[_index];
-    final advanceable = canAdvance(current, _selected, _custom.text);
+    final gate = approvalGate(
+      now: _now,
+      expiresAt: widget.expiresAt,
+      version: widget.version,
+      currentVersion: widget.currentVersion,
+    );
+    if (gate.state == IApprovalGateState.expiring) {
+      _schedule();
+    } else {
+      _timer?.cancel();
+    }
+    // 不能拍板时连「下一题」都停掉：翻到最后一题再发现按钮是灰的更让人恼火
+    final advanceable = gate.decidable && canAdvance(current, _selected, _custom.text);
 
     return _AgentCard(
       child: Column(
@@ -111,11 +170,29 @@ class _IApprovalCardState extends State<IApprovalCard> {
           ),
           const SizedBox(height: IDesignTokensLight.spacing3),
 
+          /*
+           * 失效说明放在选项上方而不是按钮旁边：读者是先看选项再看按钮的，
+           * 放在下面等于让他把一遍选项白读了。状态落在图标那一格——
+           * 图标形状 + 淡底色块，文字标签永远在，颜色只是第三条线索。
+           */
+          if (gate.state != IApprovalGateState.open) ...[
+            _ApprovalGateNotice(
+              gate: gate,
+              renewText: widget.renewText,
+              reviewText: widget.reviewText,
+              onRenew: widget.onRenew,
+              onReview: widget.onReview,
+            ),
+            const SizedBox(height: IDesignTokensLight.spacing3),
+          ],
+
           for (final option in current.options)
             InkWell(
-              onTap: () => setState(() {
-                _selected = toggleApprovalValue(current, _selected, option.value);
-              }),
+              onTap: gate.decidable
+                  ? () => setState(() {
+                        _selected = toggleApprovalValue(current, _selected, option.value);
+                      })
+                  : null,
               borderRadius: BorderRadius.circular(IDesignTokensLight.radiusMd),
               child: Container(
                 padding: const EdgeInsets.all(IDesignTokensLight.spacing2),
@@ -162,6 +239,7 @@ class _IApprovalCardState extends State<IApprovalCard> {
             const SizedBox(height: IDesignTokensLight.spacing2),
             TextField(
               controller: _custom,
+              enabled: gate.decidable,
               onChanged: (_) => setState(() {}),
               style: TextStyle(
                 fontSize: IDesignTokensLight.fontSizeMd,
@@ -197,7 +275,7 @@ class _IApprovalCardState extends State<IApprovalCard> {
                 IButton(
                   label: widget.skipText,
                   size: IButtonSize.sm,
-                  onPressed: () => _commit(const []),
+                  onPressed: gate.decidable ? () => _commit(const []) : null,
                 ),
                 const SizedBox(width: IDesignTokensLight.spacing2),
               ],
@@ -212,6 +290,95 @@ class _IApprovalCardState extends State<IApprovalCard> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 「这条确认还作不作数」。
+///
+/// 两种失效用不同的图标而不是只换颜色：等太久了是时钟，内容变了是版本记录。
+/// 每一态都带文字标签，灰度与色觉障碍都只能靠那几个字。
+class _ApprovalGateNotice extends StatelessWidget {
+  const _ApprovalGateNotice({
+    required this.gate,
+    required this.renewText,
+    required this.reviewText,
+    this.onRenew,
+    this.onReview,
+  });
+
+  final IApprovalGate gate;
+  final String renewText;
+  final String reviewText;
+  final VoidCallback? onRenew;
+  final VoidCallback? onReview;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = iColorsOf(context);
+    final (ink, tint) = switch (gate.state) {
+      IApprovalGateState.expiring => (c.warning, c.warningSubtle),
+      IApprovalGateState.expired || IApprovalGateState.stale => (c.danger, c.dangerSubtle),
+      IApprovalGateState.open => (c.textSecondary, c.bgElevated),
+    };
+
+    return Semantics(
+      liveRegion: true,
+      label: gate.detail.isEmpty ? gate.label : '\${gate.label}，\${gate.detail}',
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: IDesignTokensLight.spacing3,
+          vertical: IDesignTokensLight.spacing2,
+        ),
+        decoration: BoxDecoration(
+          color: c.bgSubtle,
+          borderRadius: BorderRadius.circular(IDesignTokensLight.radiusMd),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
+              child: IIcon(
+                gate.state == IApprovalGateState.stale ? 'history' : 'clock',
+                size: 14,
+                color: ink,
+              ),
+            ),
+            const SizedBox(width: IDesignTokensLight.spacing2),
+            Expanded(
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: IDesignTokensLight.spacing2,
+                children: [
+                  Text(
+                    gate.label,
+                    style: TextStyle(
+                      fontSize: IDesignTokensLight.fontSizeSm,
+                      fontWeight: FontWeight.w500,
+                      color: c.text,
+                    ),
+                  ),
+                  if (gate.detail.isNotEmpty)
+                    Text(
+                      gate.detail,
+                      style: TextStyle(
+                        fontSize: IDesignTokensLight.fontSizeSm,
+                        color: c.textSecondary,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (gate.action == IApprovalGateAction.renew)
+              IButton(label: renewText, size: IButtonSize.sm, onPressed: onRenew),
+            if (gate.action == IApprovalGateAction.review)
+              IButton(label: reviewText, size: IButtonSize.sm, onPressed: onReview),
+          ],
+        ),
       ),
     );
   }

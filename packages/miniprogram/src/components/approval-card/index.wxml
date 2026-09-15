@@ -6,11 +6,25 @@
     </view>
   </view>
 
+  <!--
+    失效说明放在选项上方而不是按钮旁边：读者是先看选项再看按钮的，
+    放在下面等于让他把一遍选项白读了。
+  -->
+  <view wx:if="{{gateState !== 'open'}}" class="i-approval__gate i-approval__gate--{{gateState}}">
+    <view class="i-approval__gate-icon"><i-icon name="{{gateIcon}}" size="14" /></view>
+    <view class="i-approval__gate-text">
+      <text class="i-approval__gate-label">{{gateLabel}}</text>
+      <text wx:if="{{gateDetail}}">{{gateDetail}}</text>
+    </view>
+    <i-button wx:if="{{gateAction === 'renew'}}" class="i-approval__gate-action" size="sm" bindtap="onRenew">{{renewText}}</i-button>
+    <i-button wx:elif="{{gateAction === 'review'}}" class="i-approval__gate-action" size="sm" bindtap="onReview">{{reviewText}}</i-button>
+  </view>
+
   <view class="i-approval__options">
     <view
       wx:for="{{options}}"
       wx:key="value"
-      class="i-approval__option {{item.on ? 'is-selected' : ''}}"
+      class="i-approval__option {{item.on ? 'is-selected' : ''}} {{decidable ? '' : 'is-disabled'}}"
       data-value="{{item.value}}"
       bindtap="onPick"
     >
@@ -25,6 +39,7 @@
     class="i-approval__custom"
     value="{{custom}}"
     placeholder="{{current.customPlaceholder || otherLabel + '……'}}"
+    disabled="{{!decidable}}"
     bindinput="onCustom"
   />
 
@@ -35,7 +50,7 @@
       <view class="i-approval__nav" bindtap="onNext"><i-icon name="chevron-down" size="14" /></view>
     </view>
     <view class="i-approval__actions">
-      <i-button wx:if="{{current.skippable}}" size="sm" bindtap="onSkip">{{skipLabel}}</i-button>
+      <i-button wx:if="{{current.skippable}}" size="sm" disabled="{{!decidable}}" bindtap="onSkip">{{skipLabel}}</i-button>
       <i-button size="sm" variant="primary" disabled="{{!advanceable}}" bindtap="onNext">
         {{isLast ? confirmLabel : nextLabel}}
       </i-button>

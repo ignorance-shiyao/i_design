@@ -44,6 +44,114 @@ bool canAdvance(
   return selected.isNotEmpty || custom.trim().isNotEmpty;
 }
 
+/* ---------- 确认还作不作数 ---------- */
+
+/// 一条待确认在这一刻还能不能拍板（对应 Web 端的 approvalGate）。
+///
+/// 征求确认的卡片会在屏幕上待很久——人去开了个会、切走看别的。回来时那个动作
+/// 可能已经不该再执行了，而卡片长得和刚发出来时一模一样：按钮还亮着。
+///
+/// 两种「不该再执行」出口不同：过期只是等太久了，前提没变，出口是重新发起；
+/// 版本失效是被确认的东西改了，出口是先看新版本——对着 v2 点的「同意」
+/// 不该落到 v3 上。两者同时成立时以版本失效为准。
+enum IApprovalGateState { open, expiring, expired, stale }
+
+enum IApprovalGateAction { none, renew, review }
+
+class IApprovalGate {
+  const IApprovalGate({
+    required this.state,
+    required this.decidable,
+    required this.label,
+    required this.detail,
+    required this.action,
+    this.remaining,
+  });
+
+  final IApprovalGateState state;
+
+  /// 这一刻还能不能做决定。false 时选项与确认按钮都要停用
+  final bool decidable;
+
+  /// 距离过期还有几秒。没有期限或已过期时为 null
+  final int? remaining;
+
+  /// 状态本身。颜色不是唯一线索，这句话必须出现
+  final String label;
+  final String detail;
+  final IApprovalGateAction action;
+}
+
+/// 默认提前 30 秒开始报剩余时间：再早会变成一直在催，再晚来不及反应
+const int kApprovalWarnBefore = 30000;
+
+/// 剩余秒数。向上取整：显示「10 秒」时真实剩余不超过 10 秒
+int approvalRemaining(int expiresAt, int now) {
+  final diff = expiresAt - now;
+  if (diff <= 0) return 0;
+  return (diff + 999) ~/ 1000;
+}
+
+IApprovalGate approvalGate({
+  required int now,
+  int? expiresAt,
+  int? version,
+  int? currentVersion,
+  int warnBefore = kApprovalWarnBefore,
+}) {
+  // 版本失效压过过期：给一条针对旧版本的确认续期，等于把「内容变了」悄悄抹掉
+  if (version != null && currentVersion != null && currentVersion != version) {
+    return IApprovalGate(
+      state: IApprovalGateState.stale,
+      decidable: false,
+      label: '内容已更新',
+      detail: '这条确认是针对第 $version 版发出的，现在是第 $currentVersion 版',
+      action: IApprovalGateAction.review,
+    );
+  }
+
+  if (expiresAt == null) {
+    return const IApprovalGate(
+      state: IApprovalGateState.open,
+      decidable: true,
+      label: '待确认',
+      detail: '',
+      action: IApprovalGateAction.none,
+    );
+  }
+
+  final remaining = approvalRemaining(expiresAt, now);
+  if (remaining <= 0) {
+    return const IApprovalGate(
+      state: IApprovalGateState.expired,
+      decidable: false,
+      label: '已过期',
+      detail: '这条确认等待太久已失效，需要重新发起',
+      action: IApprovalGateAction.renew,
+    );
+  }
+
+  if (expiresAt - now <= warnBefore) {
+    return IApprovalGate(
+      state: IApprovalGateState.expiring,
+      decidable: true,
+      remaining: remaining,
+      label: '即将过期',
+      detail: '还有 $remaining 秒',
+      action: IApprovalGateAction.none,
+    );
+  }
+
+  return IApprovalGate(
+    state: IApprovalGateState.open,
+    decidable: true,
+    remaining: remaining,
+    label: '待确认',
+    detail: '',
+    action: IApprovalGateAction.none,
+  );
+}
+
 /// 当前进度文本，如「2/3」
 String approvalProgress(int index, int total) =>
     '${index + 1 > total ? total : index + 1}/$total';
