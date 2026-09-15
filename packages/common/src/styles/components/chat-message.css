@@ -48,10 +48,10 @@
 /*
  * 助手消息是通栏正文，但「通栏」不等于「一行排到容器有多宽就多宽」：
  * 在 960px 宽的会话区里量出来是一行 64 个汉字，眼睛要横扫整屏才回得到下一行。
- * 90ch 约合 45 个汉字，取的是与文档站正文同一个行长上限。
+ * 45em 就是一行 45 个汉字（一个汉字恰好 1em），与文档站正文同一个上限。
  * 它只封顶不撑宽，窄容器里这条规则什么也不做。
  */
-.i-chat-msg--assistant .i-chat-msg__content { padding-top: 2px; max-width: 90ch; }
+.i-chat-msg--assistant .i-chat-msg__content { padding-top: 2px; max-width: 45em; }
 
 /* 出错的回答：整段转为危险色底，而不是只在末尾加一行小字 */
 .i-chat-msg.is-error .i-chat-msg__content {
