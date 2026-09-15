@@ -495,6 +495,16 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"unit","type":"string","doc":"「人」「个部门」「台设备」——摘要里那个量词","optional":true,"defaultText":"'项'","control":{"kind":"string"}},
     {"name":"placeholder","type":"string","doc":"","optional":true,"defaultText":"'搜索姓名、工号或部门'","control":{"kind":"string"}},
   ],
+  IExportJob: [
+    {"name":"status","type":"ExportStatus","doc":"","optional":true,"defaultText":"'queued'","control":null},
+    {"name":"queuePosition","type":"number","doc":"队列里前面还有几个","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"processed","type":"number","doc":"","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"total","type":"number","doc":"总行数。**不知道就不要给**——给一个猜的数就成了假进度条","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"expiresAt","type":"number","doc":"文件的过期时刻（毫秒时间戳）","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"error","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"meta","type":"ExportMeta","doc":"这份导出的出处。永远显示","optional":true,"defaultText":"undefined","control":null},
+    {"name":"now","type":"number","doc":"当前时间，受控——好让演示与测试给得出确定的值","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+  ],
   IFineTuneCard: [
     {"name":"fields","type":"FineTuneField[]","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"original","type":"FineTuneValues","doc":"智能体给出的原始值。退回时回到这里","optional":false,"defaultText":null,"control":null},

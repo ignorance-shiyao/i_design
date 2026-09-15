@@ -142,6 +142,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'BulkBar', cn: '批量操作条', to: '/components/table', desc: '把「对谁做」说死；部分失败只重试失败项' },
       { name: 'SchemaForm', cn: 'Schema 表单', to: '/components/form', desc: '按数据结构渲染表单；schema 里不执行任何字符串' },
       { name: 'ImportWizard', cn: '导入向导', to: '/components/upload', desc: '列映射、预检不落库、错误清单带原始行号' },
+      { name: 'ExportJob', cn: '导出任务', to: '/components/upload', desc: '排队、进度、有效期与出处，总数未知时不画进度条' },
       { name: 'EntityPicker', cn: '人员选择', to: '/components/select', desc: '远程检索、翻页不丢已选、停用的仍能读历史' },
       { name: 'DetailPage', cn: '详情页', to: '/components/card', desc: '这条记录现在能做什么；看到的这一份还作不作数' },
       { name: 'FormPage', cn: '表单页', to: '/components/form', desc: '围着表单的那几件事：重复提交、离开保护与重置范围' },

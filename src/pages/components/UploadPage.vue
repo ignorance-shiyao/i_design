@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import IUpload from '@/components/IUpload.vue'
 import IImportWizard from '@/components/IImportWizard.vue'
+import IExportJob from '@/components/IExportJob.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import { message } from '@/components/message'
 import type { UploadFile } from '@/components/upload'
@@ -10,7 +11,8 @@ import {
   guessMapping,
   importKey,
   type ColumnMapping,
-  type DryRunReport
+  type DryRunReport,
+  type ExportStatus
 } from '@i-design/common'
 
 /*
@@ -57,6 +59,69 @@ function runDryRun() {
     importBusy.value = false
   }, 500)
 }
+
+/*
+ * 导出任务的演示。
+ *
+ * 这里真的跑一个任务：排队 → 生成中 → 可下载，中途可以取消。
+ * 演示里把节奏压到两秒，好让「排队中也能取消」这件事看得见——
+ * 真实系统里几万行要跑几分钟，那正是需要取消的时候。
+ */
+const exportStatus = ref<ExportStatus>('queued')
+const exportProcessed = ref(0)
+const exportCreatedAt = ref(Date.now())
+const exportExpiresAt = ref(0)
+const exportNow = ref(Date.now())
+const EXPORT_TOTAL = 48_000
+let exportTimer: ReturnType<typeof setInterval> | undefined
+
+/* 时钟单独走：任务跑完之后「还可下载 N 分钟」那句话还得继续倒数 */
+const clock = setInterval(() => (exportNow.value = Date.now()), 1000)
+
+const exportMeta = computed(() => ({
+  subject: '销售订单',
+  createdAt: exportCreatedAt.value,
+  filters: ['负责人：林岚', '状态：已发货'],
+  columns: ['订单号', '客户', '金额', '下单时间'],
+  rows: exportProcessed.value
+}))
+
+function stopExport() {
+  if (exportTimer !== undefined) clearInterval(exportTimer)
+  exportTimer = undefined
+}
+
+function runExport() {
+  stopExport()
+  exportStatus.value = 'queued'
+  exportProcessed.value = 0
+  exportCreatedAt.value = Date.now()
+  let tick = 0
+  exportTimer = setInterval(() => {
+    tick += 1
+    if (tick === 2) exportStatus.value = 'running'
+    if (tick > 2) exportProcessed.value = Math.min(EXPORT_TOTAL, (tick - 2) * 12_000)
+    if (exportProcessed.value >= EXPORT_TOTAL) {
+      exportStatus.value = 'ready'
+      // 演示里给两分钟，好让「还可下载 N 分钟」那句话是真的在走
+      exportExpiresAt.value = Date.now() + 2 * 60 * 1000
+      stopExport()
+    }
+  }, 600)
+}
+runExport()
+onUnmounted(() => {
+  stopExport()
+  clearInterval(clock)
+})
+
+/*
+ * 第二张卡：服务端还没数完总行数。
+ * 它不画进度条，只如实报「已导出 N 行」——这正是这套逻辑的头一条规矩。
+ */
+const exportUnknown = computed(() => ({
+  processed: Math.max(1, Math.round(exportProcessed.value / 3))
+}))
 
 const basic = ref<UploadFile[]>([])
 const auto = ref<UploadFile[]>([])
@@ -182,6 +247,49 @@ function onReject(file: File, reason: string) {
       </div>
     </DemoBlock>
 
+    <h2>导出任务：它是任务，不是下载</h2>
+    <p>
+      几十行的导出确实就是一次下载，但业务系统里的导出动辄几万行：要排队、要跑一段时间、要能中途取消，生成好的文件还有有效期。做成一个「点了就等」的按钮，用户只会反复点，然后在第三次点击之后收到三份一样的文件。
+    </p>
+    <p>
+      三条规矩：<strong>不知道总数就不要画进度条</strong>——服务端还没数完总行数时，如实说「已导出 12000 行」，比一个走到 90% 就卡住的条子更让人敢离开；<strong>过期的文件给「重新生成」，不是一个坏链接</strong>——第二天回来点下载拿到 404 的人，会以为是自己权限没了；<strong>导出必须带出处</strong>——什么时候、按哪套筛选、导了哪些列、多少行，四样缺一样，两个人拿着两份表就对不上账，而他们会先怀疑数据错了，最后才想到是筛选不同。
+    </p>
+    <DemoBlock
+      title="排队、进度、有效期与出处"
+      description="这个任务是真的在跑：排队两下之后进入生成中，跑完转「可下载」，那句「还可下载 N 分钟」在实时倒数，倒完自己转成「已过期 · 重新生成」。排队与生成中都能取消——取消最省事的时机正是它还没跑完的时候。下面那张卡是服务端还没数完总行数的情形：它一条进度条也不画，只报已导出多少行。"
+      lang="vue"
+      code='<IExportJob
+  :status="status"
+  :processed="processed"
+  :total="total"
+  :expires-at="expiresAt"
+  :meta="meta"
+  @cancel="cancelExport"
+  @download="(fileName) => saveAs(fileName)"
+  @regenerate="runExport"
+/>'
+    >
+      <div class="export-demo">
+        <IExportJob
+          :status="exportStatus"
+          :processed="exportProcessed"
+          :total="EXPORT_TOTAL"
+          :expires-at="exportExpiresAt"
+          :meta="exportMeta"
+          :now="exportNow"
+          @cancel="() => { stopExport(); exportStatus = 'cancelled' }"
+          @download="(fileName: string) => message.success(`交给调用方去下载：${fileName}`)"
+          @regenerate="runExport"
+        />
+        <IExportJob
+          status="running"
+          :processed="exportUnknown.processed"
+          :now="exportNow"
+          @cancel="() => message.info('这张卡只作对照，取消不做任何事')"
+        />
+      </div>
+    </DemoBlock>
+
     <h2>校验</h2>
     <p>
       浏览器原生的 <code>accept</code> 只过滤文件选择框，<strong>拖拽进来的文件不受它约束</strong>，因此组件对类型、体积、数量做了二次校验。被拒的文件通过 <code>reject</code>事件抛出而非静默丢弃——用户需要知道为什么少了一个文件。
@@ -237,6 +345,12 @@ function onReject(file: File, reason: string) {
 
 <style scoped>
 .import-demo { width: min(640px, 100%); }
+
+.export-demo {
+  display: grid;
+  gap: var(--i-spacing-3);
+  width: min(640px, 100%);
+}
 
 .w { width: 100%; max-width: 480px; }
 </style>

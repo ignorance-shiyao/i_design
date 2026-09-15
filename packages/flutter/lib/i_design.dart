@@ -136,6 +136,7 @@ export 'src/components/i_drawer.dart';
 export 'src/components/i_dropdown.dart';
 export 'src/components/i_empty.dart';
 export 'src/components/i_entity_picker.dart';
+export 'src/components/i_export_job.dart';
 export 'src/components/i_fine_tune_card.dart';
 export 'src/components/i_float_button.dart';
 export 'src/components/i_flow.dart';

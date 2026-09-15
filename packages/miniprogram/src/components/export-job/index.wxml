@@ -1,0 +1,26 @@
+<view class="i-export-job i-export-job--{{tone}}">
+  <view class="i-export-job__head">
+    <view class="i-export-job__icon"><i-icon name="{{icon}}" size="16" /></view>
+    <view class="i-export-job__text">
+      <text class="i-export-job__label">{{label}}</text>
+      <text class="i-export-job__detail">{{detail}}</text>
+    </view>
+    <view class="i-export-job__actions">
+      <i-button wx:if="{{action === 'cancel'}}" size="sm" bind:tap="onCancel">取消</i-button>
+      <i-button wx:elif="{{action === 'download'}}" size="sm" variant="primary" bind:tap="onDownload">下载</i-button>
+      <i-button wx:elif="{{action === 'regenerate'}}" size="sm" bind:tap="onRegenerate">重新生成</i-button>
+      <i-button wx:elif="{{action === 'retry'}}" size="sm" bind:tap="onRetry">重试</i-button>
+    </view>
+  </view>
+
+  <!-- 总数未知时这里什么也不画：走到 90% 就卡住的条子比没有条子更让人不敢离开 -->
+  <view wx:if="{{percent >= 0}}" class="i-export-job__bar">
+    <view class="i-export-job__bar-fill" style="width:{{percent}}%" />
+  </view>
+
+  <!-- 出处永远在：它是这份文件能不能拿去对账的前提 -->
+  <view wx:if="{{provenance.length}}" class="i-export-job__provenance">
+    <view wx:for="{{provenance}}" wx:key="*this">{{item}}</view>
+    <view wx:if="{{fileName}}" class="i-export-job__file">{{fileName}}</view>
+  </view>
+</view>

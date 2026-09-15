@@ -139,6 +139,20 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
     ],
     modelValue: { customer: '客户', owner: '联系人' }
   },
+  /* 导出卡的时间是受控的：不给 now 与 createdAt，Lab 每次截图都会变 */
+  IExportJob: {
+    status: 'running',
+    processed: 12000,
+    total: 48000,
+    now: 1_757_900_000_000,
+    meta: {
+      subject: '销售订单',
+      createdAt: 1_757_900_000_000,
+      filters: ['负责人：林岚', '状态：已发货'],
+      columns: ['订单号', '客户', '金额'],
+      rows: 48_000
+    }
+  },
   IEntityPicker: {
     page: [
       { id: 'p1', label: '张三', hint: '销售一部' },

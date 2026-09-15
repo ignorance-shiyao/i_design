@@ -659,6 +659,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IExportJob",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IFineTuneCard",
     "ends": {
       "vue-next": true,

@@ -1,0 +1,100 @@
+/*
+ * IExportJob —— 导出任务卡。
+ *
+ * 出处（什么时候、按哪套筛选、哪些列、多少行）排在最下面但**永远在**：
+ * 它不是可选的补充说明，是这份文件能不能拿去对账的前提。
+ *
+ * 进度条只在总数已知时出现。总数未知时这里什么也不画——
+ * 一个走到 90% 就卡住的条子，比没有条子更让人不敢离开。
+ */
+.i-export-job {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+}
+
+.i-export-job__head {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+}
+.i-export-job__icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-secondary);
+  background: var(--i-color-bg-subtle);
+}
+.i-export-job--progress .i-export-job__icon {
+  color: var(--i-color-brand-text);
+  background: var(--i-color-brand-subtle);
+}
+.i-export-job--success .i-export-job__icon {
+  color: var(--i-color-success-text);
+  background: var(--i-color-success-subtle);
+}
+.i-export-job--danger .i-export-job__icon {
+  color: var(--i-color-danger-text);
+  background: var(--i-color-danger-subtle);
+}
+.i-export-job__text { flex: 1; min-width: 0; }
+.i-export-job__label { display: block; font-size: var(--i-font-size-md); color: var(--i-color-text); }
+.i-export-job__detail {
+  display: block;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-export-job__actions { display: flex; flex: none; gap: var(--i-spacing-2); }
+
+/* 进度条：只在总数已知时才渲染出来 */
+.i-export-job__bar {
+  height: 4px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-subtle);
+  overflow: hidden;
+}
+.i-export-job__bar-fill {
+  height: 100%;
+  /* 纯色，不用渐变：同一个进度在不同宽度的卡片上得是同一个观感 */
+  background: var(--i-color-brand);
+  transition: width var(--i-motion-base) var(--i-motion-easing);
+}
+@media (prefers-reduced-motion: reduce) {
+  .i-export-job__bar-fill { transition: none; }
+}
+
+/*
+ * 出处。用等宽数字让时间与行数对齐——一列数字不对齐，扫一眼就看不出哪份更大。
+ */
+.i-export-job__provenance {
+  margin: 0;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.i-export-job__file {
+  font-family: var(--i-font-family-mono);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  word-break: break-all;
+}
+
+/* 窄屏上按钮不再挤在右边，单独成行并平分宽度 */
+@media (max-width: 560px) {
+  .i-export-job__head { flex-wrap: wrap; }
+  .i-export-job__actions { flex-basis: 100%; }
+  .i-export-job__actions .i-button { flex: 1; }
+}

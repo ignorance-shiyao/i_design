@@ -1,0 +1,2 @@
+@import '../../../dist/styles/export-job.wxss';
+@import '../../../dist/styles/icons.wxss';

@@ -2282,6 +2282,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IExportJob",
+    "sources": {
+      "vue-next": "src/components/IExportJob.vue",
+      "vue": "packages/vue/src/components/IExportJob.vue",
+      "react": "packages/react/src/components/ExportJob.tsx",
+      "miniprogram": "packages/miniprogram/src/components/export-job",
+      "flutter": "packages/flutter/lib/src/components/i_export_job.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/upload"
+    ],
+    "states": {}
+  },
+  {
     "name": "IFineTuneCard",
     "sources": {
       "vue-next": "src/components/IFineTuneCard.vue",
@@ -5107,7 +5137,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/upload",
       "page": "src/pages/components/UploadPage.vue",
-      "demos": 4
+      "demos": 5
     },
     "demoRoutes": [
       "/components/upload"
