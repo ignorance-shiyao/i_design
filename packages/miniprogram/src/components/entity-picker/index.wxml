@@ -1,0 +1,44 @@
+<view class="i-entity-picker">
+  <input class="i-input" placeholder="{{placeholder}}" value="{{keyword}}" bindinput="onKeyword" />
+
+  <view class="i-entity-picker__summary">
+    <text class="i-entity-picker__count">{{summaryText}}</text>
+    <!-- 不说「请移除」：历史记录里的停用项本来就该留着 -->
+    <text wx:if="{{notice}}" class="i-entity-picker__notice">{{notice}}</text>
+    <text wx:if="{{offPageCount}}" class="i-entity-picker__notice">其中 {{offPageCount}} {{unit}}不在当前结果里，仍然算数</text>
+  </view>
+
+  <!-- 已选排在结果之上：翻页时它不该跟着滚出视野 -->
+  <view wx:if="{{chosen.length}}" class="i-entity-picker__chosen">
+    <view
+      wx:for="{{chosen}}"
+      wx:key="id"
+      class="i-entity-picker__chip {{item.inactive ? 'is-inactive' : ''}}"
+    >
+      <text>{{item.label}}</text>
+      <!-- 「已停用」四个字必须在：颜色不单独承担这个信息 -->
+      <text wx:if="{{item.inactive}}" class="i-entity-picker__chip-tag">已停用</text>
+      <view class="i-entity-picker__chip-off" data-id="{{item.id}}" bindtap="onRemove">
+        <view class="i-icon i-icon--close" style="width:12px;height:12px" />
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{hint}}" class="i-entity-picker__hint">{{hint}}</view>
+
+  <view wx:else class="i-entity-picker__list">
+    <view
+      wx:for="{{rows}}"
+      wx:key="id"
+      class="i-entity-picker__row {{item.selected ? 'is-selected' : ''}} {{item.disabled ? 'is-disabled' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onPick"
+    >
+      <view class="i-icon i-icon--{{item.icon}}" style="width:14px;height:14px" />
+      <text class="i-entity-picker__label">{{item.label}}</text>
+      <text wx:if="{{item.hint}}" class="i-entity-picker__sub">{{item.hint}}</text>
+      <!-- 不能选的理由写在行里，不是长按提示 -->
+      <text wx:if="{{item.reason}}" class="i-entity-picker__reason">{{item.reason}}</text>
+    </view>
+  </view>
+</view>

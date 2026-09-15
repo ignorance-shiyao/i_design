@@ -41,6 +41,7 @@ import IModalForm from './IModalForm.vue'
 import IStepForm from './IStepForm.vue'
 import IBulkBar from './IBulkBar.vue'
 import IDetailPage from './IDetailPage.vue'
+import IEntityPicker from './IEntityPicker.vue'
 import IChatThinking from './IChatThinking.vue'
 import IChatToolCall from './IChatToolCall.vue'
 import IChatSources from './IChatSources.vue'
@@ -251,6 +252,7 @@ export {
   IStepForm,
   IBulkBar,
   IDetailPage,
+  IEntityPicker,
   IChatThinking,
   IChatToolCall,
   IChatSources,
@@ -378,6 +380,7 @@ const components = {
   IStepForm,
   IBulkBar,
   IDetailPage,
+  IEntityPicker,
   IChatThinking,
   IChatToolCall,
   IChatSources,

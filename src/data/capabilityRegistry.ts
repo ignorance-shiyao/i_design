@@ -530,6 +530,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/button",
       "/components/icon",
       "/components/form",
+      "/components/select",
       "/components/badge",
       "/components/descriptions",
       "/components/skeleton",
@@ -2249,6 +2250,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
         "md"
       ]
     }
+  },
+  {
+    "name": "IEntityPicker",
+    "sources": {
+      "vue-next": "src/components/IEntityPicker.vue",
+      "vue": "packages/vue/src/components/IEntityPicker.vue",
+      "react": "packages/react/src/components/EntityPicker.tsx",
+      "miniprogram": "packages/miniprogram/src/components/entity-picker",
+      "flutter": "packages/flutter/lib/src/components/i_entity_picker.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/select"
+    ],
+    "states": {}
   },
   {
     "name": "IFineTuneCard",
@@ -3984,7 +4015,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/select",
       "page": "src/pages/components/SelectPage.vue",
-      "demos": 7
+      "demos": 8
     },
     "demoRoutes": [
       "/components/form",

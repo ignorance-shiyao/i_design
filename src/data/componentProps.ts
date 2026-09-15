@@ -485,6 +485,16 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"description","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"size","type":"'sm' | 'md'","doc":"","optional":true,"defaultText":"'md'","control":{"kind":"enum","options":["sm","md"]}},
   ],
+  IEntityPicker: [
+    {"name":"page","type":"EntityOption[]","doc":"当前这一页的检索结果。由调用方去请求","optional":true,"defaultText":"() => []","control":null},
+    {"name":"modelValue","type":"EntityOption[]","doc":"已选。完整对象，不是 id——回显不能依赖它还在当前页里","optional":true,"defaultText":"() => []","control":null},
+    {"name":"keyword","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"loading","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"multiple","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+    {"name":"max","type":"number","doc":"最多选几个","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"unit","type":"string","doc":"「人」「个部门」「台设备」——摘要里那个量词","optional":true,"defaultText":"'项'","control":{"kind":"string"}},
+    {"name":"placeholder","type":"string","doc":"","optional":true,"defaultText":"'搜索姓名、工号或部门'","control":{"kind":"string"}},
+  ],
   IFineTuneCard: [
     {"name":"fields","type":"FineTuneField[]","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"original","type":"FineTuneValues","doc":"智能体给出的原始值。退回时回到这里","optional":false,"defaultText":null,"control":null},

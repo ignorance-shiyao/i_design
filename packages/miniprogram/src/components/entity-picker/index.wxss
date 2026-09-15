@@ -1,0 +1,2 @@
+@import '../../../dist/styles/entity-picker.wxss';
+@import '../../../dist/styles/icons.wxss';

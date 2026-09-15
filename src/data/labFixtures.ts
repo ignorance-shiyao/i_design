@@ -128,6 +128,16 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
   /* 浮层类组件在 Lab 里默认不展开（见 LabPage 的 INTERACTIVE），必填属性仍要齐 */
   IDrawerForm: { values: {}, initial: {} },
   IModalForm: { values: {}, initial: {} },
+  IEntityPicker: {
+    page: [
+      { id: 'p1', label: '张三', hint: '销售一部' },
+      { id: 'p2', label: '李四', hint: '销售二部', blockedReason: '没有该部门的查看权限' },
+      { id: 'p3', label: '王五', hint: '已离职', inactive: true }
+    ],
+    modelValue: [{ id: 'p1', label: '张三', hint: '销售一部' }],
+    keyword: '张',
+    multiple: true
+  },
   IDetailPage: {
     title: 'SO-2026-0007',
     status: 'submitted',
