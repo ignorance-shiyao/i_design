@@ -74,6 +74,7 @@ export 'src/logic/time_select.dart';
 export 'src/logic/toolchip.dart';
 export 'src/logic/transfer.dart';
 export 'src/logic/tree.dart';
+export 'src/logic/treetable.dart';
 export 'src/logic/upload.dart';
 export 'src/logic/virtual.dart';
 export 'src/logic/wordcloud.dart';

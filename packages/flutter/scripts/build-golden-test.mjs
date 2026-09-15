@@ -23,6 +23,11 @@ const bundle = (entry, name) => {
 
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
+const {
+  sortTree, flattenRows, allRows, leafRows, toggleExpanded, expandAll,
+  selectionSummary, selectAllState, toggleSelectAll, toggleRow, pruneSelection,
+  rowSelectable, aggregateField, groupSummary, grandTotal, summaryLabel
+} = await bundle('packages/common/src/logic/treetable.ts', 'treetable')
 const { buildCalendar, weekdayLabels, toISO: dateToISO } = await bundle(
   'packages/common/src/logic/date.ts',
   'date'
@@ -2179,6 +2184,175 @@ const elapsedExpectations = [
 ]
 
 /*
+ * 树表与分组汇总：排序只在兄弟之间排、折叠不丢选择（并且数得出藏了几项）、
+ * 汇总按叶子算且不受折叠影响。
+ *
+ * 用例里故意让「子行的金额比父行大」，好验出排序确实没有打平层级；
+ * 再放一条没填金额、又不可选的行——空值不参与平均、不可选的行不进全选，
+ * 这两条各端都容易各写各的。排序键只用数值，中文的拼音排序两端本来就不同
+ * （见 table.dart 的说明），拿它做对齐只会验出一个与规则无关的差异。
+ */
+const TREE_ROWS = [
+  {
+    key: 'g1',
+    name: 'east',
+    amount: 300,
+    children: [
+      { key: 'a', name: 'alpha', amount: 100 },
+      { key: 'b', name: 'bravo', amount: 200 }
+    ]
+  },
+  {
+    key: 'g2',
+    name: 'north',
+    amount: 500,
+    children: [
+      { key: 'c', name: 'charlie', amount: 500 },
+      { key: 'd', name: 'delta', selectableReason: '没有该客户的查看权限' }
+    ]
+  }
+]
+const treeRowLit = (row) => {
+  const fields = Object.entries(row)
+    .filter(([k]) => !['key', 'children', 'selectableReason'].includes(k))
+    .map(([k, v]) => `${JSON.stringify(k)}: ${typeof v === 'number' ? v : JSON.stringify(v)}`)
+  const parts = [`key: ${JSON.stringify(row.key)}`]
+  if (row.children?.length) {
+    parts.push(`children: [${row.children.map(treeRowLit).join(', ')}]`)
+  }
+  if (row.selectableReason) {
+    parts.push(`selectableReason: ${JSON.stringify(row.selectableReason)}`)
+  }
+  if (fields.length) parts.push(`fields: const {${fields.join(', ')}}`)
+  return `ITreeRow(${parts.join(', ')})`
+}
+const TREE_DART = `const [${TREE_ROWS.map(treeRowLit).join(', ')}]`
+const treeSet = (keys) =>
+  keys.length ? `{${[...keys].map((k) => JSON.stringify(k)).join(', ')}}` : '<String>{}'
+const treeSpec = (spec) =>
+  `IAggregateSpec(field: ${JSON.stringify(spec.field)}, kind: IAggregation.${spec.kind})`
+
+const treeExpectations = [
+  `    final rows = ${TREE_DART};`,
+  // 排序只在兄弟之间排：子行不会跑到别人家下面去
+  ...['asc', 'desc'].flatMap((order, i) => {
+    const sorted = sortTree(TREE_ROWS, 'amount', order)
+    const v = `sorted${i}`
+    return [
+      `    final ${v} = sortTree(rows, 'amount', ISortOrder.${order});`,
+      `    expect(${v}.map((r) => r.key).toList(), ${JSON.stringify(sorted.map((r) => r.key))});`,
+      ...sorted.map(
+        (group, gi) =>
+          `    expect(${v}[${gi}].children.map((r) => r.key).toList(), ` +
+          `${JSON.stringify((group.children ?? []).map((r) => r.key))});`
+      )
+    ]
+  }),
+  `    expect(sortTree(rows, null, null).map((r) => r.key).toList(), ` +
+    `${JSON.stringify(sortTree(TREE_ROWS, null, null).map((r) => r.key))});`,
+
+  // 折叠：整段跳过，层级与 parentKey 跟着出来
+  ...[[], ['g1'], ['g1', 'g2']].flatMap((expanded, i) => {
+    const flat = flattenRows(TREE_ROWS, expanded)
+    const v = `flat${i}`
+    return [
+      `    final ${v} = flattenRows(rows, ${treeSet(expanded)});`,
+      `    expect(${v}.map((r) => r.key).toList(), ${JSON.stringify(flat.map((r) => r.key))});`,
+      `    expect(${v}.map((r) => r.level).toList(), ${JSON.stringify(flat.map((r) => r.level))});`,
+      `    expect(${v}.map((r) => r.hasChildren).toList(), ` +
+        `${JSON.stringify(flat.map((r) => r.hasChildren))});`
+    ]
+  }),
+  `    expect(allRows(rows).length, ${allRows(TREE_ROWS).length});`,
+  `    expect(leafRows(rows).map((r) => r.key).toList(), ` +
+    `${JSON.stringify(leafRows(TREE_ROWS).map((r) => r.key))});`,
+  `    expect(expandAll(rows), ${treeSet([...expandAll(TREE_ROWS)])});`,
+  ...[
+    [['g1'], 'g2'],
+    [['g1', 'g2'], 'g1']
+  ].map(
+    ([current, key]) =>
+      `    expect(toggleExpanded(${treeSet(current)}, ${JSON.stringify(key)}), ` +
+      `${treeSet([...toggleExpanded(current, key)])});`
+  ),
+
+  // 折叠不丢选择，而且数得出藏了几项
+  ...[
+    [['a', 'b', 'g2'], ['g1', 'g2']],
+    [['a', 'b', 'g2'], ['g2']],
+    [['a', 'b', 'g2'], []],
+    [[], []]
+  ].flatMap(([selected, expanded], i) => {
+    const summary = selectionSummary(selected, flattenRows(TREE_ROWS, expanded))
+    const v = `sum${i}`
+    return [
+      `    final ${v} = selectionSummary(${treeSet(selected)}, ` +
+        `flattenRows(rows, ${treeSet(expanded)}));`,
+      `    expect(${v}.total, ${summary.total});`,
+      `    expect(${v}.visible, ${summary.visible});`,
+      `    expect(${v}.hidden, ${summary.hidden});`,
+      `    expect(${v}.text, ${JSON.stringify(summary.text)});`
+    ]
+  }),
+
+  // 表头复选框：口径是整棵树，不随折叠变化；不可选的行不参与
+  `    expect(toggleSelectAll(rows, <String>{}), ` +
+    `${treeSet([...toggleSelectAll(TREE_ROWS, [])])});`,
+  `    expect(toggleSelectAll(rows, toggleSelectAll(rows, <String>{})), <String>{});`,
+  ...[[], ['a'], [...toggleSelectAll(TREE_ROWS, [])], ['d']].map(
+    (selected) =>
+      `    expect(selectAllState(rows, ${treeSet(selected)}), ` +
+      `ISelectAllState.${selectAllState(TREE_ROWS, selected)});`
+  ),
+
+  // 勾选单行：父子不联动，不可选的点不动
+  ...[
+    [[], 'g1'],
+    [['g1'], 'g1'],
+    [[], 'd'],
+    [[], '不存在的 key']
+  ].map(
+    ([selected, key]) =>
+      `    expect(toggleRow(rows, ${treeSet(selected)}, ${JSON.stringify(key)}), ` +
+      `${treeSet([...toggleRow(TREE_ROWS, selected, key)])});`
+  ),
+  `    expect(rowSelectable(rows[1].children[1]), ` +
+    `${rowSelectable(TREE_ROWS[1].children[1])});`,
+  `    expect(pruneSelection(rows, ${treeSet(['a', '已经不在了'])}), ` +
+    `${treeSet([...pruneSelection(TREE_ROWS, ['a', '已经不在了'])])});`,
+
+  // 汇总：按叶子算、空值不参与平均、一条都没填给 null
+  ...['sum', 'avg', 'count', 'min', 'max'].flatMap((kind) => {
+    const spec = { field: 'amount', kind }
+    const whole = aggregateField(leafRows(TREE_ROWS), spec)
+    const north = aggregateField(TREE_ROWS[1].children, spec)
+    return [
+      `    expect(aggregateField(leafRows(rows), ${treeSpec(spec)}), ` +
+        `${whole === null ? 'null' : whole});`,
+      `    expect(aggregateField(rows[1].children, ${treeSpec(spec)}), ` +
+        `${north === null ? 'null' : north});`
+    ]
+  }),
+  ...[0, 1].flatMap((gi) => {
+    const spec = { field: 'amount', kind: 'sum' }
+    const summary = groupSummary(TREE_ROWS[gi], [spec])
+    return [
+      `    expect(groupSummary(rows[${gi}], [${treeSpec(spec)}]).count, ${summary.count});`,
+      `    expect(groupSummary(rows[${gi}], [${treeSpec(spec)}]).values['amount'], ` +
+        `${summary.values.amount === null ? 'null' : summary.values.amount});`
+    ]
+  }),
+  `    expect(grandTotal(rows, [${treeSpec({ field: 'amount', kind: 'sum' })}]).values['amount'], ` +
+    `${grandTotal(TREE_ROWS, [{ field: 'amount', kind: 'sum' }]).values.amount});`,
+  `    expect(grandTotal(rows, const []).count, ` +
+    `${grandTotal(TREE_ROWS, []).count});`,
+  `    expect(summaryLabel(groupSummary(rows[0], const [])), ` +
+    `${JSON.stringify(summaryLabel(groupSummary(TREE_ROWS[0], [])))});`,
+  `    expect(summaryLabel(grandTotal(rows, const []), '合计'), ` +
+    `${JSON.stringify(summaryLabel(grandTotal(TREE_ROWS, []), '合计'))});`
+]
+
+/*
  * 导出任务：哪一态给什么出口、总数未知时给不给百分比、过期的 ready 算不算
  * ready、剩余时间怎么说成人话、时间戳怎么排版。
  *
@@ -4182,6 +4356,10 @@ ${pickerExpectations.join('\n')}
 
   test('导入的列映射、错误清单转义与幂等键与 Web 端一致', () {
 ${importExpectations.join('\n')}
+  });
+
+  test('树表的兄弟内排序、折叠不丢选择与分组汇总与 Web 端一致', () {
+${treeExpectations.join('\n')}
   });
 
   test('导出任务的状态、进度与时间排版与 Web 端一致', () {
