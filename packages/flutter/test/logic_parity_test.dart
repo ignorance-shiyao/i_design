@@ -48,6 +48,7 @@ import 'package:i_design/src/logic/formhost.dart';
 import 'package:i_design/src/logic/bulk.dart';
 import 'package:i_design/src/logic/detail.dart';
 import 'package:i_design/src/logic/entitypicker.dart';
+import 'package:i_design/src/logic/importjob.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -2558,6 +2559,34 @@ void main() {
     expect(pickerHint("张", true, 0), "检索中…");
     expect(pickerHint("张", false, 3), "");
     expect(pickerHint("  ", false, 0), "输入姓名、工号或部门开始检索");
+  });
+
+  test('导入的列映射、错误清单转义与幂等键与 Web 端一致', () {
+    expect(guessMapping([ISourceColumn(key: "客户", sample: "明远制造"), ISourceColumn(key: "联系人", sample: "林岚"), ISourceColumn(key: "备注", sample: "急")], [ITargetField(key: "customer", label: "客户", required: true), ITargetField(key: "owner", label: "负责人", required: true, aliases: ["联系人"]), ITargetField(key: "note", label: "备注"), ITargetField(key: "amount", label: "金额", required: true)]), {"customer": "客户", "owner": "联系人", "note": "备注", "amount": null});
+    final mi0 = mappingIssues({"customer": "客户", "owner": "联系人", "note": "备注", "amount": null}, [ITargetField(key: "customer", label: "客户", required: true), ITargetField(key: "owner", label: "负责人", required: true, aliases: ["联系人"]), ITargetField(key: "note", label: "备注"), ITargetField(key: "amount", label: "金额", required: true)]);
+    expect(mi0.map((x) => x.level).toList(), [IMappingIssueLevel.error]);
+    expect(mi0.map((x) => x.message).toList(), ["必填字段「金额」还没映上"]);
+    expect(canProceed(mi0), false);
+    final mi1 = mappingIssues({"customer": "客户", "owner": "联系人", "note": null, "amount": "备注"}, [ITargetField(key: "customer", label: "客户", required: true), ITargetField(key: "owner", label: "负责人", required: true, aliases: ["联系人"]), ITargetField(key: "note", label: "备注"), ITargetField(key: "amount", label: "金额", required: true)]);
+    expect(mi1.map((x) => x.level).toList(), [IMappingIssueLevel.warning]);
+    expect(mi1.map((x) => x.message).toList(), ["「备注」没映上，导入后留空"]);
+    expect(canProceed(mi1), true);
+    final mi2 = mappingIssues({"customer": "客户", "owner": "客户", "note": null, "amount": "备注"}, [ITargetField(key: "customer", label: "客户", required: true), ITargetField(key: "owner", label: "负责人", required: true, aliases: ["联系人"]), ITargetField(key: "note", label: "备注"), ITargetField(key: "amount", label: "金额", required: true)]);
+    expect(mi2.map((x) => x.level).toList(), [IMappingIssueLevel.warning, IMappingIssueLevel.error]);
+    expect(mi2.map((x) => x.message).toList(), ["「备注」没映上，导入后留空", "来源列「客户」同时映给了 客户、负责人"]);
+    expect(canProceed(mi2), false);
+    expect(clearMapping({"customer": "客户", "owner": "联系人", "note": "备注", "amount": null}, "customer"), {"customer": null, "owner": "联系人", "note": "备注", "amount": null});
+    expect(assignMapping({"customer": "客户", "owner": "联系人", "note": "备注", "amount": null}, "amount", "备注"), {"customer": "客户", "owner": "联系人", "note": null, "amount": "备注"});
+    expect(assignMapping({"customer": "客户", "owner": "联系人", "note": "备注", "amount": null}, "amount", null), {"customer": "客户", "owner": "联系人", "note": "备注", "amount": null});
+    expect(assignMapping({"customer": "客户", "owner": "联系人", "note": "备注", "amount": null}, "customer", "联系人"), {"customer": "联系人", "owner": null, "note": "备注", "amount": null});
+    expect(problemsCsv([IRowProblem(row: 3, column: "客户", message: "客户为空")]), "行号,列,问题\n3,客户,客户为空");
+    expect(problemsCsv([IRowProblem(row: 1, column: "客户", message: "「明远,制造」不存在")]), "行号,列,问题\n1,客户,\"「明远,制造」不存在\"");
+    expect(problemsCsv([IRowProblem(row: 1, message: "含\"引号\"")]), "行号,列,问题\n1,,\"含\"\"引号\"\"\"");
+    expect(problemsCsv([]), "行号,列,问题");
+    expect(importKey("sha-1", {"customer": "客户", "owner": "联系人", "note": null}), "sha-1|customer=客户&note=&owner=联系人");
+    expect(importKey("sha-1", {"note": null, "owner": "联系人", "customer": "客户"}), "sha-1|customer=客户&note=&owner=联系人");
+    expect(importKey("sha-2", {"customer": "客户", "owner": "联系人", "note": null}), "sha-2|customer=客户&note=&owner=联系人");
+    expect(importKey("sha-1", {"customer": "客户", "owner": "联系人", "note": "备注"}), "sha-1|customer=客户&note=备注&owner=联系人");
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {

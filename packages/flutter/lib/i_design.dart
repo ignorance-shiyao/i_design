@@ -36,6 +36,7 @@ export 'src/logic/formhost.dart';
 export 'src/logic/gantt.dart';
 export 'src/logic/href.dart';
 export 'src/logic/image.dart';
+export 'src/logic/importjob.dart';
 export 'src/logic/indexes.dart';
 export 'src/logic/insight.dart';
 export 'src/logic/keypad.dart';

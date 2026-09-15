@@ -121,6 +121,10 @@ const {
   pickerRows, togglePick, removePick, offPageChosen, inactiveChosen,
   pickerSummary, pickerHint
 } = await bundle('packages/common/src/logic/entitypicker.ts', 'entitypicker')
+const {
+  guessMapping, mappingIssues, canProceed, clearMapping, assignMapping,
+  problemsCsv, importKey
+} = await bundle('packages/common/src/logic/importjob.ts', 'importjob')
 const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
 const { searchCommands, moveCommandIndex } = await bundle(
   'packages/common/src/logic/command.ts',
@@ -2172,6 +2176,107 @@ const elapsedExpectations = [
 ]
 
 /*
+ * 批量导入：列映射猜得对不对、映射有什么问题、改一列会不会悄悄变成
+ * 「一列映给两个字段」、错误清单怎么转义、幂等键在键序不同时还一不一样。
+ * 两端算出不同的幂等键，等于同一批货导进去两遍。
+ */
+const importSources = [
+  { key: '客户', sample: '明远制造' },
+  { key: '联系人', sample: '林岚' },
+  { key: '备注', sample: '急' }
+]
+const importFields = [
+  { key: 'customer', label: '客户', required: true },
+  { key: 'owner', label: '负责人', required: true, aliases: ['联系人'] },
+  { key: 'note', label: '备注' },
+  { key: 'amount', label: '金额', required: true }
+]
+const importDartSources = `[${importSources
+  .map(
+    (s) =>
+      `ISourceColumn(key: ${JSON.stringify(s.key)}` +
+      `${s.sample === undefined ? '' : `, sample: ${JSON.stringify(s.sample)}`})`
+  )
+  .join(', ')}]`
+const importDartFields = `[${importFields
+  .map((f) => {
+    const args = [
+      `key: ${JSON.stringify(f.key)}`,
+      `label: ${JSON.stringify(f.label)}`,
+      ...(f.required ? ['required: true'] : []),
+      ...(f.aliases ? [`aliases: [${f.aliases.map((a) => JSON.stringify(a)).join(', ')}]`] : [])
+    ]
+    return `ITargetField(${args.join(', ')})`
+  })
+  .join(', ')}]`
+const importDartMapping = (m) =>
+  `{${Object.keys(m)
+    .map((k) => `${JSON.stringify(k)}: ${m[k] === null ? 'null' : JSON.stringify(m[k])}`)
+    .join(', ')}}`
+const importGuessed = guessMapping(importSources, importFields)
+const importMappingCases = [
+  importGuessed,
+  { customer: '客户', owner: '联系人', note: null, amount: '备注' },
+  { customer: '客户', owner: '客户', note: null, amount: '备注' }
+]
+const importProblemCases = [
+  [{ row: 3, column: '客户', message: '客户为空' }],
+  [{ row: 1, column: '客户', message: '「明远,制造」不存在' }],
+  [{ row: 1, message: '含"引号"' }],
+  []
+]
+const importKeyCases = [
+  ['sha-1', { customer: '客户', owner: '联系人', note: null }],
+  ['sha-1', { note: null, owner: '联系人', customer: '客户' }],
+  ['sha-2', { customer: '客户', owner: '联系人', note: null }],
+  ['sha-1', { customer: '客户', owner: '联系人', note: '备注' }]
+]
+const importExpectations = [
+  `    expect(guessMapping(${importDartSources}, ${importDartFields}), ` +
+    `${importDartMapping(importGuessed)});`,
+  ...importMappingCases.flatMap((mapping, i) => {
+    const issues = mappingIssues(mapping, importFields)
+    const v = `mi${i}`
+    return [
+      `    final ${v} = mappingIssues(${importDartMapping(mapping)}, ${importDartFields});`,
+      `    expect(${v}.map((x) => x.level).toList(), ` +
+        `[${issues.map((x) => `IMappingIssueLevel.${x.level}`).join(', ')}]);`,
+      `    expect(${v}.map((x) => x.message).toList(), ` +
+        `[${issues.map((x) => JSON.stringify(x.message)).join(', ')}]);`,
+      `    expect(canProceed(${v}), ${canProceed(issues)});`
+    ]
+  }),
+  `    expect(clearMapping(${importDartMapping(importGuessed)}, "customer"), ` +
+    `${importDartMapping(clearMapping(importGuessed, 'customer'))});`,
+  ...[
+    ['amount', '备注'],
+    ['amount', null],
+    ['customer', '联系人']
+  ].map(
+    ([field, source]) =>
+      `    expect(assignMapping(${importDartMapping(importGuessed)}, ${JSON.stringify(field)}, ` +
+      `${source === null ? 'null' : JSON.stringify(source)}), ` +
+      `${importDartMapping(assignMapping(importGuessed, field, source))});`
+  ),
+  ...importProblemCases.map((problems) => {
+    const dart = `[${problems
+      .map(
+        (p) =>
+          `IRowProblem(row: ${p.row}` +
+          `${p.column === undefined ? '' : `, column: ${JSON.stringify(p.column)}`}` +
+          `, message: ${JSON.stringify(p.message)})`
+      )
+      .join(', ')}]`
+    return `    expect(problemsCsv(${dart}), ${JSON.stringify(problemsCsv(problems))});`
+  }),
+  ...importKeyCases.map(
+    ([fp, mapping]) =>
+      `    expect(importKey(${JSON.stringify(fp)}, ${importDartMapping(mapping)}), ` +
+      `${JSON.stringify(importKey(fp, mapping))});`
+  )
+]
+
+/*
  * 人员 / 组织 / 资源选择：每一行能不能点与为什么不能、点一下之后已选变成什么、
  * 翻页之后哪些已选不在当前页、摘要与检索提示。两端判得不一样的后果是
  * 同一批人在一端选得上、在另一端选不上，或者停用的人在一端直接消失。
@@ -3501,6 +3606,7 @@ import 'package:i_design/src/logic/formhost.dart';
 import 'package:i_design/src/logic/bulk.dart';
 import 'package:i_design/src/logic/detail.dart';
 import 'package:i_design/src/logic/entitypicker.dart';
+import 'package:i_design/src/logic/importjob.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -3989,6 +4095,10 @@ ${detailExpectations.join('\n')}
 
   test('人员选择的可选性、已选顺序、翻页回显与提示与 Web 端一致', () {
 ${pickerExpectations.join('\n')}
+  });
+
+  test('导入的列映射、错误清单转义与幂等键与 Web 端一致', () {
+${importExpectations.join('\n')}
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {
