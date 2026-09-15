@@ -29,6 +29,7 @@ export 'src/logic/file.dart';
 export 'src/logic/finetune.dart';
 export 'src/logic/float.dart';
 export 'src/logic/flow.dart';
+export 'src/logic/formhost.dart';
 export 'src/logic/gantt.dart';
 export 'src/logic/href.dart';
 export 'src/logic/image.dart';

@@ -106,6 +106,10 @@ const { describeRun: lifecycleDescribeRun, retryCountdown } = await bundle(
   'packages/common/src/logic/lifecycle.ts',
   'lifecycle'
 )
+const {
+  submitGate, changedFields, isDirty, leaveGuard, resetValues, resetLabel,
+  stepState, stepOfError
+} = await bundle('packages/common/src/logic/formhost.ts', 'formhost')
 const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
 const { searchCommands, moveCommandIndex } = await bundle(
   'packages/common/src/logic/command.ts',
@@ -2157,6 +2161,140 @@ const elapsedExpectations = [
 ]
 
 /*
+ * 表单壳：什么时候拦住提交、什么时候拦住离开、「重置」重置到哪儿、
+ * 分步走到哪一步能不能往下。全是「该不该拦住用户」的决定，
+ * 两端判得不一样就会出现同一张表在一端拦住了、在另一端直接放走。
+ */
+const FORM_PHASE_DART = {
+  idle: 'ISubmitPhase.idle',
+  submitting: 'ISubmitPhase.submitting',
+  failed: 'ISubmitPhase.failed',
+  succeeded: 'ISubmitPhase.succeeded'
+}
+const formDartMap = (obj) =>
+  `{${Object.entries(obj)
+    .map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`)
+    .join(', ')}}`
+const formDartStrList = (xs) => `[${xs.map((x) => JSON.stringify(x)).join(', ')}]`
+
+const formSubmitGateCases = [
+  { phase: 'idle', valid: true },
+  { phase: 'idle', valid: false },
+  { phase: 'submitting', valid: true },
+  { phase: 'submitting', valid: false },
+  { phase: 'failed', valid: true },
+  { phase: 'succeeded', valid: true },
+  { phase: 'succeeded', valid: true, resubmittable: true },
+  { phase: 'idle', valid: true, disabled: true }
+]
+const formDirtyCases = [
+  [{ a: 1 }, { a: 1 }],
+  [{ a: 1, b: 'x' }, { a: 2, b: 'x' }],
+  [{ a: 1 }, { a: 1, b: 2 }],
+  [{ a: 1, b: 2 }, { a: 1 }],
+  [{ tags: ['x'] }, { tags: ['x'] }],
+  [{ tags: ['x'] }, { tags: ['y'] }],
+  [{}, {}]
+]
+const formLeaveCases = [
+  { base: { a: 1 }, current: { a: 1 }, phase: 'idle' },
+  { base: { a: 1, b: 1 }, current: { a: 2, b: 3 }, phase: 'idle' },
+  { base: { a: 1 }, current: { a: 2 }, phase: 'submitting' },
+  { base: { a: 1 }, current: { a: 2 }, phase: 'succeeded' },
+  { base: { a: 1 }, current: { a: 2 }, phase: 'idle', draftSaved: true },
+  { base: { a: 1 }, current: { a: 2 }, phase: 'failed' }
+]
+const FORM_STEPS = [
+  { key: 's1', title: '基本信息', fields: ['name', 'code'] },
+  { key: 's2', title: '收货地址', fields: ['addr'] },
+  { key: 's3', title: '备注', fields: ['note'], optional: true }
+]
+const formDartSteps = `[${FORM_STEPS.map(
+  (s) =>
+    `IStepSpec(key: ${JSON.stringify(s.key)}, title: ${JSON.stringify(s.title)}, ` +
+    `fields: ${formDartStrList(s.fields)}${s.optional ? ', optional: true' : ''})`
+).join(', ')}]`
+const formStepCases = [
+  { index: 0, errorPaths: ['addr'], visited: [0] },
+  { index: 0, errorPaths: ['name'], visited: [0] },
+  { index: 2, errorPaths: ['note'], visited: [0, 1, 2] },
+  { index: 2, errorPaths: ['addr'], visited: [0, 1, 2] },
+  { index: 1, errorPaths: [], visited: [0, 1] },
+  { index: 0, errorPaths: [], visited: [0] }
+]
+const formHostExpectations = [
+  ...formSubmitGateCases.flatMap((input, i) => {
+    const gate = submitGate(input)
+    const args = [
+      `phase: ${FORM_PHASE_DART[input.phase]}`,
+      `valid: ${input.valid}`,
+      ...(input.disabled === undefined ? [] : [`disabled: ${input.disabled}`]),
+      ...(input.resubmittable === undefined ? [] : [`resubmittable: ${input.resubmittable}`])
+    ]
+    const v = `sg${i}`
+    return [
+      `    final ${v} = submitGate(${args.join(', ')});`,
+      `    expect(${v}.allowed, ${gate.allowed});`,
+      `    expect(${v}.busy, ${gate.busy});`,
+      `    expect(${v}.reason, ${JSON.stringify(gate.reason)});`
+    ]
+  }),
+  ...formDirtyCases.flatMap(([base, current]) => [
+    `    expect(changedFields(${formDartMap(base)}, ${formDartMap(current)}), ` +
+      `${formDartStrList(changedFields(base, current))});`,
+    `    expect(isDirty(${formDartMap(base)}, ${formDartMap(current)}), ${isDirty(base, current)});`
+  ]),
+  ...formLeaveCases.flatMap((input, i) => {
+    const guard = leaveGuard(input)
+    const args = [
+      `base: ${formDartMap(input.base)}`,
+      `current: ${formDartMap(input.current)}`,
+      `phase: ${FORM_PHASE_DART[input.phase]}`,
+      ...(input.draftSaved === undefined ? [] : [`draftSaved: ${input.draftSaved}`])
+    ]
+    const v = `lg${i}`
+    return [
+      `    final ${v} = leaveGuard(${args.join(', ')});`,
+      `    expect(${v}.blocked, ${guard.blocked});`,
+      `    expect(${v}.message, ${JSON.stringify(guard.message)});`
+    ]
+  }),
+  ...['initial', 'draft', 'empty'].flatMap((scope) => {
+    const initial = { a: 1, b: 2 }
+    const draft = { a: 9 }
+    const dartScope = `IResetScope.${scope}`
+    return [
+      `    expect(resetValues(${dartScope}, ${formDartMap(initial)}, ${formDartMap(draft)}), ` +
+        `${formDartMap(resetValues(scope, initial, draft))});`,
+      `    expect(resetValues(${dartScope}, ${formDartMap(initial)}), ` +
+        `${formDartMap(resetValues(scope, initial))});`,
+      `    expect(resetLabel(${dartScope}, hasDraft: true), ` +
+        `${JSON.stringify(resetLabel(scope, true))});`,
+      `    expect(resetLabel(${dartScope}), ${JSON.stringify(resetLabel(scope, false))});`
+    ]
+  }),
+  ...formStepCases.flatMap((input, i) => {
+    const state = stepState({ steps: FORM_STEPS, ...input })
+    const v = `ss${i}`
+    return [
+      `    final ${v} = stepState(steps: ${formDartSteps}, index: ${input.index}, ` +
+        `errorPaths: ${formDartStrList(input.errorPaths)}, visited: [${input.visited.join(', ')}]);`,
+      `    expect(${v}.blocked, ${state.blocked});`,
+      `    expect(${v}.canPrev, ${state.canPrev});`,
+      `    expect(${v}.canNext, ${state.canNext});`,
+      `    expect(${v}.isLast, ${state.isLast});`,
+      `    expect(${v}.marks.map((m) => m.state).toList(), ` +
+        `[${state.marks.map((m) => `IStepMarkState.${m.state}`).join(', ')}]);`
+    ]
+  }),
+  ...[['name'], ['addr'], ['note'], ['__form'], []].map(
+    (paths) =>
+      `    expect(stepOfError(${formDartSteps}, ${formDartStrList(paths)}), ` +
+      `${stepOfError(FORM_STEPS, paths)});`
+  )
+]
+
+/*
  * 运行状态的叙述：排队、连接、断线重连、等人确认——四种「界面静止」在两端
  * 必须说同一句话，也必须在同一刻允许取消。这里最容易各端各判一遍的是优先级
  * （终态压断线、断线压生成中）和倒计时的进位方向。
@@ -2945,6 +3083,7 @@ import 'package:i_design/src/logic/overflow.dart';
 import 'package:i_design/src/logic/diff.dart';
 import 'package:i_design/src/logic/elapsed.dart';
 import 'package:i_design/src/logic/lifecycle.dart';
+import 'package:i_design/src/logic/formhost.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -3417,6 +3556,10 @@ ${elapsedExpectations.join('\n')}
 
   test('排队/连接/断线/等人确认的叙述与可取消性与 Web 端一致', () {
 ${lifecycleExpectations.join('\n')}
+  });
+
+  test('表单壳的提交闸、离开保护、重置范围与分步状态与 Web 端一致', () {
+${formHostExpectations.join('\n')}
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {
