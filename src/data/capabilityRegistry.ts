@@ -666,7 +666,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/card",
       "page": "src/pages/components/CardPage.vue",
-      "demos": 2
+      "demos": 3
     },
     "demoRoutes": [
       "/components/skeleton",
@@ -1982,6 +1982,44 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "size": [
         "sm",
         "md"
+      ]
+    }
+  },
+  {
+    "name": "IDetailPage",
+    "sources": {
+      "vue-next": "src/components/IDetailPage.vue",
+      "vue": "packages/vue/src/components/IDetailPage.vue",
+      "react": "packages/react/src/components/DetailPage.tsx",
+      "miniprogram": "packages/miniprogram/src/components/detail-page",
+      "flutter": "packages/flutter/lib/src/components/i_detail_page.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/card"
+    ],
+    "states": {
+      "statusTone": [
+        "default",
+        "brand",
+        "success",
+        "warning",
+        "danger"
       ]
     }
   },

@@ -127,6 +127,7 @@ export 'src/components/i_confirm.dart';
 export 'src/components/i_countdown.dart';
 export 'src/components/i_date_picker.dart';
 export 'src/components/i_descriptions.dart';
+export 'src/components/i_detail_page.dart';
 export 'src/components/i_divider.dart';
 export 'src/components/i_drawer.dart';
 export 'src/components/i_dropdown.dart';

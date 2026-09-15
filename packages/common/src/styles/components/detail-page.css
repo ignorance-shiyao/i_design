@@ -1,0 +1,111 @@
+/*
+ * IDetailPage —— 一条记录摊开之后的页面骨架。
+ *
+ * 顺序是刻意的：返回入口与「第几条」在最上面（用户是从列表点进来的，
+ * 第一反应是「我在哪、怎么回去」），然后是标题与状态，再是失效提示，
+ * 最后才是动作。把动作放在失效提示上面的话，用户会先点、再读到「这份已经旧了」。
+ *
+ * 停用的动作为什么灰，写在按钮下面一行，不只挂在 title 上：
+ * 触摸屏没有悬停，读屏也不会主动去念 title。
+ */
+.i-detail-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-4);
+}
+
+.i-detail-page__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-detail-page__position {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.i-detail-page__steps { display: flex; gap: var(--i-spacing-1); margin-left: auto; }
+
+.i-detail-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-3);
+}
+.i-detail-page__title {
+  margin: 0;
+  font-size: var(--i-font-size-xl);
+  font-weight: 500;
+  color: var(--i-color-text);
+}
+.i-detail-page__summary {
+  margin: 0;
+  flex-basis: 100%;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  /* 与正文同一个行长上限：摘要通栏排到底一样读不下去 */
+  max-width: 45em;
+}
+
+/*
+ * 失效提示：图标 + 淡底色块，边框保持四边等宽的发丝线。
+ * 文字标签永远在（「已被他人更新」「已被删除」），颜色只是第三条线索。
+ */
+.i-detail-page__stale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-warning-subtle);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+}
+.i-detail-page__stale--deleted { background: var(--i-color-danger-subtle); }
+.i-detail-page__stale-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-warning-text);
+  background: var(--i-color-bg-elevated);
+}
+.i-detail-page__stale--deleted .i-detail-page__stale-icon { color: var(--i-color-danger-text); }
+.i-detail-page__stale-label { font-weight: 500; }
+.i-detail-page__stale-text { flex: 1; min-width: 0; color: var(--i-color-text-secondary); }
+
+.i-detail-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+  align-items: center;
+}
+/* 灰按钮的理由：按原因归并，一行一条。同一个原因挡住三个动作时不说三遍 */
+.i-detail-page__reasons {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-detail-page__reason-keys { color: var(--i-color-text); }
+.i-detail-page__empty {
+  margin: 0;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+}
+
+.i-detail-page__body { min-width: 0; }
+
+/* 窄屏上「上一条 / 下一条」不再贴右，跟着位置文字走 */
+@media (max-width: 560px) {
+  .i-detail-page__steps { margin-left: 0; }
+}

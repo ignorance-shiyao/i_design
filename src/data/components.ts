@@ -141,6 +141,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'ProTable', cn: '查询表格', to: '/components/table', desc: 'Table 加查询层与列能力；过期响应会被丢掉' },
       { name: 'BulkBar', cn: '批量操作条', to: '/components/table', desc: '把「对谁做」说死；部分失败只重试失败项' },
       { name: 'SchemaForm', cn: 'Schema 表单', to: '/components/form', desc: '按数据结构渲染表单；schema 里不执行任何字符串' },
+      { name: 'DetailPage', cn: '详情页', to: '/components/card', desc: '这条记录现在能做什么；看到的这一份还作不作数' },
       { name: 'FormPage', cn: '表单页', to: '/components/form', desc: '围着表单的那几件事：重复提交、离开保护与重置范围' },
       { name: 'DrawerForm', cn: '抽屉表单', to: '/components/form', desc: '抽屉里的表单壳；关闭动作也要过离开保护' },
       { name: 'ModalForm', cn: '弹窗表单', to: '/components/form', desc: '弹窗里的表单壳；关闭动作也要过离开保护' },

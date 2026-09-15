@@ -77,6 +77,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ICountdown.vue",
   "src/components/IDatePicker.vue",
   "src/components/IDescriptions.vue",
+  "src/components/IDetailPage.vue",
   "src/components/IDiffTable.vue",
   "src/components/IDivider.vue",
   "src/components/IDrawer.vue",

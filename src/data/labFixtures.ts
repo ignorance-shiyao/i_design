@@ -128,6 +128,16 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
   /* 浮层类组件在 Lab 里默认不展开（见 LabPage 的 INTERACTIVE），必填属性仍要齐 */
   IDrawerForm: { values: {}, initial: {} },
   IModalForm: { values: {}, initial: {} },
+  IDetailPage: {
+    title: 'SO-2026-0007',
+    status: 'submitted',
+    actions: [
+      { key: 'approve', label: '通过', kind: 'primary', states: ['submitted'], permission: '审批' },
+      { key: 'print', label: '打印', readonly: true }
+    ],
+    siblingIds: ['SO-2026-0006', 'SO-2026-0007', 'SO-2026-0008'],
+    currentId: 'SO-2026-0007'
+  },
   IBulkBar: { scope: 'page', pageIds: ['SO-1', 'SO-2', 'SO-3'], selectedIds: ['SO-1'], matchedTotal: 8000 },
   IStepForm: {
     modelValue: {},

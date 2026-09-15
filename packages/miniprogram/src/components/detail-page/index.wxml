@@ -1,0 +1,55 @@
+<view class="i-detail-page">
+  <view class="i-detail-page__nav">
+    <i-button size="sm" variant="text" bind:tap="onBack">{{backText}}</i-button>
+    <view wx:if="{{position}}" class="i-detail-page__position">{{position}}</view>
+    <view class="i-detail-page__steps">
+      <!-- 到头了按钮停用而不是消失：消失会让人以为是页面坏了 -->
+      <i-button size="sm" disabled="{{!prevId}}" bind:tap="onPrev">上一条</i-button>
+      <i-button size="sm" disabled="{{!nextId}}" bind:tap="onNext">下一条</i-button>
+    </view>
+  </view>
+
+  <view class="i-detail-page__head">
+    <view class="i-detail-page__title">{{title}}</view>
+    <i-tag type="{{statusTone}}">{{status}}</i-tag>
+    <slot name="extra" />
+    <view wx:if="{{summary}}" class="i-detail-page__summary">{{summary}}</view>
+  </view>
+
+  <!-- 失效提示在动作上面：放下面的话，用户会先点、再读到「这份已经旧了」 -->
+  <view
+    wx:if="{{staleKind !== 'fresh'}}"
+    class="i-detail-page__stale {{staleKind === 'deleted' ? 'i-detail-page__stale--deleted' : ''}}"
+  >
+    <view class="i-detail-page__stale-icon"><i-icon name="{{staleIcon}}" size="14" /></view>
+    <text class="i-detail-page__stale-label">{{staleLabel}}</text>
+    <text class="i-detail-page__stale-text">{{staleDetail}}</text>
+    <i-button wx:if="{{staleAction === 'refresh'}}" size="sm" bind:tap="onRefresh">刷新看最新</i-button>
+    <i-button wx:elif="{{staleAction === 'back'}}" size="sm" bind:tap="onBack">回到列表</i-button>
+  </view>
+
+  <view wx:if="{{resolved.length}}" class="i-detail-page__actions">
+    <i-button
+      wx:for="{{resolved}}"
+      wx:key="key"
+      size="sm"
+      variant="{{item.variant}}"
+      disabled="{{item.disabled}}"
+      data-key="{{item.key}}"
+      bind:tap="onAction"
+    >
+      {{item.label}}
+    </i-button>
+  </view>
+  <!-- 空白一片会让人以为页面没加载完 -->
+  <view wx:else class="i-detail-page__empty">{{emptyHint}}</view>
+
+  <view wx:if="{{reasons.length}}" class="i-detail-page__reasons">
+    <view wx:for="{{reasons}}" wx:key="reason">
+      <text class="i-detail-page__reason-keys">{{item.labels}}</text>
+      <text>不可用：{{item.reason}}</text>
+    </view>
+  </view>
+
+  <view class="i-detail-page__body"><slot /></view>
+</view>
