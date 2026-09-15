@@ -24,6 +24,10 @@ const bundle = (entry, name) => {
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
 const {
+  threadItems, activitySummary, editNote, unreadState, keepDivider, readUpTo,
+  checkMentions, failedComments, retryComment, discardComment, DELETED_BODY
+} = await bundle('packages/common/src/logic/thread.ts', 'thread')
+const {
   taskOrder, taskBadge, taskNotice, dedupeNotices, submitTask, markSeen, markAllSeen,
   taskTrail, commandEntries, firstRunnable, isActive: taskIsActive
 } = await bundle('packages/common/src/logic/taskcenter.ts', 'taskcenter')
@@ -2185,6 +2189,174 @@ const elapsedExpectations = [
   ...[0, 1, 500, 999, 1000, 5400].map(
     (ms) => `    expect(elapsedInterval(${ms}), ${elapsedInterval(ms)});`
   )
+]
+
+/*
+ * 评论线程：删掉的父评论留坑、活动记录折叠、未读分隔线钉死不动、
+ * 自己发的不算未读、发失败的留在原地带着原文。
+ *
+ * 时间戳这里只作大小比较，格式化交给回调，因此可以整个对齐。
+ */
+const THREAD_NOW = 1700000000000
+const threadAt = (n) => THREAD_NOW + n * 1000
+const threadCommentLit = (c) => {
+  const parts = [
+    `id: ${JSON.stringify(c.id)}`,
+    `createdAt: ${c.createdAt}`,
+    `authorId: ${JSON.stringify(c.authorId ?? 'u1')}`,
+    `authorName: ${JSON.stringify(c.authorName ?? '林岚')}`,
+    `body: ${JSON.stringify(c.body ?? '这单先按 8 万走')}`
+  ]
+  if (c.parentId !== undefined) parts.push(`parentId: ${JSON.stringify(c.parentId)}`)
+  if (c.editedAt !== undefined) parts.push(`editedAt: ${c.editedAt}`)
+  if (c.deleted !== undefined) parts.push(`deleted: ${c.deleted}`)
+  if (c.sendState !== undefined) parts.push(`sendState: ISendState.${c.sendState}`)
+  if (c.sendError !== undefined) parts.push(`sendError: ${JSON.stringify(c.sendError)}`)
+  return `IThreadComment(${parts.join(', ')})`
+}
+const threadActivityLit = (a) =>
+  `IThreadActivity(id: ${JSON.stringify(a.id)}, createdAt: ${a.createdAt}, ` +
+  `actorId: ${JSON.stringify(a.actorId)}, actorName: ${JSON.stringify(a.actorName)}, ` +
+  `change: ${JSON.stringify(a.change)})`
+const threadEntryLit = (e) =>
+  e.kind === 'activity' ? threadActivityLit(e) : threadCommentLit(e)
+const threadListLit = (entries) => `<IThreadEntry>[${entries.map(threadEntryLit).join(', ')}]`
+const mkComment = (over) => ({
+  kind: 'comment',
+  authorId: 'u1',
+  authorName: '林岚',
+  body: '这单先按 8 万走',
+  ...over
+})
+const mkActivity = (id, createdAt, actorId, change) => ({
+  id,
+  kind: 'activity',
+  actorId,
+  actorName: actorId === 'u1' ? '林岚' : '沈黎',
+  change,
+  createdAt
+})
+
+/* 结构：一条顶层评论 + 一条回复 + 两条连续活动 + 另一条顶层评论 */
+const THREAD_BASE = [
+  mkComment({ id: 'c1', createdAt: threadAt(1) }),
+  mkComment({ id: 'c2', createdAt: threadAt(2), parentId: 'c1', authorId: 'u2', authorName: '沈黎', body: '同意' }),
+  mkActivity('a1', threadAt(3), 'u1', '修改了负责人'),
+  mkActivity('a2', threadAt(4), 'u1', '修改了金额'),
+  mkComment({ id: 'c3', createdAt: threadAt(5), authorId: 'u2', authorName: '沈黎' })
+]
+/* 删掉的父评论：底下还有回复，必须留坑 */
+const THREAD_TOMB = [
+  mkComment({ id: 'd1', createdAt: threadAt(1), deleted: true }),
+  mkComment({ id: 'd2', createdAt: threadAt(2), parentId: 'd1', body: '同意' })
+]
+const THREAD_GONE = [mkComment({ id: 'g1', createdAt: threadAt(1), deleted: true })]
+/* 未读：自己发的那条不算 */
+const THREAD_UNREAD = [
+  mkComment({ id: 'u-c1', createdAt: threadAt(1), authorId: 'u2', authorName: '沈黎' }),
+  mkComment({ id: 'u-c2', createdAt: threadAt(5), authorId: 'u2', authorName: '沈黎' }),
+  mkComment({ id: 'u-c3', createdAt: threadAt(6), authorId: 'me', authorName: '我' }),
+  mkActivity('u-a1', threadAt(7), 'u2', '修改了状态')
+]
+const THREAD_FAILED = [
+  mkComment({ id: 'f1', createdAt: threadAt(1) }),
+  mkComment({ id: 'f2', createdAt: threadAt(2), body: '三百字的长评', sendState: 'failed', sendError: '' }),
+  mkComment({ id: 'f3', createdAt: threadAt(3), sendState: 'sending' })
+]
+
+const threadExpectations = [
+  `    expect(kDeletedBody, ${JSON.stringify(DELETED_BODY)});`,
+  // 回复挂在父评论下面，活动记录按时间穿插并折成一组
+  `    final items = threadItems(${threadListLit(THREAD_BASE)});`,
+  `    expect(items.map((i) => i.kind == IThreadEntryKind.comment ? 'comment' : 'activity').toList(), ` +
+    `${JSON.stringify(threadItems(THREAD_BASE).map((i) => i.kind))});`,
+  `    expect(items[0].node!.replies.map((r) => r.comment.id).toList(), ` +
+    `${JSON.stringify(threadItems(THREAD_BASE)[0].node.replies.map((r) => r.comment.id))});`,
+  `    expect(items[1].summary, ` +
+    `${JSON.stringify(threadItems(THREAD_BASE)[1].summary)});`,
+  // 几个人一起改的不合并人名
+  `    expect(activitySummary([${[mkActivity('a1', threadAt(1), 'u1', '修改了负责人'), mkActivity('a2', threadAt(2), 'u2', '修改了金额')].map(threadActivityLit).join(', ')}]), ` +
+    `${JSON.stringify(activitySummary([mkActivity('a1', threadAt(1), 'u1', '修改了负责人'), mkActivity('a2', threadAt(2), 'u2', '修改了金额')]))});`,
+  // 删掉的父评论留坑，没有回复的真的消失
+  `    final tomb = threadItems(${threadListLit(THREAD_TOMB)});`,
+  `    expect(tomb.length, ${threadItems(THREAD_TOMB).length});`,
+  `    expect(tomb[0].node!.tombstone, ${threadItems(THREAD_TOMB)[0].node.tombstone});`,
+  `    expect(tomb[0].node!.replies.map((r) => r.comment.id).toList(), ` +
+    `${JSON.stringify(threadItems(THREAD_TOMB)[0].node.replies.map((r) => r.comment.id))});`,
+  `    expect(threadItems(${threadListLit(THREAD_GONE)}).length, ${threadItems(THREAD_GONE).length});`,
+  // 编辑痕迹
+  ...[
+    mkComment({ id: 'e1', createdAt: threadAt(1), editedAt: threadAt(9) }),
+    mkComment({ id: 'e2', createdAt: threadAt(1) }),
+    mkComment({ id: 'e3', createdAt: threadAt(1), editedAt: threadAt(9), deleted: true })
+  ].map(
+    (c) =>
+      `    expect(editNote(${threadCommentLit(c)}, (ms) => '刚刚'), ` +
+      `${JSON.stringify(editNote(c, () => '刚刚'))});`
+  ),
+  // 未读：分隔线钉在第一条未读之前，自己发的不算
+  ...[
+    [THREAD_UNREAD, threadAt(3)],
+    [THREAD_UNREAD, threadAt(99)],
+    [[mkComment({ id: 'm1', createdAt: threadAt(50), authorId: 'me', authorName: '我' })], threadAt(3)]
+  ].flatMap(([entries, lastRead], i) => {
+    const state = unreadState(entries, lastRead, 'me')
+    const v = `unread${i}`
+    return [
+      `    final ${v} = unreadState(${threadListLit(entries)}, ${lastRead}, 'me');`,
+      `    expect(${v}.count, ${state.count});`,
+      `    expect(${v}.dividerId, ${state.dividerId === null ? 'null' : JSON.stringify(state.dividerId)});`,
+      `    expect(${v}.text, ${JSON.stringify(state.text)});`
+    ]
+  }),
+  // 新评论进来分隔线不动；指向的那条被删干净了才重新算
+  ...[
+    [...THREAD_UNREAD, mkComment({ id: 'u-c4', createdAt: threadAt(20), authorId: 'u2', authorName: '沈黎' })],
+    THREAD_UNREAD.filter((e) => e.id !== 'u-c2')
+  ].flatMap((entries, i) => {
+    const first = unreadState(THREAD_UNREAD, threadAt(3), 'me')
+    const kept = keepDivider(first, entries, threadAt(3), 'me')
+    const v = `kept${i}`
+    return [
+      `    final ${v} = keepDivider(` +
+        `unreadState(${threadListLit(THREAD_UNREAD)}, ${threadAt(3)}, 'me'), ` +
+        `${threadListLit(entries)}, ${threadAt(3)}, 'me');`,
+      `    expect(${v}.count, ${kept.count});`,
+      `    expect(${v}.dividerId, ${kept.dividerId === null ? 'null' : JSON.stringify(kept.dividerId)});`
+    ]
+  }),
+  `    expect(readUpTo(${threadListLit(THREAD_UNREAD)}, ${threadAt(0)}), ` +
+    `${readUpTo(THREAD_UNREAD, threadAt(0))});`,
+  `    expect(readUpTo(<IThreadEntry>[], ${threadAt(4)}), ${readUpTo([], threadAt(4))});`,
+  // @ 到话题外的人：不拦，但要说
+  ...[
+    [['u2', 'u3'], ['u1', 'u2']],
+    [['u2'], ['u1', 'u2']],
+    [['u3', 'u3'], ['u1']]
+  ].flatMap(([mentions, participants], i) => {
+    const nameOf = (id) => ({ u2: '沈黎', u3: '周其' })[id] ?? id
+    const check = checkMentions(mentions, participants, nameOf)
+    const v = `mention${i}`
+    return [
+      `    final ${v} = checkMentions(${JSON.stringify(mentions)}, ${JSON.stringify(participants)}, ` +
+        `(id) => id == 'u2' ? '沈黎' : (id == 'u3' ? '周其' : id));`,
+      `    expect(${v}.outsiders, ${JSON.stringify(check.outsiders)});`,
+      `    expect(${v}.warning, ${JSON.stringify(check.warning)});`
+    ]
+  }),
+  // 发失败的：留在原地、带原文、有一句人话；重发不新建一条
+  `    final failed = failedComments(${threadListLit(THREAD_FAILED)});`,
+  `    expect(failed.length, ${failedComments(THREAD_FAILED).length});`,
+  `    expect(failed[0].body, ${JSON.stringify(failedComments(THREAD_FAILED)[0].body)});`,
+  `    expect(failed[0].reason, ${JSON.stringify(failedComments(THREAD_FAILED)[0].reason)});`,
+  `    final retried = retryComment(${threadListLit(THREAD_FAILED)}, 'f2');`,
+  `    expect(retried.length, ${retryComment(THREAD_FAILED, 'f2').length});`,
+  `    expect((retried[1] as IThreadComment).sendState, ISendState.sending);`,
+  `    expect((retried[1] as IThreadComment).sendError, null);`,
+  `    expect((retried[1] as IThreadComment).body, ` +
+    `${JSON.stringify(retryComment(THREAD_FAILED, 'f2')[1].body)});`,
+  `    expect(discardComment(${threadListLit(THREAD_FAILED)}, 'f2').map((e) => e.id).toList(), ` +
+    `${JSON.stringify(discardComment(THREAD_FAILED, 'f2').map((e) => e.id))});`
 ]
 
 /*
@@ -4542,6 +4714,10 @@ ${pickerExpectations.join('\n')}
 
   test('导入的列映射、错误清单转义与幂等键与 Web 端一致', () {
 ${importExpectations.join('\n')}
+  });
+
+  test('评论线程的留坑、活动折叠、未读定位与失败重发与 Web 端一致', () {
+${threadExpectations.join('\n')}
   });
 
   test('异步任务中心的排序、角标、通知定位与命令权限与 Web 端一致', () {
