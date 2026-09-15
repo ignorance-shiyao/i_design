@@ -1,0 +1,96 @@
+/*
+ * IRunStatus —— 一次运行在出字之前那段静止里，到底停在哪儿。
+ *
+ * 状态落在图标那一格：图标形状 + 淡底色块，边框四边等宽发丝线。
+ * 颜色只是第三条线索——每一态都带文字标签，灰度打印与色觉障碍都读得出来。
+ *
+ * 转圈只在「机器在忙」时出现。等人确认时不转：那时候转圈是误导，
+ * 会让人以为再等等就好了。
+ */
+.i-run-status {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-lg);
+  background: var(--i-color-bg-elevated);
+}
+
+.i-run-status__icon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-secondary);
+  background: var(--i-color-bg-subtle);
+}
+.i-run-status--progress .i-run-status__icon {
+  color: var(--i-color-brand-text);
+  background: var(--i-color-brand-subtle);
+}
+.i-run-status--success .i-run-status__icon {
+  color: var(--i-color-success-text);
+  background: var(--i-color-success-subtle);
+}
+.i-run-status--danger .i-run-status__icon {
+  color: var(--i-color-danger-text);
+  background: var(--i-color-danger-subtle);
+}
+
+/*
+ * 转圈画在图标外圈，而不是把图标换成一个转圈：
+ * 图标说的是「停在哪一步」，转圈说的是「还在动」，两件事同时要看得见。
+ */
+.i-run-status__spinner {
+  position: absolute;
+  inset: -3px;
+  border-radius: var(--i-radius-full);
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  animation: i-run-status-spin 900ms linear infinite;
+}
+@keyframes i-run-status-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .i-run-status__spinner {
+    animation: none;
+    /* 不转了也要留下「还在进行」的痕迹：一整圈淡环，而不是凭空消失 */
+    border-color: currentColor;
+    opacity: 0.35;
+  }
+}
+
+.i-run-status__body {
+  flex: 1;
+  min-width: 0;
+}
+.i-run-status__label {
+  display: block;
+  font-size: var(--i-font-size-md);
+  color: var(--i-color-text);
+}
+.i-run-status__detail {
+  display: block;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+/* 已等多久用等宽数字：秒数跳动时整行不该跟着左右抖 */
+.i-run-status__waited {
+  flex: none;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.i-run-status__cancel { flex: none; }
+
+/* 窄屏上四段挤成一行会把说明压成竖排单字，改为两行 */
+@media (max-width: 480px) {
+  .i-run-status { flex-wrap: wrap; }
+  .i-run-status__body { flex-basis: 100%; order: 3; }
+}

@@ -199,6 +199,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'ChatSources', cn: '引用来源', to: '/components/chat', desc: '回答依据的出处' },
       { name: 'ChatSuggestions', cn: '追问建议', to: '/components/chat', desc: '接着问什么' },
       { name: 'ChatTyping', cn: '生成中', to: '/components/chat', desc: '正在生成的节奏提示' },
+      { name: 'RunStatus', cn: '运行状态', to: '/components/chat', desc: '在排队、在连接还是断了在重连' },
       { name: 'ChatMessage', cn: '消息气泡', to: '/components/chat', desc: '流式输出与来源标注' },
       { name: 'PromptInput', cn: '输入台', to: '/components/chat', desc: '多行输入、附件与发送' },
       { name: 'ChatThinking', cn: '思考过程', to: '/components/chat', desc: '可展开的推理步骤' },

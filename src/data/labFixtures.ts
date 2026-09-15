@@ -123,6 +123,8 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
   },
   IChatSuggestions: { items: ['对比这两家的交期', '生成采购建议', '导出为表格'] },
   IChatToolCall: { name: 'search_suppliers' },
+  /* status 的类型是从 contracts 引来的别名，属性解析器看不到它的字面量，得在这儿给 */
+  IRunStatus: { status: 'queued', queuePosition: 3 },
   ICodeBlock: { code: "import { IButton } from '@i-design/vue-next'\n\nconst ok = true\n" },
   ICollapse: {
     items: [

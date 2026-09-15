@@ -754,6 +754,15 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"align","type":"'top' | 'middle' | 'bottom'","doc":"","optional":true,"defaultText":"'top'","control":{"kind":"enum","options":["top","middle","bottom"]}},
     {"name":"justify","type":"'start' | 'center' | 'end' | 'between'","doc":"","optional":true,"defaultText":"'start'","control":{"kind":"enum","options":["start","center","end","between"]}},
   ],
+  IRunStatus: [
+    {"name":"status","type":"RunStatus","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"queuePosition","type":"number","doc":"队列里前面还有几个。不给表示服务端没有队列信息，界面就不编一个出来","optional":true,"defaultText":null,"control":{"kind":"number"}},
+    {"name":"connection","type":"ConnectionPhase","doc":"","optional":true,"defaultText":null,"control":null},
+    {"name":"attempt","type":"number","doc":"第几次连接尝试，从 0 起","optional":true,"defaultText":"0","control":{"kind":"number"}},
+    {"name":"retryAt","type":"number","doc":"下一次重试的时刻（毫秒时间戳）","optional":true,"defaultText":null,"control":{"kind":"number"}},
+    {"name":"startedAt","type":"number","doc":"这次运行开始等待的时刻。给了才显示「已等 N 秒」","optional":true,"defaultText":null,"control":{"kind":"number"}},
+    {"name":"cancelText","type":"string","doc":"","optional":true,"defaultText":"'取消'","control":{"kind":"string"}},
+  ],
   ISchemaForm: [
     {"name":"schema","type":"FormSchema","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"modelValue","type":"Record<string, unknown>","doc":"表单值。受控：组件不自己存","optional":false,"defaultText":null,"control":null},

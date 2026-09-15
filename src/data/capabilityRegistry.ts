@@ -3658,6 +3658,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     }
   },
   {
+    "name": "IRunStatus",
+    "sources": {
+      "vue-next": "src/components/IRunStatus.vue",
+      "vue": "packages/vue/src/components/IRunStatus.vue",
+      "react": "packages/react/src/components/RunStatus.tsx",
+      "miniprogram": "packages/miniprogram/src/components/run-status",
+      "flutter": "packages/flutter/lib/src/components/i_run_status.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/chat"
+    ],
+    "states": {}
+  },
+  {
     "name": "ISchemaForm",
     "sources": {
       "vue-next": "src/components/ISchemaForm.vue",

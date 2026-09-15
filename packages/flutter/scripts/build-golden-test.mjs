@@ -102,6 +102,10 @@ const { shouldShowElapsed, elapsedParts, elapsedInterval } = await bundle(
   'packages/common/src/logic/elapsed.ts',
   'elapsed'
 )
+const { describeRun: lifecycleDescribeRun, retryCountdown } = await bundle(
+  'packages/common/src/logic/lifecycle.ts',
+  'lifecycle'
+)
 const { diffLines, diffStat } = await bundle('packages/common/src/logic/diff.ts', 'diff')
 const { searchCommands, moveCommandIndex } = await bundle(
   'packages/common/src/logic/command.ts',
@@ -2107,6 +2111,74 @@ const elapsedExpectations = [
 ]
 
 /*
+ * 运行状态的叙述：排队、连接、断线重连、等人确认——四种「界面静止」在两端
+ * 必须说同一句话，也必须在同一刻允许取消。这里最容易各端各判一遍的是优先级
+ * （终态压断线、断线压生成中）和倒计时的进位方向。
+ */
+const LIFECYCLE_STATUS_DART = {
+  queued: 'IRunPhase.queued',
+  connecting: 'IRunPhase.connecting',
+  streaming: 'IRunPhase.streaming',
+  'awaiting-approval': 'IRunPhase.awaitingApproval',
+  completed: 'IRunPhase.completed',
+  failed: 'IRunPhase.failed',
+  cancelled: 'IRunPhase.cancelled'
+}
+const LIFECYCLE_CONNECTION_DART = {
+  idle: 'IConnectionPhase.idle',
+  connecting: 'IConnectionPhase.connecting',
+  streaming: 'IConnectionPhase.streaming',
+  reconnecting: 'IConnectionPhase.reconnecting',
+  closed: 'IConnectionPhase.closed'
+}
+const LIFECYCLE_NOW = 1000000
+const lifecycleCases = [
+  { status: 'queued', queuePosition: 3 },
+  { status: 'queued', queuePosition: 0 },
+  { status: 'queued' },
+  { status: 'connecting' },
+  { status: 'streaming' },
+  { status: 'streaming', connection: 'reconnecting', attempt: 2, retryAt: LIFECYCLE_NOW + 2400 },
+  { status: 'streaming', connection: 'reconnecting' },
+  { status: 'streaming', connection: 'connecting' },
+  { status: 'awaiting-approval' },
+  { status: 'completed', connection: 'reconnecting' },
+  { status: 'failed' },
+  { status: 'cancelled' },
+  { status: 'queued', startedAt: LIFECYCLE_NOW - 4200 }
+]
+const lifecycleExpectations = [
+  ...lifecycleCases.flatMap((input, i) => {
+    const notice = lifecycleDescribeRun({ ...input, now: LIFECYCLE_NOW })
+    const args = [
+      `status: ${LIFECYCLE_STATUS_DART[input.status]}`,
+      `now: ${LIFECYCLE_NOW}`,
+      ...(input.queuePosition === undefined ? [] : [`queuePosition: ${input.queuePosition}`]),
+      ...(input.connection === undefined ? [] : [`connection: ${LIFECYCLE_CONNECTION_DART[input.connection]}`]),
+      ...(input.attempt === undefined ? [] : [`attempt: ${input.attempt}`]),
+      ...(input.retryAt === undefined ? [] : [`retryAt: ${input.retryAt}`]),
+      ...(input.startedAt === undefined ? [] : [`startedAt: ${input.startedAt}`])
+    ]
+    const v = `n${i}`
+    return [
+      `    final ${v} = describeRun(${args.join(', ')});`,
+      `    expect(${v}.label, ${JSON.stringify(notice.label)});`,
+      `    expect(${v}.detail, ${JSON.stringify(notice.detail)});`,
+      `    expect(${v}.icon, ${JSON.stringify(notice.icon)});`,
+      `    expect(${v}.tone, INoticeTone.${notice.tone});`,
+      `    expect(${v}.busy, ${notice.busy});`,
+      `    expect(${v}.cancelable, ${notice.cancelable});`,
+      `    expect(${v}.waited, ${notice.waited});`
+    ]
+  }),
+  ...[2001, 3000, 1, 0, -5000].map(
+    (delta) =>
+      `    expect(retryCountdown(${LIFECYCLE_NOW + delta}, ${LIFECYCLE_NOW}), ` +
+      `${retryCountdown(LIFECYCLE_NOW + delta, LIFECYCLE_NOW)});`
+  )
+]
+
+/*
  * 行 diff：同一个补丁在两端必须比出同一份结果。
  * 开头插一行时若退化成逐行对齐，后面每一行都会被标成改动——两端各错各的。
  */
@@ -2826,6 +2898,7 @@ import 'package:i_design/src/logic/confirm.dart';
 import 'package:i_design/src/logic/overflow.dart';
 import 'package:i_design/src/logic/diff.dart';
 import 'package:i_design/src/logic/elapsed.dart';
+import 'package:i_design/src/logic/lifecycle.dart';
 import 'package:i_design/src/logic/float.dart';
 import 'package:i_design/src/logic/href.dart';
 import 'package:i_design/src/logic/gantt.dart';
@@ -3290,6 +3363,10 @@ ${groupExpectations.join('\n')}
 
   test('等待时长的显示阈值、进位与刷新间隔与 Web 端一致', () {
 ${elapsedExpectations.join('\n')}
+  });
+
+  test('排队/连接/断线/等人确认的叙述与可取消性与 Web 端一致', () {
+${lifecycleExpectations.join('\n')}
   });
 
   test('悬浮操作按钮的展开位移与延迟与 Web 端一致', () {

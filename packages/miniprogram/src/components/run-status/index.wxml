@@ -1,0 +1,16 @@
+<view class="i-run-status i-run-status--{{tone}}" aria-role="text" aria-label="{{detail ? label + '，' + detail : label}}">
+  <view class="i-run-status__icon">
+    <view class="i-icon i-icon--{{icon}}" style="width:16px;height:16px" />
+    <!-- 转圈是纯装饰：状态已经由上面的 aria-label 说过了 -->
+    <view wx:if="{{busy}}" class="i-run-status__spinner" aria-hidden="true" />
+  </view>
+
+  <view class="i-run-status__body">
+    <text class="i-run-status__label">{{label}}</text>
+    <text wx:if="{{detail}}" class="i-run-status__detail">{{detail}}</text>
+  </view>
+
+  <text wx:if="{{waited}}" class="i-run-status__waited">{{waited}}</text>
+
+  <i-button wx:if="{{cancelable}}" class="i-run-status__cancel" size="sm" bind:tap="onCancel">{{cancelText}}</i-button>
+</view>

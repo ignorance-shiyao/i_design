@@ -34,6 +34,7 @@ import ICountdown from './ICountdown.vue'
 import ITimeline from './ITimeline.vue'
 import IChatMessage from './IChatMessage.vue'
 import IChatTyping from './IChatTyping.vue'
+import IRunStatus from './IRunStatus.vue'
 import IChatThinking from './IChatThinking.vue'
 import IChatToolCall from './IChatToolCall.vue'
 import IChatSources from './IChatSources.vue'
@@ -237,6 +238,7 @@ export {
   ILoading,
   IChatMessage,
   IChatTyping,
+  IRunStatus,
   IChatThinking,
   IChatToolCall,
   IChatSources,
@@ -357,6 +359,7 @@ const components = {
   ILoading,
   IChatMessage,
   IChatTyping,
+  IRunStatus,
   IChatThinking,
   IChatToolCall,
   IChatSources,

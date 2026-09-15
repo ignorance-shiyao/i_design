@@ -1039,6 +1039,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IRunStatus",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ISchemaForm",
     "ends": {
       "vue-next": true,

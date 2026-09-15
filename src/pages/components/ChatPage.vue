@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import IChatMessage from '@/components/IChatMessage.vue'
 import IChatTyping from '@/components/IChatTyping.vue'
+import IRunStatus from '@/components/IRunStatus.vue'
 import IChatThinking from '@/components/IChatThinking.vue'
 import IChatToolCall from '@/components/IChatToolCall.vue'
 import IToolChips from '@/components/IToolChips.vue'
@@ -113,6 +114,27 @@ function send(text: string) {
 watch(() => turns.value.length, follow)
 
 const suggestions = ['maxVisible 怎么设？', '小程序端也一样吗？', 'Flutter 端怎么验证一致性？']
+
+/*
+ * 运行状态示例的两个时刻。
+ *
+ * 「已等 N 秒」固定从 42 秒起算，好让这一条示例一进页面就处在「等得够久了」
+ * 那一档，而不是要盯着它数三秒。
+ *
+ * 重试时刻要一轮轮往前推：真实链路上退避本来就是一轮接一轮，
+ * 而写死一个时刻的话，倒计时走到 0 就永远停在「0 秒后重试」，
+ * 示范出来的恰恰是这条组件要避免的那种「看不出还会不会动」。
+ */
+const runStartedAt = Date.now() - 42_000
+const RETRY_CYCLE = 6_000
+const runRetryAt = ref(Date.now() + RETRY_CYCLE)
+let retryTimer: ReturnType<typeof setInterval> | undefined
+onMounted(() => {
+  retryTimer = setInterval(() => {
+    runRetryAt.value = Date.now() + RETRY_CYCLE
+  }, RETRY_CYCLE)
+})
+onBeforeUnmount(() => clearInterval(retryTimer))
 
 const sources = [
   { title: 'packages/common/src/logic/pagination.ts', url: undefined },
@@ -430,6 +452,50 @@ function createSession() {
         <IChatMessage role="user" name="我" time="14:03">帮我把这段配置改成按环境区分</IChatMessage>
         <IChatMessage name="Ignorance 助手" :streaming="true">好的，我先看一下现有结构</IChatMessage>
         <IChatMessage name="Ignorance 助手" :error="true">生成失败：上游服务超时，请重试。</IChatMessage>
+      </div>
+    </DemoBlock>
+
+    <h2>出字之前那段静止</h2>
+    <p>
+      一次调用在吐出第一个字之前，可能已经过去十几秒。这段时间里界面完全静止，而静止有好几种完全不同的原因：在排队、在连接、断了正在自动重连、或者在等人点一下。全都只显示一个转圈的话，它们在屏幕上长得一模一样，用户没有任何依据判断该继续等、该重试，还是该去检查网络——于是有人反复点，有人刷新页面，而刷新会把已经生成的那半截答案丢掉。
+    </p>
+    <p>
+      状态落在图标那一格：图标形状 + 淡底色块，边框保持四边等宽的发丝线。每一态都带文字标签，颜色只是第三条线索。判定写在 <code>logic/lifecycle.ts</code>，各端共用一份——「这一刻能不能取消」一旦各端各判一遍，就会出现同一个运行在网页上还能取消、在小程序里按钮已经灰了。
+    </p>
+    <DemoBlock
+      title="四种「还没开始出字」"
+      description="排队要说出前面还有几个，等待才有尽头；断线要说出第几次重连与下一次是几秒后，否则用户只会去刷新；等人确认时不转圈——那不是机器在忙，转圈会让人以为再等等就好了。"
+      lang="vue"
+      code='<IRunStatus status="queued" :queue-position="3" :started-at="startedAt" @cancel="stop" />
+<IRunStatus status="connecting" />
+<IRunStatus status="streaming" connection="reconnecting" :attempt="2" :retry-at="retryAt" />
+<IRunStatus status="awaiting-approval" />'
+    >
+      <div class="chat chat--plain run-states">
+        <IRunStatus status="queued" :queue-position="3" :started-at="runStartedAt" />
+        <IRunStatus status="connecting" />
+        <IRunStatus
+          status="streaming"
+          connection="reconnecting"
+          :attempt="2"
+          :retry-at="runRetryAt"
+        />
+        <IRunStatus status="awaiting-approval" />
+      </div>
+    </DemoBlock>
+
+    <DemoBlock
+      title="终态不再转圈，也不再能取消"
+      description="已经结束的运行即使连接还没关干净，也不该显示「重连中」——终态压过一切。"
+      lang="vue"
+      code='<IRunStatus status="completed" />
+<IRunStatus status="failed" />
+<IRunStatus status="cancelled" />'
+    >
+      <div class="chat chat--plain run-states">
+        <IRunStatus status="completed" />
+        <IRunStatus status="failed" />
+        <IRunStatus status="cancelled" />
       </div>
     </DemoBlock>
 
@@ -848,6 +914,11 @@ function createSession() {
 </template>
 
 <style scoped>
+/* 四条状态条竖着排，逐条对比措辞——横着摆会把补充说明压成竖排单字 */
+.run-states {
+  display: grid;
+  gap: var(--i-spacing-3);
+}
 /* 洞察卡不该撑满整行：那句结论一行放不到 80 个字才读得顺 */
 .insight-demo { max-width: 420px; }
 .selact-demo { display: flex; flex-direction: column; gap: var(--i-spacing-2); max-width: 560px; }
