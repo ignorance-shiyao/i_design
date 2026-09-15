@@ -177,6 +177,28 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
     selectable: true,
     showTotal: true
   },
+  /* 任务中心要同时出现失败、完成待查看与进行中，才看得出角标数的是哪两类 */
+  ITaskCenter: {
+    tasks: [
+      {
+        id: 'T-8841',
+        title: '导入客户',
+        state: 'failed',
+        createdAt: 1_757_900_000_000,
+        finishedAt: 1_757_900_020_000,
+        actor: '沈黎',
+        error: '第 12 行客户为空'
+      },
+      {
+        id: 'T-8842',
+        title: '导出销售订单',
+        state: 'running',
+        createdAt: 1_757_900_100_000,
+        actor: '林岚',
+        target: { kind: '报表', id: 'R-1', label: '销售订单-已发货' }
+      }
+    ]
+  },
   IEntityPicker: {
     page: [
       { id: 'p1', label: '张三', hint: '销售一部' },

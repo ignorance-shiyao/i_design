@@ -154,6 +154,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ITabs.vue",
   "src/components/ITag.vue",
   "src/components/ITagInput.vue",
+  "src/components/ITaskCenter.vue",
   "src/components/ITextarea.vue",
   "src/components/ITimePicker.vue",
   "src/components/ITimeSelect.vue",

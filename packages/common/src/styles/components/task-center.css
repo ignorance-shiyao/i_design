@@ -1,0 +1,131 @@
+/*
+ * ITaskCenter —— 异步任务中心。
+ *
+ * 状态用「图标 + 淡底色块 + 文字」三样一起说，不用加粗的边线，也不靠颜色单独表意：
+ * 失败与完成在灰度打印下是同一个灰，那时只剩图标形状与「失败」两个字可读。
+ *
+ * 任务号一直摆在界面上，用等宽字体——用户打电话给客服时要把它念出来。
+ */
+.i-task-center {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  width: 100%;
+}
+
+.i-task-center__head {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+}
+.i-task-center__title { font-size: var(--i-font-size-md); color: var(--i-color-text); }
+/* 角标数的是「要人处理的」，所以它有归零的一天 */
+.i-task-center__badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-danger-solid);
+  color: var(--i-color-on-danger);
+  font-size: var(--i-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.i-task-center__summary {
+  flex: 1;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+
+.i-task-center__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.i-task-center__item {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: var(--i-spacing-2) var(--i-spacing-3);
+  padding: var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+}
+/* 没看过的那些给一层淡底，看过之后退回普通底——它是「待办」的唯一线索之外的辅助 */
+.i-task-center__item.is-unseen { background: var(--i-color-bg-subtle); }
+
+.i-task-center__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-text-secondary);
+  background: var(--i-color-bg-subtle);
+}
+.i-task-center__item--running .i-task-center__icon {
+  color: var(--i-color-brand-text);
+  background: var(--i-color-brand-subtle);
+}
+.i-task-center__item--succeeded .i-task-center__icon {
+  color: var(--i-color-success-text);
+  background: var(--i-color-success-subtle);
+}
+.i-task-center__item--failed .i-task-center__icon {
+  color: var(--i-color-danger-text);
+  background: var(--i-color-danger-subtle);
+}
+
+.i-task-center__main { min-width: 0; }
+.i-task-center__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--i-spacing-2);
+  color: var(--i-color-text);
+}
+/* 状态文字与图标同时给：颜色不能是唯一线索 */
+.i-task-center__state {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+}
+.i-task-center__detail {
+  margin-top: 2px;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-task-center__actions { display: flex; align-items: center; gap: var(--i-spacing-2); }
+
+/* 追踪行。任务号用等宽字体：用户要把它念给客服听 */
+.i-task-center__trail {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-subtle);
+  list-style: none;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.i-task-center__trail li:first-child { font-family: var(--i-font-family-mono); }
+
+.i-task-center__empty {
+  padding: var(--i-spacing-8);
+  text-align: center;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}
+
+/* 窄屏上动作单独成行，标题不再被挤成两个字 */
+@media (max-width: 560px) {
+  .i-task-center__item { grid-template-columns: 28px 1fr; }
+  .i-task-center__actions { grid-column: 2 / -1; }
+}

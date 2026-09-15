@@ -45,6 +45,7 @@ import IEntityPicker from './IEntityPicker.vue'
 import IImportWizard from './IImportWizard.vue'
 import IExportJob from './IExportJob.vue'
 import ITreeTable from './ITreeTable.vue'
+import ITaskCenter from './ITaskCenter.vue'
 import IChatThinking from './IChatThinking.vue'
 import IChatToolCall from './IChatToolCall.vue'
 import IChatSources from './IChatSources.vue'
@@ -259,6 +260,7 @@ export {
   IImportWizard,
   IExportJob,
   ITreeTable,
+  ITaskCenter,
   IChatThinking,
   IChatToolCall,
   IChatSources,
@@ -390,6 +392,7 @@ const components = {
   IImportWizard,
   IExportJob,
   ITreeTable,
+  ITaskCenter,
   IChatThinking,
   IChatToolCall,
   IChatSources,

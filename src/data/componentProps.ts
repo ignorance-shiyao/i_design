@@ -1032,6 +1032,12 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"disabled","type":"boolean","doc":"","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
     {"name":"separators","type":"string[]","doc":"除回车外，哪些字符也触发成词","optional":true,"defaultText":"() => DEFAULT_SEPARATORS","control":null},
   ],
+  ITaskCenter: [
+    {"name":"tasks","type":"AsyncTaskItem[]","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'任务中心'","control":{"kind":"string"}},
+    {"name":"formatTime","type":"(ms: number) => string","doc":"把时间戳排成人话。放在调用方：时区是各端从系统拿的","optional":true,"defaultText":"(ms: number) => new Date(ms).toLocaleString('zh-CN')","control":null},
+    {"name":"showTrail","type":"boolean","doc":"默认展开追踪行。排查场景下把它打开","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
+  ],
   ITextarea: [
     {"name":"modelValue","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"placeholder","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},

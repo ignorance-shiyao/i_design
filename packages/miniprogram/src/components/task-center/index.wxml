@@ -1,0 +1,49 @@
+<view class="i-task-center">
+  <view class="i-task-center__head">
+    <text class="i-task-center__title">{{title}}</text>
+    <!-- 角标只数要人处理的：把进行中的算进去，它永远回不到零 -->
+    <text wx:if="{{badgeCount}}" class="i-task-center__badge">{{badgeCount}}</text>
+    <text class="i-task-center__summary">{{badgeText}}</text>
+    <i-button wx:if="{{badgeCount}}" size="sm" bind:tap="onMarkAll">全部标为已读</i-button>
+  </view>
+
+  <view wx:if="{{rows.length}}" class="i-task-center__list">
+    <view
+      wx:for="{{rows}}"
+      wx:key="id"
+      class="i-task-center__item i-task-center__item--{{item.state}} {{item.unseen ? 'is-unseen' : ''}}"
+    >
+      <view class="i-task-center__icon"><i-icon name="{{item.icon}}" size="16" /></view>
+
+      <view class="i-task-center__main">
+        <view class="i-task-center__name">
+          <text>{{item.title}}</text>
+          <!-- 状态文字与图标同时给：颜色不能是唯一线索 -->
+          <text class="i-task-center__state">{{item.stateLabel}}</text>
+        </view>
+        <text class="i-task-center__detail">{{item.detail}}</text>
+      </view>
+
+      <view class="i-task-center__actions">
+        <i-button wx:if="{{item.active}}" size="sm" data-id="{{item.id}}" bind:tap="onCancel">取消</i-button>
+        <block wx:else>
+          <i-button wx:if="{{item.failed}}" size="sm" data-id="{{item.id}}" bind:tap="onRetry">重试</i-button>
+          <!-- 出口永远有：没有业务对象时至少能去任务详情 -->
+          <i-button size="sm" variant="primary" data-id="{{item.id}}" bind:tap="onOpen">
+            {{item.actionLabel}}
+          </i-button>
+        </block>
+        <i-button size="sm" data-id="{{item.id}}" bind:tap="onToggleTrail">
+          {{item.trailOpen ? '收起' : '追踪'}}
+        </i-button>
+      </view>
+
+      <!-- 追踪行：任务号排第一，用户打给客服时能报出来的只有它 -->
+      <view wx:if="{{item.trailOpen}}" class="i-task-center__trail">
+        <view wx:for="{{item.trail}}" wx:for-item="line" wx:key="*this">{{line}}</view>
+      </view>
+    </view>
+  </view>
+
+  <text wx:else class="i-task-center__empty">还没有任务。导出、导入这类要跑一会儿的动作会出现在这里。</text>
+</view>

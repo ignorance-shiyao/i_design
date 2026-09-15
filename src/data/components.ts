@@ -36,6 +36,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'FloatButton', cn: '悬浮操作按钮', to: '/components/float-button', desc: '页面角落的主操作入口' },
       { name: 'CodeBlock', cn: '代码块', to: '/components/code-block', desc: '高亮、行号与 diff 视图' },
       { name: 'CommandSearch', cn: '命令搜索', to: '/components/command-search', desc: '搜一下就到，键盘全程可用' },
+      { name: 'TaskCenter', cn: '任务中心', to: '/components/task-center', desc: '异步任务追得到、通知点得下去；角标只数要人处理的' },
       { name: 'Scrollbar', cn: '滚动条', to: '/components/scrollbar', desc: '不占布局的自绘滚动条' },
       { name: 'ConfigProvider', cn: '全局配置', to: '/components/config-provider', desc: '下发文案字典与默认尺寸' }
     ]

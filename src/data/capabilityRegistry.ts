@@ -545,6 +545,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/modal",
       "/components/input-otp",
       "/components/config-provider",
+      "/components/task-center",
       "/components/command-search",
       "/components/sticky-tool",
       "/components/image-viewer",
@@ -4732,6 +4733,40 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": null,
     "demoRoutes": [
       "/components/data-entry"
+    ],
+    "states": {}
+  },
+  {
+    "name": "ITaskCenter",
+    "sources": {
+      "vue-next": "src/components/ITaskCenter.vue",
+      "vue": "packages/vue/src/components/ITaskCenter.vue",
+      "react": "packages/react/src/components/TaskCenter.tsx",
+      "miniprogram": "packages/miniprogram/src/components/task-center",
+      "flutter": "packages/flutter/lib/src/components/i_task_center.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": {
+      "route": "/components/task-center",
+      "page": "src/pages/components/TaskCenterPage.vue",
+      "demos": 2
+    },
+    "demoRoutes": [
+      "/components/task-center"
     ],
     "states": {}
   },

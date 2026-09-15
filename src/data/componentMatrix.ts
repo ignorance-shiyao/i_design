@@ -1339,6 +1339,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "ITaskCenter",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "ITextarea",
     "ends": {
       "vue-next": true,
