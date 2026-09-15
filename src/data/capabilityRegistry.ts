@@ -2277,7 +2277,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/form",
       "page": "src/pages/components/FormPage.vue",
-      "demos": 2
+      "demos": 3
     },
     "demoRoutes": [
       "/components/form"
@@ -2297,6 +2297,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "react": "packages/react/src/components/FormItem.tsx",
       "miniprogram": "packages/miniprogram/src/components/form-item",
       "flutter": "packages/flutter/lib/src/components/i_form.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/form"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IFormPage",
+    "sources": {
+      "vue-next": "src/components/IFormPage.vue",
+      "vue": "packages/vue/src/components/IFormPage.vue",
+      "react": "packages/react/src/components/FormPage.tsx",
+      "miniprogram": "packages/miniprogram/src/components/form-page",
+      "flutter": "packages/flutter/lib/src/components/i_form_page.dart"
     },
     "ends": {
       "vue-next": true,

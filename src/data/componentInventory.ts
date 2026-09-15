@@ -86,6 +86,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IFlow.vue",
   "src/components/IForm.vue",
   "src/components/IFormItem.vue",
+  "src/components/IFormPage.vue",
   "src/components/IIcon.vue",
   "src/components/IImage.vue",
   "src/components/IImageViewer.vue",

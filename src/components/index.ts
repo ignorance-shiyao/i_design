@@ -35,6 +35,7 @@ import ITimeline from './ITimeline.vue'
 import IChatMessage from './IChatMessage.vue'
 import IChatTyping from './IChatTyping.vue'
 import IRunStatus from './IRunStatus.vue'
+import IFormPage from './IFormPage.vue'
 import IChatThinking from './IChatThinking.vue'
 import IChatToolCall from './IChatToolCall.vue'
 import IChatSources from './IChatSources.vue'
@@ -239,6 +240,7 @@ export {
   IChatMessage,
   IChatTyping,
   IRunStatus,
+  IFormPage,
   IChatThinking,
   IChatToolCall,
   IChatSources,
@@ -360,6 +362,7 @@ const components = {
   IChatMessage,
   IChatTyping,
   IRunStatus,
+  IFormPage,
   IChatThinking,
   IChatToolCall,
   IChatSources,

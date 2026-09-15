@@ -11,12 +11,38 @@ import ICheckbox from '@/components/ICheckbox.vue'
 import ISwitch from '@/components/ISwitch.vue'
 import IButton from '@/components/IButton.vue'
 import ISchemaForm from '@/components/ISchemaForm.vue'
+import IFormPage from '@/components/IFormPage.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
-import type { FormSchema } from '@i-design/common'
+import type { FormSchema, SubmitPhase } from '@i-design/common'
 import { message } from '@/components/message'
 import type { FormRule } from '@/components/validate'
 
 const formRef = ref<InstanceType<typeof IForm> | null>(null)
+
+/*
+ * 表单页壳的演示状态。
+ *
+ * initial 是「打开这张表时的样子」——这里模拟编辑一条已有记录，
+ * 所以它不是空的；新建态下传空对象即可。
+ * 提交故意做成第一次必失败：真正要看的是「失败之后输入还在、还能再交一次」，
+ * 而一个永远成功的示例把这条最要紧的行为藏起来了。
+ */
+const hostValues = ref<Record<string, unknown>>({ title: '春季补货', owner: '林岚' })
+const hostInitial = { title: '春季补货', owner: '林岚' }
+const hostPhase = ref<SubmitPhase>('idle')
+const hostAttempts = ref(0)
+
+function hostSubmit() {
+  hostPhase.value = 'submitting'
+  setTimeout(() => {
+    hostAttempts.value += 1
+    // 第一次失败、第二次成功：两条路径在一个示例里都走得到
+    hostPhase.value = hostAttempts.value === 1 ? 'failed' : 'succeeded'
+    message[hostPhase.value === 'failed' ? 'error' : 'success'](
+      hostPhase.value === 'failed' ? '提交失败：编号重复。输入都还在' : '提交成功'
+    )
+  }, 1200)
+}
 
 const model = reactive({
   title: '',
@@ -256,6 +282,60 @@ const rules = {
       </div>
     </DemoBlock>
 
+    <h2>围着表单的那几件事</h2>
+    <p>
+      字段怎么算是一回事，表单被放进一个页面之后要解决的是另一批事，而且每一件都是在真实业务里踩出来的：网络慢的时候人一定会再点一次「提交」；提交失败就把表单清空，是最容易被当成「它坏了」的行为；改了一半点返回该不该拦；「重置」到底是清空、回到打开时的样子、还是回到上次的草稿。
+    </p>
+    <p>
+      判断全在 <code>logic/formhost.ts</code>，多端共用一份——这些都是「该不该拦住用户」的决定，各端各判一遍就会出现同一张表在网页上拦住了、在小程序里直接放走。
+    </p>
+    <DemoBlock
+      title="重复提交、失败保留输入、离开保护与重置范围"
+      description="点「提交」后按钮变成加载中，这段时间再点不会发出第二次。第一次故意失败——要看的正是失败之后输入还在、还能再交一次。改一个字段再点「取消」，确认会就地展开在按钮旁边，而不是弹到屏幕正中；没改过则直接走，不拦。「撤销修改」回到打开这张表时的样子，不是清空。"
+      lang="vue"
+      code='<IFormPage
+  v-model="values"
+  :initial="initial"
+  :phase="phase"
+  title="编辑采购单"
+  @submit="submit"
+  @cancel="back"
+/>'
+    >
+      <IFormPage
+        v-model="hostValues"
+        :initial="hostInitial"
+        :phase="hostPhase"
+        title="编辑采购单"
+        description="改一个字段再点「取消」，看看离开保护；连点两次「提交」，第二次不会发出去。"
+        @submit="hostSubmit"
+        @cancel="() => message.info('已离开，修改未保存')"
+        @reset="() => message.info('已回到打开这张表时的样子')"
+      >
+        <div class="host-fields">
+          <!-- id 由 IFormItem 通过插槽给出：不接上，<label for> 就落空，读屏里这两个框没有名字 -->
+          <IFormItem label="单据标题">
+            <template #default="{ id }">
+              <IInput
+                :id="id"
+                :model-value="String(hostValues.title ?? '')"
+                @update:model-value="(v: string) => (hostValues = { ...hostValues, title: v })"
+              />
+            </template>
+          </IFormItem>
+          <IFormItem label="负责人">
+            <template #default="{ id }">
+              <IInput
+                :id="id"
+                :model-value="String(hostValues.owner ?? '')"
+                @update:model-value="(v: string) => (hostValues = { ...hostValues, owner: v })"
+              />
+            </template>
+          </IFormItem>
+        </div>
+      </IFormPage>
+    </DemoBlock>
+
     <h2>校验时机</h2>
     <p>三条规则决定什么时候报错，目的都是不在用户还在输入时打断他：</p>
     <table class="i-table">
@@ -336,6 +416,12 @@ const rules = {
 </template>
 
 <style scoped>
+.host-fields {
+  display: grid;
+  gap: var(--i-spacing-3);
+  max-width: 420px;
+}
+
 .schema-demo {
   display: grid;
   gap: var(--i-spacing-3);

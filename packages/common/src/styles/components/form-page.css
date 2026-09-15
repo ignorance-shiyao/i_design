@@ -1,0 +1,95 @@
+/*
+ * IFormPage —— 整页的表单壳：标题区、内容区、贴底的操作条。
+ *
+ * 操作条贴在视口底部而不是跟着内容走：长表单里「提交」被推到屏幕外，
+ * 用户要一路滚到底才找得到它，中途还会怀疑这张表到底怎么交。
+ *
+ * 操作条左侧永远留给「为什么现在不能提交」与「有几项没保存」这两句话。
+ * 只把按钮置灰而不说原因，用户只会反复点它。
+ */
+.i-form-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-4);
+}
+
+.i-form-page__head { display: flex; align-items: flex-start; gap: var(--i-spacing-3); }
+.i-form-page__title {
+  margin: 0;
+  font-size: var(--i-font-size-xl);
+  font-weight: 500;
+  color: var(--i-color-text);
+}
+.i-form-page__desc {
+  margin: var(--i-spacing-1) 0 0;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  /* 与文档站正文同一个行长上限：说明文字通栏排到底一样读不下去 */
+  max-width: 45em;
+}
+
+.i-form-page__body { min-width: 0; }
+
+.i-form-page__foot {
+  position: sticky;
+  /* 贴底时要让开手机的安全区，否则「提交」会被 home 指示条压掉一半 */
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-3);
+  margin: 0 calc(-1 * var(--i-spacing-4));
+  padding: var(--i-spacing-3) var(--i-spacing-4);
+  padding-bottom: calc(var(--i-spacing-3) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--i-color-hairline);
+  background: var(--i-color-bg-elevated);
+}
+.i-form-page__status {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+/* 拦下来的原因用警告色的字，但字本身就说清了原因——颜色只是第二条线索 */
+.i-form-page__status.is-blocked { color: var(--i-color-warning-text); }
+.i-form-page__actions {
+  display: flex;
+  flex: none;
+  gap: var(--i-spacing-2);
+}
+
+/*
+ * 离开确认就地展开，而不是弹一个对话框。
+ *
+ * 用户点的是页面底部的「取消」，答案就该出现在他手指所在的地方；
+ * 弹到屏幕正中会让人先去找这个框是从哪儿冒出来的。
+ */
+.i-form-page__confirm {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  flex-wrap: wrap;
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-warning-subtle);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-sm);
+}
+.i-form-page__confirm-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--i-radius-full);
+  color: var(--i-color-warning-text);
+  background: var(--i-color-bg-elevated);
+}
+.i-form-page__confirm-text { flex: 1; min-width: 0; }
+
+/* 窄屏上说明与按钮挤成一行会把原因压成竖排单字，改为两行 */
+@media (max-width: 560px) {
+  .i-form-page__foot { flex-wrap: wrap; }
+  .i-form-page__status { flex-basis: 100%; }
+  .i-form-page__actions { flex: 1; }
+  .i-form-page__actions .i-button { flex: 1; }
+}

@@ -139,7 +139,8 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'AppShell', cn: '应用骨架', to: '/components/layout', desc: '顶栏、侧栏、面包屑与窄屏抽屉；只摆结构不认识路由' },
       { name: 'QueryFilter', cn: '查询筛选', to: '/components/table', desc: '列表页上方那排条件；条件变了回第一页，参数可往返' },
       { name: 'ProTable', cn: '查询表格', to: '/components/table', desc: 'Table 加查询层与列能力；过期响应会被丢掉' },
-      { name: 'SchemaForm', cn: 'Schema 表单', to: '/components/form', desc: '按数据结构渲染表单；schema 里不执行任何字符串' }
+      { name: 'SchemaForm', cn: 'Schema 表单', to: '/components/form', desc: '按数据结构渲染表单；schema 里不执行任何字符串' },
+      { name: 'FormPage', cn: '表单页', to: '/components/form', desc: '围着表单的那几件事：重复提交、离开保护与重置范围' }
     ]
   },
   {

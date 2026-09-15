@@ -669,6 +669,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IFormPage",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IIcon",
     "ends": {
       "vue-next": true,

@@ -1,0 +1,2 @@
+@import '../../../dist/styles/form-page.wxss';
+@import '../../../dist/styles/icons.wxss';
