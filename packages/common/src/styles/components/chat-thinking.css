@@ -35,6 +35,8 @@
   line-height: 1.8;
   color: var(--i-color-text-tertiary);
   white-space: pre-wrap;
+  /* 与回答正文同一个行长上限：推理过程往往比回答更长，通栏排就更难读 */
+  max-width: 90ch;
 }
 /* 进行中的推理：标题左侧的点缓慢呼吸，表示还没结束 */
 .i-chat-thinking__pulse {
