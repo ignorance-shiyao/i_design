@@ -24,6 +24,10 @@ const bundle = (entry, name) => {
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
 const {
+  taskOrder, taskBadge, taskNotice, dedupeNotices, submitTask, markSeen, markAllSeen,
+  taskTrail, commandEntries, firstRunnable, isActive: taskIsActive
+} = await bundle('packages/common/src/logic/taskcenter.ts', 'taskcenter')
+const {
   sortTree, flattenRows, allRows, leafRows, toggleExpanded, expandAll,
   selectionSummary, selectAllState, toggleSelectAll, toggleRow, pruneSelection, renderRows,
   rowSelectable, aggregateField, groupSummary, grandTotal, summaryLabel
@@ -2181,6 +2185,176 @@ const elapsedExpectations = [
   ...[0, 1, 500, 999, 1000, 5400].map(
     (ms) => `    expect(elapsedInterval(${ms}), ${elapsedInterval(ms)});`
   )
+]
+
+/*
+ * 异步任务中心：排序（进行中 → 失败 → 按结束时间倒序，且结束后不再移动）、
+ * 角标只数要人处理的、通知永远定位得到业务对象、同一件事正在跑就不再排第二个、
+ * 命令面板里没权限的照常出现但禁用。
+ *
+ * 时间戳这里只作大小比较与格式化回调，不碰时区，因此可以整个对齐。
+ */
+const TASK_NOW = 1700000000000
+const taskAt = (n) => TASK_NOW + n * 1000
+const TASK_STATE_DART = {
+  queued: 'ITaskState.queued',
+  running: 'ITaskState.running',
+  succeeded: 'ITaskState.succeeded',
+  failed: 'ITaskState.failed',
+  cancelled: 'ITaskState.cancelled'
+}
+const TASK_TARGET = { kind: '订单', id: 'SO-1', label: 'SO-2026-0912' }
+const taskTargetDart =
+  `ITaskTarget(kind: ${JSON.stringify(TASK_TARGET.kind)}, ` +
+  `id: ${JSON.stringify(TASK_TARGET.id)}, label: ${JSON.stringify(TASK_TARGET.label)})`
+const taskDart = (task) => {
+  const parts = [
+    `id: ${JSON.stringify(task.id)}`,
+    `title: ${JSON.stringify(task.title)}`,
+    `state: ${TASK_STATE_DART[task.state]}`,
+    `createdAt: ${task.createdAt}`
+  ]
+  if (task.finishedAt !== undefined) parts.push(`finishedAt: ${task.finishedAt}`)
+  if (task.actor !== undefined) parts.push(`actor: ${JSON.stringify(task.actor)}`)
+  if (task.target !== undefined) parts.push(`target: ${taskTargetDart}`)
+  if (task.error !== undefined) parts.push(`error: ${JSON.stringify(task.error)}`)
+  if (task.result !== undefined) parts.push(`result: ${JSON.stringify(task.result)}`)
+  if (task.dedupeKey !== undefined) parts.push(`dedupeKey: ${JSON.stringify(task.dedupeKey)}`)
+  if (task.seen !== undefined) parts.push(`seen: ${task.seen}`)
+  return `IAsyncTask(${parts.join(', ')})`
+}
+const TASK_LIST = [
+  { id: 'T3', title: '导出销售订单', state: 'succeeded', createdAt: taskAt(1), finishedAt: taskAt(9) },
+  { id: 'T1', title: '导出销售订单', state: 'running', createdAt: taskAt(5) },
+  { id: 'T4', title: '批量改负责人', state: 'succeeded', createdAt: taskAt(0), finishedAt: taskAt(20) },
+  { id: 'T2', title: '导入客户', state: 'failed', createdAt: taskAt(2), finishedAt: taskAt(3), error: '第 12 行客户为空' },
+  { id: 'T0', title: '生成对账单', state: 'queued', createdAt: taskAt(4) },
+  { id: 'T5', title: '导出销售订单', state: 'succeeded', createdAt: taskAt(6), finishedAt: taskAt(7), seen: true }
+]
+const TASK_NOTICE_CASES = [
+  { id: 'N1', title: '导出销售订单', state: 'succeeded', createdAt: taskAt(0), finishedAt: taskAt(1), target: TASK_TARGET, result: '导出 48000 行' },
+  { id: 'N2', title: '导出销售订单', state: 'succeeded', createdAt: taskAt(0), finishedAt: taskAt(1) },
+  { id: 'N3', title: '导入客户', state: 'failed', createdAt: taskAt(0), finishedAt: taskAt(1), target: TASK_TARGET, error: '第 12 行客户为空' },
+  { id: 'N4', title: '导入客户', state: 'failed', createdAt: taskAt(0), finishedAt: taskAt(1), error: '   ' },
+  { id: 'N5', title: '批量改负责人', state: 'cancelled', createdAt: taskAt(0), finishedAt: taskAt(1), target: TASK_TARGET },
+  { id: 'N6', title: '导出销售订单', state: 'running', createdAt: taskAt(0) },
+  { id: 'N7', title: '导出销售订单', state: 'queued', createdAt: taskAt(0) }
+]
+const TASK_COMMANDS = [
+  { key: 'export', label: '导出订单', keywords: ['daochu'], permission: 'order:export' },
+  { key: 'new', label: '新建订单' },
+  { key: 'settings', label: '系统设置', permission: 'admin' }
+]
+const taskCommandDart = (command) => {
+  const item =
+    `ICommandItem(key: ${JSON.stringify(command.key)}, label: ${JSON.stringify(command.label)}` +
+    (command.keywords ? `, keywords: ${JSON.stringify(command.keywords)}` : '') +
+    ')'
+  return command.permission
+    ? `IGuardedCommand(item: ${item}, permission: ${JSON.stringify(command.permission)})`
+    : `IGuardedCommand(item: ${item})`
+}
+const taskCan = (permission) => permission === 'order:export'
+
+const taskCenterExpectations = [
+  `    final tasks = [${TASK_LIST.map(taskDart).join(', ')}];`,
+  `    expect(taskOrder(tasks).map((t) => t.id).toList(), ` +
+    `${JSON.stringify(taskOrder(TASK_LIST).map((t) => t.id))});`,
+  ...['count', 'failed', 'unseen', 'running'].map(
+    (field) => `    expect(taskBadge(tasks).${field}, ${taskBadge(TASK_LIST)[field]});`
+  ),
+  `    expect(taskBadge(tasks).text, ${JSON.stringify(taskBadge(TASK_LIST).text)});`,
+  `    expect(taskBadge(const []).text, ${JSON.stringify(taskBadge([]).text)});`,
+  // 进行中的标不了「看过」：它还没有结果可看
+  `    expect(taskBadge(markSeen(tasks, 'T4')).count, ` +
+    `${taskBadge(markSeen(TASK_LIST, 'T4')).count});`,
+  `    expect(markSeen(tasks, 'T1')[1].seen, ${markSeen(TASK_LIST, 'T1')[1].seen === true});`,
+  `    expect(markAllSeen(tasks).map((t) => t.seen).toList(), ` +
+    `${JSON.stringify(markAllSeen(TASK_LIST).map((t) => t.seen === true))});`,
+
+  ...TASK_NOTICE_CASES.flatMap((input, i) => {
+    const notice = taskNotice(input)
+    const v = `notice${i}`
+    if (!notice) return [`    expect(taskNotice(${taskDart(input)}), null);`]
+    return [
+      `    final ${v} = taskNotice(${taskDart(input)})!;`,
+      `    expect(${v}.tone, ITaskNoticeTone.${notice.tone});`,
+      `    expect(${v}.title, ${JSON.stringify(notice.title)});`,
+      `    expect(${v}.description, ${JSON.stringify(notice.description)});`,
+      `    expect(${v}.actionLabel, ${JSON.stringify(notice.actionLabel)});`,
+      `    expect(${v}.target?.id, ${notice.target ? JSON.stringify(notice.target.id) : 'null'});`
+    ]
+  }),
+  `    expect(taskIsActive(${taskDart(TASK_NOTICE_CASES[6])}), ` +
+    `${taskIsActive(TASK_NOTICE_CASES[6])});`,
+  // 同一条任务只留最新的一条通知
+  `    expect(dedupeNotices([taskNotice(${taskDart(TASK_NOTICE_CASES[0])})!, ` +
+    `taskNotice(${taskDart(TASK_NOTICE_CASES[2])})!, ` +
+    `taskNotice(${taskDart({ ...TASK_NOTICE_CASES[0], state: 'failed', error: '超时' })})!])` +
+    `.map((n) => n.taskId).toList(), ` +
+    `${JSON.stringify(
+      dedupeNotices([
+        taskNotice(TASK_NOTICE_CASES[0]),
+        taskNotice(TASK_NOTICE_CASES[2]),
+        taskNotice({ ...TASK_NOTICE_CASES[0], state: 'failed', error: '超时' })
+      ]).map((n) => n.taskId)
+    )});`,
+
+  // 同一件事正在跑就不再排第二个
+  ...[
+    [
+      [{ id: 'S1', title: '导出销售订单', state: 'running', createdAt: taskAt(0), dedupeKey: '导出:已发货' }],
+      { id: 'S2', title: '导出销售订单', state: 'queued', createdAt: taskAt(1), dedupeKey: '导出:已发货' }
+    ],
+    [
+      [{ id: 'S1', title: '导出销售订单', state: 'succeeded', createdAt: taskAt(0), finishedAt: taskAt(1), dedupeKey: '导出:已发货' }],
+      { id: 'S2', title: '导出销售订单', state: 'queued', createdAt: taskAt(2), dedupeKey: '导出:已发货' }
+    ],
+    [
+      [{ id: 'S1', title: '导出销售订单', state: 'running', createdAt: taskAt(0), dedupeKey: '导出:已发货' }],
+      { id: 'S3', title: '生成对账单', state: 'queued', createdAt: taskAt(1) }
+    ]
+  ].flatMap(([current, incoming], i) => {
+    const result = submitTask(current, incoming)
+    const v = `submit${i}`
+    return [
+      `    final ${v} = submitTask([${current.map(taskDart).join(', ')}], ${taskDart(incoming)});`,
+      `    expect(${v}.merged, ${result.merged});`,
+      `    expect(${v}.taskId, ${JSON.stringify(result.taskId)});`,
+      `    expect(${v}.tasks.length, ${result.tasks.length});`,
+      `    expect(${v}.message, ${JSON.stringify(result.message)});`
+    ]
+  }),
+
+  // 追踪行：任务号排第一
+  ...[
+    { id: 'T-8842', title: '导出销售订单', state: 'succeeded', createdAt: taskAt(0), finishedAt: taskAt(60), actor: '林岚', target: TASK_TARGET },
+    { id: 'T-1', title: '导出销售订单', state: 'running', createdAt: taskAt(0) }
+  ].map(
+    (task) =>
+      `    expect(taskTrail(${taskDart(task)}, (ms) => 't\${(ms - ${taskAt(0)}) ~/ 1000}'), ` +
+      `${JSON.stringify(taskTrail(task, (ms) => `t${(ms - taskAt(0)) / 1000}`))});`
+  ),
+
+  // 命令：没权限的照常出现但禁用
+  `    final commands = [${TASK_COMMANDS.map(taskCommandDart).join(', ')}];`,
+  ...['', '设置', '导出'].flatMap((keyword, i) => {
+    const entries = commandEntries(TASK_COMMANDS, keyword, taskCan)
+    const v = `cmd${i}`
+    return [
+      `    final ${v} = commandEntries(commands, ${JSON.stringify(keyword)}, ` +
+        `(p) => p == 'order:export');`,
+      `    expect(${v}.map((e) => e.command.key).toList(), ` +
+        `${JSON.stringify(entries.map((e) => e.command.key))});`,
+      `    expect(${v}.map((e) => e.disabled).toList(), ` +
+        `${JSON.stringify(entries.map((e) => e.disabled))});`,
+      `    expect(${v}.map((e) => e.reason).toList(), ` +
+        `${JSON.stringify(entries.map((e) => e.reason))});`
+    ]
+  }),
+  `    expect(firstRunnable(commandEntries(commands, '', (p) => p == 'order:export'))?.command.key, ` +
+    `${JSON.stringify(firstRunnable(commandEntries(TASK_COMMANDS, '', taskCan)).command.key)});`,
+  `    expect(firstRunnable(commandEntries([commands[2]], '', (p) => false)), null);`
 ]
 
 /*
@@ -4368,6 +4542,10 @@ ${pickerExpectations.join('\n')}
 
   test('导入的列映射、错误清单转义与幂等键与 Web 端一致', () {
 ${importExpectations.join('\n')}
+  });
+
+  test('异步任务中心的排序、角标、通知定位与命令权限与 Web 端一致', () {
+${taskCenterExpectations.join('\n')}
   });
 
   test('树表的兄弟内排序、折叠不丢选择与分组汇总与 Web 端一致', () {

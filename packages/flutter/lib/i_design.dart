@@ -68,6 +68,7 @@ export 'src/logic/splitter.dart';
 export 'src/logic/stats.dart';
 export 'src/logic/table.dart';
 export 'src/logic/taginput.dart';
+export 'src/logic/taskcenter.dart';
 export 'src/logic/thinking.dart';
 export 'src/logic/time.dart';
 export 'src/logic/time_select.dart';
