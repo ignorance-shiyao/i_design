@@ -170,6 +170,9 @@ export function routesFromSource(src) {
     const parent = /path: '(\/[a-z-]*)',\s*$/.exec(line)
     if (parent) {
       group = parent[1]
+      // 父路由也可能承载默认子页面（组件总览、资源页），必须纳入扫描——
+      // 三条浏览器检查扫的页面集合不一致的话，同一个问题会在这条里查不出来
+      paths.push(group)
       continue
     }
     const child = /^\s*(?:\{\s*)?path: '([a-z0-9-]+)'/.exec(line)
