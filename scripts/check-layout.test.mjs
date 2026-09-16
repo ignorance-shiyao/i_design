@@ -32,16 +32,16 @@ async function audit(browser, html) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
   const tab = await context.newPage()
   await tab.setContent(html)
-  const found = await tab.evaluate(auditInPage, LIMITS)
+  const result = await tab.evaluate(auditInPage, LIMITS)
   await context.close()
-  return found
+  return result
 }
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined })
 test.after(() => browser.close())
 
 test('通栏的段落——行长超限时必须报出来', async () => {
-  const found = await audit(browser, page(`<p>${PROSE}</p>`))
+  const { findings: found } = await audit(browser, page(`<p>${PROSE}</p>`))
   const hits = found.filter((f) => f.kind === '行长')
   assert.equal(hits.length, 1, `应当报出一条行长问题，实际：${JSON.stringify(found)}`)
   // 量的是渲染后的结果：1000px ÷ 15px ≈ 66 个汉字一行
@@ -49,12 +49,12 @@ test('通栏的段落——行长超限时必须报出来', async () => {
 })
 
 test('加了行长上限的同一段落——不再报', async () => {
-  const found = await audit(browser, page(`<p style="max-width:45em">${PROSE}</p>`))
+  const { findings: found } = await audit(browser, page(`<p style="max-width:45em">${PROSE}</p>`))
   assert.deepEqual(found.filter((f) => f.kind === '行长'), [])
 })
 
 test('代码块与表格不算行长：它们的宽度由内容决定', async () => {
-  const found = await audit(
+  const { findings: found } = await audit(
     browser,
     page(`<pre><code>${PROSE}</code></pre><table><tr><td>${PROSE}</td></tr></table>`)
   )
@@ -69,27 +69,57 @@ const CARDS = `<ul id="g" style="display:grid;grid-template-columns:repeat(3,1fr
 </ul>`
 
 test('被同行最高的格子撑高的卡片网格——必须报出来', async () => {
-  const found = await audit(browser, page(CARDS))
+  const { findings: found } = await audit(browser, page(CARDS))
   const hits = found.filter((f) => f.kind === '撑高')
   assert.equal(hits.length, 1, `应当报出一条撑高问题，实际：${JSON.stringify(found)}`)
   assert.match(hits[0].detail, /最惨一格被拉高 2[0-9][0-9]px/)
 })
 
 test('同一片网格改成按内容定高——不再报', async () => {
-  const found = await audit(browser, page(CARDS, '#g{align-items:start}'))
+  const { findings: found } = await audit(browser, page(CARDS, '#g{align-items:start}'))
   assert.deepEqual(found.filter((f) => f.kind === '撑高'), [])
 })
 
 test('子项不是卡片的网格不算：组件内部用网格拼出来的构件不在此列', async () => {
   const bare = CARDS.replaceAll('border:1px solid #ddd;border-radius:8px;', '')
-  const found = await audit(browser, page(bare))
+  const { findings: found } = await audit(browser, page(bare))
   assert.deepEqual(found.filter((f) => f.kind === '撑高'), [])
 })
 
 test('量的是渲染后的结果，不是 CSS 里写了什么——被盖掉的上限照样报', async () => {
-  const found = await audit(
+  const { findings: found } = await audit(
     browser,
     page(`<p class="prose" style="max-width:45em">${PROSE}</p>`, '.prose{max-width:none!important}')
   )
   assert.equal(found.filter((f) => f.kind === '行长').length, 1)
+})
+
+/* ——— 写明理由的豁免：空白本身就是落点的那种网格 ——— */
+
+test('写了理由的网格不再报，理由原样带出来', async () => {
+  const { findings, exempted } = await audit(
+    browser,
+    page(CARDS.replace('id="g"', 'id="g" data-stretch-reason="看板的列：空白本身就是放卡片的落点"'))
+  )
+  assert.deepEqual(findings.filter((f) => f.kind === '撑高'), [])
+  // 豁免不是静音：它要带着理由出现在报告里，好让下一个人判断还成不成立
+  assert.equal(exempted.length, 1)
+  assert.equal(exempted[0].reason, '看板的列：空白本身就是放卡片的落点')
+})
+
+test('理由留空不算豁免——一个不用写理由的开关，半年后会长在每一处', async () => {
+  const { findings, exempted } = await audit(
+    browser,
+    page(CARDS.replace('id="g"', 'id="g" data-stretch-reason="   "'))
+  )
+  assert.equal(findings.filter((f) => f.kind === '撑高').length, 1)
+  assert.deepEqual(exempted, [])
+})
+
+test('豁免只挡撑高那一条，行长照报', async () => {
+  const { findings } = await audit(
+    browser,
+    page(`<div data-stretch-reason="落点"><p>${PROSE}</p></div>`)
+  )
+  assert.equal(findings.filter((f) => f.kind === '行长').length, 1)
 })

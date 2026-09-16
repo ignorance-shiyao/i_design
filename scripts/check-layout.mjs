@@ -98,6 +98,8 @@ export function auditInPage({ maxMeasure, maxStretchPx, maxStretchPct }) {
   }
 
   // ——— 撑高的空白 ———
+  /** 写明理由后豁免的网格，原样报出来给人看 */
+  const exempted = []
   const isCard = (el) => {
     const cs = getComputedStyle(el)
     const framed = ['Top', 'Right', 'Bottom', 'Left'].every(
@@ -110,6 +112,22 @@ export function auditInPage({ maxMeasure, maxStretchPx, maxStretchPct }) {
     const cs = getComputedStyle(grid)
     // `normal` 就是没写过 align-items，即默认的 stretch
     if (cs.display !== 'grid' || cs.alignItems !== 'normal') continue
+    /*
+     * 唯一的豁免口：格子里的空白**本身就是可交互的落点**（看板的列、日历的格）。
+     * 那里的空白不是浪费——把列压到内容高度，一个空列就没地方放卡片了。
+     *
+     * 豁免必须写明理由（`data-stretch-reason` 的内容），空着不算：
+     * 一个不用写理由的开关，半年之后会出现在每一个被这条检查拦下的网格上。
+     * 理由会原样打进报告，好让下一个人看见它并判断还成不成立。
+     */
+    const reason = grid.getAttribute('data-stretch-reason')
+    if (reason && reason.trim()) {
+      exempted.push({
+        selector: `${grid.tagName.toLowerCase()}${[...grid.classList].map((c) => '.' + c).join('')}`,
+        reason: reason.trim()
+      })
+      continue
+    }
     const cells = [...grid.children].filter((c) => c.getBoundingClientRect().height > 0)
     if (cells.length < 3 || !cells.every(isCard)) continue
 
@@ -141,7 +159,7 @@ export function auditInPage({ maxMeasure, maxStretchPx, maxStretchPct }) {
     })
   }
 
-  return findings
+  return { findings, exempted }
 }
 
 /** 与 check-a11y / check-responsive 同一套路由提取：各写一份的话，新页面会在其中一处被静默跳过 */
@@ -182,6 +200,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined })
   const problems = []
+  const exemptions = new Map()
   let scanned = 0
 
   try {
@@ -199,17 +218,24 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       })
       await page.waitForTimeout(400)
       scanned++
-      const found = await page.evaluate(auditInPage, {
+      const { findings, exempted } = await page.evaluate(auditInPage, {
         maxMeasure: MAX_MEASURE,
         maxStretchPx: MAX_STRETCH_PX,
         maxStretchPct: MAX_STRETCH_PCT
       })
-      for (const f of found) problems.push(`${path} — ${f.kind}：${f.selector} ${f.detail}`)
+      for (const f of findings) problems.push(`${path} — ${f.kind}：${f.selector} ${f.detail}`)
+      // 豁免不是静音：每一条都报出来，好让下一个人看见理由并判断还成不成立
+      for (const e of exempted) exemptions.set(`${e.selector} —— ${e.reason}`, true)
     }
     await context.close()
   } finally {
     await browser.close()
     server?.kill()
+  }
+
+  if (exemptions.size) {
+    console.log(`按内容定高这条有 ${exemptions.size} 处写明理由的豁免：`)
+    for (const line of exemptions.keys()) console.log(`  · ${line}`)
   }
 
   if (problems.length) {
@@ -219,7 +245,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       '\n行长：给段落加 `max-width: var(--doc-measure)`（90ch ≈ 45 个汉字）。' +
         '只封顶不撑宽，窄容器里这条规则什么也不做。\n' +
         '撑高：让格子按自己的内容定高。`align-items: start` 只是把空白从格子里挪到格子之间，' +
-        '页面一样长；高矮差得远的清单改用多列（`column-width` + `break-inside: avoid`）。'
+        '页面一样长；高矮差得远的清单改用多列（`column-width` + `break-inside: avoid`）。\n' +
+        '格子里的空白本身就是落点（看板的列、日历的格）时，在网格上写 ' +
+        '`data-stretch-reason="…"` 说明理由——理由会打进报告，空着的不算豁免。'
     )
     process.exit(1)
   }
