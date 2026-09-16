@@ -14,6 +14,7 @@ export 'src/logic/affix.dart';
 export 'src/logic/agent.dart';
 export 'src/logic/anchor.dart';
 export 'src/logic/axis.dart';
+export 'src/logic/board.dart';
 export 'src/logic/bulk.dart';
 export 'src/logic/calendar.dart';
 export 'src/logic/carousel.dart';

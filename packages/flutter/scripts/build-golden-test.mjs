@@ -24,6 +24,10 @@ const bundle = (entry, name) => {
 const { buildPages, pageCountOf, clampPage } = await bundle('packages/common/src/logic/pagination.ts', 'pagination')
 const { nextSortOrder, sortRows } = await bundle('packages/common/src/logic/table.ts', 'table')
 const {
+  moveCheck, dropTargets, moveMenu, moveCard, describeMove, nextDropTarget,
+  columnStat, countIn
+} = await bundle('packages/common/src/logic/board.ts', 'board')
+const {
   threadItems, activitySummary, editNote, unreadState, keepDivider, readUpTo,
   checkMentions, failedComments, retryComment, discardComment, DELETED_BODY
 } = await bundle('packages/common/src/logic/thread.ts', 'thread')
@@ -2189,6 +2193,170 @@ const elapsedExpectations = [
   ...[0, 1, 500, 999, 1000, 5400].map(
     (ms) => `    expect(elapsedInterval(${ms}), ${elapsedInterval(ms)});`
   )
+]
+
+/*
+ * 看板：拖动与菜单是同一份清单、不能落的带着理由、判定顺序固定、
+ * 跨泳道说清同时改了负责人与状态、键盘跳过落不下的格子。
+ */
+const BOARD_COLUMNS = [
+  { id: 'todo', title: '待办' },
+  { id: 'doing', title: '进行中', wipLimit: 2 },
+  { id: 'done', title: '已完成', allowFrom: ['doing'] }
+]
+const BOARD_LANES = [
+  { id: 'lan', title: '林岚' },
+  { id: 'shen', title: '沈黎' },
+  { id: 'zhou', title: '周其', blockedReason: '周其已离职，不能再分派' }
+]
+const BOARD_CARDS = [
+  { id: 'k1', title: '对账单', columnId: 'todo', laneId: 'lan' },
+  { id: 'k2', title: '合同附件', columnId: 'doing', laneId: 'lan' },
+  { id: 'k3', title: '发货单', columnId: 'doing', laneId: 'lan' },
+  { id: 'k4', title: '归档的那张', columnId: 'todo', laneId: 'shen', lockedReason: '已归档，不能再改' }
+]
+const boardColumnLit = (c) => {
+  const parts = [`id: ${JSON.stringify(c.id)}`, `title: ${JSON.stringify(c.title)}`]
+  if (c.wipLimit !== undefined) parts.push(`wipLimit: ${c.wipLimit}`)
+  if (c.allowFrom !== undefined) parts.push(`allowFrom: ${JSON.stringify(c.allowFrom)}`)
+  return `IBoardColumn(${parts.join(', ')})`
+}
+const boardLaneLit = (l) =>
+  `IBoardLane(id: ${JSON.stringify(l.id)}, title: ${JSON.stringify(l.title)}` +
+  (l.blockedReason ? `, blockedReason: ${JSON.stringify(l.blockedReason)}` : '') +
+  ')'
+const boardCardLit = (c) => {
+  const parts = [
+    `id: ${JSON.stringify(c.id)}`,
+    `title: ${JSON.stringify(c.title)}`,
+    `columnId: ${JSON.stringify(c.columnId)}`
+  ]
+  if (c.laneId !== undefined) parts.push(`laneId: ${JSON.stringify(c.laneId)}`)
+  if (c.lockedReason !== undefined) parts.push(`lockedReason: ${JSON.stringify(c.lockedReason)}`)
+  return `IBoardCard(${parts.join(', ')})`
+}
+const boardTargetLit = (t) =>
+  `IMoveTarget(columnId: ${JSON.stringify(t.columnId)}` +
+  (t.laneId !== undefined ? `, laneId: ${JSON.stringify(t.laneId)}` : '') +
+  ')'
+const BOARD_COLS_DART = `[${BOARD_COLUMNS.map(boardColumnLit).join(', ')}]`
+const BOARD_LANES_DART = `[${BOARD_LANES.map(boardLaneLit).join(', ')}]`
+const BOARD_CARDS_DART = `[${BOARD_CARDS.map(boardCardLit).join(', ')}]`
+
+const boardExpectations = [
+  `    final bColumns = ${BOARD_COLS_DART};`,
+  `    final bLanes = ${BOARD_LANES_DART};`,
+  `    final bCards = ${BOARD_CARDS_DART};`,
+  // 能不能落，以及为什么（顺序固定：锁着 > 泳道 > 流转 > 在制品）
+  ...[
+    [0, { columnId: 'doing', laneId: 'lan' }],
+    [0, { columnId: 'done', laneId: 'lan' }],
+    [3, { columnId: 'doing', laneId: 'shen' }],
+    [0, { columnId: 'todo', laneId: 'zhou' }],
+    [3, { columnId: 'doing', laneId: 'zhou' }],
+    [0, { columnId: 'doing', laneId: 'zhou' }],
+    [1, { columnId: 'doing', laneId: 'lan' }],
+    [0, { columnId: 'doing', laneId: 'shen' }],
+    [0, { columnId: '不存在的列', laneId: 'lan' }]
+  ].flatMap(([cardIndex, to], i) => {
+    const check = moveCheck(BOARD_CARDS[cardIndex], to, BOARD_COLUMNS, BOARD_CARDS, BOARD_LANES)
+    const v = `chk${i}`
+    return [
+      `    final ${v} = moveCheck(bCards[${cardIndex}], ${boardTargetLit(to)}, ` +
+        `bColumns, bCards, bLanes);`,
+      `    expect(${v}.allowed, ${check.allowed});`,
+      `    expect(${v}.reason, ${JSON.stringify(check.reason)});`
+    ]
+  }),
+  `    expect(countIn(bCards, 'doing', 'lan'), ${countIn(BOARD_CARDS, 'doing', 'lan')});`,
+  // 拖动与菜单是同一份清单
+  `    expect(dropTargets(bCards[0], bColumns, bCards, bLanes).map((t) => t.title).toList(), ` +
+    `${JSON.stringify(dropTargets(BOARD_CARDS[0], BOARD_COLUMNS, BOARD_CARDS, BOARD_LANES).map((t) => t.title))});`,
+  `    expect(dropTargets(bCards[0], bColumns, bCards, bLanes).map((t) => t.allowed).toList(), ` +
+    `${JSON.stringify(dropTargets(BOARD_CARDS[0], BOARD_COLUMNS, BOARD_CARDS, BOARD_LANES).map((t) => t.allowed))});`,
+  `    expect(dropTargets(bCards[0], bColumns, bCards, bLanes).map((t) => t.reason).toList(), ` +
+    `${JSON.stringify(dropTargets(BOARD_CARDS[0], BOARD_COLUMNS, BOARD_CARDS, BOARD_LANES).map((t) => t.reason))});`,
+  `    expect(moveMenu(bCards[0], bColumns, bCards, bLanes).map((t) => t.title).toList(), ` +
+    `${JSON.stringify(moveMenu(BOARD_CARDS[0], BOARD_COLUMNS, BOARD_CARDS, BOARD_LANES).map((t) => t.title))});`,
+  // 不分泳道时每列一个落点
+  `    expect(dropTargets(IBoardCard(id: 'f1', title: '无泳道', columnId: 'todo'), bColumns, ` +
+    `[IBoardCard(id: 'f1', title: '无泳道', columnId: 'todo')]).map((t) => t.title).toList(), ` +
+    `${JSON.stringify(
+      dropTargets(
+        { id: 'f1', title: '无泳道', columnId: 'todo' },
+        BOARD_COLUMNS,
+        [{ id: 'f1', title: '无泳道', columnId: 'todo' }]
+      ).map((t) => t.title)
+    )});`,
+  // 移动：结果与那句话
+  ...[
+    ['k1', { columnId: 'doing', laneId: 'shen' }, undefined],
+    ['k1', { columnId: 'done', laneId: 'lan' }, undefined],
+    ['k3', { columnId: 'doing', laneId: 'lan' }, 0],
+    ['k1', { columnId: 'todo', laneId: 'shen' }, undefined],
+    ['k4', { columnId: 'todo', laneId: 'shen' }, 0],
+    ['不存在', { columnId: 'todo', laneId: 'lan' }, undefined]
+  ].flatMap(([id, to, index], i) => {
+    const result = moveCard(BOARD_CARDS, id, to, BOARD_COLUMNS, BOARD_LANES, index)
+    const v = `mv${i}`
+    return [
+      `    final ${v} = moveCard(bCards, ${JSON.stringify(id)}, ${boardTargetLit(to)}, ` +
+        `bColumns, bLanes${index === undefined ? '' : `, ${index}`});`,
+      `    expect(${v}.ok, ${result.ok});`,
+      `    expect(${v}.message, ${JSON.stringify(result.message)});`,
+      `    expect(${v}.cards.map((c) => c.id).toList(), ` +
+        `${JSON.stringify(result.cards.map((c) => c.id))});`,
+      `    expect(${v}.cards.map((c) => '\${c.columnId}/\${c.laneId}').toList(), ` +
+        `${JSON.stringify(result.cards.map((c) => `${c.columnId}/${c.laneId}`))});`
+    ]
+  }),
+  // 只换列 / 只换人 / 原地重排各说各的
+  ...[
+    [1, { columnId: 'done', laneId: 'lan' }],
+    [1, { columnId: 'doing', laneId: 'shen' }],
+    [1, { columnId: 'doing', laneId: 'lan' }]
+  ].map(
+    ([cardIndex, to]) =>
+      `    expect(describeMove(bCards[${cardIndex}], ${boardTargetLit(to)}, bColumns, bLanes), ` +
+      `${JSON.stringify(describeMove(BOARD_CARDS[cardIndex], to, BOARD_COLUMNS, BOARD_LANES))});`
+  ),
+  // 键盘：跳过落不下的、走到头停住、全都不能落时是 null
+  ...[
+    [0, { columnId: 'todo', laneId: 'lan' }, 1],
+    [0, { columnId: 'shen', laneId: undefined }, -1]
+  ].map(([cardIndex, current, delta]) => {
+    const targets = dropTargets(BOARD_CARDS[cardIndex], BOARD_COLUMNS, BOARD_CARDS, BOARD_LANES)
+    const next = nextDropTarget(targets, current, delta)
+    return (
+      `    expect(nextDropTarget(dropTargets(bCards[${cardIndex}], bColumns, bCards, bLanes), ` +
+      `${boardTargetLit(current)}, ${delta})?.title, ` +
+      `${next === null ? 'null' : JSON.stringify(next.title)});`
+    )
+  }),
+  `    expect(nextDropTarget(dropTargets(bCards[3], bColumns, bCards, bLanes), ` +
+    `IMoveTarget(columnId: 'todo', laneId: 'shen'), 1), null);`,
+  // 列头计数：有上限写成 2/2；超了只是不让新的再进
+  ...[
+    [1, 'lan'],
+    [0, 'lan']
+  ].flatMap(([columnIndex, laneId]) => {
+    const stat = columnStat(BOARD_COLUMNS[columnIndex], BOARD_CARDS, laneId)
+    return [
+      `    expect(columnStat(bColumns[${columnIndex}], bCards, ${JSON.stringify(laneId)}).text, ` +
+        `${JSON.stringify(stat.text)});`,
+      `    expect(columnStat(bColumns[${columnIndex}], bCards, ${JSON.stringify(laneId)}).over, ${stat.over});`
+    ]
+  }),
+  ...(() => {
+    const crowded = [...BOARD_CARDS, { id: 'k5', title: '第三张', columnId: 'doing', laneId: 'lan' }]
+    const stat = columnStat(BOARD_COLUMNS[1], crowded, 'lan')
+    return [
+      `    final crowded = [${crowded.map(boardCardLit).join(', ')}];`,
+      `    expect(columnStat(bColumns[1], crowded, 'lan').text, ${JSON.stringify(stat.text)});`,
+      `    expect(columnStat(bColumns[1], crowded, 'lan').over, ${stat.over});`,
+      `    expect(columnStat(bColumns[1], crowded, 'lan').count, ${stat.count});`
+    ]
+  })()
 ]
 
 /*
@@ -4714,6 +4882,10 @@ ${pickerExpectations.join('\n')}
 
   test('导入的列映射、错误清单转义与幂等键与 Web 端一致', () {
 ${importExpectations.join('\n')}
+  });
+
+  test('看板的落点判定、拖动与菜单一致、键盘跳格与 Web 端一致', () {
+${boardExpectations.join('\n')}
   });
 
   test('评论线程的留坑、活动折叠、未读定位与失败重发与 Web 端一致', () {
