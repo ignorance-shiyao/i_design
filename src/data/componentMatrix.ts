@@ -129,6 +129,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IBoard",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IBreadcrumb",
     "ends": {
       "vue-next": true,

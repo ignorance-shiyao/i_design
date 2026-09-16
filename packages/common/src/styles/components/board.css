@@ -1,0 +1,141 @@
+/*
+ * IBoard —— 看板与人员泳道。
+ *
+ * 落不下的格子在**拿起卡片的那一刻**就标出来并写上理由：拖着卡在一列上悬停
+ * 半天没反应，用户的结论是「这破东西又卡了」，不是「这一列不收」。
+ * 标法是淡底 + 一行字，不是把边框加粗——那在这套体系里是禁止的状态表达。
+ */
+.i-board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  width: 100%;
+}
+
+.i-board__hint {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+
+.i-board__lane { display: flex; flex-direction: column; gap: var(--i-spacing-2); }
+.i-board__lane-title {
+  font-size: var(--i-font-size-sm);
+  font-weight: var(--i-font-weight-medium);
+  color: var(--i-color-text);
+}
+/* 不收新卡的泳道：理由跟在名字后面，而不是只把它变灰 */
+.i-board__lane-blocked {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+
+.i-board__columns {
+  display: grid;
+  grid-template-columns: repeat(var(--i-board-columns, 3), minmax(180px, 1fr));
+  gap: var(--i-spacing-3);
+}
+
+.i-board__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-2);
+  min-height: 72px;
+  padding: var(--i-spacing-2);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+}
+/* 拖动中：能落的淡淡提起来，落不下的压暗并在底部写出理由 */
+.i-board__cell.is-droppable { background: var(--i-color-brand-subtle); }
+.i-board__cell.is-blocked { background: var(--i-color-bg-muted); }
+.i-board__cell-reason {
+  margin: 0;
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+
+.i-board__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--i-spacing-2);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+}
+/* 列头的计数写成 2/2：没有分母，用户要等到拖不进去才知道有上限 */
+.i-board__count {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.i-board__count.is-over {
+  color: var(--i-color-warning-text);
+  background: var(--i-color-warning-subtle);
+  border-radius: var(--i-radius-full);
+  padding: 0 var(--i-spacing-2);
+}
+
+.i-board__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-1);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-elevated);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+  cursor: grab;
+  text-align: left;
+}
+.i-board__card:focus-visible {
+  outline: 2px solid var(--i-color-brand);
+  outline-offset: 2px;
+}
+.i-board__card.is-picked { background: var(--i-color-brand-subtle); }
+/* 锁着的卡：说清为什么，而不是只把它变灰让人反复试 */
+.i-board__card.is-locked { cursor: not-allowed; color: var(--i-color-text-tertiary); }
+.i-board__card-locked {
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-tertiary);
+}
+
+/* 「移动到…」菜单：落不下的照常列出来，禁用并写明理由 */
+.i-board__menu {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: var(--i-spacing-2);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-elevated);
+  list-style: none;
+}
+.i-board__menu-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--i-spacing-2);
+  width: 100%;
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border: none;
+  border-radius: var(--i-radius-sm);
+  background: none;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text);
+  text-align: left;
+  cursor: pointer;
+}
+.i-board__menu-item:hover:not(:disabled) { background: var(--i-color-bg-subtle); }
+.i-board__menu-item:disabled { color: var(--i-color-text-tertiary); cursor: not-allowed; }
+.i-board__menu-reason { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
+
+@media (max-width: 560px) {
+  .i-board__columns { grid-template-columns: 1fr; }
+}

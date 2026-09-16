@@ -99,6 +99,11 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"showZero","type":"boolean","doc":"count 为 0 时是否仍然显示","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
     {"name":"type","type":"'brand' | 'success' | 'warning' | 'danger'","doc":"","optional":true,"defaultText":"'danger'","control":{"kind":"enum","options":["brand","success","warning","danger"]}},
   ],
+  IBoard: [
+    {"name":"cards","type":"BoardCard[]","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"columns","type":"BoardColumn[]","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"lanes","type":"BoardLane[]","doc":"人员泳道。不给就是一张平看板","optional":true,"defaultText":"() => []","control":null},
+  ],
   IBreadcrumb: [
     {"name":"items","type":"BreadcrumbItem[]","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"separator","type":"string","doc":"传入字符串则用文字分隔；默认使用图标，视觉上比斜杠更轻","optional":true,"defaultText":"''","control":{"kind":"string"}},

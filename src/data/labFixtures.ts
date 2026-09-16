@@ -248,6 +248,20 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
       }
     ]
   },
+  /* 看板在 Lab 里要有在制品满、流转限制与锁着的卡，才看得出它与普通列表的差别 */
+  IBoard: {
+    columns: [
+      { id: 'todo', title: '待办' },
+      { id: 'doing', title: '进行中', wipLimit: 2 },
+      { id: 'done', title: '已完成', allowFrom: ['doing'] }
+    ],
+    lanes: [{ id: 'lan', title: '林岚' }],
+    cards: [
+      { id: 'k1', title: '对账单核对', columnId: 'todo', laneId: 'lan' },
+      { id: 'k2', title: '合同附件更新', columnId: 'doing', laneId: 'lan' },
+      { id: 'k3', title: '去年的结转单', columnId: 'todo', laneId: 'lan', lockedReason: '已归档' }
+    ]
+  },
   IEntityPicker: {
     page: [
       { id: 'p1', label: '张三', hint: '销售一部' },

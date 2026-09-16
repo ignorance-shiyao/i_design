@@ -434,6 +434,40 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     }
   },
   {
+    "name": "IBoard",
+    "sources": {
+      "vue-next": "src/components/IBoard.vue",
+      "vue": "packages/vue/src/components/IBoard.vue",
+      "react": "packages/react/src/components/Board.tsx",
+      "miniprogram": "packages/miniprogram/src/components/board",
+      "flutter": "packages/flutter/lib/src/components/i_board.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": {
+      "route": "/components/board",
+      "page": "src/pages/components/BoardPage.vue",
+      "demos": 1
+    },
+    "demoRoutes": [
+      "/components/board"
+    ],
+    "states": {}
+  },
+  {
     "name": "IBreadcrumb",
     "sources": {
       "vue-next": "src/components/IBreadcrumb.vue",

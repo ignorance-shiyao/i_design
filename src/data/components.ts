@@ -37,6 +37,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'CodeBlock', cn: '代码块', to: '/components/code-block', desc: '高亮、行号与 diff 视图' },
       { name: 'CommandSearch', cn: '命令搜索', to: '/components/command-search', desc: '搜一下就到，键盘全程可用' },
       { name: 'TaskCenter', cn: '任务中心', to: '/components/task-center', desc: '异步任务追得到、通知点得下去；角标只数要人处理的' },
+      { name: 'Board', cn: '看板', to: '/components/board', desc: '拖动、菜单、键盘三条路径同一个结果；落不下的当场说原因' },
       { name: 'Scrollbar', cn: '滚动条', to: '/components/scrollbar', desc: '不占布局的自绘滚动条' },
       { name: 'ConfigProvider', cn: '全局配置', to: '/components/config-provider', desc: '下发文案字典与默认尺寸' }
     ]

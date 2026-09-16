@@ -66,6 +66,10 @@ const routes: RouteRecordRaw[] = [
       { path: 'scrollbar', component: () => import('@/pages/components/ScrollbarPage.vue') },
       { path: 'qrcode', component: () => import('@/pages/components/QrcodePage.vue') },
       {
+        path: 'board',
+        component: () => import('@/pages/components/BoardPage.vue')
+      },
+      {
         path: 'task-center',
         component: () => import('@/pages/components/TaskCenterPage.vue')
       },

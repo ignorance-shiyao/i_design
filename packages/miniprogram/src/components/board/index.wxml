@@ -1,0 +1,64 @@
+<view class="i-board">
+  <view wx:if="{{pickedTitle}}" class="i-board__hint">
+    <i-icon name="arrow-right" size="14" />
+    <text>拿起「{{pickedTitle}}」：点一个格子放下。落不下的格子已经压暗并写明原因。</text>
+  </view>
+
+  <view wx:for="{{lanesView}}" wx:key="key" class="i-board__lane">
+    <view wx:if="{{item.title}}" class="i-board__lane-title">
+      <text>{{item.title}}</text>
+      <!-- 不收新卡的泳道：理由跟在名字后面，而不是只把它变灰 -->
+      <text wx:if="{{item.blockedReason}}" class="i-board__lane-blocked">{{item.blockedReason}}</text>
+    </view>
+
+    <!-- 空白是落点，不是浪费 -->
+    <view class="i-board__columns" data-stretch-reason="看板的列：格子里的空白本身就是放卡片的落点，压到内容高度就没地方放了">
+      <view
+        wx:for="{{item.cells}}"
+        wx:for-item="cell"
+        wx:key="key"
+        class="i-board__cell {{cell.droppable ? 'is-droppable' : ''}} {{cell.blocked ? 'is-blocked' : ''}}"
+        data-column="{{cell.key}}"
+        data-lane="{{cell.laneId}}"
+        bindtap="onDrop"
+      >
+        <view class="i-board__head">
+          <text>{{cell.title}}</text>
+          <!-- 计数写成 2/2：没有分母，用户要等到放不进去才知道有上限 -->
+          <text class="i-board__count {{cell.over ? 'is-over' : ''}}">{{cell.count}}</text>
+        </view>
+
+        <view
+          wx:for="{{cell.cards}}"
+          wx:for-item="card"
+          wx:key="id"
+          class="i-board__card {{card.picked ? 'is-picked' : ''}} {{card.locked ? 'is-locked' : ''}}"
+          data-id="{{card.id}}"
+          catchtap="onPick"
+        >
+          <text>{{card.title}}</text>
+          <!-- 锁着的卡说清为什么，而不是只变灰让人反复试 -->
+          <text wx:if="{{card.locked}}" class="i-board__card-locked">{{card.lockedReason}}</text>
+        </view>
+
+        <!-- 落不下的原因就写在格子里 -->
+        <text wx:if="{{cell.reason}}" class="i-board__cell-reason">{{cell.reason}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 「移动到…」：与放下是同一份清单，落不下的也列出来并写明理由 -->
+  <view wx:if="{{menu.length}}" class="i-board__menu">
+    <view
+      wx:for="{{menu}}"
+      wx:key="key"
+      class="i-board__menu-item"
+      data-column="{{item.columnId}}"
+      data-lane="{{item.laneId}}"
+      bindtap="onMenu"
+    >
+      <text>移动到 {{item.title}}</text>
+      <text wx:if="{{!item.allowed}}" class="i-board__menu-reason">{{item.reason}}</text>
+    </view>
+  </view>
+</view>

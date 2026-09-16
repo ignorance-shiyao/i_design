@@ -36,6 +36,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/sticky-tool', label: 'StickyTool 侧边工具条' },
       { to: '/components/command-search', label: 'CommandSearch 命令搜索' },
       { to: '/components/task-center', label: 'TaskCenter 任务中心' },
+      { to: '/components/board', label: 'Board 看板' },
       { to: '/components/scrollbar', label: 'Scrollbar 滚动条' },
       { to: '/components/config-provider', label: 'ConfigProvider 全局配置' }
     ]

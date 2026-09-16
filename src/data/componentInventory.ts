@@ -31,6 +31,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IAvatarGroup.vue",
   "src/components/IBackTop.vue",
   "src/components/IBadge.vue",
+  "src/components/IBoard.vue",
   "src/components/IBreadcrumb.vue",
   "src/components/IBulkBar.vue",
   "src/components/IButton.vue",
