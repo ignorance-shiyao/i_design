@@ -108,7 +108,7 @@ const level = ref<QrEcLevel>('M')
 .playground__form {
   display: flex;
   flex: 1;
-  min-width: 260px;
+  min-width: min(260px, 100%);
   flex-direction: column;
   gap: var(--i-spacing-3);
 }

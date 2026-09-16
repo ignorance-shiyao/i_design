@@ -37,6 +37,8 @@ function routesFromSource() {
     const parent = /path: '(\/[a-z-]*)',\s*$/.exec(line)
     if (parent) {
       group = parent[1]
+      // 父路由也可能承载默认子页面（组件总览、资源页），必须纳入扫描。
+      paths.push(group)
       continue
     }
     const child = /^\s*(?:\{\s*)?path: '([a-z0-9-]+)'/.exec(line)
