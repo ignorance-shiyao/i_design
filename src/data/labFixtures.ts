@@ -199,6 +199,55 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
       }
     ]
   },
+  /* 线程在 Lab 里要同时出现留坑、活动折叠与未读分隔线 */
+  IThread: {
+    meId: 'me',
+    lastReadAt: 1_757_900_060_000,
+    entries: [
+      {
+        id: 'c1',
+        kind: 'comment',
+        authorId: 'u2',
+        authorName: '沈黎',
+        body: '这单客户要求先发一半。',
+        createdAt: 1_757_900_000_000
+      },
+      {
+        id: 'c2',
+        kind: 'comment',
+        authorId: 'u3',
+        authorName: '周其',
+        body: '',
+        createdAt: 1_757_900_030_000,
+        deleted: true
+      },
+      {
+        id: 'c3',
+        kind: 'comment',
+        authorId: 'u1',
+        authorName: '林岚',
+        body: '那按 8 万走。',
+        createdAt: 1_757_900_090_000,
+        parentId: 'c2'
+      },
+      {
+        id: 'a1',
+        kind: 'activity',
+        actorId: 'u1',
+        actorName: '林岚',
+        change: '金额：12 万 → 8 万',
+        createdAt: 1_757_900_120_000
+      },
+      {
+        id: 'a2',
+        kind: 'activity',
+        actorId: 'u1',
+        actorName: '林岚',
+        change: '状态：待确认 → 已确认',
+        createdAt: 1_757_900_150_000
+      }
+    ]
+  },
   IEntityPicker: {
     page: [
       { id: 'p1', label: '张三', hint: '销售一部' },

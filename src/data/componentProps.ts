@@ -1049,6 +1049,12 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"resize","type":"'none' | 'vertical' | 'both'","doc":"","optional":true,"defaultText":"'vertical'","control":{"kind":"enum","options":["none","vertical","both"]}},
     {"name":"ariaLabel","type":"string","doc":"无障碍名。 控件旁边没有可见文字时必须给：读屏用户听到的是「编辑框，空」， 填什么全靠猜。占位文案不算名字——它一开始打字就消失了。","optional":true,"defaultText":"''","control":{"kind":"string"}},
   ],
+  IThread: [
+    {"name":"entries","type":"ThreadEntry[]","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"meId","type":"string","doc":"我是谁。自己说的话不算未读","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"lastReadAt","type":"number","doc":"上次读到哪个时刻","optional":true,"defaultText":"0","control":{"kind":"number"}},
+    {"name":"formatTime","type":"(ms: number) => string","doc":"把时间戳排成人话。时区是各端从系统拿的，因此留在调用方","optional":true,"defaultText":"(ms: number) => new Date(ms).toLocaleString('zh-CN')","control":null},
+  ],
   ITimePicker: [
     {"name":"modelValue","type":"string","doc":"HH:mm 或 HH:mm:ss；空串表示未选","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"placeholder","type":"string","doc":"","optional":true,"defaultText":"'选择时间'","control":{"kind":"string"}},

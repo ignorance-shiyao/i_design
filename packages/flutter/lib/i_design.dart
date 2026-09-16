@@ -206,6 +206,7 @@ export 'src/components/i_tag.dart';
 export 'src/components/i_tag_input.dart';
 export 'src/components/i_task_center.dart';
 export 'src/components/i_textarea.dart';
+export 'src/components/i_thread.dart';
 export 'src/components/i_time_picker.dart';
 export 'src/components/i_time_select.dart';
 export 'src/components/i_timeline.dart';

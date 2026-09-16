@@ -1,0 +1,122 @@
+/*
+ * IThread —— 评论线程与活动记录。
+ *
+ * 人说的话与系统记的账按时间穿插在一条时间轴上：分成两栏的话，
+ * 读者永远拼不出「当时到底发生了什么」。活动记录排版上更轻——
+ * 它是背景，不是对话本身。
+ *
+ * 未读分隔线是一条横贯的发丝线加一枚标签。它**不是**用加粗边线标状态：
+ * 它标的是位置（「你上次读到这儿」），而不是某一条的类型或状态。
+ */
+.i-thread {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* 顶部那条：几条新消息、跳过去、以及「全部标为已读」 */
+.i-thread__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) var(--i-spacing-3);
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+}
+.i-thread__bar-text { flex: 1; }
+
+/* 未读分隔线：标的是位置，不是状态 */
+.i-thread__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  margin: var(--i-spacing-3) 0;
+  color: var(--i-color-brand-text);
+  font-size: var(--i-font-size-xs);
+}
+.i-thread__divider::before,
+.i-thread__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--i-color-hairline);
+}
+
+/* 活动记录：比对话轻一档，它是背景 */
+.i-thread__activity {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--i-spacing-2);
+  padding: var(--i-spacing-2) 0;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+}
+.i-thread__activity-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-bg-subtle);
+}
+.i-thread__activity-list {
+  margin: var(--i-spacing-1) 0 0;
+  padding-left: var(--i-spacing-4);
+  display: grid;
+  gap: 2px;
+}
+
+/* 回复：左侧缩进表达从属，不用一条加粗竖线（那会变成「类型」的暗示） */
+.i-thread__replies { padding-left: var(--i-spacing-8); }
+
+/* 删掉但留着位置的那条：正文换成一句说明，仍占着原来的位置 */
+.i-thread__tombstone {
+  padding: var(--i-spacing-2) 0;
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-tertiary);
+  font-style: italic;
+}
+
+.i-thread__edited { font-size: var(--i-font-size-xs); color: var(--i-color-text-tertiary); }
+
+/* 发送中与发失败：状态用图标 + 文字 + 淡底块，不靠颜色单独表意 */
+.i-thread__send {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  padding: 0 var(--i-spacing-2);
+  border-radius: var(--i-radius-full);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-text-secondary);
+  background: var(--i-color-bg-subtle);
+}
+.i-thread__send--failed {
+  color: var(--i-color-danger-text);
+  background: var(--i-color-danger-subtle);
+}
+.i-thread__failed-actions {
+  display: flex;
+  gap: var(--i-spacing-2);
+  margin-top: var(--i-spacing-1);
+}
+
+/* @ 到话题外的人时那句提醒。不拦，只说 */
+.i-thread__mention-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  margin-top: var(--i-spacing-2);
+  font-size: var(--i-font-size-xs);
+  color: var(--i-color-warning-text);
+}
+
+.i-thread__empty {
+  padding: var(--i-spacing-8);
+  text-align: center;
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-sm);
+}

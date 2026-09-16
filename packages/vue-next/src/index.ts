@@ -46,6 +46,7 @@ import IImportWizard from './IImportWizard.vue'
 import IExportJob from './IExportJob.vue'
 import ITreeTable from './ITreeTable.vue'
 import ITaskCenter from './ITaskCenter.vue'
+import IThread from './IThread.vue'
 import IChatThinking from './IChatThinking.vue'
 import IChatToolCall from './IChatToolCall.vue'
 import IChatSources from './IChatSources.vue'
@@ -261,6 +262,7 @@ export {
   IExportJob,
   ITreeTable,
   ITaskCenter,
+  IThread,
   IChatThinking,
   IChatToolCall,
   IChatSources,
@@ -393,6 +395,7 @@ const components = {
   IExportJob,
   ITreeTable,
   ITaskCenter,
+  IThread,
   IChatThinking,
   IChatToolCall,
   IChatSources,

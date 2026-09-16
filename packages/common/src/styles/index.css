@@ -142,6 +142,7 @@
 @import './components/taginput.css';
 @import './components/task-center.css';
 @import './components/textarea.css';
+@import './components/thread.css';
 @import './components/time-select.css';
 @import './components/timeline.css';
 @import './components/timepicker.css';

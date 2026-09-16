@@ -1,0 +1,57 @@
+<view class="i-thread">
+  <view wx:if="{{unreadCount}}" class="i-thread__bar">
+    <text class="i-thread__bar-text">{{unreadText}}</text>
+    <i-button wx:if="{{dividerId}}" size="sm" bind:tap="onJump">跳到第一条</i-button>
+    <i-button size="sm" bind:tap="onReadAll">全部标为已读</i-button>
+  </view>
+
+  <block wx:for="{{rows}}" wx:key="key">
+    <!-- 分隔线钉在打开时算出的那一条之前，之后不再移动 -->
+    <view wx:if="{{item.key === dividerId}}" class="i-thread__divider">{{unreadText}}</view>
+
+    <!-- 连续的活动记录折成一组：逐条铺开会把人说的话淹掉 -->
+    <view wx:if="{{item.activity}}" class="i-thread__activity">
+      <view class="i-thread__activity-icon"><i-icon name="history" size="12" /></view>
+      <view>
+        <text>{{item.summary}}</text>
+        <view wx:if="{{item.changes.length}}" class="i-thread__activity-list">
+          <view wx:for="{{item.changes}}" wx:for-item="change" wx:key="*this">{{change}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="{{item.reply ? 'i-thread__replies' : ''}}">
+      <!-- 删掉但底下还有回复：留一个坑，否则那几句「同意」挂在空气里 -->
+      <text wx:if="{{item.tombstone}}" class="i-thread__tombstone">{{deletedBody}}</text>
+      <view wx:else class="i-comment {{item.reply ? 'i-comment--reply' : ''}}">
+        <view class="i-comment__main">
+          <view class="i-comment__head">
+            <text class="i-comment__author">{{item.author}}</text>
+            <text class="i-comment__time">{{item.time}}</text>
+            <!-- 编辑过就看得见：一句话被改了意思，读者不该毫无察觉 -->
+            <text wx:if="{{item.edited}}" class="i-thread__edited">{{item.edited}}</text>
+            <view wx:if="{{item.sending}}" class="i-thread__send">
+              <i-icon name="clock" size="11" /><text>发送中</text>
+            </view>
+            <view wx:elif="{{item.failed}}" class="i-thread__send i-thread__send--failed">
+              <i-icon name="error-circle" size="11" /><text>发送失败：{{item.failReason}}</text>
+            </view>
+          </view>
+
+          <view class="i-comment__content">{{item.body}}</view>
+
+          <!-- 失败那条的原文还在，动作摆在旁边：悄悄丢掉是最糟的 -->
+          <view wx:if="{{item.failed}}" class="i-thread__failed-actions">
+            <i-button size="sm" variant="primary" data-id="{{item.key}}" bind:tap="onRetry">重发</i-button>
+            <i-button size="sm" data-id="{{item.key}}" bind:tap="onDiscard">放弃这条</i-button>
+          </view>
+          <view wx:elif="{{!item.sending}}" class="i-comment__actions">
+            <i-button size="sm" data-id="{{item.key}}" bind:tap="onReply">回复</i-button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <text wx:if="{{!rows.length}}" class="i-thread__empty">还没有评论。第一条通常是把背景说清楚。</text>
+</view>

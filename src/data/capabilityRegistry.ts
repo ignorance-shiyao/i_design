@@ -548,6 +548,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/task-center",
       "/components/command-search",
       "/components/sticky-tool",
+      "/components/comment",
       "/components/image-viewer",
       "/components/steps",
       "/components/tooltip",
@@ -1784,7 +1785,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/comment",
       "page": "src/pages/components/CommentPage.vue",
-      "demos": 3
+      "demos": 4
     },
     "demoRoutes": [
       "/components/comment"
@@ -4812,6 +4813,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
         "both"
       ]
     }
+  },
+  {
+    "name": "IThread",
+    "sources": {
+      "vue-next": "src/components/IThread.vue",
+      "vue": "packages/vue/src/components/IThread.vue",
+      "react": "packages/react/src/components/Thread.tsx",
+      "miniprogram": "packages/miniprogram/src/components/thread",
+      "flutter": "packages/flutter/lib/src/components/i_thread.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/comment"
+    ],
+    "states": {}
   },
   {
     "name": "ITimePicker",

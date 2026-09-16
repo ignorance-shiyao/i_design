@@ -122,6 +122,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'InfiniteScroll', cn: '无限滚动', to: '/components/mobile', desc: '翻到底自动续下一页' },
       { name: 'Descriptions', cn: '描述列表', to: '/components/descriptions', desc: '成组展示只读字段' },
       { name: 'Comment', cn: '评论', to: '/components/comment', desc: '展示一条讨论记录' },
+      { name: 'Thread', cn: '评论线程', to: '/components/comment', desc: '活动记录穿插、未读分隔线不跳位、发失败留原文' },
       { name: 'ImageViewer', cn: '图片预览', to: '/components/image-viewer', desc: '全屏看大图，支持缩放与翻页' },
       { name: 'Qrcode', cn: '二维码', to: '/components/qrcode', desc: '把文本编成可扫的码' },
       { name: 'Skeleton', cn: '骨架屏', to: '/components/skeleton', desc: '加载中的内容占位' }
