@@ -227,7 +227,8 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'FineTuneCard', cn: '属性检查器', to: '/components/chat', desc: '生成之后逐项微调，改过的能退回' },
       { name: 'AgentScreen', cn: '智能体屏幕', to: '/components/chat', desc: '看着它操作，画面几秒前一目了然' },
       { name: 'ChatList', cn: '会话列表', to: '/components/chat', desc: '按时间分组，删一条不弹回顶部' },
-      { name: 'DiffTable', cn: '差异表', to: '/components/chat', desc: '成批改动逐行采纳' }
+      { name: 'DiffTable', cn: '差异表', to: '/components/chat', desc: '成批改动逐行采纳' },
+      { name: 'ArtifactWorkspace', cn: '产物工作区', to: '/components/chat', desc: '版本回看、逐项采纳与只读预览' }
     ]
   },
   {

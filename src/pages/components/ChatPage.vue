@@ -29,6 +29,7 @@ import { snippets } from '@/data/snippets'
 import type {
   AgentTask,
   ApprovalQuestion,
+  ArtifactRevision,
   ChatSession,
   ContextChunk,
   DiffRow,
@@ -41,6 +42,7 @@ import IAgentTasks from '@/components/IAgentTasks.vue'
 import IRecommendCard from '@/components/IRecommendCard.vue'
 import IContextCards from '@/components/IContextCards.vue'
 import IDiffTable from '@/components/IDiffTable.vue'
+import IArtifactWorkspace from '@/components/IArtifactWorkspace.vue'
 import ISegmented from '@/components/ISegmented.vue'
 import IButton from '@/components/IButton.vue'
 import ITag from '@/components/ITag.vue'
@@ -259,6 +261,37 @@ const diffRows: DiffRow[] = [
     kind: 'added',
     cells: { flavor: { value: '黑芝麻' }, category: { value: '当季' }, supplier: { value: '南岭食品' } }
   }
+]
+
+/*
+ * 产物版本不是聊天附件的替身：同一份采购方案重生后，旧版仍可回看；
+ * 采纳项按当前版本过滤，不能把 v1 的选择偷偷带进 v2。
+ */
+const artifactRevisions: ArtifactRevision[] = [
+  {
+    id: 'purchase-plan',
+    kind: 'document',
+    title: '第四季度采购方案',
+    version: 2,
+    createdAt: 1_757_030_400_000,
+    content: '保留开心果与黑芝麻两项补货；石板街停止采购，并在周五前通知门店。',
+    itemIds: ['keep-pistachio', 'keep-sesame', 'stop-stone-street']
+  },
+  {
+    id: 'purchase-plan',
+    kind: 'document',
+    title: '第四季度采购方案',
+    version: 1,
+    createdAt: 1_756_944_000_000,
+    content: '建议补货开心果、黑芝麻与石板街三项。',
+    itemIds: ['keep-pistachio', 'keep-sesame', 'keep-stone-street']
+  }
+]
+const artifactVersion = ref(2)
+const artifactAdopted = ref<string[]>([])
+const artifactStructured: ArtifactRevision[] = [
+  { id: 'stock-table', kind: 'table', title: '建议补货清单', version: 1, createdAt: 1_757_030_400_000, payload: { kind: 'table', columns: ['品类', '数量'], rows: [['开心果', '120'], ['黑芝麻', '80']] } },
+  { id: 'demand-chart', kind: 'chart', title: '周需求趋势', version: 1, createdAt: 1_757_030_400_000, payload: { kind: 'chart', points: [{ label: '周一', value: 42 }, { label: '周二', value: 68 }, { label: '周三', value: 55 }] } }
 ]
 const sourceOptions = [
   { label: 'pagination.ts', description: 'packages/common/src/logic', keywords: ['分页'] },
@@ -940,6 +973,30 @@ function createSession() {
       />
     </DemoBlock>
 
+    <h2>产物工作区</h2>
+    <p>
+      方案、表格和代码等运行结果不该塞回聊天气泡。这里保留每次生成的版本，采纳与撤销只作用于当前版本；正文始终按只读文本预览，内容即使长得像 HTML 也不会在页面里执行。
+    </p>
+    <DemoBlock
+      title="版本回看与逐项采纳"
+      description="切到旧版后，v2 的采纳项不会跟过去；再切回新版时，会自动丢弃旧版才有的项目，避免把已失效的建议重新应用。点击导出会给出真实反馈。"
+      lang="vue"
+      code='<IArtifactWorkspace v-model:version="artifactVersion" v-model:adopted="artifactAdopted" :artifacts="artifactRevisions" artifact-id="purchase-plan" />'
+    >
+      <IArtifactWorkspace
+        v-model:version="artifactVersion"
+        v-model:adopted="artifactAdopted"
+        :artifacts="artifactRevisions"
+        artifact-id="purchase-plan"
+        style="max-width: 620px"
+        @download="() => message.success('已准备导出当前版本')"
+      />
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 16px; max-width: 620px">
+        <IArtifactWorkspace :artifacts="artifactStructured" artifact-id="stock-table" />
+        <IArtifactWorkspace :artifacts="artifactStructured" artifact-id="demand-chart" />
+      </div>
+    </DemoBlock>
+
     <h2>属性</h2>
     <table class="i-table">
       <thead>
@@ -963,6 +1020,7 @@ function createSession() {
         <tr><td>IRecommendCard</td><td>title、confidence、acceptText、alternativeText、showAlternative</td><td>accept、alternative</td></tr>
         <tr><td>IContextCards</td><td>chunks、title、previewLimit</td><td>—</td></tr>
         <tr><td>IDiffTable</td><td>title、columns、rows</td><td>apply</td></tr>
+        <tr><td>IArtifactWorkspace</td><td>artifacts、artifactId、version、adopted、title</td><td>update:version、update:adopted、download</td></tr>
       </tbody>
     </table>
     <h2>什么时候不该用它</h2>

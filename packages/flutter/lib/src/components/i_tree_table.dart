@@ -16,20 +16,24 @@ import 'i_icon.dart';
 /// 既是 CLAUDE.md 禁的那条，也让真正需要着色的选中行没了对比。
 class ITreeTableColumn {
   const ITreeTableColumn({
-    required this.key,
+    this.key,
     required this.title,
     this.width,
     this.numeric = false,
     this.sortable = false,
+    this.mergeVertical = false,
+    this.children = const [],
   });
 
-  final String key;
+  final String? key;
   final String title;
   final double? width;
 
   /// 数字列：右对齐并用等宽数字
   final bool numeric;
   final bool sortable;
+  final bool mergeVertical;
+  final List<ITreeTableColumn> children;
 }
 
 class ITreeTable extends StatelessWidget {
@@ -76,9 +80,20 @@ class ITreeTable extends StatelessWidget {
     return value.toStringAsFixed(2);
   }
 
+  static List<ITreeTableColumn> _leafColumns(List<ITreeTableColumn> columns) => [
+        for (final column in columns)
+          if (column.children.isEmpty) column else ..._leafColumns(column.children),
+      ];
+
   @override
   Widget build(BuildContext context) {
     final c = iColorsOf(context);
+    final leafColumns = _leafColumns(columns);
+    ITreeTableColumnSpec asSpec(ITreeTableColumn column) => ITreeTableColumnSpec(
+      key: column.key, title: column.title, mergeVertical: column.mergeVertical,
+      children: column.children.map(asSpec).toList(),
+    );
+    final header = buildHeaderLayout(columns.map(asSpec).toList());
     final sorted = sortTree(data, sortKey, sortOrder);
     final rows = flattenRows(sorted, expanded);
     final summary = selectionSummary(selected, rows);
@@ -115,21 +130,21 @@ class ITreeTable extends StatelessWidget {
           child: Row(
             children: [
               if (selectable) const SizedBox(width: 44),
-              for (var i = 0; i < columns.length; i += 1)
+              for (var i = 0; i < leafColumns.length; i += 1)
                 wrapCell(
                   i == 0
                       ? Padding(
                           padding: EdgeInsets.only(left: (entry.level + 1) * 20.0),
-                          child: cellText(summaryLabel(group), columns[i], color: c.text),
+                          child: cellText(summaryLabel(group), leafColumns[i], color: c.text),
                         )
                       : cellText(
-                          group.values.containsKey(columns[i].key)
-                              ? _format(group.values[columns[i].key])
+                          group.values.containsKey(leafColumns[i].key!)
+                              ? _format(group.values[leafColumns[i].key!])
                               : '',
-                          columns[i],
+                          leafColumns[i],
                           color: c.text,
                         ),
-                  columns[i],
+                  leafColumns[i],
                 ),
             ],
           ),
@@ -155,7 +170,7 @@ class ITreeTable extends StatelessWidget {
                       : null,
                 ),
               ),
-            for (var i = 0; i < columns.length; i += 1)
+            for (var i = 0; i < leafColumns.length; i += 1)
               wrapCell(
                 i == 0
                     // 第一列带缩进与箭头：层级只靠这两样表示
@@ -184,8 +199,8 @@ class ITreeTable extends StatelessWidget {
                               const SizedBox(width: 24),
                             Flexible(
                               child: cellText(
-                                '${row.row.fields[columns[i].key] ?? ''}',
-                                columns[i],
+                                '${row.row.fields[leafColumns[i].key!] ?? ''}',
+                                leafColumns[i],
                                 color: c.text,
                               ),
                             ),
@@ -203,8 +218,8 @@ class ITreeTable extends StatelessWidget {
                           ],
                         ),
                       )
-                    : cellText('${row.row.fields[columns[i].key] ?? ''}', columns[i]),
-                columns[i],
+                    : cellText('${row.row.fields[leafColumns[i].key!] ?? ''}', leafColumns[i]),
+                leafColumns[i],
               ),
           ],
         ),
@@ -276,9 +291,12 @@ class ITreeTable extends StatelessWidget {
         Container(
           color: c.bgSubtle,
           padding: const EdgeInsets.symmetric(vertical: IDesignTokensLight.spacing2),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              if (selectable)
+              for (var headerIndex = 0; headerIndex < header.rows.length; headerIndex += 1)
+                Row(children: [
+              if (selectable && headerIndex == 0)
                 SizedBox(
                   width: 44,
                   child: Checkbox(
@@ -288,22 +306,22 @@ class ITreeTable extends StatelessWidget {
                         onSelectedChanged?.call(toggleSelectAll(data, selected)),
                   ),
                 ),
-              for (final column in columns)
-                wrapCell(
-                  InkWell(
-                    onTap: column.sortable && onSortChanged != null
+              for (final cell in header.rows[headerIndex])
+                Expanded(
+                  flex: cell.colSpan,
+                  child: InkWell(
+                    onTap: cell.column.key != null && onSortChanged != null
                         ? () {
-                            if (sortKey != column.key) {
-                              onSortChanged!(column.key, ISortOrder.asc);
+                            if (sortKey != cell.column.key) {
+                              onSortChanged!(cell.column.key, ISortOrder.asc);
                               return;
                             }
                             final next = nextSortOrder(sortOrder);
-                            onSortChanged!(next == null ? null : column.key, next);
+                            onSortChanged!(next == null ? null : cell.column.key, next);
                           }
                         : null,
                     child: Text(
-                      column.title,
-                      textAlign: column.numeric ? TextAlign.right : TextAlign.left,
+                      cell.column.title,
                       style: TextStyle(
                         fontSize: IDesignTokensLight.fontSizeSm,
                         fontWeight: FontWeight.w600,
@@ -311,8 +329,8 @@ class ITreeTable extends StatelessWidget {
                       ),
                     ),
                   ),
-                  column,
                 ),
+            ]),
             ],
           ),
         ),
@@ -325,18 +343,18 @@ class ITreeTable extends StatelessWidget {
             child: Row(
               children: [
                 if (selectable) const SizedBox(width: 44),
-                for (var i = 0; i < columns.length; i += 1)
+                for (var i = 0; i < leafColumns.length; i += 1)
                   wrapCell(
                     cellText(
                       i == 0
                           ? summaryLabel(total, '合计')
-                          : (total.values.containsKey(columns[i].key)
-                              ? _format(total.values[columns[i].key])
+                          : (total.values.containsKey(leafColumns[i].key!)
+                              ? _format(total.values[leafColumns[i].key!])
                               : ''),
-                      columns[i],
+                      leafColumns[i],
                       color: c.text,
                     ),
-                    columns[i],
+                    leafColumns[i],
                   ),
               ],
             ),

@@ -86,6 +86,7 @@ import IMenu from './IMenu.vue'
 import IAnchor from './IAnchor.vue'
 import INotificationLayer from './INotificationLayer.vue'
 import IApprovalCard from './IApprovalCard.vue'
+import IArtifactWorkspace from './IArtifactWorkspace.vue'
 import IAgentTasks from './IAgentTasks.vue'
 import IRecommendCard from './IRecommendCard.vue'
 import IContextCards from './IContextCards.vue'
@@ -185,6 +186,7 @@ export {
   IAnchor,
   INotificationLayer,
   IApprovalCard,
+  IArtifactWorkspace,
   IAgentTasks,
   IRecommendCard,
   IContextCards,

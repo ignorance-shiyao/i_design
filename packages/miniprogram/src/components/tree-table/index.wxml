@@ -9,11 +9,12 @@
   </view>
 
   <view class="i-table-c i-table-c--sm">
-    <view class="i-table-c__head">
-      <view wx:if="{{selectable}}" class="i-table-c__check-cell">
+    <view wx:for="{{headerRows}}" wx:for-item="headerRow" wx:key="index" class="i-table-c__head">
+      <view wx:if="{{selectable && index === 0}}" class="i-table-c__check-cell">
         <checkbox class="i-table-c__check" checked="{{allChecked}}" bindtap="onToggleAll" />
       </view>
-      <view wx:for="{{columns}}" wx:key="key" class="i-table-c__cell i-table-c__th">{{item.title}}</view>
+      <view wx:for="{{headerRow}}" wx:for-item="header" wx:key="key"
+            class="i-table-c__cell i-table-c__th" data-colspan="{{header.colSpan}}" data-rowspan="{{header.rowSpan}}">{{header.title}}</view>
     </view>
 
     <view
@@ -32,7 +33,7 @@
         />
       </view>
 
-      <view wx:for="{{item.cells}}" wx:for-item="cell" wx:key="key"
+      <view wx:for="{{item.cells}}" wx:for-item="cell" wx:key="key" wx:if="{{!cell.hidden}}"
             class="i-table-c__cell {{cell.numeric ? 'i-tree-table__num' : ''}}">
         <!-- 第一列带缩进与箭头：层级只靠这两样表示 -->
         <view wx:if="{{index === 0}}" class="i-tree-table__label" style="padding-left:{{item.indent}}rpx">

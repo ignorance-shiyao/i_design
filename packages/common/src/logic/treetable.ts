@@ -33,6 +33,71 @@ export interface TreeRow {
   [field: string]: unknown
 }
 
+/**
+ * 树表的列同时描述两件不同的事：叶子列描述一格数据，非叶子列只描述表头分组。
+ *
+ * 因此分组列没有 `key`，叶子列必须有 `key`。把这条结构约束放在共享逻辑里，
+ * 各端就不用各自猜一遍 colspan / rowspan，也不会出现 Web 两行表头、小程序一行表头。
+ */
+export interface TreeTableColumnSpec {
+  key?: string
+  title: string
+  width?: string
+  align?: 'left' | 'center' | 'right'
+  sortable?: boolean
+  numeric?: boolean
+  /** 仅叶子列可开启：连续的同级兄弟行值相同才纵向合并 */
+  merge?: 'vertical'
+  children?: TreeTableColumnSpec[]
+}
+
+export interface HeaderCell<T extends TreeTableColumnSpec = TreeTableColumnSpec> {
+  column: T
+  colSpan: number
+  rowSpan: number
+}
+
+/** 由上到下的表头网格。`leaves` 是正文与排序唯一可用的列。 */
+export interface HeaderLayout<T extends TreeTableColumnSpec = TreeTableColumnSpec> {
+  rows: HeaderCell<T>[][]
+  leaves: T[]
+  depth: number
+}
+
+/**
+ * 把列树摊成 HTML table / 原生表格所需的表头网格。
+ *
+ * 叶子列补满剩余深度；分组列横跨它全部后代。这样「业务信息」下的客户、金额
+ * 永远和正文两格一一对应，而不是由每个端用 index 再拼一次。
+ */
+export function buildHeaderLayout<T extends TreeTableColumnSpec>(
+  columns: readonly T[]
+): HeaderLayout<T> {
+  const depthOf = (column: T): number =>
+    column.children?.length ? 1 + Math.max(...column.children.map((child) => depthOf(child as T))) : 1
+  const depth = columns.length ? Math.max(...columns.map(depthOf)) : 1
+  const rows: HeaderCell<T>[][] = Array.from({ length: depth }, () => [])
+  const leaves: T[] = []
+  const leafCount = (column: T): number =>
+    column.children?.length
+      ? column.children.reduce((total, child) => total + leafCount(child as T), 0)
+      : 1
+  const walk = (list: readonly T[], level: number) => {
+    for (const column of list) {
+      const grouped = !!column.children?.length
+      rows[level].push({
+        column,
+        colSpan: grouped ? leafCount(column) : 1,
+        rowSpan: grouped ? 1 : depth - level
+      })
+      if (grouped) walk(column.children as T[], level + 1)
+      else leaves.push(column)
+    }
+  }
+  walk(columns, 0)
+  return { rows, leaves, depth }
+}
+
 export interface FlatRow {
   key: string
   row: TreeRow
@@ -83,6 +148,55 @@ export type RenderRow =
   | { kind: 'row'; row: FlatRow }
   /** 一个分组的小计，摆在它最后一条子行之后 */
   | { kind: 'summary'; groupKey: string; group: TreeRow; level: number }
+
+export interface CellSpan {
+  /** 0 表示这格被上方锚点合并，不渲染；正数为锚点跨越的行数 */
+  rowSpan: number
+}
+
+/**
+ * 排好、展开好之后的纵向合并结果。
+ *
+ * 合并不是数据属性，而是**当前视图的排版结果**：排序把原本相邻的两行打散，
+ * 就必须断开；小计、父子层级和不同父节点也必须断开。否则一格看似省了重复文字，
+ * 实际却把两条已经没有连续关系的记录说成同一个分组。
+ */
+export function bodyCellSpans(
+  entries: readonly RenderRow[],
+  columns: readonly TreeTableColumnSpec[]
+): Map<string, CellSpan> {
+  const merged = columns.filter((column) => column.merge === 'vertical' && column.key)
+  const out = new Map<string, CellSpan>()
+  for (const column of merged) {
+    const key = column.key!
+    let run: FlatRow[] = []
+    const flush = () => {
+      if (!run.length) return
+      const span = run.length
+      for (let i = 0; i < run.length; i += 1) {
+        out.set(`${run[i].key}:${key}`, { rowSpan: i === 0 ? span : 0 })
+      }
+      run = []
+    }
+    for (const entry of entries) {
+      if (entry.kind !== 'row') {
+        flush()
+        continue
+      }
+      const row = entry.row
+      const previous = run[run.length - 1]
+      const sameRun =
+        previous &&
+        previous.level === row.level &&
+        previous.parentKey === row.parentKey &&
+        previous.row[key] === row.row[key]
+      if (!sameRun) flush()
+      run.push(row)
+    }
+    flush()
+  }
+  return out
+}
 
 /**
  * 连小计一起排好的渲染序列。

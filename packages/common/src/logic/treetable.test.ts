@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   aggregateField,
   allRows,
+  bodyCellSpans,
+  buildHeaderLayout,
   expandAll,
   flattenRows,
   grandTotal,
@@ -196,5 +198,57 @@ describe('小计摆在哪儿', () => {
     expect(renderRows(rows, ['g1'], false).map((e) => (e.kind === 'row' ? e.row.key : ''))).toEqual(
       flattenRows(rows, ['g1']).map((r) => r.key)
     )
+  })
+})
+
+describe('多级表头', () => {
+  it('分组列横跨全部叶子列，叶子列补满剩余表头高度', () => {
+    const layout = buildHeaderLayout([
+      { title: '客户', key: 'name' },
+      {
+        title: '经营数据',
+        children: [
+          { title: '本月', children: [{ title: '金额', key: 'amount' }, { title: '数量', key: 'count' }] },
+          { title: '同比', key: 'growth' }
+        ]
+      }
+    ])
+    expect(layout.depth).toBe(3)
+    expect(layout.rows.map((row) => row.map((cell) => [cell.column.title, cell.colSpan, cell.rowSpan]))).toEqual([
+      [['客户', 1, 3], ['经营数据', 3, 1]],
+      [['本月', 2, 1], ['同比', 1, 2]],
+      [['金额', 1, 1], ['数量', 1, 1]]
+    ])
+    expect(layout.leaves.map((column) => column.key)).toEqual(['name', 'amount', 'count', 'growth'])
+  })
+})
+
+describe('合并单元格只认排序后的连续同级行', () => {
+  const mergeColumns = [
+    { key: 'name', title: '客户' },
+    { key: 'owner', title: '负责人', merge: 'vertical' as const }
+  ]
+  const mergeRows: TreeRow[] = [
+    { key: 'g', name: '华东', children: [
+      { key: 'a', name: '甲', owner: '林岚', amount: 1 },
+      { key: 'b', name: '乙', owner: '林岚', amount: 3 },
+      { key: 'c', name: '丙', owner: '沈野', amount: 2 }
+    ] }
+  ]
+
+  it('连续相同值只渲染一个锚点，后面的格子为 0', () => {
+    const spans = bodyCellSpans(renderRows(mergeRows, ['g']), mergeColumns)
+    expect(spans.get('a:owner')).toEqual({ rowSpan: 2 })
+    expect(spans.get('b:owner')).toEqual({ rowSpan: 0 })
+    expect(spans.get('c:owner')).toEqual({ rowSpan: 1 })
+    // 父行与子行即使同值也不能跨层合并
+    expect(spans.get('g:owner')).toEqual({ rowSpan: 1 })
+  })
+
+  it('排序把同值行打散后，合并随当前顺序断开，不再声称它们是一组', () => {
+    const sorted = sortTree(mergeRows, 'amount', 'asc')
+    const spans = bodyCellSpans(renderRows(sorted, ['g']), mergeColumns)
+    expect(spans.get('a:owner')).toEqual({ rowSpan: 1 })
+    expect(spans.get('b:owner')).toEqual({ rowSpan: 1 })
   })
 })

@@ -10,6 +10,7 @@ import 'package:i_design/src/logic/table.dart';
 import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
+import 'package:i_design/src/logic/artifact.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/axis.dart';
 import 'package:i_design/src/logic/query.dart';
@@ -3800,5 +3801,24 @@ void main() {
     expect(tiles[5].y, closeTo(252.3234723872663, 1e-9));
     expect(tiles[5].width, closeTo(88.92735789208412, 1e-9));
     expect(tiles[5].height, closeTo(47.67652761273371, 1e-9));
+  });
+
+  test('智能体产物的版本、采纳与只读预览与 Web 端一致', () {
+    final artifacts = <IArtifactRevision>[const IArtifactRevision(id: 'plan', kind: IArtifactKind.document, title: '采购方案', version: 1, createdAt: 10, itemIds: <String>['old']), const IArtifactRevision(id: 'plan', kind: IArtifactKind.document, title: '采购方案', version: 2, createdAt: 20, itemIds: <String>['keep', 'remove'])];
+    expect(artifactVersions(artifacts, 'plan').map((item) => item.version).toList(), <int>[2, 1]);
+    final opened = openArtifact(artifacts, 'plan', version: 2, adopted: <String>['old', 'keep', 'keep']);
+    expect(opened.current?.version, 2);
+    expect(opened.adopted, <String>['keep']);
+    expect(artifactAdoptableIds(opened.current), <String>['keep', 'remove']);
+    expect(toggleArtifactAdoption(opened.current, opened.adopted, 'remove'), <String>['keep', 'remove']);
+    expect(toggleArtifactAdoption(opened.current, opened.adopted, 'old'), <String>['keep']);
+    final textPreview = artifactPreview(opened.current);
+    expect(textPreview.mode, IArtifactPreviewMode.text);
+    expect(textPreview.executable, false);
+    expect(textPreview.label, "文档预览（只读）");
+    expect(artifactPreview().mode, IArtifactPreviewMode.file);
+    expect(artifactVersionDiff(artifacts, 'plan', version: 2).changes, <String>['items']);
+    expect(artifactPayload(const IArtifactRevision(id: 'table', kind: IArtifactKind.table, title: '库存', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>['名称'], rows: <List<String>>[<String>['库存']])) is IArtifactTablePayload, true);
+    expect(artifactPayload(const IArtifactRevision(id: 'chart', kind: IArtifactKind.chart, title: '趋势', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>[], rows: <List<String>>[])), null);
   });
 }

@@ -1,0 +1,2 @@
+@import '../../../dist/styles/artifact-workspace.wxss';
+@import '../../../dist/styles/icons.wxss';

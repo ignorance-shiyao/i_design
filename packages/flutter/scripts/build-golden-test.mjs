@@ -217,6 +217,9 @@ const {
   chunkLength, chunkPreview, summarizeDiff, defaultDiffSelection,
   toggleDiffRow, diffActionLabel
 } = await bundle('packages/common/src/logic/agent.ts', 'agent')
+const {
+  artifactVersions, artifactVersionDiff, openArtifact, artifactAdoptableIds, toggleArtifactAdoption, artifactPreview, artifactPayload
+} = await bundle('packages/common/src/logic/artifact.ts', 'artifact')
 
 /* ---------- 浮层定位 ---------- */
 /*
@@ -509,6 +512,39 @@ const diffExpectations = [
         ${JSON.stringify(diffActionLabel(s))}, 'summarizeDiff(${sel.length} 选中)');`
   }),
   `    expect(diffActionLabel(summarizeDiff(<IDiffRow>[], <String>[])), ${JSON.stringify(diffActionLabel(summarizeDiff([], [])))});`
+]
+
+/* ---------- 智能体产物 ----------
+ * 版本回看和采纳过滤最容易在移植时各端各算一遍：这里的期望值由 TS 算出，
+ * 专门覆盖「旧版选择不能漏到新版」与「文本产物绝不执行」两条边界。
+ */
+const artifactCases = [
+  { id: 'plan', kind: 'document', title: '采购方案', version: 1, createdAt: 10, itemIds: ['old'] },
+  { id: 'plan', kind: 'document', title: '采购方案', version: 2, createdAt: 20, itemIds: ['keep', 'remove'] }
+]
+const artifactOpen = openArtifact(artifactCases, 'plan', 2, ['old', 'keep', 'keep'])
+const artifactToggle = toggleArtifactAdoption(artifactOpen.current, artifactOpen.adopted, 'remove')
+const artifactTextPreview = artifactPreview(artifactOpen.current)
+const artifactFilePreview = artifactPreview()
+const artifactTablePayload = artifactPayload({ ...artifactCases[0], kind: 'table', payload: { kind: 'table', columns: ['名称'], rows: [['库存']] } })
+const artifactDiff = artifactVersionDiff(artifactCases, 'plan', 2)
+const artifactExpectations = [
+  `    final artifacts = <IArtifactRevision>[const IArtifactRevision(id: 'plan', kind: IArtifactKind.document, title: '采购方案', version: 1, createdAt: 10, itemIds: <String>['old']), const IArtifactRevision(id: 'plan', kind: IArtifactKind.document, title: '采购方案', version: 2, createdAt: 20, itemIds: <String>['keep', 'remove'])];`,
+  `    expect(artifactVersions(artifacts, 'plan').map((item) => item.version).toList(), <int>[${artifactVersions(artifactCases, 'plan').map((item) => item.version).join(', ')}]);`,
+  `    final opened = openArtifact(artifacts, 'plan', version: 2, adopted: <String>['old', 'keep', 'keep']);`,
+  `    expect(opened.current?.version, ${artifactOpen.current?.version});`,
+  `    expect(opened.adopted, <String>[${artifactOpen.adopted.map((item) => `'${item}'`).join(', ')}]);`,
+  `    expect(artifactAdoptableIds(opened.current), <String>[${artifactAdoptableIds(artifactOpen.current).map((item) => `'${item}'`).join(', ')}]);`,
+  `    expect(toggleArtifactAdoption(opened.current, opened.adopted, 'remove'), <String>[${artifactToggle.map((item) => `'${item}'`).join(', ')}]);`,
+  `    expect(toggleArtifactAdoption(opened.current, opened.adopted, 'old'), <String>[${artifactOpen.adopted.map((item) => `'${item}'`).join(', ')}]);`,
+  `    final textPreview = artifactPreview(opened.current);`,
+  `    expect(textPreview.mode, IArtifactPreviewMode.${artifactTextPreview.mode});`,
+  `    expect(textPreview.executable, ${artifactTextPreview.executable});`,
+  `    expect(textPreview.label, ${JSON.stringify(artifactTextPreview.label)});`,
+  `    expect(artifactPreview().mode, IArtifactPreviewMode.${artifactFilePreview.mode});`,
+  `    expect(artifactVersionDiff(artifacts, 'plan', version: 2).changes, <String>[${artifactDiff.changes.map((item) => `'${item}'`).join(', ')}]);`,
+  `    expect(artifactPayload(const IArtifactRevision(id: 'table', kind: IArtifactKind.table, title: '库存', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>['名称'], rows: <List<String>>[<String>['库存']])) is IArtifactTablePayload, ${artifactTablePayload !== undefined});`,
+  `    expect(artifactPayload(const IArtifactRevision(id: 'chart', kind: IArtifactKind.chart, title: '趋势', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>[], rows: <List<String>>[])), null);`,
 ]
 
 /* ---------- 分页 ---------- */
@@ -4350,6 +4386,7 @@ import 'package:i_design/src/logic/table.dart';
 import 'package:i_design/src/logic/overlay.dart';
 import 'package:i_design/src/logic/tree.dart';
 import 'package:i_design/src/logic/agent.dart';
+import 'package:i_design/src/logic/artifact.dart';
 import 'package:i_design/src/logic/chart.dart';
 import 'package:i_design/src/logic/axis.dart';
 import 'package:i_design/src/logic/query.dart';
@@ -5022,6 +5059,10 @@ ${filterExpectations.join('\n')}
     final tiles = treemapLayout(${dartTreemap}, 640.0, 300.0);
     expect(tiles.length, ${treemapResult.length});
 ${treemapExpectations.join('\n')}
+  });
+
+  test('智能体产物的版本、采纳与只读预览与 Web 端一致', () {
+${artifactExpectations.join('\n')}
   });
 }
 `

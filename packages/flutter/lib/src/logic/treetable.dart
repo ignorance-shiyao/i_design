@@ -60,6 +60,57 @@ class IFlatRow {
   final bool expanded;
 }
 
+/// 树表列的共享结构。分组列只有标题和 children；正文/排序只使用 leaves。
+class ITreeTableColumnSpec {
+  const ITreeTableColumnSpec({
+    this.key,
+    required this.title,
+    this.mergeVertical = false,
+    this.children = const [],
+  });
+
+  final String? key;
+  final String title;
+  final bool mergeVertical;
+  final List<ITreeTableColumnSpec> children;
+}
+
+class IHeaderCell {
+  const IHeaderCell(this.column, this.colSpan, this.rowSpan);
+  final ITreeTableColumnSpec column;
+  final int colSpan;
+  final int rowSpan;
+}
+
+class IHeaderLayout {
+  const IHeaderLayout(this.rows, this.leaves, this.depth);
+  final List<List<IHeaderCell>> rows;
+  final List<ITreeTableColumnSpec> leaves;
+  final int depth;
+}
+
+/// 各端从同一列树推导表头，叶子列补满剩余高度，分组列横跨全部后代。
+IHeaderLayout buildHeaderLayout(List<ITreeTableColumnSpec> columns) {
+  int depthOf(ITreeTableColumnSpec column) => column.children.isEmpty
+      ? 1
+      : 1 + column.children.map(depthOf).reduce((a, b) => a > b ? a : b);
+  int leafCount(ITreeTableColumnSpec column) => column.children.isEmpty
+      ? 1
+      : column.children.map(leafCount).reduce((a, b) => a + b);
+  final depth = columns.isEmpty ? 1 : columns.map(depthOf).reduce((a, b) => a > b ? a : b);
+  final rows = List.generate(depth, (_) => <IHeaderCell>[]);
+  final leaves = <ITreeTableColumnSpec>[];
+  void walk(List<ITreeTableColumnSpec> list, int level) {
+    for (final column in list) {
+      final grouped = column.children.isNotEmpty;
+      rows[level].add(IHeaderCell(column, grouped ? leafCount(column) : 1, grouped ? 1 : depth - level));
+      if (grouped) walk(column.children, level + 1); else leaves.add(column);
+    }
+  }
+  walk(columns, 0);
+  return IHeaderLayout(rows, leaves, depth);
+}
+
 /// 一行能不能选。理由有值就不能选，那句话直接给用户看
 bool rowSelectable(ITreeRow row) =>
     row.selectableReason == null || row.selectableReason!.isEmpty;

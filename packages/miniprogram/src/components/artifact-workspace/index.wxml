@@ -1,0 +1,41 @@
+<view class="i-artifact-workspace">
+  <view class="i-artifact-workspace__head">
+    <view>
+      <text class="i-artifact-workspace__title">{{current.title || title}}</text>
+      <text class="i-artifact-workspace__hint">{{preview.label}}</text>
+    </view>
+    <i-button wx:if="{{current}}" size="sm" bindtap="onDownload">导出</i-button>
+  </view>
+  <view wx:if="{{workspace.revisions.length > 1}}" class="i-artifact-workspace__versions">
+    <view
+      wx:for="{{workspace.revisions}}"
+      wx:key="version"
+      class="i-artifact-workspace__version {{item.version === current.version ? 'is-active' : ''}}"
+      data-version="{{item.version}}"
+      bindtap="onVersion"
+    >v{{item.version}}</view>
+  </view>
+  <view wx:if="{{current}}" class="i-artifact-workspace__preview">
+    <i-tag>{{current.kind}}</i-tag>
+    <text wx:if="{{preview.mode === 'text'}}" class="i-artifact-workspace__content">{{current.content || '此版本未提供正文预览。'}}</text>
+    <view wx:elif="{{payload.kind === 'table'}}" class="i-artifact-workspace__table">
+      <view wx:for="{{payload.rows}}" wx:key="index" class="i-artifact-workspace__table-row"><text wx:for="{{item}}" wx:for-item="cell" wx:key="index">{{cell}}</text></view>
+    </view>
+    <view wx:elif="{{payload.kind === 'chart'}}" class="i-artifact-workspace__chart">
+      <view wx:for="{{payload.points}}" wx:key="label" class="i-artifact-workspace__bar"><text>{{item.label}}</text><view class="i-artifact-workspace__bar-track"><view class="i-artifact-workspace__bar-fill" style="width: {{item.value}}%" /></view><text>{{item.value}}</text></view>
+    </view>
+    <text wx:else>{{current.meta.summary || '此版本可作为结构化结果查看或导出。'}}</text>
+  </view>
+  <text wx:if="{{diff.previous}}" class="i-artifact-workspace__diff">相比 v{{diff.previous.version}}：{{diff.changes.length ? '内容已变更' : '内容未变更'}}</text>
+  <view wx:if="{{ids.length}}" class="i-artifact-workspace__foot">
+    <text>{{workspace.adopted.length ? '已采纳 ' + workspace.adopted.length + ' 项' : '尚未采纳'}}</text>
+    <i-button
+      wx:for="{{ids}}"
+      wx:key="*this"
+      size="sm"
+      variant="{{workspace.adopted.indexOf(item) !== -1 ? 'secondary' : 'primary'}}"
+      data-id="{{item}}"
+      bindtap="onToggle"
+    >{{workspace.adopted.indexOf(item) !== -1 ? '撤销采纳' : '采纳'}}</i-button>
+  </view>
+</view>
