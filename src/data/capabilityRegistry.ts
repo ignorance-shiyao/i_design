@@ -249,6 +249,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IArtifactWorkspace",
+    "sources": {
+      "vue-next": "src/components/IArtifactWorkspace.vue",
+      "vue": "packages/vue/src/components/IArtifactWorkspace.vue",
+      "react": "packages/react/src/components/ArtifactWorkspace.tsx",
+      "miniprogram": "packages/miniprogram/src/components/artifact-workspace",
+      "flutter": "packages/flutter/lib/src/components/i_artifact_workspace.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/chat"
+    ],
+    "states": {}
+  },
+  {
     "name": "IAutoComplete",
     "sources": {
       "vue-next": "src/components/IAutoComplete.vue",

@@ -330,6 +330,15 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
       { id: 'r3', kind: 'added', cells: { name: { value: '边缘计算盒' }, qty: { value: '2' } } }
     ]
   },
+  IArtifactWorkspace: {
+    artifactId: 'plan',
+    version: 2,
+    artifacts: [
+      { id: 'plan', kind: 'document', title: '采购方案', version: 2, createdAt: 1_757_030_400_000, content: '保留开心果与黑芝麻两项补货。', itemIds: ['keep-pistachio', 'keep-sesame'] },
+      { id: 'plan', kind: 'document', title: '采购方案', version: 1, createdAt: 1_756_944_000_000, content: '建议补货开心果、黑芝麻与石板街。', itemIds: ['keep-pistachio', 'keep-stone-street'] }
+    ],
+    adopted: ['keep-pistachio']
+  },
   IDropdown: {
     items: [
       { key: 'edit', label: '编辑', icon: 'edit' },

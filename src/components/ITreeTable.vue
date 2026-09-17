@@ -15,6 +15,8 @@
 import { computed } from 'vue'
 import {
   expandAll,
+  bodyCellSpans,
+  buildHeaderLayout,
   flattenRows,
   grandTotal,
   groupSummary,
@@ -32,17 +34,10 @@ import {
   type SortOrder,
   type TreeRow
 } from '@i-design/common'
+import type { TreeTableColumnSpec } from '@i-design/common'
 import IIcon from './IIcon.vue'
 
-export interface TreeTableColumn {
-  key: string
-  title: string
-  width?: string
-  align?: 'left' | 'center' | 'right'
-  sortable?: boolean
-  /** 数字列：右对齐并用等宽数字 */
-  numeric?: boolean
-}
+export interface TreeTableColumn extends TreeTableColumnSpec {}
 
 const props = withDefaults(
   defineProps<{
@@ -77,10 +72,10 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  'update:expanded': [string[]]
-  'update:selected': [string[]]
-  'update:sortKey': [string | null]
-  'update:sortOrder': [SortOrder]
+  (event: 'update:expanded', value: string[]): void
+  (event: 'update:selected', value: string[]): void
+  (event: 'update:sortKey', value: string | null): void
+  (event: 'update:sortOrder', value: SortOrder): void
 }>()
 
 /* 排序只在兄弟之间排——共享逻辑负责递归，这里拿到的已经是排好的树 */
@@ -88,6 +83,13 @@ const sorted = computed(() => sortTree(props.data, props.sortKey, props.sortOrde
 const rows = computed(() => flattenRows(sorted.value, props.expanded))
 /* 小计跟在这个分组最后一条子行之后——摆在标题下面会读成这一行自己的数字 */
 const entries = computed(() => renderRows(sorted.value, props.expanded, props.aggregates.length > 0))
+const header = computed(() => buildHeaderLayout(props.columns))
+/* buildHeaderLayout 已保证叶子有 key；在类型层也收窄，模板索引就不会把分组列误当正文列。 */
+const leafColumns = computed(() =>
+  header.value.leaves.filter((column): column is TreeTableColumn & { key: string } => Boolean(column.key))
+)
+/* 合并取排序后的渲染序列：被排序、小计或层级打断就立刻断开。 */
+const spans = computed(() => bodyCellSpans(entries.value, leafColumns.value))
 
 const summary = computed(() => selectionSummary(props.selected, rows.value))
 const allState = computed(() => selectAllState(props.data, props.selected))
@@ -96,9 +98,9 @@ const total = computed(() =>
   props.showTotal && props.aggregates.length ? grandTotal(props.data, props.aggregates) : null
 )
 
-const colCount = computed(() => props.columns.length + (props.selectable ? 1 : 0))
+const colCount = computed(() => leafColumns.value.length + (props.selectable ? 1 : 0))
 
-function onSort(column: TreeTableColumn) {
+function onSort(column: TreeTableColumnSpec) {
   if (!column.sortable) return
   if (props.sortKey !== column.key) {
     emit('update:sortKey', column.key)
@@ -110,7 +112,7 @@ function onSort(column: TreeTableColumn) {
   if (!next) emit('update:sortKey', null)
 }
 
-function ariaSort(column: TreeTableColumn) {
+function ariaSort(column: TreeTableColumnSpec) {
   if (!column.sortable) return undefined
   if (props.sortKey !== column.key || !props.sortOrder) return 'none'
   return props.sortOrder === 'asc' ? 'ascending' : 'descending'
@@ -158,8 +160,8 @@ const format = (value: number | null) =>
     <div class="i-table-wrap">
       <table class="i-table-c" :class="`i-table-c--${size}`">
         <thead>
-          <tr>
-            <th v-if="selectable" class="i-table-c__check-cell">
+          <tr v-for="(headerRow, headerIndex) in header.rows" :key="headerIndex">
+            <th v-if="selectable && headerIndex === 0" :rowspan="header.depth" class="i-table-c__check-cell">
               <input
                 type="checkbox"
                 class="i-table-c__check"
@@ -170,18 +172,20 @@ const format = (value: number | null) =>
               />
             </th>
             <th
-              v-for="column in columns"
-              :key="column.key"
-              :style="{ width: column.width, textAlign: column.align ?? (column.numeric ? 'right' : 'left') }"
-              :class="{ 'is-sortable': column.sortable }"
-              :aria-sort="ariaSort(column)"
-              @click="onSort(column)"
+              v-for="cell in headerRow"
+              :key="cell.column.key ?? `${headerIndex}-${cell.column.title}`"
+              :colspan="cell.colSpan"
+              :rowspan="cell.rowSpan"
+              :style="{ width: cell.column.width, textAlign: cell.column.align ?? (cell.column.numeric ? 'right' : 'left') }"
+              :class="{ 'is-sortable': cell.column.sortable }"
+              :aria-sort="ariaSort(cell.column)"
+              @click="onSort(cell.column)"
             >
               <span class="i-table-c__th">
-                {{ column.title }}
-                <span v-if="column.sortable" class="i-table-c__sorter">
-                  <i :class="{ 'is-on': sortKey === column.key && sortOrder === 'asc' }" data-dir="up" />
-                  <i :class="{ 'is-on': sortKey === column.key && sortOrder === 'desc' }" data-dir="down" />
+                {{ cell.column.title }}
+                <span v-if="cell.column.sortable" class="i-table-c__sorter">
+                  <i :class="{ 'is-on': sortKey === cell.column.key && sortOrder === 'asc' }" data-dir="up" />
+                  <i :class="{ 'is-on': sortKey === cell.column.key && sortOrder === 'desc' }" data-dir="down" />
                 </span>
               </span>
             </th>
@@ -204,9 +208,10 @@ const format = (value: number | null) =>
                   @change="onToggleRow(entry.row.key)"
                 />
               </td>
+              <template v-for="(column, index) in leafColumns" :key="column.key">
               <td
-                v-for="(column, index) in columns"
-                :key="column.key"
+                v-if="spans.get(`${entry.row.key}:${column.key}`)?.rowSpan !== 0"
+                :rowspan="spans.get(`${entry.row.key}:${column.key}`)?.rowSpan || undefined"
                 :class="{ 'i-tree-table__num': column.numeric }"
                 :style="{ textAlign: column.align ?? (column.numeric ? 'right' : 'left') }"
               >
@@ -242,13 +247,14 @@ const format = (value: number | null) =>
                   {{ entry.row.row[column.key] }}
                 </slot>
               </td>
+              </template>
             </tr>
 
             <!-- 小计：按这个分组全部叶子行算，收起再展开也还是同一个数 -->
             <tr v-else class="i-tree-table__row--summary">
               <td v-if="selectable" />
               <td
-                v-for="(column, index) in columns"
+                v-for="(column, index) in leafColumns"
                 :key="column.key"
                 :class="{ 'i-tree-table__num': column.numeric }"
                 :style="{ textAlign: column.align ?? (column.numeric ? 'right' : 'left') }"
@@ -265,7 +271,7 @@ const format = (value: number | null) =>
 
           <tr v-if="total" class="i-tree-table__row--total">
             <td v-if="selectable" />
-            <td v-for="(column, index) in columns" :key="column.key" :class="{ 'i-tree-table__num': column.numeric }"
+            <td v-for="(column, index) in leafColumns" :key="column.key" :class="{ 'i-tree-table__num': column.numeric }"
                 :style="{ textAlign: column.align ?? (column.numeric ? 'right' : 'left') }">
               <template v-if="index === 0">{{ summaryLabel(total, '合计') }}</template>
               <template v-else-if="total.values[column.key] !== undefined">

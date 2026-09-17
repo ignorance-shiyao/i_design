@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import {
   expandAll,
+  bodyCellSpans,
+  buildHeaderLayout,
   flattenRows,
   grandTotal,
   groupSummary,
@@ -18,16 +20,10 @@ import {
   type SortOrder,
   type TreeRow
 } from '@i-design/common'
+import type { TreeTableColumnSpec } from '@i-design/common'
 import { Icon } from './Icon'
 
-export interface TreeTableColumn {
-  key: string
-  title: string
-  width?: string
-  align?: 'left' | 'center' | 'right'
-  sortable?: boolean
-  /** 数字列：右对齐并用等宽数字 */
-  numeric?: boolean
+export interface TreeTableColumn extends TreeTableColumnSpec {
   /** 自定义单元格 */
   render?: (row: TreeRow) => React.ReactNode
 }
@@ -90,12 +86,15 @@ export function TreeTable({
     () => renderRows(sorted, expanded, aggregates.length > 0),
     [sorted, expanded, aggregates.length]
   )
+  const header = useMemo(() => buildHeaderLayout(columns), [columns])
+  const leafColumns = header.leaves
+  const spans = useMemo(() => bodyCellSpans(entries, leafColumns), [entries, leafColumns])
   const summary = selectionSummary(selected, rows)
   const allState = selectAllState(data, selected)
   const total = showTotal && aggregates.length ? grandTotal(data, aggregates) : null
-  const colCount = columns.length + (selectable ? 1 : 0)
+  const colCount = leafColumns.length + (selectable ? 1 : 0)
 
-  const onSort = (column: TreeTableColumn) => {
+  const onSort = (column: TreeTableColumnSpec) => {
     if (!column.sortable || !onSortChange) return
     if (sortKey !== column.key) {
       onSortChange(column.key, 'asc')
@@ -105,16 +104,16 @@ export function TreeTable({
     onSortChange(next ? column.key : null, next)
   }
 
-  const ariaSort = (column: TreeTableColumn) => {
+  const ariaSort = (column: TreeTableColumnSpec) => {
     if (!column.sortable) return undefined
     if (sortKey !== column.key || !sortOrder) return 'none' as const
     return sortOrder === 'asc' ? ('ascending' as const) : ('descending' as const)
   }
 
   const cell = (column: TreeTableColumn, row: TreeRow) =>
-    column.render ? column.render(row) : String(row[column.key] ?? '')
+    column.render ? column.render(row) : String(row[column.key ?? ''] ?? '')
 
-  const alignOf = (column: TreeTableColumn) => column.align ?? (column.numeric ? 'right' : 'left')
+  const alignOf = (column: TreeTableColumnSpec) => column.align ?? (column.numeric ? 'right' : 'left')
 
   return (
     <div className={`i-tree-table ${className}`.trim()}>
@@ -143,9 +142,10 @@ export function TreeTable({
       <div className="i-table-wrap">
         <table className={`i-table-c i-table-c--${size}`}>
           <thead>
-            <tr>
-              {selectable && (
-                <th className="i-table-c__check-cell">
+            {header.rows.map((headerRow, headerIndex) => (
+            <tr key={headerIndex}>
+              {selectable && headerIndex === 0 && (
+                <th className="i-table-c__check-cell" rowSpan={header.depth}>
                   <input
                     type="checkbox"
                     className="i-table-c__check"
@@ -158,9 +158,11 @@ export function TreeTable({
                   />
                 </th>
               )}
-              {columns.map((column) => (
+              {headerRow.map(({ column, colSpan, rowSpan }) => (
                 <th
-                  key={column.key}
+                  key={column.key ?? `${headerIndex}-${column.title}`}
+                  colSpan={colSpan}
+                  rowSpan={rowSpan}
                   style={{ width: column.width, textAlign: alignOf(column) }}
                   className={column.sortable ? 'is-sortable' : undefined}
                   aria-sort={ariaSort(column)}
@@ -184,6 +186,7 @@ export function TreeTable({
                 </th>
               ))}
             </tr>
+            ))}
           </thead>
           <tbody>
             {entries.map((entry) => {
@@ -192,7 +195,7 @@ export function TreeTable({
                 return (
                   <tr key={`${entry.groupKey}__summary`} className="i-tree-table__row--summary">
                     {selectable && <td />}
-                    {columns.map((column, index) => (
+                    {leafColumns.map((column, index) => (
                       <td
                         key={column.key}
                         className={column.numeric ? 'i-tree-table__num' : undefined}
@@ -229,9 +232,13 @@ export function TreeTable({
                       />
                     </td>
                   )}
-                  {columns.map((column, index) => (
+                  {leafColumns.map((column, index) => {
+                    const span = spans.get(`${row.key}:${column.key}`)?.rowSpan ?? 1
+                    if (span === 0) return null
+                    return (
                     <td
                       key={column.key}
+                      rowSpan={span > 1 ? span : undefined}
                       className={column.numeric ? 'i-tree-table__num' : undefined}
                       style={{ textAlign: alignOf(column) }}
                     >
@@ -264,7 +271,7 @@ export function TreeTable({
                         cell(column, row.row)
                       )}
                     </td>
-                  ))}
+                    )})}
                 </tr>
               )
             })}
@@ -272,7 +279,7 @@ export function TreeTable({
             {total && (
               <tr className="i-tree-table__row--total">
                 {selectable && <td />}
-                {columns.map((column, index) => (
+                {leafColumns.map((column, index) => (
                   <td
                     key={column.key}
                     className={column.numeric ? 'i-tree-table__num' : undefined}

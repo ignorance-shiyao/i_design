@@ -49,7 +49,7 @@ const treeData: TreeRow[] = [
     amount: 3000,
     children: [
       { key: 'east-1', name: '明远制造', owner: '林岚', amount: 1200 },
-      { key: 'east-2', name: '合力重工', owner: '沈黎', amount: 2600 },
+      { key: 'east-2', name: '合力重工', owner: '林岚', amount: 2600 },
       { key: 'east-3', name: '中辰物流', owner: '周其', amount: 800 }
     ]
   },
@@ -72,8 +72,13 @@ const treeData: TreeRow[] = [
 ]
 const treeColumns: TreeTableColumn[] = [
   { key: 'name', title: '客户 / 大区', width: '40%', sortable: true },
-  { key: 'owner', title: '负责人' },
-  { key: 'amount', title: '本季金额（万元）', numeric: true, sortable: true }
+  {
+    title: '经营信息',
+    children: [
+      { key: 'owner', title: '负责人', merge: 'vertical' },
+      { title: '本季', children: [{ key: 'amount', title: '金额（万元）', numeric: true, sortable: true }] }
+    ]
+  }
 ]
 const treeAggregates: AggregateSpec[] = [{ field: 'amount', kind: 'sum' }]
 const treeExpanded = ref<string[]>(['east', 'north'])
@@ -310,7 +315,7 @@ const tablePgCode = [':columns="columns"', ':data="data"']
     </p>
     <DemoBlock
       title="排序、折叠与小计"
-      description="按金额倒序排一下：华北排到前面，但远大科技的 5200 还在华北下面，没有跑到华东去。勾上几行再收起那个分组——选择还在，摘要那行会写出「其中 N 项在收起的分组里」，表头的复选框也不会因为折叠就从「全选」退回「半选」。小计与合计按全部叶子行算，收起再展开都是同一个数。「安泰化工」没有查看权限：它勾不动，理由写在名字旁边。"
+      description="「经营信息」下还有「本季」这一层，表头由列树算出跨列与跨行，不由各端手写索引。华东的两条负责人同为林岚，会合并为一格；按金额排序后若两条被别的负责人打散，合并会立刻断开。再收起分组：选择、表头全选状态与汇总口径都不变，摘要会说清有多少项被折叠。"
       lang="vue"
       code='<ITreeTable
   v-model:expanded="expanded"

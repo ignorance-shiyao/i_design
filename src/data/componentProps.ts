@@ -68,6 +68,13 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"reviewText","type":"string","doc":"","optional":true,"defaultText":"'查看新版本'","control":{"kind":"string"}},
     {"name":"closable","type":"boolean","doc":"","optional":true,"defaultText":"true","control":{"kind":"boolean"}},
   ],
+  IArtifactWorkspace: [
+    {"name":"artifacts","type":"ArtifactRevision[]","doc":"","optional":false,"defaultText":null,"control":null},
+    {"name":"artifactId","type":"string","doc":"","optional":false,"defaultText":null,"control":{"kind":"string"}},
+    {"name":"version","type":"number","doc":"","optional":true,"defaultText":"undefined","control":{"kind":"number"}},
+    {"name":"adopted","type":"string[]","doc":"","optional":true,"defaultText":"() => []","control":null},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'产物工作区'","control":{"kind":"string"}},
+  ],
   IAutoComplete: [
     {"name":"modelValue","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"options","type":"Suggestion[]","doc":"","optional":false,"defaultText":"() => []","control":null},

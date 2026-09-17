@@ -79,6 +79,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IArtifactWorkspace",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IAutoComplete",
     "ends": {
       "vue-next": true,
