@@ -87,7 +87,18 @@ export function TreeTable({
     [sorted, expanded, aggregates.length]
   )
   const header = useMemo(() => buildHeaderLayout(columns), [columns])
-  const leafColumns = header.leaves
+  /*
+   * 只有叶子列有 key，分组列没有——正文、排序与合并都只认叶子列。
+   * 这里连类型一起收窄（与 Vue 端同一套写法），否则 `column.key` 会以
+   * `string | undefined` 流进取值与排序，把一个分组标题当成数据列。
+   */
+  const leafColumns = useMemo(
+    () =>
+      header.leaves.filter(
+        (column): column is TreeTableColumn & { key: string } => Boolean(column.key)
+      ),
+    [header]
+  )
   const spans = useMemo(() => bodyCellSpans(entries, leafColumns), [entries, leafColumns])
   const summary = selectionSummary(selected, rows)
   const allState = selectAllState(data, selected)
@@ -95,13 +106,16 @@ export function TreeTable({
   const colCount = leafColumns.length + (selectable ? 1 : 0)
 
   const onSort = (column: TreeTableColumnSpec) => {
-    if (!column.sortable || !onSortChange) return
-    if (sortKey !== column.key) {
-      onSortChange(column.key, 'asc')
+    // 分组列没有 key：它只是表头上的一个跨列标题，点它排不了序，
+    // 放行的话排序键会变成 undefined——那等于按一个不存在的列排
+    if (!column.sortable || !column.key || !onSortChange) return
+    const key = column.key
+    if (sortKey !== key) {
+      onSortChange(key, 'asc')
       return
     }
     const next = nextSortOrder(sortOrder)
-    onSortChange(next ? column.key : null, next)
+    onSortChange(next ? key : null, next)
   }
 
   const ariaSort = (column: TreeTableColumnSpec) => {

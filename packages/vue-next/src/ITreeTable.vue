@@ -101,7 +101,9 @@ const total = computed(() =>
 const colCount = computed(() => leafColumns.value.length + (props.selectable ? 1 : 0))
 
 function onSort(column: TreeTableColumnSpec) {
-  if (!column.sortable) return
+  // 分组列没有 key：它只是表头上的一个跨列标题，点它排不了序。
+  // 放行的话排序键会变成 undefined——那等于按一个不存在的列排
+  if (!column.sortable || !column.key) return
   if (props.sortKey !== column.key) {
     emit('update:sortKey', column.key)
     emit('update:sortOrder', 'asc')
