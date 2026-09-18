@@ -185,15 +185,25 @@ const format = (value: number | null) =>
               :style="{ width: cell.column.width, textAlign: cell.column.align ?? (cell.column.numeric ? 'right' : 'left') }"
               :class="{ 'is-sortable': cell.column.sortable }"
               :aria-sort="ariaSort(cell.column)"
-              @click="onSort(cell.column)"
             >
-              <span class="i-table-c__th">
+              <!--
+                可排序的表头是一个真正的按钮，而不是挂了 click 的 th：
+                th 不可聚焦，只挂 click 的话用键盘的人根本排不了序——屏幕上箭头都在，
+                按 Tab 却永远走不到它。包成 button 之后键盘操作与焦点环都是白来的。
+              -->
+              <button
+                v-if="cell.column.sortable"
+                type="button"
+                class="i-table-c__th i-table-c__sort"
+                @click="onSort(cell.column)"
+              >
                 {{ cell.column.title }}
-                <span v-if="cell.column.sortable" class="i-table-c__sorter">
+                <span class="i-table-c__sorter">
                   <i :class="{ 'is-on': sortKey === cell.column.key && sortOrder === 'asc' }" data-dir="up" />
                   <i :class="{ 'is-on': sortKey === cell.column.key && sortOrder === 'desc' }" data-dir="down" />
                 </span>
-              </span>
+              </button>
+              <span v-else class="i-table-c__th">{{ cell.column.title }}</span>
             </th>
           </tr>
         </thead>

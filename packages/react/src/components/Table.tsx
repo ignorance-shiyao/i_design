@@ -211,17 +211,19 @@ export function Table<T extends Record<string, any>>({
                 style={{ width: column.width, textAlign: column.align ?? 'left' }}
                 className={column.sortable ? 'is-sortable' : undefined}
                 aria-sort={ariaSort(column)}
-                onClick={() => toggle(column)}
               >
-                <span className="i-table-c__th">
-                  {column.title}
-                  {column.sortable && (
+                {/* 可排序的表头是一个真正的按钮：th 不可聚焦，只挂 onClick 的话键盘排不了序 */}
+                {column.sortable ? (
+                  <button type="button" className="i-table-c__th i-table-c__sort" onClick={() => toggle(column)}>
+                    {column.title}
                     <span className="i-table-c__sorter">
                       <i data-dir="up" className={sortKey === column.key && order === 'asc' ? 'is-on' : ''} />
                       <i data-dir="down" className={sortKey === column.key && order === 'desc' ? 'is-on' : ''} />
                     </span>
-                  )}
-                </span>
+                  </button>
+                ) : (
+                  <span className="i-table-c__th">{column.title}</span>
+                )}
               </th>
             ))}
           </tr>

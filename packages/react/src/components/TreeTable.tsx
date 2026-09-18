@@ -180,11 +180,19 @@ export function TreeTable({
                   style={{ width: column.width, textAlign: alignOf(column) }}
                   className={column.sortable ? 'is-sortable' : undefined}
                   aria-sort={ariaSort(column)}
-                  onClick={() => onSort(column)}
                 >
-                  <span className="i-table-c__th">
-                    {column.title}
-                    {column.sortable && (
+                  {/*
+                    可排序的表头是一个真正的按钮，而不是挂了 onClick 的 th：
+                    th 不可聚焦，只挂 onClick 的话用键盘的人根本排不了序——
+                    屏幕上箭头都在，按 Tab 却永远走不到它。
+                  */}
+                  {column.sortable ? (
+                    <button
+                      type="button"
+                      className="i-table-c__th i-table-c__sort"
+                      onClick={() => onSort(column)}
+                    >
+                      {column.title}
                       <span className="i-table-c__sorter">
                         <i
                           data-dir="up"
@@ -195,8 +203,10 @@ export function TreeTable({
                           className={sortKey === column.key && sortOrder === 'desc' ? 'is-on' : undefined}
                         />
                       </span>
-                    )}
-                  </span>
+                    </button>
+                  ) : (
+                    <span className="i-table-c__th">{column.title}</span>
+                  )}
                 </th>
               ))}
             </tr>

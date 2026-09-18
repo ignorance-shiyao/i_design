@@ -21,6 +21,18 @@
   text-align: left;
 }
 .i-table-c th.is-sortable { cursor: pointer; user-select: none; }
+/*
+ * 可排序表头里的那个按钮：外观完全继承表头，只为了把键盘操作与焦点环拿回来。
+ * 不写 `outline: none`——那正是键盘用户唯一的定位线索。
+ */
+.i-table-c__sort {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
 .i-table-c th.is-sortable:hover { color: var(--i-color-brand-text); }
 .i-table-c__th { display: inline-flex; align-items: center; gap: var(--i-spacing-2); }
 .i-table-c__sorter { display: inline-flex; flex-direction: column; gap: 2px; }

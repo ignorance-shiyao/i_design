@@ -221,15 +221,21 @@ watch(
             :style="{ width: column.width, textAlign: column.align ?? 'left' }"
             :class="{ 'is-sortable': column.sortable }"
             :aria-sort="ariaSort(column)"
-            @click="toggleSort(column)"
           >
-            <span class="i-table-c__th">
+            <!-- 可排序的表头是一个真正的按钮：th 不可聚焦，只挂 click 的话键盘排不了序 -->
+            <button
+              v-if="column.sortable"
+              type="button"
+              class="i-table-c__th i-table-c__sort"
+              @click="toggleSort(column)"
+            >
               {{ column.title }}
-              <span v-if="column.sortable" class="i-table-c__sorter">
+              <span class="i-table-c__sorter">
                 <i :class="{ 'is-on': sortKey === column.key && sortOrder === 'asc' }" data-dir="up" />
                 <i :class="{ 'is-on': sortKey === column.key && sortOrder === 'desc' }" data-dir="down" />
               </span>
-            </span>
+            </button>
+            <span v-else class="i-table-c__th">{{ column.title }}</span>
           </th>
         </tr>
       </thead>
