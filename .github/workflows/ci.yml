@@ -56,6 +56,11 @@ jobs:
       - name: 桌面版面检查
         run: npm run check:layout
 
+      # 焦点看不见、或者掉进收起来的内容里，用鼠标完全察觉不到；axe 也查不出，
+      # 它不模拟 Tab。这条要真按两千多次 Tab，跑得比别的检查久（约七分钟）
+      - name: 键盘可用性检查
+        run: npm run check:keyboard
+
       # 开发机上没人会去打开系统的「减少动效」，漏掉那一半完全看不出来
       - name: 动效开关检查
         run: npm run check:motion
