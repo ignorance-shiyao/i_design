@@ -55,7 +55,7 @@ export const exampleApps: ExampleApp[] = [
     summary: '销售问题 → 工具结果 → 人类确认 → 产物，取消与失败都可重放',
     path: '../agent-studio/',
     source: 'examples/agent-studio',
-    status: 'planned',
+    status: 'ready',
     topics: ['对话', '工具', '可重放']
   },
   {
