@@ -24,7 +24,7 @@
     "build:mp": "node packages/miniprogram/scripts/build-styles.mjs && node packages/miniprogram/scripts/build-icons.mjs && node packages/miniprogram/scripts/scaffold.mjs",
     "check:mp": "npm run build:mp && node packages/miniprogram/scripts/validate.mjs",
     "build:flutter": "node packages/flutter/scripts/build-icons.mjs && node packages/flutter/scripts/build-barrel.mjs && node packages/flutter/scripts/build-golden-test.mjs",
-    "check:flutter": "npm run build:flutter && node packages/flutter/scripts/validate.mjs",
+    "check:flutter": "npm run build:flutter && node --test packages/flutter/scripts/validate.test.mjs && node packages/flutter/scripts/validate.mjs",
     "check:scoped-css": "node scripts/check-scoped-css.mjs",
     "build:mobile-index": "node scripts/build-mobile-index.mjs",
     "build:vue2": "node --test packages/vue/scripts/convert.test.mjs && node packages/vue/scripts/convert.mjs && node packages/vue/scripts/build-index.mjs",

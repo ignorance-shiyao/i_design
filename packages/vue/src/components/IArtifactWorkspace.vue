@@ -4,9 +4,10 @@
 -->
 <script setup lang="ts">
 import { computed } from 'vue'
-import { artifactAdoptableIds, artifactPayload, artifactPreview, artifactVersionDiff, openArtifact, toggleArtifactAdoption, type ArtifactRevision } from '@i-design/common'
+import { artifactAdoptableIds, artifactContentDiff, artifactPayload, artifactPreview, openArtifact, toggleArtifactAdoption, type ArtifactRevision } from '@i-design/common'
 import IButton from './IButton.vue'
 import ITag from './ITag.vue'
+import ICodeBlock from './ICodeBlock.vue'
 
 const props = withDefaults(defineProps<{
   artifacts: ArtifactRevision[]
@@ -19,7 +20,18 @@ const emit = defineEmits<{ (e: 'update:version', a0: number): void; (e: 'update:
 const workspace = computed(() => openArtifact(props.artifacts, props.artifactId, props.version, props.adopted))
 const preview = computed(() => artifactPreview(workspace.value.current))
 const payload = computed(() => artifactPayload(workspace.value.current))
-const versionDiff = computed(() => artifactVersionDiff(props.artifacts, props.artifactId, workspace.value.current?.version))
+/*
+ * 差异不止说「变了」，还要说清改了哪几行——一句「内容有变化」等于没说：
+ * 用户要么逐字重读一遍，要么干脆不看，而产物工作区存在的理由恰恰是让人能复核。
+ */
+const versionDiff = computed(() =>
+  artifactContentDiff(props.artifacts, props.artifactId, workspace.value.current?.version)
+)
+/* 逐行视图直接复用 ICodeBlock：它已经有前后行号与 +/− 号（不靠颜色单独表意）。
+   另写一套的话，同一段改动在代码块里与在产物里会显示成两个样子。 */
+const showLines = computed(
+  () => versionDiff.value.mode === 'lines' && versionDiff.value.added + versionDiff.value.removed > 0
+)
 const ids = computed(() => artifactAdoptableIds(workspace.value.current))
 function select(version: number) { emit('update:version', version) }
 function toggle(id: string) { emit('update:adopted', toggleArtifactAdoption(workspace.value.current, props.adopted, id)) }
@@ -46,9 +58,17 @@ function toggle(id: string) { emit('update:adopted', toggleArtifactAdoption(work
       </div>
       <p v-else>{{ workspace.current.meta?.summary ?? '此版本可作为结构化结果查看或导出。' }}</p>
     </div>
-    <p v-if="versionDiff.previous" class="i-artifact-workspace__diff">
-      相比 v{{ versionDiff.previous.version }}：{{ versionDiff.changes.length ? versionDiff.changes.map((item) => ({ content: '正文', payload: '结构数据', items: '采纳项' })[item]).join('、') + '已变更' : '内容未变更' }}
-    </p>
+    <!-- 任何情况下都有话可说：比不了也说清为什么，不会只剩一块空白 -->
+    <p class="i-artifact-workspace__diff">{{ versionDiff.summary }}</p>
+    <div v-if="showLines" class="i-artifact-workspace__diff-lines">
+      <ICodeBlock
+        :code="versionDiff.current?.content ?? ''"
+        :before="versionDiff.previous?.content ?? ''"
+        :filename="`v${versionDiff.previous?.version} → v${versionDiff.current?.version}`"
+        :copyable="false"
+        :max-lines="14"
+      />
+    </div>
     <footer v-if="ids.length" class="i-artifact-workspace__foot">
       <span>{{ adopted.length ? `已采纳 ${adopted.length} 项` : '尚未采纳' }}</span>
       <IButton v-for="id in ids" :key="id" size="sm" :variant="adopted.includes(id) ? 'secondary' : 'primary'" @click="toggle(id)">{{ adopted.includes(id) ? '撤销采纳' : '采纳' }}</IButton>

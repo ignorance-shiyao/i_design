@@ -218,7 +218,8 @@ const {
   toggleDiffRow, diffActionLabel
 } = await bundle('packages/common/src/logic/agent.ts', 'agent')
 const {
-  artifactVersions, artifactVersionDiff, openArtifact, artifactAdoptableIds, toggleArtifactAdoption, artifactPreview, artifactPayload
+  artifactVersions, artifactVersionDiff, artifactContentDiff, openArtifact, artifactAdoptableIds,
+  toggleArtifactAdoption, artifactPreview, artifactPayload
 } = await bundle('packages/common/src/logic/artifact.ts', 'artifact')
 
 /* ---------- 浮层定位 ---------- */
@@ -543,8 +544,71 @@ const artifactExpectations = [
   `    expect(textPreview.label, ${JSON.stringify(artifactTextPreview.label)});`,
   `    expect(artifactPreview().mode, IArtifactPreviewMode.${artifactFilePreview.mode});`,
   `    expect(artifactVersionDiff(artifacts, 'plan', version: 2).changes, <String>[${artifactDiff.changes.map((item) => `'${item}'`).join(', ')}]);`,
-  `    expect(artifactPayload(const IArtifactRevision(id: 'table', kind: IArtifactKind.table, title: '库存', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>['名称'], rows: <List<String>>[<String>['库存']])) is IArtifactTablePayload, ${artifactTablePayload !== undefined});`,
-  `    expect(artifactPayload(const IArtifactRevision(id: 'chart', kind: IArtifactKind.chart, title: '趋势', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>[], rows: <List<String>>[])), null);`,
+  `    expect(artifactPayload(const IArtifactRevision(id: 'table', kind: IArtifactKind.table, title: '库存', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>['名称'], rows: <List<String>>[<String>['库存']]))) is IArtifactTablePayload, ${artifactTablePayload !== undefined});`,
+  // 种类与 payload 对不上时要拿到 null：表格不能伪装成图表，反之亦然
+  `    expect(artifactPayload(const IArtifactRevision(id: 'chart', kind: IArtifactKind.chart, title: '趋势', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>[], rows: <List<String>>[]))), null);`,
+  ,
+  /*
+   * 行级差异：只跟紧邻旧版比、种类变了不逐行比、结构化产物只报规模。
+   * 行的文本与加减数都要对齐——同一段改动在两端显示成不同的行数，
+   * 读者不知道该信哪个。
+   */
+  ...(() => {
+    const revs = [
+      { id: 'memo', kind: 'document', title: '采购建议', version: 1, createdAt: 1, content: '一、先补库存\n二、再谈价格\n三、月底前签' },
+      { id: 'memo', kind: 'document', title: '采购建议', version: 2, createdAt: 2, content: '一、先补库存\n二、先谈价格再补\n三、月底前签\n四、抄送财务' },
+      { id: 'memo', kind: 'document', title: '采购建议', version: 3, createdAt: 3, content: '一、先补库存\n二、先谈价格再补\n三、月底前签\n四、抄送财务' }
+    ]
+    const revLit = (r) =>
+      `const IArtifactRevision(id: 'memo', kind: IArtifactKind.document, title: '采购建议', ` +
+      `version: ${r.version}, createdAt: ${r.createdAt}, content: ${JSON.stringify(r.content)})`
+    const listLit = `<IArtifactRevision>[${revs.map(revLit).join(', ')}]`
+    const tables = [
+      { id: 'stock', kind: 'table', title: '库存', version: 1, createdAt: 1, payload: { kind: 'table', columns: ['名'], rows: [['甲'], ['乙']] } },
+      { id: 'stock', kind: 'table', title: '库存', version: 2, createdAt: 2, payload: { kind: 'table', columns: ['名'], rows: [['甲'], ['乙'], ['丙']] } }
+    ]
+    const tableLit = (t) =>
+      `const IArtifactRevision(id: 'stock', kind: IArtifactKind.table, title: '库存', ` +
+      `version: ${t.version}, createdAt: ${t.createdAt}, payload: IArtifactTablePayload(` +
+      `columns: <String>['名'], rows: <List<String>>[${t.payload.rows.map((r) => `<String>['${r[0]}']`).join(', ')}]))`
+    const out = [`    final memos = ${listLit};`]
+    for (const version of [1, 2, 3]) {
+      const diff = artifactContentDiff(revs, 'memo', version)
+      const v = `memoDiff${version}`
+      out.push(
+        `    final ${v} = artifactContentDiff(memos, 'memo', version: ${version});`,
+        `    expect(${v}.mode, IDiffMode.${diff.mode});`,
+        `    expect(${v}.added, ${diff.added});`,
+        `    expect(${v}.removed, ${diff.removed});`,
+        `    expect(${v}.summary, ${JSON.stringify(diff.summary)});`,
+        `    expect(${v}.previous?.version, ${diff.previous ? diff.previous.version : 'null'});`,
+        `    expect(${v}.lines.where((l) => l.kind == IDiffKind.add).map((l) => l.text).toList(), ` +
+          `<String>[${diff.lines.filter((l) => l.kind === 'add').map((l) => JSON.stringify(l.text)).join(', ')}]);`,
+        `    expect(${v}.lines.where((l) => l.kind == IDiffKind.remove).map((l) => l.text).toList(), ` +
+          `<String>[${diff.lines.filter((l) => l.kind === 'remove').map((l) => JSON.stringify(l.text)).join(', ')}]);`
+      )
+    }
+    // 种类变了就不逐行比：硬比出来的加减行毫无意义
+    const mixed = [revs[0], { ...tables[0], id: 'memo', version: 2, createdAt: 2 }]
+    const mixedDiff = artifactContentDiff(mixed, 'memo', 2)
+    out.push(
+      `    final mixedDiff = artifactContentDiff(<IArtifactRevision>[${revLit(revs[0])}, ` +
+        `const IArtifactRevision(id: 'memo', kind: IArtifactKind.table, title: '库存', version: 2, ` +
+        `createdAt: 2, payload: IArtifactTablePayload(columns: <String>['名'], rows: <List<String>>[<String>['甲'], <String>['乙']]))], 'memo', version: 2);`,
+      `    expect(mixedDiff.mode, IDiffMode.${mixedDiff.mode});`,
+      `    expect(mixedDiff.lines.isEmpty, true);`,
+      `    expect(mixedDiff.summary, ${JSON.stringify(mixedDiff.summary)});`
+    )
+    // 结构化产物只报规模，不假装做单元格级比对
+    const tableDiff = artifactContentDiff(tables, 'stock', 2)
+    out.push(
+      `    final tableDiff = artifactContentDiff(<IArtifactRevision>[${tables.map(tableLit).join(', ')}], 'stock', version: 2);`,
+      `    expect(tableDiff.mode, IDiffMode.${tableDiff.mode});`,
+      `    expect(tableDiff.lines.isEmpty, true);`,
+      `    expect(tableDiff.summary, ${JSON.stringify(tableDiff.summary)});`
+    )
+    return out
+  })()
 ]
 
 /* ---------- 分页 ---------- */

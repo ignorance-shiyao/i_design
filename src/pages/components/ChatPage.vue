@@ -274,7 +274,13 @@ const artifactRevisions: ArtifactRevision[] = [
     title: '第四季度采购方案',
     version: 2,
     createdAt: 1_757_030_400_000,
-    content: '保留开心果与黑芝麻两项补货；石板街停止采购，并在周五前通知门店。',
+    /* 与 v1 刻意共享两行原文：差异才看得出「改的是其中哪几行」，
+       而不是整份重写——整份不同的话，逐行视图退化成两份文档并排 */
+    content:
+      '一、开心果：补货 200 箱，按原供应商。\n' +
+      '二、黑芝麻：补货 80 箱。\n' +
+      '三、石板街：停止采购，周五前通知门店。\n' +
+      '四、本单需财务复核后下发。',
     itemIds: ['keep-pistachio', 'keep-sesame', 'stop-stone-street']
   },
   {
@@ -283,13 +289,19 @@ const artifactRevisions: ArtifactRevision[] = [
     title: '第四季度采购方案',
     version: 1,
     createdAt: 1_756_944_000_000,
-    content: '建议补货开心果、黑芝麻与石板街三项。',
+    content:
+      '一、开心果：补货 200 箱，按原供应商。\n' +
+      '二、黑芝麻：补货 120 箱。\n' +
+      '三、石板街：补货 60 箱。',
     itemIds: ['keep-pistachio', 'keep-sesame', 'keep-stone-street']
   }
 ]
 const artifactVersion = ref(2)
 const artifactAdopted = ref<string[]>([])
 const artifactStructured: ArtifactRevision[] = [
+  /* 表格给两版：结构化产物的差异只报规模（从 2 行变成 3 行），
+     不假装做单元格级比对——产物是重新生成的，行与行之间没有可靠的对应关系 */
+  { id: 'stock-table', kind: 'table', title: '建议补货清单', version: 2, createdAt: 1_757_116_800_000, payload: { kind: 'table', columns: ['品类', '数量'], rows: [['开心果', '200'], ['黑芝麻', '80'], ['山核桃', '40']] } },
   { id: 'stock-table', kind: 'table', title: '建议补货清单', version: 1, createdAt: 1_757_030_400_000, payload: { kind: 'table', columns: ['品类', '数量'], rows: [['开心果', '120'], ['黑芝麻', '80']] } },
   { id: 'demand-chart', kind: 'chart', title: '周需求趋势', version: 1, createdAt: 1_757_030_400_000, payload: { kind: 'chart', points: [{ label: '周一', value: 42 }, { label: '周二', value: 68 }, { label: '周三', value: 55 }] } }
 ]
@@ -979,7 +991,7 @@ function createSession() {
     </p>
     <DemoBlock
       title="版本回看与逐项采纳"
-      description="切到旧版后，v2 的采纳项不会跟过去；再切回新版时，会自动丢弃旧版才有的项目，避免把已失效的建议重新应用。点击导出会给出真实反馈。"
+      description="v2 相对 v1 的差异逐行摆在下面：开心果那行两版一样，作为上下文原样列着（没有 +/− 号）；黑芝麻从 120 改成 80、石板街从补货改成停采，各是一删一增；「需财务复核」是新增的一行。摘要写「+3 −2 行」，加与减各报各的数——改 3 行与「删 3 行又加 3 行」不是一回事。切到 v1 会看到「这是最早的一版，没有可比对的旧版」，而不是一片空白。下面那张表格是结构化产物：它只报规模变化「从 2 行变成 3 行」，不假装做单元格级比对——产物是重新生成的，行与行之间没有可靠的对应关系。"
       lang="vue"
       code='<IArtifactWorkspace v-model:version="artifactVersion" v-model:adopted="artifactAdopted" :artifacts="artifactRevisions" artifact-id="purchase-plan" />'
     >
