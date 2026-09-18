@@ -66,6 +66,10 @@ jobs:
       - name: 键盘路径抽检
         run: npm run check:keyboard-paths
 
+      # 虚拟化被谁顺手去掉之后，页面照样能用、测试照样绿，只是慢十倍
+      - name: 性能基线检查
+        run: npm run check:perf
+
       # 开发机上没人会去打开系统的「减少动效」，漏掉那一半完全看不出来
       - name: 动效开关检查
         run: npm run check:motion
