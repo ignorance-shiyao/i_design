@@ -3818,7 +3818,7 @@ void main() {
     expect(textPreview.label, "文档预览（只读）");
     expect(artifactPreview().mode, IArtifactPreviewMode.file);
     expect(artifactVersionDiff(artifacts, 'plan', version: 2).changes, <String>['items']);
-    expect(artifactPayload(const IArtifactRevision(id: 'table', kind: IArtifactKind.table, title: '库存', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>['名称'], rows: <List<String>>[<String>['库存']])) is IArtifactTablePayload, true);
-    expect(artifactPayload(const IArtifactRevision(id: 'chart', kind: IArtifactKind.chart, title: '趋势', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>[], rows: <List<String>>[])), null);
+    expect(artifactPayload(const IArtifactRevision(id: 'table', kind: IArtifactKind.table, title: '库存', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>['名称'], rows: <List<String>>[<String>['库存']]))) is IArtifactTablePayload, true);
+    expect(artifactPayload(const IArtifactRevision(id: 'chart', kind: IArtifactKind.chart, title: '趋势', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>[], rows: <List<String>>[]))), null);
   });
 }

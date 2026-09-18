@@ -543,8 +543,9 @@ const artifactExpectations = [
   `    expect(textPreview.label, ${JSON.stringify(artifactTextPreview.label)});`,
   `    expect(artifactPreview().mode, IArtifactPreviewMode.${artifactFilePreview.mode});`,
   `    expect(artifactVersionDiff(artifacts, 'plan', version: 2).changes, <String>[${artifactDiff.changes.map((item) => `'${item}'`).join(', ')}]);`,
-  `    expect(artifactPayload(const IArtifactRevision(id: 'table', kind: IArtifactKind.table, title: '库存', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>['名称'], rows: <List<String>>[<String>['库存']])) is IArtifactTablePayload, ${artifactTablePayload !== undefined});`,
-  `    expect(artifactPayload(const IArtifactRevision(id: 'chart', kind: IArtifactKind.chart, title: '趋势', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>[], rows: <List<String>>[])), null);`,
+  `    expect(artifactPayload(const IArtifactRevision(id: 'table', kind: IArtifactKind.table, title: '库存', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>['名称'], rows: <List<String>>[<String>['库存']]))) is IArtifactTablePayload, ${artifactTablePayload !== undefined});`,
+  // 种类与 payload 对不上时要拿到 null：表格不能伪装成图表，反之亦然
+  `    expect(artifactPayload(const IArtifactRevision(id: 'chart', kind: IArtifactKind.chart, title: '趋势', version: 1, createdAt: 1, payload: IArtifactTablePayload(columns: <String>[], rows: <List<String>>[]))), null);`,
 ]
 
 /* ---------- 分页 ---------- */
