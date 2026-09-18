@@ -6,7 +6,7 @@
  * `colorTextInverseBg` 这种根本不存在的令牌。这里用静态解析补上那道关：
  * 引用的令牌、图标、导出清单必须真实存在，括号必须闭合。
  */
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -23,6 +23,21 @@ const walk = (dir) => {
   }
 }
 walk(lib)
+
+/*
+ * 生成的跨端对齐测试也要过括号那一关。
+ *
+ * 它原本不在扫描范围里，于是出过这样一件事：生成器少写了一个右括号，
+ * `logic_parity_test.dart` 整份编译不过——两千多条断言一条也没跑，
+ * 而 check:flutter 一直是绿的（它只扫 lib/），仓库里又没有 Dart SDK 能跑
+ * `flutter test`，所以谁也不会发现。
+ *
+ * 这是「永远绿的检查等于没有检查」的典型：真正该被它拦住的东西，
+ * 恰恰落在它的扫描范围之外。生成物是给别人 `flutter test` 用的，
+ * 它编不过就等于没交付。
+ */
+const goldenTest = join(root, 'test/logic_parity_test.dart')
+if (existsSync(goldenTest)) dartFiles.push(goldenTest)
 
 /* ---------- 1. 令牌常量必须真实存在 ---------- */
 const tokensSrc = readFileSync(join(lib, 'src/tokens/tokens.dart'), 'utf8')
@@ -118,6 +133,8 @@ const barrel = readFileSync(join(lib, 'i_design.dart'), 'utf8')
 for (const file of dartFiles) {
   const rel = relative(lib, file).split('\\').join('/')
   if (rel === 'i_design.dart') continue
+  // 测试文件不属于对外导出的那份清单，它只需要能编译
+  if (rel.startsWith('../')) continue
   if (!barrel.includes(`export '${rel}';`)) {
     problems.push(`i_design.dart 未导出 ${rel}（跑 npm run build:flutter 重新生成）`)
   }
@@ -130,4 +147,7 @@ if (problems.length) {
   for (const p of problems) console.error(`  ✗ ${p}`)
   process.exit(1)
 }
-console.log(`Flutter 校验通过：${dartFiles.length} 个文件，${componentCount} 个组件，${iconNames.size} 个图标`)
+console.log(
+  `Flutter 校验通过：${dartFiles.length} 个文件（含生成的跨端对齐测试），` +
+    `${componentCount} 个组件，${iconNames.size} 个图标`
+)
