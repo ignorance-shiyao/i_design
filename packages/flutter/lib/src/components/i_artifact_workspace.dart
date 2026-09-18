@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../logic/artifact.dart';
+import '../logic/diff.dart';
 import '../theme/i_theme.dart';
 import '../tokens/tokens.dart';
 import 'i_button.dart';
@@ -35,7 +36,12 @@ class IArtifactWorkspace extends StatelessWidget {
     final current = workspace.current;
     final preview = artifactPreview(current);
     final payload = artifactPayload(current);
-    final versionDiff = artifactVersionDiff(artifacts, artifactId, version: current?.version);
+    // 差异不止说「变了」，还要说清改了哪几行：一句「内容有变化」等于没说，
+    // 用户要么逐字重读一遍，要么干脆不看
+    final versionDiff = artifactContentDiff(artifacts, artifactId, version: current?.version);
+    final changedLines = versionDiff.mode == IDiffMode.lines && versionDiff.added + versionDiff.removed > 0
+        ? versionDiff.lines.where((line) => line.kind != IDiffKind.same).toList()
+        : const <IDiffLine>[];
     final ids = artifactAdoptableIds(current);
     return Container(
       decoration: BoxDecoration(
@@ -96,10 +102,52 @@ class IArtifactWorkspace extends StatelessWidget {
                   Text(current.meta['summary'] ?? '此版本可作为结构化结果查看或导出。', style: TextStyle(color: c.textSecondary, fontSize: IDesignTokensLight.fontSizeSm, height: 1.6)),
               ]),
             ),
-          if (versionDiff.previous != null)
+          // 任何情况下都有话可说：比不了也说清为什么，不会只剩一块空白
+          Padding(
+            padding: const EdgeInsets.fromLTRB(IDesignTokensLight.spacing3, 0, IDesignTokensLight.spacing3, IDesignTokensLight.spacing2),
+            child: Text(versionDiff.summary, style: TextStyle(color: c.textTertiary, fontSize: IDesignTokensLight.fontSizeXs)),
+          ),
+          if (changedLines.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(IDesignTokensLight.spacing3, 0, IDesignTokensLight.spacing3, IDesignTokensLight.spacing3),
-              child: Text('相比 v${versionDiff.previous!.version}：${versionDiff.changes.isEmpty ? '内容未变更' : '内容已变更'}', style: TextStyle(color: c.textTertiary, fontSize: IDesignTokensLight.fontSizeXs)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final line in changedLines)
+                    Container(
+                      width: double.infinity,
+                      color: line.kind == IDiffKind.add ? c.successSubtle : c.dangerSubtle,
+                      padding: const EdgeInsets.symmetric(horizontal: IDesignTokensLight.spacing1),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            child: Text(
+                              '${line.kind == IDiffKind.add ? line.after ?? '' : line.before ?? ''}',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(color: c.textTertiary, fontSize: IDesignTokensLight.fontSizeXs, fontFamily: 'monospace'),
+                            ),
+                          ),
+                          const SizedBox(width: IDesignTokensLight.spacing2),
+                          // 符号与底色一起给：只靠颜色的话，灰度打印与色觉障碍下读不出增删
+                          Text(
+                            line.kind == IDiffKind.add ? '+' : '−',
+                            style: TextStyle(color: line.kind == IDiffKind.add ? c.success : c.danger, fontSize: IDesignTokensLight.fontSizeXs, fontFamily: 'monospace'),
+                          ),
+                          const SizedBox(width: IDesignTokensLight.spacing1),
+                          Expanded(
+                            child: Text(
+                              line.text,
+                              style: TextStyle(color: c.text, fontSize: IDesignTokensLight.fontSizeXs, fontFamily: 'monospace', height: 1.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
             ),
           if (ids.isNotEmpty)
             Container(

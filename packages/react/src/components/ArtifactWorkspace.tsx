@@ -3,13 +3,14 @@ import {
   artifactAdoptableIds,
   artifactPayload,
   artifactPreview,
-  artifactVersionDiff,
+  artifactContentDiff,
   openArtifact,
   toggleArtifactAdoption,
   type ArtifactRevision
 } from '@i-design/common'
 import { Button } from './Button'
 import { Tag } from './Tag'
+import { CodeBlock } from './CodeBlock'
 
 export interface ArtifactWorkspaceProps {
   /** 同一产物可给出多个版本；组件只按 artifactId 打开其中一个序列。 */
@@ -43,7 +44,14 @@ export function ArtifactWorkspace({
   )
   const preview = artifactPreview(workspace.current)
   const payload = artifactPayload(workspace.current)
-  const versionDiff = artifactVersionDiff(artifacts, artifactId, workspace.current?.version)
+  /*
+   * 差异不止说「变了」，还要说清改了哪几行——一句「内容有变化」等于没说：
+   * 用户要么逐字重读一遍，要么干脆不看，而产物工作区存在的理由恰恰是让人能复核。
+   */
+  const versionDiff = artifactContentDiff(artifacts, artifactId, workspace.current?.version)
+  /* 逐行视图复用 CodeBlock：它已经有前后行号与 +/− 号（不靠颜色单独表意）。
+     另写一套的话，同一段改动在代码块里与在产物里会显示成两个样子。 */
+  const showLines = versionDiff.mode === 'lines' && versionDiff.added + versionDiff.removed > 0
   const ids = artifactAdoptableIds(workspace.current)
   const current = workspace.current
 
@@ -89,7 +97,19 @@ export function ArtifactWorkspace({
           )}
         </div>
       )}
-      {versionDiff.previous && <p className="i-artifact-workspace__diff">相比 v{versionDiff.previous.version}：{versionDiff.changes.length ? `${versionDiff.changes.map((item) => ({ content: '正文', payload: '结构数据', items: '采纳项' })[item]).join('、')}已变更` : '内容未变更'}</p>}
+      {/* 任何情况下都有话可说：比不了也说清为什么，不会只剩一块空白 */}
+      <p className="i-artifact-workspace__diff">{versionDiff.summary}</p>
+      {showLines && (
+        <div className="i-artifact-workspace__diff-lines">
+          <CodeBlock
+            code={versionDiff.current?.content ?? ''}
+            before={versionDiff.previous?.content ?? ''}
+            filename={`v${versionDiff.previous?.version} → v${versionDiff.current?.version}`}
+            copyable={false}
+            maxLines={14}
+          />
+        </div>
+      )}
       {ids.length > 0 && (
         <footer className="i-artifact-workspace__foot">
           <span>{workspace.adopted.length ? `已采纳 ${workspace.adopted.length} 项` : '尚未采纳'}</span>

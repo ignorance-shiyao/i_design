@@ -5,6 +5,7 @@
  * 回看版本、逐项采纳并撤销。生成内容一律按数据预览，绝不作为宿主 HTML / 脚本执行。
  */
 import type { Artifact } from '../contracts/run'
+import { diffLines, diffStat, type DiffLine } from './diff'
 
 export interface ArtifactRevision extends Artifact {
   /** 已脱敏的预览数据；document / code 只作为纯文本渲染 */
@@ -108,6 +109,116 @@ export function artifactVersionDiff(
   if (JSON.stringify(current.payload) !== JSON.stringify(previous.payload)) changes.push('payload')
   if (JSON.stringify(current.itemIds ?? []) !== JSON.stringify(previous.itemIds ?? [])) changes.push('items')
   return { current, previous, changes }
+}
+
+/* ---------- 具体改了哪几行 ---------- */
+
+export type DiffMode =
+  /** 文本产物：逐行比 */
+  | 'lines'
+  /** 结构化产物：只报规模变化，不假装做单元格级比对 */
+  | 'summary'
+  /** 比不了：没有旧版，或者两版根本不是同一种东西 */
+  | 'none'
+
+export interface ArtifactContentDiff {
+  current?: ArtifactRevision
+  previous?: ArtifactRevision
+  mode: DiffMode
+  /** mode 为 lines 时才有内容 */
+  lines: DiffLine[]
+  added: number
+  removed: number
+  /** 摆给用户看的那一句。任何 mode 下都有话可说，不会只剩一个空白区域 */
+  summary: string
+}
+
+/** 结构化产物的规模：表格数行、图表数点。用来说「从 3 行变成 5 行」 */
+function payloadSize(artifact: ArtifactRevision): number | null {
+  const payload = artifact.payload
+  if (!payload) return null
+  return payload.kind === 'table' ? payload.rows.length : payload.points.length
+}
+
+/**
+ * 相对紧邻旧版，具体改了哪几行。
+ *
+ * 这一层补的是「只说 content 变了，看不见改了什么」那个缺口——
+ * 一句「内容有变化」等于没说：用户要么逐字重读一遍，要么干脆不看，
+ * 而产物工作区存在的理由恰恰是**让人能复核**。
+ *
+ * 三条边界：
+ *
+ * **一、只跟紧邻旧版比。** 与 `artifactVersionDiff` 同一条规矩：v3 直接同 v1 比，
+ * 会把 v2 的改动算到 v3 头上，读者据此去问「谁改的」，问到的是错的人。
+ *
+ * **二、两版不是同一种东西就不逐行比。** 上一版是表格、这一版是文档，
+ * 硬拿两段文本比出来的加减行毫无意义——如实说「产物类型变了」，
+ * 让人去整份重看，比给一堆假的行号诚实。
+ *
+ * **三、结构化产物不假装做单元格级比对。** 表格与图表只报规模变化
+ * （从 3 行变成 5 行）。做到单元格级需要稳定的行标识，而产物是重新生成的，
+ * 行与行之间没有可靠的对应关系——按位置对齐会把「中间插了一行」说成
+ * 「后面每一行都变了」，那正是 `diff.ts` 里用 LCS 而不是逐行对齐要避开的事。
+ *
+ * 行级比对复用 `diff.ts` 的 `diffLines`：同一段改动在代码块里与在产物里
+ * 必须给出同一个结果，各写一份迟早会差出几行。
+ */
+export function artifactContentDiff(
+  artifacts: readonly ArtifactRevision[],
+  artifactId: string,
+  version?: number
+): ArtifactContentDiff {
+  const { current, previous } = artifactVersionDiff(artifacts, artifactId, version)
+  const empty = { current, previous, lines: [] as DiffLine[], added: 0, removed: 0 }
+
+  if (!current || !previous) {
+    return { ...empty, mode: 'none', summary: current ? '这是最早的一版，没有可比对的旧版' : '没有可比对的版本' }
+  }
+
+  if (current.kind !== previous.kind) {
+    return {
+      ...empty,
+      mode: 'none',
+      summary: `产物类型从「${previous.kind}」变成了「${current.kind}」，两版无法逐行比较，请整份重看`
+    }
+  }
+
+  const isText = current.kind === 'document' || current.kind === 'code'
+  if (!isText) {
+    const before = payloadSize(previous)
+    const after = payloadSize(current)
+    const unit = current.kind === 'table' ? '行' : '个数据点'
+    if (before === null || after === null || before === after) {
+      const same = JSON.stringify(current.payload) === JSON.stringify(previous.payload)
+      return {
+        ...empty,
+        mode: 'summary',
+        summary: same ? `与 v${previous.version} 相比，数据没有变化` : `与 v${previous.version} 相比，数据有改动（规模未变）`
+      }
+    }
+    return {
+      ...empty,
+      mode: 'summary',
+      summary: `与 v${previous.version} 相比，从 ${before} ${unit}变成 ${after} ${unit}`
+    }
+  }
+
+  const lines = diffLines(previous.content ?? '', current.content ?? '')
+  const { added, removed } = diffStat(lines)
+  if (!added && !removed) {
+    return { ...empty, mode: 'lines', lines, summary: `与 v${previous.version} 相比，正文没有变化` }
+  }
+  return {
+    current,
+    previous,
+    mode: 'lines',
+    lines,
+    added,
+    removed,
+    // 加减各报各的数，不合成一个「改了 N 行」：改 3 行与「删 3 行又加 3 行」不是一回事
+    summary: `与 v${previous.version} 相比，+${added} −${removed} 行`
+  }
 }
 
 export function artifactPreview(artifact?: ArtifactRevision): ArtifactPreview {

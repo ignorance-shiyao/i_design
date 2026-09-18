@@ -26,7 +26,19 @@
     </view>
     <text wx:else>{{current.meta.summary || '此版本可作为结构化结果查看或导出。'}}</text>
   </view>
-  <text wx:if="{{diff.previous}}" class="i-artifact-workspace__diff">相比 v{{diff.previous.version}}：{{diff.changes.length ? '内容已变更' : '内容未变更'}}</text>
+  <!-- 任何情况下都有话可说：比不了也说清为什么，不会只剩一块空白 -->
+  <text class="i-artifact-workspace__diff">{{diff.summary}}</text>
+  <view wx:if="{{diff.changed}}" class="i-artifact-workspace__diff-lines">
+    <view
+      wx:for="{{diff.lines}}"
+      wx:key="index"
+      class="i-artifact-workspace__diff-line i-artifact-workspace__diff-line--{{item.kind}}"
+    >
+      <text class="i-artifact-workspace__diff-no">{{item.no}}</text>
+      <text class="i-artifact-workspace__diff-sign">{{item.sign}}</text>
+      <text>{{item.text}}</text>
+    </view>
+  </view>
   <view wx:if="{{ids.length}}" class="i-artifact-workspace__foot">
     <text>{{workspace.adopted.length ? '已采纳 ' + workspace.adopted.length + ' 项' : '尚未采纳'}}</text>
     <i-button

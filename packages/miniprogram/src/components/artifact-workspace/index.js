@@ -6,10 +6,30 @@ import {
   artifactAdoptableIds,
   artifactPayload,
   artifactPreview,
-  artifactVersionDiff,
+  artifactContentDiff,
   openArtifact,
   toggleArtifactAdoption
 } from '@i-design/common'
+
+/** 把差异摊成 WXML 能直接渲染的形状；只保留有增删的行，全同的正文不必再铺一遍 */
+function diffView(diff) {
+  const changed = diff.mode === 'lines' && diff.added + diff.removed > 0
+  return {
+    summary: diff.summary,
+    changed,
+    // 符号与文字一起给：只靠颜色的话，灰度打印与色觉障碍下读不出增删
+    lines: changed
+      ? diff.lines
+          .filter((line) => line.kind !== 'same')
+          .map((line) => ({
+            kind: line.kind,
+            sign: line.kind === 'add' ? '+' : '−',
+            no: line.kind === 'add' ? line.after : line.before,
+            text: line.text
+          }))
+      : []
+  }
+}
 
 Component({
   options: { addGlobalClass: true },
@@ -40,7 +60,14 @@ Component({
         current: workspace.current || null,
         preview: artifactPreview(workspace.current),
         payload: artifactPayload(workspace.current) || null,
-        diff: artifactVersionDiff(this.data.artifacts, this.data.artifactId, workspace.current?.version),
+        /*
+         * 差异不止说「变了」，还要说清改了哪几行：一句「内容有变化」等于没说，
+         * 用户要么逐字重读一遍，要么干脆不看。
+         * WXML 里跑不了函数，逐行的展示数据在这儿摊平。
+         */
+        diff: diffView(
+          artifactContentDiff(this.data.artifacts, this.data.artifactId, workspace.current?.version)
+        ),
         ids: artifactAdoptableIds(workspace.current)
       })
     },

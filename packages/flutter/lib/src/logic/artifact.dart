@@ -4,6 +4,8 @@
 /// 因而不会把生成内容作为宿主脚本执行。
 library;
 
+import 'diff.dart';
+
 enum IArtifactKind { document, table, code, chart, file }
 enum IArtifactPreviewMode { text, table, chart, file }
 
@@ -153,4 +155,153 @@ IArtifactPayload? artifactPayload(IArtifactRevision? artifact) {
   if (artifact?.kind == IArtifactKind.table && payload is IArtifactTablePayload) return payload;
   if (artifact?.kind == IArtifactKind.chart && payload is IArtifactChartPayload) return payload;
   return null;
+}
+
+/* ---------- 具体改了哪几行 ---------- */
+
+enum IDiffMode {
+  /// 文本产物：逐行比
+  lines,
+
+  /// 结构化产物：只报规模变化，不假装做单元格级比对
+  summary,
+
+  /// 比不了：没有旧版，或者两版根本不是同一种东西
+  none,
+}
+
+class IArtifactContentDiff {
+  const IArtifactContentDiff({
+    required this.current,
+    required this.previous,
+    required this.mode,
+    required this.lines,
+    required this.added,
+    required this.removed,
+    required this.summary,
+  });
+
+  final IArtifactRevision? current;
+  final IArtifactRevision? previous;
+  final IDiffMode mode;
+  final List<IDiffLine> lines;
+  final int added;
+  final int removed;
+
+  /// 摆给用户看的那一句。任何 mode 下都有话可说，不会只剩一个空白区域
+  final String summary;
+}
+
+/// 结构化产物的规模：表格数行、图表数点
+int? _payloadSize(IArtifactRevision artifact) => switch (artifact.payload) {
+      IArtifactTablePayload(:final rows) => rows.length,
+      IArtifactChartPayload(:final points) => points.length,
+      null => null,
+    };
+
+const Map<IArtifactKind, String> _kindLabels = {
+  IArtifactKind.document: 'document',
+  IArtifactKind.table: 'table',
+  IArtifactKind.code: 'code',
+  IArtifactKind.chart: 'chart',
+  IArtifactKind.file: 'file',
+};
+
+/// 相对紧邻旧版，具体改了哪几行。
+///
+/// 补的是「只说 content 变了，看不见改了什么」那个缺口——一句「内容有变化」
+/// 等于没说：用户要么逐字重读一遍，要么干脆不看，而产物工作区存在的理由
+/// 恰恰是**让人能复核**。
+///
+/// 三条边界与 Web 端逐字一致：只跟紧邻旧版比（v3 直接同 v1 比会把 v2 的改动
+/// 算到 v3 头上）；两版不是同一种东西就不逐行比；结构化产物只报规模变化，
+/// 不假装做单元格级比对（产物是重新生成的，行与行之间没有可靠的对应关系）。
+IArtifactContentDiff artifactContentDiff(
+  List<IArtifactRevision> artifacts,
+  String artifactId, {
+  int? version,
+}) {
+  final base = artifactVersionDiff(artifacts, artifactId, version: version);
+  final current = base.current;
+  final previous = base.previous;
+
+  if (current == null || previous == null) {
+    return IArtifactContentDiff(
+      current: current,
+      previous: previous,
+      mode: IDiffMode.none,
+      lines: const [],
+      added: 0,
+      removed: 0,
+      summary: current != null ? '这是最早的一版，没有可比对的旧版' : '没有可比对的版本',
+    );
+  }
+
+  if (current.kind != previous.kind) {
+    return IArtifactContentDiff(
+      current: current,
+      previous: previous,
+      mode: IDiffMode.none,
+      lines: const [],
+      added: 0,
+      removed: 0,
+      summary:
+          '产物类型从「${_kindLabels[previous.kind]}」变成了「${_kindLabels[current.kind]}」，两版无法逐行比较，请整份重看',
+    );
+  }
+
+  final isText =
+      current.kind == IArtifactKind.document || current.kind == IArtifactKind.code;
+  if (!isText) {
+    final before = _payloadSize(previous);
+    final after = _payloadSize(current);
+    final unit = current.kind == IArtifactKind.table ? '行' : '个数据点';
+    if (before == null || after == null || before == after) {
+      final same = _payloadSignature(current.payload) == _payloadSignature(previous.payload);
+      return IArtifactContentDiff(
+        current: current,
+        previous: previous,
+        mode: IDiffMode.summary,
+        lines: const [],
+        added: 0,
+        removed: 0,
+        summary: same
+            ? '与 v${previous.version} 相比，数据没有变化'
+            : '与 v${previous.version} 相比，数据有改动（规模未变）',
+      );
+    }
+    return IArtifactContentDiff(
+      current: current,
+      previous: previous,
+      mode: IDiffMode.summary,
+      lines: const [],
+      added: 0,
+      removed: 0,
+      summary: '与 v${previous.version} 相比，从 $before $unit变成 $after $unit',
+    );
+  }
+
+  final lines = diffLines(previous.content ?? '', current.content ?? '');
+  final stat = diffStat(lines);
+  if (stat.added == 0 && stat.removed == 0) {
+    return IArtifactContentDiff(
+      current: current,
+      previous: previous,
+      mode: IDiffMode.lines,
+      lines: lines,
+      added: 0,
+      removed: 0,
+      summary: '与 v${previous.version} 相比，正文没有变化',
+    );
+  }
+  return IArtifactContentDiff(
+    current: current,
+    previous: previous,
+    mode: IDiffMode.lines,
+    lines: lines,
+    added: stat.added,
+    removed: stat.removed,
+    // 加减各报各的数，不合成一个「改了 N 行」：改 3 行与「删 3 行又加 3 行」不是一回事
+    summary: '与 v${previous.version} 相比，+${stat.added} −${stat.removed} 行',
+  );
 }

@@ -13,4 +13,16 @@
 .i-artifact-workspace__table { width:100%; margin-top:var(--i-spacing-2); border-collapse:collapse; font-size:var(--i-font-size-sm); color:var(--i-color-text-secondary); }.i-artifact-workspace__table th,.i-artifact-workspace__table td { padding:var(--i-spacing-1) var(--i-spacing-2); border-bottom:1px solid var(--i-color-hairline); text-align:left; }.i-artifact-workspace__table th { color:var(--i-color-text); font-weight:var(--i-font-weight-medium); }.i-artifact-workspace__chart { display:grid; gap:var(--i-spacing-2); margin-top:var(--i-spacing-2); }.i-artifact-workspace__bar { display:grid; grid-template-columns:minmax(5em, 1fr) 3fr auto; align-items:center; gap:var(--i-spacing-2); font-size:var(--i-font-size-sm); }.i-artifact-workspace__bar i { display:block; min-width:2px; height:var(--i-spacing-2); background:var(--i-color-brand); border-radius:var(--i-radius-full); }.i-artifact-workspace__bar b { font-weight:var(--i-font-weight-medium); color:var(--i-color-text-secondary); }
 .i-artifact-workspace__table-row { display:flex; gap:var(--i-spacing-2); padding-bottom:var(--i-spacing-1); border-bottom:1px solid var(--i-color-hairline); }.i-artifact-workspace__chart { display:flex; flex-direction:column; }.i-artifact-workspace__bar-track { flex:1; height:var(--i-spacing-2); overflow:hidden; border-radius:var(--i-radius-full); background:var(--i-color-bg-muted); }.i-artifact-workspace__bar-fill { min-width:2px; height:100%; background:var(--i-color-brand); }
 .i-artifact-workspace__foot { border-top:1px solid var(--i-color-hairline); font-size:var(--i-font-size-sm); color:var(--i-color-text-secondary); flex-wrap:wrap; }
+
+/* 逐行差异区：复用代码块的 diff 视图，这里只管它在工作区里的留白 */
+.i-artifact-workspace__diff-lines { padding:0 var(--i-spacing-3) var(--i-spacing-3); }
+/*
+ * 小程序端没有代码块组件可复用，逐行自己铺。增删同时用符号与底色表示——
+ * 只靠颜色的话，灰度打印与色觉障碍下读不出哪行是加、哪行是删。
+ */
+.i-artifact-workspace__diff-line { display:flex; gap:var(--i-spacing-2); font-family:var(--i-font-family-mono); font-size:var(--i-font-size-xs); line-height:1.7; }
+.i-artifact-workspace__diff-no { min-width:2em; color:var(--i-color-text-tertiary); text-align:right; }
+.i-artifact-workspace__diff-sign { width:1em; }
+.i-artifact-workspace__diff-line--add { background:var(--i-color-success-subtle); color:var(--i-color-success-text); }
+.i-artifact-workspace__diff-line--remove { background:var(--i-color-danger-subtle); color:var(--i-color-danger-text); }
 .i-artifact-workspace__diff { margin:0; padding:0 var(--i-spacing-3) var(--i-spacing-3); color:var(--i-color-text-tertiary); font-size:var(--i-font-size-xs); }
