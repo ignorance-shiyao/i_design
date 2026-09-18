@@ -61,6 +61,11 @@ jobs:
       - name: 键盘可用性检查
         run: npm run check:keyboard
 
+      # 键盘走完那几条路径之后，结果得和鼠标一样：排序状态读得出来、
+      # 收起不丢选择、键盘与菜单落到同一格、重试原地更新、未读线不被推走
+      - name: 键盘路径抽检
+        run: npm run check:keyboard-paths
+
       # 开发机上没人会去打开系统的「减少动效」，漏掉那一半完全看不出来
       - name: 动效开关检查
         run: npm run check:motion
