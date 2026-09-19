@@ -64,6 +64,7 @@
   --i-tok-directive: #7048e8;
   --i-tok-punct: #7c8496;
   --i-color-text-on-brand: #ffffff;
+  --i-font-size-2xs: 12px;
   --i-font-size-xs: 13px;
   --i-font-size-sm: 14px;
   --i-font-size-md: 16px;
@@ -232,6 +233,7 @@
   --i-tok-directive: #b197fc;
   --i-tok-punct: #b2bdd1;
   --i-color-text-on-brand: #2c3752;
+  --i-font-size-2xs: 12px;
   --i-font-size-xs: 13px;
   --i-font-size-sm: 14px;
   --i-font-size-md: 16px;

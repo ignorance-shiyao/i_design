@@ -48,6 +48,6 @@
   border-radius: var(--i-radius-full);
   background: var(--i-color-danger-solid);
   color: var(--i-color-on-danger);
-  font-size: 10px;
+  font-size: var(--i-font-size-2xs);
   line-height: 16px;
 }

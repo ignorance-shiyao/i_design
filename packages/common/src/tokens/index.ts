@@ -110,6 +110,12 @@ export const chartDivergingDark = ['#de3c3b', '#8f4a48', '#3a3f4d', '#3f5599', '
 
 /** 字号刻度：以 14px 正文为基准 */
 export const fontSize = {
+  /*
+   * 2xs 是徽标数字、标签栏文字这类「附在别的元素上的小字」的唯一一档。
+   * 以前它们各自写死 10px / 11px，于是移动端把其余字号整体调大时这些原地不动，
+   * 同一个组件里大小关系就变了。放进令牌表，覆盖层才跟得上。
+   */
+  '2xs': '11px',
   xs: '12px',
   sm: '13px',
   md: '14px',
@@ -458,6 +464,7 @@ export const mobileOverrides: Record<string, string> = {
   'font-size-md': '16px',
   'font-size-sm': '14px',
   'font-size-xs': '13px',
+  'font-size-2xs': '12px',
   'font-size-lg': '18px',
 
   // 控件最小高度 44px，来自 Apple HIG 与 Material 的可点击区域下限

@@ -1,6 +1,7 @@
 /* 由 packages/common/scripts/build-tokens.mjs 自动生成，请勿手改 */
 @media (max-width: 768px), (pointer: coarse) {
   :root {
+    --i-font-size-2xs: 12px;
     --i-font-size-xs: 13px;
     --i-font-size-sm: 14px;
     --i-font-size-md: 16px;
@@ -15,6 +16,7 @@
   }
 
   :root[data-theme='dark'] {
+    --i-font-size-2xs: 12px;
     --i-font-size-xs: 13px;
     --i-font-size-sm: 14px;
     --i-font-size-md: 16px;

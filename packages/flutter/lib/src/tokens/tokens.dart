@@ -106,6 +106,7 @@ class IDesignTokensLight {
   static const chartDiv4Ink = Color(0xFF293852);
   static const chartDiv5Ink = Color(0xFFFFFFFF);
 
+  static const double fontSize2xs = 11.0;
   static const double fontSizeXs = 12.0;
   static const double fontSizeSm = 13.0;
   static const double fontSizeMd = 14.0;
@@ -250,6 +251,7 @@ class IDesignTokensDark {
   static const chartDiv4Ink = Color(0xFFFFFFFF);
   static const chartDiv5Ink = Color(0xFF090F27);
 
+  static const double fontSize2xs = 11.0;
   static const double fontSizeXs = 12.0;
   static const double fontSizeSm = 13.0;
   static const double fontSizeMd = 14.0;
