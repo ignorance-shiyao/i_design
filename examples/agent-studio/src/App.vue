@@ -53,13 +53,21 @@ const script = computed(() => scriptFor(outcome.value, startedAt.value))
  * 实际投递顺序。乱序只在窗口内发生：真实网络不会把第 1 条排到第 90 条之后，
  * 窗口之外造出来的是一个不会发生的场景，测出来的结论也没用。
  */
-const deliveries = computed(() =>
-  planDelivery(script.value, {
+const deliveries = computed(() => {
+  const options = {
     seed: 20260318,
     shuffleWindow: delivery.value === 'shuffle' ? 3 : 0,
     dropAfter: delivery.value === 'reconnect' ? 5 : undefined
-  })
-)
+  }
+  // 人确认之后才会产生后半段事件，乱序窗口不能跨过这道人类确认边界。
+  // 否则先收到 resolved 就停泵，尚在队尾的 requested 永远没有机会显示。
+  const boundary = script.value.findIndex((event) => event.type === 'approval.resolved')
+  if (boundary < 0) return planDelivery(script.value, options)
+  return [
+    ...planDelivery(script.value.slice(0, boundary), options),
+    ...planDelivery(script.value.slice(boundary), { ...options, dropAfter: undefined })
+  ]
+})
 
 function stop() {
   if (timer !== undefined) clearInterval(timer)
