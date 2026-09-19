@@ -31,7 +31,7 @@ test('当前仓库通过', async () => {
 
 test('登记为 ready 却没有应用目录时失败——门户上的入口点进去是 404', async (t) => {
   const root = fixture(t)
-  patch(root, APPS, "    source: 'examples/oa',\n    status: 'planned',", "    source: 'examples/oa',\n    status: 'ready',")
+  rmSync(join(root, 'examples/oa'), { recursive: true, force: true })
   await assert.rejects(checkExamples(root), /examples\/oa/)
 })
 

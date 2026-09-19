@@ -37,7 +37,7 @@ export const exampleApps: ExampleApp[] = [
     summary: '提交申请 → 待办审批 → 退回再提交 → 通知，申请人不能审批自己的单据',
     path: '../oa/',
     source: 'examples/oa',
-    status: 'planned',
+    status: 'ready',
     topics: ['审批链', '通知', '角色']
   },
   {

@@ -1,10 +1,12 @@
-/** H02 第一版：在独立构建产物上操作，断言业务结果。OA 尚未覆盖。 */
+/** H02：在独立构建产物上操作，核验 ERP、OA、Agent 的业务结果。 */
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import { resolve, extname, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { chromium } from 'playwright'
+import AxeBuilder from '@axe-core/playwright'
+import { auditInPage } from './check-layout.mjs'
 
 export async function checkE2E({ only, mutate } = {}) {
   const root = resolve('dist-examples')
@@ -25,7 +27,8 @@ export async function checkE2E({ only, mutate } = {}) {
     const base = `http://127.0.0.1:${server.address().port}`
     async function scenario(name, action) {
       if (only && only !== name) return
-      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
+      const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
+      const page = await context.newPage()
       page.setDefaultTimeout(10000)
       const errors = []
       page.on('pageerror', e => errors.push(e.message))
@@ -36,7 +39,7 @@ export async function checkE2E({ only, mutate } = {}) {
       })
       try { await action(page, base); assert.deepEqual(errors, [], '浏览器运行错误'); results.push(name); console.log(`业务结果通过：${name}`) }
       catch (e) { throw new Error(`${name}: ${e.message}`, { cause: e }) }
-      finally { await page.close() }
+      finally { await context.close() }
     }
     const button = (p, name) => p.getByRole('button', { name, exact: true })
     const text = async (p, selector, expected) => {
@@ -79,6 +82,116 @@ export async function checkE2E({ only, mutate } = {}) {
       await text(p, 'tbody tr', id)
       assert.equal(await p.locator('tbody tr').count(), 1, '重复提交生成了额外订单')
       await text(p, 'tbody tr', '已关闭')
+    })
+    async function oaVisual(p, stage) {
+      for (const width of [1440, 390, 320]) {
+        await p.setViewportSize({ width, height: 1000 })
+        await p.waitForTimeout(120)
+        const measured = await p.evaluate(() => ({
+          width: innerWidth, overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
+          cardHeights: Array.from(document.querySelectorAll('.oa__cards > li')).map(el => Math.round(el.getBoundingClientRect().height)),
+          paragraphEm: Math.max(0, ...Array.from(document.querySelectorAll('.oa p')).flatMap(el => {
+            const range = document.createRange(); range.selectNodeContents(el)
+            return Array.from(range.getClientRects()).map(r => r.width / parseFloat(getComputedStyle(el).fontSize))
+          }))
+        }))
+        assert.equal(measured.overflow, 0, `OA ${stage} ${width} 横向溢出`)
+        if (width === 1440) {
+          const layout = await p.evaluate(auditInPage, { maxMeasure: 45, maxStretchPx: 48, maxStretchPct: 25 })
+          assert.deepEqual(layout.findings, [], `OA ${stage} 版面`)
+          await p.screenshot({ path: `/tmp/g05-${stage}.png`, fullPage: true })
+        }
+        console.log('OA 渲染测量', stage, measured)
+      }
+      await p.setViewportSize({ width: 1440, height: 1000 })
+      for (const theme of ['light', 'dark']) {
+        await p.evaluate(value => { document.documentElement.dataset.theme = value; document.documentElement.dataset.motion = 'off' }, theme)
+        await p.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
+        const { violations } = await new AxeBuilder({ page: p }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+        assert.deepEqual(violations.filter(v => ['serious', 'critical'].includes(v.impact)).map(v => ({ id: v.id, targets: v.nodes.map(n => n.target) })), [], `OA ${stage} ${theme} a11y`)
+      }
+      await p.evaluate(() => { document.documentElement.dataset.theme = 'light' })
+    }
+    async function createOa(p, base) {
+      await p.goto(`${base}/oa/`)
+      await button(p, '新建申请').click()
+      await p.getByLabel('申请标题', { exact: true }).fill('外勤报销回归')
+      await button(p, '提交').click()
+      await text(p, '.i-detail-page__title', 'OA-0001')
+    }
+    await scenario('oa', async (p, base) => {
+      await p.goto(`${base}/oa/`)
+      await button(p, '新建申请').click()
+      await p.getByLabel('申请标题', { exact: true }).fill('外勤报销回归')
+      await p.locator('.i-entity-picker__chip-off').click()
+      await p.getByPlaceholder('搜索姓名、工号或部门').fill('审批人')
+      await p.getByRole('checkbox').click()
+      assert.equal(await p.locator('.i-entity-picker__chip').count(), 1, '审批人选择应恢复')
+      await p.getByLabel('报销金额（元）', { exact: true }).fill('0')
+      await button(p, '提交').click()
+      await text(p, '.oa__error', '422')
+      assert.equal(await p.getByLabel('申请标题', { exact: true }).inputValue(), '外勤报销回归')
+      await p.getByLabel('报销金额（元）', { exact: true }).fill('1200.50')
+      await oaVisual(p, 'form')
+      await button(p, '提交').click()
+      await text(p, '.i-detail-page__title', 'OA-0001')
+      assert.equal(await button(p, '同意申请').isDisabled(), true, 'OA 禁止自审')
+      await text(p, '.i-detail-page__reasons', '不能审批自己提交的申请')
+      await button(p, '只读观察员').click()
+      assert.equal(await button(p, '同意申请').isDisabled(), true, 'OA 观察员只读')
+      await button(p, '审批人').click()
+      await button(p, '我的通知').click()
+      assert.equal(await p.locator('.i-task-center__item').count(), 1, 'OA 通知必须送达审批人')
+      await button(p, '查看申请').click()
+      await button(p, '退回修改').click()
+      await text(p, '.oa__error', '修改原因')
+      await p.getByLabel('审批意见（退回时必填）', { exact: true }).fill('补充出差行程，' + '请列明交通和住宿明细。'.repeat(10))
+      await button(p, '退回修改').click()
+      await text(p, '.i-detail-page__head', '已退回')
+      await button(p, '申请人').click()
+      await button(p, '我的通知').click()
+      await text(p, '.i-task-center', '补充出差行程')
+      await button(p, '查看申请').click()
+      await button(p, '修改并重新提交').click()
+      await p.getByLabel('用途说明', { exact: true }).fill('已补充出差行程及住宿明细')
+      await button(p, '提交').click()
+      await text(p, '.i-detail-page__head', '待审批')
+      await text(p, '.i-detail-page__summary', 'v3')
+      await button(p, '审批人').click()
+      await button(p, '同意申请').click()
+      await text(p, '.i-detail-page__head', '已通过')
+      assert.equal(await p.locator('.oa__history li').count(), 4, 'OA 历史必须包含四次真实流转')
+      await text(p, '.oa__reason', '已补充出差行程及住宿明细')
+      await oaVisual(p, 'approved')
+      await button(p, '申请人').click()
+      await button(p, '我的通知').click()
+      assert.equal(await p.locator('.i-task-center__item').count(), 2, 'OA 退回与通过各产生一条通知')
+      await text(p, '.i-task-center', '已通过')
+      await oaVisual(p, 'notices')
+      await button(p, '申请记录').click()
+      assert.equal(await p.locator('.oa__cards > li').count(), 1, 'OA 重提必须保留同一张申请')
+      await text(p, '.oa__cards', '已通过')
+      for (const length of [80, 180]) {
+        await button(p, '新建申请').click()
+        await p.getByLabel('用途说明', { exact: true }).fill('申请说明'.repeat(length / 4))
+        await button(p, '提交').click()
+        await button(p, '申请记录').click()
+      }
+      assert.equal(await p.locator('.oa__cards > li').count(), 3)
+      await oaVisual(p, 'list')
+    })
+    await scenario('oa-conflict', async (p, base) => {
+      await createOa(p, base)
+      await button(p, '审批人').click()
+      await button(p, '模拟其他窗口退回').click()
+      await p.locator('.i-detail-page__stale').waitFor()
+      await button(p, '申请人').click()
+      assert.equal(await button(p, '修改并重新提交').isDisabled(), true, 'OA 旧版本不能重提')
+      await button(p, '刷新看最新').click()
+      await button(p, '修改并重新提交').click()
+      await button(p, '提交').click()
+      await text(p, '.i-detail-page__summary', 'v3')
+      await text(p, '.i-detail-page__head', '待审批')
     })
     for (const outcome of ['成功', '拒绝', '取消', '失败']) {
       for (const delivery of ['正常', '乱序', '断线重连']) {
@@ -144,5 +257,5 @@ export async function checkE2E({ only, mutate } = {}) {
   } finally { await browser?.close(); await new Promise(r => server.close(r)) }
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  console.log('H02 第一版业务回归通过（OA 未覆盖）：', await checkE2E())
+  console.log('H02 业务回归通过（ERP / OA / Agent）：', await checkE2E())
 }
