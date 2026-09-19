@@ -1,6 +1,11 @@
 import { defineConfig } from 'vitest/config'
+import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
+  // 仓库内测试直接读共享源码，不能依赖尚未执行 build:packages 的 dist 入口。
+  resolve: {
+    alias: { '@i-design/common': fileURLToPath(new URL('./packages/common/src/index.ts', import.meta.url)) }
+  },
   test: {
     /*
      * 只跑各包源码里的测试。
