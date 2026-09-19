@@ -104,11 +104,23 @@ const level = ref<QrEcLevel>('M')
   flex-wrap: wrap;
   align-items: flex-start;
   gap: var(--i-spacing-6);
+  /*
+   * 这一层不归零，分段控制器那一排选项的最小宽度会一路算到祖先上：
+   * 它自己有 overflow-x: auto，看起来「会自己滚」，但把父级撑宽之后
+   * 谁也没超过谁，整页却被顶宽了（320px 下溢出 13px）。
+   */
+  min-width: 0;
 }
 .playground__form {
   display: flex;
-  flex: 1;
-  min-width: min(260px, 100%);
+  /*
+   * 想要的是「够宽时占 260，容器更窄就跟着缩」。
+   * 写 min-width: min(260px, 100%) 做不到：这里的 100% 按 flex 容器算，
+   * 而容器宽度又由内容决定，于是 260 原地生效，320px 的屏幕上把演示区顶破。
+   * 基准宽度归 flex-basis，能不能缩归 min-width——两件事分开写才准。
+   */
+  flex: 1 1 260px;
+  min-width: 0;
   flex-direction: column;
   gap: var(--i-spacing-3);
 }

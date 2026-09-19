@@ -75,7 +75,12 @@ import {
 import { dedentCode } from './highlight'
 import { describeAccept } from './upload'
 import { contrastRatio, hexToRgb, readableOn, rgbToOklch, solidPair } from './palette'
-import { DEFAULT_THEME_CONFIG, resolveThemeTokens } from './theme'
+import {
+  CONTROL_SIZE_KEYS,
+  DEFAULT_THEME_CONFIG,
+  FONT_SIZE_KEYS,
+  resolveThemeTokens
+} from './theme'
 import { qrMatrix, qrVersionFor } from './qrcode'
 import { avatarSizePx, initialsOf, tintOf } from './avatar'
 import { safeHref } from './href'
@@ -587,6 +592,38 @@ describe('有颜色的字要读得出来', () => {
     for (const key of ['color-brand-text', 'color-text-link', 'color-danger-text']) {
       expect(contrastRatio(tokens[key], '#ffffff')).toBeGreaterThanOrEqual(4.5)
     }
+  })
+})
+
+describe('面板没调过的档不写行内覆盖', () => {
+  /*
+   * 行内 style 压过 tokens.responsive.css。默认档照写一遍默认值，
+   * 手机上的移动尺度就整个失效：正文停在 14px、控件停在 34px，
+   * 而没走令牌的字照常变大——同一屏里字号忽大忽小。
+   */
+  it('默认档下字号与控件高度都是空串', () => {
+    const tokens = resolveThemeTokens(DEFAULT_THEME_CONFIG, 'light')
+    for (const key of FONT_SIZE_KEYS) expect(tokens[`font-size-${key}`]).toBe('')
+    for (const key of CONTROL_SIZE_KEYS) expect(tokens[`control-height-${key}`]).toBe('')
+  })
+
+  it('调过了才写出来', () => {
+    const tokens = resolveThemeTokens({ ...DEFAULT_THEME_CONFIG, fontSize: 'loose' }, 'light')
+    expect(tokens['font-size-md']).not.toBe('')
+    expect(parseFloat(tokens['font-size-md'])).toBeGreaterThan(14)
+  })
+
+  it('自定义档里只改了一级，其余仍然不写', () => {
+    const tokens = resolveThemeTokens(
+      {
+        ...DEFAULT_THEME_CONFIG,
+        fontSize: 'custom',
+        fontSizeCustom: { ...DEFAULT_THEME_CONFIG.fontSizeCustom, lg: 22 }
+      },
+      'light'
+    )
+    expect(tokens['font-size-lg']).toBe('22px')
+    expect(tokens['font-size-md']).toBe('')
   })
 })
 

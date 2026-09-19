@@ -60,6 +60,8 @@ export const CONTROL_SIZE_KEYS = Object.keys(controlHeightTokens) as ControlSize
  * 区间同时也是护栏：正文再小不过 12px，超大展示再大不过 96px。
  */
 export const FONT_SIZE_RANGE: Record<FontSizeKey, [number, number]> = {
+  // 9px 是「还认得出是什么字」的下限，再小就只是一团墨点
+  '2xs': [9, 16],
   xs: [10, 18],
   sm: [11, 20],
   md: [12, 24],
@@ -419,6 +421,11 @@ export type SemanticColorKey = (typeof SEMANTIC_COLOR_KEYS)[number]
  * 一次算出全部要覆盖的令牌。键名不带前缀，调用方自行拼 `--i-`。
  * 值为空字符串表示「删掉这条覆盖，回到编译出的默认值」。
  */
+/** 覆盖值与编译出的默认值相同吗——相同就不该写这条行内覆盖 */
+function sameAsDefault(value: string, token: string | undefined): boolean {
+  return token !== undefined && parseFloat(value) === parseFloat(token)
+}
+
 export function resolveThemeTokens(
   config: ThemeConfig,
   mode: ThemeMode = 'light'
@@ -473,8 +480,18 @@ export function resolveThemeTokens(
   Object.assign(out, tintNeutrals(config.brand, config.neutralTint, mode))
   Object.assign(out, resolveGlass(config, mode))
 
-  for (const [key, value] of Object.entries(resolveFontSizes(config))) {
-    out[`font-size-${key}`] = px(value)
+  /*
+   * 值和编译出的默认值一样时，写空串（= 删掉这条行内覆盖），不要照着再写一遍。
+   *
+   * 行内 style 的优先级高于任何样式表，包括 tokens.responsive.css 那层
+   * 「窄屏或触屏切到移动尺度」。照写一遍默认值，等于把移动尺度整个顶掉：
+   * 手机上正文本该 16px 却停在 14px、控件本该 44px 却停在 34px，
+   * 而没走令牌的那些字照常变大——于是同一屏里字号忽大忽小。
+   * 面板什么都没调的时候，这里本来就不该留下任何覆盖。
+   */
+  for (const key of FONT_SIZE_KEYS) {
+    const value = px(resolveFontSizes(config)[key])
+    out[`font-size-${key}`] = sameAsDefault(value, fontSizeTokens[key]) ? '' : value
   }
   out['line-height-base'] = lineHeightTokens[config.lineHeight]
   out['font-family'] =
@@ -487,8 +504,9 @@ export function resolveThemeTokens(
   }
 
   for (const [key, value] of Object.entries(resolveSpacing(config))) out[`spacing-${key}`] = px(value)
-  for (const [key, value] of Object.entries(resolveControlHeights(config))) {
-    out[`control-height-${key}`] = px(value)
+  for (const key of CONTROL_SIZE_KEYS) {
+    const value = px(resolveControlHeights(config)[key])
+    out[`control-height-${key}`] = sameAsDefault(value, controlHeightTokens[key]) ? '' : value
   }
 
   // 关掉动效时把时长压到 0：组件全部引用这几个令牌，因此一处生效
