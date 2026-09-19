@@ -88,6 +88,9 @@ jobs:
       - name: ERP 与 Agent 第一版业务回归（含故障注入）
         run: npm run check:e2e
 
+      - name: 站点包含全部可运行示例（含故障注入）
+        run: node --test scripts/assemble-site.test.mjs && node scripts/assemble-site.mjs
+
       # 插画是仓库里唯一的二进制资产：少一张 @2x 或者素材里烤了底，
       # 静态检查全绿，只有 Retina 用户和深色主题用户看得到
       - name: 插画矩阵与素材

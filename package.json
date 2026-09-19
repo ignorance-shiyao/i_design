@@ -66,7 +66,8 @@
     "build:examples": "node scripts/build-examples.mjs",
     "check:examples": "node --test scripts/check-examples.test.mjs && node scripts/check-examples.mjs",
     "check:overview": "node --test scripts/check-overview-coverage.test.mjs && node scripts/check-overview-coverage.mjs",
-    "check:e2e": "npm run build:examples && node --test scripts/check-e2e.test.mjs && node scripts/check-e2e.mjs"
+    "check:e2e": "npm run build:examples && node --test scripts/check-e2e.test.mjs && node scripts/check-e2e.mjs",
+    "build:site": "npm run build && npm run build:examples && node --test scripts/assemble-site.test.mjs && node scripts/assemble-site.mjs"
   },
   "dependencies": {
     "three": "^0.186.0",

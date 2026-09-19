@@ -22,7 +22,7 @@ import { build } from 'esbuild'
 const PORTAL_APP = 'examples/portal/src/App.vue'
 const DOCS_PAGE = 'src/pages/ResourcesPage.vue'
 
-async function loadApps(root) {
+export async function loadApps(root) {
   const bundled = await build({
     stdin: { contents: `export * from './examples/shell/src/apps.ts'`, resolveDir: root, loader: 'ts' },
     bundle: true, write: false, format: 'esm', platform: 'node'
