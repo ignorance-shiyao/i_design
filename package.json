@@ -57,7 +57,7 @@
     "check:layout": "node --test scripts/check-layout.test.mjs && node scripts/check-layout.mjs",
     "check:keyboard": "node --test scripts/check-keyboard.test.mjs && node scripts/check-keyboard.mjs",
     "check:keyboard-paths": "node --test scripts/check-keyboard-paths.test.mjs && node scripts/check-keyboard-paths.mjs",
-    "check:perf": "node --test scripts/check-perf.test.mjs && node scripts/check-perf.mjs",
+    "check:perf": "node --test scripts/check-perf.test.mjs scripts/check-perf-browser.test.mjs && node scripts/check-perf.mjs",
     "check:motion": "node scripts/check-motion.mjs",
     "build:props": "node scripts/build-component-props.mjs",
     "check:cjk": "node --test scripts/check-cjk-wrap.test.mjs && node scripts/check-cjk-wrap.mjs",

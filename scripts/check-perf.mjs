@@ -19,7 +19,8 @@
  * 用法：
  *   node scripts/check-perf.mjs
  *   node scripts/check-perf.mjs --record
- *   node scripts/check-perf.mjs --base=http://localhost:4173
+ *   node scripts/check-perf.mjs --base=http://localhost:5173
+ * --base 必须指向 Vite 开发服务器（固定负载夹具不进入生产构建）。
  */
 import { spawn } from 'node:child_process'
 import { chromium } from 'playwright'
@@ -60,6 +61,33 @@ export const BUDGETS = [
 
 /** 全站单页元素上限。它拦的是「某一页把什么都铺出来了」这种整体性退化 */
 export const MAX_ELEMENTS = 4000
+
+// 非虚拟化组件：固定输入规模，分别约束完整性和每项 DOM 开销。
+export const FIXED_WORKLOADS = [
+  { name: '百节点画布', kind: 'flow', selector: '.i-flow__node', total: 100, maxElements: 2000 },
+  { name: '千条会话列表', kind: 'chat', selector: '.i-chatlist__item', total: 1000, maxElements: 30000 }
+]
+
+export function judgeFixed(budget, measurement) {
+  const problems = []
+  if (measurement.rendered !== budget.total) {
+    problems.push(`${budget.name}：应完整渲染 ${budget.total} 项，实际 ${measurement.rendered}`)
+  }
+  if (measurement.elements > budget.maxElements) {
+    problems.push(`${budget.name}：固定负载 ${measurement.elements} 个元素，超过 ${budget.maxElements}`)
+  }
+  return problems
+}
+
+export async function measureFixed(page, base, budget) {
+  await page.goto(`${base}/scripts/perf/index.html?kind=${budget.kind}`)
+  await page.waitForSelector('body[data-ready="true"]')
+  return {
+    name: budget.name,
+    rendered: await page.locator(budget.selector).count(),
+    elements: await page.locator('#workload *').count()
+  }
+}
 
 export function judge(measurements, { budgets = BUDGETS, maxElements = MAX_ELEMENTS } = {}) {
   const problems = []
@@ -103,6 +131,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined })
   const measurements = []
+  const fixedMeasurements = []
+  const memory = []
 
   try {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' })
@@ -116,15 +146,37 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       measurements.push({ name: budget.name, rendered, elements, ms: Date.now() - started })
     }
     await context.close()
+    for (const budget of FIXED_WORKLOADS) {
+      // 每个负载独立 context；同页预热一次，再做三次 reload + 显式 GC。
+      const isolated = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' })
+      const sample = await isolated.newPage()
+      fixedMeasurements.push(await measureFixed(sample, base, budget))
+      if (record) {
+        const cdp = await isolated.newCDPSession(sample)
+        const heaps = []
+        for (let i = 0; i < 3; i++) {
+          await measureFixed(sample, base, budget)
+          await cdp.send('HeapProfiler.collectGarbage')
+          heaps.push((await cdp.send('Runtime.getHeapUsage')).usedSize)
+        }
+        memory.push({ name: budget.name, usedHeapBytes: heaps })
+        await cdp.detach()
+      }
+      await isolated.close()
+    }
   } finally {
     await browser.close()
     server?.kill()
   }
 
   const problems = judge(measurements)
+  fixedMeasurements.forEach((m, i) => problems.push(...judgeFixed(FIXED_WORKLOADS[i], m)))
 
   if (record) {
     console.log('环境：', process.platform, process.arch, 'node', process.version)
+    console.log('Chromium：', browser.version(), '视口：1440×900；减少动效：reduce')
+    console.log('固定负载：', JSON.stringify(fixedMeasurements))
+    console.log('GC 后 JS heap 字节（非进程 RSS，不作断言）：', JSON.stringify(memory))
     console.log('注意：下面的毫秒数只作记录，不参与判定——换台机器就不是这个数。\n')
     for (const m of measurements) {
       const budget = BUDGETS.find((b) => b.name === m.name)
@@ -142,6 +194,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(1)
   }
   console.log(
-    `性能基线检查通过：${measurements.map((m) => `${m.name} ${m.rendered} 节点`).join('、')}，都在预算内`
+    `性能基线检查通过：${[...measurements, ...fixedMeasurements].map((m) => `${m.name} ${m.rendered} 节点`).join('、')}，都在预算内`
   )
 }
