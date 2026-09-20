@@ -38,6 +38,7 @@ export { ChartFunnel, type FunnelStage, type ChartFunnelProps } from './componen
 export { ChartGantt, type ChartGanttProps } from './components/ChartGantt'
 export { ChartGauge, type ChartGaugeProps } from './components/ChartGauge'
 export { ChartHeatmap, type ChartHeatmapProps } from './components/ChartHeatmap'
+export { ChartIcicle, type ChartIcicleProps } from './components/ChartIcicle'
 export { ChartPareto, type ChartParetoProps } from './components/ChartPareto'
 export { ChartPie, type PieItem, type ChartPieProps } from './components/ChartPie'
 export { ChartRadar, type RadarSeries, type ChartRadarProps } from './components/ChartRadar'

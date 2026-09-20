@@ -111,6 +111,7 @@ export 'src/components/i_chart_distribution.dart';
 export 'src/components/i_chart_extras.dart';
 export 'src/components/i_chart_frame.dart';
 export 'src/components/i_chart_gantt.dart';
+export 'src/components/i_chart_icicle.dart';
 export 'src/components/i_chart_pareto.dart';
 export 'src/components/i_chart_pie.dart';
 export 'src/components/i_chart_sankey.dart';

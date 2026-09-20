@@ -625,6 +625,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/data-display",
       "/components/pareto",
       "/components/sunburst",
+      "/components/icicle",
       "/components/chart",
       "/components/flow",
       "/components/mobile"
@@ -1093,6 +1094,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "states": {}
   },
   {
+    "name": "IChartIcicle",
+    "sources": {
+      "vue-next": "src/components/IChartIcicle.vue",
+      "vue": "packages/vue/src/components/IChartIcicle.vue",
+      "react": "packages/react/src/components/ChartIcicle.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-icicle",
+      "flutter": "packages/flutter/lib/src/components/i_chart_icicle.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/icicle"
+    ],
+    "states": {}
+  },
+  {
     "name": "IChartPareto",
     "sources": {
       "vue-next": "src/components/IChartPareto.vue",
@@ -1269,7 +1300,8 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "maturity": "stable",
     "doc": null,
     "demoRoutes": [
-      "/components/sunburst"
+      "/components/sunburst",
+      "/components/icicle"
     ],
     "states": {}
   },

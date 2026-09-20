@@ -1,0 +1,57 @@
+.i-icicle { margin: 0; min-width: 0; color: var(--i-color-text); }
+.i-icicle__title { font-size: var(--i-font-size-md); font-weight: 600; }
+.i-icicle__caption { max-width: 45em; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); margin-block: var(--i-spacing-3); }
+.i-icicle__crumb { display: flex; flex-wrap: wrap; align-items: center; gap: var(--i-spacing-2); margin-block: var(--i-spacing-2); font-size: var(--i-font-size-sm); color: var(--i-color-text-secondary); }
+.i-icicle__up { padding: var(--i-spacing-1) var(--i-spacing-3); border: 1px solid var(--i-color-hairline); border-radius: var(--i-radius-full); background: var(--i-color-bg-elevated); color: var(--i-color-text); font: inherit; font-size: var(--i-font-size-sm); cursor: pointer; }
+.i-icicle__up:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+
+/* 宽度是数据，不是版心：整幅铺满容器，窄屏上跟着缩 */
+.i-icicle__plot { position: relative; width: 100%; }
+.i-icicle__cell { position: absolute; display: flex; align-items: center; overflow: hidden; padding-inline: var(--i-spacing-2); border: 1px solid var(--i-color-bg); cursor: pointer; }
+.i-icicle__cell.is-selected { border-color: var(--i-color-text); }
+/*
+ * 标签压在实心色块上，所以字色必须跟着底色成对取，不能一律白字：
+ * 八个分类色里有四个上的白字连 3:1 都到不了。每个分类色自带 -ink，
+ * 那是按它自己的亮度定的字色。中性底（未细分、超出调色板的支）用正文色。
+ */
+.i-icicle__label { font-size: var(--i-font-size-2xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; color: inherit; }
+
+.i-icicle__cell.is-c0 { background: var(--i-chart-1); color: var(--i-chart-1-ink); }
+.i-icicle__cell.is-c1 { background: var(--i-chart-2); color: var(--i-chart-2-ink); }
+.i-icicle__cell.is-c2 { background: var(--i-chart-3); color: var(--i-chart-3-ink); }
+.i-icicle__cell.is-c3 { background: var(--i-chart-4); color: var(--i-chart-4-ink); }
+.i-icicle__cell.is-c4 { background: var(--i-chart-5); color: var(--i-chart-5-ink); }
+.i-icicle__cell.is-c5 { background: var(--i-chart-6); color: var(--i-chart-6-ink); }
+.i-icicle__cell.is-c6 { background: var(--i-chart-7); color: var(--i-chart-7-ink); }
+.i-icicle__cell.is-c7 { background: var(--i-chart-8); color: var(--i-chart-8-ink); }
+/*
+ * 「未细分」不参与分类取色：它不是一个类别，是这一层没报全的那部分。
+ * 用中性底加上清单里的「未细分」文字标签说明它，而不是拿一个分类色冒充类别。
+ */
+.i-icicle__cell.is-rest { background: var(--i-color-bg-muted); color: var(--i-color-text); }
+/*
+ * 第九支起不再循环取色：绕回第一个色，读者会把两支当成同一类，比没有颜色更糟。
+ * 中性底 + 清单里的文字标签，身份照样读得出来。
+ */
+.i-icicle__cell.is-over { background: var(--i-color-bg-muted); color: var(--i-color-text); }
+
+
+.i-icicle__data { list-style: none; padding: 0; margin: var(--i-spacing-3) 0; }
+.i-icicle__data li + li { margin-top: var(--i-spacing-2); }
+.i-icicle__row { display: flex; flex-direction: column; align-items: flex-start; gap: var(--i-spacing-1); width: 100%; padding: var(--i-spacing-3); border: 1px solid var(--i-color-hairline); border-radius: var(--i-radius-md); background: var(--i-color-bg-elevated); color: var(--i-color-text); text-align: left; font: inherit; cursor: pointer; white-space: normal; overflow-wrap: anywhere; }
+.i-icicle__row[aria-pressed="true"], .i-icicle__row.is-selected { background: var(--i-color-brand-subtle); }
+.i-icicle__row:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+.i-icicle__values { display: block; max-width: 45em; font-size: var(--i-font-size-sm); color: var(--i-color-text-secondary); }
+.i-icicle__issues { max-width: 45em; padding-left: var(--i-spacing-5); color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+/* 小程序 Canvas 从这里读语义色，取不到 CSS 变量时才不会画成一团黑 */
+.i-icicle__palette { height: 0; overflow: hidden; color: var(--i-color-text); background-color: var(--i-color-bg); border-top-color: var(--i-color-bg-muted); }
+/* 八个分类色同样探针化：小程序 Canvas 没法读 CSS 变量，只能量出来 */
+.i-icicle__swatch { height: 0; overflow: hidden; }
+.i-icicle__swatch--0 { background-color: var(--i-chart-1); }
+.i-icicle__swatch--1 { background-color: var(--i-chart-2); }
+.i-icicle__swatch--2 { background-color: var(--i-chart-3); }
+.i-icicle__swatch--3 { background-color: var(--i-chart-4); }
+.i-icicle__swatch--4 { background-color: var(--i-chart-5); }
+.i-icicle__swatch--5 { background-color: var(--i-chart-6); }
+.i-icicle__swatch--6 { background-color: var(--i-chart-7); }
+.i-icicle__swatch--7 { background-color: var(--i-chart-8); }

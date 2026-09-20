@@ -1,0 +1,21 @@
+<view class="i-icicle" wx:if="{{model}}">
+  <view class="i-icicle__title">{{title}}</view>
+  <view class="i-icicle__caption">{{model.caption}}</view>
+  <view wx:if="{{model.state === 'ready'}}">
+    <view wx:if="{{focusId}}" class="i-icicle__crumb">
+      <button class="i-icicle__up" data-id="" bindtap="focus">返回全部</button>
+      <text>当前只看：{{focusLabel}}</text>
+    </view>
+    <view class="i-icicle__palette" aria-hidden="true" />
+    <view wx:for="{{[0,1,2,3,4,5,6,7]}}" wx:key="*this" class="i-icicle__swatch i-icicle__swatch--{{item}}" aria-hidden="true" />
+    <canvas class="i-icicle__plot" type="2d" style="height:{{canvasHeight}}px" aria-label="{{title}}，数据见下方层级列表" />
+    <view class="i-icicle__caption">每一行是一层，上一行是下一行的上级；宽度按占全体的比例分配，同一支各层同色。</view>
+  </view>
+  <view class="i-icicle__data">
+    <button wx:for="{{rows}}" wx:key="id" class="i-icicle__row {{selectedId === item.id ? 'is-selected' : ''}}" style="margin-left:{{item.depth * 16}}px" data-id="{{item.id}}" bindtap="select" aria-label="{{item.description}}{{selectedId === item.id ? '，已选' : ''}}">
+      <text>{{item.label}}{{selectedId === item.id ? ' · 已选' : ''}}</text>
+      <text class="i-icicle__values">{{item.valueText}} · 占全体 {{item.shareText}}{{item.parentText}} · 源行 {{item.sourceIndex + 1}}</text>
+    </button>
+  </view>
+  <view class="i-icicle__issues" wx:if="{{model.excluded.length}}"><view wx:for="{{model.excluded}}" wx:key="id">源行 {{item.sourceIndex + 1}} · {{item.label}}：{{item.reason}}</view></view>
+</view>

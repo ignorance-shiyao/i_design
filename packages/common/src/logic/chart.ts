@@ -16,6 +16,7 @@ export {
   type HierarchyNodeKind,
   type HierarchyModel
 } from './hierarchy'
+export { icicleCells, icicleHeight, type IcicleCell, type IcicleOptions } from './icicle'
 export {
   sunburstSectors,
   CHART_PALETTE_SIZE,

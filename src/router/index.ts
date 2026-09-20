@@ -115,6 +115,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'data-entry', component: () => import('@/pages/components/DataEntryPage.vue') },
       { path: 'pareto', component: () => import('@/pages/components/ParetoPage.vue') },
       { path: 'sunburst', component: () => import('@/pages/components/SunburstPage.vue') },
+      { path: 'icicle', component: () => import('@/pages/components/IciclePage.vue') },
       { path: 'chart', component: () => import('@/pages/components/ChartPage.vue') },
       { path: 'flow', component: () => import('@/pages/components/FlowPage.vue') },
       { path: 'mobile', component: () => import('@/pages/components/MobilePage.vue') }

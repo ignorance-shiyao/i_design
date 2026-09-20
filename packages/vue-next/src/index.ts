@@ -28,6 +28,7 @@ import IChartFunnel from './IChartFunnel.vue'
 import IChartGantt from './IChartGantt.vue'
 import IChartGauge from './IChartGauge.vue'
 import IChartHeatmap from './IChartHeatmap.vue'
+import IChartIcicle from './IChartIcicle.vue'
 import IChartPareto from './IChartPareto.vue'
 import IChartPie from './IChartPie.vue'
 import IChartRadar from './IChartRadar.vue'
@@ -185,6 +186,7 @@ export {
   IChartGantt,
   IChartGauge,
   IChartHeatmap,
+  IChartIcicle,
   IChartPareto,
   IChartPie,
   IChartRadar,
@@ -373,6 +375,7 @@ const components = {
   IChartGantt,
   IChartGauge,
   IChartHeatmap,
+  IChartIcicle,
   IChartPareto,
   IChartPie,
   IChartRadar,

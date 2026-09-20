@@ -238,6 +238,13 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"unit","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
   ],
+  IChartIcicle: [
+    {"name":"model","type":"HierarchyModel","doc":"buildHierarchy 生成的同源模型，可直接序列化给其他端","optional":false,"defaultText":null,"control":null},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'Icicle 图'","control":{"kind":"string"}},
+    {"name":"focusId","type":"string","doc":"下钻焦点；为空表示看整棵树。受控，由调用方决定怎么变","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"selectedId","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"rowHeight","type":"number","doc":"","optional":true,"defaultText":"28","control":{"kind":"number"}},
+  ],
   IChartPareto: [
     {"name":"model","type":"ParetoModel","doc":"buildPareto 生成的同源模型，可直接序列化给其他端","optional":false,"defaultText":null,"control":null},
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'帕累托图'","control":{"kind":"string"}},
