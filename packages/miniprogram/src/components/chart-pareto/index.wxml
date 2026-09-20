@@ -1,0 +1,18 @@
+<view class="i-pareto" wx:if="{{model}}">
+  <view class="i-pareto__title">{{title}}</view>
+  <view class="i-pareto__caption">{{model.caption}}</view>
+  <view wx:if="{{model.state === 'ready'}}">
+    <view class="i-pareto__legend"><text>柱形：0 — {{model.maxText}}</text><text>折线：累计占比 0 — 100%</text></view>
+    <view class="i-pareto__palette" aria-hidden="true" />
+    <canvas class="i-pareto__plot" type="2d" style="height:{{height}}px" aria-label="{{title}}，数据见下方类别列表" />
+    <view class="i-pareto__ranks"><text wx:for="{{model.rows}}" wx:key="id" style="flex:1;text-align:center">{{item.rank}}</text></view>
+    <view class="i-pareto__caption">虚线：{{model.thresholdText}} 累计阈值。序号对应下方类别；累计只表示数量构成，不说明因果。</view>
+  </view>
+  <view class="i-pareto__data">
+    <button wx:for="{{model.rows}}" wx:key="id" class="i-pareto__row {{selectedId === item.id ? 'is-selected' : ''}}" data-id="{{item.id}}" bindtap="select" aria-label="{{item.description}}{{selectedId === item.id ? '，已选' : ''}}">
+      <text>{{item.rank}}. {{item.label}}{{selectedId === item.id ? ' · 已选' : ''}}</text>
+      <text class="i-pareto__values">{{item.valueText}} · 占比 {{item.shareText}} · 累计 {{item.cumulativeText}} · 源行 {{item.sourceIndex + 1}}</text>
+    </button>
+  </view>
+  <view class="i-pareto__issues" wx:if="{{model.excluded.length}}"><view wx:for="{{model.excluded}}" wx:key="id">源行 {{item.sourceIndex + 1}} · {{item.label}}：{{item.reason}}</view></view>
+</view>

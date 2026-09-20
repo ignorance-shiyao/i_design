@@ -76,6 +76,9 @@ jobs:
       - name: 公共网页导航与内容闭环
         run: npm run check:public
 
+      - name: 帕累托口径与浏览器回归
+        run: npm run check:pareto
+
       # 开发机上没人会去打开系统的「减少动效」，漏掉那一半完全看不出来
       - name: 动效开关检查
         run: npm run check:motion

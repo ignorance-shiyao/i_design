@@ -5,6 +5,8 @@
  * Flutter 用同一套规则移植。「同一组数据在两个端上刻度不一样」因此不可能发生。
  */
 
+export { buildPareto, type ParetoInput, type ParetoRow, type ParetoModel } from './pareto'
+
 export interface ChartSeries {
   name: string
   data: number[]

@@ -1,310 +1,312 @@
-import type { App } from 'vue'
-import IIcon from './IIcon.vue'
-import IFlow from './IFlow.vue'
-import IChart from './IChart.vue'
-import IChartDistribution from './IChartDistribution.vue'
-import IChartFunnel from './IChartFunnel.vue'
-import IChartGauge from './IChartGauge.vue'
-import IChartRadar from './IChartRadar.vue'
-import IChartHeatmap from './IChartHeatmap.vue'
-import IChartScatter from './IChartScatter.vue'
-import IChartPie from './IChartPie.vue'
-import ISparkline from './ISparkline.vue'
-import IInputNumber from './IInputNumber.vue'
-import IInputOtp from './IInputOtp.vue'
-import ISlider from './ISlider.vue'
-import IQrcode from './IQrcode.vue'
-import IQueryFilter from './IQueryFilter.vue'
-import IRangeInput from './IRangeInput.vue'
-import IRate from './IRate.vue'
-import ILink from './ILink.vue'
-import ILayout from './ILayout.vue'
-import IList from './IList.vue'
-import ISpace from './ISpace.vue'
-import ITypography from './ITypography.vue'
-import IRow from './IRow.vue'
-import ICol from './ICol.vue'
-import ISchemaForm from './ISchemaForm.vue'
-import ISegmented from './ISegmented.vue'
-import IProTable from './IProTable.vue'
-import IProgress from './IProgress.vue'
-import IStatistic from './IStatistic.vue'
-import IConfigProvider from './IConfigProvider.vue'
-import ICountdown from './ICountdown.vue'
-import ITimeline from './ITimeline.vue'
-import IChatMessage from './IChatMessage.vue'
-import IChatTyping from './IChatTyping.vue'
-import IRunStatus from './IRunStatus.vue'
-import IFormPage from './IFormPage.vue'
-import IDrawerForm from './IDrawerForm.vue'
-import IModalForm from './IModalForm.vue'
-import IStepForm from './IStepForm.vue'
-import IBulkBar from './IBulkBar.vue'
-import IDetailPage from './IDetailPage.vue'
-import IEntityPicker from './IEntityPicker.vue'
-import IImportWizard from './IImportWizard.vue'
-import IExportJob from './IExportJob.vue'
-import ITreeTable from './ITreeTable.vue'
-import ITaskCenter from './ITaskCenter.vue'
-import IThread from './IThread.vue'
-import IBoard from './IBoard.vue'
-import IChatThinking from './IChatThinking.vue'
-import IChatToolCall from './IChatToolCall.vue'
-import IChatSources from './IChatSources.vue'
-import IChatSuggestions from './IChatSuggestions.vue'
-import IPromptInput from './IPromptInput.vue'
-import IButton from './IButton.vue'
-import IButtonGroup from './IButtonGroup.vue'
-import IInput from './IInput.vue'
-import IInputAdornment from './IInputAdornment.vue'
-import ITextarea from './ITextarea.vue'
-import ISelect from './ISelect.vue'
-import IScrollbar from './IScrollbar.vue'
-import ISelectInput from './ISelectInput.vue'
-import IRadio from './IRadio.vue'
-import IRadioGroup from './IRadioGroup.vue'
-import ICheckbox from './ICheckbox.vue'
-import ICheckTag from './ICheckTag.vue'
-import ICheckboxGroup from './ICheckboxGroup.vue'
-import ISwitch from './ISwitch.vue'
-import IDatePicker from './IDatePicker.vue'
-import IUpload from './IUpload.vue'
-import IAvatar from './IAvatar.vue'
-import IAvatarGroup from './IAvatarGroup.vue'
-import IBadge from './IBadge.vue'
-import ICollapse from './ICollapse.vue'
-import IDescriptions from './IDescriptions.vue'
-import ISkeleton from './ISkeleton.vue'
-import IResult from './IResult.vue'
-import IPopconfirm from './IPopconfirm.vue'
-import IPopover from './IPopover.vue'
-import IDropdown from './IDropdown.vue'
-import ITree from './ITree.vue'
-import ICascader from './ICascader.vue'
-import ITreeSelect from './ITreeSelect.vue'
-import IMenu from './IMenu.vue'
+import IAffix from './IAffix.vue'
+import IAgentScreen from './IAgentScreen.vue'
+import IAgentTasks from './IAgentTasks.vue'
+import IAlert from './IAlert.vue'
 import IAnchor from './IAnchor.vue'
-import INotificationLayer from './INotificationLayer.vue'
+import IAppShell from './IAppShell.vue'
 import IApprovalCard from './IApprovalCard.vue'
 import IArtifactWorkspace from './IArtifactWorkspace.vue'
-import IAgentTasks from './IAgentTasks.vue'
-import IRecommendCard from './IRecommendCard.vue'
-import IContextCards from './IContextCards.vue'
-import IDiffTable from './IDiffTable.vue'
+import IAutoComplete from './IAutoComplete.vue'
+import IAvatar from './IAvatar.vue'
+import IAvatarGroup from './IAvatarGroup.vue'
+import IBackTop from './IBackTop.vue'
+import IBadge from './IBadge.vue'
+import IBoard from './IBoard.vue'
+import IBreadcrumb from './IBreadcrumb.vue'
+import IBulkBar from './IBulkBar.vue'
+import IButton from './IButton.vue'
+import IButtonGroup from './IButtonGroup.vue'
+import ICalendar from './ICalendar.vue'
+import ICard from './ICard.vue'
+import ICarousel from './ICarousel.vue'
+import ICascader from './ICascader.vue'
+import IChart from './IChart.vue'
 import IChartBox from './IChartBox.vue'
-import IChartWaterfall from './IChartWaterfall.vue'
+import IChartDistribution from './IChartDistribution.vue'
+import IChartFrame from './IChartFrame.vue'
+import IChartFunnel from './IChartFunnel.vue'
 import IChartGantt from './IChartGantt.vue'
+import IChartGauge from './IChartGauge.vue'
+import IChartHeatmap from './IChartHeatmap.vue'
+import IChartPareto from './IChartPareto.vue'
+import IChartPie from './IChartPie.vue'
+import IChartRadar from './IChartRadar.vue'
+import IChartSankey from './IChartSankey.vue'
+import IChartScatter from './IChartScatter.vue'
+import IChartTreemap from './IChartTreemap.vue'
+import IChartWaterfall from './IChartWaterfall.vue'
 import IChartWordCloud from './IChartWordCloud.vue'
 import IChartZoom from './IChartZoom.vue'
-import IChartSankey from './IChartSankey.vue'
-import IChartTreemap from './IChartTreemap.vue'
-import ICarousel from './ICarousel.vue'
-import IInfiniteScroll from './IInfiniteScroll.vue'
-import INumberKeypad from './INumberKeypad.vue'
-import ITour from './ITour.vue'
-import ITagInput from './ITagInput.vue'
-import IAutoComplete from './IAutoComplete.vue'
-import ITimePicker from './ITimePicker.vue'
-import ITimeSelect from './ITimeSelect.vue'
-import ITransfer from './ITransfer.vue'
-import IAffix from './IAffix.vue'
-import IAppShell from './IAppShell.vue'
-import IBackTop from './IBackTop.vue'
-import ICodeBlock from './ICodeBlock.vue'
-import ICommandSearch from './ICommandSearch.vue'
-import IAgentScreen from './IAgentScreen.vue'
 import IChatList from './IChatList.vue'
-import IFineTuneCard from './IFineTuneCard.vue'
-import IInsightCards from './IInsightCards.vue'
-import ISelectionActions from './ISelectionActions.vue'
-import IToolChips from './IToolChips.vue'
-import IFloatButton from './IFloatButton.vue'
-import IWatermark from './IWatermark.vue'
-import IImage from './IImage.vue'
-import IImageViewer from './IImageViewer.vue'
-import ISplitter from './ISplitter.vue'
-import IVirtualList from './IVirtualList.vue'
+import IChatMessage from './IChatMessage.vue'
+import IChatSources from './IChatSources.vue'
+import IChatSuggestions from './IChatSuggestions.vue'
+import IChatThinking from './IChatThinking.vue'
+import IChatToolCall from './IChatToolCall.vue'
+import IChatTyping from './IChatTyping.vue'
+import ICheckTag from './ICheckTag.vue'
+import ICheckbox from './ICheckbox.vue'
+import ICheckboxGroup from './ICheckboxGroup.vue'
+import ICodeBlock from './ICodeBlock.vue'
+import ICol from './ICol.vue'
+import ICollapse from './ICollapse.vue'
 import IColorPicker from './IColorPicker.vue'
-import ICalendar from './ICalendar.vue'
-import IMentions from './IMentions.vue'
-import ISticky from './ISticky.vue'
-import IStickyTool from './IStickyTool.vue'
+import ICommandSearch from './ICommandSearch.vue'
+import IComment from './IComment.vue'
+import IConfigProvider from './IConfigProvider.vue'
+import IContextCards from './IContextCards.vue'
+import ICountdown from './ICountdown.vue'
+import IDatePicker from './IDatePicker.vue'
+import IDescriptions from './IDescriptions.vue'
+import IDetailPage from './IDetailPage.vue'
+import IDiffTable from './IDiffTable.vue'
+import IDivider from './IDivider.vue'
+import IDrawer from './IDrawer.vue'
+import IDrawerForm from './IDrawerForm.vue'
+import IDropdown from './IDropdown.vue'
+import IEmpty from './IEmpty.vue'
+import IEntityPicker from './IEntityPicker.vue'
+import IExportJob from './IExportJob.vue'
+import IFineTuneCard from './IFineTuneCard.vue'
+import IFloatButton from './IFloatButton.vue'
+import IFlow from './IFlow.vue'
 import IForm from './IForm.vue'
 import IFormItem from './IFormItem.vue'
-import ITag from './ITag.vue'
-import IComment from './IComment.vue'
-import IDivider from './IDivider.vue'
-import ITabs from './ITabs.vue'
-import IBreadcrumb from './IBreadcrumb.vue'
-import ISteps from './ISteps.vue'
-import IChartFrame from './IChartFrame.vue'
+import IFormPage from './IFormPage.vue'
+import IIcon from './IIcon.vue'
+import IImage from './IImage.vue'
+import IImageViewer from './IImageViewer.vue'
+import IImportWizard from './IImportWizard.vue'
+import IInfiniteScroll from './IInfiniteScroll.vue'
+import IInput from './IInput.vue'
+import IInputAdornment from './IInputAdornment.vue'
+import IInputNumber from './IInputNumber.vue'
+import IInputOtp from './IInputOtp.vue'
+import IInsightCards from './IInsightCards.vue'
+import ILayout from './ILayout.vue'
+import ILink from './ILink.vue'
+import IList from './IList.vue'
+import ILoading from './ILoading.vue'
 import IMarkdown from './IMarkdown.vue'
+import IMentions from './IMentions.vue'
+import IMenu from './IMenu.vue'
 import IMessageParts from './IMessageParts.vue'
+import IModal from './IModal.vue'
+import IModalForm from './IModalForm.vue'
+import INotificationLayer from './INotificationLayer.vue'
+import INumberKeypad from './INumberKeypad.vue'
+import IPageHeader from './IPageHeader.vue'
 import IPageState from './IPageState.vue'
 import IPagination from './IPagination.vue'
-import IPageHeader from './IPageHeader.vue'
-import ICard from './ICard.vue'
+import IPopconfirm from './IPopconfirm.vue'
+import IPopover from './IPopover.vue'
+import IProTable from './IProTable.vue'
+import IProgress from './IProgress.vue'
+import IPromptInput from './IPromptInput.vue'
+import IQrcode from './IQrcode.vue'
+import IQueryFilter from './IQueryFilter.vue'
+import IRadio from './IRadio.vue'
+import IRadioGroup from './IRadioGroup.vue'
+import IRangeInput from './IRangeInput.vue'
+import IRate from './IRate.vue'
+import IRecommendCard from './IRecommendCard.vue'
+import IResult from './IResult.vue'
+import IRow from './IRow.vue'
+import IRunStatus from './IRunStatus.vue'
+import ISchemaForm from './ISchemaForm.vue'
+import IScrollbar from './IScrollbar.vue'
+import ISegmented from './ISegmented.vue'
+import ISelect from './ISelect.vue'
+import ISelectInput from './ISelectInput.vue'
+import ISelectionActions from './ISelectionActions.vue'
+import ISkeleton from './ISkeleton.vue'
+import ISlider from './ISlider.vue'
+import ISpace from './ISpace.vue'
+import ISparkline from './ISparkline.vue'
+import ISplitter from './ISplitter.vue'
+import IStatistic from './IStatistic.vue'
+import IStepForm from './IStepForm.vue'
+import ISteps from './ISteps.vue'
+import ISticky from './ISticky.vue'
+import IStickyTool from './IStickyTool.vue'
+import ISwitch from './ISwitch.vue'
 import ITable from './ITable.vue'
+import ITabs from './ITabs.vue'
+import ITag from './ITag.vue'
+import ITagInput from './ITagInput.vue'
+import ITaskCenter from './ITaskCenter.vue'
+import ITextarea from './ITextarea.vue'
+import IThread from './IThread.vue'
+import ITimePicker from './ITimePicker.vue'
+import ITimeSelect from './ITimeSelect.vue'
+import ITimeline from './ITimeline.vue'
+import IToolChips from './IToolChips.vue'
 import ITooltip from './ITooltip.vue'
-import IEmpty from './IEmpty.vue'
-import IAlert from './IAlert.vue'
-import IModal from './IModal.vue'
-import IDrawer from './IDrawer.vue'
-import ILoading from './ILoading.vue'
+import ITour from './ITour.vue'
+import ITransfer from './ITransfer.vue'
+import ITree from './ITree.vue'
+import ITreeSelect from './ITreeSelect.vue'
+import ITreeTable from './ITreeTable.vue'
+import ITypography from './ITypography.vue'
+import IUpload from './IUpload.vue'
+import IVirtualList from './IVirtualList.vue'
+import IWatermark from './IWatermark.vue'
+import type { App } from 'vue'
 
 export {
-  IIcon,
-  IButton,
-  IButtonGroup,
-  IInput,
-  ITextarea,
-  ISelect,
-  IScrollbar,
-  ISelectInput,
-  IRadio,
-  IRadioGroup,
-  ICheckbox,
-  ICheckTag,
-  ICheckboxGroup,
-  ISwitch,
-  IDatePicker,
-  IUpload,
-  IAvatar,
-  IAvatarGroup,
-  IBadge,
-  ICollapse,
-  IDescriptions,
-  ISkeleton,
-  IResult,
-  IPopconfirm,
-  IPopover,
-  IDropdown,
-  ITree,
-  ICascader,
-  ITreeSelect,
-  IMenu,
+  IAffix,
+  IAgentScreen,
+  IAgentTasks,
+  IAlert,
   IAnchor,
-  INotificationLayer,
+  IAppShell,
   IApprovalCard,
   IArtifactWorkspace,
-  IAgentTasks,
-  IRecommendCard,
-  IContextCards,
-  IDiffTable,
+  IAutoComplete,
+  IAvatar,
+  IAvatarGroup,
+  IBackTop,
+  IBadge,
+  IBoard,
+  IBreadcrumb,
+  IBulkBar,
+  IButton,
+  IButtonGroup,
+  ICalendar,
+  ICard,
+  ICarousel,
+  ICascader,
+  IChart,
   IChartBox,
-  IChartWaterfall,
+  IChartDistribution,
+  IChartFrame,
+  IChartFunnel,
   IChartGantt,
+  IChartGauge,
+  IChartHeatmap,
+  IChartPareto,
+  IChartPie,
+  IChartRadar,
+  IChartSankey,
+  IChartScatter,
+  IChartTreemap,
+  IChartWaterfall,
   IChartWordCloud,
   IChartZoom,
-  IChartSankey,
-  IChartTreemap,
-  ICarousel,
-  IInfiniteScroll,
-  INumberKeypad,
-  ITour,
-  ITagInput,
-  IAutoComplete,
-  ITimePicker,
-  ITimeSelect,
-  ITransfer,
-  IAffix,
-  IAppShell,
-  IBackTop,
-  ICodeBlock,
-  ICommandSearch,
-  IAgentScreen,
   IChatList,
-  IFineTuneCard,
-  IInsightCards,
-  ISelectionActions,
-  IToolChips,
-  IFloatButton,
-  IWatermark,
-  IImage,
-  IImageViewer,
-  ISplitter,
-  IVirtualList,
-  IColorPicker,
-  ICalendar,
-  IMentions,
-  ISticky,
-  IStickyTool,
-  IForm,
-  IFormItem,
-  ITag,
-  IComment,
-  IDivider,
-  ITabs,
-  IBreadcrumb,
-  ISteps,
-  IChartFrame,
-  IMarkdown,
-  IMessageParts,
-  IPageState,
-  IPagination,
-  IPageHeader,
-  ICard,
-  ITable,
-  ITooltip,
-  IEmpty,
-  IAlert,
-  IModal,
-  IDrawer,
-  ILoading,
   IChatMessage,
-  IChatTyping,
-  IRunStatus,
-  IFormPage,
-  IDrawerForm,
-  IModalForm,
-  IStepForm,
-  IBulkBar,
-  IDetailPage,
-  IEntityPicker,
-  IImportWizard,
-  IExportJob,
-  ITreeTable,
-  ITaskCenter,
-  IThread,
-  IBoard,
-  IChatThinking,
-  IChatToolCall,
   IChatSources,
   IChatSuggestions,
-  IPromptInput,
-  ISpace,
-  ITypography,
-  IRow,
+  IChatThinking,
+  IChatToolCall,
+  IChatTyping,
+  ICheckTag,
+  ICheckbox,
+  ICheckboxGroup,
+  ICodeBlock,
   ICol,
-  ISchemaForm,
-  ISegmented,
-  IProTable,
-  IProgress,
-  IStatistic,
+  ICollapse,
+  IColorPicker,
+  ICommandSearch,
+  IComment,
   IConfigProvider,
+  IContextCards,
   ICountdown,
-  ITimeline,
+  IDatePicker,
+  IDescriptions,
+  IDetailPage,
+  IDiffTable,
+  IDivider,
+  IDrawer,
+  IDrawerForm,
+  IDropdown,
+  IEmpty,
+  IEntityPicker,
+  IExportJob,
+  IFineTuneCard,
+  IFloatButton,
+  IFlow,
+  IForm,
+  IFormItem,
+  IFormPage,
+  IIcon,
+  IImage,
+  IImageViewer,
+  IImportWizard,
+  IInfiniteScroll,
+  IInput,
   IInputAdornment,
   IInputNumber,
   IInputOtp,
-  ISlider,
-  IQrcode,
-  IQueryFilter,
-  IRangeInput,
-  IRate,
+  IInsightCards,
   ILayout,
   ILink,
   IList,
-  IChart,
-  IChartPie,
+  ILoading,
+  IMarkdown,
+  IMentions,
+  IMenu,
+  IMessageParts,
+  IModal,
+  IModalForm,
+  INotificationLayer,
+  INumberKeypad,
+  IPageHeader,
+  IPageState,
+  IPagination,
+  IPopconfirm,
+  IPopover,
+  IProTable,
+  IProgress,
+  IPromptInput,
+  IQrcode,
+  IQueryFilter,
+  IRadio,
+  IRadioGroup,
+  IRangeInput,
+  IRate,
+  IRecommendCard,
+  IResult,
+  IRow,
+  IRunStatus,
+  ISchemaForm,
+  IScrollbar,
+  ISegmented,
+  ISelect,
+  ISelectInput,
+  ISelectionActions,
+  ISkeleton,
+  ISlider,
+  ISpace,
   ISparkline,
-  IFlow,
-  IChartDistribution,
-  IChartFunnel,
-  IChartGauge,
-  IChartRadar,
-  IChartHeatmap,
-  IChartScatter
+  ISplitter,
+  IStatistic,
+  IStepForm,
+  ISteps,
+  ISticky,
+  IStickyTool,
+  ISwitch,
+  ITable,
+  ITabs,
+  ITag,
+  ITagInput,
+  ITaskCenter,
+  ITextarea,
+  IThread,
+  ITimePicker,
+  ITimeSelect,
+  ITimeline,
+  IToolChips,
+  ITooltip,
+  ITour,
+  ITransfer,
+  ITree,
+  ITreeSelect,
+  ITreeTable,
+  ITypography,
+  IUpload,
+  IVirtualList,
+  IWatermark
 }
 
 /*
@@ -339,107 +341,159 @@ export type { DescriptionItem } from './IDescriptions.vue'
 export { icons, iconNames } from './icons'
 
 const components = {
-  IIcon,
-  IButton,
-  IButtonGroup,
-  IInput,
-  ITextarea,
-  ISelect,
-  IScrollbar,
-  ISelectInput,
-  IRadio,
-  IRadioGroup,
-  ICheckbox,
-  ICheckTag,
-  ICheckboxGroup,
-  ISwitch,
-  IDatePicker,
-  IUpload,
+  IAffix,
+  IAgentScreen,
+  IAgentTasks,
+  IAlert,
+  IAnchor,
+  IAppShell,
+  IApprovalCard,
+  IArtifactWorkspace,
+  IAutoComplete,
   IAvatar,
   IAvatarGroup,
+  IBackTop,
   IBadge,
-  ICollapse,
-  IDescriptions,
-  ISkeleton,
-  IResult,
-  IPopconfirm,
-  IForm,
-  IFormItem,
-  ITag,
-  IComment,
-  IDivider,
-  ITabs,
-  IBreadcrumb,
-  ISteps,
-  IChartFrame,
-  IMarkdown,
-  IMessageParts,
-  IPageState,
-  IPagination,
-  IPageHeader,
-  ICard,
-  ITable,
-  ITooltip,
-  IEmpty,
-  IAlert,
-  IModal,
-  IDrawer,
-  ILoading,
-  IChatMessage,
-  IChatTyping,
-  IRunStatus,
-  IFormPage,
-  IDrawerForm,
-  IModalForm,
-  IStepForm,
-  IBulkBar,
-  IDetailPage,
-  IEntityPicker,
-  IImportWizard,
-  IExportJob,
-  ITreeTable,
-  ITaskCenter,
-  IThread,
   IBoard,
-  IChatThinking,
-  IChatToolCall,
+  IBreadcrumb,
+  IBulkBar,
+  IButton,
+  IButtonGroup,
+  ICalendar,
+  ICard,
+  ICarousel,
+  ICascader,
+  IChart,
+  IChartBox,
+  IChartDistribution,
+  IChartFrame,
+  IChartFunnel,
+  IChartGantt,
+  IChartGauge,
+  IChartHeatmap,
+  IChartPareto,
+  IChartPie,
+  IChartRadar,
+  IChartSankey,
+  IChartScatter,
+  IChartTreemap,
+  IChartWaterfall,
+  IChartWordCloud,
+  IChartZoom,
+  IChatList,
+  IChatMessage,
   IChatSources,
   IChatSuggestions,
-  IPromptInput,
-  ISpace,
-  ITypography,
-  IRow,
+  IChatThinking,
+  IChatToolCall,
+  IChatTyping,
+  ICheckTag,
+  ICheckbox,
+  ICheckboxGroup,
+  ICodeBlock,
   ICol,
-  ISchemaForm,
-  ISegmented,
-  IProTable,
-  IProgress,
-  IStatistic,
+  ICollapse,
+  IColorPicker,
+  ICommandSearch,
+  IComment,
   IConfigProvider,
+  IContextCards,
   ICountdown,
-  ITimeline,
+  IDatePicker,
+  IDescriptions,
+  IDetailPage,
+  IDiffTable,
+  IDivider,
+  IDrawer,
+  IDrawerForm,
+  IDropdown,
+  IEmpty,
+  IEntityPicker,
+  IExportJob,
+  IFineTuneCard,
+  IFloatButton,
+  IFlow,
+  IForm,
+  IFormItem,
+  IFormPage,
+  IIcon,
+  IImage,
+  IImageViewer,
+  IImportWizard,
+  IInfiniteScroll,
+  IInput,
   IInputAdornment,
   IInputNumber,
   IInputOtp,
-  ISlider,
-  IQrcode,
-  IQueryFilter,
-  IRangeInput,
-  IRate,
-  IAppShell,
+  IInsightCards,
   ILayout,
   ILink,
   IList,
-  IChart,
-  IChartPie,
+  ILoading,
+  IMarkdown,
+  IMentions,
+  IMenu,
+  IMessageParts,
+  IModal,
+  IModalForm,
+  INotificationLayer,
+  INumberKeypad,
+  IPageHeader,
+  IPageState,
+  IPagination,
+  IPopconfirm,
+  IPopover,
+  IProTable,
+  IProgress,
+  IPromptInput,
+  IQrcode,
+  IQueryFilter,
+  IRadio,
+  IRadioGroup,
+  IRangeInput,
+  IRate,
+  IRecommendCard,
+  IResult,
+  IRow,
+  IRunStatus,
+  ISchemaForm,
+  IScrollbar,
+  ISegmented,
+  ISelect,
+  ISelectInput,
+  ISelectionActions,
+  ISkeleton,
+  ISlider,
+  ISpace,
   ISparkline,
-  IFlow,
-  IChartDistribution,
-  IChartFunnel,
-  IChartGauge,
-  IChartRadar,
-  IChartHeatmap,
-  IChartScatter
+  ISplitter,
+  IStatistic,
+  IStepForm,
+  ISteps,
+  ISticky,
+  IStickyTool,
+  ISwitch,
+  ITable,
+  ITabs,
+  ITag,
+  ITagInput,
+  ITaskCenter,
+  ITextarea,
+  IThread,
+  ITimePicker,
+  ITimeSelect,
+  ITimeline,
+  IToolChips,
+  ITooltip,
+  ITour,
+  ITransfer,
+  ITree,
+  ITreeSelect,
+  ITreeTable,
+  ITypography,
+  IUpload,
+  IVirtualList,
+  IWatermark
 }
 
 /** 全量注册，便于文档站与 demo 直接使用；业务侧推荐按需引入 */

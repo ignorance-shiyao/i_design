@@ -238,6 +238,12 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"unit","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
   ],
+  IChartPareto: [
+    {"name":"model","type":"ParetoModel","doc":"buildPareto 生成的同源模型，可直接序列化给其他端","optional":false,"defaultText":null,"control":null},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'帕累托图'","control":{"kind":"string"}},
+    {"name":"selectedId","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"height","type":"number","doc":"","optional":true,"defaultText":"220","control":{"kind":"number"}},
+  ],
   IChartPie: [
     {"name":"items","type":"PieItem[]","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"donut","type":"boolean","doc":"环形：读者比较的是弧长而不是面积，比实心饼更容易读准","optional":true,"defaultText":"true","control":{"kind":"boolean"}},

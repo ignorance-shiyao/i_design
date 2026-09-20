@@ -1,0 +1,21 @@
+.i-pareto { margin: 0; min-width: 0; color: var(--i-color-text); }
+.i-pareto__title { font-size: var(--i-font-size-md); font-weight: 600; }
+.i-pareto__caption { max-width: 45em; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); margin-block: var(--i-spacing-3); }
+.i-pareto__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--i-spacing-2); margin-bottom: var(--i-spacing-2); font-size: var(--i-font-size-sm); color: var(--i-color-text-secondary); }
+.i-pareto__plot { display: block; width: 100%; overflow: visible; }
+.i-pareto__grid { stroke: var(--i-color-hairline); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.i-pareto__bar { fill: var(--i-chart-1); cursor: pointer; }
+.i-pareto__bar.is-selected { fill: var(--i-color-brand-solid); }
+.i-pareto__threshold { stroke: var(--i-color-text-secondary); stroke-dasharray: 4 4; stroke-width: 1; vector-effect: non-scaling-stroke; pointer-events: none; }
+.i-pareto__line { stroke: var(--i-color-text); fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none; }
+.i-pareto__ranks { display: flex; font-size: var(--i-font-size-sm); }
+.i-pareto__ranks span { flex: 1; min-width: 0; text-align: center; }
+.i-pareto__data { list-style: none; padding: 0; margin: var(--i-spacing-3) 0; }
+.i-pareto__data li + li { margin-top: var(--i-spacing-2); }
+.i-pareto__row { display: flex; flex-direction: column; align-items: flex-start; gap: var(--i-spacing-1); width: 100%; padding: var(--i-spacing-3); border: 1px solid var(--i-color-hairline); border-radius: var(--i-radius-md); background: var(--i-color-bg-elevated); color: var(--i-color-text); text-align: left; font: inherit; cursor: pointer; white-space: normal; overflow-wrap: anywhere; }
+.i-pareto__row[aria-pressed="true"], .i-pareto__row.is-selected { background: var(--i-color-brand-subtle); }
+.i-pareto__row:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+.i-pareto__values { display: block; max-width: 45em; font-size: var(--i-font-size-sm); color: var(--i-color-text-secondary); }
+.i-pareto__issues { max-width: 45em; padding-left: var(--i-spacing-5); color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+.i-pareto__palette { height: 0; overflow: hidden; color: var(--i-color-text); background-color: var(--i-chart-1); border-top-color: var(--i-color-hairline); }
+.i-pareto__point { stroke: var(--i-color-text); stroke-width: 5; stroke-linecap: round; vector-effect: non-scaling-stroke; pointer-events: none; }

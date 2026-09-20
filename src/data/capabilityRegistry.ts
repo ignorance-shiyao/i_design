@@ -623,6 +623,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/chat",
       "/components/layout",
       "/components/data-display",
+      "/components/pareto",
       "/components/chart",
       "/components/flow",
       "/components/mobile"
@@ -1087,6 +1088,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": null,
     "demoRoutes": [
       "/components/chart"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IChartPareto",
+    "sources": {
+      "vue-next": "src/components/IChartPareto.vue",
+      "vue": "packages/vue/src/components/IChartPareto.vue",
+      "react": "packages/react/src/components/ChartPareto.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-pareto",
+      "flutter": "packages/flutter/lib/src/components/i_chart_pareto.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/pareto"
     ],
     "states": {}
   },
