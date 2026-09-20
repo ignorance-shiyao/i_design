@@ -6,6 +6,16 @@
  */
 
 export { buildPareto, type ParetoInput, type ParetoRow, type ParetoModel } from './pareto'
+export {
+  buildHierarchy,
+  hierarchyPath,
+  hierarchyView,
+  restIdOf,
+  type HierarchyInput,
+  type HierarchyNode,
+  type HierarchyNodeKind,
+  type HierarchyModel
+} from './hierarchy'
 
 export interface ChartSeries {
   name: string
