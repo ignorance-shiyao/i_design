@@ -17,7 +17,8 @@ export const docNav: NavGroup[] = [
       { to: '/design/tokens', label: '设计令牌' },
       { to: '/design/cross-platform', label: '跨端支持' },
       { to: '/design/catalog', label: '组件全景' },
-      { to: '/design/lab', label: 'Patterns Lab' }
+      { to: '/design/lab', label: 'Patterns Lab' },
+      { to: '/design/access', label: '账号与权限' }
     ]
   },
   {

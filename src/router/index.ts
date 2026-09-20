@@ -13,7 +13,8 @@ const routes: RouteRecordRaw[] = [
       { path: 'tokens', component: () => import('@/pages/DesignTokensPage.vue') },
       { path: 'cross-platform', component: () => import('@/pages/CrossPlatformPage.vue') },
       { path: 'catalog', component: () => import('@/pages/CatalogPage.vue') },
-      { path: 'lab', component: () => import('@/pages/LabPage.vue') }
+      { path: 'lab', component: () => import('@/pages/LabPage.vue') },
+      { path: 'access', component: () => import('@/pages/AccessPatternsPage.vue') }
     ]
   },
   {

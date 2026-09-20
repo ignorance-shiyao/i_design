@@ -70,6 +70,9 @@ jobs:
       - name: 性能基线检查
         run: npm run check:perf
 
+      - name: 账号与权限页面闭环
+        run: npm run check:access
+
       # 开发机上没人会去打开系统的「减少动效」，漏掉那一半完全看不出来
       - name: 动效开关检查
         run: npm run check:motion
