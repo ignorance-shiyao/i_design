@@ -54,6 +54,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/IChartRadar.vue",
   "src/components/IChartSankey.vue",
   "src/components/IChartScatter.vue",
+  "src/components/IChartSunburst.vue",
   "src/components/IChartTreemap.vue",
   "src/components/IChartWaterfall.vue",
   "src/components/IChartWordCloud.vue",

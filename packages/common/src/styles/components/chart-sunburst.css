@@ -1,0 +1,50 @@
+.i-sunburst { margin: 0; min-width: 0; color: var(--i-color-text); }
+.i-sunburst__title { font-size: var(--i-font-size-md); font-weight: 600; }
+.i-sunburst__caption { max-width: 45em; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); margin-block: var(--i-spacing-3); }
+.i-sunburst__crumb { display: flex; flex-wrap: wrap; align-items: center; gap: var(--i-spacing-2); margin-block: var(--i-spacing-2); font-size: var(--i-font-size-sm); color: var(--i-color-text-secondary); }
+.i-sunburst__up { padding: var(--i-spacing-1) var(--i-spacing-3); border: 1px solid var(--i-color-hairline); border-radius: var(--i-radius-full); background: var(--i-color-bg-elevated); color: var(--i-color-text); font: inherit; font-size: var(--i-font-size-sm); cursor: pointer; }
+.i-sunburst__up:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+
+/* 圆是画布，不是版心：窄屏上它跟着容器缩，但不撑宽容器 */
+.i-sunburst__plot { display: block; max-width: 100%; height: auto; }
+.i-sunburst__sector { cursor: pointer; stroke: var(--i-color-bg); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.i-sunburst__sector.is-c0 { fill: var(--i-chart-1); }
+.i-sunburst__sector.is-c1 { fill: var(--i-chart-2); }
+.i-sunburst__sector.is-c2 { fill: var(--i-chart-3); }
+.i-sunburst__sector.is-c3 { fill: var(--i-chart-4); }
+.i-sunburst__sector.is-c4 { fill: var(--i-chart-5); }
+.i-sunburst__sector.is-c5 { fill: var(--i-chart-6); }
+.i-sunburst__sector.is-c6 { fill: var(--i-chart-7); }
+.i-sunburst__sector.is-c7 { fill: var(--i-chart-8); }
+/*
+ * 「未细分」不参与分类取色：它不是一个类别，是这一层没报全的那部分。
+ * 用中性底加上清单里的「未细分」文字标签说明它，而不是拿一个分类色冒充类别。
+ */
+.i-sunburst__sector.is-rest { fill: var(--i-color-bg-muted); }
+/*
+ * 第九支起不再循环取色：绕回第一个色，读者会把两支当成同一类，比没有颜色更糟。
+ * 中性底 + 清单里的文字标签，身份照样读得出来。
+ */
+.i-sunburst__sector.is-over { fill: var(--i-color-bg-muted); }
+.i-sunburst__sector.is-selected { stroke: var(--i-color-text); stroke-width: 2; }
+.i-sunburst__center { fill: var(--i-color-text); font-size: var(--i-font-size-sm); text-anchor: middle; dominant-baseline: middle; }
+
+.i-sunburst__data { list-style: none; padding: 0; margin: var(--i-spacing-3) 0; }
+.i-sunburst__data li + li { margin-top: var(--i-spacing-2); }
+.i-sunburst__row { display: flex; flex-direction: column; align-items: flex-start; gap: var(--i-spacing-1); width: 100%; padding: var(--i-spacing-3); border: 1px solid var(--i-color-hairline); border-radius: var(--i-radius-md); background: var(--i-color-bg-elevated); color: var(--i-color-text); text-align: left; font: inherit; cursor: pointer; white-space: normal; overflow-wrap: anywhere; }
+.i-sunburst__row[aria-pressed="true"], .i-sunburst__row.is-selected { background: var(--i-color-brand-subtle); }
+.i-sunburst__row:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+.i-sunburst__values { display: block; max-width: 45em; font-size: var(--i-font-size-sm); color: var(--i-color-text-secondary); }
+.i-sunburst__issues { max-width: 45em; padding-left: var(--i-spacing-5); color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+/* 小程序 Canvas 从这里读语义色，取不到 CSS 变量时才不会画成一团黑 */
+.i-sunburst__palette { height: 0; overflow: hidden; color: var(--i-color-text); background-color: var(--i-color-bg); border-top-color: var(--i-color-bg-muted); }
+/* 八个分类色同样探针化：小程序 Canvas 没法读 CSS 变量，只能量出来 */
+.i-sunburst__swatch { height: 0; overflow: hidden; }
+.i-sunburst__swatch--0 { background-color: var(--i-chart-1); }
+.i-sunburst__swatch--1 { background-color: var(--i-chart-2); }
+.i-sunburst__swatch--2 { background-color: var(--i-chart-3); }
+.i-sunburst__swatch--3 { background-color: var(--i-chart-4); }
+.i-sunburst__swatch--4 { background-color: var(--i-chart-5); }
+.i-sunburst__swatch--5 { background-color: var(--i-chart-6); }
+.i-sunburst__swatch--6 { background-color: var(--i-chart-7); }
+.i-sunburst__swatch--7 { background-color: var(--i-chart-8); }

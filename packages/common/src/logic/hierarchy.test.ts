@@ -207,3 +207,48 @@ describe('层级汇总契约', () => {
     expect(hierarchyView(model, '不存在')).toHaveLength(model.nodes.length)
   })
 })
+
+describe('取色序号', () => {
+  it('按支取号：同一支各层同号，另一支换号', () => {
+    const model = buildHierarchy(flat)
+    const byId = new Map(model.nodes.map((n) => [n.id, n]))
+    expect(byId.get('a1')!.colorIndex).toBe(byId.get('a')!.colorIndex)
+    expect(byId.get('b')!.colorIndex).not.toBe(byId.get('a')!.colorIndex)
+  })
+
+  it('「未细分」跟着它父级的号，不另占一个颜色', () => {
+    const model = buildHierarchy(gapped)
+    const rest = model.nodes.find((n) => n.kind === 'rest')!
+    expect(rest.colorIndex).toBe(model.nodes.find((n) => n.id === 'cn')!.colorIndex)
+  })
+
+  it('号是顺着根的显示次序发的，不会因为深处的节点多而跳号', () => {
+    const model = buildHierarchy([
+      { id: 'big', parentId: null, label: '大支', value: null },
+      { id: 'b1', parentId: 'big', label: '一', value: 5 },
+      { id: 'b2', parentId: 'big', label: '二', value: 5 },
+      { id: 'b3', parentId: 'big', label: '三', value: 5 },
+      { id: 'small', parentId: null, label: '小支', value: 1 }
+    ])
+    expect(model.nodes.find((n) => n.id === 'big')!.colorIndex).toBe(0)
+    expect(model.nodes.find((n) => n.id === 'small')!.colorIndex).toBe(1)
+  })
+})
+
+describe('叶子的空值', () => {
+  it('叶子没有值就是没有值，不当成零记进分母', () => {
+    const model = buildHierarchy([
+      { id: 'a', parentId: null, label: 'A', value: 10 },
+      { id: 'todo', parentId: null, label: '待补录', value: null }
+    ])
+    expect(model.total).toBe(10)
+    expect(model.nodes.some((n) => n.id === 'todo')).toBe(false)
+    expect(model.excluded.find((e) => e.id === 'todo')!.reason).toContain('没有值')
+  })
+
+  it('有下级的节点不给值是合法的：那是由下级汇总而来，不算缺失', () => {
+    const model = buildHierarchy(flat)
+    expect(model.excluded).toHaveLength(0)
+    expect(model.nodes.find((n) => n.id === 'a')!.value).toBe(50)
+  })
+})

@@ -33,6 +33,7 @@ import IChartPie from './IChartPie.vue'
 import IChartRadar from './IChartRadar.vue'
 import IChartSankey from './IChartSankey.vue'
 import IChartScatter from './IChartScatter.vue'
+import IChartSunburst from './IChartSunburst.vue'
 import IChartTreemap from './IChartTreemap.vue'
 import IChartWaterfall from './IChartWaterfall.vue'
 import IChartWordCloud from './IChartWordCloud.vue'
@@ -189,6 +190,7 @@ export {
   IChartRadar,
   IChartSankey,
   IChartScatter,
+  IChartSunburst,
   IChartTreemap,
   IChartWaterfall,
   IChartWordCloud,
@@ -376,6 +378,7 @@ const components = {
   IChartRadar,
   IChartSankey,
   IChartScatter,
+  IChartSunburst,
   IChartTreemap,
   IChartWaterfall,
   IChartWordCloud,

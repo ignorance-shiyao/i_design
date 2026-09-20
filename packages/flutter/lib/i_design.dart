@@ -116,6 +116,7 @@ export 'src/components/i_chart_pie.dart';
 export 'src/components/i_chart_sankey.dart';
 export 'src/components/i_chart_scatter.dart';
 export 'src/components/i_chart_stats.dart';
+export 'src/components/i_chart_sunburst.dart';
 export 'src/components/i_chart_treemap.dart';
 export 'src/components/i_chart_word_cloud.dart';
 export 'src/components/i_chart_zoom.dart';

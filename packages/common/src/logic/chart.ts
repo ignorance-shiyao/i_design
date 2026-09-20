@@ -16,6 +16,12 @@ export {
   type HierarchyNodeKind,
   type HierarchyModel
 } from './hierarchy'
+export {
+  sunburstSectors,
+  CHART_PALETTE_SIZE,
+  type SunburstSector,
+  type SunburstOptions
+} from './sunburst'
 
 export interface ChartSeries {
   name: string

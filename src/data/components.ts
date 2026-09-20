@@ -185,6 +185,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'ChartGauge', cn: '仪表盘', to: '/components/chart', desc: '单值与阈值' },
       { name: 'ChartBox', cn: '箱线图', to: '/components/chart', desc: '多组之间比分布：五数概括加离群点' },
       { name: 'ChartPareto', cn: '帕累托图', to: '/components/pareto', desc: '降序构成与累计占比，保留分母和排除明细' },
+      { name: 'ChartSunburst', cn: '旭日图', to: '/components/sunburst', desc: '层级构成与下钻，父子差额单列为未细分' },
       { name: 'ChartDistribution', cn: '分布图', to: '/components/chart', desc: '单组看形状：直方、密度、小提琴、误差棒' },
       { name: 'ChartWaterfall', cn: '瀑布图', to: '/components/chart', desc: '增减归因' },
       { name: 'ChartSankey', cn: '桑基图', to: '/components/chart', desc: '流向与分流' },

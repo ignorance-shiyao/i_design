@@ -276,6 +276,13 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"yUnit","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
     {"name":"trend","type":"boolean","doc":"叠加最小二乘拟合线与 R²：把「看着像有关系」变成可核对的数字","optional":true,"defaultText":"false","control":{"kind":"boolean"}},
   ],
+  IChartSunburst: [
+    {"name":"model","type":"HierarchyModel","doc":"buildHierarchy 生成的同源模型，可直接序列化给其他端","optional":false,"defaultText":null,"control":null},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'旭日图'","control":{"kind":"string"}},
+    {"name":"focusId","type":"string","doc":"下钻焦点；为空表示看整棵树。受控，由调用方决定怎么变","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"selectedId","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"size","type":"number","doc":"","optional":true,"defaultText":"220","control":{"kind":"number"}},
+  ],
   IChartTreemap: [
     {"name":"items","type":"TreemapItem[]","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},

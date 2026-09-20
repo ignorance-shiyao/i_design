@@ -47,6 +47,7 @@ function openAt(index: number) {
           :key="shot"
           class="thumbs__item"
           type="button"
+          :aria-label="`打开示例图片 ${i + 1}`"
           @click="openAt(i)"
         >
           <img :src="shot" :alt="`示例图片 ${i + 1}`" />

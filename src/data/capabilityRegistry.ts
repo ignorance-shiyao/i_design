@@ -624,6 +624,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/layout",
       "/components/data-display",
       "/components/pareto",
+      "/components/sunburst",
       "/components/chart",
       "/components/flow",
       "/components/mobile"
@@ -1239,6 +1240,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": null,
     "demoRoutes": [
       "/components/chart"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IChartSunburst",
+    "sources": {
+      "vue-next": "src/components/IChartSunburst.vue",
+      "vue": "packages/vue/src/components/IChartSunburst.vue",
+      "react": "packages/react/src/components/ChartSunburst.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-sunburst",
+      "flutter": "packages/flutter/lib/src/components/i_chart_sunburst.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/sunburst"
     ],
     "states": {}
   },

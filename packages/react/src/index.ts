@@ -43,6 +43,7 @@ export { ChartPie, type PieItem, type ChartPieProps } from './components/ChartPi
 export { ChartRadar, type RadarSeries, type ChartRadarProps } from './components/ChartRadar'
 export { ChartSankey, type ChartSankeyProps } from './components/ChartSankey'
 export { ChartScatter, type ChartScatterProps } from './components/ChartScatter'
+export { ChartSunburst, type ChartSunburstProps } from './components/ChartSunburst'
 export { ChartTreemap, type ChartTreemapProps } from './components/ChartTreemap'
 export { ChartWaterfall, type ChartWaterfallProps } from './components/ChartWaterfall'
 export { ChartWordCloud, type ChartWordCloudProps } from './components/ChartWordCloud'

@@ -1,4 +1,4 @@
-import { buildPareto } from '@i-design/common'
+import { buildHierarchy, buildPareto } from '@i-design/common'
 /**
  * Patterns Lab 的最小可运行数据。
  *
@@ -412,6 +412,7 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
     ]
   },
   IChartPareto: { model: buildPareto([{ id: 'timeout', label: '请求超时', value: 60 }, { id: 'other', label: '其他', value: 40 }]) },
+  IChartSunburst: { model: buildHierarchy([{ id: 'direct', parentId: null, label: '直销', value: 60 }, { id: 'key', parentId: 'direct', label: '大客户', value: 40 }, { id: 'channel', parentId: null, label: '渠道', value: 40 }]) },
   IChartDistribution: {
     values: [
       12, 15, 15, 16, 18, 18, 19, 20, 21, 22, 22, 23, 24, 25, 26, 28, 29, 31, 33, 35,

@@ -61,6 +61,15 @@ export interface HierarchyNode {
   start: number
   end: number
   childIds: string[]
+  /**
+   * 取色序号：同一支（同一个顶层祖先）下的所有层共用一个号。
+   *
+   * 逐层换色会让读者以为层与层之间有对应关系；按支取色，一眼看出「这一大块是谁的」。
+   * 算在模型里而不是渲染时算：下钻之后视图里只剩一支，在视图上重新编号
+   * 会让同一支在下钻前后变成两种颜色——读者会以为自己点错了。
+   * 颜色只是辅助，每个节点都另有文字标签与清单条目。
+   */
+  colorIndex: number
   valueText: string
   shareText: string
   description: string
@@ -187,7 +196,21 @@ export function buildHierarchy(
   for (const item of input) {
     const sourceIndex = (dropIndex += 1)
     const value = item.value
-    if (value === null) continue
+    /*
+     * 叶子没有值就是没有值，不是零。
+     *
+     * 没有下级可以汇总，却把它当成 0 记进分母，图上就多出一块面积为零、
+     * 占比写着 0.0% 的节点——读者会当成「这一项确实是零」，而事实是它没报上来。
+     * 有下级的节点不给值是另一回事：那是「由下级汇总而来」，合法且常见。
+     */
+    if (value === null) {
+      const hasChildren = (byId.get(item.id)?.children.length ?? 0) > 0
+      if (!hasChildren) {
+        base.excluded.push({ id: item.id, label: item.label, sourceIndex, reason: '叶子没有值，未计入分母' })
+        dropped.add(item.id)
+      }
+      continue
+    }
     const reason = !Number.isFinite(value)
       ? '值非有限数，未计入分母'
       : value < 0
@@ -256,6 +279,7 @@ export function buildHierarchy(
   /* 第二轮：自顶向下铺位置。同层降序、相同值按输入次序，「未细分」恒排在最后 */
   const nodes: HierarchyNode[] = []
   let maxDepth = 0
+  const colorIndex = new Map<string, number>()
   const emit = (node: Pending, depth: number, start: number, span: number, parentValue: number | null) => {
     const { value, rest } = rollup.get(node.item.id)!
     const children = node.children
@@ -279,6 +303,7 @@ export function buildHierarchy(
       start,
       end: start + span,
       childIds,
+      colorIndex: colorIndex.get(node.item.id) ?? 0,
       valueText: `${numberText(value)}${unit}`,
       shareText: percentText(share),
       description: describe(node.item.label, depth, value, share, shareOfParent, unit)
@@ -287,6 +312,7 @@ export function buildHierarchy(
     if (!childIds.length || value <= 0) return
     let cursor = start
     for (const child of children) {
+      colorIndex.set(child.item.id, colorIndex.get(node.item.id) ?? 0)
       const childValue = rollup.get(child.item.id)!.value
       const childSpan = (childValue / value) * span
       emit(child, depth + 1, cursor, childSpan, value)
@@ -309,6 +335,7 @@ export function buildHierarchy(
         start: cursor,
         end: cursor + restSpan,
         childIds: [],
+        colorIndex: colorIndex.get(node.item.id) ?? 0,
         valueText: `${numberText(rest)}${unit}`,
         shareText: percentText(restShare),
         description: `${node.item.label} 里未细分的部分：${numberText(rest)}${unit}，占上级 ${percentText(rest / value)}——下级只报到了 ${numberText(value - rest)}${unit}`
@@ -320,7 +347,10 @@ export function buildHierarchy(
     .filter(live)
     .sort((a, b) => rollup.get(b.item.id)!.value - rollup.get(a.item.id)!.value || a.sourceIndex - b.sourceIndex)
   let cursor = 0
+  let rootSeq = 0
   for (const root of liveRoots) {
+    colorIndex.set(root.item.id, rootSeq)
+    rootSeq += 1
     const value = rollup.get(root.item.id)!.value
     const span = total > 0 ? value / total : 0
     emit(root, 0, cursor, span, null)

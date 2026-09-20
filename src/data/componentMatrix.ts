@@ -359,6 +359,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IChartSunburst",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IChartTreemap",
     "ends": {
       "vue-next": true,
