@@ -14,7 +14,8 @@ const routes: RouteRecordRaw[] = [
       { path: 'cross-platform', component: () => import('@/pages/CrossPlatformPage.vue') },
       { path: 'catalog', component: () => import('@/pages/CatalogPage.vue') },
       { path: 'lab', component: () => import('@/pages/LabPage.vue') },
-      { path: 'access', component: () => import('@/pages/AccessPatternsPage.vue') }
+      { path: 'access', component: () => import('@/pages/AccessPatternsPage.vue') },
+      { path: 'public', component: () => import('@/pages/PublicPatternsPage.vue') }
     ]
   },
   {

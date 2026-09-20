@@ -18,7 +18,8 @@ export const docNav: NavGroup[] = [
       { to: '/design/cross-platform', label: '跨端支持' },
       { to: '/design/catalog', label: '组件全景' },
       { to: '/design/lab', label: 'Patterns Lab' },
-      { to: '/design/access', label: '账号与权限' }
+      { to: '/design/access', label: '账号与权限' },
+      { to: '/design/public', label: '公共网页' }
     ]
   },
   {
