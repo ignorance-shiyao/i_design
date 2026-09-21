@@ -160,3 +160,4 @@
   min-width: 4.5em;
   text-align: left;
 }
+.i-adjacency__value { font-variant-numeric: tabular-nums; }

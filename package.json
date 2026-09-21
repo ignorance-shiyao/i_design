@@ -72,7 +72,8 @@
     "build:site": "npm run build && npm run build:examples && node --test scripts/assemble-site.test.mjs && node scripts/assemble-site.mjs",
     "build:vue-index": "node scripts/build-vue-index.mjs",
     "check:pareto": "node scripts/check-pareto.mjs && node --test scripts/check-pareto.test.mjs",
-    "check:realtime": "node scripts/check-realtime.mjs && node --test scripts/check-realtime.test.mjs"
+    "check:realtime": "node scripts/check-realtime.mjs && node --test scripts/check-realtime.test.mjs",
+    "check:adjacency": "node scripts/check-adjacency.mjs && node --test scripts/check-adjacency.test.mjs"
   },
   "dependencies": {
     "three": "^0.186.0",

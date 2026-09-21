@@ -78,7 +78,7 @@ const zeroCount = computed(() =>
                   :aria-label="cell.description"
                   @click="emit('select', rowIndex, colIndex)"
                 >
-                  <span>{{ cell.valueText }}</span>
+                  <span class="i-adjacency__value">{{ cell.valueText }}</span>
                   <span v-if="stateLabel(cell.state, cell.value)" class="i-adjacency__state">
                     {{ stateLabel(cell.state, cell.value) }}
                   </span>
