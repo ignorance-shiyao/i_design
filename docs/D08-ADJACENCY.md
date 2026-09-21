@@ -29,6 +29,15 @@
 
 亮暗两态 axe serious/critical = 0。有向示例中甲→乙有值、乙→甲保持空档。
 
+合并前在 main 上实测为 EXIT:0 的门禁：`typecheck` / `test` / `build` /
+`check:parity` / `check:adjacency` / `check:a11y`（162 页亮暗）/ `check:responsive` /
+`check:layout` / `check:motion`。
+
+这不是全仓门禁。同一时点 `check:bundle` 与 `check:nodes` 都是红的：前者因为
+`logic/noderegistry.ts` 的顶层调用让内置节点表摇不掉，后者因为 E03 在同一页
+加了第二个「重置示例」按钮撞坏了 E02 的定位。两条都已在 main 上修掉——
+记在这里是因为「跑过的那几条绿」和「全仓绿」差着的正是这两条。
+
 单测：`adjacency.test.ts` 10 条。浏览器故障注入 8 次，每次确认对应用例报红：
 
 - 无边空档画成 0、未观测空档画成 0、口径说明被改、有向图被镜像、
