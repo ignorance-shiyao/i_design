@@ -5,24 +5,32 @@ import IButton from '@/components/IButton.vue'
 import ISpace from '@/components/ISpace.vue'
 import ISegmented from '@/components/ISegmented.vue'
 import ISchemaForm from '@/components/ISchemaForm.vue'
+import ISelect from '@/components/ISelect.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
 import {
   autoLayout,
+  canConnect,
+  connectEdge,
   createNode,
   defaultNodeRegistry,
   deleteNodes,
+  disconnectEdge,
   insertNode,
   resolvePropertySchema,
   seedApprovalGraph,
+  setEdgeType,
   toFlowEdges,
   toFlowNodes,
   updateNodeData,
   updateNodeLabel,
+  validateWiring,
+  type EdgeIssue,
   type FlowEdge,
   type FlowGroup,
   type FlowNode,
   type FormSchema,
-  type GraphDocument
+  type GraphDocument,
+  type GraphKind
 } from '@i-design/common'
 
 const edges: FlowEdge[] = [
@@ -156,6 +164,132 @@ function resetGraphDemo() {
   graphSelection.value = []
 }
 
+/*
+ * E03：连线自己也要被校验。
+ * 面板上的每一条都带着 target，点一下就能定位到那条线或那个端口——
+ * 一句「连线非法」等于没说，用户只能一条条试。
+ */
+const graphKind = ref<GraphKind>('cyclic')
+const kindOptions = [
+  { label: '状态机（允许回环）', value: 'cyclic' },
+  { label: 'DAG（禁止成环）', value: 'dag' }
+]
+const EDGE_TYPES = ['flow', 'reject'] as const
+const wiringDoc = ref<GraphDocument>(seedApprovalGraph(registry))
+const fromPick = ref<string | null>(null)
+const toPick = ref<string | null>(null)
+const edgeTypePick = ref<string>('flow')
+const wiringNotice = ref('选一个出口和一个入口，连线会先过一遍校验。')
+const focusedTarget = ref('')
+
+/** 端口下拉的选项：值写成 node.port，读起来就知道连的是哪一头 */
+function portOptions(side: 'in' | 'out') {
+  return wiringDoc.value.nodes.flatMap((node) =>
+    (node.ports ?? [])
+      .filter((port) => port.side === side)
+      .map((port) => ({
+        value: `${node.id}.${port.id}`,
+        label: `${node.label} · ${port.label ?? port.id}`
+      }))
+  )
+}
+
+const outPorts = computed(() => portOptions('out'))
+const inPorts = computed(() => portOptions('in'))
+
+const wiringOptions = computed(() => ({
+  kind: graphKind.value,
+  edgeTypes: EDGE_TYPES as readonly string[]
+}))
+
+const wiringFlowNodes = computed(() => toFlowNodes(wiringDoc.value, registry))
+const wiringFlowEdges = computed(() => toFlowEdges(wiringDoc.value))
+const wiringIssues = computed<EdgeIssue[]>(() => validateWiring(wiringDoc.value, wiringOptions.value))
+
+function splitPick(pick: string | null) {
+  if (!pick) return null
+  const at = pick.lastIndexOf('.')
+  return { node: pick.slice(0, at), port: pick.slice(at + 1) }
+}
+
+const candidate = computed(() => {
+  const from = splitPick(fromPick.value)
+  const to = splitPick(toPick.value)
+  if (!from || !to) return null
+  return {
+    from: from.node,
+    to: to.node,
+    fromPort: from.port,
+    toPort: to.port,
+    type: edgeTypePick.value
+  }
+})
+
+/* 拖到一半就变红，比松手之后弹一句错误好：后者用户已经做完了动作 */
+const preview = computed(() =>
+  candidate.value
+    ? canConnect(wiringDoc.value, candidate.value, wiringOptions.value)
+    : { ok: false, reason: '' }
+)
+
+function connect() {
+  if (!candidate.value) return
+  const result = connectEdge(wiringDoc.value, candidate.value, wiringOptions.value)
+  if (result.status === 'ok') {
+    wiringDoc.value = result.document
+    wiringNotice.value = `已连：${result.edge.from}.${result.edge.fromPort} → ${result.edge.to}.${result.edge.toPort}`
+    focusedTarget.value = `edge:${result.edge.id}`
+    return
+  }
+  wiringNotice.value = result.issues[0].message
+  focusedTarget.value = result.issues[0].target
+}
+
+function dropEdge(id: string) {
+  wiringDoc.value = disconnectEdge(wiringDoc.value, id)
+  wiringNotice.value = `已断开 ${id}`
+  focusedTarget.value = ''
+}
+
+function switchEdgeType(id: string, type: string) {
+  const result = setEdgeType(wiringDoc.value, id, type, wiringOptions.value)
+  if (result.status === 'ok') {
+    wiringDoc.value = result.document
+    wiringNotice.value = `${id} 的类型改成了 ${type}`
+    return
+  }
+  wiringNotice.value = result.issues[0].message
+  focusedTarget.value = result.issues[0].target
+}
+
+/** 面板点一条问题：把它记成当前焦点，画布与列表同时高亮 */
+function focusIssue(issue: EdgeIssue) {
+  focusedTarget.value = issue.target
+  wiringNotice.value = issue.message
+}
+
+function resetWiring() {
+  wiringDoc.value = seedApprovalGraph(registry)
+  fromPick.value = null
+  toPick.value = null
+  edgeTypePick.value = 'flow'
+  focusedTarget.value = ''
+  wiringNotice.value = '选一个出口和一个入口，连线会先过一遍校验。'
+}
+
+/** 故意连出一条坏线：悬空 + 成环，用来看校验面板真的报得出来 */
+function injectBadEdges() {
+  wiringDoc.value = {
+    ...wiringDoc.value,
+    edges: [
+      ...wiringDoc.value.edges,
+      { id: 'loose-1', from: 'n-approve', to: 'n-ghost', type: 'flow' },
+      { id: 'back-1', from: 'n-end', to: 'n-start', type: 'flow' }
+    ]
+  }
+  wiringNotice.value = '已塞进一条悬空边与一条回边，校验面板应当逐条点名。'
+}
+
 function injectUnknown() {
   graphDoc.value = {
     ...graphDoc.value,
@@ -256,6 +390,109 @@ function injectUnknown() {
             />
             <p v-else class="hint">{{ propertyHint }}</p>
           </aside>
+        </div>
+      </div>
+    </DemoBlock>
+
+    <DemoBlock
+      title="端口连线与校验面板"
+      description="连线先过校验再落到文档上：方向按端口的 in / out 判，端口必须真的存在，同一对端口之间的第二条线会被拒。环按图类型处理——状态机的驳回回边是正常语义，DAG 里一个环就是死循环。面板上的每一条都点得过去，而不是只说一句「连线非法」。"
+    >
+      <div class="wiring-demo">
+        <ISpace>
+          <ISegmented v-model="graphKind" :options="kindOptions" />
+          <IButton size="sm" @click="resetWiring">重置示例</IButton>
+          <IButton size="sm" variant="secondary" @click="injectBadEdges">塞一条坏线</IButton>
+        </ISpace>
+        <div class="wiring-demo__form">
+          <ISelect
+            v-model="fromPick"
+            class="wiring-demo__pick"
+            size="sm"
+            :options="outPorts"
+            placeholder="从哪个出口"
+            aria-label="连线起点端口"
+          />
+          <ISelect
+            v-model="toPick"
+            class="wiring-demo__pick"
+            size="sm"
+            :options="inPorts"
+            placeholder="到哪个入口"
+            aria-label="连线终点端口"
+          />
+          <ISelect
+            v-model="edgeTypePick"
+            class="wiring-demo__pick"
+            size="sm"
+            :options="[
+              { value: 'flow', label: '流转 flow' },
+              { value: 'reject', label: '驳回 reject' },
+              { value: 'data', label: '数据 data（白名单外）' }
+            ]"
+            aria-label="连线类型"
+          />
+          <IButton size="sm" variant="primary" :disabled="!candidate" @click="connect">连线</IButton>
+          <span v-if="candidate && !preview.ok" class="wiring-demo__preview" role="status">
+            连不上：{{ preview.reason }}
+          </span>
+        </div>
+        <p class="wiring-demo__notice" role="status">{{ wiringNotice }}</p>
+        <div class="wiring-demo__body">
+          <div class="wiring-demo__canvas">
+            <IFlow :nodes="wiringFlowNodes" :edges="wiringFlowEdges" edge-type="polyline" readonly />
+          </div>
+          <div class="wiring-demo__side">
+            <section class="wiring-demo__panel" aria-label="连线列表">
+              <p class="wiring-demo__caption">连线</p>
+              <ul class="wiring-demo__list">
+                <li
+                  v-for="edge in wiringDoc.edges"
+                  :key="edge.id"
+                  class="wiring-demo__row"
+                  :class="{ 'is-focused': focusedTarget === `edge:${edge.id}` }"
+                >
+                  <span class="wiring-demo__edge">
+                    {{ edge.id }}：{{ edge.from }}.{{ edge.fromPort ?? '—' }} →
+                    {{ edge.to }}.{{ edge.toPort ?? '—' }}（{{ edge.type ?? '未标类型' }}）
+                  </span>
+                  <span class="wiring-demo__row-actions">
+                    <IButton
+                      size="sm"
+                      variant="text"
+                      @click="switchEdgeType(edge.id, edge.type === 'reject' ? 'flow' : 'reject')"
+                    >
+                      换类型
+                    </IButton>
+                    <IButton size="sm" variant="text" @click="dropEdge(edge.id)">断开</IButton>
+                  </span>
+                </li>
+              </ul>
+            </section>
+            <section class="wiring-demo__panel" aria-label="校验面板">
+              <p class="wiring-demo__caption">
+                校验
+                <span v-if="wiringIssues.length" class="wiring-demo__count">
+                  {{ wiringIssues.length }} 处待修
+                </span>
+              </p>
+              <ul v-if="wiringIssues.length" class="wiring-demo__list">
+                <li v-for="issue in wiringIssues" :key="issue.target + issue.code">
+                  <button
+                    type="button"
+                    class="wiring-demo__issue"
+                    :class="{ 'is-focused': focusedTarget === issue.target }"
+                    @click="focusIssue(issue)"
+                  >
+                    <span class="wiring-demo__issue-code">{{ issue.code }}</span>
+                    <span class="wiring-demo__issue-text">{{ issue.message }}</span>
+                    <span class="wiring-demo__issue-target">{{ issue.target }}</span>
+                  </button>
+                </li>
+              </ul>
+              <p v-else class="hint">这张图现在没有连线问题。</p>
+            </section>
+          </div>
         </div>
       </div>
     </DemoBlock>
@@ -377,6 +614,120 @@ function injectUnknown() {
   color: var(--i-color-text-secondary);
 }
 .registry-demo__canvas { min-width: 0; }
+.wiring-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  width: 100%;
+  min-width: 0;
+}
+.wiring-demo__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--i-spacing-2);
+}
+.wiring-demo__pick { width: min(220px, 100%); }
+.wiring-demo__preview,
+.wiring-demo__notice {
+  font-size: var(--i-font-size-sm);
+  color: var(--i-color-text-secondary);
+  max-width: 45em;
+}
+.wiring-demo__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(min(320px, 100%), 24rem);
+  gap: var(--i-spacing-3);
+  align-items: start;
+}
+.wiring-demo__canvas { min-width: 0; }
+.wiring-demo__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  min-width: 0;
+}
+.wiring-demo__panel {
+  min-width: 0;
+  padding: var(--i-spacing-3);
+  /* 四边等宽发丝线：状态与类型靠图标和淡底色块说，不靠加粗某一条边 */
+  border: 1px solid var(--i-color-hairline);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+}
+.wiring-demo__caption {
+  display: flex;
+  align-items: center;
+  gap: var(--i-spacing-2);
+  margin: 0 0 var(--i-spacing-2);
+  font-size: var(--i-font-size-sm);
+  font-weight: 600;
+  color: var(--i-color-text-secondary);
+}
+.wiring-demo__count {
+  padding: 0 var(--i-spacing-2);
+  border-radius: var(--i-radius-full);
+  background: var(--i-color-danger-subtle);
+  color: var(--i-color-danger-text);
+  font-size: var(--i-font-size-xs);
+  font-weight: 400;
+}
+.wiring-demo__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wiring-demo__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--i-spacing-1);
+  font-size: var(--i-font-size-sm);
+}
+.wiring-demo__row.is-focused { color: var(--i-color-brand-text); }
+.wiring-demo__edge {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.wiring-demo__row-actions { display: flex; gap: var(--i-spacing-1); }
+.wiring-demo__issue {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--i-radius-sm);
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.wiring-demo__issue:hover,
+.wiring-demo__issue.is-focused {
+  border-color: var(--i-color-hairline);
+  background: var(--i-color-bg-elevated);
+}
+.wiring-demo__issue-code {
+  color: var(--i-color-danger-text);
+  font-size: var(--i-font-size-xs);
+}
+.wiring-demo__issue-text {
+  font-size: var(--i-font-size-sm);
+  max-width: 45em;
+  overflow-wrap: anywhere;
+}
+.wiring-demo__issue-target {
+  color: var(--i-color-text-tertiary);
+  font-size: var(--i-font-size-xs);
+}
+@media (max-width: 900px) {
+  .wiring-demo__body { grid-template-columns: 1fr; }
+}
 @media (max-width: 900px) {
   .registry-demo__body { grid-template-columns: 1fr; }
 }
