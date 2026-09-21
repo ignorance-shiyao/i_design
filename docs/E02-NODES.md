@@ -16,8 +16,17 @@
 - 7 条 vitest：创建/插入、删除同步边与分组、未知类型只读、扩展注册表、Flow 投影。
 - 分支：`cursor/e02-node-registry-c2d1`。
 
-## 还没做（下一刀）
+## 文档页演示（第二刀）
 
-- 工具箱 + 属性检查器接到 Flow 文档页
-- 五端组件（若拆成独立组件）
+`FlowPage` 增加「节点工具箱与属性检查器」：
+
+- 工具箱 = `registry.list()`，插入走 `createNode` + `insertNode`
+- 画布只吃 `toFlowNodes` / `toFlowEdges` 投影
+- 属性检查器 = `resolvePropertySchema` → `ISchemaForm`；未知类型只读占位
+- 删除走 `deleteNodes`（边与分组成员同步）
+
+## 还没做
+
+- 五端独立工具箱 / 检查器组件（若需要拆出页面级组合）
 - `check:nodes` 浏览器闭环与故障注入
+- 端口连线编辑（E03）

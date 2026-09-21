@@ -1,11 +1,29 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import IFlow from '@/components/IFlow.vue'
 import IButton from '@/components/IButton.vue'
 import ISpace from '@/components/ISpace.vue'
 import ISegmented from '@/components/ISegmented.vue'
+import ISchemaForm from '@/components/ISchemaForm.vue'
 import DemoBlock from '@/site/DemoBlock.vue'
-import { autoLayout, type FlowEdge, type FlowGroup, type FlowNode } from '@i-design/common'
+import {
+  autoLayout,
+  createNode,
+  defaultNodeRegistry,
+  deleteNodes,
+  insertNode,
+  resolvePropertySchema,
+  seedApprovalGraph,
+  toFlowEdges,
+  toFlowNodes,
+  updateNodeData,
+  updateNodeLabel,
+  type FlowEdge,
+  type FlowGroup,
+  type FlowNode,
+  type FormSchema,
+  type GraphDocument
+} from '@i-design/common'
 
 const edges: FlowEdge[] = [
   { from: 'start', to: 'fill' },
@@ -61,6 +79,99 @@ const edgeTypes = [
   { label: '直连', value: 'straight' },
   { label: '曲线', value: 'bezier' }
 ]
+
+/*
+ * E02：文档真相是 GraphDocument；画布只吃投影。
+ * 工具箱 / 删除 / 属性表全部走注册表，不改 IFlow。
+ */
+const registry = defaultNodeRegistry
+const graphDoc = ref<GraphDocument>(seedApprovalGraph(registry))
+const graphSelection = ref<string[]>([])
+const propertyValues = ref<Record<string, unknown>>({})
+const propertySchema = ref<FormSchema | null>(null)
+const propertyHint = ref('点画布上的节点看属性；左侧工具箱可插入新类型。')
+
+const graphFlowNodes = computed(() => toFlowNodes(graphDoc.value, registry))
+const graphFlowEdges = computed(() => toFlowEdges(graphDoc.value))
+const toolbox = computed(() => registry.list())
+
+watch(
+  () => graphSelection.value.slice(),
+  (ids) => {
+    const id = ids[0]
+    if (!id) {
+      propertySchema.value = null
+      propertyValues.value = {}
+      propertyHint.value = '点画布上的节点看属性；左侧工具箱可插入新类型。'
+      return
+    }
+    const resolved = resolvePropertySchema(registry, graphDoc.value, id)
+    if (resolved.status === 'editable') {
+      propertySchema.value = resolved.schema
+      propertyValues.value = { ...(graphDoc.value.nodes.find((n) => n.id === id)?.data ?? {}) }
+      propertyHint.value = `正在编辑「${graphDoc.value.nodes.find((n) => n.id === id)?.label ?? id}」`
+      return
+    }
+    propertySchema.value = null
+    propertyValues.value = {}
+    propertyHint.value = resolved.reason
+  }
+)
+
+function addFromToolbox(type: string) {
+  const count = graphDoc.value.nodes.length
+  const node = createNode(registry, type, {
+    x: 40 + (count % 4) * 180,
+    y: 40 + Math.floor(count / 4) * 100
+  })
+  if (!node) return
+  const inserted = insertNode(graphDoc.value, node)
+  if (inserted.status === 'ok') {
+    graphDoc.value = inserted.document
+    graphSelection.value = [node.id]
+  }
+}
+
+function removeSelected() {
+  if (!graphSelection.value.length) return
+  graphDoc.value = deleteNodes(graphDoc.value, graphSelection.value)
+  graphSelection.value = []
+}
+
+function onPropertyUpdate(values: Record<string, unknown>) {
+  const id = graphSelection.value[0]
+  if (!id) return
+  propertyValues.value = values
+  let next = updateNodeData(graphDoc.value, id, values)
+  if (typeof values.title === 'string' && values.title.trim()) {
+    next = updateNodeLabel(next, id, values.title.trim())
+  } else if (typeof values.approver === 'string' && values.approver.trim()) {
+    next = updateNodeLabel(next, id, values.approver.trim())
+  }
+  graphDoc.value = next
+}
+
+function resetGraphDemo() {
+  graphDoc.value = seedApprovalGraph(registry)
+  graphSelection.value = []
+}
+
+function injectUnknown() {
+  graphDoc.value = {
+    ...graphDoc.value,
+    nodes: [
+      ...graphDoc.value.nodes,
+      {
+        id: `unknown-${graphDoc.value.nodes.length + 1}`,
+        type: 'legacy-vendor',
+        x: 40,
+        y: 280,
+        label: '旧插件节点',
+        data: { vendor: 'acme' }
+      }
+    ]
+  }
+}
 </script>
 
 <template>
@@ -92,6 +203,60 @@ const edgeTypes = [
           :readonly="readonly"
           @move="onMove"
         />
+      </div>
+    </DemoBlock>
+
+    <DemoBlock
+      title="节点工具箱与属性检查器"
+      description="左侧工具箱来自 NodeRegistry：加一种业务节点只需往注册表塞定义，不必改画布。选中节点后右侧用 SchemaForm 编辑 data；删节点会同步清掉相连的边与分组成员。注入「旧插件」可看未知类型的只读占位。"
+    >
+      <div class="registry-demo">
+        <ISpace>
+          <IButton size="sm" @click="resetGraphDemo">重置示例</IButton>
+          <IButton size="sm" variant="secondary" @click="injectUnknown">注入未知类型</IButton>
+          <IButton
+            size="sm"
+            variant="danger"
+            :disabled="!graphSelection.length"
+            @click="removeSelected"
+          >
+            删除选中
+          </IButton>
+          <span class="hint">{{ propertyHint }}</span>
+        </ISpace>
+        <div class="registry-demo__body">
+          <aside class="registry-demo__toolbox" aria-label="节点工具箱">
+            <p class="registry-demo__caption">工具箱</p>
+            <IButton
+              v-for="item in toolbox"
+              :key="item.type"
+              size="sm"
+              variant="secondary"
+              @click="addFromToolbox(item.type)"
+            >
+              {{ item.label }}
+            </IButton>
+          </aside>
+          <div class="registry-demo__canvas">
+            <IFlow
+              v-model:selection="graphSelection"
+              :nodes="graphFlowNodes"
+              :edges="graphFlowEdges"
+              edge-type="polyline"
+            />
+          </div>
+          <aside class="registry-demo__inspector" aria-label="属性检查器">
+            <p class="registry-demo__caption">属性</p>
+            <ISchemaForm
+              v-if="propertySchema"
+              :schema="propertySchema"
+              :model-value="propertyValues"
+              submit-text="应用到节点"
+              @update:model-value="onPropertyUpdate"
+            />
+            <p v-else class="hint">{{ propertyHint }}</p>
+          </aside>
+        </div>
       </div>
     </DemoBlock>
 
@@ -181,4 +346,38 @@ const edgeTypes = [
 <style scoped>
 .flow-demo { display: flex; flex-direction: column; gap: var(--i-spacing-3); width: 100%; }
 .hint { font-size: var(--i-font-size-sm); color: var(--i-color-text-tertiary); }
+.registry-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-3);
+  width: 100%;
+  min-width: 0;
+}
+.registry-demo__body {
+  display: grid;
+  grid-template-columns: minmax(7rem, 9rem) minmax(0, 1fr) minmax(12rem, 16rem);
+  gap: var(--i-spacing-3);
+  align-items: start;
+}
+.registry-demo__toolbox,
+.registry-demo__inspector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--i-spacing-2);
+  min-width: 0;
+  padding: var(--i-spacing-3);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-md);
+  background: var(--i-color-bg-subtle);
+}
+.registry-demo__caption {
+  margin: 0;
+  font-size: var(--i-font-size-sm);
+  font-weight: 600;
+  color: var(--i-color-text-secondary);
+}
+.registry-demo__canvas { min-width: 0; }
+@media (max-width: 900px) {
+  .registry-demo__body { grid-template-columns: 1fr; }
+}
 </style>
