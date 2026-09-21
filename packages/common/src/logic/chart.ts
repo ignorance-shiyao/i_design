@@ -49,6 +49,18 @@ export {
   type RealtimeModel,
   type RealtimeOptions
 } from './realtime'
+export {
+  buildAdjacency,
+  adjacencyShade,
+  type AdjacencySort,
+  type AdjacencyCellState,
+  type AdjacencyNodeInput,
+  type AdjacencyEdgeInput,
+  type AdjacencyCell,
+  type AdjacencyNode,
+  type AdjacencyModel,
+  type AdjacencyOptions
+} from './adjacency'
 export { icicleCells, icicleHeight, type IcicleCell, type IcicleOptions } from './icicle'
 export {
   sunburstSectors,
