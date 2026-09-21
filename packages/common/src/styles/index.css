@@ -34,12 +34,12 @@
 @import './components/carousel.css';
 @import './components/cascader.css';
 @import './components/cell.css';
+@import './components/chart-adjacency.css';
 @import './components/chart-balance.css';
 @import './components/chart-distribution.css';
 @import './components/chart-frame.css';
 @import './components/chart-icicle.css';
 @import './components/chart-pareto.css';
-@import './components/chart-adjacency.css';
 @import './components/chart-realtime.css';
 @import './components/chart-retention.css';
 @import './components/chart-sunburst.css';

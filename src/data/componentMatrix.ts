@@ -239,6 +239,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IChartAdjacency",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IChartBalance",
     "ends": {
       "vue-next": true,
