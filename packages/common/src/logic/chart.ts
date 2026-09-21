@@ -39,6 +39,16 @@ export {
   type RetentionAverage,
   type RetentionModel
 } from './retention'
+export {
+  buildRealtimeWindow,
+  type RealtimePointInput,
+  type RealtimeGapInput,
+  type RealtimeBucketState,
+  type RealtimeMark,
+  type RealtimeBucket,
+  type RealtimeModel,
+  type RealtimeOptions
+} from './realtime'
 export { icicleCells, icicleHeight, type IcicleCell, type IcicleOptions } from './icicle'
 export {
   sunburstSectors,
