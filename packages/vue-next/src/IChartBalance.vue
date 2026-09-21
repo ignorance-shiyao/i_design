@@ -39,7 +39,7 @@ function bar(step: BalanceModel['steps'][number]) {
           v-for="step in model.steps"
           :key="step.id"
           class="i-balance__row"
-          :style="{ height: `${rowHeight}px` }"
+          :style="{ minHeight: `${rowHeight}px` }"
         >
           <button
             type="button"
