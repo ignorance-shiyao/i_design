@@ -1,0 +1,21 @@
+<view class="i-balance" wx:if="{{model}}">
+  <view class="i-balance__title">{{title}}</view>
+  <view class="i-balance__caption">{{model.caption}}</view>
+  <view wx:if="{{model.state === 'ready'}}">
+    <view class="i-balance__plot">
+      <view class="i-balance__row" wx:for="{{rows}}" wx:key="id" style="min-height:{{rowHeight}}px">
+        <button class="i-balance__pick {{selectedId === item.id ? 'is-selected' : ''}}" data-id="{{item.id}}" bindtap="select" aria-label="{{item.description}}{{selectedId === item.id ? '，已选' : ''}}">
+          <text class="i-balance__label">{{item.label}}</text>
+          <view class="i-balance__track">
+            <view class="i-balance__zero" style="left:{{zero}}%" aria-hidden="true" />
+            <view class="i-balance__bar is-{{item.kind}} is-{{item.direction}}" style="left:{{item.left}}%;width:{{item.width}}%" />
+          </view>
+          <text class="i-balance__value">{{item.valueText}}</text>
+          <text class="i-balance__cumulative">{{item.cumulativeText}}</text>
+        </button>
+      </view>
+    </view>
+    <view class="i-balance__caption">柱子从上一项的累计画起；右边两列是本项的增减与之后的累计。坐标轴含 0，负的那一段画在零线左边。</view>
+  </view>
+  <view class="i-balance__issues" wx:if="{{model.excluded.length}}"><view wx:for="{{model.excluded}}" wx:key="id">源行 {{item.sourceIndex + 1}} · {{item.label}}：{{item.reason}}</view></view>
+</view>

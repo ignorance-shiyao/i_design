@@ -17,6 +17,18 @@ export {
   type HierarchyModel
 } from './hierarchy'
 export {
+  buildBalance,
+  checkFlowBalance,
+  type BalanceItemInput,
+  type BalanceStep,
+  type BalanceStepKind,
+  type BalanceModel,
+  type BalanceOptions,
+  type FlowBalanceNodeInput,
+  type FlowBalanceNode,
+  type FlowBalanceModel
+} from './balance'
+export {
   buildRetention,
   retentionShade,
   RETENTION_SHADES,

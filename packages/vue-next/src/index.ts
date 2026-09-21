@@ -21,6 +21,7 @@ import ICard from './ICard.vue'
 import ICarousel from './ICarousel.vue'
 import ICascader from './ICascader.vue'
 import IChart from './IChart.vue'
+import IChartBalance from './IChartBalance.vue'
 import IChartBox from './IChartBox.vue'
 import IChartDistribution from './IChartDistribution.vue'
 import IChartFrame from './IChartFrame.vue'
@@ -180,6 +181,7 @@ export {
   ICarousel,
   ICascader,
   IChart,
+  IChartBalance,
   IChartBox,
   IChartDistribution,
   IChartFrame,
@@ -370,6 +372,7 @@ const components = {
   ICarousel,
   ICascader,
   IChart,
+  IChartBalance,
   IChartBox,
   IChartDistribution,
   IChartFrame,

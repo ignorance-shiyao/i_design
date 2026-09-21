@@ -627,6 +627,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/sunburst",
       "/components/icicle",
       "/components/retention",
+      "/components/balance",
       "/components/chart",
       "/components/flow",
       "/components/mobile"
@@ -865,6 +866,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
         "none"
       ]
     }
+  },
+  {
+    "name": "IChartBalance",
+    "sources": {
+      "vue-next": "src/components/IChartBalance.vue",
+      "vue": "packages/vue/src/components/IChartBalance.vue",
+      "react": "packages/react/src/components/ChartBalance.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-balance",
+      "flutter": "packages/flutter/lib/src/components/i_chart_balance.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/balance"
+    ],
+    "states": {}
   },
   {
     "name": "IChartBox",

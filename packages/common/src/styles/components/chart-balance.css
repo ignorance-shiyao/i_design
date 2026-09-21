@@ -1,0 +1,41 @@
+.i-balance { margin: 0; min-width: 0; color: var(--i-color-text); }
+.i-balance__title { font-size: var(--i-font-size-md); font-weight: 600; }
+.i-balance__caption { max-width: 45em; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); margin-block: var(--i-spacing-3); }
+.i-balance__plot { list-style: none; margin: 0; padding: 0; }
+.i-balance__row { display: block; }
+/* 窄屏：柱子换到第二行，占满整行 */
+@media (max-width: 480px) {
+  .i-balance__track { flex: 1 1 100%; order: 1; }
+}
+/*
+ * 一行四栏：名字、柱子、本项增减、之后的累计。
+ *
+ * 窄屏上四栏挤不下——三栏文字就吃掉 250 多像素，柱子被压成一条 4px 的缝，
+ * 整行等于白占。所以允许换行：名字与两列数字留在第一行，柱子整条占第二行。
+ * 不选择「窄屏隐藏累计列」——那是把数据藏起来，不是排版。
+ */
+.i-balance__pick { display: flex; flex-wrap: wrap; align-items: center; gap: var(--i-spacing-2) var(--i-spacing-3); width: 100%; min-height: 100%; padding: var(--i-spacing-1) var(--i-spacing-2); border: none; background: none; color: inherit; font: inherit; font-size: var(--i-font-size-sm); text-align: left; cursor: pointer; }
+.i-balance__pick:hover { background: var(--i-color-bg-subtle); }
+.i-balance__pick.is-selected { background: var(--i-color-brand-subtle); }
+.i-balance__pick:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+.i-balance__label { flex: 1 1 4em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 柱子那一栏至少 8em 才看得出长短；不够就换行去占整整一行 */
+.i-balance__track { position: relative; flex: 1 1 8em; min-width: 0; height: 12px; }
+.i-balance__zero { position: absolute; top: -20%; bottom: -20%; width: 1px; background: var(--i-color-border-strong); }
+.i-balance__bar { position: absolute; top: 0; bottom: 0; border-radius: var(--i-radius-sm); }
+/*
+ * 增与减分两个语义色，并且**不靠颜色单独说话**：右边那列数字自带 +/- 号，
+ * 读屏器念的是完整读法。色觉障碍用户与灰度打印读的是符号，不是深浅。
+ */
+.i-balance__bar.is-up { background: var(--i-color-success); }
+.i-balance__bar.is-down { background: var(--i-color-danger); }
+.i-balance__bar.is-flat { background: var(--i-color-border-strong); }
+/* 期初期末是「现在有多少」，不是「变了多少」，因此用中性的品牌色而不是增减色 */
+.i-balance__bar.is-start, .i-balance__bar.is-end { background: var(--i-color-brand); }
+/* 未解释的差额不占增减色：它不是一项业务，是账没平的那一段 */
+.i-balance__bar.is-gap { background: var(--i-color-warning); }
+.i-balance__value { flex: 0 0 auto; min-width: 4.5em; text-align: right; font-variant-numeric: tabular-nums; }
+.i-balance__cumulative { flex: 0 0 auto; min-width: 4.5em; text-align: right; color: var(--i-color-text-secondary); font-variant-numeric: tabular-nums; }
+.i-balance__issues { max-width: 45em; padding-left: var(--i-spacing-5); color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+/* 小程序 Canvas 之外不用；小程序从这里读四个语义色 */
+.i-balance__palette { height: 0; overflow: hidden; color: var(--i-color-success); background-color: var(--i-color-danger); border-top-color: var(--i-color-warning); border-bottom-color: var(--i-color-brand); }

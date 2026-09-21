@@ -182,6 +182,12 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"axes","type":"{ left: { series: string[]; unit: string; label?: string } right: { series: string[]; unit: string; label?: string } } | null","doc":"第二值轴：把两种单位的量画在一张图里。 只对折线生效。双轴是最容易骗人的图型——两条线谁在上、在哪儿交叉， 全由两侧刻度的取值决定，换一组刻度就能把结论反过来。所以这里要求 两侧都写明单位，并把「不该用双轴」的情形（两侧单位相同、有系列没归属、 零位对不齐）直接印在图下，而不是让读者自己看出来。 柱状与面积不支持：那需要每个系列各自的图型（柱 + 线）， 是另一件事，不在这里假装支持。","optional":true,"defaultText":"null","control":null},
     {"name":"thresholds","type":"ChartThreshold[]","doc":"阈值线与阈值带：把「多少算正常」画进图里。 没有它，读者只能看出趋势，看不出「现在是不是超了」—— 而后者往往才是看这张图的原因。value 是一条线，from/to 是一条带。","optional":true,"defaultText":"() => []","control":null},
   ],
+  IChartBalance: [
+    {"name":"model","type":"BalanceModel","doc":"buildBalance 生成的同源模型，可直接序列化给其他端","optional":false,"defaultText":null,"control":null},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'贡献'","control":{"kind":"string"}},
+    {"name":"selectedId","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+    {"name":"rowHeight","type":"number","doc":"","optional":true,"defaultText":"32","control":{"kind":"number"}},
+  ],
   IChartBox: [
     {"name":"groups","type":"BoxGroup[]","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},

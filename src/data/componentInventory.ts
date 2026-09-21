@@ -42,6 +42,7 @@ export const componentSourceFiles: readonly string[] = [
   "src/components/ICarousel.vue",
   "src/components/ICascader.vue",
   "src/components/IChart.vue",
+  "src/components/IChartBalance.vue",
   "src/components/IChartBox.vue",
   "src/components/IChartDistribution.vue",
   "src/components/IChartFrame.vue",

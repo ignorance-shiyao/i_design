@@ -94,6 +94,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/sunburst', label: '旭日图' },
       { to: '/components/icicle', label: 'Icicle 图' },
       { to: '/components/retention', label: '留存' },
+      { to: '/components/balance', label: '贡献与流量平衡' },
       { to: '/components/chart', label: '图表' },
       { to: '/components/flow', label: '流程图' }
     ]
