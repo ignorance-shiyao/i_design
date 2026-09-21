@@ -177,7 +177,7 @@ break-inside: avoid;
 
 - **「构建通过」不等于「能用」**：改了界面就用 Playwright 真跑一遍看截图；
   改了依赖就在 `git archive` 出的干净树里验证。
-- 新增组件要五端齐备（Vue3 / Vue2 / React / 小程序 / Flutter），
+- 新增组件要各端齐备（Vue3 / Vue2 / React / 小程序 / Flutter），
   跑 `npm run check:parity`，覆盖矩阵不得回退。
 - 文档站文案从**产品自身视角**写：不写「对标某某库」、不写「抄自哪里」。
 - **不强调数量**：不写「七端」「五端」「已实现 33 个组件」这类计数，

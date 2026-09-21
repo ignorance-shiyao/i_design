@@ -57,7 +57,7 @@ npm run check:lab         # Patterns Lab 里每个组件都真的渲染出来（
 
 ## 新增组件
 
-组件要五端齐备（Vue 3 / Vue 2 / React / 小程序 / Flutter），并且：
+组件要各端齐备（Vue 3 / Vue 2 / React / 小程序 / Flutter），并且：
 
 - 只引用语义令牌（`var(--i-color-*)` / `var(--i-radius-*)`），不写死色值与尺寸；
 - 小程序目录名必须是组件名的 kebab 形式（`IFineTuneCard` → `fine-tune-card`），

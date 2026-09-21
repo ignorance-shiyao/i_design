@@ -98,7 +98,7 @@ src/              文档站：组件示例、组件源码（vue-next 包由它�
 scripts/          生成与检查脚本；哪些文件是生成的，看 package.json 的 build:* 各自写到哪儿
 ```
 
-新增组件要五端齐备，并在文档站里有可运行的演示——`npm run check:parity`
+新增组件要各端齐备，并在文档站里有可运行的演示——`npm run check:parity`
 与 `npm run check:registry` 会把漏掉的那一端和没有演示的组件报出来。
 具体流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
