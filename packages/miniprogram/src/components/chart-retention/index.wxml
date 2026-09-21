@@ -1,0 +1,33 @@
+<view class="i-retention" wx:if="{{model}}">
+  <view class="i-retention__title">{{title}}</view>
+  <view class="i-retention__caption">{{model.caption}}</view>
+  <view class="i-retention__basis">口径：{{model.basis}}。空格表示这一期还没到，不是 0。</view>
+  <view wx:if="{{model.state === 'ready'}}">
+    <scroll-view class="i-retention__scroll" scroll-x>
+      <view class="i-retention__table">
+        <view class="i-retention__tr i-retention__head">
+          <view class="i-retention__th">批次</view>
+          <view class="i-retention__th">期初</view>
+          <view class="i-retention__th" wx:for="{{columns}}" wx:key="*this">第 {{item}} 期</view>
+        </view>
+        <view class="i-retention__tr {{selectedId === row.id ? 'is-selected' : ''}}" wx:for="{{rows}}" wx:for-item="row" wx:key="id">
+          <view class="i-retention__th">
+            <button class="i-retention__pick" data-id="{{row.id}}" bindtap="select" aria-label="{{row.label}}{{selectedId === row.id ? '，已选' : ''}}">{{row.label}}</button>
+          </view>
+          <view class="i-retention__td i-retention__size">{{row.sizeText}}</view>
+          <view class="i-retention__td i-retention__cell {{cell.shadeClass}}" wx:for="{{row.cells}}" wx:for-item="cell" wx:key="period" aria-label="{{cell.description}}">{{cell.rateText}}</view>
+        </view>
+        <view class="i-retention__tr i-retention__average">
+          <view class="i-retention__th">各期平均</view>
+          <view class="i-retention__td i-retention__size">—</view>
+          <view class="i-retention__td {{item.comparable ? '' : 'is-partial'}}" wx:for="{{model.averages}}" wx:key="period" aria-label="{{item.description}}">
+            <text>{{item.rateText}}</text>
+            <text wx:if="{{!item.comparable}}" class="i-retention__flag">{{item.cohorts}} / {{rows.length}} 批</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    <view wx:if="{{hasPartial}}" class="i-retention__caption">标着「N / M 批」的那几期只有部分批次到得了，是幸存者平均，不能和左边几期比。</view>
+  </view>
+  <view class="i-retention__issues" wx:if="{{model.excluded.length}}"><view wx:for="{{model.excluded}}" wx:key="id">源行 {{item.sourceIndex + 1}} · {{item.label}}：{{item.reason}}</view></view>
+</view>

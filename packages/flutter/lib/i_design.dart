@@ -114,6 +114,7 @@ export 'src/components/i_chart_gantt.dart';
 export 'src/components/i_chart_icicle.dart';
 export 'src/components/i_chart_pareto.dart';
 export 'src/components/i_chart_pie.dart';
+export 'src/components/i_chart_retention.dart';
 export 'src/components/i_chart_sankey.dart';
 export 'src/components/i_chart_scatter.dart';
 export 'src/components/i_chart_stats.dart';

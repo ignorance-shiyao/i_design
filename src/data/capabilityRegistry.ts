@@ -626,6 +626,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/pareto",
       "/components/sunburst",
       "/components/icicle",
+      "/components/retention",
       "/components/chart",
       "/components/flow",
       "/components/mobile"
@@ -1211,6 +1212,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": null,
     "demoRoutes": [
       "/components/chart"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IChartRetention",
+    "sources": {
+      "vue-next": "src/components/IChartRetention.vue",
+      "vue": "packages/vue/src/components/IChartRetention.vue",
+      "react": "packages/react/src/components/ChartRetention.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-retention",
+      "flutter": "packages/flutter/lib/src/components/i_chart_retention.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/retention"
     ],
     "states": {}
   },

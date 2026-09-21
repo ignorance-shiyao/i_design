@@ -32,6 +32,7 @@ import IChartIcicle from './IChartIcicle.vue'
 import IChartPareto from './IChartPareto.vue'
 import IChartPie from './IChartPie.vue'
 import IChartRadar from './IChartRadar.vue'
+import IChartRetention from './IChartRetention.vue'
 import IChartSankey from './IChartSankey.vue'
 import IChartScatter from './IChartScatter.vue'
 import IChartSunburst from './IChartSunburst.vue'
@@ -190,6 +191,7 @@ export {
   IChartPareto,
   IChartPie,
   IChartRadar,
+  IChartRetention,
   IChartSankey,
   IChartScatter,
   IChartSunburst,
@@ -379,6 +381,7 @@ const components = {
   IChartPareto,
   IChartPie,
   IChartRadar,
+  IChartRetention,
   IChartSankey,
   IChartScatter,
   IChartSunburst,

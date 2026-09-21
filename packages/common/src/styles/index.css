@@ -38,6 +38,7 @@
 @import './components/chart-frame.css';
 @import './components/chart-icicle.css';
 @import './components/chart-pareto.css';
+@import './components/chart-retention.css';
 @import './components/chart-sunburst.css';
 @import './components/chart.css';
 @import './components/chat-list.css';

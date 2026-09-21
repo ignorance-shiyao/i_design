@@ -1,0 +1,58 @@
+.i-retention { margin: 0; min-width: 0; color: var(--i-color-text); }
+.i-retention__title { font-size: var(--i-font-size-md); font-weight: 600; }
+.i-retention__caption { max-width: 45em; color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); margin-block: var(--i-spacing-3); }
+/* 口径要一直摆在图上：同一张留存图换个分母就是另一回事，而读者无从分辨 */
+.i-retention__basis { max-width: 45em; color: var(--i-color-text); font-size: var(--i-font-size-sm); margin-block: var(--i-spacing-2); }
+
+/*
+ * 期数一多就该自己横向滚，而不是把页面顶宽。
+ *
+ * `position: relative` 不是装饰：格子里那些只给读屏器的读法是绝对定位的，
+ * 没有一个定位祖先时它们的包含块是整个页面——于是它们跟着表格跑到视口外面，
+ * 横向滚动框里滚的是表格，整页却也能左右拖。实测 320px 下整页宽出 154px，
+ * 而逐元素排查会一无所获：溢出的每一个元素都「在一个可横滚的祖先里」。
+ */
+.i-retention__scroll { position: relative; overflow-x: auto; }
+.i-retention__table { border-collapse: collapse; font-size: var(--i-font-size-sm); }
+.i-retention__table th, .i-retention__table td { border: 1px solid var(--i-color-hairline); padding: var(--i-spacing-2) var(--i-spacing-3); text-align: right; white-space: nowrap; }
+.i-retention__table thead th { color: var(--i-color-text-secondary); font-weight: 500; background: var(--i-color-bg-subtle); }
+.i-retention__table tbody th[scope="row"] { text-align: left; font-weight: 400; }
+.i-retention__size { color: var(--i-color-text-secondary); }
+.i-retention__pick { padding: 0; border: none; background: none; color: var(--i-color-text); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 0.18em; }
+.i-retention__pick:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: 2px; }
+.i-retention__table tr.is-selected { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+
+/*
+ * 五档色阶，底色与字色成对取。
+ *
+ * 不用连续的透明度：色阶的每一档都配好了字色（-ink，0 预算推导），
+ * 连续深浅上压什么字色都是猜。档位由共享逻辑按比例本身算，不按本图内排名——
+ * 归一化之后两张留存图就比不了了。
+ */
+.i-retention__cell.is-s1 { background: var(--i-chart-seq-1); color: var(--i-chart-seq-1-ink); }
+.i-retention__cell.is-s2 { background: var(--i-chart-seq-2); color: var(--i-chart-seq-2-ink); }
+.i-retention__cell.is-s3 { background: var(--i-chart-seq-3); color: var(--i-chart-seq-3-ink); }
+.i-retention__cell.is-s4 { background: var(--i-chart-seq-4); color: var(--i-chart-seq-4-ink); }
+.i-retention__cell.is-s5 { background: var(--i-chart-seq-5); color: var(--i-chart-seq-5-ink); }
+/* 未到期：不涂色，也不是最浅的一档 */
+.i-retention__cell.is-pending { background: none; color: var(--i-color-text-tertiary); }
+
+.i-retention__average th, .i-retention__average td { border-top: 1px solid var(--i-color-border-strong); color: var(--i-color-text); }
+/* 幸存者平均单独标一个文字角标——颜色不能是唯一线索 */
+.i-retention__flag { display: block; color: var(--i-color-text-secondary); font-size: var(--i-font-size-2xs); }
+.i-retention__issues { max-width: 45em; padding-left: var(--i-spacing-5); color: var(--i-color-text-secondary); font-size: var(--i-font-size-sm); }
+/* 读屏器念得到、眼睛看不到：每格的完整读法，含分母 */
+.i-retention__sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+/* 小程序 Canvas 之外的端不用它，但小程序要从这里读五档色 */
+.i-retention__swatch { height: 0; overflow: hidden; }
+.i-retention__swatch--1 { background-color: var(--i-chart-seq-1); }
+.i-retention__swatch--2 { background-color: var(--i-chart-seq-2); }
+.i-retention__swatch--3 { background-color: var(--i-chart-seq-3); }
+.i-retention__swatch--4 { background-color: var(--i-chart-seq-4); }
+.i-retention__swatch--5 { background-color: var(--i-chart-seq-5); }
+
+/* 小程序没有表格元素，用盒子拼出同样的行列；类名与 Web 端保持一致 */
+.i-retention__tr { display: flex; }
+.i-retention__th, .i-retention__td { flex: none; min-width: 72px; border: 1px solid var(--i-color-hairline); padding: var(--i-spacing-2) var(--i-spacing-3); text-align: right; font-size: var(--i-font-size-sm); }
+.i-retention__head .i-retention__th { color: var(--i-color-text-secondary); background: var(--i-color-bg-subtle); }
+.i-retention__tr .i-retention__th:first-child { flex: none; min-width: 120px; text-align: left; }

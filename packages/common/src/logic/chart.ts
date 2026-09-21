@@ -16,6 +16,17 @@ export {
   type HierarchyNodeKind,
   type HierarchyModel
 } from './hierarchy'
+export {
+  buildRetention,
+  retentionShade,
+  RETENTION_SHADES,
+  type RetentionCohortInput,
+  type RetentionCohort,
+  type RetentionCell,
+  type RetentionCellState,
+  type RetentionAverage,
+  type RetentionModel
+} from './retention'
 export { icicleCells, icicleHeight, type IcicleCell, type IcicleOptions } from './icicle'
 export {
   sunburstSectors,

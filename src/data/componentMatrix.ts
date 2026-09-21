@@ -349,6 +349,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IChartRetention",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IChartSankey",
     "ends": {
       "vue-next": true,

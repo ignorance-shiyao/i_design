@@ -266,6 +266,11 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"size","type":"number","doc":"","optional":true,"defaultText":"240","control":{"kind":"number"}},
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
   ],
+  IChartRetention: [
+    {"name":"model","type":"RetentionModel","doc":"buildRetention 生成的同源模型，可直接序列化给其他端","optional":false,"defaultText":null,"control":null},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'留存'","control":{"kind":"string"}},
+    {"name":"selectedId","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
+  ],
   IChartSankey: [
     {"name":"links","type":"SankeyLink[]","doc":"","optional":false,"defaultText":null,"control":null},
     {"name":"labels","type":"Record<string, string>","doc":"key → 显示名；不传就直接用 key","optional":true,"defaultText":"() => ({})","control":null},

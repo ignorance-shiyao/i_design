@@ -93,6 +93,7 @@ export const docNav: NavGroup[] = [
       { to: '/components/pareto', label: '帕累托图' },
       { to: '/components/sunburst', label: '旭日图' },
       { to: '/components/icicle', label: 'Icicle 图' },
+      { to: '/components/retention', label: '留存' },
       { to: '/components/chart', label: '图表' },
       { to: '/components/flow', label: '流程图' }
     ]
