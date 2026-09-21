@@ -25,8 +25,29 @@
 - 属性检查器 = `resolvePropertySchema` → `ISchemaForm`；未知类型只读占位
 - 删除走 `deleteNodes`（边与分组成员同步）
 
+## 验证证据
+
+2026-09-21 实测（Playwright，`CHROMIUM_PATH` 指向缓存 Chromium）：
+
+| 页面 | 视口 | 横向溢出 | 工具箱按钮 | 画布节点 |
+| --- | --- | --- | --- | --- |
+| 流程图 / 节点编辑器 | 1440 / 390 / 320 | 0 / 0 / 0 | 5 / 5 / 5 | 3 / 3 / 3 |
+
+亮暗两态 axe serious/critical = 0；`check:nodes` 已接 CI。
+
+浏览器故障注入 8 次，每次确认对应用例报红：
+
+- 删除不清相连边、未知类型给出可编辑表单、投影不吃 canvasShape、
+  注册表标签改名、schema 字段改名、改属性不同步标签、
+  工具箱少列类型、插入结果没落到文档上。
+
+Vite 把 TS/SFC 编成 JS 后再交给浏览器，故障串必须命中编译后的双引号形态。
+
+顺带修掉一个真缺陷：SchemaForm 的开关字段没有可访问名（`<label for>` 落不到
+`role="switch"` 的按钮上），读屏只会念「开关，未选中」。各端都补了名字——
+Web 用 `aria-label`，小程序用 `aria-label`，Flutter 用 `Semantics`。
+
 ## 还没做
 
 - 五端独立工具箱 / 检查器组件（若需要拆出页面级组合）
-- `check:nodes` 浏览器闭环与故障注入
 - 端口连线编辑（E03）
