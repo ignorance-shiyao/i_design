@@ -71,7 +71,8 @@
     "check:e2e": "npm run build:examples && node --test scripts/check-e2e.test.mjs && node scripts/check-e2e.mjs",
     "build:site": "npm run build && npm run build:examples && node --test scripts/assemble-site.test.mjs && node scripts/assemble-site.mjs",
     "build:vue-index": "node scripts/build-vue-index.mjs",
-    "check:pareto": "node scripts/check-pareto.mjs && node --test scripts/check-pareto.test.mjs"
+    "check:pareto": "node scripts/check-pareto.mjs && node --test scripts/check-pareto.test.mjs",
+    "check:realtime": "node scripts/check-realtime.mjs && node --test scripts/check-realtime.test.mjs"
   },
   "dependencies": {
     "three": "^0.186.0",
