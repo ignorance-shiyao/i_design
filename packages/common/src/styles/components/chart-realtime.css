@@ -25,17 +25,17 @@
   font-size: var(--i-font-size-xs);
 }
 .i-realtime__chip.is-paused {
-  background: color-mix(in srgb, var(--i-color-warning) 12%, transparent);
-  color: var(--i-color-warning);
+  background: var(--i-color-warning-subtle);
+  color: var(--i-color-warning-text);
   border-color: var(--i-color-border);
 }
 .i-realtime__chip.is-gap {
-  background: color-mix(in srgb, var(--i-color-danger) 12%, transparent);
-  color: var(--i-color-danger);
+  background: var(--i-color-danger-subtle);
+  color: var(--i-color-danger-text);
 }
 .i-realtime__chip.is-live {
-  background: color-mix(in srgb, var(--i-color-success) 12%, transparent);
-  color: var(--i-color-success);
+  background: var(--i-color-success-subtle);
+  color: var(--i-color-success-text);
 }
 
 .i-realtime__plot {
@@ -73,7 +73,7 @@
   stroke: none;
 }
 .i-realtime__gap-label {
-  fill: var(--i-color-danger);
+  fill: var(--i-color-danger-text);
   font-size: 10px;
 }
 .i-realtime__mark {
@@ -117,7 +117,7 @@
   background: color-mix(in srgb, var(--i-color-danger) 8%, transparent);
 }
 .i-realtime__bucket-state { color: var(--i-color-text-secondary); font-size: var(--i-font-size-xs); }
-.i-realtime__bucket.is-gap .i-realtime__bucket-state { color: var(--i-color-danger); }
+.i-realtime__bucket.is-gap .i-realtime__bucket-state { color: var(--i-color-danger-text); }
 .i-realtime__bucket-value { font-variant-numeric: tabular-nums; font-weight: 600; }
 
 .i-realtime__issues { padding-left: var(--i-spacing-5); }
