@@ -2691,7 +2691,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": {
       "route": "/components/flow",
       "page": "src/pages/components/FlowPage.vue",
-      "demos": 2
+      "demos": 3
     },
     "demoRoutes": [
       "/components/flow"
@@ -4365,7 +4365,8 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "demoRoutes": [
       "/components/form",
       "/components/select",
-      "/components/config-provider"
+      "/components/config-provider",
+      "/components/flow"
     ],
     "states": {
       "size": [

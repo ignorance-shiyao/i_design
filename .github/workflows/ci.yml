@@ -79,6 +79,14 @@ jobs:
       - name: 帕累托口径与浏览器回归
         run: npm run check:pareto
 
+      # 断流画成 0 在图上和真的掉到 0 长得一样，只有跑起来才分得出
+      - name: 实时滑窗口径与浏览器回归
+        run: npm run check:realtime
+
+      # 空格是无边还是未观测，读图的人分不出，门禁替他分
+      - name: 邻接矩阵口径与浏览器回归
+        run: npm run check:adjacency
+
       # 注册表一旦被绕过，画布上照样能画出节点，只是删了节点边还悬着
       - name: 节点注册表与属性检查器闭环
         run: npm run check:nodes
