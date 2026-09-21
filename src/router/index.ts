@@ -119,6 +119,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'retention', component: () => import('@/pages/components/RetentionPage.vue') },
       { path: 'balance', component: () => import('@/pages/components/BalancePage.vue') },
       { path: 'realtime', component: () => import('@/pages/components/RealtimePage.vue') },
+      { path: 'adjacency', component: () => import('@/pages/components/AdjacencyPage.vue') },
       { path: 'chart', component: () => import('@/pages/components/ChartPage.vue') },
       { path: 'flow', component: () => import('@/pages/components/FlowPage.vue') },
       { path: 'mobile', component: () => import('@/pages/components/MobilePage.vue') }

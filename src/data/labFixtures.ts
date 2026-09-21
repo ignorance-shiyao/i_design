@@ -1,4 +1,4 @@
-import { buildBalance, buildHierarchy, buildPareto, buildRealtimeWindow, buildRetention } from '@i-design/common'
+import { buildAdjacency, buildBalance, buildHierarchy, buildPareto, buildRealtimeWindow, buildRetention } from '@i-design/common'
 /**
  * Patterns Lab 的最小可运行数据。
  *
@@ -414,6 +414,21 @@ export const labFixtures: Record<string, Record<string, unknown>> = {
   IChartPareto: { model: buildPareto([{ id: 'timeout', label: '请求超时', value: 60 }, { id: 'other', label: '其他', value: 40 }]) },
   IChartBalance: { model: buildBalance([{ id: 'new', label: '新签', value: 42 }, { id: 'churn', label: '流失', value: -18 }], { start: 100, unit: ' 万' }) },
   IChartRealtime: { model: buildRealtimeWindow([{ id: 'a', at: 500, value: 2 }, { id: 'b', at: 1500, value: 3 }, { id: 'c', at: 3500, value: 1 }], { now: 4000, windowMs: 4000, bucketMs: 1000, unit: ' 次' }) },
+  IChartAdjacency: {
+    model: buildAdjacency(
+      [
+        { id: 'a', label: '甲', community: '东' },
+        { id: 'b', label: '乙', community: '东' },
+        { id: 'c', label: '丙', community: '西' }
+      ],
+      [
+        { from: 'a', to: 'b', weight: 3 },
+        { from: 'a', to: 'c', weight: 0 },
+        { from: 'b', to: 'c', unknown: true }
+      ],
+      { sort: 'input' }
+    )
+  },
   IChartRetention: { model: buildRetention([{ id: 'a', label: '1 月进来的', size: 100, values: [80, 60] }, { id: 'b', label: '2 月进来的', size: 120, values: [90, null] }]) },
   IChartIcicle: { model: buildHierarchy([{ id: 'direct', parentId: null, label: '直销', value: 60 }, { id: 'key', parentId: 'direct', label: '大客户', value: 40 }, { id: 'channel', parentId: null, label: '渠道', value: 40 }]) },
   IChartSunburst: { model: buildHierarchy([{ id: 'direct', parentId: null, label: '直销', value: 60 }, { id: 'key', parentId: 'direct', label: '大客户', value: 40 }, { id: 'channel', parentId: null, label: '渠道', value: 40 }]) },

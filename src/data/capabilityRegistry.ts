@@ -629,6 +629,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/retention",
       "/components/balance",
       "/components/realtime",
+      "/components/adjacency",
       "/components/chart",
       "/components/flow",
       "/components/mobile"
@@ -867,6 +868,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
         "none"
       ]
     }
+  },
+  {
+    "name": "IChartAdjacency",
+    "sources": {
+      "vue-next": "src/components/IChartAdjacency.vue",
+      "vue": "packages/vue/src/components/IChartAdjacency.vue",
+      "react": "packages/react/src/components/ChartAdjacency.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-adjacency",
+      "flutter": "packages/flutter/lib/src/components/i_chart_adjacency.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/adjacency"
+    ],
+    "states": {}
   },
   {
     "name": "IChartBalance",

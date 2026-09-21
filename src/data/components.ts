@@ -190,6 +190,7 @@ const categoryDefinitions: (Omit<ComponentCategory, 'items'> & { items: Omit<Com
       { name: 'ChartRetention', cn: '留存', to: '/components/retention', desc: '按批次看还剩多少，分母与未到期都说得清' },
       { name: 'ChartBalance', cn: '贡献与流量平衡', to: '/components/balance', desc: '带符号的增减台阶，对不上的差额单列出来' },
       { name: 'ChartRealtime', cn: '实时滑窗', to: '/components/realtime', desc: '按时间切开的直播窗口，断流是空档不是 0' },
+      { name: 'ChartAdjacency', cn: '邻接矩阵', to: '/components/adjacency', desc: '谁连着谁；无边与未观测都不是 0' },
       { name: 'ChartDistribution', cn: '分布图', to: '/components/chart', desc: '单组看形状：直方、密度、小提琴、误差棒' },
       { name: 'ChartWaterfall', cn: '瀑布图', to: '/components/chart', desc: '增减归因' },
       { name: 'ChartSankey', cn: '桑基图', to: '/components/chart', desc: '流向与分流' },

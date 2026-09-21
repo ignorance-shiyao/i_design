@@ -1,0 +1,162 @@
+.i-adjacency { margin: 0; min-width: 0; color: var(--i-color-text); }
+.i-adjacency__title { font-size: var(--i-font-size-md); font-weight: 600; }
+.i-adjacency__caption,
+.i-adjacency__basis,
+.i-adjacency__note,
+.i-adjacency__issues {
+  max-width: 45em;
+  color: var(--i-color-text-secondary);
+  font-size: var(--i-font-size-sm);
+  margin-block: var(--i-spacing-3);
+}
+.i-adjacency__basis { color: var(--i-color-text); }
+
+.i-adjacency__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--i-spacing-2);
+  margin-block: var(--i-spacing-3);
+}
+.i-adjacency__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-spacing-1);
+  padding: var(--i-spacing-1) var(--i-spacing-2);
+  border: 1px solid var(--i-color-border);
+  border-radius: var(--i-radius-sm);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text);
+  font-size: var(--i-font-size-xs);
+}
+.i-adjacency__chip.is-absent {
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text-secondary);
+}
+.i-adjacency__chip.is-unknown {
+  background: var(--i-color-warning-subtle);
+  color: var(--i-color-warning-text);
+}
+.i-adjacency__chip.is-zero {
+  background: var(--i-color-info-subtle);
+  color: var(--i-color-info-text);
+}
+
+/*
+ * 矩阵一宽就自己横滚，别把整页顶出横向滚动条。
+ * position: relative 锁住读屏专用文本的包含块（留存页踩过这个坑）。
+ */
+.i-adjacency__scroll {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+.i-adjacency__table {
+  border-collapse: collapse;
+  font-size: var(--i-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+.i-adjacency__table th,
+.i-adjacency__table td {
+  border: 1px solid var(--i-color-hairline);
+  padding: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+.i-adjacency__table thead th {
+  color: var(--i-color-text-secondary);
+  font-weight: 500;
+  background: var(--i-color-bg-subtle);
+  padding: var(--i-spacing-2);
+}
+.i-adjacency__corner {
+  background: var(--i-color-bg-subtle);
+  min-width: 4.5em;
+}
+.i-adjacency__row-head {
+  text-align: left;
+  font-weight: 400;
+  padding: var(--i-spacing-2);
+  background: var(--i-color-bg-subtle);
+  color: var(--i-color-text);
+}
+
+.i-adjacency__cell {
+  display: block;
+  width: 100%;
+  min-width: 3.5em;
+  padding: var(--i-spacing-2);
+  border: none;
+  background: var(--i-color-bg);
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  cursor: pointer;
+}
+.i-adjacency__cell:hover { filter: brightness(0.97); }
+.i-adjacency__cell:focus-visible { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+.i-adjacency__cell.is-selected { outline: 2px solid var(--i-color-brand); outline-offset: -2px; }
+
+/* 五档色阶：底色与字色成对；只涂 ready */
+.i-adjacency__cell.is-s1 { background: var(--i-chart-seq-1); color: var(--i-chart-seq-1-ink); }
+.i-adjacency__cell.is-s2 { background: var(--i-chart-seq-2); color: var(--i-chart-seq-2-ink); }
+.i-adjacency__cell.is-s3 { background: var(--i-chart-seq-3); color: var(--i-chart-seq-3-ink); }
+.i-adjacency__cell.is-s4 { background: var(--i-chart-seq-4); color: var(--i-chart-seq-4-ink); }
+.i-adjacency__cell.is-s5 { background: var(--i-chart-seq-5); color: var(--i-chart-seq-5-ink); }
+
+/* 没有边：不涂色，不是最浅档 */
+.i-adjacency__cell.is-absent {
+  background: none;
+  color: var(--i-color-text-tertiary);
+}
+/* 未观测：淡底 + 文字，颜色不是唯一线索 */
+.i-adjacency__cell.is-unknown {
+  background: var(--i-color-warning-subtle);
+  color: var(--i-color-warning-text);
+}
+
+.i-adjacency__state {
+  display: block;
+  font-size: var(--i-font-size-2xs);
+  color: var(--i-color-text-secondary);
+}
+.i-adjacency__cell.is-s1 .i-adjacency__state,
+.i-adjacency__cell.is-s2 .i-adjacency__state,
+.i-adjacency__cell.is-s3 .i-adjacency__state,
+.i-adjacency__cell.is-s4 .i-adjacency__state,
+.i-adjacency__cell.is-s5 .i-adjacency__state {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.i-adjacency__issues { padding-left: var(--i-spacing-5); }
+.i-adjacency__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 小程序没有 table，用 flex 拼出同样的行列 */
+.i-adjacency__tr { display: flex; }
+.i-adjacency__th,
+.i-adjacency__td {
+  flex: none;
+  min-width: 3.5em;
+  border: 1px solid var(--i-color-hairline);
+  padding: var(--i-spacing-2);
+  text-align: center;
+  font-size: var(--i-font-size-sm);
+}
+.i-adjacency__tr .i-adjacency__th:first-child,
+.i-adjacency__corner {
+  flex: none;
+  min-width: 4.5em;
+  text-align: left;
+}

@@ -1,0 +1,45 @@
+<view class="i-adjacency" wx:if="{{model}}">
+  <view class="i-adjacency__title">{{title}}</view>
+  <view class="i-adjacency__caption">{{caption}}</view>
+  <view class="i-adjacency__basis">口径：{{basis}}</view>
+
+  <view class="i-adjacency__status" aria-label="矩阵状态">
+    <text class="i-adjacency__chip">{{directed ? '有向' : '无向'}}</text>
+    <text class="i-adjacency__chip">排序 · {{sortLabel}}</text>
+    <text wx:if="{{counts.absent}}" class="i-adjacency__chip is-absent">{{counts.absent}} 个无边空档</text>
+    <text wx:if="{{counts.unknown}}" class="i-adjacency__chip is-unknown">{{counts.unknown}} 个未观测</text>
+    <text wx:if="{{zeroCount}}" class="i-adjacency__chip is-zero">{{zeroCount}} 条零权边</text>
+  </view>
+
+  <block wx:if="{{ready}}">
+    <view class="i-adjacency__scroll">
+      <view class="i-adjacency__tr i-adjacency__head">
+        <view class="i-adjacency__th i-adjacency__corner">从 \ 到</view>
+        <view class="i-adjacency__th" wx:for="{{headers}}" wx:key="*this">{{item}}</view>
+      </view>
+      <view class="i-adjacency__tr" wx:for="{{rows}}" wx:key="id">
+        <view class="i-adjacency__th">
+          {{item.label}}
+          <text class="i-adjacency__state">度 {{item.degree}}</text>
+        </view>
+        <view class="i-adjacency__td" wx:for="{{item.cells}}" wx:for-item="cell" wx:key="colIndex">
+          <button
+            class="i-adjacency__cell {{cell.shadeClass}} {{cell.selected ? 'is-selected' : ''}}"
+            data-row="{{cell.rowIndex}}"
+            data-col="{{cell.colIndex}}"
+            bindtap="select"
+            aria-label="{{cell.description}}"
+          >
+            <text>{{cell.valueText}}</text>
+            <text wx:if="{{cell.stateLabel}}" class="i-adjacency__state">{{cell.stateLabel}}</text>
+          </button>
+        </view>
+      </view>
+    </view>
+    <view class="i-adjacency__note">「—」且标「无边」是确认没有边；「—」且标「未观测」是没统计到；「0」是权重为零的边。</view>
+  </block>
+
+  <view class="i-adjacency__issues" wx:if="{{excluded.length}}">
+    <view wx:for="{{excluded}}" wx:key="sourceIndex">未计入 · {{item.id}}：{{item.reason}}</view>
+  </view>
+</view>
