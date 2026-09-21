@@ -93,6 +93,7 @@ export * from './contracts/query'
 export * from './contracts/form'
 export * from './contracts/protable'
 export * from './logic/graph'
+export * from './logic/noderegistry'
 export * from './icons/meta'
 export * from './icons/filled'
 /*
