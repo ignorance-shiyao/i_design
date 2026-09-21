@@ -14,6 +14,13 @@ export interface GraphPort {
   /** in / out；连线方向校验按它判断 */
   side: 'in' | 'out'
   label?: string
+  /**
+   * 这个端口收哪几种连线类型。不写＝什么都收。
+   *
+   * 写出来才有「类型不匹配」可报——否则一条数据流连到审批的通过口上，
+   * 图看着是通的，跑起来才发现走错了路。
+   */
+  accepts?: string[]
 }
 
 export interface GraphNode {
