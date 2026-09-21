@@ -93,6 +93,35 @@ function defaultsOf(text) {
  * 类型不做归一化——`'sm' | 'md' | 'lg'` 这种联合字面量正是 playground
  * 生成分段器的依据，转成 `string` 就全丢了。
  */
+/**
+ * 把类型文本压成一行。
+ *
+ * 换行在嵌套对象类型里就是成员分隔符——源码里的
+ *   { left: { … }\n  right: { … } }
+ * 直接把 \s+ 换成空格，会得到 `{ left: { … } right: { … } }`，
+ * 这不是合法 TypeScript，使用方 tsc 会在这一行整份 d.ts 崩掉。
+ * topLevelEntries 对顶层换行已经这么做了，这里补上嵌套层。
+ */
+export function flattenType(type) {
+  let out = ''
+  let depth = 0
+  for (let i = 0; i < type.length; i += 1) {
+    const ch = type[i]
+    if (ch === '{' || ch === '(' || ch === '[' || ch === '<') depth += 1
+    else if (ch === '}' || ch === ')' || ch === ']' || ch === '>') depth -= 1
+    if (ch === '\n' && depth > 0) {
+      // 只有当两侧都还有内容、且前一个非空字符不是已有分隔符时才补
+      const before = out.replace(/\s+$/, '')
+      const after = type.slice(i + 1).replace(/^\s+/, '')
+      const needs = before && after && !/[;,{(<[]$/.test(before) && !/^[}\])>;,|&]/.test(after)
+      out = before + (needs ? '; ' : ' ')
+      continue
+    }
+    out += ch
+  }
+  return out.trim().replace(/\s+/g, ' ')
+}
+
 export function parseVueProps(file) {
   const text = readFileSync(file, 'utf8')
   const m = /defineProps<\s*\{/.exec(text)
@@ -113,7 +142,7 @@ export function parseVueProps(file) {
     const [, name, question, type] = hit
     props.push({
       name,
-      type: type.trim().replace(/\s+/g, ' '),
+      type: flattenType(type),
       optional: question === '?',
       defaultText: defaults.get(name) ?? null,
       doc: docs.get(name) ?? ''

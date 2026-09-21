@@ -12,6 +12,7 @@
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import ts from 'typescript'
 import { parseVueProps } from '../../../scripts/lib/parse-props.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -109,6 +110,21 @@ const dts = lines.join('\n')
 // 整份 d.ts 在第一处截断处就解析失败，使用方的类型检查全部变成语法错。
 if (/:\s*(?:Partial<)?Record<[^>\n]*$/m.test(dts)) {
   throw new Error('Vue 2 类型声明含有未闭合的 Record<…>，检查 parse-props 是否把泛型逗号当成了属性分隔')
+}
+
+/*
+ * 上面那条只认得 Record 这一种坏法。真正要保证的是「整份 d.ts 是合法
+ * TypeScript」——曾经嵌套对象类型的换行被压成空格，`{ a: {…} b: {…} }`
+ * 在仓库内毫无征兆，只有装到别人项目里 tsc 才会炸。让编译器自己说了算。
+ */
+const parsed = ts.createSourceFile('index.d.ts', dts, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+const syntax = parsed.parseDiagnostics ?? []
+if (syntax.length) {
+  const where = syntax.slice(0, 3).map((d) => {
+    const { line, character } = parsed.getLineAndCharacterOfPosition(d.start ?? 0)
+    return `  ${line + 1}:${character + 1} ${ts.flattenDiagnosticMessageText(d.messageText, ' ')}\n    ${dts.split('\n')[line]?.trim().slice(0, 160)}`
+  }).join('\n')
+  throw new Error(`Vue 2 类型声明不是合法 TypeScript，使用方的 tsc 会整份解析失败：\n${where}`)
 }
 writeFileSync(join(outDir, 'index.d.ts'), dts)
 console.log(`Vue 2 类型声明 → dist/types/index.d.ts（${components.length} 个组件）`)
