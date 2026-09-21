@@ -29,6 +29,9 @@
 
 亮暗两态 axe serious/critical = 0。有向示例中甲→乙有值、乙→甲保持空档。
 
+全仓门禁（本分支）：`typecheck` / `test` / `build` / `check:parity` / `check:adjacency` /
+`check:a11y`（162 页亮暗）/ `check:responsive` / `check:layout` / `check:motion` 均为 EXIT:0。
+
 单测：`adjacency.test.ts` 10 条。浏览器故障注入 8 次，每次确认对应用例报红：
 
 - 无边空档画成 0、未观测空档画成 0、口径说明被改、有向图被镜像、
