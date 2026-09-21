@@ -34,10 +34,12 @@
       bindinput="onInput"
     />
 
+    <!-- 开关只是一个圆点，label 落不到它上面：不给名字，读屏只会念「开关」 -->
     <switch
       wx:elif="{{item.isSwitch}}"
       checked="{{item.on}}"
       disabled="{{disabled}}"
+      aria-label="{{item.label}}"
       data-name="{{item.name}}"
       bindchange="onSwitch"
     />

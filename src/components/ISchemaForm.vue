@@ -165,10 +165,12 @@ function focusFirst(list: FormFieldError[]) {
         @update:model-value="(v: number | null) => setValue(field.name, v)"
       />
 
+      <!-- 开关是一个圆点，<label for> 落不到 button 上，读屏只会念「开关，未选中」 -->
       <ISwitch
         v-else-if="field.kind === 'switch'"
         :model-value="!!modelValue[field.name]"
         :disabled="disabled"
+        :aria-label="field.label"
         @update:model-value="(v: boolean) => setValue(field.name, v)"
       />
 

@@ -149,9 +149,14 @@ class _ISchemaFormState extends State<ISchemaForm> {
           onChanged: (v) => _set(field.name, num.tryParse(v)),
         );
       case IFormFieldKind.switchKind:
-        return Switch(
-          value: widget.value[field.name] == true,
-          onChanged: widget.disabled ? null : (v) => _set(field.name, v),
+        // 开关旁边的文字不构成它的名字，读屏要靠 Semantics 才念得出开的是什么
+        return Semantics(
+          label: field.label,
+          toggled: widget.value[field.name] == true,
+          child: Switch(
+            value: widget.value[field.name] == true,
+            onChanged: widget.disabled ? null : (v) => _set(field.name, v),
+          ),
         );
       case IFormFieldKind.select:
       case IFormFieldKind.multiSelect:
