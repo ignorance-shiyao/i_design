@@ -73,7 +73,11 @@ Flutter 不新增第二份统计算法。6 条逻辑测试，`check:pareto` 浏�
 
 **E02 第一、二刀已落地**：`logic/noderegistry.ts` 写死注册表与文档变更口径；`FlowPage` 接上工具箱 + SchemaForm 属性检查器（画布只吃投影）。见 `docs/E02-NODES.md`。分支 `cursor/e02-node-registry-c2d1`。`check:nodes` 浏览器闭环与五端独立组件还没做。
 
-**下一件仓库内可做的是 `check:nodes` / E03 端口连线**，
+**E03 端口连线已落地**：口径在 `logic/wiring.ts`（方向按端口 side、端口必须存在、
+重复边拒绝、类型按 accepts 收、环按图类型处理），文档页带校验面板，
+每条问题带 target 点得过去；`check:edges` 8 次故障注入已接 CI。见 `docs/E03-EDGES.md`。
+
+**下一件仓库内可做的是 E04（命令式事务与撤销/重做、剪贴板、快捷键）**，
 或切 F05、G12。都不依赖别的人或环境。
 
 
