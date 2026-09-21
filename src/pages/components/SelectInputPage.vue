@@ -154,7 +154,10 @@ function toggle(zone: string) {
   display: flex;
   flex-direction: column;
   gap: var(--i-spacing-3);
-  max-width: 320px;
+  /* 320 视口下页面有内边距，写死 320px 会撑出 2px 横滚 */
+  max-width: min(320px, 100%);
+  width: 100%;
+  box-sizing: border-box;
 }
 .fake-panel {
   list-style: none;
