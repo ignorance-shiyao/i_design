@@ -71,8 +71,10 @@ Flutter 不新增第二份统计算法。6 条逻辑测试，`check:pareto` 浏�
 排序显式选 input / degree / community。口径在 `logic/adjacency.ts`，五端齐备，
 见 `docs/D08-ADJACENCY.md`。分支 `cursor/d08-adjacency-matrix-c2d1`。
 
-**下一件仓库内可做的是 E02～E04 / E09 / E10（节点编辑器那一族）**，
-或 F05（附件校验与草稿恢复）、G12（页面模板导出）。都不依赖别的人或环境。
+**E02 第一刀已落地**：`logic/noderegistry.ts` 写死注册表与文档变更口径（属性 schema 驱动、删除同步边/分组、未知类型只读），见 `docs/E02-NODES.md`。分支 `cursor/e02-node-registry-c2d1`。工具箱/属性检查器 UI 与 `check:nodes` 还没做。
+
+**下一件仓库内可做的是 E02 UI（工具箱 + 属性检查器）接上 Flow 文档页**，
+或继续 E03/E04；也可切 F05、G12。都不依赖别的人或环境。
 
 
 **H03 剩下的两件、H06、H07 在这个仓库里做不完**，别反复尝试：截图基线必须在
