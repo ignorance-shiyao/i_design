@@ -79,6 +79,10 @@ jobs:
       - name: 帕累托口径与浏览器回归
         run: npm run check:pareto
 
+      # 注册表一旦被绕过，画布上照样能画出节点，只是删了节点边还悬着
+      - name: 节点注册表与属性检查器闭环
+        run: npm run check:nodes
+
       # 开发机上没人会去打开系统的「减少动效」，漏掉那一半完全看不出来
       - name: 动效开关检查
         run: npm run check:motion
