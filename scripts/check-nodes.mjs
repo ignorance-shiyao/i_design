@@ -83,7 +83,7 @@ try {
 
     /** 属性由 schema 驱动：检查器字段来自节点类型，改值同步回节点标签 */
     async inspect(page) {
-      await page.getByRole('button', { name: '重置示例', exact: true }).click()
+      await demo(page).getByRole('button', { name: '重置示例', exact: true }).click()
       await selectNode(page, '审批')
       const form = inspector(page).locator('form')
       await form.waitFor()
@@ -105,7 +105,7 @@ try {
 
     /** 删除同步边：悬空边是以后最难查的脏数据 */
     async deleteSync(page) {
-      await page.getByRole('button', { name: '重置示例', exact: true }).click()
+      await demo(page).getByRole('button', { name: '重置示例', exact: true }).click()
       await demo(page).locator('.i-flow__node').first().waitFor()
       const edgeCount = await edges(page).count()
       assert.ok(edgeCount >= 2, '示例应有两条边')
@@ -123,7 +123,7 @@ try {
 
     /** 未知类型只读占位：没有 schema，不假装可编辑 */
     async unknown(page) {
-      await page.getByRole('button', { name: '重置示例', exact: true }).click()
+      await demo(page).getByRole('button', { name: '重置示例', exact: true }).click()
       await page.getByRole('button', { name: '注入未知类型', exact: true }).click()
       await selectNode(page, '旧插件节点')
       // 先断「没有表单」：给了可编辑表单时占位根本不会出现，等它只会等到超时
@@ -135,7 +135,7 @@ try {
     },
 
     async visual(page, shots = false) {
-      await page.getByRole('button', { name: '重置示例', exact: true }).click()
+      await demo(page).getByRole('button', { name: '重置示例', exact: true }).click()
       const samples = []
       for (const width of [1440, 390, 320]) {
         await page.setViewportSize({ width, height: 1000 })
@@ -165,7 +165,7 @@ try {
       for (const key of ['toolbox', 'inspect', 'deleteSync', 'unknown']) await checks[key](page)
       await checks.visual(page, true)
       await page.setViewportSize({ width: 1440, height: 1000 })
-      await page.getByRole('button', { name: '重置示例', exact: true }).click()
+      await demo(page).getByRole('button', { name: '重置示例', exact: true }).click()
       await selectNode(page, '审批')
       for (const theme of ['light', 'dark']) {
         if ((await page.locator('html').getAttribute('data-theme')) !== theme) {
