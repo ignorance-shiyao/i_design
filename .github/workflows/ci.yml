@@ -83,6 +83,10 @@ jobs:
       - name: 节点注册表与属性检查器闭环
         run: npm run check:nodes
 
+      # 一条连错方向的线在图上和连对的长得一样，只有跑起来才发现走不通
+      - name: 端口连线校验与校验面板闭环
+        run: npm run check:edges
+
       # 开发机上没人会去打开系统的「减少动效」，漏掉那一半完全看不出来
       - name: 动效开关检查
         run: npm run check:motion

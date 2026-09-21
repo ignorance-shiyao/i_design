@@ -62,6 +62,7 @@
     "check:public": "node scripts/check-public.mjs",
     "check:motion": "node scripts/check-motion.mjs",
     "check:nodes": "node scripts/check-nodes.mjs",
+    "check:edges": "node scripts/check-edges.mjs",
     "build:props": "node scripts/build-component-props.mjs",
     "check:cjk": "node --test scripts/check-cjk-wrap.test.mjs && node scripts/check-cjk-wrap.mjs",
     "check:whennot": "node --test scripts/check-when-not.test.mjs && node scripts/check-when-not.mjs",
