@@ -59,7 +59,7 @@
 Vue3 / Vue2 / React / 小程序 / Flutter 各做一遍，而这些端对「固定列 +
 横向虚拟滚动 + 拖拽改宽」的支持程度差得很远。因此这个决策带三条约束：
 
-1. **先做一个最小 pro 组件的五端垂直切片标定成本**，再排后面的批次。
+1. **先做一个最小 pro 组件的各端垂直切片标定成本**，再排后面的批次。
    切片选 B03 QueryFilter：它是 B 组里最小的 P1，同时已经具备 pro 层的
    全部结构特征——跨端共享的状态机、URL 往返、以及各端差异极大的输入控件。
 2. **凡是某端确实做不到的，写成能力声明，不用空壳满足 parity。**
@@ -71,7 +71,7 @@ Vue3 / Vue2 / React / 小程序 / Flutter 各做一遍，而这些端对「固�
    例如小程序没有拖拽改列宽，替代路径是列设置面板里的分档宽度；
    Flutter 没有 URL，替代路径是路由参数对象的同构序列化。
 
-按五端计工作量后，B 组的批次排期随之拉长——这是选 B 的代价，写在这里，
+按各端计工作量后，B 组的批次排期随之拉长——这是选 B 的代价，写在这里，
 而不是等到某个批次做不完再解释。
 
 ```text
@@ -520,7 +520,7 @@ B18（通知中心）必须排在 G05 之前——G05 的验收里就有「通�
 D01 ～ D08/D10/D12/D13、C01 ～ C06、B05 ～ B07/B11/B14 ～ B17、E09/E10、G04/G06/G07/G09/G10、H02/H03。每完成一个图族或页面族，就登记 registry 的样式/状态用例与应用页面。
 E09/E10 排在 D08 之后（E09 依赖它）；H02 要等 G03/G05/G08 三条业务链都在，H03 要等 G11 与 A05。
 D13 是从 D03 里拆出来的：百分比堆叠、阶梯与目标线都是数据变换，四个端共用一份实现就够；
-横条与双轴要动坐标轴本身（轴的方向、第二值轴、单位限制），四端各有一套绘制，
+横条与双轴要动坐标轴本身（轴的方向、第二值轴、单位限制），各端各有一套绘制，
 与前者混在一个任务里只会让「做完了吗」说不清。
 
 ### 第五批：规模与生态
@@ -544,10 +544,10 @@ H06（发布渠道与回滚演练）依赖 A03 与 H02，放在这一批收口�
 
 判定口径，三档，宁可判低不判高：
 
-- **✅ 完成**：有实现；若是库组件则五端齐备且都从入口导出；有自动检查或测试守着；
+- **完成**：有实现；若是库组件则各端齐备且都从入口导出；有自动检查或测试守着；
   文档站有可运行演示。四条缺一条都不算完成。
-- **🟡 部分**：核心能力在，但验收条件里有明确的一条还没做到——括号里写清缺什么。
-- **⬜ 未开始**：没有对应实现。
+- **部分**：核心能力在，但验收条件里有明确的一条还没做到——括号里写清缺什么。
+- **未开始**：没有对应实现。
 
 「有源码」不等于完成，「构建通过」也不等于完成——这张表按上面的口径填，
 不按工作量填。
@@ -556,115 +556,115 @@ H06（发布渠道与回滚演练）依赖 A03 与 H02，放在这一批收口�
 
 | ID | 状态 | 证据 |
 | --- | --- | --- |
-| A01 | ✅ | `scripts/build-capability-registry.mjs` + `check-capability-registry`，覆盖矩阵页 |
-| A02 | ✅ | `scripts/check-install.mjs`：打包 → 仓库外四个消费项目 → 断言渲染出的实际色值 |
-| A03 | ✅ | `VERSIONING.md`、`CHANGELOG.md`、`scripts/release.mjs`、`.github/workflows/release.yml` |
-| A04 | ✅ | `README.md`、`CONTRIBUTING.md`（含「已验证 / 未验证运行时 / 未发布」矩阵） |
-| A05 | ✅ | `scripts/check-style-rules.mjs`、`check-a11y`（零容忍）、`logic/palette.ts` 的 `solidPair` |
-| A06 | ✅ | `scripts/check-ssr.mjs`：无 DOM 导入、Vue/React SSR、两档 CSP 下的 hydration |
-| A07 | ✅ | `scripts/check-bundle.mjs`：按入口称重，单图标 gzip < 1 KB 是硬断言 |
-| A08 | ✅ | `scripts/check-licenses.mjs`、`THIRD-PARTY.md`、`assets/PROVENANCE.json` |
+| A01 | 完成 | `scripts/build-capability-registry.mjs` + `check-capability-registry`，覆盖矩阵页 |
+| A02 | 完成 | `scripts/check-install.mjs`：打包 → 仓库外四个消费项目 → 断言渲染出的实际色值 |
+| A03 | 完成 | `VERSIONING.md`、`CHANGELOG.md`、`scripts/release.mjs`、`.github/workflows/release.yml` |
+| A04 | 完成 | `README.md`、`CONTRIBUTING.md`（含「已验证 / 未验证运行时 / 未发布」矩阵） |
+| A05 | 完成 | `scripts/check-style-rules.mjs`、`check-a11y`（零容忍）、`logic/palette.ts` 的 `solidPair` |
+| A06 | 完成 | `scripts/check-ssr.mjs`：无 DOM 导入、Vue/React SSR、两档 CSP 下的 hydration |
+| A07 | 完成 | `scripts/check-bundle.mjs`：按入口称重，单图标 gzip < 1 KB 是硬断言 |
+| A08 | 完成 | `scripts/check-licenses.mjs`、`THIRD-PARTY.md`、`assets/PROVENANCE.json` |
 
 ### B. 原子组件补强与页面组合
 
 | ID | 状态 | 证据 / 缺口 |
 | --- | --- | --- |
-| B01 | ✅ | `IAppShell` 五端；示例层的壳已改为在它之上只加应用切换器与源码入口 |
-| B02 | ✅ | `IPageState` + `logic/pagestate.ts`，七种状态的优先级有测试 |
-| B03 | ✅ | `IQueryFilter` 五端 + `logic/query.ts` + 42 条 Dart 对齐断言 |
-| B04 | ✅ | `IProTable` 五端 + `logic/protable.ts`（带序号的请求、过期响应丢弃并记账、总数与行同源） |
-| B05 | ✅ | `logic/columns.ts`（显隐/顺序/宽度/固定/密度/视图持久化），隐藏与权限分开；小程序的固定列走「优先显示」替代路径 |
-| B06 | ✅ | `ITreeTable` 五端 + `logic/treetable.ts`（排序只在兄弟之间排、折叠不丢选择并数出「有几项在收起的分组里」、汇总按叶子算因而不受折叠影响、小计跟在分组最后一条子行之后；列树统一推导多级表头的跨列/跨行，纵向合并只认排序后连续的同级兄弟行，遇小计、层级或排序打散立即断开），27 条 vitest + Dart 端同构表头布局 |
-| B07 | ✅ | `IBulkBar` 五端 + `logic/bulk.ts`（三种作用域各有摘要、「全部匹配」要再确认且不给 id 名单、部分失败只重试失败项、多轮重试成功集累加），81 条 Dart 对齐断言 |
-| B08 | ✅ | `ISchemaForm` 五端 + `logic/schemaform.ts`（条件是数据、环检测、数组子表、服务端错误落位），40 条 Dart 对齐断言 |
-| B09 | ✅ | `IFormPage` / `IDrawerForm` / `IModalForm` / `IStepForm` 五端 + `logic/formhost.ts`（重复提交、失败保留输入、离开保护、重置范围、分步不丢数据），97 条 Dart 对齐断言 |
-| B10 | ✅ | `IEntityPicker` 五端 + `logic/entitypicker.ts`（已选存完整对象所以翻页不丢名字、不可选的留在列表里说原因、停用的不能新选但已选照常显示与移除），44 条 Dart 对齐断言 |
-| B11 | ✅ | `IImportWizard` + `IExportJob` 五端 + `logic/importjob.ts` / `logic/exportjob.ts`（列映射可回退、预检不落库且在签名上就不可能落库、错误清单带原始行号、同文件同映射算同一个幂等键；导出排队可取消、总数未知不画进度条、过期给「重新生成」、出处与文件名带时间与筛选摘要），22 + 113 条 Dart 对齐断言 |
-| B12 | ✅ | `IDetailPage` 五端 + `logic/detail.ts`（状态不允许的动作不出现、没权限的出现但停用并说明、失效时写动作停而只读动作照常、返回票据与上一条/下一条），93 条 Dart 对齐断言 |
-| B13 | ✅ | `IMarkdown` + `logic/markdown.ts`（令牌树、危险 URL 拒绝）、`ICodeBlock`、附件预览 |
-| B14 | ✅ | `IComment` 之外补上 `IThread` 五端 + `logic/thread.ts`（活动记录按时间穿插并折叠、删掉的父评论留坑、未读分隔线打开时钉死不动、自己发的不算未读、发失败的留在原地带原文、@ 到话题外的人不拦但要说），20 条 vitest + 41 条 Dart 对齐断言 |
-| B15 | ✅ | `ICalendar`、`IChartGantt` 之外补上 `IBoard` 五端 + `logic/board.ts`（拖动/菜单/键盘三条路径同一个 `moveCard`、落不下的当场写理由、在制品与流转限制、跨泳道说清同时改了负责人与状态、键盘跳过落不下的格子），22 条 vitest + 61 条 Dart 对齐断言 |
-| B16 | ✅ | `/design/access` 登录/个人设置/用户/固定角色/扁平组织页面配方；菜单、字段投影与写入授权共用 common 模型；8 条逻辑测试，`check:access` 的浏览器闭环与 10 次源码故障注入。模拟登录明确标注，不代替后端鉴权；范围见 `docs/B16-ACCESS-PATTERNS.md` |
-| B17 | ✅ | `/design/public`：Hero/功能入口、明确标注的示例定价、FAQ、可搜索帮助、更新日志；URL 状态支持刷新与前进后退，失效文章可恢复。6 条 common 单测、`check:public` 浏览器闭环与 11 次源码故障注入；见 `docs/B17-PUBLIC-PATTERNS.md` |
-| B18 | ✅ | `INotificationLayer`、`ICommandSearch` 之外补上 `ITaskCenter` 五端 + `logic/taskcenter.ts`（任务号与业务对象一直在、角标只数要人处理的、同键任务正在跑就不再排第二个、命令面板里没权限的照常出现但禁用并写明理由），19 条 vitest + 64 条 Dart 对齐断言；三者在 /components/task-center 上打通 |
+| B01 | 完成 | `IAppShell` 各端；示例层的壳已改为在它之上只加应用切换器与源码入口 |
+| B02 | 完成 | `IPageState` + `logic/pagestate.ts`，七种状态的优先级有测试 |
+| B03 | 完成 | `IQueryFilter` 各端 + `logic/query.ts` + 42 条 Dart 对齐断言 |
+| B04 | 完成 | `IProTable` 各端 + `logic/protable.ts`（带序号的请求、过期响应丢弃并记账、总数与行同源） |
+| B05 | 完成 | `logic/columns.ts`（显隐/顺序/宽度/固定/密度/视图持久化），隐藏与权限分开；小程序的固定列走「优先显示」替代路径 |
+| B06 | 完成 | `ITreeTable` 各端 + `logic/treetable.ts`（排序只在兄弟之间排、折叠不丢选择并数出「有几项在收起的分组里」、汇总按叶子算因而不受折叠影响、小计跟在分组最后一条子行之后；列树统一推导多级表头的跨列/跨行，纵向合并只认排序后连续的同级兄弟行，遇小计、层级或排序打散立即断开），27 条 vitest + Dart 端同构表头布局 |
+| B07 | 完成 | `IBulkBar` 各端 + `logic/bulk.ts`（三种作用域各有摘要、「全部匹配」要再确认且不给 id 名单、部分失败只重试失败项、多轮重试成功集累加），81 条 Dart 对齐断言 |
+| B08 | 完成 | `ISchemaForm` 各端 + `logic/schemaform.ts`（条件是数据、环检测、数组子表、服务端错误落位），40 条 Dart 对齐断言 |
+| B09 | 完成 | `IFormPage` / `IDrawerForm` / `IModalForm` / `IStepForm` 各端 + `logic/formhost.ts`（重复提交、失败保留输入、离开保护、重置范围、分步不丢数据），97 条 Dart 对齐断言 |
+| B10 | 完成 | `IEntityPicker` 各端 + `logic/entitypicker.ts`（已选存完整对象所以翻页不丢名字、不可选的留在列表里说原因、停用的不能新选但已选照常显示与移除），44 条 Dart 对齐断言 |
+| B11 | 完成 | `IImportWizard` + `IExportJob` 各端 + `logic/importjob.ts` / `logic/exportjob.ts`（列映射可回退、预检不落库且在签名上就不可能落库、错误清单带原始行号、同文件同映射算同一个幂等键；导出排队可取消、总数未知不画进度条、过期给「重新生成」、出处与文件名带时间与筛选摘要），22 + 113 条 Dart 对齐断言 |
+| B12 | 完成 | `IDetailPage` 各端 + `logic/detail.ts`（状态不允许的动作不出现、没权限的出现但停用并说明、失效时写动作停而只读动作照常、返回票据与上一条/下一条），93 条 Dart 对齐断言 |
+| B13 | 完成 | `IMarkdown` + `logic/markdown.ts`（令牌树、危险 URL 拒绝）、`ICodeBlock`、附件预览 |
+| B14 | 完成 | `IComment` 之外补上 `IThread` 各端 + `logic/thread.ts`（活动记录按时间穿插并折叠、删掉的父评论留坑、未读分隔线打开时钉死不动、自己发的不算未读、发失败的留在原地带原文、@ 到话题外的人不拦但要说），20 条 vitest + 41 条 Dart 对齐断言 |
+| B15 | 完成 | `ICalendar`、`IChartGantt` 之外补上 `IBoard` 各端 + `logic/board.ts`（拖动/菜单/键盘三条路径同一个 `moveCard`、落不下的当场写理由、在制品与流转限制、跨泳道说清同时改了负责人与状态、键盘跳过落不下的格子），22 条 vitest + 61 条 Dart 对齐断言 |
+| B16 | 完成 | `/design/access` 登录/个人设置/用户/固定角色/扁平组织页面配方；菜单、字段投影与写入授权共用 common 模型；8 条逻辑测试，`check:access` 的浏览器闭环与 10 次源码故障注入。模拟登录明确标注，不代替后端鉴权；范围见 `docs/B16-ACCESS-PATTERNS.md` |
+| B17 | 完成 | `/design/public`：Hero/功能入口、明确标注的示例定价、FAQ、可搜索帮助、更新日志；URL 状态支持刷新与前进后退，失效文章可恢复。6 条 common 单测、`check:public` 浏览器闭环与 11 次源码故障注入；见 `docs/B17-PUBLIC-PATTERNS.md` |
+| B18 | 完成 | `INotificationLayer`、`ICommandSearch` 之外补上 `ITaskCenter` 各端 + `logic/taskcenter.ts`（任务号与业务对象一直在、角标只数要人处理的、同键任务正在跑就不再排第二个、命令面板里没权限的照常出现但禁用并写明理由），19 条 vitest + 64 条 Dart 对齐断言；三者在 /components/task-center 上打通 |
 
 ### C. 图标与资源
 
 | ID | 状态 | 证据 |
 | --- | --- | --- |
-| C01 | ✅ | `icons/meta.ts` + `check-icons`（元数据、分类、别名唯一性） |
-| C02 | ✅ | 87 个图标，按语义域分类 |
-| C03 | ✅ | `icons/filled.ts` 的描边/填充协议，双色用同一色两档透明度 |
-| C04 | ✅ | 图标浏览器页（检索、尺寸/线宽预览、复制与下载） |
-| C05 | ✅ | `build-icon-paths.mjs` 的单图标导出 + `check-bundle` 的实测断言 |
-| C06 | ✅ | `illustrationMeta` + `check:illustrations`（@2x 尺寸、四角透明、替代文本） |
+| C01 | 完成 | `icons/meta.ts` + `check-icons`（元数据、分类、别名唯一性） |
+| C02 | 完成 | 87 个图标，按语义域分类 |
+| C03 | 完成 | `icons/filled.ts` 的描边/填充协议，双色用同一色两档透明度 |
+| C04 | 完成 | 图标浏览器页（检索、尺寸/线宽预览、复制与下载） |
+| C05 | 完成 | `build-icon-paths.mjs` 的单图标导出 + `check-bundle` 的实测断言 |
+| C06 | 完成 | `illustrationMeta` + `check:illustrations`（@2x 尺寸、四角透明、替代文本） |
 
 ### D. 图表与分析
 
 | ID | 状态 | 证据 / 缺口 |
 | --- | --- | --- |
-| D01 | ✅ | `contracts/chart.ts` + `logic/dataset.ts`（单位/时区/聚合/数据质量） |
-| D02 | ✅ | `IChartFrame`：口径、数据表、下载，缺失值不补零 |
-| D03 | ✅ | 百分比堆叠、阶梯线、目标线 |
-| D13 | ✅ | 横条与双轴（`logic/axis.ts` 五端共用，双轴把不该用的情形印在图下） |
-| D04 | ✅ | `IChartDistribution` 五端（直方/密度/小提琴/误差棒）+ `logic/stats.ts`；散点矩阵的布局逻辑在，组件留到 D05 一起做 |
-| D05 | ✅ | 五张全部实现：帕累托（`docs/D05-PARETO.md`）、层级三件套（`docs/D05-HIERARCHY.md`）、留存与贡献/流量平衡（`docs/D05-BALANCE.md`）。共同的一条是口径写死在共享逻辑里：父子差额单列为「未细分」、留存分母恒为本批期初且未到期不是 0、贡献的负值是数据不是脏数据、对不上的差额单列不摊进柱子 |
-| D06 | ✅ | `logic/linkage.ts`：统一 SelectionEvent、下钻压栈、循环终止 |
-| D07 | ✅ | 实时滑窗五端齐备（`docs/D07-REALTIME.md`）：窗口按时间切、迟到点按事件时间归桶、断流是 `gap` 不是 0、暂停钉住窗口；`check:realtime` 亮暗/断流态 axe 零 serious，10 次故障注入均报红 |
-| D08 | ✅ | 邻接矩阵五端齐备（`docs/D08-ADJACENCY.md`）：空格分无边/未观测（都不是 0），排序显式选 input/degree/community；`check:adjacency` 亮暗态 axe 零 serious，8 次故障注入均报红 | `IFlow` 与 `logic/graph.ts` 在，缺邻接矩阵与调用轨迹视图 |
-| D09～D12 | ⬜ | 地图、金融图、跨图协作等未做 |
+| D01 | 完成 | `contracts/chart.ts` + `logic/dataset.ts`（单位/时区/聚合/数据质量） |
+| D02 | 完成 | `IChartFrame`：口径、数据表、下载，缺失值不补零 |
+| D03 | 完成 | 百分比堆叠、阶梯线、目标线 |
+| D13 | 完成 | 横条与双轴（`logic/axis.ts` 各端共用，双轴把不该用的情形印在图下） |
+| D04 | 完成 | `IChartDistribution` 各端（直方/密度/小提琴/误差棒）+ `logic/stats.ts`；散点矩阵的布局逻辑在，组件留到 D05 一起做 |
+| D05 | 完成 | 五张全部实现：帕累托（`docs/D05-PARETO.md`）、层级三件套（`docs/D05-HIERARCHY.md`）、留存与贡献/流量平衡（`docs/D05-BALANCE.md`）。共同的一条是口径写死在共享逻辑里：父子差额单列为「未细分」、留存分母恒为本批期初且未到期不是 0、贡献的负值是数据不是脏数据、对不上的差额单列不摊进柱子 |
+| D06 | 完成 | `logic/linkage.ts`：统一 SelectionEvent、下钻压栈、循环终止 |
+| D07 | 完成 | 实时滑窗各端齐备（`docs/D07-REALTIME.md`）：窗口按时间切、迟到点按事件时间归桶、断流是 `gap` 不是 0、暂停钉住窗口；`check:realtime` 亮暗/断流态 axe 零 serious，10 次故障注入均报红 |
+| D08 | 完成 | 邻接矩阵各端齐备（`docs/D08-ADJACENCY.md`）：空格分无边/未观测（都不是 0），排序显式选 input/degree/community；`check:adjacency` 亮暗态 axe 零 serious，8 次故障注入均报红 | `IFlow` 与 `logic/graph.ts` 在，缺邻接矩阵与调用轨迹视图 |
+| D09～D12 | 未开始 | 地图、金融图、跨图协作等未做 |
 
 ### E. 流程与可视化编辑
 
 | ID | 状态 | 证据 / 缺口 |
 | --- | --- | --- |
-| E01 | ✅ | `contracts/graph.ts` v2：往返无损、`extras` 保留、v1 迁移、拒绝过新版本 |
-| E02 | 🟡 | common 注册表 + FlowPage 工具箱/属性检查器已落地（`docs/E02-NODES.md`），`check:nodes` 已接 CI；五端独立组件未做 |
-| E03 | 🟡 | 连线校验口径 + 校验面板已落地（`docs/E03-EDGES.md`）：方向/端口/重复/类型有可定位错误，环按图类型处理；画布上直接拖端口连线未做 |
-| E04 | 🟡 | `logic/flow.ts` 有框选、批量移动、缩放与缩略图，缺事务化的撤销/重做与剪贴板 |
-| E05～E08 | ⬜ | 布局导航、GraphStore、节点模板、运行态覆盖未做 |
-| E09 | ⬜ | 状态机/血缘模板与差异查看未做 |
-| E10 | 🟡 | 触摸与键盘在 `IFlow` 里，缺大图性能用例与导出验收 |
+| E01 | 完成 | `contracts/graph.ts` v2：往返无损、`extras` 保留、v1 迁移、拒绝过新版本 |
+| E02 | 部分 | common 注册表 + FlowPage 工具箱/属性检查器已落地（`docs/E02-NODES.md`），`check:nodes` 已接 CI；各端独立组件未做 |
+| E03 | 部分 | 连线校验口径 + 校验面板已落地（`docs/E03-EDGES.md`）：方向/端口/重复/类型有可定位错误，环按图类型处理；画布上直接拖端口连线未做 |
+| E04 | 部分 | `logic/flow.ts` 有框选、批量移动、缩放与缩略图，缺事务化的撤销/重做与剪贴板 |
+| E05～E08 | 未开始 | 布局导航、GraphStore、节点模板、运行态覆盖未做 |
+| E09 | 未开始 | 状态机/血缘模板与差异查看未做 |
+| E10 | 部分 | 触摸与键盘在 `IFlow` 里，缺大图性能用例与导出验收 |
 
 ### F. AI 对话与智能体
 
 | ID | 状态 | 证据 / 缺口 |
 | --- | --- | --- |
-| F01 | ✅ | `contracts/run.ts` + `logic/run.ts`：seq 排序、重复丢弃、终态、取消 |
-| F02 | ✅ | `logic/transport.ts`：mock 与流式、取消、重试、恢复游标 |
-| F03 | ✅ | `IChatList` + `logic/chatlist.ts`（搜索、重命名、归档、恢复） |
-| F04 | ✅ | `IMessageParts`、`IMarkdown`、`ICodeBlock`：多段混排与流式更新 |
-| F05 | 🟡 | `IPromptInput` + `logic/mention.ts` 在，缺附件校验与草稿恢复 |
-| F06 | ✅ | `IRunStatus` 五端 + `logic/lifecycle.ts`（排队/连接/断线重连/等人确认四态，终态压断线、断线压生成中），96 条 Dart 对齐断言 |
-| F07 | ✅ | `IChatToolCall` + `IToolChips`：输入输出、耗时、错误 |
-| F08 | ✅ | `IApprovalCard` 的 `approvalGate`：即将过期仍可拍板、过期给「重新发起」、版本失效给「查看新版本」，两者同时成立以版本失效为准；65 条 Dart 对齐断言 |
-| F10 | ✅ | 五端文档/表格/代码/图表的安全预览、版本回看、按版本采纳/撤销与导出事件，外加 `artifactContentDiff`：文本产物逐行比（复用 `diff.ts` 的 LCS，Web 端直接复用 ICodeBlock 的 diff 视图）、只跟紧邻旧版比、种类变了不逐行比、结构化产物只报规模变化不假装做单元格级比对 |
-| F09、F11～F15 | ⬜ | 分支比较、上下文管理、Agent 配置、RunExplorer、评测、多模态未做 |
+| F01 | 完成 | `contracts/run.ts` + `logic/run.ts`：seq 排序、重复丢弃、终态、取消 |
+| F02 | 完成 | `logic/transport.ts`：mock 与流式、取消、重试、恢复游标 |
+| F03 | 完成 | `IChatList` + `logic/chatlist.ts`（搜索、重命名、归档、恢复） |
+| F04 | 完成 | `IMessageParts`、`IMarkdown`、`ICodeBlock`：多段混排与流式更新 |
+| F05 | 部分 | `IPromptInput` + `logic/mention.ts` 在，缺附件校验与草稿恢复 |
+| F06 | 完成 | `IRunStatus` 各端 + `logic/lifecycle.ts`（排队/连接/断线重连/等人确认四态，终态压断线、断线压生成中），96 条 Dart 对齐断言 |
+| F07 | 完成 | `IChatToolCall` + `IToolChips`：输入输出、耗时、错误 |
+| F08 | 完成 | `IApprovalCard` 的 `approvalGate`：即将过期仍可拍板、过期给「重新发起」、版本失效给「查看新版本」，两者同时成立以版本失效为准；65 条 Dart 对齐断言 |
+| F10 | 完成 | 各端文档/表格/代码/图表的安全预览、版本回看、按版本采纳/撤销与导出事件，外加 `artifactContentDiff`：文本产物逐行比（复用 `diff.ts` 的 LCS，Web 端直接复用 ICodeBlock 的 diff 视图）、只跟紧邻旧版比、种类变了不逐行比、结构化产物只报规模变化不假装做单元格级比对 |
+| F09、F11～F15 | 未开始 | 分支比较、上下文管理、Agent 配置、RunExplorer、评测、多模态未做 |
 
 ### G. 示例应用
 
 | ID | 状态 | 证据 / 缺口 |
 | --- | --- | --- |
-| G01 | ✅ | `examples/shared`：固定种子、可控时钟、mock API、版本化存储、重放 |
-| G02 | ✅ | 门户 + 共用壳 + 应用登记表 + `check:examples`（双向链接、无死路） |
-| G03 | ✅ | ERP 第一切片：列表用查询层 + `IBulkBar`，新建用 `IFormPage`，详情用 `IDetailPage`；422/403/409/幂等四条分支都在真构建产物上走通 |
-| G08 | ✅ | `examples/agent-studio`：销售问题 → 工具结果 → 人类确认 → 产物。四种结局（成功/取消/失败/拒绝）都是同一串 `RunEvent`，同一个 reducer 折叠，因而都可重放；运行停在人类确认那一步等人点，确认卡上写的是具体那件事；失败与取消时工具结果与已写出的正文都留在屏幕上 |
-| G05 | ✅ | OA 报销申请 → 审批 → 退回重提 → 通知；复用表单、人员选择、详情和任务中心，共享事务模型在 common；9 条单测与 OA 主流程/版本冲突浏览器路径，见 `docs/G05-OA.md` |
-| G04、G06、G07、G09、G10 | ⬜ | Analytics、OA 扩展、Agent 编排、移动工作台未做 |
-| G11 | ✅ | Patterns Lab 自动注册 + `check:lab`（每个组件必须真的渲染出来） |
-| G12 | ⬜ | 页面模板导出未做 |
+| G01 | 完成 | `examples/shared`：固定种子、可控时钟、mock API、版本化存储、重放 |
+| G02 | 完成 | 门户 + 共用壳 + 应用登记表 + `check:examples`（双向链接、无死路） |
+| G03 | 完成 | ERP 第一切片：列表用查询层 + `IBulkBar`，新建用 `IFormPage`，详情用 `IDetailPage`；422/403/409/幂等四条分支都在真构建产物上走通 |
+| G08 | 完成 | `examples/agent-studio`：销售问题 → 工具结果 → 人类确认 → 产物。四种结局（成功/取消/失败/拒绝）都是同一串 `RunEvent`，同一个 reducer 折叠，因而都可重放；运行停在人类确认那一步等人点，确认卡上写的是具体那件事；失败与取消时工具结果与已写出的正文都留在屏幕上 |
+| G05 | 完成 | OA 报销申请 → 审批 → 退回重提 → 通知；复用表单、人员选择、详情和任务中心，共享事务模型在 common；9 条单测与 OA 主流程/版本冲突浏览器路径，见 `docs/G05-OA.md` |
+| G04、G06、G07、G09、G10 | 未开始 | Analytics、OA 扩展、Agent 编排、移动工作台未做 |
+| G11 | 完成 | Patterns Lab 自动注册 + `check:lab`（每个组件必须真的渲染出来） |
+| G12 | 未开始 | 页面模板导出未做 |
 
 ### H. 工程与质量
 
 | ID | 状态 | 证据 |
 | --- | --- | --- |
-| H01 | ✅ | parity / a11y / responsive / motion / lab / bundle / install / ssr / icons / routes / release / mp / flutter / illustrations / capability / examples，每条新检查都带故障注入 |
-| H05 | ✅ | 生成物漂移检查（CI 里 `git diff --exit-code`） |
-| H08 | ✅ | 确定性 mock：同一 seed 出同一批数据，截图与 E2E 不漂 |
-| H02 | ✅ | `check:e2e` 覆盖 ERP / OA / Agent 的第一切片业务链，共 15 条路径；错误、权限与版本冲突分支、产物与通知结果均有断言；4 项构建代码故障注入，已接入 CI。范围不含真实后端与移动运行时 |
-| H03 | 🟡 | 键盘那一列已自动化：`check:keyboard`（全站 2549 个焦点位，焦点可见/不落进隐藏区/有可访问名，9 条故障注入）与 `check:keyboard-paths`（表格、看板、线程三条路径的结果判据，12 条故障注入）；后者逮出「可排序表头不可聚焦、键盘排不了序」并已修。剩：截图基线要在跑 CI 的那个环境里生成（开发容器字体不同，从这里提交会让 CI 全红），以及人工读屏抽检记录 |
-| H04 | 🟡 | `check:perf` + `docs/H04-PERF-BASELINE.md`：判定只用结构性的量（两万行表格渲染 44 个节点等），时间只作记录不作断言——毫秒基线在别人机器上必红，会被当噪音关掉；5 条故障注入，含「渲染 0 个节点也算失败」防空跑。现已补固定负载画布（100 节点/642 元素）与会话列表（1000 项/13011 元素）、6 次真实浏览器故障注入和显式 GC 后三次堆采样。全图表类型、消息内容与原生内存仍不在本轮范围 |
-| H06、H07 | ⬜ | 灰度与回滚演练、渠道与多端运行验证未做（H06 没做完之前不宣称「可发布」） |
+| H01 | 完成 | parity / a11y / responsive / motion / lab / bundle / install / ssr / icons / routes / release / mp / flutter / illustrations / capability / examples，每条新检查都带故障注入 |
+| H05 | 完成 | 生成物漂移检查（CI 里 `git diff --exit-code`） |
+| H08 | 完成 | 确定性 mock：同一 seed 出同一批数据，截图与 E2E 不漂 |
+| H02 | 完成 | `check:e2e` 覆盖 ERP / OA / Agent 的第一切片业务链，共 15 条路径；错误、权限与版本冲突分支、产物与通知结果均有断言；4 项构建代码故障注入，已接入 CI。范围不含真实后端与移动运行时 |
+| H03 | 部分 | 键盘那一列已自动化：`check:keyboard`（全站 2549 个焦点位，焦点可见/不落进隐藏区/有可访问名，9 条故障注入）与 `check:keyboard-paths`（表格、看板、线程三条路径的结果判据，12 条故障注入）；后者逮出「可排序表头不可聚焦、键盘排不了序」并已修。剩：截图基线要在跑 CI 的那个环境里生成（开发容器字体不同，从这里提交会让 CI 全红），以及人工读屏抽检记录 |
+| H04 | 部分 | `check:perf` + `docs/H04-PERF-BASELINE.md`：判定只用结构性的量（两万行表格渲染 44 个节点等），时间只作记录不作断言——毫秒基线在别人机器上必红，会被当噪音关掉；5 条故障注入，含「渲染 0 个节点也算失败」防空跑。现已补固定负载画布（100 节点/642 元素）与会话列表（1000 项/13011 元素）、6 次真实浏览器故障注入和显式 GC 后三次堆采样。全图表类型、消息内容与原生内存仍不在本轮范围 |
+| H06、H07 | 未开始 | 灰度与回滚演练、渠道与多端运行验证未做（H06 没做完之前不宣称「可发布」） |
 
 ### 下一步的顺序
 
@@ -710,11 +710,11 @@ G03、G08）不在这里重复列了——逐条的证据在上面的进度核�
 
 **D07 实时滑窗已完成**，见 `docs/D07-REALTIME.md`。
 窗口按时间切、迟到点按事件时间归桶、断流空档不是 0、暂停钉住窗口；
-口径写死在 `logic/realtime.ts`，五端消费同一份模型。
+口径写死在 `logic/realtime.ts`，各端消费同一份模型。
 
 **D08 邻接矩阵已完成**，见 `docs/D08-ADJACENCY.md`。
 空格分无边 / 未观测（都不是 0），零权边才画 0；排序显式选 input / degree / community；
-口径写死在 `logic/adjacency.ts`，五端消费同一份模型。
+口径写死在 `logic/adjacency.ts`，各端消费同一份模型。
 
 下一件仓库内可做的是 **E02～E04 / E09 / E10（节点编辑器那一族）**，
 或 F05、G12——都不依赖别的人或环境。

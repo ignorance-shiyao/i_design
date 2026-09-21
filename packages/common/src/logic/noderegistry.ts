@@ -106,7 +106,7 @@ export const BUILTIN_NODE_TYPES: readonly NodeTypeDefinition[] = [
     icon: 'sparkle',
     canvasShape: 'start',
     defaultLabel: '开始',
-    defaultPorts: [outPort()],
+    defaultPorts: [/* @__PURE__ */ outPort()],
     defaultData: { title: '' },
     propertySchema: {
       fields: [
@@ -126,7 +126,7 @@ export const BUILTIN_NODE_TYPES: readonly NodeTypeDefinition[] = [
     icon: 'edit',
     canvasShape: 'process',
     defaultLabel: '处理',
-    defaultPorts: [inPort(), outPort()],
+    defaultPorts: [/* @__PURE__ */ inPort(), /* @__PURE__ */ outPort()],
     defaultData: { owner: '' },
     propertySchema: {
       fields: [
@@ -142,7 +142,7 @@ export const BUILTIN_NODE_TYPES: readonly NodeTypeDefinition[] = [
     icon: 'filter',
     canvasShape: 'decision',
     defaultLabel: '判断',
-    defaultPorts: [inPort(), outPort('yes', '是'), outPort('no', '否')],
+    defaultPorts: [/* @__PURE__ */ inPort(), /* @__PURE__ */ outPort('yes', '是'), /* @__PURE__ */ outPort('no', '否')],
     defaultData: { expression: '' },
     propertySchema: {
       fields: [
@@ -162,7 +162,7 @@ export const BUILTIN_NODE_TYPES: readonly NodeTypeDefinition[] = [
     icon: 'check-circle',
     canvasShape: 'end',
     defaultLabel: '结束',
-    defaultPorts: [inPort()],
+    defaultPorts: [/* @__PURE__ */ inPort()],
     defaultData: { summary: '' },
     propertySchema: {
       fields: [{ name: 'summary', label: '结果说明', kind: 'textarea' }]
@@ -175,7 +175,7 @@ export const BUILTIN_NODE_TYPES: readonly NodeTypeDefinition[] = [
     icon: 'user',
     canvasShape: 'process',
     defaultLabel: '审批',
-    defaultPorts: [inPort(), outPort('pass', '通过'), outPort('reject', '驳回')],
+    defaultPorts: [/* @__PURE__ */ inPort(), /* @__PURE__ */ outPort('pass', '通过'), /* @__PURE__ */ outPort('reject', '驳回')],
     defaultData: { approver: '', required: true },
     propertySchema: {
       fields: [
@@ -213,7 +213,12 @@ export function createRegistry(definitions: readonly NodeTypeDefinition[]): Node
   }
 }
 
-export const defaultNodeRegistry = createRegistry(BUILTIN_NODE_TYPES)
+/*
+ * @__PURE__ 不是装饰：createRegistry 只装配 Map 与冻结数组，没有外部副作用，
+ * 但打包器证明不了顶层调用是安全的，于是把 BUILTIN_NODE_TYPES 整张表钉进
+ * 每一个碰到 common barrel 的产物——包括只引一个按钮的那个。
+ */
+export const defaultNodeRegistry = /* @__PURE__ */ createRegistry(BUILTIN_NODE_TYPES)
 
 /**
  * 按类型创建节点。类型不在注册表里时返回 null——

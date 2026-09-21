@@ -65,13 +65,13 @@ Flutter 不新增第二份统计算法。6 条逻辑测试，`check:pareto` 浏�
 占全体与占上级两个分母都报，叶子的 null 是缺失不是零。
 
 **D07 实时滑窗已完成**：窗口按时间切、迟到点按事件时间归桶、断流是空档不是 0、
-暂停钉住窗口。口径在 `logic/realtime.ts`，五端齐备，见 `docs/D07-REALTIME.md`。
+暂停钉住窗口。口径在 `logic/realtime.ts`，各端齐备，见 `docs/D07-REALTIME.md`。
 
 **D08 邻接矩阵已完成**：空格分无边 / 未观测（都不是 0），零权边才画 0；
-排序显式选 input / degree / community。口径在 `logic/adjacency.ts`，五端齐备，
+排序显式选 input / degree / community。口径在 `logic/adjacency.ts`，各端齐备，
 见 `docs/D08-ADJACENCY.md`。分支 `cursor/d08-adjacency-matrix-c2d1`。
 
-**E02 第一、二刀已落地**：`logic/noderegistry.ts` 写死注册表与文档变更口径；`FlowPage` 接上工具箱 + SchemaForm 属性检查器（画布只吃投影）。见 `docs/E02-NODES.md`。分支 `cursor/e02-node-registry-c2d1`。`check:nodes` 浏览器闭环与五端独立组件还没做。
+**E02 第一、二刀已落地**：`logic/noderegistry.ts` 写死注册表与文档变更口径；`FlowPage` 接上工具箱 + SchemaForm 属性检查器（画布只吃投影）。见 `docs/E02-NODES.md`。分支 `cursor/e02-node-registry-c2d1`。`check:nodes` 浏览器闭环与各端独立组件还没做。
 
 **E03 端口连线已落地**：口径在 `logic/wiring.ts`（方向按端口 side、端口必须存在、
 重复边拒绝、类型按 accepts 收、环按图类型处理），文档页带校验面板，
@@ -164,7 +164,7 @@ npm run check:motion
 
 按提交倒序，每条都能 `git show` 看到细节：
 
-- `610a09f` / `bfad28a` **B15 看板与人员泳道**：`IBoard` 五端 +
+- `610a09f` / `bfad28a` **B15 看板与人员泳道**：`IBoard` 各端 +
   `logic/board.ts`。中心思想只有一句：**「移动一张卡」只有一个实现**——
   拖动、「移动到…」菜单、键盘方向键三条路径调的是同一个 `moveCard`，
   各写一遍的话同一次移动会落到三个结果，用户会以为其中一条坏了。
@@ -176,7 +176,7 @@ npm run check:motion
 - `c369dc8` **check:layout 开了一个必须写明理由的豁免口**：看板的列被拉齐是
   功能不是浪费（空白本身就是落点）。豁免要写 `data-stretch-reason`，
   留空不算，且每条豁免连同理由打进报告——三条故障注入钉住了这三点。
-- `41477e3` **B14 评论线程与未读定位**：`IThread` 五端 + `logic/thread.ts`。
+- `41477e3` **B14 评论线程与未读定位**：`IThread` 各端 + `logic/thread.ts`。
   人说的话与系统记的账按时间穿插（分成两个标签页，读者拼不出「当时发生了
   什么」）；删掉的父评论**留一个坑**，否则底下那几句「同意」挂在空气里；
   **未读分隔线在打开的那一刻钉死**，之后只涨计数不挪线——跟着新评论往下跑
@@ -184,7 +184,7 @@ npm run check:motion
   发失败的留在原地带着原文，重发是把那条改回「发送中」而不是新建一条。
   连续的活动记录折成一组，但几个人一起改的不合并人名（那是在记错账）。
   20 条 vitest + 41 条 Dart 对齐断言。
-- `05494b1` **B18 异步任务中心**：`ITaskCenter` 五端 + `logic/taskcenter.ts`。
+- `05494b1` **B18 异步任务中心**：`ITaskCenter` 各端 + `logic/taskcenter.ts`。
   任务号与业务对象一直摆在界面上，通知照抄这两样——没有业务对象的任务给的是
   任务号与「查看任务详情」，绝不只报一句「完成了」；角标只数「要人处理的」
   （失败的 + 跑完没人看过的），进行中的不算，否则那个数字永远回不到零；
@@ -192,7 +192,7 @@ npm run check:motion
   命令面板沿用详情页动作那套口径：没权限的照常出现但禁用并写明理由，
   回车执行第一条**可用**的命令。文档站 /components/task-center 上三段是连着跑的。
   19 条 vitest + 64 条 Dart 对齐断言。
-- `bc506e5` / `fad2307` **B06 树表与分组汇总**：`ITreeTable` 五端 +
+- `bc506e5` / `fad2307` **B06 树表与分组汇总**：`ITreeTable` 各端 +
   `logic/treetable.ts`。排序只在兄弟之间排（拿拍平后的行去排，子行会跑到
   别人家下面去）；折叠只动展开集合，选择原样留着，并且把「其中 N 项在收起
   的分组里」数出来——留着却不说，用户按下删除会删掉他看不见的那几行；
@@ -202,7 +202,7 @@ npm run check:motion
   量出来才发现的一处错：小计原本紧跟在分组标题下面，读起来像那一行自己的
   数字——改成跟在这个分组最后一条子行之后，并把这条排法收进共享的
   `renderRows`，免得四个端各摆各的。24 条 vitest + 70 条 Dart 对齐断言。
-- `04fa18e` / `6e53c5e` **B11 的导出那一半**：`IExportJob` 五端 +
+- `04fa18e` / `6e53c5e` **B11 的导出那一半**：`IExportJob` 各端 +
   `logic/exportjob.ts`。导出是**任务**不是下载：排队与生成中都能取消；
   **总数未知时不画进度条**（走到 90% 就卡住的条子比没有条子更让人不敢离开），
   只如实报「已导出 N 行」；`ready` 但已过期的按 `expired` 报，给的是
@@ -211,7 +211,7 @@ npm run check:motion
   跨端只对齐 `formatStamp`（收拆好的年月日时分）：时间戳转年月日要看时区，
   时区是各端从系统拿的，把转换也对齐会让 CI 与开发机时区不同时无缘无故变红。
   21 条 vitest + 113 条 Dart 对齐断言。
-- `eb8d96e` / `2761928` **B11 的导入那一半**：`IImportWizard` 五端 +
+- `eb8d96e` / `2761928` **B11 的导入那一半**：`IImportWizard` 各端 +
   `logic/importjob.ts`。预检**在签名上就不可能落库**（只收一个纯校验器），
   报告里的 `wrote` 永远是 false；映射是数据，指给别人时从原处自动摘掉；
   错误清单带原始行号；同文件同映射算同一个幂等键（键按名字排序拼，
@@ -246,7 +246,7 @@ npm run check:motion
   判定在 `logic/agent.ts` 的 `approvalGate`——即将过期仍可拍板、过期给
   「重新发起」、版本失效给「查看新版本」，两者同时成立以版本失效为准
   （给旧版本的确认续期等于把「内容变了」悄悄抹掉）。
-- `eb83ec5` **F06**：新组件 `IRunStatus` 五端，把「排队中」「连接中」
+- `eb83ec5` **F06**：新组件 `IRunStatus` 各端，把「排队中」「连接中」
   「连接断开（第几次重连、几秒后重试）」「等待确认」四种静止分开说。
   判定在 `logic/lifecycle.ts`，钉住三条优先级与「这一刻能不能取消」。
 - `195c0f3`…`57a9f8b` **版面**：正文行长上限（71 → 45 个汉字一行）、
@@ -259,12 +259,12 @@ npm run check:motion
   并把教训变成检查：`check:responsive` 现在量渲染后的实际字号。
   同一提交里还把总览漏掉的 39 个组件归了类、删掉 3 个重复条目，
   新增 `check:overview` 守住它，新开「布局」与「业务组合」两档。
-- `5537fcc` D04 分布图五端（直方/密度/小提琴/误差棒），分箱规则、带宽、误差棒含义印在图下。
-- `080fead` B01 `IAppShell` 五端 —— 形态先在示例里跑过一轮再抽成库组件。
+- `5537fcc` D04 分布图各端（直方/密度/小提琴/误差棒），分箱规则、带宽、误差棒含义印在图下。
+- `080fead` B01 `IAppShell` 各端 —— 形态先在示例里跑过一轮再抽成库组件。
 - `eac22bb` / `c52de4a` B04+B05 `IProTable` —— 过期响应丢弃、隐藏列与权限分开、固定列上限。
 - `879149b` / `3bdec6f` B08 `ISchemaForm` —— schema 里不执行任何字符串，依赖环检测。
 - `bede640` G02 门户 + 共用壳 + `check:examples`；G03 ERP 第一切片（422/403/409/幂等四条分支）。
-- `b8af6e3` B03 `IQueryFilter` 五端垂直切片 —— pro 层全端的成本标定。
+- `b8af6e3` B03 `IQueryFilter` 各端垂直切片 —— pro 层全端的成本标定。
 - `b4e602b` pro 层定为全端，并把「某端不支持」变成 `check:capability` 要校验的声明。
 
 G03 已经转正：三页都换成了组件（`4a669c7`）。
