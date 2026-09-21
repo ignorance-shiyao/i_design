@@ -359,6 +359,16 @@ export const componentMatrix: ComponentRow[] = [
     }
   },
   {
+    "name": "IChartRealtime",
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    }
+  },
+  {
     "name": "IChartRetention",
     "ends": {
       "vue-next": true,

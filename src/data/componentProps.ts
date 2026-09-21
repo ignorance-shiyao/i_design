@@ -272,6 +272,12 @@ export const componentProps: Record<string, PropMeta[]> = {
     {"name":"size","type":"number","doc":"","optional":true,"defaultText":"240","control":{"kind":"number"}},
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"''","control":{"kind":"string"}},
   ],
+  IChartRealtime: [
+    {"name":"model","type":"RealtimeModel","doc":"buildRealtimeWindow 生成的同源模型，可直接序列化给其他端","optional":false,"defaultText":null,"control":null},
+    {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'实时滑窗'","control":{"kind":"string"}},
+    {"name":"selectedIndex","type":"number | null","doc":"","optional":true,"defaultText":"null","control":null},
+    {"name":"height","type":"number","doc":"","optional":true,"defaultText":"180","control":{"kind":"number"}},
+  ],
   IChartRetention: [
     {"name":"model","type":"RetentionModel","doc":"buildRetention 生成的同源模型，可直接序列化给其他端","optional":false,"defaultText":null,"control":null},
     {"name":"title","type":"string","doc":"","optional":true,"defaultText":"'留存'","control":{"kind":"string"}},

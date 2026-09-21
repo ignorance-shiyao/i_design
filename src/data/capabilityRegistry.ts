@@ -628,6 +628,7 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
       "/components/icicle",
       "/components/retention",
       "/components/balance",
+      "/components/realtime",
       "/components/chart",
       "/components/flow",
       "/components/mobile"
@@ -1243,6 +1244,36 @@ export const capabilityRegistry: readonly CapabilityRow[] = [
     "doc": null,
     "demoRoutes": [
       "/components/chart"
+    ],
+    "states": {}
+  },
+  {
+    "name": "IChartRealtime",
+    "sources": {
+      "vue-next": "src/components/IChartRealtime.vue",
+      "vue": "packages/vue/src/components/IChartRealtime.vue",
+      "react": "packages/react/src/components/ChartRealtime.tsx",
+      "miniprogram": "packages/miniprogram/src/components/chart-realtime",
+      "flutter": "packages/flutter/lib/src/components/i_chart_realtime.dart"
+    },
+    "ends": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "consumable": {
+      "vue-next": true,
+      "vue": true,
+      "react": true,
+      "miniprogram": true,
+      "flutter": true
+    },
+    "maturity": "stable",
+    "doc": null,
+    "demoRoutes": [
+      "/components/realtime"
     ],
     "states": {}
   },

@@ -1,0 +1,41 @@
+<view class="i-realtime" wx:if="{{model}}">
+  <view class="i-realtime__title">{{title}}</view>
+  <view class="i-realtime__caption">{{model.caption}}</view>
+  <view class="i-realtime__basis">口径：{{model.basis}}</view>
+
+  <view class="i-realtime__status" aria-label="运行状态">
+    <text class="i-realtime__chip {{model.paused ? 'is-paused' : 'is-live'}}">{{model.paused ? '已暂停' : '直播中'}}</text>
+    <text class="i-realtime__chip">{{model.lagText}}</text>
+    <text wx:if="{{gapCount}}" class="i-realtime__chip is-gap">{{gapCount}} 个断流空档</text>
+  </view>
+
+  <block wx:if="{{model.state === 'ready'}}">
+    <view class="i-realtime__plot">
+      <view class="i-realtime__svg" style="height:{{height}}px;position:relative;background:var(--i-color-bg);border:1px solid var(--i-color-border);">
+        <view wx:for="{{gapBands}}" wx:key="index" class="i-realtime__gap" style="position:absolute;top:0;bottom:0;left:{{item.x}}%;width:{{item.width}}%;"></view>
+        <view wx:for="{{points}}" wx:key="index" class="i-realtime__point {{item.selected ? 'is-selected' : ''}}" style="position:absolute;left:{{item.x}}%;top:{{item.y}}%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;"></view>
+        <text class="i-realtime__sr">折线由 {{segments.length}} 段组成；断流空档不连线。</text>
+      </view>
+    </view>
+
+    <view class="i-realtime__buckets">
+      <button
+        wx:for="{{model.buckets}}"
+        wx:key="index"
+        class="i-realtime__bucket {{selectedIndex === item.index ? 'is-selected' : ''}} {{item.state === 'gap' ? 'is-gap' : ''}}"
+        data-index="{{item.index}}"
+        bindtap="select"
+        aria-label="{{item.description}}"
+      >
+        <text class="i-realtime__bucket-state">{{item.state === 'gap' ? '断流' : '桶 ' + (item.index + 1)}}</text>
+        <text class="i-realtime__bucket-value">{{item.valueText}}</text>
+      </button>
+    </view>
+    <view class="i-realtime__note">折线在断流空档处断开。下方每个桶都可以选中；断流桶标着「断流」，不是 0。</view>
+  </block>
+
+  <view class="i-realtime__issues" wx:if="{{model.late.length || model.excluded.length}}">
+    <view wx:for="{{model.late}}" wx:key="id">未入窗 · {{item.id}}：{{item.reason}}</view>
+    <view wx:for="{{model.excluded}}" wx:key="id">未计入 · 源行 {{item.sourceIndex + 1}} · {{item.id}}：{{item.reason}}</view>
+  </view>
+</view>
